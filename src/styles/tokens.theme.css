@@ -47,9 +47,9 @@
   --color-text-muted: var(--color-gray-600);
   --color-text-subtle: var(--color-gray-500);
   --color-text-weak: var(--color-gray-400);
-  --color-text-faint: var(--color-gray-300);
   --color-text-placeholder: var(--color-gray-500);
   --color-text-disabled: var(--color-gray-600);
+  --color-text-description: var(--color-black-200);
   --color-text-brand: var(--color-brand-primary);
   --color-text-inverse: var(--color-white);
   --color-text-error: var(--color-status-error);
@@ -141,6 +141,8 @@
   --nav-text-default: var(--color-gray-500);
   --nav-indicator-active: var(--color-black-400);
   --icon-arrow-right-fill: var(--color-black-300);
+  --filter-button-icon: var(--color-gray-600);
+  --filter-button-border: var(--color-gray-600);
 
   --gnb-height-mobile: 3.375rem;
   --gnb-height-tablet: 3.375rem;
