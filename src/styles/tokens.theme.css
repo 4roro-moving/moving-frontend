@@ -1,0 +1,194 @@
+@theme inline {
+  --color-white: #ffffff;
+  --color-gray-100: #dedede;
+  --color-gray-200: #d9d9d9;
+  --color-gray-300: #c4c4c4;
+  --color-gray-400: #ababab;
+  --color-gray-500: #999999;
+  --color-gray-600: #808080;
+  --color-black-100: #61605e;
+  --color-black-200: #474643;
+  --color-black-300: #302f2d;
+  --color-black-400: #262524;
+  --color-black-500: #111111;
+  --color-orange-100: #feeeea;
+  --color-orange-200: #fed8d0;
+  --color-orange-300: #fd947f;
+  --color-orange-400: #f9502e;
+  --color-orange-500: #e04829;
+  --color-red-100: #ffeef0;
+  --color-red-200: #ff4f64;
+  --color-yellow-100: #ffc149;
+  --color-line-100: #f2f2f2;
+  --color-line-200: #e6e6e6;
+  --color-background-100: #fafafa;
+  --color-background-200: #f7f7f7;
+  --color-background-300: #efefef;
+
+  --color-brand-primary-strong: var(--color-orange-500);
+  --color-brand-primary: var(--color-orange-400);
+  --color-brand-primary-muted: var(--color-orange-300);
+  --color-brand-primary-subtle: var(--color-orange-100);
+
+  --color-background-default: var(--color-white);
+  --color-background-surface: var(--color-white);
+  --color-background-muted: var(--color-background-200);
+  --color-background-subtle: var(--color-background-100);
+  --color-background-brand-hover: var(--color-brand-primary-strong);
+  --color-background-brand: var(--color-brand-primary);
+  --color-background-brand-muted: var(--color-brand-primary-subtle);
+  --color-background-hover: var(--color-background-300);
+  --color-background-disabled: var(--color-gray-200);
+  --color-background-avatar: var(--color-black-300);
+
+  --color-text-primary: var(--color-black-500);
+  --color-text-secondary: var(--color-black-400);
+  --color-text-tertiary: var(--color-black-300);
+  --color-text-muted: var(--color-gray-600);
+  --color-text-subtle: var(--color-gray-500);
+  --color-text-weak: var(--color-gray-400);
+  --color-text-faint: var(--color-gray-300);
+  --color-text-placeholder: var(--color-gray-500);
+  --color-text-disabled: var(--color-gray-600);
+  --color-text-brand: var(--color-brand-primary);
+  --color-text-inverse: var(--color-white);
+  --color-text-error: var(--color-status-error);
+
+  --color-border-default: var(--color-line-200);
+  --color-border-muted: var(--color-gray-200);
+  --color-border-subtle: var(--color-line-100);
+  --color-border-brand: var(--color-brand-primary);
+  --color-border-error: var(--color-status-error);
+  --color-border-disabled: var(--color-gray-300);
+  --color-border-dimmed: var(--color-gray-400);
+
+  --color-icon-strong: var(--color-black-100);
+  --color-icon-default: var(--color-gray-400);
+  --color-icon-muted: var(--color-gray-300);
+  --color-icon-subtle: var(--color-gray-200);
+  --color-icon-weak: var(--color-gray-100);
+  --color-icon-brand: var(--color-brand-primary);
+  --color-icon-brand-secondary: var(--color-brand-primary-muted);
+  --color-icon-brand-tertiary: var(--color-brand-primary-subtle);
+  --color-icon-inverse: var(--color-white);
+
+  --color-status-error: var(--color-red-200);
+
+  --color-rating-fill: var(--color-yellow-100);
+
+  --color-rating-count: var(--color-gray-400);
+  --color-rating-track: var(--color-background-300);
+  --color-rating-empty: var(--color-gray-200);
+  --color-scrollbar-thumb: var(--color-gray-400);
+
+  --color-overlay-card-disabled: rgba(4, 4, 4, 0.64);
+  --color-overlay-scrim: rgba(20, 20, 20, 0.5);
+
+  --radius-2: 0.125rem;
+  --radius-4: 0.25rem;
+  --radius-6: 0.375rem;
+  --radius-8: 0.5rem;
+  --radius-12: 0.75rem;
+  --radius-16: 1rem;
+  --radius-20: 1.25rem;
+  --radius-24: 1.5rem;
+  --radius-32: 2rem;
+  --radius-40: 2.5rem;
+  --radius-100: 6.25rem;
+
+  --spacing-2: 0.125rem;
+  --spacing-4: 0.25rem;
+  --spacing-6: 0.375rem;
+  --spacing-8: 0.5rem;
+  --spacing-10: 0.625rem;
+  --spacing-12: 0.75rem;
+  --spacing-14: 0.875rem;
+  --spacing-16: 1rem;
+  --spacing-18: 1.125rem;
+  --spacing-20: 1.25rem;
+  --spacing-22: 1.375rem;
+  --spacing-24: 1.5rem;
+  --spacing-26: 1.625rem;
+  --spacing-28: 1.75rem;
+  --spacing-30: 1.875rem;
+  --spacing-31: 1.9375rem;
+  --spacing-32: 2rem;
+  --spacing-36: 2.25rem;
+  --spacing-40: 2.5rem;
+  --spacing-48: 3rem;
+  --spacing-57: 3.5625rem;
+  --spacing-64: 4rem;
+  --spacing-72: 4.5rem;
+  --spacing-80: 5rem;
+  --spacing-160: 10rem;
+
+  --like-default-stroke: var(--color-gray-100);
+  --like-active-fill: var(--color-red-200);
+  --like-active-stroke: var(--color-red-200);
+  --social-kakao-icon: #331d1e;
+  --social-kakao-background: #fae100;
+  --social-google-background: var(--color-line-100);
+  --social-naver-icon: var(--color-white);
+  --social-naver-background: #03c75a;
+  --social-facebook-icon: var(--color-white);
+  --social-facebook-background: #1877f2;
+  --toast-background: var(--color-orange-200);
+  --toast-text: var(--color-orange-400);
+  --date-disabled: var(--color-gray-200);
+  --notice-background: var(--color-background-200);
+  --notice-text: var(--color-black-100);
+  --nav-text-active: var(--color-black-500);
+  --nav-text-default: var(--color-gray-500);
+  --nav-indicator-active: var(--color-black-400);
+  --icon-arrow-right-fill: var(--color-black-300);
+
+  --gnb-height-mobile: 3.375rem;
+  --gnb-height-tablet: 3.375rem;
+  --gnb-height-desktop: 5.5rem;
+  --tab-height-mobile: 3.375rem;
+  --tab-height-tablet: 3.375rem;
+  --tab-height-desktop: 5rem;
+  --page-header-height-mobile: 3.375rem;
+  --page-header-height-tablet: 3.375rem;
+  --page-header-height-desktop: 6rem;
+  --margin-mobile: 1.5rem;
+  --margin-tablet: 4.5rem;
+  --margin-desktop: 10rem;
+  --container-mobile: 20.4375rem;
+  --container-tablet: 37.5rem;
+  --container-desktop: 75rem;
+  --container-desktop-narrow: 70rem;
+
+  --font-family-base: "Pretendard", sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --font-size-12: 0.75rem;
+  --font-size-13: 0.8125rem;
+  --font-size-14: 0.875rem;
+  --font-size-16: 1rem;
+  --font-size-18: 1.125rem;
+  --font-size-20: 1.25rem;
+  --font-size-24: 1.5rem;
+  --font-size-32: 2rem;
+  --font-size-38: 2.375rem;
+  --font-size-40: 2.5rem;
+  --font-size-64: 4rem;
+
+  --line-height-18: 1.125rem;
+  --line-height-20: 1.25rem;
+  --line-height-22: 1.375rem;
+  --line-height-24: 1.5rem;
+  --line-height-26: 1.625rem;
+  --line-height-29: 1.8125rem;
+  --line-height-32: 2rem;
+  --line-height-42: 2.625rem;
+  --line-height-45: 2.8125rem;
+  --line-height-46: 2.875rem;
+  --line-height-48: 3rem;
+  --line-height-76: 4.75rem;
+
+  --letter-spacing-0: 0rem;
+}
