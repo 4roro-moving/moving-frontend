@@ -97,7 +97,7 @@ export function Text<T extends ElementType = "p">({
   className,
   ...props
 }: TextProps<T>) {
-  const Component = as ?? "p";
+  const Component = as ?? "span";
 
   return (
     <Component className={cn(textVariants({ variant }), className)} {...props}>
