@@ -122,9 +122,9 @@
   --spacing-80: 5rem;
   --spacing-160: 10rem;
 
-  --like-default-storke: var(--color-gray-100);
+  --like-default-stroke: var(--color-gray-100);
   --like-active-fill: var(--color-red-200);
-  --like-active-storke: var(--color-red-200);
+  --like-active-stroke: var(--color-red-200);
   --social-kakao-icon: #331d1e;
   --social-kakao-background: #fae100;
   --social-google-background: var(--color-line-100);
@@ -159,7 +159,7 @@
   --container-desktop: 75rem;
   --container-desktop-narrow: 70rem;
 
-  --font-family-base: Pretendard;
+  --font-family-base: "Pretendard", sans-serif;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
