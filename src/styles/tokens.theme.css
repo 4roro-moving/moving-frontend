@@ -197,6 +197,13 @@
   --page-header-height-tablet: 3.375rem;
   --page-header-height-desktop: 6rem;
 
+  /* Layout - GNB, Tab, PageHeader 컴포넌트 desktop padding */
+  --gnb-padding-x-desktop: 10rem;
+  --tab-padding-x-desktop: 22.5rem;
+  --page-header-padding-x-desktop: 22.5rem;
+  --sub-header-padding-left-desktop: 22.5rem;
+  --sub-header-padding-right-desktop: 25rem;
+
   /* Layout - responsive margin */
   --margin-mobile: 1.5rem;
   --margin-tablet: 4.5rem;
@@ -204,4 +211,15 @@
   /* Layout - container */
   --container-desktop: 75rem;
   --container-desktop-narrow: 70rem;
+
+  /* Layout - Auth */
+  --container-desktop: 75rem;
+  --container-desktop-narrow: 70rem;
+  --auth-container-radius: 2.5rem;
+  --auth-container-width-tablet: 40rem;
+  --auth-container-width-desktop: 46.25rem;
+  --auth-container-padding-x-tablet: 2.5rem;
+  --auth-container-padding-x-desktop: 3rem;
+  --auth-container-padding-y-tablet: 4.25rem;
+  --auth-container-padding-y-desktop: 3rem;
 }
