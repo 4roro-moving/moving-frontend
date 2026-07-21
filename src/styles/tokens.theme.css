@@ -222,4 +222,8 @@
   --auth-container-padding-x-desktop: 3rem;
   --auth-container-padding-y-tablet: 4.25rem;
   --auth-container-padding-y-desktop: 3rem;
+
+  /* Tailwind spacing aliases - px-margin-mobile, mt-margin-tablet 등으로 사용 가능 */
+  --spacing-margin-mobile: var(--margin-mobile);
+  --spacing-margin-tablet: var(--margin-tablet);
 }
