@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
 
-const TOAST_DURATION_MS = 3000 * 60;
+const TOAST_DURATION_MS = 3000;
 
 export interface ToastProps {
   children: ReactNode;
