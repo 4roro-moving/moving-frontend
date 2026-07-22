@@ -90,7 +90,13 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
             disabled={isPrevDisabled}
             aria-label="이전 페이지"
           >
-            <Image src="/icons/ic_left.svg" alt="" width={24} height={24} aria-hidden />
+            <Image
+              src="/icons/ic_left.svg"
+              alt="이전 페이지 아이콘"
+              width={24}
+              height={24}
+              aria-hidden
+            />
           </button>
         </li>
 
@@ -138,7 +144,13 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
             disabled={isNextDisabled}
             aria-label="다음 페이지"
           >
-            <Image src="/icons/ic_right.svg" alt="" width={24} height={24} aria-hidden />
+            <Image
+              src="/icons/ic_right.svg"
+              alt="다음 페이지 아이콘"
+              width={24}
+              height={24}
+              aria-hidden
+            />
           </button>
         </li>
       </ul>

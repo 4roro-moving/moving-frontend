@@ -8,11 +8,23 @@ import Image from "next/image";
 type PasswordInputProps = Omit<InputProps, "type" | "rightSlot" | "numericOnly">;
 
 const EyeIcon = () => (
-  <Image src="/icons/ic_visibility_on.svg" alt="" width={24} height={24} aria-hidden />
+  <Image
+    src="/icons/ic_visibility_on.svg"
+    alt="비밀번호 보이기 아이콘"
+    width={24}
+    height={24}
+    aria-hidden
+  />
 );
 
 const EyeOffIcon = () => (
-  <Image src="/icons/ic_visibility_off.svg" alt="" width={24} height={24} aria-hidden />
+  <Image
+    src="/icons/ic_visibility_off.svg"
+    alt="비밀번호 숨기기 아이콘"
+    width={24}
+    height={24}
+    aria-hidden
+  />
 );
 
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
