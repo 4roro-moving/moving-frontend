@@ -1,28 +1,21 @@
-"use client";
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { type ReactNode, useState } from "react";
+import QueryProvider from "@/providers/QueryProvider";
 
-interface QueryProviderProps {
-  children: ReactNode;
-}
+import "./globals.css";
 
-export default function QueryProvider({ children }: QueryProviderProps) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 60 * 1000,
-            retry: 1,
-            refetchOnWindowFocus: false,
-          },
-          mutations: {
-            retry: 0,
-          },
-        },
-      }),
+export const metadata: Metadata = {
+  title: "moving-frontend",
+  description: "이사 서비스 프론트엔드",
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="ko">
+      <body>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
+    </html>
   );
-
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }

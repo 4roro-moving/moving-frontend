@@ -1,0 +1,170 @@
+"use client";
+
+import { cva, type VariantProps } from "class-variance-authority";
+import Image from "next/image";
+import {
+  Children,
+  createContext,
+  isValidElement,
+  useContext,
+  useEffect,
+  useId,
+  useState,
+  type ReactNode,
+} from "react";
+
+import { Text } from "@/components/common/Text";
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { cn } from "@/lib/utils/cn";
+
+interface SelectContextValue {
+  selected: string;
+  selectedLabel: ReactNode;
+  handleChange: (value: string, label: ReactNode) => void;
+}
+
+const SelectContext = createContext<SelectContextValue | null>(null);
+
+const selectVariants = cva("relative", {
+  variants: {
+    size: {
+      noLine: "w-fit",
+      xs: "h-[50px] w-[180px]",
+      sm: "w-[345px]",
+      md: "w-[440px]",
+      lg: "w-[520px]",
+    },
+  },
+  defaultVariants: { size: "lg" },
+});
+
+const triggerVariants = cva(
+  "flex w-full items-center justify-between rounded-4 bg-background-surface text-text-primary transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
+  {
+    variants: {
+      size: {
+        noLine: "gap-10 border-transparent whitespace-nowrap",
+        xs: "border border-border-default px-20 py-13",
+        sm: "border border-border-default px-20 py-18",
+        md: "border border-border-default px-20 py-18",
+        lg: "border border-border-default px-20 py-18",
+      },
+    },
+    defaultVariants: { size: "lg" },
+  },
+);
+
+export interface SelectMainProps extends VariantProps<typeof selectVariants> {
+  children: ReactNode;
+  desc: ReactNode;
+  /** 수정 폼 등에서 이전 선택값을 미리 채워야 할 때 사용 */
+  defaultValue?: string;
+  onChange?: (value: string) => void;
+  error?: string;
+  disabled?: boolean;
+}
+
+const SelectMain = ({
+  children,
+  desc,
+  size,
+  defaultValue,
+  onChange,
+  error,
+  disabled,
+}: SelectMainProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState(defaultValue ?? "");
+  const [selectedLabel, setSelectedLabel] = useState<ReactNode>("");
+  const listboxId = useId();
+  const containerRef = useClickOutside<HTMLDivElement>(() => setIsOpen(false));
+
+  useEffect(() => {
+    if (!defaultValue) return;
+
+    Children.forEach(children, (child) => {
+      if (
+        isValidElement<{ value: string; children: ReactNode }>(child) &&
+        child.props.value === defaultValue
+      ) {
+        setSelectedLabel(child.props.children);
+      }
+    });
+    // defaultValue는 최초 진입값을 채우는 용도이므로 children 변경 시마다 재평가할 필요는 없습니다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultValue]);
+
+  const handleChange = (value: string, label: ReactNode) => {
+    setSelected(value);
+    setSelectedLabel(label);
+    setIsOpen(false);
+    onChange?.(value);
+  };
+
+  return (
+    <SelectContext.Provider value={{ selected, selectedLabel, handleChange }}>
+      <div className="flex w-full flex-col gap-4">
+        <div ref={containerRef} className={selectVariants({ size })}>
+          <button
+            type="button"
+            role="combobox"
+            aria-haspopup="listbox"
+            aria-expanded={isOpen}
+            aria-controls={listboxId}
+            aria-invalid={!!error}
+            disabled={disabled}
+            className={cn(triggerVariants({ size }), error && "border-border-error")}
+            onClick={() => setIsOpen((prev) => !prev)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setIsOpen(false);
+            }}
+          >
+            <Text
+              variant="md-regular"
+              className={selectedLabel ? "text-text-primary" : "text-text-placeholder"}
+            >
+              {selectedLabel || desc}
+            </Text>
+            <Image
+              src={isOpen ? "/icons/ic_up.svg" : "/icons/ic_down.svg"}
+              alt=""
+              width={24}
+              height={24}
+              aria-hidden
+            />
+          </button>
+
+          {isOpen && (
+            <div
+              id={listboxId}
+              role="listbox"
+              className={cn(
+                "rounded-4 border-border-default bg-background-surface absolute z-50 my-4 flex min-w-[100px] flex-col items-start border shadow-md",
+                size === "noLine" ? "w-fit" : "w-full",
+              )}
+            >
+              {children}
+            </div>
+          )}
+        </div>
+        {error && (
+          <Text variant="xs-regular" className="text-text-error">
+            {error}
+          </Text>
+        )}
+      </div>
+    </SelectContext.Provider>
+  );
+};
+
+export const useSelectContext = () => {
+  const context = useContext(SelectContext);
+
+  if (!context) {
+    throw new Error("Select 컴포넌트 내에서만 사용 가능합니다.");
+  }
+
+  return context;
+};
+
+export { SelectMain };
