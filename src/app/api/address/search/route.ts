@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
 
 import {
+  extractZipCodeFromCoordDocument,
   mapKakaoDocumentToAddressItem,
   mapKakaoKeywordToAddressItem,
   mergeAddressSearchResults,
+  toCoordinateKey,
   type KakaoAddressDocument,
+  type KakaoCoord2AddressDocument,
   type KakaoKeywordDocument,
   type KakaoSearchResponse,
 } from "@/lib/kakao/addressSearch";
 
 const KAKAO_ADDRESS_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/address.json";
 const KAKAO_KEYWORD_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
+const KAKAO_COORD2ADDRESS_URL = "https://dapi.kakao.com/v2/local/geo/coord2address.json";
 
 async function fetchKakao<T>(url: URL, apiKey: string): Promise<KakaoSearchResponse<T>> {
   const response = await fetch(url.toString(), {
@@ -28,6 +32,33 @@ async function fetchKakao<T>(url: URL, apiKey: string): Promise<KakaoSearchRespo
   }
 
   return payload;
+}
+
+async function resolveZipCodesByCoordinates(
+  coordinates: string[],
+  apiKey: string,
+  zipCodeByCoordinates: Map<string, string>,
+): Promise<Map<string, string>> {
+  const resolvedZipCodes = new Map(zipCodeByCoordinates);
+
+  await Promise.allSettled(
+    coordinates.map(async (coordinateKey) => {
+      if (resolvedZipCodes.has(coordinateKey)) return;
+
+      const [x, y] = coordinateKey.split(",");
+      const coordUrl = new URL(KAKAO_COORD2ADDRESS_URL);
+      coordUrl.searchParams.set("x", x);
+      coordUrl.searchParams.set("y", y);
+
+      const payload = await fetchKakao<KakaoCoord2AddressDocument>(coordUrl, apiKey);
+      const zipCode = extractZipCodeFromCoordDocument(payload.documents?.[0]);
+      if (zipCode) {
+        resolvedZipCodes.set(coordinateKey, zipCode);
+      }
+    }),
+  );
+
+  return resolvedZipCodes;
 }
 
 export async function GET(request: Request) {
@@ -74,8 +105,32 @@ export async function GET(request: Request) {
     return NextResponse.json({ message }, { status: 502 });
   }
 
+  const zipCodeByCoordinates = new Map<string, string>();
+  for (const document of addressPayload?.documents ?? []) {
+    const zipCode = document.road_address?.zone_no || document.address?.zip_code || "";
+    if (!zipCode) continue;
+    zipCodeByCoordinates.set(toCoordinateKey(document.x, document.y), zipCode);
+  }
+
+  const keywordDocuments = keywordPayload?.documents ?? [];
+  const missingCoordinateKeys = [
+    ...new Set(
+      keywordDocuments
+        .map((document) => toCoordinateKey(document.x, document.y))
+        .filter((coordinateKey) => !zipCodeByCoordinates.has(coordinateKey)),
+    ),
+  ];
+
+  const resolvedZipCodeByCoordinates =
+    missingCoordinateKeys.length > 0
+      ? await resolveZipCodesByCoordinates(missingCoordinateKeys, apiKey, zipCodeByCoordinates)
+      : zipCodeByCoordinates;
+
   const addressResults = (addressPayload?.documents ?? []).map(mapKakaoDocumentToAddressItem);
-  const keywordResults = (keywordPayload?.documents ?? []).map(mapKakaoKeywordToAddressItem);
+  const keywordResults = keywordDocuments.map((document, index) => {
+    const zipCode = resolvedZipCodeByCoordinates.get(toCoordinateKey(document.x, document.y)) || "";
+    return mapKakaoKeywordToAddressItem(document, index, zipCode);
+  });
   const results = mergeAddressSearchResults(addressResults, keywordResults);
 
   return NextResponse.json({ results });

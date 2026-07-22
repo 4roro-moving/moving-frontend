@@ -54,11 +54,17 @@ export interface KakaoSearchResponse<T> {
   documents: T[];
 }
 
+export interface KakaoCoord2AddressDocument {
+  address: KakaoAddressDocument["address"];
+  road_address: KakaoAddressDocument["road_address"];
+}
+
 export interface AddressSearchItem {
   id: string;
   zipCode: string;
   roadAddress: string;
   jibunAddress: string;
+  sido: string;
 }
 
 /** 괄호 안 건물명 제거 후 도로명 기준 비교용 */
@@ -68,6 +74,21 @@ export function normalizeRoadAddress(roadAddress: string): string {
 
 function dedupeKey(item: AddressSearchItem): string {
   return `${normalizeRoadAddress(item.roadAddress)}|${item.jibunAddress.trim()}`;
+}
+
+function extractSido(value: string): string {
+  return value.trim().split(/\s+/)[0] ?? "";
+}
+
+export function extractZipCodeFromCoordDocument(
+  document: KakaoCoord2AddressDocument | undefined,
+): string {
+  if (!document) return "";
+  return document.road_address?.zone_no || document.address?.zip_code || "";
+}
+
+export function toCoordinateKey(x: string, y: string): string {
+  return `${x},${y}`;
 }
 
 export function mapKakaoDocumentToAddressItem(
@@ -87,6 +108,7 @@ export function mapKakaoDocumentToAddressItem(
     zipCode: road?.zone_no || jibun?.zip_code || "",
     roadAddress,
     jibunAddress: jibun?.address_name || "",
+    sido: extractSido(jibun?.address_name || roadBase),
   };
 }
 
@@ -94,6 +116,7 @@ export function mapKakaoDocumentToAddressItem(
 export function mapKakaoKeywordToAddressItem(
   document: KakaoKeywordDocument,
   index: number,
+  resolvedZipCode = "",
 ): AddressSearchItem {
   const road = document.road_address_name.trim();
   const place = document.place_name.trim();
@@ -106,9 +129,10 @@ export function mapKakaoKeywordToAddressItem(
 
   return {
     id: `keyword-${document.id}-${index}`,
-    zipCode: "",
+    zipCode: resolvedZipCode,
     roadAddress,
     jibunAddress: jibun,
+    sido: extractSido(jibun || roadAddress),
   };
 }
 
