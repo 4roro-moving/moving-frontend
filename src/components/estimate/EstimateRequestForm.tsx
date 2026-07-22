@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
+import AddressSelectModal, { type AddressItem } from "./AddressSelectModal";
 import DatePickerField from "./DatePickerField";
 import MoveTypeCard from "./MoveTypeCard";
 
@@ -29,9 +30,6 @@ const MOVE_TYPES = [
   },
 ] as const;
 
-// 목업용 샘플 주소 (API 미연결)
-const SAMPLE_REGION = "서울특별시 중구 세종대로 110";
-
 type RegionKind = "출발지" | "도착지";
 
 interface RegionFieldProps {
@@ -43,40 +41,43 @@ interface RegionFieldProps {
 
 function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
   return (
-    <div className="flex flex-1 flex-col justify-center gap-12">
-      <div className="flex items-center justify-between">
-        <Text as="span" variant="lg-medium" className="text-text-primary">
-          {kind}
-        </Text>
-        {value && (
-          <button type="button" onClick={onReset}>
-            <Text
-              as="span"
-              variant="md-medium"
-              className="text-text-subtle hover:text-text-primary underline underline-offset-2"
-            >
-              수정하기
+    <div className="flex flex-1 flex-col gap-12">
+      <Text as="span" variant="lg-medium" className="text-text-primary">
+        {kind}
+      </Text>
+      <div className="flex flex-col items-end gap-8">
+        {value ? (
+          <div className="rounded-12 border-border-brand flex h-[54px] w-full items-center border px-24 py-16">
+            <Text as="p" variant="lg-medium" className="text-text-brand truncate">
+              {value}
+            </Text>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onSelect}
+            className="rounded-12 border-border-brand hover:bg-background-brand-muted flex h-[54px] w-full items-center border px-24 py-16 transition-colors"
+          >
+            <Text as="span" variant="lg-semibold" className="text-text-brand">
+              {kind} 선택하기
             </Text>
           </button>
         )}
-      </div>
-      {value ? (
-        <div className="rounded-12 border-border-subtle bg-background-muted flex h-[54px] items-center border px-24 py-16">
-          <Text as="p" variant="lg-medium" className="text-text-secondary truncate">
-            {value}
-          </Text>
+        {/* 수정하기 영역 높이 고정 → 주소 입력 전후 레이아웃이 밀리지 않음 */}
+        <div className="flex h-[26px] w-full items-center justify-end">
+          {value && (
+            <button type="button" onClick={onReset}>
+              <Text
+                as="span"
+                variant="md-medium"
+                className="text-text-subtle hover:text-text-primary"
+              >
+                수정하기
+              </Text>
+            </button>
+          )}
         </div>
-      ) : (
-        <button
-          type="button"
-          onClick={onSelect}
-          className="rounded-12 border-border-brand hover:bg-background-brand-muted flex h-[54px] items-center border px-24 py-16 transition-colors"
-        >
-          <Text as="span" variant="lg-semibold" className="text-text-brand">
-            {kind} 선택하기
-          </Text>
-        </button>
-      )}
+      </div>
     </div>
   );
 }
@@ -87,8 +88,17 @@ export default function EstimateRequestForm() {
   const [moveDate, setMoveDate] = useState<Date>(() => new Date());
   const [fromRegion, setFromRegion] = useState<string | null>(null);
   const [toRegion, setToRegion] = useState<string | null>(null);
+  const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
 
   const canSubmit = Boolean(selectedType && fromRegion && toRegion);
+
+  function handleAddressConfirm(address: AddressItem) {
+    // 도로명 주소에서 괄호 안 건물명은 제외하고 번지까지만 표시
+    const display = address.roadAddress.replace(/\s*\([^)]*\)\s*/g, "").trim();
+    if (addressModalKind === "출발지") setFromRegion(display);
+    if (addressModalKind === "도착지") setToRegion(display);
+    setAddressModalKind(null);
+  }
 
   return (
     <div className="rounded-40 bg-background-surface mx-auto flex w-full max-w-[894px] flex-col px-24 pt-48 pb-40 md:px-[47px] md:pt-[89px] md:pb-[76px]">
@@ -148,14 +158,14 @@ export default function EstimateRequestForm() {
               <RegionField
                 kind="출발지"
                 value={fromRegion}
-                onSelect={() => setFromRegion(SAMPLE_REGION)}
-                onReset={() => setFromRegion(null)}
+                onSelect={() => setAddressModalKind("출발지")}
+                onReset={() => setAddressModalKind("출발지")}
               />
               <RegionField
                 kind="도착지"
                 value={toRegion}
-                onSelect={() => setToRegion(SAMPLE_REGION)}
-                onReset={() => setToRegion(null)}
+                onSelect={() => setAddressModalKind("도착지")}
+                onReset={() => setAddressModalKind("도착지")}
               />
             </div>
           </div>
@@ -179,6 +189,15 @@ export default function EstimateRequestForm() {
           </Text>
         </button>
       </div>
+
+      {addressModalKind && (
+        <AddressSelectModal
+          open
+          kind={addressModalKind}
+          onClose={() => setAddressModalKind(null)}
+          onConfirm={handleAddressConfirm}
+        />
+      )}
     </div>
   );
 }

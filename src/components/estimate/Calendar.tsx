@@ -37,9 +37,9 @@ export default function Calendar({ selected, onSelect, minDate }: CalendarProps)
   const isPrevDisabled = viewMonth.getTime() <= minMonth.getTime();
 
   return (
-    <div className="rounded-16 border-border-muted bg-background-surface flex w-full flex-col gap-16 border p-16 shadow-[2px_2px_10px_0_rgba(224,224,224,0.20)]">
+    <div className="rounded-16 border-border-muted bg-background-surface flex h-[352px] w-full flex-col gap-16 overflow-hidden border p-16 shadow-[2px_2px_10px_0_rgba(224,224,224,0.20)]">
       {/* Header: 월 이동 */}
-      <div className="flex items-center justify-between">
+      <div className="flex shrink-0 items-center justify-between">
         <button
           type="button"
           onClick={() => setViewMonth((m) => addMonths(m, -1))}
@@ -63,7 +63,7 @@ export default function Calendar({ selected, onSelect, minDate }: CalendarProps)
       </div>
 
       {/* 요일 */}
-      <div className="grid grid-cols-7">
+      <div className="grid shrink-0 grid-cols-7">
         {WEEKDAYS.map((weekday) => (
           <Text
             key={weekday}
@@ -77,7 +77,7 @@ export default function Calendar({ selected, onSelect, minDate }: CalendarProps)
       </div>
 
       {/* 날짜 */}
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid min-h-0 flex-1 grid-cols-7 grid-rows-6 gap-2">
         {cells.map(({ date, inCurrentMonth }) => {
           const isSelected = isSameDay(date, selected);
           const isToday = isSameDay(date, today);
@@ -90,7 +90,7 @@ export default function Calendar({ selected, onSelect, minDate }: CalendarProps)
               onClick={() => onSelect(date)}
               disabled={isDisabled}
               className={cn(
-                "rounded-8 flex aspect-square items-center justify-center transition-colors",
+                "rounded-8 flex h-full w-full items-center justify-center transition-colors",
                 isDisabled
                   ? "pointer-events-none"
                   : isSelected
