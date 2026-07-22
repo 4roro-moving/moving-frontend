@@ -12,6 +12,7 @@ import Pagination from "@/components/common/Pagination/Pagination";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
+import Toast from "@/components/common/Toast/Toast";
 
 const Section = ({ title, children }: { title: string; children: ReactNode }) => (
   <section className="border-border-subtle flex flex-col gap-16 border-b pb-32">
@@ -42,8 +43,10 @@ export default function ComponentsTestPage() {
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(20);
 
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
   return (
-    <div className="mx-auto flex max-w-[600px] flex-col gap-40 px-20 py-40">
+    <div className="relative mx-auto flex max-w-[600px] flex-col gap-40 px-20 py-40">
       <Text as="h1" variant="2xl-bold" className="text-text-primary">
         공통 컴포넌트 테스트
       </Text>
@@ -216,6 +219,24 @@ export default function ComponentsTestPage() {
             전체 페이지 +5
           </Button>
         </div>
+      </Section>
+
+      {/* Toast */}
+      <Section title="Toast">
+        <div className="flex flex-wrap gap-12">
+          <Button
+            variant="solid"
+            size="sm"
+            onClick={() => setToast({ type: "success", message: "링크가 복사되었어요." })}
+          >
+            토스트 띄우기
+          </Button>
+        </div>
+        {toast && (
+          <Toast key={toast.message} onClose={() => setToast(null)}>
+            {toast.message}
+          </Toast>
+        )}
       </Section>
     </div>
   );

@@ -109,6 +109,8 @@
   --filter-button-icon: var(--color-gray-600);
   --filter-button-border: var(--color-gray-600);
 
+  --shadow-select: 4px 4px 10px 0px rgba(224, 224, 224, 0.25);
+
   /* Typography */
   --font-family-base: "Pretendard", sans-serif;
   --font-weight-regular: 400;
