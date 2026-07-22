@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 
 import Footer from "@/components/common/Footer/Footer";
+import Header from "@/components/common/Header/Header";
 
 import "./globals.css";
 
@@ -32,6 +33,7 @@ export default function QueryProvider({ children }: QueryProviderProps) {
     <html lang="ko">
       <body className="flex min-h-screen flex-col">
         <QueryClientProvider client={queryClient}>
+          <Header isLogin />
           <div className="flex-1">{children}</div>
           <Footer />
         </QueryClientProvider>
