@@ -15,6 +15,7 @@ import {
 
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useListboxKeyboardNav } from "@/hooks/useListboxKeyboardNav";
 import { cn } from "@/lib/utils/cn";
 
 interface SelectContextValue {
@@ -59,6 +60,12 @@ const SelectMain = ({
   const [selectedLabel, setSelectedLabel] = useState<ReactNode>("");
   const listboxId = useId();
   const containerRef = useClickOutside<HTMLDivElement>(() => setIsOpen(false));
+  const { triggerRef, listboxRef, handleTriggerKeyDown, handleListboxKeyDown, focusTrigger } =
+    useListboxKeyboardNav<HTMLButtonElement, HTMLDivElement>({
+      isOpen,
+      onOpen: () => setIsOpen(true),
+      onClose: () => setIsOpen(false),
+    });
 
   useEffect(() => {
     if (!defaultValue) return;
@@ -79,6 +86,7 @@ const SelectMain = ({
     setSelectedLabel(label);
     setIsOpen(false);
     onChange?.(value);
+    focusTrigger();
   };
 
   return (
@@ -86,6 +94,7 @@ const SelectMain = ({
       <div className="flex w-full flex-col gap-4">
         <div ref={containerRef} className={selectVariants({ size })}>
           <button
+            ref={triggerRef}
             type="button"
             role="combobox"
             aria-haspopup="listbox"
@@ -97,13 +106,11 @@ const SelectMain = ({
               "rounded-12 shadow-card flex h-48 w-full items-center justify-between border px-12 py-16",
               "border-border-default bg-background-surface text-text-primary transition-colors",
               "disabled:bg-background-disabled disabled:text-text-disabled disabled:cursor-not-allowed",
-              "focus:border-border-brand focus:bg-background-brand-muted focus:text-text-brand",
+              isOpen && "border-border-brand bg-background-brand-muted text-text-brand",
               error && "border-border-error",
             )}
             onClick={() => setIsOpen((prev) => !prev)}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") setIsOpen(false);
-            }}
+            onKeyDown={handleTriggerKeyDown}
           >
             <Text variant="md-regular">{selectedLabel || desc}</Text>
             <Image
@@ -117,11 +124,13 @@ const SelectMain = ({
 
           {isOpen && (
             <div
+              ref={listboxRef}
               id={listboxId}
               role="listbox"
+              onKeyDown={handleListboxKeyDown}
               className={cn(
-                "rounded-12 border-border-default bg-background-surface absolute z-50 my-4 flex w-full min-w-[128px] flex-col items-start border",
-                "shadow-[4px_4px_10px_0px_rgba(224,224,224,0.25)]",
+                "rounded-12 bg-background-surface absolute z-50 my-4 flex w-full min-w-[128px] flex-col items-start",
+                "border-border-default border shadow-[4px_4px_10px_0px_rgba(224,224,224,0.25)]",
               )}
             >
               {children}

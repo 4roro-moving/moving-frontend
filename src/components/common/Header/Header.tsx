@@ -59,22 +59,10 @@ const Header = ({ isLogin = false }: HeaderProps) => {
         {isLogin ? (
           <div className="flex items-center gap-20">
             <button type="button" aria-label="알림">
-              <Image
-                src="/icons/ic_alarm.svg"
-                alt="알람 아이콘"
-                width={24}
-                height={24}
-                aria-hidden
-              />
+              <Image src="/icons/ic_alarm.svg" alt="" width={24} height={24} />
             </button>
             <button type="button" aria-label="프로필">
-              <Image
-                src="/icons/ic_profile.svg"
-                alt="프로필 아이콘"
-                width={24}
-                height={24}
-                aria-hidden
-              />
+              <Image src="/icons/ic_profile.svg" alt="" width={24} height={24} />
             </button>
             {/* TODO: 프로필 기능 연동 전까지 닉네임 placeholder */}
             <button type="button" className="text-text-primary">

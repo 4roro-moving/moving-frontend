@@ -58,9 +58,11 @@ const ModalMain = ({ children, onClose, className, overlayClassName }: ModalMain
         ref={panelRef}
         role="dialog"
         aria-modal="true"
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
         tabIndex={-1}
         className={cn(
-          "rounded-8 bg-background-surface relative flex flex-col items-center gap-40 p-40 shadow-lg focus:outline-none",
+          "rounded-24 bg-background-surface relative flex flex-col items-center gap-40 p-40 shadow-lg focus:outline-none",
           className,
         )}
       >

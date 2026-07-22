@@ -60,7 +60,7 @@ const getPageItems = (currentPage: number, pageCount: number): PageItem[] => {
 };
 
 const pageButtonStyle =
-  "flex size-48 p-10 items-center justify-center rounded-6 bg-background-surface border border-1 border-border-dimmed";
+  "flex size-48 p-10 items-center justify-center rounded-6 bg-background-surface border border-border-dimmed";
 
 const Pagination = ({ currentPage, pageCount, onPageChange, className }: PaginationProps) => {
   const [openEllipsisIndex, setOpenEllipsisIndex] = useState<number | null>(null);
@@ -90,13 +90,7 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
             disabled={isPrevDisabled}
             aria-label="이전 페이지"
           >
-            <Image
-              src="/icons/ic_left.svg"
-              alt="이전 페이지 아이콘"
-              width={24}
-              height={24}
-              aria-hidden
-            />
+            <Image src="/icons/ic_left.svg" alt="" width={24} height={24} />
           </button>
         </li>
 
@@ -114,7 +108,7 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
               />
             </li>
           ) : (
-            <li key={item.page} aria-current={item.page === currentPage ? "page" : undefined}>
+            <li key={item.page}>
               <button
                 type="button"
                 className={cn(
@@ -126,6 +120,7 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
                 onClick={() => goToPage(item.page)}
                 disabled={item.page === currentPage}
                 aria-label={`${item.page} 페이지`}
+                aria-current={item.page === currentPage ? "page" : undefined}
               >
                 <Text variant="md-regular">{item.page}</Text>
               </button>
@@ -144,13 +139,7 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
             disabled={isNextDisabled}
             aria-label="다음 페이지"
           >
-            <Image
-              src="/icons/ic_right.svg"
-              alt="다음 페이지 아이콘"
-              width={24}
-              height={24}
-              aria-hidden
-            />
+            <Image src="/icons/ic_right.svg" alt="" width={24} height={24} />
           </button>
         </li>
       </ul>

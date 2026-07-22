@@ -10,7 +10,12 @@ interface ModalDescriptionProps {
 
 const ModalDescription = ({ children, className }: ModalDescriptionProps) => {
   return (
-    <Text as="p" variant="md-regular" className={cn("text-text-secondary", className)}>
+    <Text
+      as="p"
+      id="modal-description"
+      variant="md-regular"
+      className={cn("text-text-secondary", className)}
+    >
       {children}
     </Text>
   );

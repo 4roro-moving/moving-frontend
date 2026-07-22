@@ -87,28 +87,29 @@
   --color-overlay-scrim: rgba(20, 20, 20, 0.5);
 
   /* Component Color */
-  --like-default-stroke: var(--color-gray-100);
-  --like-active-fill: var(--color-red-200);
-  --like-active-stroke: var(--color-red-200);
-  --social-kakao-icon: #331d1e;
-  --social-kakao-background: #fae100;
-  --social-google-background: var(--color-line-100);
-  --social-naver-icon: var(--color-white);
-  --social-naver-background: #03c75a;
-  --social-facebook-icon: var(--color-white);
-  --social-facebook-background: #1877f2;
-  --toast-background: var(--color-orange-200);
-  --toast-text: var(--color-orange-400);
-  --date-disabled: var(--color-gray-200);
-  --notice-background: var(--color-background-200);
-  --notice-text: var(--color-black-100);
-  --nav-text-active: var(--color-black-500);
-  --nav-text-default: var(--color-gray-500);
-  --nav-indicator-active: var(--color-black-400);
-  --icon-arrow-right-fill: var(--color-black-300);
-  --filter-button-icon: var(--color-gray-600);
-  --filter-button-border: var(--color-gray-600);
+  --color-like-default-stroke: var(--color-gray-100);
+  --color-like-active-fill: var(--color-red-200);
+  --color-like-active-stroke: var(--color-red-200);
+  --color-social-kakao-icon: #331d1e;
+  --color-social-kakao-background: #fae100;
+  --color-social-google-background: var(--color-line-100);
+  --color-social-naver-icon: var(--color-white);
+  --color-social-naver-background: #03c75a;
+  --color-social-facebook-icon: var(--color-white);
+  --color-social-facebook-background: #1877f2;
+  --color-toast-background: var(--color-orange-200);
+  --color-toast-text: var(--color-orange-400);
+  --color-date-disabled: var(--color-gray-200);
+  --color-notice-background: var(--color-background-200);
+  --color-notice-text: var(--color-black-100);
+  --color-nav-text-active: var(--color-black-500);
+  --color-nav-text-default: var(--color-gray-500);
+  --color-nav-indicator-active: var(--color-black-400);
+  --color-icon-arrow-right-fill: var(--color-black-300);
+  --color-filter-button-icon: var(--color-gray-600);
+  --color-filter-button-border: var(--color-gray-600);
 
+  --shadow-input: 0 4px 4px -1px rgba(249, 80, 46, 0.2);
   --shadow-select: 4px 4px 10px 0px rgba(224, 224, 224, 0.25);
 
   /* Typography */

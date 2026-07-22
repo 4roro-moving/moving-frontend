@@ -12,10 +12,10 @@ const inputVariants = cva(
     variants: {
       size: {
         sm: "text-[length:var(--font-size-13)] leading-[var(--line-height-22)]",
-        lg: "text-[length:var(--font-size-14)] leading-[var(--line-height-24)]",
+        md: "text-[length:var(--font-size-14)] leading-[var(--line-height-24)]",
       },
     },
-    defaultVariants: { size: "lg" },
+    defaultVariants: { size: "md" },
   },
 );
 
@@ -48,7 +48,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           inputVariants({ size }),
           error && "border-border-error",
           className,
-          "hover:bg-background-hover focus:shadow-md",
+          "hover:bg-background-hover focus-within:shadow-input",
         )}
       >
         {leftSlot}
@@ -56,7 +56,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           ref={ref}
           type={type}
           aria-invalid={!!error}
-          className="text-text-primary placeholder:text-text-placeholder disabled:text-text-disabled disable w-full bg-transparent focus:outline-none"
+          className="text-text-primary placeholder:text-text-placeholder disabled:text-text-disabled w-full bg-transparent focus:outline-none"
           onChange={handleChange}
           {...props}
         />

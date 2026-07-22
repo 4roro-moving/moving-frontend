@@ -12,7 +12,7 @@ const ModalClose = ({ onClose }: ModalCloseProps) => {
       onClick={onClose}
       aria-label="모달 닫기"
     >
-      <Image src="/icons/ic_close.svg" alt="모달 닫기 아이콘" width={18} height={18} aria-hidden />
+      <Image src="/icons/ic_close.svg" alt="" width={18} height={18} aria-hidden />
     </button>
   );
 };

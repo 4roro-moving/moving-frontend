@@ -4,7 +4,7 @@ import { Text } from "@/components/common/Text";
 
 const ModalTitle = ({ children }: { children: ReactNode }) => {
   return (
-    <Text as="p" variant="xl-bold" className="text-text-primary">
+    <Text as="h2" id="modal-title" variant="xl-bold" className="text-text-primary">
       {children}
     </Text>
   );

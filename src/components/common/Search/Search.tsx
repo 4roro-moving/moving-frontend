@@ -12,10 +12,10 @@ const searchVariants = cva(
     variants: {
       size: {
         sm: "w-[260px] text-sm leading-6",
-        lg: "w-[560px] text-lg leading-6",
+        md: "w-[560px] text-lg leading-6",
       },
     },
-    defaultVariants: { size: "lg" },
+    defaultVariants: { size: "md" },
   },
 );
 
@@ -31,7 +31,7 @@ const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
   return (
     <div className={cn(searchVariants({ size }), className)}>
       <span className="text-icon-default">
-        <Image src="/icons/ic_search.svg" alt="search" width={24} height={24} />
+        <Image src="/icons/ic_search.svg" alt="" width={24} height={24} />
       </span>
       <input
         ref={ref}

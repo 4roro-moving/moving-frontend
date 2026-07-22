@@ -30,7 +30,7 @@ const Toast = ({ children, onClose }: ToastProps) => {
       aria-live="polite"
       className="fixed top-20 left-1/2 z-[9999] w-full -translate-x-1/2"
     >
-      <div className="rounded-16 flex w-full items-center bg-[var(--toast-background)] px-32 py-20 text-[var(--toast-text)]">
+      <div className="rounded-16 bg-toast-background text-toast-text flex w-full items-center px-32 py-20">
         <Text variant="sm-medium">{children}</Text>
       </div>
     </div>

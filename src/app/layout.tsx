@@ -33,7 +33,7 @@ export default function QueryProvider({ children }: QueryProviderProps) {
     <html lang="ko">
       <body className="flex min-h-screen flex-col">
         <QueryClientProvider client={queryClient}>
-          <Header isLogin />
+          <Header />
           <div className="flex-1">{children}</div>
           <Footer />
         </QueryClientProvider>

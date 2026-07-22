@@ -14,7 +14,7 @@ const buttonVariants = cva(
       },
       size: {
         sm: "min-w-[300px]",
-        lg: "min-w-[600px]",
+        md: "min-w-[600px]",
       },
       fullWidth: {
         true: "w-full",
@@ -23,7 +23,7 @@ const buttonVariants = cva(
     },
     defaultVariants: {
       variant: "solid",
-      size: "lg",
+      size: "md",
       fullWidth: false,
     },
   },
