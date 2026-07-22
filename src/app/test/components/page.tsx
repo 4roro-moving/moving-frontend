@@ -8,6 +8,7 @@ import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import Textarea from "@/components/common/Input/Textarea";
 import Modal from "@/components/common/Modal/Modal";
+import Pagination from "@/components/common/Pagination/Pagination";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
@@ -37,6 +38,9 @@ export default function ComponentsTestPage() {
   const [showSelectError, setShowSelectError] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(20);
 
   return (
     <div className="mx-auto flex max-w-[600px] flex-col gap-40 px-20 py-40">
@@ -197,6 +201,26 @@ export default function ComponentsTestPage() {
             </Modal.Button>
           </Modal>
         )}
+      </Section>
+
+      {/* Pagination */}
+      <Section title="Pagination">
+        <Pagination currentPage={page} pageCount={pageCount} onPageChange={setPage} />
+        <Text variant="sm-medium" className="text-text-muted">
+          현재 페이지: {page} / 전체 {pageCount}페이지
+        </Text>
+        <div className="flex gap-8">
+          <Button
+            variant="sec"
+            size="sm"
+            onClick={() => setPageCount((prev) => Math.max(1, prev - 5))}
+          >
+            전체 페이지 -5
+          </Button>
+          <Button variant="sec" size="sm" onClick={() => setPageCount((prev) => prev + 5)}>
+            전체 페이지 +5
+          </Button>
+        </div>
       </Section>
     </div>
   );
