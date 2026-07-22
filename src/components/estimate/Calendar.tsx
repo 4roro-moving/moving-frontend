@@ -18,9 +18,16 @@ interface CalendarProps {
 }
 
 export default function Calendar({ selected, onSelect, minDate }: CalendarProps) {
+  const selectedMonthKey = selected.getFullYear() * 12 + selected.getMonth();
   const [viewMonth, setViewMonth] = useState<Date>(
     () => new Date(selected.getFullYear(), selected.getMonth(), 1),
   );
+  // selected가 다른 달로 바뀌면 표시 월도 함께 맞춘다. (재사용 시 월/선택일 불일치 방지)
+  const [syncedSelectedMonth, setSyncedSelectedMonth] = useState(selectedMonthKey);
+  if (syncedSelectedMonth !== selectedMonthKey) {
+    setSyncedSelectedMonth(selectedMonthKey);
+    setViewMonth(new Date(selected.getFullYear(), selected.getMonth(), 1));
+  }
 
   const today = new Date();
   const min = minDate ? startOfDay(minDate) : startOfDay(today);
@@ -96,11 +103,11 @@ export default function Calendar({ selected, onSelect, minDate }: CalendarProps)
                 variant={isSelected ? "md-semibold" : "md-regular"}
                 className={cn(
                   isDisabled
-                    ? "text-text-faint"
+                    ? "text-[var(--date-disabled)]"
                     : isSelected
                       ? "text-text-inverse"
                       : !inCurrentMonth
-                        ? "text-text-faint"
+                        ? "text-[var(--date-disabled)]"
                         : isToday
                           ? "text-text-brand"
                           : "text-text-secondary",

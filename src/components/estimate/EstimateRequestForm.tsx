@@ -83,7 +83,7 @@ function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
 
 export default function EstimateRequestForm() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
-  // 오늘 날짜를 초기 선택값으로 사용한다.
+  // 오늘 날짜를 초기 선택값으로 사용
   const [moveDate, setMoveDate] = useState<Date>(() => new Date());
   const [fromRegion, setFromRegion] = useState<string | null>(null);
   const [toRegion, setToRegion] = useState<string | null>(null);

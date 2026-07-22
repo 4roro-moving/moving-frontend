@@ -44,8 +44,9 @@ export default function DatePickerField({ value, onChange, className }: DatePick
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        aria-haspopup="dialog"
+        aria-haspopup="true"
         aria-expanded={isOpen}
+        aria-controls="estimate-date-picker-popup"
         className="rounded-12 border-border-subtle bg-background-surface flex h-[50px] w-full items-center gap-8 border pr-12 pl-20"
       >
         <CalendarIcon className="text-icon-brand shrink-0" />
@@ -63,7 +64,12 @@ export default function DatePickerField({ value, onChange, className }: DatePick
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 z-20 mt-8 w-full">
+        <div
+          id="estimate-date-picker-popup"
+          role="region"
+          aria-label="날짜 선택"
+          className="absolute top-full left-0 z-20 mt-8 w-full"
+        >
           <Calendar
             selected={value}
             onSelect={(date) => {
