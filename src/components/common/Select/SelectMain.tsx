@@ -28,31 +28,12 @@ const SelectContext = createContext<SelectContextValue | null>(null);
 const selectVariants = cva("relative", {
   variants: {
     size: {
-      noLine: "w-fit",
-      xs: "h-[50px] w-[180px]",
-      sm: "w-[345px]",
-      md: "w-[440px]",
-      lg: "w-[520px]",
+      sm: "w-[54px]",
+      lg: "w-[128px]",
     },
   },
   defaultVariants: { size: "lg" },
 });
-
-const triggerVariants = cva(
-  "flex w-full items-center justify-between rounded-4 bg-background-surface text-text-primary transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
-  {
-    variants: {
-      size: {
-        noLine: "gap-10 border-transparent whitespace-nowrap",
-        xs: "border border-border-default px-20 py-13",
-        sm: "border border-border-default px-20 py-18",
-        md: "border border-border-default px-20 py-18",
-        lg: "border border-border-default px-20 py-18",
-      },
-    },
-    defaultVariants: { size: "lg" },
-  },
-);
 
 export interface SelectMainProps extends VariantProps<typeof selectVariants> {
   children: ReactNode;
@@ -91,7 +72,6 @@ const SelectMain = ({
       }
     });
     // defaultValue는 최초 진입값을 채우는 용도이므로 children 변경 시마다 재평가할 필요는 없습니다.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValue]);
 
   const handleChange = (value: string, label: ReactNode) => {
@@ -113,21 +93,22 @@ const SelectMain = ({
             aria-controls={listboxId}
             aria-invalid={!!error}
             disabled={disabled}
-            className={cn(triggerVariants({ size }), error && "border-border-error")}
+            className={cn(
+              "rounded-12 shadow-card flex h-48 w-full items-center justify-between border px-12 py-16",
+              "border-border-default bg-background-surface text-text-primary transition-colors",
+              "disabled:bg-background-disabled disabled:text-text-disabled disabled:cursor-not-allowed",
+              "focus:border-border-brand focus:bg-background-brand-muted focus:text-text-brand",
+              error && "border-border-error",
+            )}
             onClick={() => setIsOpen((prev) => !prev)}
             onKeyDown={(event) => {
               if (event.key === "Escape") setIsOpen(false);
             }}
           >
-            <Text
-              variant="md-regular"
-              className={selectedLabel ? "text-text-primary" : "text-text-placeholder"}
-            >
-              {selectedLabel || desc}
-            </Text>
+            <Text variant="md-regular">{selectedLabel || desc}</Text>
             <Image
               src={isOpen ? "/icons/ic_up.svg" : "/icons/ic_down.svg"}
-              alt=""
+              alt="open icon"
               width={24}
               height={24}
               aria-hidden
@@ -139,8 +120,8 @@ const SelectMain = ({
               id={listboxId}
               role="listbox"
               className={cn(
-                "rounded-4 border-border-default bg-background-surface absolute z-50 my-4 flex min-w-[100px] flex-col items-start border shadow-md",
-                size === "noLine" ? "w-fit" : "w-full",
+                "rounded-12 border-border-default bg-background-surface absolute z-50 my-4 flex w-full min-w-[128px] flex-col items-start border",
+                "shadow-[4px_4px_10px_0px_rgba(224,224,224,0.25)]",
               )}
             >
               {children}

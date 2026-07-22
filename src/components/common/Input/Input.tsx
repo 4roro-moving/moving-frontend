@@ -7,7 +7,7 @@ import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
 const inputVariants = cva(
-  "flex w-full items-center gap-8 rounded-4 border border-border-default bg-background-surface px-20 py-18 transition-colors focus-within:border-border-brand has-[input:disabled]:bg-background-disabled",
+  "flex w-full items-center gap-8 rounded-16 border border-border-default bg-background-surface p-14 transition-colors focus-within:border-border-brand has-[input:disabled]:bg-background-disabled",
   {
     variants: {
       size: {
@@ -22,7 +22,9 @@ const inputVariants = cva(
 export interface InputProps
   extends Omit<ComponentPropsWithoutRef<"input">, "size">, VariantProps<typeof inputVariants> {
   error?: string;
+  /* input 내부에 들어갈 요소 (왼쪽) */
   leftSlot?: ReactNode;
+  /* input 내부에 들어갈 요소 (오른쪽) */
   rightSlot?: ReactNode;
   /** 숫자만 입력받도록 자동 필터링 (선행 0 제거) */
   numericOnly?: boolean;
@@ -41,13 +43,20 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className={cn(inputVariants({ size }), error && "border-border-error", className)}>
+      <div
+        className={cn(
+          inputVariants({ size }),
+          error && "border-border-error",
+          className,
+          "hover:bg-background-hover focus:shadow-md",
+        )}
+      >
         {leftSlot}
         <input
           ref={ref}
           type={type}
           aria-invalid={!!error}
-          className="text-text-primary placeholder:text-text-placeholder disabled:text-text-disabled w-full bg-transparent focus:outline-none"
+          className="text-text-primary placeholder:text-text-placeholder disabled:text-text-disabled disable w-full bg-transparent focus:outline-none"
           onChange={handleChange}
           {...props}
         />

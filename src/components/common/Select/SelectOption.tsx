@@ -22,12 +22,13 @@ const SelectOption = ({ children, value }: SelectOptionProps) => {
       role="option"
       aria-selected={isSelected}
       className={cn(
-        "hover:bg-background-hover w-full px-16 py-10 text-left whitespace-nowrap",
+        "hover:bg-background-hover text-text-secondary shadow-card w-full px-16 py-20 text-left whitespace-nowrap",
+        "first:rounded-t-12 last:rounded-b-12",
         isSelected && "bg-background-hover",
       )}
       onClick={() => handleChange(value, children)}
     >
-      <Text variant="sm-medium" className="text-text-primary">
+      <Text variant="lg-regular" className="text-text-primary">
         {children}
       </Text>
     </button>

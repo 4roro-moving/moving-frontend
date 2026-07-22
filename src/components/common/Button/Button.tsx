@@ -4,18 +4,17 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils/cn";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-8 rounded-4 font-semibold transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
+  "inline-flex h-15 p-16 items-center justify-center gap-8 rounded-16 font-semibold transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
   {
     variants: {
       variant: {
-        pri: "bg-background-brand text-text-inverse hover:bg-background-brand-hover",
-        sec: "border border-border-default bg-background-surface text-text-primary hover:bg-background-hover",
-        google: "border border-border-default bg-white text-text-primary hover:bg-background-hover",
+        solid: "bg-background-brand text-text-inverse hover:bg-background-brand-hover",
+        outline:
+          "border border-1 border-border-brand bg-background-surface text-text-brand hover:bg-background-brand-muted",
       },
       size: {
-        sm: "h-[38px] px-16 text-[length:var(--font-size-13)] leading-[var(--line-height-22)]",
-        md: "h-[48px] px-24 text-[length:var(--font-size-14)] leading-[var(--line-height-24)]",
-        lg: "h-[56px] px-32 text-[length:var(--font-size-16)] leading-[var(--line-height-26)]",
+        sm: "min-w-[300px]",
+        lg: "min-w-[600px]",
       },
       fullWidth: {
         true: "w-full",
@@ -23,8 +22,8 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "pri",
-      size: "md",
+      variant: "solid",
+      size: "lg",
       fullWidth: false,
     },
   },

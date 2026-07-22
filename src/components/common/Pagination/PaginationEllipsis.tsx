@@ -10,6 +10,7 @@ interface PaginationEllipsisProps {
   end: number;
   onOpenChange: (index: number | null) => void;
   onSelect: (page: number) => void;
+  className?: string;
 }
 
 const PaginationEllipsis = ({
@@ -19,19 +20,20 @@ const PaginationEllipsis = ({
   end,
   onOpenChange,
   onSelect,
+  className,
 }: PaginationEllipsisProps) => {
   const hiddenPages = Array.from({ length: Math.max(0, end - start - 1) }, (_, i) => start + 1 + i);
 
   return (
-    <div className="relative z-10 size-full">
+    <div className="relative">
       <button
         type="button"
-        className="size-full"
+        className={cn(className, "flex items-center justify-center")}
         onClick={() => onOpenChange(isOpen ? null : index)}
         aria-label="숨겨진 페이지 더보기"
         aria-expanded={isOpen}
       >
-        <Text variant="md-regular" className="text-text-primary">
+        <Text variant="md-regular" className="text-text-weak">
           ...
         </Text>
       </button>
@@ -39,7 +41,7 @@ const PaginationEllipsis = ({
       {isOpen && (
         <ul
           role="listbox"
-          className="border-border-default bg-background-surface rounded-4 absolute bottom-0 flex max-h-[180px] w-full flex-col items-center overflow-y-auto border shadow-md"
+          className="border-border-default bg-background-surface rounded-4 absolute bottom-0 z-10 flex max-h-[180px] w-full flex-col items-center overflow-y-auto border shadow-md"
         >
           {hiddenPages.map((page) => (
             <li key={page} className="w-full">
@@ -48,8 +50,8 @@ const PaginationEllipsis = ({
                 role="option"
                 aria-selected={false}
                 className={cn(
-                  "hover:bg-background-hover w-full py-8 text-center",
-                  hiddenPages.length === 1 && "py-13",
+                  "hover:bg-background-hover size-full py-8 text-center",
+                  hiddenPages.length === 1 && "py-12",
                 )}
                 onClick={() => {
                   onSelect(page);

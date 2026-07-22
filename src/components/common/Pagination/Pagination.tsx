@@ -60,7 +60,7 @@ const getPageItems = (currentPage: number, pageCount: number): PageItem[] => {
 };
 
 const pageButtonStyle =
-  "flex size-[50px] items-center justify-center rounded-4 bg-color-background-surface rounded-lg";
+  "flex size-48 p-10 items-center justify-center rounded-6 bg-background-surface border border-1 border-border-dimmed";
 
 const Pagination = ({ currentPage, pageCount, onPageChange, className }: PaginationProps) => {
   const [openEllipsisIndex, setOpenEllipsisIndex] = useState<number | null>(null);
@@ -78,13 +78,13 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
 
   return (
     <nav aria-label="페이지네이션" className={className}>
-      <ul ref={containerRef} className="flex items-center justify-center gap-20">
+      <ul ref={containerRef} className="flex items-center justify-center gap-4">
         <li>
           <button
             type="button"
             className={cn(
               pageButtonStyle,
-              "text-text-primary hover:bg-background-hover transition disabled:cursor-not-allowed disabled:grayscale disabled:hover:bg-transparent",
+              "text-text-weak hover:bg-background-hover transition disabled:cursor-not-allowed disabled:grayscale disabled:hover:bg-transparent",
             )}
             onClick={() => goToPage(currentPage - 1)}
             disabled={isPrevDisabled}
@@ -97,16 +97,15 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
         {pageItems.map((item, index) =>
           item.type === "ellipsis" ? (
             <li key={`ellipsis-${item.start}-${item.end}`} className="relative">
-              <span className={cn(pageButtonStyle, "text-text-primary hover:bg-background-hover")}>
-                <PaginationEllipsis
-                  isOpen={openEllipsisIndex === index}
-                  index={index}
-                  start={item.start}
-                  end={item.end}
-                  onOpenChange={setOpenEllipsisIndex}
-                  onSelect={goToPage}
-                />
-              </span>
+              <PaginationEllipsis
+                className={cn(pageButtonStyle, "hover:bg-background-hover")}
+                isOpen={openEllipsisIndex === index}
+                index={index}
+                start={item.start}
+                end={item.end}
+                onOpenChange={setOpenEllipsisIndex}
+                onSelect={goToPage}
+              />
             </li>
           ) : (
             <li key={item.page} aria-current={item.page === currentPage ? "page" : undefined}>
@@ -115,8 +114,8 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
                 className={cn(
                   pageButtonStyle,
                   item.page === currentPage
-                    ? "border-border-brand text-text-primary border"
-                    : "text-text-primary hover:bg-background-hover cursor-pointer",
+                    ? "text-text-secondary"
+                    : "text-text-weak hover:bg-background-hover cursor-pointer",
                 )}
                 onClick={() => goToPage(item.page)}
                 disabled={item.page === currentPage}
@@ -133,7 +132,7 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
             type="button"
             className={cn(
               pageButtonStyle,
-              "text-text-primary hover:bg-background-hover transition disabled:cursor-not-allowed disabled:grayscale disabled:hover:bg-transparent",
+              "text-text-secondary hover:bg-background-hover transition disabled:cursor-not-allowed disabled:grayscale disabled:hover:bg-transparent",
             )}
             onClick={() => goToPage(currentPage + 1)}
             disabled={isNextDisabled}

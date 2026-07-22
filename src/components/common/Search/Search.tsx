@@ -7,13 +7,12 @@ import { cn } from "@/lib/utils/cn";
 import Image from "next/image";
 
 const searchVariants = cva(
-  "flex items-center gap-10 rounded-4 border border-border-default bg-background-surface text-text-primary transition-colors focus-within:border-border-brand",
+  "flex items-center gap-10 rounded-16 p-14 bg-background-muted text-text-primary transition-colors focus-within:border-border-brand",
   {
     variants: {
       size: {
-        sm: "w-[200px] px-20 py-[11px] text-[length:var(--font-size-13)] leading-[var(--line-height-22)]",
-        md: "h-[50px] w-[320px] rounded-2 px-20 py-[13px] text-[length:var(--font-size-13)] leading-[var(--line-height-22)]",
-        lg: "w-[345px] px-20 py-[11px] text-[length:var(--font-size-14)] leading-[var(--line-height-24)]",
+        sm: "w-[260px] text-sm leading-6",
+        lg: "w-[560px] text-lg leading-6",
       },
     },
     defaultVariants: { size: "lg" },
@@ -31,6 +30,9 @@ const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
 ) {
   return (
     <div className={cn(searchVariants({ size }), className)}>
+      <span className="text-icon-default">
+        <Image src="/icons/ic_search.svg" alt="search" width={24} height={24} />
+      </span>
       <input
         ref={ref}
         type="text"
@@ -38,9 +40,6 @@ const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
         className="placeholder:text-text-placeholder w-full bg-transparent focus:outline-none"
         {...props}
       />
-      <span className="text-icon-default">
-        <Image src="/icons/ic_search.svg" alt="search" width={24} height={24} />
-      </span>
     </div>
   );
 });

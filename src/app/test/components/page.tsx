@@ -132,7 +132,6 @@ export default function ComponentsTestPage() {
       <Section title="Search">
         <div className="flex flex-wrap gap-16">
           <Search size="sm" />
-          <Search size="md" />
           <Search size="lg" />
         </div>
       </Section>
@@ -140,24 +139,20 @@ export default function ComponentsTestPage() {
       {/* Button */}
       <Section title="Button">
         <div className="flex flex-wrap items-center gap-12">
-          <Button variant="pri" size="sm">
+          <Button variant="solid" size="sm">
             Primary sm
           </Button>
-          <Button variant="pri" size="md">
-            Primary md
-          </Button>
-          <Button variant="pri" size="lg">
+          <Button variant="solid" size="lg">
             Primary lg
           </Button>
         </div>
         <div className="flex flex-wrap items-center gap-12">
-          <Button variant="sec">Secondary</Button>
-          <Button variant="google">Google</Button>
-          <Button variant="pri" disabled>
+          <Button variant="outline">Secondary</Button>
+          <Button variant="solid" disabled>
             Disabled
           </Button>
         </div>
-        <Button variant="pri" fullWidth>
+        <Button variant="solid" fullWidth>
           Full Width
         </Button>
       </Section>
@@ -166,7 +161,7 @@ export default function ComponentsTestPage() {
       <Section title="Select">
         <Select
           desc="지역을 선택해주세요"
-          size="md"
+          size="lg"
           onChange={setRegion}
           error={showSelectError ? "지역을 선택해주세요." : undefined}
         >
@@ -188,7 +183,7 @@ export default function ComponentsTestPage() {
 
       {/* Modal */}
       <Section title="Modal">
-        <Button variant="pri" onClick={() => setIsModalOpen(true)}>
+        <Button variant="solid" onClick={() => setIsModalOpen(true)}>
           모달 열기
         </Button>
         {isModalOpen && (
@@ -196,7 +191,7 @@ export default function ComponentsTestPage() {
             <Modal.Close onClose={() => setIsModalOpen(false)} />
             <Modal.Title>테스트 모달입니다</Modal.Title>
             <Modal.Desc>오버레이 클릭, ESC 키로 닫힐 수 있는지 확인해보세요.</Modal.Desc>
-            <Modal.Button variant="pri" onClick={() => setIsModalOpen(false)}>
+            <Modal.Button variant="solid" onClick={() => setIsModalOpen(false)}>
               확인
             </Modal.Button>
           </Modal>
@@ -211,13 +206,13 @@ export default function ComponentsTestPage() {
         </Text>
         <div className="flex gap-8">
           <Button
-            variant="sec"
+            variant="outline"
             size="sm"
             onClick={() => setPageCount((prev) => Math.max(1, prev - 5))}
           >
             전체 페이지 -5
           </Button>
-          <Button variant="sec" size="sm" onClick={() => setPageCount((prev) => prev + 5)}>
+          <Button variant="outline" size="sm" onClick={() => setPageCount((prev) => prev + 5)}>
             전체 페이지 +5
           </Button>
         </div>
