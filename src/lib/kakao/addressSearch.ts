@@ -99,11 +99,9 @@ export function mapKakaoKeywordToAddressItem(
   const place = document.place_name.trim();
   const jibun = document.address_name.trim();
 
-  let roadAddress = road;
+  let roadAddress = road || jibun || place;
   if (road && place && !road.includes(place)) {
     roadAddress = `${road} (${place})`;
-  } else if (!road && place) {
-    roadAddress = place;
   }
 
   return {

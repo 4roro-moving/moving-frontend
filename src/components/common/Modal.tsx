@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
@@ -14,6 +14,18 @@ interface ModalProps {
   onConfirm?: () => void;
   onClose: () => void;
   className?: string;
+}
+
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function getFocusableElements(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (element) =>
+      !element.hidden &&
+      element.getAttribute("aria-hidden") !== "true" &&
+      !("disabled" in element && (element as HTMLButtonElement).disabled),
+  );
 }
 
 function CloseIcon({ className }: { className?: string }) {
@@ -53,20 +65,62 @@ export default function Modal({
   onClose,
   className,
 }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!open) return;
 
+    const previousActiveElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      if (event.key !== "Tab" || !dialogRef.current) return;
+
+      const focusable = getFocusableElements(dialogRef.current);
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey) {
+        if (active === first || !dialogRef.current.contains(active)) {
+          event.preventDefault();
+          last.focus();
+        }
+        return;
+      }
+
+      if (active === last || !dialogRef.current.contains(active)) {
+        event.preventDefault();
+        first.focus();
+      }
     }
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleKeyDown);
 
+    requestAnimationFrame(() => {
+      if (!dialogRef.current) return;
+
+      const focusable = getFocusableElements(dialogRef.current);
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      } else {
+        dialogRef.current.focus();
+      }
+    });
+
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
+      previousActiveElement?.focus();
     };
   }, [open, onClose]);
 
@@ -81,9 +135,11 @@ export default function Modal({
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
         className={cn(
           "bg-background-surface rounded-32 flex w-full max-w-[608px] flex-col gap-40 overflow-hidden px-24 pt-32 pb-40 shadow-[4px_4px_5px_0_rgba(169,169,169,0.20)]",
           className,

@@ -46,28 +46,37 @@ export async function GET(request: Request) {
     );
   }
 
-  try {
-    const addressUrl = new URL(KAKAO_ADDRESS_SEARCH_URL);
-    addressUrl.searchParams.set("query", query);
-    addressUrl.searchParams.set("analyze_type", "similar");
-    addressUrl.searchParams.set("size", "15");
+  const addressUrl = new URL(KAKAO_ADDRESS_SEARCH_URL);
+  addressUrl.searchParams.set("query", query);
+  addressUrl.searchParams.set("analyze_type", "similar");
+  addressUrl.searchParams.set("size", "15");
 
-    const keywordUrl = new URL(KAKAO_KEYWORD_SEARCH_URL);
-    keywordUrl.searchParams.set("query", query);
-    keywordUrl.searchParams.set("size", "15");
+  const keywordUrl = new URL(KAKAO_KEYWORD_SEARCH_URL);
+  keywordUrl.searchParams.set("query", query);
+  keywordUrl.searchParams.set("size", "15");
 
-    const [addressPayload, keywordPayload] = await Promise.all([
-      fetchKakao<KakaoAddressDocument>(addressUrl, apiKey),
-      fetchKakao<KakaoKeywordDocument>(keywordUrl, apiKey),
-    ]);
+  const [addressResult, keywordResult] = await Promise.allSettled([
+    fetchKakao<KakaoAddressDocument>(addressUrl, apiKey),
+    fetchKakao<KakaoKeywordDocument>(keywordUrl, apiKey),
+  ]);
 
-    const addressResults = (addressPayload.documents ?? []).map(mapKakaoDocumentToAddressItem);
-    const keywordResults = (keywordPayload.documents ?? []).map(mapKakaoKeywordToAddressItem);
-    const results = mergeAddressSearchResults(addressResults, keywordResults);
+  const addressPayload = addressResult.status === "fulfilled" ? addressResult.value : null;
+  const keywordPayload = keywordResult.status === "fulfilled" ? keywordResult.value : null;
 
-    return NextResponse.json({ results });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "카카오 주소 검색에 실패했습니다.";
+  if (!addressPayload && !keywordPayload) {
+    const reason =
+      addressResult.status === "rejected"
+        ? addressResult.reason
+        : keywordResult.status === "rejected"
+          ? keywordResult.reason
+          : null;
+    const message = reason instanceof Error ? reason.message : "카카오 주소 검색에 실패했습니다.";
     return NextResponse.json({ message }, { status: 502 });
   }
+
+  const addressResults = (addressPayload?.documents ?? []).map(mapKakaoDocumentToAddressItem);
+  const keywordResults = (keywordPayload?.documents ?? []).map(mapKakaoKeywordToAddressItem);
+  const results = mergeAddressSearchResults(addressResults, keywordResults);
+
+  return NextResponse.json({ results });
 }
