@@ -47,7 +47,10 @@ export default function DatePickerField({ value, onChange, className }: DatePick
         aria-haspopup="true"
         aria-expanded={isOpen}
         aria-controls="estimate-date-picker-popup"
-        className="rounded-12 border-border-subtle bg-background-surface flex h-[50px] w-full items-center gap-8 border pr-12 pl-20"
+        className={cn(
+          "rounded-12 bg-background-surface flex h-[50px] w-full items-center gap-8 border pr-12 pl-20",
+          isOpen ? "border-border-brand" : "border-border-subtle",
+        )}
       >
         <CalendarIcon className="text-icon-brand shrink-0" />
         <Text

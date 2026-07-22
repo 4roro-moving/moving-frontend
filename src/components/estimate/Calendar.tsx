@@ -37,7 +37,7 @@ export default function Calendar({ selected, onSelect, minDate }: CalendarProps)
   const isPrevDisabled = viewMonth.getTime() <= minMonth.getTime();
 
   return (
-    <div className="rounded-16 border-border-subtle bg-background-surface flex w-full flex-col gap-16 border p-16 shadow-lg">
+    <div className="rounded-16 border-border-muted bg-background-surface flex w-full flex-col gap-16 border p-16 shadow-[2px_2px_10px_0_rgba(224,224,224,0.20)]">
       {/* Header: 월 이동 */}
       <div className="flex items-center justify-between">
         <button
