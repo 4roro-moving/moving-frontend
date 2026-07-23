@@ -13,6 +13,7 @@ import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
+import Image from "next/image";
 
 const Section = ({ title, children }: { title: string; children: ReactNode }) => (
   <section className="border-border-subtle flex flex-col gap-16 border-b pb-32">
@@ -145,7 +146,11 @@ export default function ComponentsTestPage() {
           <Button variant="solid" size="sm">
             Primary sm
           </Button>
-          <Button variant="solid" size="md">
+          <Button
+            variant="solid"
+            size="md"
+            rightIcon={<Image alt="arrow-right" src="/icons/ic_write.svg" width={24} height={24} />}
+          >
             Primary md
           </Button>
         </div>

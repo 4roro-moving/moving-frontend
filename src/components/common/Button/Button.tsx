@@ -1,11 +1,11 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { forwardRef, type ButtonHTMLAttributes } from "react";
+import { forwardRef, ReactNode, type ButtonHTMLAttributes } from "react";
 
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
 const buttonVariants = cva(
-  "inline-flex h-15 p-16 items-center justify-center gap-8 rounded-16 transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
+  "inline-flex h-15 p-16 items-center justify-center gap-4 rounded-16 transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
   {
     variants: {
       variant: {
@@ -36,10 +36,12 @@ const buttonTextVariant = {
 } as const;
 
 export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {}
+  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  rightIcon?: ReactNode;
+}
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant, size, fullWidth, type = "button", className, children, ...props },
+  { variant, size, fullWidth, type = "button", className, rightIcon, children, ...props },
   ref,
 ) {
   const resolvedSize = size ?? "md";
@@ -54,6 +56,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
       <Text as="span" variant={buttonTextVariant[resolvedSize]}>
         {children}
       </Text>
+      {rightIcon}
     </button>
   );
 });
