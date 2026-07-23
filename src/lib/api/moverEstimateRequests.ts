@@ -56,14 +56,19 @@ function getMockMoverEstimateRequests(query: MoverEstimateRequestQuery) {
   const keyword = query.keyword?.trim().toLowerCase();
   const filtered = MOCK_REQUESTS.filter((request) => {
     if (keyword && !request.customer.name.toLowerCase().includes(keyword)) return false;
-    if (query.moveType?.length && !query.moveType.includes(request.moveType)) return false;
-    if (query.isDesignated !== undefined && request.isDesignated !== query.isDesignated) {
-      return false;
-    }
-    if (query.isServiceArea !== undefined && request.isServiceArea !== query.isServiceArea) {
-      return false;
-    }
-    return true;
+
+    const hasActiveFilter =
+      Boolean(query.moveType?.length) ||
+      query.isDesignated === true ||
+      query.isServiceArea === true;
+
+    if (!hasActiveFilter) return true;
+
+    return (
+      Boolean(query.moveType?.includes(request.moveType)) ||
+      (query.isDesignated === true && request.isDesignated) ||
+      (query.isServiceArea === true && request.isServiceArea)
+    );
   }).sort((a, b) => {
     const field = query.sort === "moveDate" ? "moveDate" : "createdAt";
     return new Date(a[field]).getTime() - new Date(b[field]).getTime();

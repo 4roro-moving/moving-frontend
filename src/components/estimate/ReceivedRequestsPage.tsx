@@ -19,15 +19,15 @@ export default function ReceivedRequestsPage() {
   const [searchText, setSearchText] = useState("");
   const [keyword, setKeyword] = useState("");
   const [moveTypes, setMoveTypes] = useState<MoveType[]>([]);
-  const [includeDesignated, setIncludeDesignated] = useState(true);
-  const [serviceAreaOnly, setServiceAreaOnly] = useState(true);
+  const [includeDesignated, setIncludeDesignated] = useState(false);
+  const [serviceAreaOnly, setServiceAreaOnly] = useState(false);
   const [sort, setSort] = useState<RequestSort>("requestedAt");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const query = useMoverEstimateRequests({
     keyword: keyword || undefined,
     moveType: moveTypes.length ? moveTypes : undefined,
-    isDesignated: includeDesignated ? undefined : false,
+    isDesignated: includeDesignated ? true : undefined,
     isServiceArea: serviceAreaOnly ? true : undefined,
     sort,
     limit: 10,
