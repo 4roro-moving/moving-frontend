@@ -26,13 +26,21 @@ export type MoverEstimateRequestQuery = {
   limit: number;
 };
 
-export type MoverEstimateRequestResponse = {
-  success: true;
-  data: {
-    items: MoverEstimateRequest[];
-    pagination: {
-      nextCursor: string | null;
-      hasNextPage: boolean;
+export type MoverEstimateRequestResponse =
+  | {
+      success: true;
+      data: {
+        items: MoverEstimateRequest[];
+        pagination: {
+          nextCursor: string | null;
+          hasNextPage: boolean;
+        };
+      };
+    }
+  | {
+      success: false;
+      error: {
+        code: string;
+        message: string;
+      };
     };
-  };
-};

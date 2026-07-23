@@ -108,5 +108,9 @@ export async function getMoverEstimateRequests(query: MoverEstimateRequestQuery)
     },
   );
 
+  if (!response.data.success) {
+    throw new Error(response.data.error.code);
+  }
+
   return response.data.data;
 }

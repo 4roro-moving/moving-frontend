@@ -8,6 +8,17 @@ export function formatKoreanDate(date: Date): string {
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 }
 
+/** ISO 날짜 문자열 → KST 기준 "2025. 07. 01. (화)" */
+export function formatKoreanDateTime(date: string): string {
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+    timeZone: "Asia/Seoul",
+  }).format(new Date(date));
+}
+
 /** 두 날짜가 같은 '일'인지 (연/월/일 비교) */
 export function isSameDay(a: Date, b: Date): boolean {
   return (
