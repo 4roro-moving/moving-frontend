@@ -1,0 +1,150 @@
+"use client";
+
+import { useState } from "react";
+
+import { Text } from "@/components/common/Text";
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { cn } from "@/lib/utils/cn";
+
+import PaginationEllipsis from "./PaginationEllipsis";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/icons";
+
+type PageItem = { type: "page"; page: number } | { type: "ellipsis"; start: number; end: number };
+
+export interface PaginationProps {
+  /** 현재 페이지 (1부터 시작) */
+  currentPage: number;
+  /** 전체 페이지 수 */
+  pageCount: number;
+  /** 페이지 이동 시 실행할 콜백 */
+  onPageChange: (page: number) => void;
+  className?: string;
+}
+
+// 항상 [첫 페이지, 현재-1, 현재, 현재+1, 마지막 페이지] 또는
+// 경계일 땐 [1,2,3 ... n-2,n-1,n] 형태로 최대 5~6개의 숫자만 보여주고 나머지는 "..."으로 접습니다.
+const WINDOW_RADIUS = 1;
+const BOUNDARY_COUNT = 3;
+
+const getPageItems = (currentPage: number, pageCount: number): PageItem[] => {
+  if (pageCount <= 1) return [{ type: "page", page: 1 }];
+
+  const firstPage = 1;
+  const lastPage = pageCount;
+  const prevPage = Math.max(currentPage - WINDOW_RADIUS, firstPage);
+  const nextPage = Math.min(currentPage + WINDOW_RADIUS, lastPage);
+
+  const pageSet = new Set<number>();
+
+  if (currentPage === firstPage || currentPage === lastPage) {
+    for (let i = firstPage; i <= Math.min(firstPage + BOUNDARY_COUNT - 1, lastPage); i++) {
+      pageSet.add(i);
+    }
+    for (let i = Math.max(lastPage - BOUNDARY_COUNT + 1, firstPage); i <= lastPage; i++) {
+      pageSet.add(i);
+    }
+  } else {
+    [firstPage, prevPage, currentPage, nextPage, lastPage].forEach((page) => pageSet.add(page));
+  }
+
+  const sortedPages = Array.from(pageSet).sort((a, b) => a - b);
+
+  return sortedPages.reduce<PageItem[]>((items, page, index) => {
+    const prev = sortedPages[index - 1];
+    if (index > 0 && prev !== undefined && page - prev > 1) {
+      items.push({ type: "ellipsis", start: prev, end: page });
+    }
+    items.push({ type: "page", page });
+    return items;
+  }, []);
+};
+
+const pageButtonStyle =
+  "flex size-48 p-10 items-center justify-center rounded-6 bg-background-surface border border-border-dimmed";
+
+const Pagination = ({ currentPage, pageCount, onPageChange, className }: PaginationProps) => {
+  const [openEllipsisIndex, setOpenEllipsisIndex] = useState<number | null>(null);
+  const containerRef = useClickOutside<HTMLUListElement>(() => setOpenEllipsisIndex(null));
+
+  if (pageCount <= 0) return null;
+
+  const isPrevDisabled = currentPage <= 1;
+  const isNextDisabled = currentPage >= pageCount;
+  const pageItems = getPageItems(currentPage, pageCount);
+
+  const goToPage = (page: number) => {
+    onPageChange(Math.min(Math.max(page, 1), pageCount));
+  };
+
+  return (
+    <nav aria-label="페이지네이션" className={className}>
+      <ul ref={containerRef} className="flex items-center justify-center gap-4">
+        <li>
+          <button
+            type="button"
+            className={cn(
+              pageButtonStyle,
+              "text-text-secondary hover:bg-background-hover disabled:text-text-weak transition disabled:cursor-not-allowed disabled:hover:bg-transparent",
+            )}
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={isPrevDisabled}
+            aria-label="이전 페이지"
+          >
+            <ChevronLeftIcon className="size-24" />
+          </button>
+        </li>
+
+        {pageItems.map((item, index) =>
+          item.type === "ellipsis" ? (
+            <li key={`ellipsis-${item.start}-${item.end}`} className="relative">
+              <PaginationEllipsis
+                className={cn(pageButtonStyle, "hover:bg-background-hover")}
+                isOpen={openEllipsisIndex === index}
+                index={index}
+                start={item.start}
+                end={item.end}
+                onOpenChange={setOpenEllipsisIndex}
+                onSelect={goToPage}
+              />
+            </li>
+          ) : (
+            <li key={item.page}>
+              <button
+                type="button"
+                className={cn(
+                  pageButtonStyle,
+                  item.page === currentPage
+                    ? "text-text-secondary"
+                    : "text-text-weak hover:bg-background-hover cursor-pointer",
+                )}
+                onClick={() => goToPage(item.page)}
+                disabled={item.page === currentPage}
+                aria-label={`${item.page} 페이지`}
+                aria-current={item.page === currentPage ? "page" : undefined}
+              >
+                <Text variant="md-regular">{item.page}</Text>
+              </button>
+            </li>
+          ),
+        )}
+
+        <li>
+          <button
+            type="button"
+            className={cn(
+              pageButtonStyle,
+              "text-text-secondary hover:bg-background-hover disabled:text-text-weak transition disabled:cursor-not-allowed disabled:hover:bg-transparent",
+            )}
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={isNextDisabled}
+            aria-label="다음 페이지"
+          >
+            <ChevronRightIcon className="size-24" />
+          </button>
+        </li>
+      </ul>
+    </nav>
+  );
+};
+
+export default Pagination;

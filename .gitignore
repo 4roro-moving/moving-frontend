@@ -41,4 +41,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# cursor
+.cursor/rules/*.local.mdc
+
+# zip
 .zip
