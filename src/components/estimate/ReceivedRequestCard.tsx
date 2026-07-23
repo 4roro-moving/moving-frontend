@@ -28,16 +28,16 @@ function formatElapsedTime(date: string) {
 
 export default function ReceivedRequestCard({ request }: { request: MoverEstimateRequest }) {
   return (
-    <article className="flex flex-col gap-8 rounded-[20px] border border-[#f2f2f2] bg-white px-6 py-6 shadow-[0_0_10px_rgba(220,220,220,0.2)] lg:px-10 lg:py-8">
-      <div className="flex flex-col gap-6">
-        <div className="flex min-h-8 items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
-            <span className="bg-brand-100 text-brand-400 flex items-center gap-1 rounded-md py-1 pr-2 pl-1 text-sm font-semibold">
+    <article className="flex flex-col gap-24 rounded-[20px] border border-[#f2f2f2] bg-white px-20 py-24 shadow-[0_0_10px_rgba(220,220,220,0.2)] min-[744px]:gap-32 min-[744px]:px-40 min-[744px]:py-32 lg:px-40 lg:py-32">
+      <div className="flex flex-col gap-16 min-[744px]:gap-24">
+        <div className="flex min-h-32 items-center justify-between gap-12">
+          <div className="flex flex-wrap gap-8">
+            <span className="bg-background-brand-muted text-text-brand flex items-center gap-4 rounded-md py-4 pr-8 pl-4 text-sm font-semibold">
               <Image src="/icons/box.svg" alt="" width={20} height={20} />
               {MOVE_TYPE_LABEL[request.moveType]}
             </span>
             {request.isDesignated && (
-              <span className="flex items-center gap-1 rounded-md bg-[#ffeef0] py-1 pr-2 pl-1 text-sm font-semibold text-[#ff4f64]">
+              <span className="flex items-center gap-4 rounded-md bg-[#ffeef0] py-4 pr-8 pl-4 text-sm font-semibold text-[#ff4f64]">
                 <Image src="/icons/document.svg" alt="" width={20} height={20} />
                 지정 견적 요청
               </span>
@@ -48,15 +48,15 @@ export default function ReceivedRequestCard({ request }: { request: MoverEstimat
           </span>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-12">
           <Text as="h2" variant="xl-semibold" className="text-[#302f2d]">
             {request.customer.name} 고객님
           </Text>
           <div className="h-px bg-[#f2f2f2]" />
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:gap-5">
-          <div className="flex items-end gap-3">
+        <div className="flex flex-col gap-12 sm:flex-row sm:justify-between sm:gap-20">
+          <div className="flex items-end gap-12">
             <div>
               <Text as="p" variant="md-regular" className="text-[#808080]">
                 출발지
@@ -85,15 +85,15 @@ export default function ReceivedRequestCard({ request }: { request: MoverEstimat
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 sm:grid sm:grid-cols-2 sm:gap-3">
+      <div className="flex flex-col gap-[11px] sm:grid sm:grid-cols-2 sm:gap-[11px]">
         <button
-          className="border-brand-400 text-brand-400 order-2 h-[54px] rounded-xl border font-semibold sm:order-1"
+          className="border-border-brand text-text-brand order-2 h-[54px] rounded-xl border font-semibold sm:order-1"
           type="button"
         >
           반려하기
         </button>
         <button
-          className="bg-brand-400 order-1 flex h-[54px] items-center justify-center gap-1 rounded-xl font-semibold text-white"
+          className="bg-background-brand order-1 flex h-[54px] items-center justify-center gap-4 rounded-xl font-semibold text-white"
           type="button"
         >
           견적 보내기

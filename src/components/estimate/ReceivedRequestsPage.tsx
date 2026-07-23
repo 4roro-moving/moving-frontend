@@ -51,15 +51,15 @@ export default function ReceivedRequestsPage() {
   return (
     <div className="min-h-screen bg-white text-[#111]">
       <header className="border-b border-[#f2f2f2]">
-        <div className="mx-auto flex h-[54px] max-w-[1600px] items-center justify-between px-6 md:px-[72px] lg:h-[88px] lg:px-20">
-          <div className="flex items-center gap-8 lg:gap-20">
-            <div className="flex items-center gap-2">
+        <div className="mx-auto flex h-[54px] max-w-[1600px] items-center justify-between px-24 min-[744px]:px-[72px] lg:h-[88px] lg:px-80">
+          <div className="flex items-center gap-32 lg:gap-80">
+            <div className="flex items-center gap-8">
               <Image
                 src="/icons/moving-logo-icon.svg"
                 alt="무빙"
                 width={44}
                 height={44}
-                className="h-8 w-8 lg:h-11 lg:w-11"
+                className="h-32 w-32 lg:h-11 lg:w-11"
               />
               <Image
                 src="/icons/moving-logo-text.svg"
@@ -69,7 +69,7 @@ export default function ReceivedRequestsPage() {
                 className="hidden h-auto w-[68px] lg:block"
               />
             </div>
-            <nav className="hidden items-center gap-10 text-lg font-bold lg:flex">
+            <nav className="hidden items-center gap-40 text-lg font-bold lg:flex">
               <span>받은 요청</span>
               <span className="text-[#999]">내 견적 관리</span>
             </nav>
@@ -79,23 +79,23 @@ export default function ReceivedRequestsPage() {
       </header>
 
       <div className="border-b border-[#f8f8f8]">
-        <div className="mx-auto flex h-[54px] max-w-[1200px] items-center px-6 text-lg font-semibold md:px-0 lg:h-24 lg:text-2xl">
+        <div className="mx-auto flex h-[54px] max-w-[1200px] items-center px-24 text-lg font-semibold min-[744px]:px-[72px] lg:h-[96px] lg:px-0 lg:text-2xl">
           받은 요청
         </div>
       </div>
 
-      <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-6 pb-20 md:px-[72px] lg:gap-10 lg:px-0">
-        <section className="flex flex-col gap-6">
+      <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-24 pb-80 min-[744px]:px-[72px] lg:gap-40 lg:px-0">
+        <section className="flex flex-col gap-24">
           <form
             onSubmit={submitSearch}
-            className="flex h-[52px] items-center gap-2 rounded-2xl bg-[#f7f7f7] px-4 lg:h-16 lg:px-6"
+            className="mx-10 flex h-[52px] w-[calc(100%-20px)] items-center gap-8 rounded-2xl bg-[#f7f7f7] px-16 lg:mx-0 lg:h-64 lg:w-full lg:px-24"
           >
             <Image
               src="/icons/search.svg"
               alt=""
               width={36}
               height={36}
-              className="h-7 w-7 lg:h-9 lg:w-9"
+              className="h-24 w-24 lg:h-36 lg:w-36"
             />
             <input
               value={searchText}
@@ -106,7 +106,7 @@ export default function ReceivedRequestsPage() {
             />
           </form>
 
-          <div className="hidden flex-wrap gap-3 lg:flex">
+          <div className="hidden flex-wrap gap-12 lg:flex">
             {MOVE_TYPES.map((moveType) => {
               const isSelected = moveTypes.includes(moveType.value);
               return (
@@ -114,7 +114,7 @@ export default function ReceivedRequestsPage() {
                   key={moveType.value}
                   type="button"
                   onClick={() => toggleMoveType(moveType.value)}
-                  className={`rounded-full border px-5 py-2.5 text-base lg:text-lg ${isSelected ? "border-brand-400 text-brand-400" : "border-[#d9d9d9] bg-[#fafafa] text-[#262524]"}`}
+                  className={`rounded-full border px-20 py-2.5 text-base lg:text-lg ${isSelected ? "border-border-brand bg-background-brand-muted text-text-brand font-medium" : "border-[#d9d9d9] bg-[#fafafa] font-normal text-[#262524]"}`}
                 >
                   {moveType.label}
                 </button>
@@ -123,25 +123,25 @@ export default function ReceivedRequestsPage() {
           </div>
         </section>
 
-        <section className="flex flex-col gap-3 lg:gap-6">
+        <section className="flex flex-col gap-12 lg:gap-24">
           <Text as="p" variant="2lg-semibold" className="hidden text-[#262524] lg:block">
             전체 {items.length}건
           </Text>
-          <div className="flex min-h-10 flex-wrap items-center justify-between gap-3">
+          <div className="flex min-h-40 flex-wrap items-center justify-between gap-12 px-10 lg:px-0">
             <Text as="p" variant="md-semibold" className="text-[#262524] lg:hidden">
               전체 {items.length}건
             </Text>
-            <div className="hidden flex-wrap items-center gap-3 text-base lg:flex">
-              <label className="flex items-center gap-1">
+            <div className="hidden flex-wrap items-center gap-12 text-base lg:flex">
+              <label className="flex items-center gap-4">
                 <input
                   className="peer sr-only"
                   type="checkbox"
                   checked={includeDesignated}
                   onChange={(event) => setIncludeDesignated(event.target.checked)}
                 />
-                <span className="flex h-9 w-9 items-center justify-center">
+                <span className="flex h-36 w-36 items-center justify-center">
                   <span
-                    className={`flex h-5 w-5 items-center justify-center rounded ${includeDesignated ? "bg-brand-400" : "border border-[#dedede] bg-white"}`}
+                    className={`flex h-20 w-20 items-center justify-center rounded ${includeDesignated ? "bg-background-brand" : "border border-[#dedede] bg-white"}`}
                   >
                     {includeDesignated && (
                       <Image src="/icons/checkbox-check.svg" alt="" width={10} height={6} />
@@ -150,16 +150,16 @@ export default function ReceivedRequestsPage() {
                 </span>
                 지정 견적 요청
               </label>
-              <label className="flex items-center gap-1">
+              <label className="flex items-center gap-4">
                 <input
                   className="peer sr-only"
                   type="checkbox"
                   checked={serviceAreaOnly}
                   onChange={(event) => setServiceAreaOnly(event.target.checked)}
                 />
-                <span className="flex h-9 w-9 items-center justify-center">
+                <span className="flex h-36 w-36 items-center justify-center">
                   <span
-                    className={`flex h-5 w-5 items-center justify-center rounded ${serviceAreaOnly ? "bg-brand-400" : "border border-[#dedede] bg-white"}`}
+                    className={`flex h-20 w-20 items-center justify-center rounded ${serviceAreaOnly ? "bg-background-brand" : "border border-[#dedede] bg-white"}`}
                   >
                     {serviceAreaOnly && (
                       <Image src="/icons/checkbox-check.svg" alt="" width={10} height={6} />
@@ -169,11 +169,11 @@ export default function ReceivedRequestsPage() {
                 서비스 가능 지역
               </label>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-4">
               <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value as RequestSort)}
-                className="rounded-lg bg-white px-2 py-2 text-sm text-[#808080] outline-none"
+                className="rounded-lg bg-white px-8 py-8 text-sm text-[#808080] outline-none"
               >
                 <option value="requestedAt">요청일 빠른순</option>
                 <option value="moveDate">이사 빠른순</option>
@@ -182,7 +182,7 @@ export default function ReceivedRequestsPage() {
                 type="button"
                 aria-label="필터 열기"
                 onClick={() => setIsFilterOpen(true)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#808080] lg:hidden"
+                className="flex h-32 w-32 items-center justify-center rounded-lg border border-[#808080] lg:hidden"
               >
                 <Image src="/icons/filter.svg" alt="" width={24} height={24} />
               </button>
@@ -190,17 +190,17 @@ export default function ReceivedRequestsPage() {
           </div>
 
           {query.isPending && (
-            <Text as="p" variant="lg-regular" className="py-20 text-center text-[#999]">
+            <Text as="p" variant="lg-regular" className="py-80 text-center text-[#999]">
               받은 요청을 불러오는 중이에요.
             </Text>
           )}
           {query.isError && (
-            <Text as="p" variant="lg-regular" className="py-20 text-center text-[#ff4f64]">
+            <Text as="p" variant="lg-regular" className="py-80 text-center text-[#ff4f64]">
               받은 요청을 불러오지 못했어요.
             </Text>
           )}
           {!query.isPending && !query.isError && items.length === 0 && (
-            <div className="flex flex-col items-center gap-8 py-24">
+            <div className="flex flex-col items-center gap-32 py-[96px]">
               <Image
                 className="opacity-50"
                 src="/images/empty-received-requests.png"
@@ -214,7 +214,7 @@ export default function ReceivedRequestsPage() {
             </div>
           )}
           {items.length > 0 && (
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid w-full grid-cols-1 gap-24 min-[744px]:max-w-[588px] lg:max-w-none lg:grid-cols-2">
               {items.map((request) => (
                 <ReceivedRequestCard key={request.id} request={request} />
               ))}
@@ -224,50 +224,111 @@ export default function ReceivedRequestsPage() {
       </main>
 
       {isFilterOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 lg:hidden">
-          <div className="w-full max-w-[420px] rounded-t-[20px] bg-white px-6 pt-8 pb-6">
-            <h2 className="mb-6 text-xl font-semibold">필터</h2>
-            <div className="mb-8 flex flex-wrap gap-3">
-              {MOVE_TYPES.map((moveType) => {
-                const isSelected = moveTypes.includes(moveType.value);
-                return (
-                  <button
-                    key={moveType.value}
-                    type="button"
-                    onClick={() => toggleMoveType(moveType.value)}
-                    className={`rounded-full border px-4 py-2 ${isSelected ? "border-brand-400 text-brand-400" : "border-[#d9d9d9] text-[#262524]"}`}
-                  >
-                    {moveType.label}
-                  </button>
-                );
-              })}
+        <div
+          className="bg-overlay-scrim fixed inset-0 z-50 flex items-end justify-center min-[744px]:items-center lg:hidden"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setIsFilterOpen(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="필터"
+            className="bg-background-surface flex w-full flex-col gap-32 rounded-t-[32px] px-24 pt-24 pb-32 shadow-[4px_4px_5px_rgba(169,169,169,0.2)] min-[744px]:w-[375px] min-[744px]:rounded-[32px]"
+          >
+            <div className="flex flex-col gap-20">
+              <div className="flex items-center justify-between py-8 pr-8">
+                <Text as="h2" variant="2lg-bold" className="text-text-primary">
+                  필터
+                </Text>
+                <button
+                  type="button"
+                  aria-label="필터 닫기"
+                  onClick={() => setIsFilterOpen(false)}
+                  className="text-text-weak flex h-24 w-24 items-center justify-center text-xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-28">
+                <section className="flex flex-col gap-8">
+                  <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
+                    이사 유형
+                  </Text>
+                  <div className="flex flex-wrap gap-12">
+                    {MOVE_TYPES.map((moveType) => {
+                      const isSelected = moveTypes.includes(moveType.value);
+                      return (
+                        <button
+                          key={moveType.value}
+                          type="button"
+                          onClick={() => toggleMoveType(moveType.value)}
+                          className={`rounded-full border px-12 py-6 text-sm ${
+                            isSelected
+                              ? "border-border-brand bg-background-brand-muted text-text-brand font-medium"
+                              : "border-border-muted bg-background-subtle text-text-secondary font-medium"
+                          }`}
+                        >
+                          {moveType.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section className="flex flex-col gap-8">
+                  <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
+                    지역 및 견적
+                  </Text>
+                  <div className="flex flex-col gap-12">
+                    {[
+                      {
+                        label: "지정 견적 요청",
+                        checked: includeDesignated,
+                        onChange: setIncludeDesignated,
+                      },
+                      {
+                        label: "서비스 가능 지역",
+                        checked: serviceAreaOnly,
+                        onChange: setServiceAreaOnly,
+                      },
+                    ].map((filter) => (
+                      <label key={filter.label} className="text-text-secondary flex items-center">
+                        <input
+                          className="peer sr-only"
+                          type="checkbox"
+                          checked={filter.checked}
+                          onChange={(event) => filter.onChange(event.target.checked)}
+                        />
+                        <span className="flex h-36 w-36 items-center justify-center">
+                          <span
+                            className={`rounded-4 flex h-20 w-20 items-center justify-center ${
+                              filter.checked
+                                ? "bg-background-brand"
+                                : "border-border-default bg-background-surface border"
+                            }`}
+                          >
+                            {filter.checked && (
+                              <Image src="/icons/checkbox-check.svg" alt="" width={10} height={6} />
+                            )}
+                          </span>
+                        </span>
+                        {filter.label}
+                      </label>
+                    ))}
+                  </div>
+                </section>
+              </div>
             </div>
-            <div className="mb-8 flex flex-col gap-4">
-              <label className="flex items-center justify-between">
-                지정 견적 요청 포함
-                <input
-                  type="checkbox"
-                  checked={includeDesignated}
-                  onChange={(event) => setIncludeDesignated(event.target.checked)}
-                  className="h-5 w-5 accent-[#f9502e]"
-                />
-              </label>
-              <label className="flex items-center justify-between">
-                서비스 가능 지역만 보기
-                <input
-                  type="checkbox"
-                  checked={serviceAreaOnly}
-                  onChange={(event) => setServiceAreaOnly(event.target.checked)}
-                  className="h-5 w-5 accent-[#f9502e]"
-                />
-              </label>
-            </div>
+
             <button
               type="button"
               onClick={() => setIsFilterOpen(false)}
-              className="bg-brand-400 h-14 w-full rounded-xl font-semibold text-white"
+              className="rounded-12 bg-background-brand text-text-inverse flex h-[54px] w-full items-center justify-center font-semibold"
             >
-              적용하기
+              조회하기
             </button>
           </div>
         </div>
