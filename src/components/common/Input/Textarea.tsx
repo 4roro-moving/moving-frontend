@@ -21,9 +21,11 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textare
         className={cn(
           "rounded-16 h-[180px] w-full border px-20 py-12",
           "border-border-default bg-background-surface text-text-primary transition-colors",
-          "placeholder:text-text-placeholder focus:border-border-brand disabled:bg-background-disabled disabled:text-text-disabled focus:outline-none",
+          "placeholder:text-text-placeholder disabled:bg-background-disabled disabled:text-text-disabled focus:outline-none",
           "hover:bg-background-hover",
-          error && "border-border-error",
+          error
+            ? "border-border-error"
+            : "focus-within:shadow-input focus-within:border-border-brand",
           className,
         )}
         {...props}

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -8,6 +7,7 @@ import { useClickOutside } from "@/hooks/useClickOutside";
 import { cn } from "@/lib/utils/cn";
 
 import PaginationEllipsis from "./PaginationEllipsis";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/icons";
 
 type PageItem = { type: "page"; page: number } | { type: "ellipsis"; start: number; end: number };
 
@@ -84,13 +84,13 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
             type="button"
             className={cn(
               pageButtonStyle,
-              "text-text-weak hover:bg-background-hover transition disabled:cursor-not-allowed disabled:grayscale disabled:hover:bg-transparent",
+              "text-text-secondary hover:bg-background-hover disabled:text-text-weak transition disabled:cursor-not-allowed disabled:hover:bg-transparent",
             )}
             onClick={() => goToPage(currentPage - 1)}
             disabled={isPrevDisabled}
             aria-label="이전 페이지"
           >
-            <Image src="/icons/ic_left.svg" alt="" width={24} height={24} />
+            <ChevronLeftIcon className="size-24" />
           </button>
         </li>
 
@@ -133,13 +133,13 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
             type="button"
             className={cn(
               pageButtonStyle,
-              "text-text-secondary hover:bg-background-hover transition disabled:cursor-not-allowed disabled:grayscale disabled:hover:bg-transparent",
+              "text-text-secondary hover:bg-background-hover disabled:text-text-weak transition disabled:cursor-not-allowed disabled:hover:bg-transparent",
             )}
             onClick={() => goToPage(currentPage + 1)}
             disabled={isNextDisabled}
             aria-label="다음 페이지"
           >
-            <Image src="/icons/ic_right.svg" alt="" width={24} height={24} />
+            <ChevronRightIcon className="size-24" />
           </button>
         </li>
       </ul>

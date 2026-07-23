@@ -3,13 +3,13 @@
 import { forwardRef, useState } from "react";
 
 import Input, { type InputProps } from "./Input";
-import Image from "next/image";
+import { VisibilityIcon, VisibilityOffIcon } from "@/icons";
 
 type PasswordInputProps = Omit<InputProps, "type" | "rightSlot" | "numericOnly">;
 
-const EyeIcon = () => <Image src="/icons/ic_visibility_on.svg" alt="" width={24} height={24} />;
+const EyeIcon = () => <VisibilityIcon className="size-24" />;
 
-const EyeOffIcon = () => <Image src="/icons/ic_visibility_off.svg" alt="" width={24} height={24} />;
+const EyeOffIcon = () => <VisibilityOffIcon className="size-24" />;
 
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
   function PasswordInput(props, ref) {

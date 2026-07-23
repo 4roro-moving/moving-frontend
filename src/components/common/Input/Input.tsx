@@ -7,7 +7,7 @@ import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
 const inputVariants = cva(
-  "flex w-full items-center gap-8 rounded-16 border border-border-default bg-background-surface p-14 transition-colors focus-within:border-border-brand has-[input:disabled]:bg-background-disabled",
+  "flex w-full items-center gap-8 rounded-16 border border-border-default bg-background-surface p-14 transition-colors has-[input:disabled]:bg-background-disabled",
   {
     variants: {
       size: {
@@ -46,9 +46,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       <div
         className={cn(
           inputVariants({ size }),
-          error && "border-border-error",
+          error
+            ? "border-border-error"
+            : "focus-within:shadow-input focus-within:border-border-brand",
           className,
-          "hover:bg-background-hover focus-within:shadow-input",
+          "hover:bg-background-hover",
         )}
       >
         {leftSlot}

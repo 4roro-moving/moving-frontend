@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { CloseIcon } from "@/icons";
 
 interface ModalCloseProps {
   onClose: () => void;
@@ -12,7 +12,7 @@ const ModalClose = ({ onClose }: ModalCloseProps) => {
       onClick={onClose}
       aria-label="모달 닫기"
     >
-      <Image src="/icons/ic_close.svg" alt="" width={18} height={18} aria-hidden />
+      <CloseIcon className="size-18" aria-hidden />
     </button>
   );
 };

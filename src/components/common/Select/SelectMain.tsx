@@ -1,7 +1,6 @@
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
-import Image from "next/image";
 import {
   Children,
   createContext,
@@ -17,6 +16,7 @@ import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useListboxKeyboardNav } from "@/hooks/useListboxKeyboardNav";
 import { cn } from "@/lib/utils/cn";
+import { ChevronDownIcon, ChevronUpIcon } from "@/icons";
 
 interface SelectContextValue {
   selected: string;
@@ -113,13 +113,11 @@ const SelectMain = ({
             onKeyDown={handleTriggerKeyDown}
           >
             <Text variant="md-regular">{selectedLabel || desc}</Text>
-            <Image
-              src={isOpen ? "/icons/ic_up.svg" : "/icons/ic_down.svg"}
-              alt="open icon"
-              width={24}
-              height={24}
-              aria-hidden
-            />
+            {isOpen ? (
+              <ChevronUpIcon className="size-24" />
+            ) : (
+              <ChevronDownIcon className="size-24" />
+            )}
           </button>
 
           {isOpen && (

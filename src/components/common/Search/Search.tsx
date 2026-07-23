@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { forwardRef, type ComponentPropsWithoutRef } from "react";
 
 import { cn } from "@/lib/utils/cn";
-import Image from "next/image";
+import { SearchIcon } from "@/components/estimate/icons";
 
 const searchVariants = cva(
   "flex items-center gap-10 rounded-16 p-14 bg-background-muted text-text-primary transition-colors focus-within:border-border-brand",
@@ -31,7 +31,7 @@ const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
   return (
     <div className={cn(searchVariants({ size }), className)}>
       <span className="text-icon-default">
-        <Image src="/icons/ic_search.svg" alt="" width={24} height={24} />
+        <SearchIcon className="size-24" />
       </span>
       <input
         ref={ref}
