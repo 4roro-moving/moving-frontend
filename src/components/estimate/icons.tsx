@@ -108,3 +108,37 @@ export function CheckIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function SearchIcon({ className }: IconProps) {
+  return (
+    <svg
+      className={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="6.2" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M16.2 16.2L20 20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function ClearCircleIcon({ className }: IconProps) {
+  return (
+    <svg
+      className={className}
+      width="28"
+      height="28"
+      viewBox="0 0 28 28"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <circle cx="14" cy="14" r="14" fill="currentColor" />
+      <path d="M10 10L18 18M18 10L10 18" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
