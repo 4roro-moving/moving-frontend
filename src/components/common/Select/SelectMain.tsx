@@ -6,7 +6,6 @@ import {
   createContext,
   isValidElement,
   useContext,
-  useEffect,
   useId,
   useState,
   type ReactNode,
@@ -20,8 +19,7 @@ import { ChevronDownIcon, ChevronUpIcon } from "@/icons";
 
 interface SelectContextValue {
   selected: string;
-  selectedLabel: ReactNode;
-  handleChange: (value: string, label: ReactNode) => void;
+  handleChange: (value: string) => void;
 }
 
 const SelectContext = createContext<SelectContextValue | null>(null);
@@ -56,8 +54,10 @@ const SelectMain = ({
   disabled,
 }: SelectMainProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  // selectedLabel 을 selected 로 합쳐둠
   const [selected, setSelected] = useState(defaultValue ?? "");
-  const [selectedLabel, setSelectedLabel] = useState<ReactNode>("");
+  // 수정 등 폼에 미리 있어야하는 값이 있다면 이전 값을 저장해둠
+  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
   const listboxId = useId();
   const containerRef = useClickOutside<HTMLDivElement>(() => setIsOpen(false));
   const { triggerRef, listboxRef, handleTriggerKeyDown, handleListboxKeyDown, focusTrigger } =
@@ -67,30 +67,33 @@ const SelectMain = ({
       onClose: () => setIsOpen(false),
     });
 
-  useEffect(() => {
-    if (!defaultValue) return;
+  let selectedLabel: ReactNode = "";
 
-    Children.forEach(children, (child) => {
-      if (
-        isValidElement<{ value: string; children: ReactNode }>(child) &&
-        child.props.value === defaultValue
-      ) {
-        setSelectedLabel(child.props.children);
-      }
-    });
-    // defaultValue는 최초 진입값을 채우는 용도이므로 children 변경 시마다 재평가할 필요는 없습니다.
-  }, [defaultValue]);
+  Children.forEach(children, (child) => {
+    if (
+      isValidElement<{ value: string; children: ReactNode }>(child) &&
+      child.props.value === selected
+    ) {
+      selectedLabel = child.props.children;
+    }
+  });
 
-  const handleChange = (value: string, label: ReactNode) => {
+  if (defaultValue !== prevDefaultValue) {
+    setPrevDefaultValue(defaultValue);
+    if (defaultValue) {
+      setSelected(defaultValue);
+    }
+  }
+
+  const handleChange = (value: string) => {
     setSelected(value);
-    setSelectedLabel(label);
     setIsOpen(false);
     onChange?.(value);
     focusTrigger();
   };
 
   return (
-    <SelectContext.Provider value={{ selected, selectedLabel, handleChange }}>
+    <SelectContext.Provider value={{ selected, handleChange }}>
       <div className="flex w-full flex-col gap-4">
         <div ref={containerRef} className={selectVariants({ size })}>
           <button

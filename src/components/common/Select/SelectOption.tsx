@@ -26,7 +26,7 @@ const SelectOption = ({ children, value }: SelectOptionProps) => {
         "first:rounded-t-12 last:rounded-b-12",
         isSelected && "bg-background-hover",
       )}
-      onClick={() => handleChange(value, children)}
+      onClick={() => handleChange(value)}
     >
       <Text variant="lg-regular" className="text-text-primary">
         {children}
