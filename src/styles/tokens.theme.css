@@ -200,6 +200,17 @@
   --page-header-height-tablet: 3.375rem;
   --page-header-height-desktop: 6rem;
 
+  /* Custom spacing - GNB 등 Tailwind 클래스 사용 시 컴포넌트 height */
+  --spacing-gnb-height-mobile: var(--gnb-height-mobile);
+  --spacing-gnb-height-tablet: var(--gnb-height-tablet);
+  --spacing-gnb-height-desktop: var(--gnb-height-desktop);
+  --spacing-tab-height-mobile: var(--tab-height-mobile);
+  --spacing-tab-height-tablet: var(--tab-height-tablet);
+  --spacing-tab-height-desktop: var(--tab-height-desktop);
+  --spacing-page-header-height-mobile: var(--page-header-height-mobile);
+  --spacing-page-header-height-tablet: var(--page-header-height-tablet);
+  --spacing-page-header-height-desktop: var(--page-header-height-desktop);
+
   /* Layout - GNB, Tab, PageHeader 컴포넌트 desktop padding */
   --gnb-padding-x-desktop: 10rem;
   --tab-padding-x-desktop: 22.5rem;

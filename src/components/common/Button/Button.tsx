@@ -1,10 +1,11 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 
+import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
 const buttonVariants = cva(
-  "inline-flex h-15 p-16 items-center justify-center gap-8 rounded-16 font-semibold transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
+  "inline-flex h-15 p-16 items-center justify-center gap-8 rounded-16 transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
   {
     variants: {
       variant: {
@@ -29,20 +30,31 @@ const buttonVariants = cva(
   },
 );
 
+const buttonTextVariant = {
+  sm: "lg-semibold",
+  md: "2lg-semibold",
+} as const;
+
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {}
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant, size, fullWidth, type = "button", className, ...props },
+  { variant, size, fullWidth, type = "button", className, children, ...props },
   ref,
 ) {
+  const resolvedSize = size ?? "md";
+
   return (
     <button
       ref={ref}
       type={type}
       className={cn(buttonVariants({ variant, size, fullWidth }), className)}
       {...props}
-    />
+    >
+      <Text as="span" variant={buttonTextVariant[resolvedSize]}>
+        {children}
+      </Text>
+    </button>
   );
 });
 

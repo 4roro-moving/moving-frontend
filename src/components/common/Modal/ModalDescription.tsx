@@ -1,7 +1,11 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, type ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
+
+import { useModalContext } from "./ModalMain";
 
 interface ModalDescriptionProps {
   children: ReactNode;
@@ -9,10 +13,17 @@ interface ModalDescriptionProps {
 }
 
 const ModalDescription = ({ children, className }: ModalDescriptionProps) => {
+  const { descriptionId, setHasDescription } = useModalContext();
+
+  useEffect(() => {
+    setHasDescription(true);
+    return () => setHasDescription(false);
+  }, [setHasDescription]);
+
   return (
     <Text
       as="p"
-      id="modal-description"
+      id={descriptionId}
       variant="md-regular"
       className={cn("text-text-secondary", className)}
     >

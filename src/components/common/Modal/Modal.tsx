@@ -3,7 +3,7 @@ import type { FC } from "react";
 import Button from "../Button/Button";
 import ModalClose from "./ModalClose";
 import ModalDescription from "./ModalDescription";
-import ModalMain, { type ModalMainProps } from "./ModalMain";
+import { ModalMain, type ModalMainProps } from "./ModalMain";
 import ModalTitle from "./ModalTitle";
 
 interface ModalComponent extends FC<ModalMainProps> {
