@@ -1,5 +1,6 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 
+import { Text } from "@/components/common/Text";
 import type { MoveType, MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 const MOVE_TYPE_LABEL: Record<MoveType, string> = {
@@ -48,14 +49,18 @@ export default function ReceivedRequestCard({ request }: { request: MoverEstimat
         </div>
 
         <div className="flex flex-col gap-3">
-          <h2 className="text-xl font-semibold text-[#302f2d]">{request.customer.name} 고객님</h2>
+          <Text as="h2" variant="xl-semibold" className="text-[#302f2d]">
+            {request.customer.name} 고객님
+          </Text>
           <div className="h-px bg-[#f2f2f2]" />
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:gap-5">
           <div className="flex items-end gap-3">
             <div>
-              <p className="text-sm text-[#808080]">출발지</p>
+              <Text as="p" variant="md-regular" className="text-[#808080]">
+                출발지
+              </Text>
               <p className="font-semibold text-[#111]">{request.fromRegion}</p>
             </div>
             <span className="mb-[9px] flex w-[18px] items-center" aria-hidden="true">
@@ -63,12 +68,16 @@ export default function ReceivedRequestCard({ request }: { request: MoverEstimat
               <span className="-ml-1 h-1.5 w-1.5 rotate-45 border-t border-r border-[#262524]" />
             </span>
             <div>
-              <p className="text-sm text-[#808080]">도착지</p>
+              <Text as="p" variant="md-regular" className="text-[#808080]">
+                도착지
+              </Text>
               <p className="font-semibold text-[#111]">{request.toRegion}</p>
             </div>
           </div>
           <div>
-            <p className="text-sm text-[#808080]">이사일</p>
+            <Text as="p" variant="md-regular" className="text-[#808080]">
+              이사일
+            </Text>
             <p className="font-semibold whitespace-nowrap text-[#111]">
               {formatMoveDate(request.moveDate)}
             </p>

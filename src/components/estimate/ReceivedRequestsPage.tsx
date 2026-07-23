@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import { FormEvent, useState } from "react";
 
+import { Text } from "@/components/common/Text";
 import { useMoverEstimateRequests } from "@/hooks/useMoverEstimateRequests";
 import type { MoveType, RequestSort } from "@/types/moverEstimateRequest";
 
@@ -123,11 +124,13 @@ export default function ReceivedRequestsPage() {
         </section>
 
         <section className="flex flex-col gap-3 lg:gap-6">
-          <p className="hidden text-lg font-semibold text-[#262524] lg:block">
+          <Text as="p" variant="2lg-semibold" className="hidden text-[#262524] lg:block">
             전체 {items.length}건
-          </p>
+          </Text>
           <div className="flex min-h-10 flex-wrap items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-[#262524] lg:hidden">전체 {items.length}건</p>
+            <Text as="p" variant="md-semibold" className="text-[#262524] lg:hidden">
+              전체 {items.length}건
+            </Text>
             <div className="hidden flex-wrap items-center gap-3 text-base lg:flex">
               <label className="flex items-center gap-1">
                 <input
@@ -187,10 +190,14 @@ export default function ReceivedRequestsPage() {
           </div>
 
           {query.isPending && (
-            <p className="py-20 text-center text-[#999]">받은 요청을 불러오는 중이에요.</p>
+            <Text as="p" variant="lg-regular" className="py-20 text-center text-[#999]">
+              받은 요청을 불러오는 중이에요.
+            </Text>
           )}
           {query.isError && (
-            <p className="py-20 text-center text-[#ff4f64]">받은 요청을 불러오지 못했어요.</p>
+            <Text as="p" variant="lg-regular" className="py-20 text-center text-[#ff4f64]">
+              받은 요청을 불러오지 못했어요.
+            </Text>
           )}
           {!query.isPending && !query.isError && items.length === 0 && (
             <div className="flex flex-col items-center gap-8 py-24">
@@ -201,7 +208,9 @@ export default function ReceivedRequestsPage() {
                 width={240}
                 height={196}
               />
-              <p className="text-xl text-[#999]">아직 받은 요청이 없어요!</p>
+              <Text as="p" variant="xl-regular" className="text-[#999]">
+                아직 받은 요청이 없어요!
+              </Text>
             </div>
           )}
           {items.length > 0 && (
