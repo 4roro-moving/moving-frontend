@@ -80,9 +80,7 @@ const SelectMain = ({
 
   if (defaultValue !== prevDefaultValue) {
     setPrevDefaultValue(defaultValue);
-    if (defaultValue) {
-      setSelected(defaultValue);
-    }
+    setSelected(defaultValue ?? "");
   }
 
   const handleChange = (value: string) => {
