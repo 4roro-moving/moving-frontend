@@ -6,9 +6,10 @@ import { usePathname } from "next/navigation";
 
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
+import { AlarmIcon } from "@/icons";
 
 export interface HeaderProps {
-  /** TODO: auth 연동 전 임시 prop. 추후 useIsAuthenticated() 등으로 대체 */
+  /** TODO: auth 연동 전 임시 prop. 추후 대체 */
   isLogin?: boolean;
 }
 
@@ -35,7 +36,7 @@ const Header = ({ isLogin = false }: HeaderProps) => {
           <nav aria-label="주요 메뉴">
             <ul className="flex items-center gap-40">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
 
                 return (
                   <li key={link.label}>
@@ -59,10 +60,10 @@ const Header = ({ isLogin = false }: HeaderProps) => {
         {isLogin ? (
           <div className="flex items-center gap-20">
             <button type="button" aria-label="알림">
-              <Image src="/icons/ic_alarm.svg" alt="" width={24} height={24} />
+              <AlarmIcon className="text-icon-default size-24" />
             </button>
             <button type="button" aria-label="프로필">
-              <Image src="/icons/ic_profile.svg" alt="" width={24} height={24} />
+              <Image src="/icons/profile-default.svg" alt="" width={36} height={36} />
             </button>
             {/* TODO: 프로필 기능 연동 전까지 닉네임 placeholder */}
             <button type="button" className="text-text-primary">

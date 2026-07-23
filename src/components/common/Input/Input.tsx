@@ -36,7 +36,21 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 ) {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (numericOnly) {
-      event.target.value = event.target.value.replace(/[^0-9]/g, "").replace(/^0+(?=\d)/, "");
+      const input = event.target;
+      const prevValue = input.value;
+      // 현재 커서 위치
+      const cursorPos = input.selectionStart ?? prevValue.length;
+      // 커서 앞 구간 개수 세기
+      const digitsBeforeCursor = prevValue.slice(0, cursorPos).replace(/[^0-9]/g, "").length;
+      const digitsOnly = prevValue.replace(/[^0-9]/g, "");
+      const nextValue = digitsOnly.replace(/^0+(?=\d)/, "");
+      // 선행 0 제거로 앞쪽에서 사라진 글자 수
+      const strippedLeadingZeros = digitsOnly.length - nextValue.length;
+      if (nextValue !== prevValue) {
+        input.value = nextValue;
+        const nextCursorPos = Math.max(0, digitsBeforeCursor - strippedLeadingZeros);
+        input.setSelectionRange(nextCursorPos, nextCursorPos);
+      }
     }
     onChange?.(event);
   };

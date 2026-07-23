@@ -34,7 +34,7 @@ export default function QueryProvider({ children }: QueryProviderProps) {
       <body className="flex min-h-screen flex-col">
         <QueryClientProvider client={queryClient}>
           <Header />
-          <div className="flex-1">{children}</div>
+          <main className="flex-1">{children}</main>
           <Footer />
         </QueryClientProvider>
       </body>

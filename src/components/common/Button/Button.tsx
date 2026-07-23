@@ -5,7 +5,7 @@ import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
 const buttonVariants = cva(
-  "inline-flex h-15 p-16 items-center justify-center gap-4 rounded-16 transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
+  "inline-flex h-57 p-16 items-center justify-center gap-4 rounded-16 transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
   {
     variants: {
       variant: {

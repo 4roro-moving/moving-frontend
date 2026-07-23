@@ -15,6 +15,10 @@ import { createPortal } from "react-dom";
 import { useIsClient } from "@/hooks/useIsClient";
 import { cn } from "@/lib/utils/cn";
 
+// 모달 내부에서 Tab 포커스 트랩 대상으로 볼 요소 목록
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 interface ModalContextValue {
   titleId: string;
   descriptionId: string;
@@ -44,6 +48,7 @@ const ModalMain = ({
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descriptionId = useId();
+
   // Modal.Title / Modal.Desc가 마운트되면 스스로 등록해서, 실제로 쓰인 경우에만
   // dialog에 aria-labelledby / aria-describedby를 연결합니다.
   const [hasTitle, setHasTitle] = useState(false);
@@ -63,6 +68,36 @@ const ModalMain = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose?.();
+        return;
+      }
+
+      if (event.key === "Tab") {
+        const panel = panelRef.current;
+        if (!panel) return;
+
+        const focusableElements = panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+
+        // 포커스 가능한 요소가 없으면 모달 밖으로 못 나가게
+        if (focusableElements.length === 0) {
+          event.preventDefault();
+          return;
+        }
+
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+        const active = document.activeElement;
+
+        if (event.shiftKey) {
+          if (active === first || active === panel || !panel.contains(active)) {
+            event.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (active === last || !panel.contains(active)) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
       }
     };
 
