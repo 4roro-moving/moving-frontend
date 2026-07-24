@@ -14,6 +14,7 @@ interface ModalProps {
   onConfirm?: () => void;
   onClose: () => void;
   className?: string;
+  overlayClassName?: string;
 }
 
 const FOCUSABLE_SELECTOR =
@@ -64,6 +65,7 @@ export default function Modal({
   onConfirm,
   onClose,
   className,
+  overlayClassName,
 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -128,7 +130,10 @@ export default function Modal({
 
   return (
     <div
-      className="bg-overlay-scrim fixed inset-0 z-50 flex items-center justify-center px-24"
+      className={cn(
+        "bg-overlay-scrim fixed inset-0 z-50 flex items-center justify-center px-24",
+        overlayClassName,
+      )}
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
