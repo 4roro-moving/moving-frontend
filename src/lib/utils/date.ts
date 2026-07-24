@@ -17,7 +17,8 @@ export function formatKoreanDateTime(date: string): string {
     weekday: "short",
     timeZone: "Asia/Seoul",
   }).format(new Date(date));
-  
+}
+
 /** Date → "YYYY-MM-DD" (백엔드 moveDate 형식) */
 export function formatDateToISODate(date: Date): string {
   const year = date.getFullYear();
