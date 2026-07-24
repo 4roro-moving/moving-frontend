@@ -1,22 +1,28 @@
-const ACCESS_TOKEN_KEY = "moving_access_token";
-const REFRESH_TOKEN_KEY = "moving_refresh_token";
+/**
+ * Access token은 메모리에만 보관합니다.
+ * Refresh token은 서버가 내려주는 HttpOnly 쿠키로만 유지됩니다.
+ */
+let accessToken: string | null = null;
+
+const LEGACY_ACCESS_TOKEN_KEY = "moving_access_token";
+const LEGACY_REFRESH_TOKEN_KEY = "moving_refresh_token";
+
+function clearLegacyStorage(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY);
+  localStorage.removeItem(LEGACY_REFRESH_TOKEN_KEY);
+}
 
 export function getAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+  return accessToken;
 }
 
-export function getRefreshToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(REFRESH_TOKEN_KEY);
-}
-
-export function setAuthTokens(tokens: { accessToken: string; refreshToken: string }): void {
-  localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
-  localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+export function setAccessToken(token: string): void {
+  accessToken = token;
+  clearLegacyStorage();
 }
 
 export function clearAuthTokens(): void {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  accessToken = null;
+  clearLegacyStorage();
 }

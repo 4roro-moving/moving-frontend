@@ -23,8 +23,12 @@ export interface CreateEstimateRequestPayload {
 
 export interface CreateEstimateRequestResponse {
   success: boolean;
-  data: unknown;
+  data?: unknown;
   message?: string;
+  error?: {
+    code?: string;
+    message?: string;
+  };
 }
 
 const MOVE_TYPE_MAP = {
@@ -72,5 +76,10 @@ export async function createEstimateRequest(
     API_ROUTES.ESTIMATE_REQUESTS,
     payload,
   );
+
+  if (!data.success) {
+    throw new Error(data.error?.message || data.message || "견적 요청이 실패하였습니다.");
+  }
+
   return data;
 }

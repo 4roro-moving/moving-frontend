@@ -1,16 +1,16 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 import { useCallback, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast";
-import { login } from "@/lib/api/auth";
+import { login, refreshSession } from "@/lib/api/auth";
 import {
   buildCreateEstimateRequestPayload,
   createEstimateRequest,
 } from "@/lib/api/estimateRequest";
+import { getApiError } from "@/lib/api/getApiError";
 import { getAccessToken } from "@/lib/auth/token";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
@@ -26,7 +26,21 @@ const TEST_CUSTOMER = {
 } as const;
 
 const TOAST_SUCCESS_MESSAGE = "견적 요청이 완료되었습니다.";
-const TOAST_FAILURE_MESSAGE = "견적 요청에 실패하였습니다. 기존 견적이 있는지 확인해주세요.";
+const TOAST_FAILURE_MESSAGE = "견적 요청이 실패하였습니다.";
+const TOAST_EXISTING_REQUEST_MESSAGE =
+  "견적 요청에 실패하였습니다. 기존 견적이 있는지 확인해주세요.";
+const TOAST_INVALID_ZIP_MESSAGE = "우편번호 정보가 올바르지 않습니다. 주소를 다시 선택해주세요.";
+const TOAST_LOGIN_FAILURE_MESSAGE = "로그인에 실패하였습니다. 잠시 후 다시 시도해주세요.";
+
+function getCreateEstimateErrorMessage(error: unknown): string {
+  const { code } = getApiError(error);
+
+  if (code === "ACTIVE_REQUEST_EXISTS") {
+    return TOAST_EXISTING_REQUEST_MESSAGE;
+  }
+
+  return TOAST_FAILURE_MESSAGE;
+}
 
 const MOVE_TYPES = [
   {
@@ -125,9 +139,14 @@ export default function EstimateRequestForm() {
 
       setIsLoggingIn(true);
       try {
-        await login(TEST_CUSTOMER);
+        // 페이지 새로고침 시 메모리 access token은 사라지므로 HttpOnly cookie로 먼저 복구
+        try {
+          await refreshSession();
+        } catch {
+          await login(TEST_CUSTOMER);
+        }
       } catch {
-        if (!cancelled) setToastMessage(TOAST_FAILURE_MESSAGE);
+        if (!cancelled) setToastMessage(TOAST_LOGIN_FAILURE_MESSAGE);
       } finally {
         if (!cancelled) setIsLoggingIn(false);
       }
@@ -144,8 +163,8 @@ export default function EstimateRequestForm() {
     onSuccess: () => {
       setToastMessage(TOAST_SUCCESS_MESSAGE);
     },
-    onError: () => {
-      setToastMessage(TOAST_FAILURE_MESSAGE);
+    onError: (error) => {
+      setToastMessage(getCreateEstimateErrorMessage(error));
     },
   });
 
@@ -159,17 +178,21 @@ export default function EstimateRequestForm() {
     if (!selectedType || !fromAddress || !toAddress) return;
 
     if (!/^\d{5}$/.test(fromAddress.zipCode) || !/^\d{5}$/.test(toAddress.zipCode)) {
-      setToastMessage(TOAST_FAILURE_MESSAGE);
+      setToastMessage(TOAST_INVALID_ZIP_MESSAGE);
       return;
     }
 
     try {
       if (!getAccessToken()) {
         setIsLoggingIn(true);
-        await login(TEST_CUSTOMER);
+        try {
+          await refreshSession();
+        } catch {
+          await login(TEST_CUSTOMER);
+        }
       }
     } catch {
-      setToastMessage(TOAST_FAILURE_MESSAGE);
+      setToastMessage(TOAST_LOGIN_FAILURE_MESSAGE);
       return;
     } finally {
       setIsLoggingIn(false);

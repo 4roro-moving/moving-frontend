@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/api/axiosInstance";
-import { setAuthTokens } from "@/lib/auth/token";
+import { clearAuthTokens, setAccessToken } from "@/lib/auth/token";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 
 export interface LoginInput {
@@ -15,21 +15,74 @@ export interface AuthUser {
   role: "CUSTOMER" | "MOVER" | "ADMIN";
 }
 
-export interface AuthTokens {
+export interface PublicAuthTokens {
   accessToken: string;
-  refreshToken: string;
 }
 
 export interface LoginResponse {
   success: boolean;
-  data: {
+  data?: {
     user: AuthUser;
-    tokens: AuthTokens;
+    tokens: PublicAuthTokens;
   };
+  error?: {
+    code?: string;
+    message?: string;
+  };
+  message?: string;
 }
 
-export async function login(input: LoginInput): Promise<LoginResponse["data"]> {
+export interface RefreshResponse {
+  success: boolean;
+  data?: {
+    tokens: PublicAuthTokens;
+  };
+  error?: {
+    code?: string;
+    message?: string;
+  };
+  message?: string;
+}
+
+function assertAccessToken(
+  data: {
+    success: boolean;
+    data?: { tokens?: PublicAuthTokens };
+    error?: { message?: string };
+    message?: string;
+  },
+  fallbackMessage: string,
+): string {
+  const accessToken = data.data?.tokens?.accessToken;
+
+  if (!data.success || !accessToken) {
+    throw new Error(data.error?.message || data.message || fallbackMessage);
+  }
+
+  return accessToken;
+}
+
+export async function login(input: LoginInput): Promise<NonNullable<LoginResponse["data"]>> {
   const { data } = await axiosInstance.post<LoginResponse>(API_ROUTES.AUTH.LOGIN, input);
-  setAuthTokens(data.data.tokens);
-  return data.data;
+  const accessToken = assertAccessToken(data, "로그인에 실패했습니다.");
+
+  setAccessToken(accessToken);
+  return data.data!;
+}
+
+/** HttpOnly refresh cookie로 access token 재발급 */
+export async function refreshSession(): Promise<string> {
+  const { data } = await axiosInstance.post<RefreshResponse>(API_ROUTES.AUTH.REFRESH);
+  const accessToken = assertAccessToken(data, "세션 갱신에 실패했습니다.");
+
+  setAccessToken(accessToken);
+  return accessToken;
+}
+
+export async function logout(): Promise<void> {
+  try {
+    await axiosInstance.post(API_ROUTES.AUTH.LOGOUT);
+  } finally {
+    clearAuthTokens();
+  }
 }
