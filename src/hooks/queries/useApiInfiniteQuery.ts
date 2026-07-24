@@ -11,19 +11,18 @@ import { ApiError } from "@/types/api";
 
 // 4xx(클라이언트 오류)는 재시도하지 않고, 나머지는 최대 2회까지 재시도 : query provider 참고
 const isNonRetryableError = (error: unknown): boolean =>
-  error instanceof ApiError && !!error.status && error.status < 500;
+  error instanceof ApiError && !!error.status && error.status >= 400 && error.status < 500;
 
 // 각 api 문서에서 작성한 queryKey, queryFn ... 등을 그대로 전달받아 사용
 // infinite query 사용 시 사용
 export const useApiInfiniteQuery = <
   TQueryFnData = unknown,
-  TError = ApiError,
   TData = InfiniteData<TQueryFnData>,
   TQueryKey extends QueryKey = QueryKey,
   TPageParam = unknown,
 >(
-  options: UseInfiniteQueryOptions<TQueryFnData, TError, TData, TQueryKey, TPageParam>,
-): UseInfiniteQueryResult<TData, TError> =>
+  options: UseInfiniteQueryOptions<TQueryFnData, ApiError, TData, TQueryKey, TPageParam>,
+): UseInfiniteQueryResult<TData, ApiError> =>
   useInfiniteQuery({
     retry: (failureCount, error) => {
       if (isNonRetryableError(error)) return false;
