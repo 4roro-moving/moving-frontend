@@ -369,8 +369,9 @@ export default function EstimateRequestForm() {
         {mobileStep > 1 && (
           <button
             type="button"
+            disabled={isBusy}
             onClick={() => setMobileStep((step) => (step - 1) as MobileStep)}
-            className="rounded-12 border-border-brand text-text-brand flex h-[54px] flex-1 items-center justify-center border px-24"
+            className="rounded-12 border-border-brand text-text-brand flex h-[54px] flex-1 items-center justify-center border px-24 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Text as="span" variant="lg-semibold" className="text-text-brand">
               이전
