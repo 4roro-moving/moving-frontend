@@ -1,9 +1,14 @@
-import axios from "axios";
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
+
+import { clearAuthTokens, getAccessToken, setAccessToken } from "@/lib/auth/token";
+import { API_ROUTES } from "@/lib/constants/apiRoutes";
+
+type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 import { clearDevAuthTokens, getDevAccessToken, isDevAuthEnabled } from "@/lib/dev-auth";
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -11,13 +16,66 @@ const axiosInstance = axios.create({
   timeout: 10_000,
 });
 
-// 2026.07.24 정슬기 - [추가] 개발 전용 Bearer 토큰 주입 (실제 로그인 PR 병합 시 삭제/교체)
+let refreshPromise: Promise<string> | null = null;
+let isRedirectingToDevLogin = false;
+
+function isAuthPath(url?: string): boolean {
+  if (!url) return false;
+
+  return (
+    url.includes(API_ROUTES.AUTH.LOGIN) ||
+    url.includes(API_ROUTES.AUTH.REFRESH) ||
+    url.includes(API_ROUTES.AUTH.LOGOUT)
+  );
+}
+
+async function refreshAccessToken(): Promise<string> {
+  if (!refreshPromise) {
+    refreshPromise = axios
+      .post<{
+        success: boolean;
+        data?: {
+          tokens?: {
+            accessToken?: string;
+          };
+        };
+      }>(
+        `${process.env.NEXT_PUBLIC_API_URL}${API_ROUTES.AUTH.REFRESH}`,
+        {},
+        {
+          withCredentials: true,
+        },
+      )
+      .then((response) => {
+        const accessToken = response.data.data?.tokens?.accessToken;
+
+        if (!response.data.success || !accessToken) {
+          throw new Error("세션 갱신에 실패했습니다.");
+        }
+
+        setAccessToken(accessToken);
+
+        return accessToken;
+      })
+      .catch((error: unknown) => {
+        clearAuthTokens();
+        throw error;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
+}
+
 axiosInstance.interceptors.request.use((config) => {
-  if (!isDevAuthEnabled()) {
+  if (isDevAuthEnabled()) {
     return config;
   }
 
-  const accessToken = getDevAccessToken();
+  const accessToken = getAccessToken();
+
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
@@ -25,12 +83,9 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-let isRedirectingToDevLogin = false;
-
-// 2026.07.24 정슬기 - [추가] 개발 환경 401 시 /dev-login 이동 (무한 리다이렉트·refresh 반복 호출 방지)
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error: AxiosError) => {
     if (
       isDevAuthEnabled() &&
       typeof window !== "undefined" &&
@@ -41,9 +96,34 @@ axiosInstance.interceptors.response.use(
       isRedirectingToDevLogin = true;
       clearDevAuthTokens();
       window.location.assign("/dev-login");
+
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    const originalRequest = error.config as RetryConfig | undefined;
+
+    if (
+      !originalRequest ||
+      error.response?.status !== 401 ||
+      originalRequest._retry ||
+      isAuthPath(originalRequest.url)
+    ) {
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+
+    try {
+      const accessToken = await refreshAccessToken();
+
+      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+      return axiosInstance(originalRequest);
+    } catch (refreshError) {
+      return Promise.reject(refreshError);
+    }
+  },
+);
   },
 );
 

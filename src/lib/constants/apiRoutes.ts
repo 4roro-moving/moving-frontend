@@ -5,8 +5,11 @@ export const API_ROUTES = {
     /** 백엔드 실제 로그인 경로. 개발 전용 로그인에서 사용 */
     LOGIN: "/auth/login",
     SIGN_OUT: "/auth/logout",
+    SIGN_UP_CUSTOMER: "/auth/signup/customer",
+    SIGN_UP_MOVER: "/auth/signup/mover",
+    LOGIN: "/auth/login",
+    LOGOUT: "/auth/logout",
     REFRESH: "/auth/refresh",
-    ME: "/auth/me",
   },
   USERS: "/users",
   PROFILES: "/profiles",
