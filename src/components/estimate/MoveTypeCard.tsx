@@ -28,13 +28,13 @@ export default function MoveTypeCard({
       onClick={onSelect}
       aria-pressed={selected}
       className={cn(
-        "rounded-16 flex flex-1 flex-col items-end gap-16 border-2 px-16 pt-20 pb-16 text-left transition-colors",
+        "rounded-16 flex flex-1 items-start justify-end gap-8 border-2 px-16 py-20 text-left transition-colors md:flex-col md:items-end md:gap-16 md:pt-20 md:pb-16",
         selected
           ? "border-border-brand bg-background-brand-muted"
           : "bg-background-muted hover:bg-background-hover border-transparent",
       )}
     >
-      <div className="flex w-full items-start gap-8">
+      <div className="flex min-w-0 flex-1 flex-col gap-8 md:w-full md:flex-row md:items-start">
         <span
           className={cn(
             "flex size-24 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
@@ -54,7 +54,7 @@ export default function MoveTypeCard({
           </Text>
         </span>
       </div>
-      <div className="relative size-[120px] self-end">
+      <div className="relative size-[120px] shrink-0 self-end">
         <Image
           src={imageSrc}
           alt={title}
