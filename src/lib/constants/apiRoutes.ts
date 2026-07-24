@@ -1,10 +1,10 @@
 export const API_ROUTES = {
   AUTH: {
-    SIGN_UP: "/auth/signup",
-    SIGN_IN: "/auth/signin",
-    SIGN_OUT: "/auth/signout",
+    SIGN_UP_CUSTOMER: "/auth/signup/customer",
+    SIGN_UP_MOVER: "/auth/signup/mover",
+    LOGIN: "/auth/login",
+    LOGOUT: "/auth/logout",
     REFRESH: "/auth/refresh",
-    ME: "/auth/me",
   },
   USERS: "/users",
   PROFILES: "/profiles",
