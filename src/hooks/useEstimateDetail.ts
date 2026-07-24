@@ -31,7 +31,7 @@ export function useConfirmEstimate(estimateId: number, options?: UseConfirmEstim
       queryClient.setQueryData(QUERY_KEYS.ESTIMATES.DETAIL(estimateId), detail);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
-        queryClient.invalidateQueries({ queryKey: ["estimates", "detail"] }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
       ]);
       options?.onSuccess?.(detail);
     },

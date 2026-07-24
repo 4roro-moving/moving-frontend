@@ -17,11 +17,16 @@ interface InfoRowProps {
 
 function InfoRow({ label, value }: InfoRowProps) {
   return (
-    <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:gap-[23px]">
+    // 2026.07.24 정슬기 - [수정] Mobile에서도 라벨·값 가로 배치, 긴 주소 줄바꿈
+    <div className="flex w-full items-start justify-between gap-12 sm:items-center sm:gap-[23px]">
       <Text as="dt" variant="lg-regular" className="text-text-weak w-[90px] shrink-0">
         {label}
       </Text>
-      <Text as="dd" variant="lg-semibold" className="text-text-primary">
+      <Text
+        as="dd"
+        variant="lg-semibold"
+        className="text-text-primary min-w-0 text-right break-words sm:text-left"
+      >
         {value}
       </Text>
     </div>
@@ -32,8 +37,12 @@ export default function EstimateDetailInfo({ detail }: EstimateDetailInfoProps) 
   const { estimateRequest, createdAt } = detail;
 
   return (
-    <section className="flex w-full flex-col gap-28" aria-label="견적 정보">
-      <Text as="h2" variant="xl-semibold" className="text-text-primary">
+    <section className="flex w-full flex-col gap-20 md:gap-28" aria-label="견적 정보">
+      <Text
+        as="h2"
+        variant="lg-semibold"
+        className="text-text-primary md:text-[length:var(--font-size-20)] md:leading-[var(--line-height-32)]"
+      >
         견적 정보
       </Text>
 

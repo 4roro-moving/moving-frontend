@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
+import { isConfirmedEstimate, isPendingEstimate } from "@/lib/utils/estimateFormat";
 import type { EstimateOfferFilter, MoveType, ReceivedEstimateListItem } from "@/types/estimate";
 
 import EstimateOfferCard from "./EstimateOfferCard";
@@ -13,6 +14,12 @@ const FILTER_OPTIONS: { value: EstimateOfferFilter; label: string }[] = [
   { value: "confirmed", label: "확정견적" },
   { value: "pending", label: "견적대기" },
 ];
+
+const FILTER_VALUES = new Set<EstimateOfferFilter>(FILTER_OPTIONS.map((option) => option.value));
+
+function isEstimateOfferFilter(value: string): value is EstimateOfferFilter {
+  return FILTER_VALUES.has(value as EstimateOfferFilter);
+}
 
 interface EstimateOfferSectionProps {
   offers: ReceivedEstimateListItem[];
@@ -31,13 +38,13 @@ export default function EstimateOfferSection({
   const filteredOffers = useMemo(() => {
     if (filter === "all") return offers;
     if (filter === "confirmed") {
-      return offers.filter((offer) => offer.status === "CONFIRMED");
+      return offers.filter((offer) => isConfirmedEstimate(offer.status));
     }
-    return offers.filter((offer) => offer.status === "SENT");
+    return offers.filter((offer) => isPendingEstimate(offer.status));
   }, [filter, offers]);
 
   return (
-    <section className="flex min-w-0 flex-1 flex-col gap-20" aria-label="견적서 목록">
+    <section className="flex min-w-0 flex-1 flex-col gap-16 md:gap-20" aria-label="견적서 목록">
       <div className="flex items-start gap-8">
         <Text as="h2" variant="xl-semibold" className="text-text-secondary">
           견적서 목록
@@ -47,31 +54,44 @@ export default function EstimateOfferSection({
         </Text>
       </div>
 
-      <Select
-        desc="전체"
-        defaultValue="all"
-        size="lg"
-        className="w-[160px]"
-        onChange={(value) => setFilter(value as EstimateOfferFilter)}
-      >
-        {FILTER_OPTIONS.map((option) => (
-          <Select.Option key={option.value} value={option.value}>
-            {option.label}
-          </Select.Option>
-        ))}
-      </Select>
+      <div className="flex flex-col gap-4">
+        <span className="sr-only">견적 상태 필터</span>
+        <Select
+          desc="전체"
+          defaultValue="all"
+          size="lg"
+          className="w-[128px] md:w-[160px]"
+          onChange={(value) => {
+            if (isEstimateOfferFilter(value)) {
+              setFilter(value);
+            }
+          }}
+        >
+          {FILTER_OPTIONS.map((option) => (
+            <Select.Option key={option.value} value={option.value}>
+              {option.label}
+            </Select.Option>
+          ))}
+        </Select>
+      </div>
 
-      <ul className="flex w-full flex-col items-start">
-        {filteredOffers.map((offer) => (
-          <li key={offer.id} className="w-full">
-            <EstimateOfferCard
-              offer={offer}
-              moveType={moveType}
-              onFavoriteError={onFavoriteError}
-            />
-          </li>
-        ))}
-      </ul>
+      {filteredOffers.length === 0 ? (
+        <Text as="p" variant="md-regular" className="text-text-muted py-24">
+          해당 조건의 견적이 없습니다.
+        </Text>
+      ) : (
+        <ul className="flex w-full flex-col items-start">
+          {filteredOffers.map((offer) => (
+            <li key={offer.id} className="w-full">
+              <EstimateOfferCard
+                offer={offer}
+                moveType={moveType}
+                onFavoriteError={onFavoriteError}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

@@ -17,8 +17,9 @@ export default function ReceivedEstimatesList({
     return <ReceivedEstimatesStatus message="받은 견적이 없습니다." />;
   }
 
+  // 2026.07.24 정슬기 - [수정] Figma margin/mobile·tablet 적용, Desktop 컨테이너는 lg부터
   return (
-    <div className="flex w-full max-w-[var(--container-desktop-narrow)] flex-col gap-24 px-16 md:gap-40 md:px-0">
+    <div className="px-margin-mobile md:px-margin-tablet flex w-full max-w-[var(--container-desktop-narrow)] flex-col gap-24 md:gap-40 lg:px-0">
       {panels.map((panel) => (
         <EstimateDetailPanel
           key={panel.estimateRequest.id}

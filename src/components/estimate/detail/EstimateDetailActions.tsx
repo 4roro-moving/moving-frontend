@@ -1,5 +1,3 @@
-"use client";
-
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import { ConfirmedCheckIcon } from "@/icons";
@@ -48,6 +46,8 @@ export default function EstimateDetailActions({
         fullWidth
         disabled={disabled}
         onClick={onConfirm}
+        // 2026.07.24 정슬기 - [수정] 좁은 Mobile 폭에서 min-width 오버플로우 방지
+        className="max-w-full min-w-0"
       >
         {isConfirming ? "확정 중..." : "견적 확정하기"}
       </Button>

@@ -13,7 +13,7 @@ export default function ReceivedEstimatesStatus({
   onAction,
 }: ReceivedEstimatesStatusProps) {
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-16 py-80">
+    <div className="px-margin-mobile flex w-full flex-col items-center justify-center gap-16 py-64 md:px-0 md:py-80">
       <Text as="p" variant="lg-regular" className="text-text-muted text-center">
         {message}
       </Text>
@@ -21,7 +21,7 @@ export default function ReceivedEstimatesStatus({
         <button
           type="button"
           onClick={onAction}
-          className="text-text-brand underline-offset-2 hover:underline"
+          className="text-text-brand focus-visible:ring-border-brand rounded-4 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-none"
         >
           <Text as="span" variant="md-semibold" className="text-text-brand">
             {actionLabel}

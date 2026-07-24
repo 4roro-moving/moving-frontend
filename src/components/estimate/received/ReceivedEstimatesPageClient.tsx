@@ -13,8 +13,9 @@ export default function ReceivedEstimatesPageClient() {
   const { data, isLoading, isError, error, refetch } = useReceivedEstimates();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // 2026.07.24 정슬기 - [수정] Mobile 배경을 Figma처럼 default로 맞춰 카드가 튀지 않게 함 (md+는 기존 subtle 유지)
   return (
-    <div className="bg-background-subtle flex w-full flex-col items-center py-40 md:py-64">
+    <div className="bg-background-default md:bg-background-subtle flex w-full flex-col items-center py-[38px] md:py-32 lg:py-64">
       {/* 2026.07.24 정슬기 - [추가] 목록 로딩·에러·성공 상태 분기 */}
       {isLoading ? <ReceivedEstimatesStatus message="받은 견적을 불러오는 중입니다." /> : null}
 

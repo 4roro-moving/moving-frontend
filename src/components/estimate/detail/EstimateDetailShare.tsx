@@ -1,5 +1,11 @@
+"use client";
+
+import { useState } from "react";
+
 import { Text } from "@/components/common/Text";
+import Toast from "@/components/common/Toast/Toast";
 import { ClipIcon } from "@/icons";
+import { cn } from "@/lib/utils/cn";
 
 function KakaoIcon({ className }: { className?: string }) {
   return (
@@ -23,38 +29,71 @@ function FacebookIcon({ className }: { className?: string }) {
   );
 }
 
+// 2026.07.24 정슬기 - [수정] 비동작 공유 버튼 CodeRabbit 이슈 대응 (링크 복사 동작, SNS는 준비 중 표시)
 export default function EstimateDetailShare() {
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setToastMessage("견적 링크가 복사되었습니다.");
+    } catch {
+      setToastMessage("링크 복사에 실패했습니다.");
+    }
+  };
+
   return (
-    <section className="flex w-full flex-col gap-22" aria-label="견적서 공유하기">
-      <Text as="h2" variant="xl-semibold" className="text-text-secondary">
+    <section className="flex w-full flex-col gap-12 md:gap-22" aria-label="견적서 공유하기">
+      <Text
+        as="h2"
+        variant="lg-semibold"
+        className="text-text-secondary md:text-[length:var(--font-size-20)] md:leading-[var(--line-height-32)]"
+      >
         견적서 공유하기
       </Text>
 
-      <div className="flex items-start gap-16">
+      <div className="flex items-start gap-10 md:gap-16">
         <button
           type="button"
           aria-label="링크 복사"
-          className="bg-background-surface border-border-default rounded-16 flex size-64 shrink-0 items-center justify-center border p-10"
+          onClick={() => {
+            void handleCopyLink();
+          }}
+          className="bg-background-surface border-border-default focus-visible:ring-border-brand rounded-8 md:rounded-16 flex size-40 shrink-0 items-center justify-center border p-10 focus-visible:ring-2 focus-visible:outline-none md:size-64"
         >
-          <ClipIcon className="size-36" aria-hidden="true" />
+          <ClipIcon className="size-24 md:size-36" aria-hidden="true" />
         </button>
 
         <button
           type="button"
-          aria-label="카카오톡 공유"
-          className="bg-social-kakao-background text-social-kakao-icon rounded-16 flex size-64 shrink-0 items-center justify-center p-14"
+          aria-label="카카오톡 공유 (준비 중)"
+          aria-disabled="true"
+          disabled
+          title="준비 중"
+          className={cn(
+            "bg-social-kakao-background text-social-kakao-icon rounded-8 md:rounded-16 flex size-40 shrink-0 items-center justify-center p-8 md:size-64 md:p-14",
+            "cursor-not-allowed opacity-60",
+          )}
         >
-          <KakaoIcon className="size-28" />
+          <KakaoIcon className="size-24 md:size-28" />
         </button>
 
         <button
           type="button"
-          aria-label="페이스북 공유"
-          className="bg-social-facebook-background text-social-facebook-icon rounded-16 flex size-64 shrink-0 items-center justify-center p-14"
+          aria-label="페이스북 공유 (준비 중)"
+          aria-disabled="true"
+          disabled
+          title="준비 중"
+          className={cn(
+            "bg-social-facebook-background text-social-facebook-icon rounded-8 md:rounded-16 flex size-40 shrink-0 items-center justify-center p-8 md:size-64 md:p-14",
+            "cursor-not-allowed opacity-60",
+          )}
         >
-          <FacebookIcon className="size-28" />
+          <FacebookIcon className="size-24 md:size-28" />
         </button>
       </div>
+
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </section>
   );
 }

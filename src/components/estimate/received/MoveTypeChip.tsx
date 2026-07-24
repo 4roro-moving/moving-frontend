@@ -1,13 +1,8 @@
 import { Text } from "@/components/common/Text";
 import { BoxIcon, DocumentIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
+import { getMoveTypeLabel } from "@/lib/utils/estimateFormat";
 import type { MoveType } from "@/types/estimate";
-
-const MOVE_TYPE_LABEL: Record<MoveType, string> = {
-  SMALL: "소형이사",
-  HOME: "가정이사",
-  OFFICE: "사무실이사",
-};
 
 interface MoveTypeChipProps {
   moveType: MoveType;
@@ -24,7 +19,7 @@ export default function MoveTypeChip({ moveType, className }: MoveTypeChipProps)
     >
       <BoxIcon className="text-icon-brand size-20 shrink-0" aria-hidden="true" />
       <Text as="span" variant="md-semibold" className="text-text-brand">
-        {MOVE_TYPE_LABEL[moveType]}
+        {getMoveTypeLabel(moveType)}
       </Text>
     </span>
   );

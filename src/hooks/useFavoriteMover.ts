@@ -11,11 +11,11 @@ interface UseFavoriteMoverOptions {
   onError?: (message: string) => void;
 }
 
-function patchMoverFavorite(
-  mover: EstimateMoverSummary,
+function patchMoverFavorite<T extends EstimateMoverSummary>(
+  mover: T,
   moverId: string,
   nextIsFavorite: boolean,
-): EstimateMoverSummary {
+): T {
   if (mover.id !== moverId) {
     return mover;
   }
@@ -30,7 +30,7 @@ function patchMoverFavorite(
 }
 
 // 2026.07.24 정슬기 - [추가] 찜 API 연동 후 받은 견적 목록·상세 캐시 갱신
-// 2026.07.24 정슬기 - [수정] 클릭 직후 하트 채움이 보이도록 낙관적 업데이트 적용
+// 2026.07.24 정슬기 - [수정] 낙관적 업데이트 롤백을 previous 캐시가 undefined여도 복원하도록 교정
 export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   const queryClient = useQueryClient();
 
@@ -46,14 +46,14 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
 
       await Promise.all([
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
-        queryClient.cancelQueries({ queryKey: ["estimates", "detail"] }),
+        queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
       ]);
 
       const previousReceived = queryClient.getQueryData<ReceivedEstimatePanel[]>(
         QUERY_KEYS.ESTIMATES.RECEIVED,
       );
       const previousDetails = queryClient.getQueriesData<EstimateDetail>({
-        queryKey: ["estimates", "detail"],
+        queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT,
       });
 
       queryClient.setQueryData<ReceivedEstimatePanel[]>(QUERY_KEYS.ESTIMATES.RECEIVED, (panels) => {
@@ -71,7 +71,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       });
 
       queryClient.setQueriesData<EstimateDetail>(
-        { queryKey: ["estimates", "detail"] },
+        { queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT },
         (detail) => {
           if (!detail) {
             return detail;
@@ -87,20 +87,19 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       return { previousReceived, previousDetails };
     },
     onError: (error, _variables, context) => {
-      if (context?.previousReceived) {
+      if (context) {
         queryClient.setQueryData(QUERY_KEYS.ESTIMATES.RECEIVED, context.previousReceived);
+        context.previousDetails.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
       }
-
-      context?.previousDetails.forEach(([queryKey, data]) => {
-        queryClient.setQueryData(queryKey, data);
-      });
 
       options?.onError?.(getApiErrorMessage(error));
     },
     onSettled: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
-        queryClient.invalidateQueries({ queryKey: ["estimates", "detail"] }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
       ]);
     },
   });

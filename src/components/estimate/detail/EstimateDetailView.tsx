@@ -54,24 +54,25 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
   }
 
   return (
-    <div className="bg-background-default flex w-full flex-col items-start">
+    <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
       <EstimateDetailHeader />
       <EstimateDetailHero
         imageUrl={data.mover.imageUrl}
         name={data.mover.nickname || data.mover.name}
       />
 
-      <div className="flex w-full flex-col items-center px-16 pt-28 pb-80 md:px-0 md:pb-[150px]">
-        <div className="flex w-full max-w-[1200px] flex-col items-stretch gap-40 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex w-full flex-col gap-30 lg:w-[740px]">
-            <div className="flex w-full flex-col gap-26">
-              <EstimateDetailDriverSummary detail={data} />
+      {/* 2026.07.24 정슬기 - [수정] Figma Mobile/Tablet 여백·단일 컬럼, Desktop(lg) 2열 유지 */}
+      <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 lg:px-0 lg:pb-[150px]">
+        <div className="flex w-full max-w-[1200px] flex-col items-stretch gap-32 md:gap-40 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex w-full min-w-0 flex-col gap-24 md:gap-30 lg:w-[740px]">
+            <div className="flex w-full flex-col gap-20 md:gap-26">
+              <EstimateDetailDriverSummary detail={data} onFavoriteError={setToastMessage} />
               <EstimateDetailPrice price={data.price} />
             </div>
             <EstimateDetailInfo detail={data} />
           </div>
 
-          <aside className="flex w-full flex-col items-start gap-40 lg:w-[320px] lg:overflow-clip lg:pt-40">
+          <aside className="flex w-full min-w-0 flex-col items-start gap-28 md:gap-40 lg:w-[320px] lg:overflow-clip lg:pt-40">
             {/* 2026.07.24 정슬기 - [추가] API canConfirm 기준으로 확정 버튼 노출·비활성화 */}
             <EstimateDetailActions
               isConfirmed={data.isConfirmed}

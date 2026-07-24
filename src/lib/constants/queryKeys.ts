@@ -22,6 +22,7 @@ export const QUERY_KEYS = {
   ESTIMATES: {
     ALL: ["estimates"],
     RECEIVED: ["estimates", "received"] as const,
+    DETAIL_ROOT: ["estimates", "detail"] as const,
     DETAIL: (estimateId: number) => ["estimates", "detail", estimateId] as const,
   },
 
