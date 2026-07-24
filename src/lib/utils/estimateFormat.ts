@@ -47,7 +47,7 @@ export function formatRequestDateLabel(value: string | Date): string {
 }
 
 export function formatMoveDateLabel(value: string | Date): string {
-  // moveDate는 "YYYY-MM-DD" 날짜 전용
+  // moveDate: YYYY-MM-DD 또는 API/mock ISO datetime → parseDateOnly가 날짜 prefix로 정규화
   const date = parseDateOnly(value);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
