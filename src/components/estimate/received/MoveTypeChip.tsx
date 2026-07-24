@@ -38,7 +38,7 @@ export function DesignatedChip({ className }: DesignatedChipProps) {
         className,
       )}
     >
-      <DocumentIcon className="size-20 shrink-0" aria-hidden="true" />
+      <DocumentIcon className="text-text-error size-20 shrink-0" aria-hidden="true" />
       <Text as="span" variant="md-semibold" className="text-text-error">
         지정 견적 요청
       </Text>

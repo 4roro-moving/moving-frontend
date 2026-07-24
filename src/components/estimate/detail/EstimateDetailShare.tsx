@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
 import { Text } from "@/components/common/Text";
-import Toast from "@/components/common/Toast/Toast";
 import { ClipIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 
@@ -29,16 +26,18 @@ function FacebookIcon({ className }: { className?: string }) {
   );
 }
 
-// 2026.07.24 정슬기 - [수정] 비동작 공유 버튼 CodeRabbit 이슈 대응 (링크 복사 동작, SNS는 준비 중 표시)
-export default function EstimateDetailShare() {
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+interface EstimateDetailShareProps {
+  onToastMessage?: (message: string) => void;
+}
 
+// 2026.07.24 정슬기 - [수정] Toast를 부모로 올려 상세 페이지에서 단일 Toast로 관리
+export default function EstimateDetailShare({ onToastMessage }: EstimateDetailShareProps) {
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      setToastMessage("견적 링크가 복사되었습니다.");
+      onToastMessage?.("견적 링크가 복사되었습니다.");
     } catch {
-      setToastMessage("링크 복사에 실패했습니다.");
+      onToastMessage?.("링크 복사에 실패했습니다.");
     }
   };
 
@@ -68,7 +67,6 @@ export default function EstimateDetailShare() {
         <button
           type="button"
           aria-label="카카오톡 공유 (준비 중)"
-          aria-disabled="true"
           disabled
           title="준비 중"
           className={cn(
@@ -82,7 +80,6 @@ export default function EstimateDetailShare() {
         <button
           type="button"
           aria-label="페이스북 공유 (준비 중)"
-          aria-disabled="true"
           disabled
           title="준비 중"
           className={cn(
@@ -93,8 +90,6 @@ export default function EstimateDetailShare() {
           <FacebookIcon className="size-24 md:size-28" />
         </button>
       </div>
-
-      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </section>
   );
 }

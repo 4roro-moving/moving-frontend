@@ -2,13 +2,13 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 import { clearAuthTokens, getAccessToken, setAccessToken } from "@/lib/auth/token";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
+import { clearDevAuthTokens, isDevAuthEnabled } from "@/lib/dev-auth";
 
 type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
-import { clearDevAuthTokens, getDevAccessToken, isDevAuthEnabled } from "@/lib/dev-auth";
-
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  // 프로젝트 .env는 NEXT_PUBLIC_API_BASE_URL 사용 (예: http://localhost:5000/api)
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -21,7 +21,6 @@ let isRedirectingToDevLogin = false;
 
 function isAuthPath(url?: string): boolean {
   if (!url) return false;
-
   return (
     url.includes(API_ROUTES.AUTH.LOGIN) ||
     url.includes(API_ROUTES.AUTH.REFRESH) ||
@@ -34,30 +33,21 @@ async function refreshAccessToken(): Promise<string> {
     refreshPromise = axios
       .post<{
         success: boolean;
-        data?: {
-          tokens?: {
-            accessToken?: string;
-          };
-        };
+        data?: { tokens?: { accessToken?: string } };
       }>(
-        `${process.env.NEXT_PUBLIC_API_URL}${API_ROUTES.AUTH.REFRESH}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}${API_ROUTES.AUTH.REFRESH}`,
         {},
-        {
-          withCredentials: true,
-        },
+        { withCredentials: true },
       )
       .then((response) => {
         const accessToken = response.data.data?.tokens?.accessToken;
-
         if (!response.data.success || !accessToken) {
           throw new Error("세션 갱신에 실패했습니다.");
         }
-
         setAccessToken(accessToken);
-
         return accessToken;
       })
-      .catch((error: unknown) => {
+      .catch((error) => {
         clearAuthTokens();
         throw error;
       })
@@ -70,36 +60,16 @@ async function refreshAccessToken(): Promise<string> {
 }
 
 axiosInstance.interceptors.request.use((config) => {
-  if (isDevAuthEnabled()) {
-    return config;
-  }
-
   const accessToken = getAccessToken();
-
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
-
   return config;
 });
 
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (
-      isDevAuthEnabled() &&
-      typeof window !== "undefined" &&
-      error.response?.status === 401 &&
-      !window.location.pathname.startsWith("/dev-login") &&
-      !isRedirectingToDevLogin
-    ) {
-      isRedirectingToDevLogin = true;
-      clearDevAuthTokens();
-      window.location.assign("/dev-login");
-
-      return Promise.reject(error);
-    }
-
     const originalRequest = error.config as RetryConfig | undefined;
 
     if (
@@ -115,15 +85,24 @@ axiosInstance.interceptors.response.use(
 
     try {
       const accessToken = await refreshAccessToken();
-
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-
       return axiosInstance(originalRequest);
     } catch (refreshError) {
+      // 2026.07.24 정슬기 - [수정] 개발 환경에서는 refresh 실패 시 /dev-login으로 유도
+      if (
+        isDevAuthEnabled() &&
+        typeof window !== "undefined" &&
+        !window.location.pathname.startsWith("/dev-login") &&
+        !isRedirectingToDevLogin
+      ) {
+        isRedirectingToDevLogin = true;
+        clearDevAuthTokens();
+        clearAuthTokens();
+        window.location.assign("/dev-login");
+      }
+
       return Promise.reject(refreshError);
     }
-  },
-);
   },
 );
 

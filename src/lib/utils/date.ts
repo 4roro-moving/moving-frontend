@@ -17,7 +17,22 @@ export function formatKoreanDateTime(date: string): string {
     weekday: "short",
     timeZone: "Asia/Seoul",
   }).format(new Date(date));
-  
+}
+
+/**
+ * 날짜 전용 값(`YYYY-MM-DD` 또는 Date)을 로컬 Date로 변환합니다.
+ * `new Date("YYYY-MM-DD")`는 UTC 자정으로 해석되어 타임존에 따라 하루가 밀릴 수 있어 사용하지 않습니다.
+ * // 2026.07.24 정슬기 - [추가] 날짜 전용 문자열 파서 (타임존 밀림 방지)
+ */
+export function parseDateOnly(value: string | Date): Date {
+  if (value instanceof Date) {
+    return value;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
 /** Date → "YYYY-MM-DD" (백엔드 moveDate 형식) */
 export function formatDateToISODate(date: Date): string {
   const year = date.getFullYear();

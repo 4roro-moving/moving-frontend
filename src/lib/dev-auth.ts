@@ -55,11 +55,7 @@ export function clearDevAuthTokens(): void {
   sessionStorage.removeItem(REFRESH_TOKEN_KEY);
 }
 
-/** 개발 로그인 폼 기본 이메일 (비밀번호는 환경변수/시드 문서만 사용, 코드에 하드코딩하지 않음) */
+/** 개발 로그인 폼 기본 이메일 (비밀번호는 코드/공개 env에 두지 않음) */
 export function getDevLoginDefaultEmail(): string {
-  return process.env.NEXT_PUBLIC_DEV_LOGIN_EMAIL?.trim() || "";
-}
-
-export function getDevLoginDefaultPassword(): string {
-  return process.env.NEXT_PUBLIC_DEV_LOGIN_PASSWORD ?? "";
+  return process.env.NEXT_PUBLIC_DEV_LOGIN_EMAIL?.trim() ?? "";
 }

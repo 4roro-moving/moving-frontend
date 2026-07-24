@@ -8,12 +8,8 @@ import Input from "@/components/common/Input/Input";
 import { Text } from "@/components/common/Text";
 import { loginWithPassword } from "@/lib/api/devLogin";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import {
-  getDevLoginDefaultEmail,
-  getDevLoginDefaultPassword,
-  isDevAuthEnabled,
-  setDevAuthTokens,
-} from "@/lib/dev-auth";
+import { setAccessToken } from "@/lib/auth/token";
+import { getDevLoginDefaultEmail, isDevAuthEnabled } from "@/lib/dev-auth";
 
 /**
  * 개발 전용 임시 로그인 페이지
@@ -25,7 +21,7 @@ import {
 export default function DevLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState(getDevLoginDefaultEmail);
-  const [password, setPassword] = useState(getDevLoginDefaultPassword);
+  const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,9 +35,9 @@ export default function DevLoginPage() {
     setIsSubmitting(true);
 
     try {
-      // 2026.07.24 정슬기 - [추가] 실제 백엔드 로그인 API로 토큰 발급
+      // 2026.07.24 정슬기 - [수정] 공통 auth 토큰 저장소에 accessToken 반영 (refresh는 HttpOnly 쿠키)
       const result = await loginWithPassword({ email, password });
-      setDevAuthTokens(result.tokens);
+      setAccessToken(result.tokens.accessToken);
       router.replace("/estimates/received");
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, "로그인에 실패했습니다."));
@@ -95,7 +91,7 @@ export default function DevLoginPage() {
           </label>
 
           {errorMessage ? (
-            <Text as="p" variant="md-regular" className="text-text-error">
+            <Text as="p" variant="md-regular" className="text-text-error" role="alert">
               {errorMessage}
             </Text>
           ) : null}

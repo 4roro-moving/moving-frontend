@@ -50,7 +50,8 @@ export default function EstimateOfferSection({
           견적서 목록
         </Text>
         <Text as="span" variant="xl-semibold" className="text-text-brand">
-          {offers.length}
+          {/* 2026.07.24 정슬기 - [수정] 필터 적용 후 개수 표시 */}
+          {filteredOffers.length}
         </Text>
       </div>
 

@@ -12,7 +12,7 @@ export function useEstimateDetail(estimateId: number) {
   return useQuery({
     queryKey: QUERY_KEYS.ESTIMATES.DETAIL(estimateId),
     queryFn: () => fetchReceivedEstimateDetail(estimateId),
-    enabled: Number.isFinite(estimateId) && estimateId > 0,
+    enabled: Number.isInteger(estimateId) && estimateId > 0,
   });
 }
 
