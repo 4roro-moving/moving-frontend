@@ -47,7 +47,8 @@ export default function ReceivedRequestsPage() {
     }
   }
 
-  const items = query.data?.items ?? [];
+  const items = query.data?.pages.flatMap((page) => page.items) ?? [];
+  const totalCount = query.data?.pages[0]?.pagination.totalCount ?? 0;
 
   return (
     <>
@@ -93,13 +94,13 @@ export default function ReceivedRequestsPage() {
         <section className="flex flex-col gap-12 lg:gap-24">
           {!query.isPending && (
             <Text as="p" variant="2lg-semibold" className="text-text-secondary hidden lg:block">
-              전체 {items.length}건
+              전체 {totalCount}건
             </Text>
           )}
           <div className="flex min-h-40 flex-wrap items-center justify-between gap-12 px-10 lg:px-0">
             {!query.isPending && (
               <Text as="p" variant="md-semibold" className="text-text-secondary lg:hidden">
-                전체 {items.length}건
+                전체 {totalCount}건
               </Text>
             )}
             <div className="hidden flex-wrap items-center gap-12 text-base lg:flex">
@@ -185,11 +186,23 @@ export default function ReceivedRequestsPage() {
             </div>
           )}
           {items.length > 0 && (
-            <div className="grid w-full grid-cols-1 gap-24 min-[744px]:max-w-[588px] lg:max-w-none lg:grid-cols-2">
-              {items.map((request) => (
-                <ReceivedRequestCard key={request.id} request={request} />
-              ))}
-            </div>
+            <>
+              <div className="grid w-full grid-cols-1 gap-24 min-[744px]:max-w-[588px] lg:max-w-none lg:grid-cols-2">
+                {items.map((request) => (
+                  <ReceivedRequestCard key={request.id} request={request} />
+                ))}
+              </div>
+              {query.hasNextPage && (
+                <button
+                  type="button"
+                  disabled={query.isFetchingNextPage}
+                  onClick={() => query.fetchNextPage()}
+                  className="border-border-brand text-text-brand disabled:text-text-disabled disabled:border-border-disabled mx-auto h-[54px] w-full max-w-[327px] rounded-xl border font-semibold disabled:cursor-not-allowed"
+                >
+                  {query.isFetchingNextPage ? "불러오는 중..." : "더 보기"}
+                </button>
+              )}
+            </>
           )}
         </section>
       </main>

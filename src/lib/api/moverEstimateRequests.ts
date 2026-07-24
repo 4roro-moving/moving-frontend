@@ -73,10 +73,19 @@ function getMockMoverEstimateRequests(query: MoverEstimateRequestQuery) {
     const field = query.sort === "moveDate" ? "moveDate" : "createdAt";
     return new Date(a[field]).getTime() - new Date(b[field]).getTime();
   });
+  const cursorIndex = query.cursor
+    ? filtered.findIndex((request) => String(request.id) === query.cursor) + 1
+    : 0;
+  const pageItems = filtered.slice(cursorIndex, cursorIndex + query.limit);
+  const hasNextPage = cursorIndex + query.limit < filtered.length;
 
   return {
-    items: filtered.slice(0, query.limit),
-    pagination: { nextCursor: null, hasNextPage: filtered.length > query.limit },
+    items: pageItems,
+    pagination: {
+      nextCursor: hasNextPage ? String(pageItems.at(-1)?.id) : null,
+      hasNextPage,
+      totalCount: filtered.length,
+    },
   };
 }
 
@@ -91,6 +100,7 @@ export async function getMoverEstimateRequests(query: MoverEstimateRequestQuery)
   params.set("limit", String(query.limit));
   params.set("sort", query.sort);
 
+  if (query.cursor) params.set("cursor", query.cursor);
   if (query.keyword) params.set("keyword", query.keyword);
   if (query.isDesignated !== undefined) {
     params.set("isDesignated", String(query.isDesignated));

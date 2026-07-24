@@ -18,6 +18,7 @@ export type MoverEstimateRequest = {
 };
 
 export type MoverEstimateRequestQuery = {
+  cursor?: string;
   keyword?: string;
   moveType?: MoveType[];
   isDesignated?: boolean;
@@ -34,6 +35,7 @@ export type MoverEstimateRequestResponse =
         pagination: {
           nextCursor: string | null;
           hasNextPage: boolean;
+          totalCount: number;
         };
       };
     }
