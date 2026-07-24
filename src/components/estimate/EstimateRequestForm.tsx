@@ -1,13 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
+import Toast from "@/components/common/Toast";
+import { login, refreshSession } from "@/lib/api/auth";
+import {
+  buildCreateEstimateRequestPayload,
+  createEstimateRequest,
+} from "@/lib/api/estimateRequest";
+import { getApiError } from "@/lib/api/getApiError";
+import { getAccessToken } from "@/lib/auth/token";
+import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
 
 import AddressSelectModal, { type AddressItem } from "./AddressSelectModal";
 import DatePickerField from "./DatePickerField";
 import MoveTypeCard from "./MoveTypeCard";
+
+// 로컬 테스트용 고객 계정 (로그인 화면 연동 전 임시)
+const TEST_CUSTOMER = {
+  email: "customer1@test.com",
+  password: "Moving123!",
+} as const;
+
+const TOAST_SUCCESS_MESSAGE = "견적 요청이 완료되었습니다.";
+const TOAST_FAILURE_MESSAGE = "견적 요청이 실패하였습니다.";
+const TOAST_EXISTING_REQUEST_MESSAGE =
+  "견적 요청에 실패하였습니다. 기존 견적이 있는지 확인해주세요.";
+const TOAST_INVALID_ZIP_MESSAGE = "우편번호 정보가 올바르지 않습니다. 주소를 다시 선택해주세요.";
+const TOAST_LOGIN_FAILURE_MESSAGE = "로그인에 실패하였습니다. 잠시 후 다시 시도해주세요.";
+
+function getCreateEstimateErrorMessage(error: unknown): string {
+  const { code } = getApiError(error);
+
+  if (code === "ACTIVE_REQUEST_EXISTS") {
+    return TOAST_EXISTING_REQUEST_MESSAGE;
+  }
+
+  return TOAST_FAILURE_MESSAGE;
+}
 
 const MOVE_TYPES = [
   {
@@ -30,6 +63,7 @@ const MOVE_TYPES = [
   },
 ] as const;
 
+type MoveTypeId = (typeof MOVE_TYPES)[number]["id"];
 type RegionKind = "출발지" | "도착지";
 
 interface RegionFieldProps {
@@ -83,25 +117,101 @@ function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
 }
 
 export default function EstimateRequestForm() {
-  const [selectedType, setSelectedType] = useState<string | null>(null);
-  // 오늘 날짜를 초기 선택값으로 사용
+  const [selectedType, setSelectedType] = useState<MoveTypeId | null>(null);
   const [moveDate, setMoveDate] = useState<Date>(() => new Date());
-  const [fromRegion, setFromRegion] = useState<string | null>(null);
-  const [toRegion, setToRegion] = useState<string | null>(null);
+  const [fromAddress, setFromAddress] = useState<AddressItem | null>(null);
+  const [toAddress, setToAddress] = useState<AddressItem | null>(null);
   const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const canSubmit = Boolean(selectedType && fromRegion && toRegion);
+  const canSubmit = Boolean(selectedType && fromAddress && toAddress);
+
+  const closeToast = useCallback(() => {
+    setToastMessage(null);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function ensureLogin() {
+      if (getAccessToken()) return;
+
+      setIsLoggingIn(true);
+      try {
+        // 페이지 새로고침 시 메모리 access token은 사라지므로 HttpOnly cookie로 먼저 복구
+        try {
+          await refreshSession();
+        } catch {
+          await login(TEST_CUSTOMER);
+        }
+      } catch {
+        if (!cancelled) setToastMessage(TOAST_LOGIN_FAILURE_MESSAGE);
+      } finally {
+        if (!cancelled) setIsLoggingIn(false);
+      }
+    }
+
+    void ensureLogin();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const createMutation = useMutation({
+    mutationFn: createEstimateRequest,
+    onSuccess: () => {
+      setToastMessage(TOAST_SUCCESS_MESSAGE);
+    },
+    onError: (error) => {
+      setToastMessage(getCreateEstimateErrorMessage(error));
+    },
+  });
 
   function handleAddressConfirm(address: AddressItem) {
-    // 도로명 주소에서 괄호 안 건물명은 제외하고 번지까지만 표시
-    const display = address.roadAddress.replace(/\s*\([^)]*\)\s*/g, "").trim();
-    if (addressModalKind === "출발지") setFromRegion(display);
-    if (addressModalKind === "도착지") setToRegion(display);
+    if (addressModalKind === "출발지") setFromAddress(address);
+    if (addressModalKind === "도착지") setToAddress(address);
     setAddressModalKind(null);
+  }
+
+  async function handleSubmit() {
+    if (!selectedType || !fromAddress || !toAddress) return;
+
+    if (!/^\d{5}$/.test(fromAddress.zipCode) || !/^\d{5}$/.test(toAddress.zipCode)) {
+      setToastMessage(TOAST_INVALID_ZIP_MESSAGE);
+      return;
+    }
+
+    try {
+      if (!getAccessToken()) {
+        setIsLoggingIn(true);
+        try {
+          await refreshSession();
+        } catch {
+          await login(TEST_CUSTOMER);
+        }
+      }
+    } catch {
+      setToastMessage(TOAST_LOGIN_FAILURE_MESSAGE);
+      return;
+    } finally {
+      setIsLoggingIn(false);
+    }
+
+    const payload = buildCreateEstimateRequestPayload({
+      moveTypeId: selectedType,
+      moveDate,
+      from: fromAddress,
+      to: toAddress,
+    });
+
+    createMutation.mutate(payload);
   }
 
   return (
     <div className="rounded-40 bg-background-surface mx-auto flex w-full max-w-[894px] flex-col px-24 pt-48 pb-40 md:px-[47px] md:pt-[89px] md:pb-[76px]">
+      <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+
       {/* Title */}
       <div className="flex flex-col items-center gap-8 text-center">
         <Text as="h1" variant="2xl-bold" className="text-text-primary">
@@ -157,13 +267,13 @@ export default function EstimateRequestForm() {
             <div className="flex w-full gap-16 md:w-[520px]">
               <RegionField
                 kind="출발지"
-                value={fromRegion}
+                value={fromAddress ? normalizeRoadAddress(fromAddress.roadAddress) : null}
                 onSelect={() => setAddressModalKind("출발지")}
                 onReset={() => setAddressModalKind("출발지")}
               />
               <RegionField
                 kind="도착지"
-                value={toRegion}
+                value={toAddress ? normalizeRoadAddress(toAddress.roadAddress) : null}
                 onSelect={() => setAddressModalKind("도착지")}
                 onReset={() => setAddressModalKind("도착지")}
               />
@@ -176,16 +286,19 @@ export default function EstimateRequestForm() {
       <div className="mt-64 flex justify-end md:mt-80">
         <button
           type="button"
-          disabled={!canSubmit}
+          disabled={!canSubmit || createMutation.isPending || isLoggingIn}
+          onClick={() => {
+            void handleSubmit();
+          }}
           className={cn(
             "rounded-16 flex h-64 w-full items-center justify-center px-16 transition-colors md:w-[200px]",
-            canSubmit
+            canSubmit && !createMutation.isPending && !isLoggingIn
               ? "bg-background-brand hover:bg-background-brand-hover"
               : "bg-background-disabled cursor-not-allowed",
           )}
         >
           <Text as="span" variant="2lg-semibold" className="text-text-inverse">
-            견적 요청하기
+            {createMutation.isPending ? "요청 중..." : "견적 요청하기"}
           </Text>
         </button>
       </div>
