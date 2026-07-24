@@ -1,16 +1,11 @@
 import type { ReactNode } from "react";
 
-import MyEstimateTabs from "@/components/estimate/MyEstimateTabs";
+import EstimatesShell from "@/components/estimate/EstimatesShell";
 
 interface EstimatesLayoutProps {
   children: ReactNode;
 }
 
 export default function EstimatesLayout({ children }: EstimatesLayoutProps) {
-  return (
-    <>
-      <MyEstimateTabs />
-      {children}
-    </>
-  );
+  return <EstimatesShell>{children}</EstimatesShell>;
 }

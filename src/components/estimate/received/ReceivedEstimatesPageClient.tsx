@@ -1,0 +1,38 @@
+"use client";
+
+import { useState } from "react";
+
+import Toast from "@/components/common/Toast/Toast";
+import ReceivedEstimatesList from "@/components/estimate/received/ReceivedEstimatesList";
+import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
+import { useReceivedEstimates } from "@/hooks/useReceivedEstimates";
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+
+export default function ReceivedEstimatesPageClient() {
+  // 2026.07.24 정슬기 - [추가] 받은 견적 목록 API 연동 (Mock 제거)
+  const { data, isLoading, isError, error, refetch } = useReceivedEstimates();
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  return (
+    <div className="bg-background-subtle flex w-full flex-col items-center py-40 md:py-64">
+      {/* 2026.07.24 정슬기 - [추가] 목록 로딩·에러·성공 상태 분기 */}
+      {isLoading ? <ReceivedEstimatesStatus message="받은 견적을 불러오는 중입니다." /> : null}
+
+      {isError ? (
+        <ReceivedEstimatesStatus
+          message={getApiErrorMessage(error, "받은 견적을 불러오지 못했습니다.")}
+          actionLabel="다시 시도"
+          onAction={() => {
+            void refetch();
+          }}
+        />
+      ) : null}
+
+      {!isLoading && !isError && data ? (
+        <ReceivedEstimatesList panels={data} onFavoriteError={setToastMessage} />
+      ) : null}
+
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
+    </div>
+  );
+}

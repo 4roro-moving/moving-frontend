@@ -1,19 +1,27 @@
 import { Text } from "@/components/common/Text";
-import type { EstimateRequestSummaryData } from "@/types/estimate";
+import {
+  formatMoveDateLabel,
+  formatRequestDateLabel,
+  getMoveTypeLabel,
+} from "@/lib/utils/estimateFormat";
+import type { ReceivedEstimateRequestSummary } from "@/types/estimate";
 
 interface EstimateRequestSummaryProps {
-  data: EstimateRequestSummaryData;
+  data: ReceivedEstimateRequestSummary;
 }
 
 export default function EstimateRequestSummary({ data }: EstimateRequestSummaryProps) {
   return (
-    <section className="flex w-[260px] shrink-0 flex-col gap-40" aria-label="견적 정보">
+    <section
+      className="flex w-full flex-col gap-24 md:w-[260px] md:shrink-0 md:gap-40"
+      aria-label="견적 정보"
+    >
       <div className="flex w-full items-center justify-between">
         <Text as="h2" variant="xl-semibold" className="text-text-secondary">
           견적 정보
         </Text>
         <Text as="time" variant="md-regular" className="text-text-muted">
-          {data.createdAtLabel}
+          {formatRequestDateLabel(data.createdAt)}
         </Text>
       </div>
 
@@ -23,7 +31,7 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
             이사 유형
           </Text>
           <Text as="dd" variant="lg-semibold" className="text-text-primary">
-            {data.moveTypeLabel}
+            {getMoveTypeLabel(data.moveType)}
           </Text>
         </div>
         <div className="flex w-full items-start justify-between gap-12">
@@ -47,7 +55,7 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
             이용일
           </Text>
           <Text as="dd" variant="lg-semibold" className="text-text-primary text-right">
-            {data.moveDateLabel}
+            {formatMoveDateLabel(data.moveDate)}
           </Text>
         </div>
       </dl>

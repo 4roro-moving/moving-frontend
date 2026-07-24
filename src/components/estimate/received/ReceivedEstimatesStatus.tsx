@@ -1,0 +1,33 @@
+import { Text } from "@/components/common/Text";
+
+interface ReceivedEstimatesStatusProps {
+  message: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}
+
+// 2026.07.24 정슬기 - [추가] 받은 견적 도메인 전용 로딩·빈·에러 상태 UI
+export default function ReceivedEstimatesStatus({
+  message,
+  actionLabel,
+  onAction,
+}: ReceivedEstimatesStatusProps) {
+  return (
+    <div className="flex w-full flex-col items-center justify-center gap-16 py-80">
+      <Text as="p" variant="lg-regular" className="text-text-muted text-center">
+        {message}
+      </Text>
+      {actionLabel && onAction ? (
+        <button
+          type="button"
+          onClick={onAction}
+          className="text-text-brand underline-offset-2 hover:underline"
+        >
+          <Text as="span" variant="md-semibold" className="text-text-brand">
+            {actionLabel}
+          </Text>
+        </button>
+      ) : null}
+    </div>
+  );
+}

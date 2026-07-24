@@ -13,7 +13,8 @@ export { default as CloseIcon } from "./close.svg";
 export { default as ConfirmedCheckIcon } from "./confirmed-estimate.svg";
 export { default as DocumentIcon } from "./document.svg";
 export { default as InfoIcon } from "./info.svg";
-export { default as LikeIcon } from "./like.svg";
+// 2026.07.24 정슬기 - [수정] 찜 상태(fill) prop을 받도록 LikeIcon을 TSX 컴포넌트로 연결
+export { default as LikeIcon } from "./like";
 export { default as MenuIcon } from "./menu.svg";
 export { default as ProfileDefaultIcon } from "./profile-default.svg";
 export { default as StarIcon } from "./star.svg";

@@ -17,7 +17,7 @@ export default function MyEstimateTabs() {
   return (
     <nav
       aria-label="내 견적 관리"
-      className="bg-background-default border-border-subtle flex h-[var(--tab-height-desktop)] w-full items-end border-b border-solid px-[var(--tab-padding-x-desktop)] shadow-[0_2px_5px_0_rgba(248,248,248,0.1)]"
+      className="bg-background-default border-border-subtle flex h-[var(--tab-height-desktop)] w-full items-end border-b px-16 shadow-[0_2px_5px_0_rgba(248,248,248,0.1)] md:px-[var(--tab-padding-x-desktop)]"
     >
       <div className="flex h-full flex-1 items-end gap-32 pt-16">
         {TABS.map((tab) => {
@@ -30,17 +30,13 @@ export default function MyEstimateTabs() {
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex h-64 shrink-0 items-center",
-                isActive && "border-b-2 border-solid border-[var(--nav-indicator-active)]",
+                isActive && "border-b-2 border-[var(--nav-indicator-active)]",
               )}
             >
               <Text
                 as="span"
                 variant="xl-semibold"
-                className={
-                  isActive
-                    ? "text-[color:var(--nav-text-active)]"
-                    : "text-[color:var(--nav-text-default)]"
-                }
+                className={isActive ? "text-text-primary" : "text-text-subtle"}
               >
                 {tab.label}
               </Text>
