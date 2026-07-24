@@ -11,6 +11,45 @@ const NO_REFRESH_ENDPOINTS: string[] = [
   API_ROUTES.AUTH.REFRESH,
 ];
 
+// 예외 처리 공통 함수
+const safeFetch = async (url: string, init: RequestInit): Promise<Response> => {
+  try {
+    return await fetch(url, init);
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") throw err;
+
+    if (err instanceof Error && err.name === "TimeoutError") {
+      throw new ApiError("요청 시간이 초과되었습니다.");
+    }
+
+    throw new ApiError("네트워크 연결이 원활하지 않습니다.");
+  }
+};
+
+// error 처리 공통 함수
+// status 와 body 를 받아 ApiError 를 반환
+const setApiError = (status: number, body: unknown): ApiError => {
+  // body 타입에 SuccessResponese 가 있을 수 있으므로 unknown으로 정의하고 따로 체크
+  const record = typeof body === "object" && body !== null ? (body as Record<string, unknown>) : {};
+
+  const errorInfo = "error" in record ? (record.error as ApiErrorResponse["error"]) : undefined;
+  const debugInfo =
+    "path" in record
+      ? {
+          path: record.path as string | undefined,
+          method: record.method as string | undefined,
+          timestamp: record.timestamp as string | undefined,
+        }
+      : undefined;
+
+  return new ApiError(
+    errorInfo?.message ?? "알 수 없는 오류가 발생했습니다.",
+    status,
+    errorInfo?.code,
+    debugInfo,
+  );
+};
+
 // 서버(Server Component 등)에서 실행 중이면 브라우저 쿠키가 자동으로 안 실리므로 직접 포워딩한다.
 const getRequestHeaders = async (
   customHeaders?: HeadersInit,
@@ -45,7 +84,7 @@ const buildTimeoutSignal = (signal?: AbortSignal): AbortSignal => {
 const refreshAccessToken = async (): Promise<void> => {
   const headers = await getRequestHeaders();
 
-  const res = await fetch(`${BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {
+  const res = await safeFetch(`${BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {
     method: "POST",
     credentials: "include",
     headers,
@@ -53,8 +92,34 @@ const refreshAccessToken = async (): Promise<void> => {
   });
 
   if (!res.ok) {
-    throw new ApiError("로그인이 만료되었습니다.", 401);
+    const body = (await res.json().catch(() => ({}))) as ApiErrorResponse | Record<string, never>;
+    throw setApiError(res.status, body);
   }
+};
+
+// 401 동시 요청 제어
+let refreshPromise: Promise<void> | null = null;
+
+const getRefreshPromise = (): Promise<void> => {
+  // SSR 에서는 캐싱하지 않고 매번 새로 호출함.
+  if (typeof window === "undefined") {
+    return refreshAccessToken();
+  }
+
+  if (!refreshPromise) {
+    refreshPromise = refreshAccessToken()
+      .catch((err) => {
+        // token 발급 실패 시 에러 처리
+        // 추후 authProvider 에서 addEventListner로 처리할 예정
+        window.dispatchEvent(new CustomEvent("auth:expired"));
+        throw err;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
 };
 
 // fetch 요청 함수
@@ -64,27 +129,14 @@ const request = async <T>(
   retry = true,
 ): Promise<T> => {
   const isFormData = options.body instanceof FormData;
-  let res: Response;
+  const headers = await getRequestHeaders(options.headers, isFormData);
 
-  try {
-    const headers = await getRequestHeaders(options.headers, isFormData);
-    res = await fetch(`${BASE_URL}${endpoint}`, {
-      ...options,
-      credentials: "include",
-      headers,
-      signal: buildTimeoutSignal(options.signal ?? undefined),
-    });
-  } catch (err) {
-    // 요청 중단 시 에러 처리
-    if (err instanceof Error && err.name === "AbortError") throw err;
-
-    // 타임 아웃 시 에러 처리
-    if (err instanceof Error && err.name === "TimeoutError") {
-      throw new ApiError("요청 시간이 초과되었습니다.", undefined);
-    }
-
-    throw new ApiError("네트워크 연결이 원활하지 않습니다.", undefined);
-  }
+  const res = await safeFetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    credentials: "include",
+    headers,
+    signal: buildTimeoutSignal(options.signal ?? undefined),
+  });
 
   if (res.status === 204) {
     return null as T;
@@ -97,22 +149,11 @@ const request = async <T>(
     const shouldRefresh = retry && res.status === 401 && !NO_REFRESH_ENDPOINTS.includes(endpoint);
 
     if (shouldRefresh) {
-      await refreshAccessToken();
+      await getRefreshPromise();
       return request<T>(endpoint, options, false);
     }
 
-    const errorInfo = "error" in body ? body.error : undefined;
-    const debugInfo =
-      "path" in body
-        ? { path: body.path, method: body.method, timestamp: body.timestamp }
-        : undefined;
-
-    throw new ApiError(
-      errorInfo?.message ?? "알 수 없는 오류가 발생했습니다.",
-      res.status,
-      errorInfo?.code,
-      debugInfo,
-    );
+    throw setApiError(res.status, body);
   }
 
   return (body as ApiSuccessResponse<T>).data;
@@ -127,14 +168,14 @@ const fetchInstance = {
     request<TResponse>(endpoint, {
       ...options,
       method: "POST",
-      body: body instanceof FormData ? body : JSON.stringify(body),
+      body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
     }),
 
   patch: <TResponse, TBody = unknown>(endpoint: string, body?: TBody, options?: RequestInit) =>
     request<TResponse>(endpoint, {
       ...options,
       method: "PATCH",
-      body: body instanceof FormData ? body : JSON.stringify(body),
+      body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
     }),
 
   delete: <TResponse>(endpoint: string, options?: RequestInit) =>
