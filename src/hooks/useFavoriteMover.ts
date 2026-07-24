@@ -96,7 +96,8 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
 
       options?.onError?.(getApiErrorMessage(error));
     },
-    onSettled: async () => {
+    onSuccess: async () => {
+      // 2026.07.24 정슬기 - [수정] 찜 API는 estimateId가 없으므로 상세 키 invalidate로 동기화
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),

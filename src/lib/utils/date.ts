@@ -23,14 +23,49 @@ export function formatKoreanDateTime(date: string): string {
  * 날짜 전용 값(`YYYY-MM-DD` 또는 Date)을 로컬 Date로 변환합니다.
  * `new Date("YYYY-MM-DD")`는 UTC 자정으로 해석되어 타임존에 따라 하루가 밀릴 수 있어 사용하지 않습니다.
  * // 2026.07.24 정슬기 - [추가] 날짜 전용 문자열 파서 (타임존 밀림 방지)
+ * // 2026.07.24 정슬기 - [수정] YYYY-MM-DD 형식·달력 유효성 검증 강화
  */
 export function parseDateOnly(value: string | Date): Date {
   if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) {
+      throw new RangeError("유효하지 않은 날짜입니다.");
+    }
     return value;
   }
 
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, month - 1, day);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) {
+    throw new RangeError("날짜는 YYYY-MM-DD 형식이어야 합니다.");
+  }
+
+  const [, yearText, monthText, dayText] = match;
+  if (yearText === undefined || monthText === undefined || dayText === undefined) {
+    throw new RangeError("날짜는 YYYY-MM-DD 형식이어야 합니다.");
+  }
+
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+    throw new RangeError("날짜는 YYYY-MM-DD 형식이어야 합니다.");
+  }
+
+  if (month < 1 || month > 12) {
+    throw new RangeError("달은 1부터 12 사이여야 합니다.");
+  }
+
+  if (day < 1) {
+    throw new RangeError("일은 1 이상이어야 합니다.");
+  }
+
+  const date = new Date(year, month - 1, day);
+
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    throw new RangeError("달력상 존재하지 않는 날짜입니다.");
+  }
+
+  return date;
 }
 
 /** Date → "YYYY-MM-DD" (백엔드 moveDate 형식) */

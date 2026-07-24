@@ -28,11 +28,9 @@ export function useConfirmEstimate(estimateId: number, options?: UseConfirmEstim
   return useMutation({
     mutationFn: () => confirmReceivedEstimate(estimateId),
     onSuccess: async (detail) => {
+      // 2026.07.24 정슬기 - [수정] 상세는 setQueryData로 반영하고 목록만 invalidate
       queryClient.setQueryData(QUERY_KEYS.ESTIMATES.DETAIL(estimateId), detail);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
-      ]);
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED });
       options?.onSuccess?.(detail);
     },
     onError: (error) => {

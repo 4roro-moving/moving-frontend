@@ -1,5 +1,5 @@
-import type { EstimateStatus, MoveType } from "@/types/estimate";
 import { parseDateOnly } from "@/lib/utils/date";
+import type { EstimateStatus, MoveType } from "@/types/estimate";
 
 const MOVE_TYPE_LABEL: Record<MoveType, string> = {
   SMALL: "소형이사",
@@ -10,20 +10,27 @@ const MOVE_TYPE_LABEL: Record<MoveType, string> = {
 const WEEKDAY_LABEL = ["일", "월", "화", "수", "목", "금", "토"] as const;
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
+function assertValidDate(date: Date): Date {
+  if (Number.isNaN(date.getTime())) {
+    throw new RangeError("유효하지 않은 날짜입니다.");
+  }
+  return date;
+}
+
 /**
- * 날짜 전용(`YYYY-MM-DD`)은 parseDateOnly, Date/ISO datetime은 기존처럼 처리합니다.
+ * createdAt 등 datetime은 `new Date`로, date-only 문자열만 parseDateOnly를 사용합니다.
  * // 2026.07.24 정슬기 - [수정] 날짜 전용 문자열 타임존 밀림 방지
  */
 function toDisplayDate(value: string | Date): Date {
   if (value instanceof Date) {
-    return value;
+    return assertValidDate(value);
   }
 
   if (DATE_ONLY_PATTERN.test(value)) {
     return parseDateOnly(value);
   }
 
-  return new Date(value);
+  return assertValidDate(new Date(value));
 }
 
 export function getMoveTypeLabel(moveType: MoveType): string {
@@ -46,6 +53,9 @@ export function formatMoveDateLabel(value: string | Date): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   const weekday = WEEKDAY_LABEL[date.getDay()];
+  if (weekday === undefined) {
+    throw new RangeError("유효하지 않은 날짜입니다.");
+  }
   return `${year}년 ${month}월 ${day}일 (${weekday})`;
 }
 

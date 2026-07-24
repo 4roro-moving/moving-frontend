@@ -2,7 +2,7 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 import { clearAuthTokens, getAccessToken, setAccessToken } from "@/lib/auth/token";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
-import { clearDevAuthTokens, isDevAuthEnabled } from "@/lib/dev-auth";
+import { clearDevAuthTokens, getDevAccessToken, isDevAuthEnabled } from "@/lib/dev-auth";
 
 type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -60,9 +60,10 @@ async function refreshAccessToken(): Promise<string> {
 }
 
 axiosInstance.interceptors.request.use((config) => {
-  const accessToken = getAccessToken();
+  // 2026.07.24 정슬기 - [수정] 개발 로그인은 sessionStorage 토큰, 그 외는 메모리 토큰 주입
+  const accessToken = isDevAuthEnabled() ? getDevAccessToken() : getAccessToken();
   if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
+    config.headers.set("Authorization", `Bearer ${accessToken}`);
   }
   return config;
 });
@@ -85,7 +86,7 @@ axiosInstance.interceptors.response.use(
 
     try {
       const accessToken = await refreshAccessToken();
-      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+      originalRequest.headers.set("Authorization", `Bearer ${accessToken}`);
       return axiosInstance(originalRequest);
     } catch (refreshError) {
       // 2026.07.24 정슬기 - [수정] 개발 환경에서는 refresh 실패 시 /dev-login으로 유도

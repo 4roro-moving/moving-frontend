@@ -8,8 +8,7 @@ import Input from "@/components/common/Input/Input";
 import { Text } from "@/components/common/Text";
 import { loginWithPassword } from "@/lib/api/devLogin";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { setAccessToken } from "@/lib/auth/token";
-import { getDevLoginDefaultEmail, isDevAuthEnabled } from "@/lib/dev-auth";
+import { getDevLoginDefaultEmail, isDevAuthEnabled, setDevAuthTokens } from "@/lib/dev-auth";
 
 /**
  * 개발 전용 임시 로그인 페이지
@@ -35,9 +34,9 @@ export default function DevLoginPage() {
     setIsSubmitting(true);
 
     try {
-      // 2026.07.24 정슬기 - [수정] 공통 auth 토큰 저장소에 accessToken 반영 (refresh는 HttpOnly 쿠키)
+      // 2026.07.24 정슬기 - [수정] 개발용 access token을 sessionStorage에 저장 (axios interceptor에서 주입)
       const result = await loginWithPassword({ email, password });
-      setAccessToken(result.tokens.accessToken);
+      setDevAuthTokens(result.tokens);
       router.replace("/estimates/received");
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, "로그인에 실패했습니다."));
