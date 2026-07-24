@@ -5,7 +5,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const DEFAULT_TIMEOUT_MS = 10_000;
 
 // auth 엔드포인트 제외 리프레시 금지
-const NO_REFRESH_ENDPOINTS: string[] = [
+const NO_REFRESH_ENDPOINTS: readonly string[] = [
   API_ROUTES.AUTH.SIGN_IN,
   API_ROUTES.AUTH.SIGN_UP,
   API_ROUTES.AUTH.REFRESH,
@@ -82,6 +82,7 @@ const buildTimeoutSignal = (signal?: AbortSignal): AbortSignal => {
 
 // 토큰 리프레시 요청
 const refreshAccessToken = async (): Promise<void> => {
+  // SSR 에서는 쿠키 헤더 추가
   const headers = await getRequestHeaders();
 
   const res = await safeFetch(`${BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {
