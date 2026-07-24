@@ -1,5 +1,4 @@
 export { default as AlarmIcon } from "./alarm.svg";
-export { default as BoxIcon } from "./calendar.svg";
 export { default as CalendarIcon } from "./calendar.svg";
 export { default as ChevronDownIcon } from "./chevron-down.svg";
 export { default as ChevronLeftIcon } from "./chevron-left.svg";
