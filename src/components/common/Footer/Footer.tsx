@@ -11,7 +11,7 @@ const FOOTER_LINKS = [
 const Footer = () => {
   return (
     <footer className="border-border-default bg-background-subtle w-full border-t">
-      <div className="px-margin-mobile mx-auto flex w-full max-w-[var(--container-desktop)] flex-col items-center gap-16 py-40 md:px-40">
+      <div className="px-margin-mobile max-w-container-desktop mx-auto flex w-full flex-col items-center gap-16 py-40 md:px-40">
         <Image src="/icons/logo_full.svg" alt="4roro-moving" width={100} height={37} />
 
         <nav aria-label="footer" className="flex items-center gap-24">

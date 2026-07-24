@@ -42,6 +42,7 @@ export interface SelectMainProps extends VariantProps<typeof selectVariants> {
   onChange?: (value: string) => void;
   error?: string;
   disabled?: boolean;
+  className?: string;
 }
 
 const SelectMain = ({
@@ -52,6 +53,7 @@ const SelectMain = ({
   onChange,
   error,
   disabled,
+  className,
 }: SelectMainProps) => {
   const [isOpen, setIsOpen] = useState(false);
   // selectedLabel 을 selected 로 합쳐둠
@@ -93,7 +95,7 @@ const SelectMain = ({
   return (
     <SelectContext.Provider value={{ selected, handleChange }}>
       <div className="flex w-full flex-col gap-4">
-        <div ref={containerRef} className={selectVariants({ size })}>
+        <div ref={containerRef} className={cn(selectVariants({ size }), className)}>
           <button
             ref={triggerRef}
             type="button"

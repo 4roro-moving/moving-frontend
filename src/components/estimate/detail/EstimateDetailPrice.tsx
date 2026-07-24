@@ -1,0 +1,33 @@
+import { Text } from "@/components/common/Text";
+import { formatPrice } from "@/lib/utils/estimateFormat";
+
+interface EstimateDetailPriceProps {
+  price: number;
+}
+
+export default function EstimateDetailPrice({ price }: EstimateDetailPriceProps) {
+  return (
+    // 2026.07.24 정슬기 - [수정] Mobile/Tablet 견적가 justify-between, Desktop 간격 유지
+    <section className="flex w-full flex-col gap-24 md:gap-36" aria-label="견적가">
+      <div className="flex w-full items-center justify-between gap-16 md:justify-start md:gap-24 lg:gap-60">
+        <h2 className="text-text-primary shrink-0">
+          <Text as="span" variant="lg-semibold" className="md:hidden">
+            견적가
+          </Text>
+          <Text as="span" variant="xl-semibold" className="hidden md:inline">
+            견적가
+          </Text>
+        </h2>
+        <p className="text-text-primary break-words">
+          <Text as="span" variant="xl-bold" className="md:hidden">
+            {formatPrice(price)}
+          </Text>
+          <Text as="span" variant="2xl-bold" className="hidden md:inline">
+            {formatPrice(price)}
+          </Text>
+        </p>
+      </div>
+      <div className="border-border-subtle w-full border-t" aria-hidden="true" />
+    </section>
+  );
+}
