@@ -15,7 +15,7 @@ export default function EstimateDetailPanel({ panel, onFavoriteError }: Estimate
       className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle flex w-full flex-col items-center border-0 px-0 py-0 shadow-none md:border-[0.5px] md:px-28 md:py-32 md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)] lg:px-40 lg:pt-48 lg:pb-40"
       aria-label={`견적 요청 ${panel.estimateRequest.id}`}
     >
-      <div className="flex w-full flex-col items-stretch gap-28 md:gap-40 lg:flex-row lg:items-start lg:gap-[60px]">
+      <div className="flex w-full flex-col items-stretch gap-28 md:gap-40 lg:flex-row lg:items-start lg:gap-60">
         <EstimateRequestSummary data={panel.estimateRequest} />
 
         <div

@@ -62,8 +62,9 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
       />
 
       {/* 2026.07.24 정슬기 - [수정] Figma Mobile/Tablet 여백·단일 컬럼, Desktop(lg) 2열 유지 */}
+      {/* 2026.07.24 정슬기 - [수정] container-desktop max-width 토큰 유틸 사용 */}
       <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 lg:px-0 lg:pb-[150px]">
-        <div className="flex w-full max-w-[1200px] flex-col items-stretch gap-32 md:gap-40 lg:flex-row lg:items-start lg:justify-between">
+        <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-32 md:gap-40 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex w-full min-w-0 flex-col gap-24 md:gap-30 lg:w-[740px]">
             <div className="flex w-full flex-col gap-20 md:gap-26">
               <EstimateDetailDriverSummary detail={data} onFavoriteError={setToastMessage} />

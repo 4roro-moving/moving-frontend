@@ -65,10 +65,18 @@ export default function EstimateOfferCard({
 
         <div className="flex w-full flex-col gap-16">
           <div className="flex w-full items-start justify-between gap-12">
+            {/* 2026.07.24 정슬기 - [수정] 반응형 타이포를 Text variant로 분리 */}
             <Text
               as="p"
               variant="lg-semibold"
-              className="text-text-secondary min-w-0 break-words md:truncate md:text-[length:var(--font-size-18)] md:leading-[var(--line-height-26)] md:font-semibold"
+              className="text-text-secondary min-w-0 break-words md:hidden"
+            >
+              {intro}
+            </Text>
+            <Text
+              as="p"
+              variant="2lg-semibold"
+              className="text-text-secondary hidden min-w-0 truncate md:block"
             >
               {intro}
             </Text>
@@ -85,7 +93,7 @@ export default function EstimateOfferCard({
               className="focus-visible:ring-border-brand rounded-8 flex min-w-0 flex-1 items-end gap-12 focus-visible:ring-2 focus-visible:outline-none"
               aria-label={`${displayName} 기사님 견적 상세 보기`}
             >
-              <div className="bg-background-avatar rounded-12 relative size-[50px] shrink-0 overflow-hidden">
+              <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
                 {mover.imageUrl ? (
                   <Image src={mover.imageUrl} alt="" fill sizes="50px" className="object-cover" />
                 ) : (
@@ -97,7 +105,14 @@ export default function EstimateOfferCard({
                 <Text
                   as="p"
                   variant="md-semibold"
-                  className="text-text-primary break-words md:text-[length:var(--font-size-16)] md:leading-[var(--line-height-26)]"
+                  className="text-text-primary break-words md:hidden"
+                >
+                  {displayName} 기사님
+                </Text>
+                <Text
+                  as="p"
+                  variant="lg-semibold"
+                  className="text-text-primary hidden break-words md:block"
                 >
                   {displayName} 기사님
                 </Text>
@@ -146,7 +161,7 @@ export default function EstimateOfferCard({
             {/* 2026.07.24 정슬기 - [추가] 찜 버튼을 Link 바깥 독립 버튼으로 연결 */}
             <button
               type="button"
-              className="focus-visible:ring-border-brand rounded-8 flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+              className="focus-visible:ring-border-brand rounded-8 flex min-h-44 min-w-44 shrink-0 items-center justify-center gap-2 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
               aria-label={
                 mover.isFavorite ? `${displayName} 기사님 찜 해제` : `${displayName} 기사님 찜하기`
               }
@@ -182,10 +197,13 @@ export default function EstimateOfferCard({
             <Text as="span" variant="md-medium" className="text-text-muted shrink-0">
               견적 금액
             </Text>
+            <Text as="p" variant="2lg-bold" className="text-text-primary break-words md:hidden">
+              {formatPrice(price)}
+            </Text>
             <Text
               as="p"
-              variant="2lg-bold"
-              className="text-text-primary break-words md:text-[length:var(--font-size-24)] md:leading-[var(--line-height-32)] md:font-bold"
+              variant="2xl-bold"
+              className="text-text-primary hidden break-words md:block"
             >
               {formatPrice(price)}
             </Text>

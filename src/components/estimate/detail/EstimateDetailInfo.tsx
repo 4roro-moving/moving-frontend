@@ -18,8 +18,8 @@ interface InfoRowProps {
 function InfoRow({ label, value }: InfoRowProps) {
   return (
     // 2026.07.24 정슬기 - [수정] Mobile에서도 라벨·값 가로 배치, 긴 주소 줄바꿈
-    <div className="flex w-full items-start justify-between gap-12 sm:items-center sm:gap-[23px]">
-      <Text as="dt" variant="lg-regular" className="text-text-weak w-[90px] shrink-0">
+    <div className="flex w-full items-start justify-between gap-12 sm:items-center sm:gap-24">
+      <Text as="dt" variant="lg-regular" className="text-text-weak w-90 shrink-0">
         {label}
       </Text>
       <Text
@@ -38,13 +38,14 @@ export default function EstimateDetailInfo({ detail }: EstimateDetailInfoProps) 
 
   return (
     <section className="flex w-full flex-col gap-20 md:gap-28" aria-label="견적 정보">
-      <Text
-        as="h2"
-        variant="lg-semibold"
-        className="text-text-primary md:text-[length:var(--font-size-20)] md:leading-[var(--line-height-32)]"
-      >
-        견적 정보
-      </Text>
+      <h2 className="text-text-primary">
+        <Text as="span" variant="lg-semibold" className="md:hidden">
+          견적 정보
+        </Text>
+        <Text as="span" variant="xl-semibold" className="hidden md:inline">
+          견적 정보
+        </Text>
+      </h2>
 
       <dl className="flex w-full flex-col gap-16">
         <InfoRow label="견적 요청일" value={formatDetailDateLabel(createdAt)} />

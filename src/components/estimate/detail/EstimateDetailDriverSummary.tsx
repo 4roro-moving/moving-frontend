@@ -55,7 +55,14 @@ export default function EstimateDetailDriverSummary({
           <Text
             as="p"
             variant="2lg-semibold"
-            className="text-text-secondary min-w-0 break-words md:text-[length:var(--font-size-24)] md:leading-[var(--line-height-32)]"
+            className="text-text-secondary min-w-0 break-words md:hidden"
+          >
+            {intro}
+          </Text>
+          <Text
+            as="p"
+            variant="2xl-semibold"
+            className="text-text-secondary hidden min-w-0 break-words md:block"
           >
             {intro}
           </Text>
@@ -81,7 +88,7 @@ export default function EstimateDetailDriverSummary({
           </Text>
           <button
             type="button"
-            className="focus-visible:ring-border-brand rounded-8 flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-4 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+            className="focus-visible:ring-border-brand rounded-8 flex min-h-44 min-w-44 shrink-0 items-center justify-center gap-4 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
             aria-label={
               mover.isFavorite ? `${displayName} 기사님 찜 해제` : `${displayName} 기사님 찜하기`
             }

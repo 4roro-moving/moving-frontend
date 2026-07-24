@@ -17,12 +17,13 @@ export default function EstimateDetailHero({ imageUrl, name }: EstimateDetailHer
           aria-hidden="true"
         />
         <div
-          className="bg-icon-brand-tertiary pointer-events-none absolute top-1/2 left-[calc(50%-665px)] hidden size-[120px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-20 lg:block"
+          className="bg-icon-brand-tertiary pointer-events-none absolute top-1/2 left-[calc(50%-665px)] hidden size-120 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-20 lg:block"
           aria-hidden="true"
         />
       </div>
 
-      <div className="rounded-16 md:rounded-20 absolute bottom-0 left-[var(--margin-mobile)] size-[86px] overflow-hidden md:left-[var(--margin-tablet)] md:size-[96px] lg:top-[122px] lg:bottom-auto lg:left-[max(1rem,calc(50%-600px))] lg:h-[137px] lg:w-[129px]">
+      {/* 2026.07.24 정슬기 - [수정] margin 토큰 유틸(left-margin-*) 사용 */}
+      <div className="rounded-16 md:rounded-20 left-margin-mobile md:left-margin-tablet absolute bottom-0 size-[86px] overflow-hidden md:size-[96px] lg:top-[122px] lg:bottom-auto lg:left-[max(1rem,calc(50%-600px))] lg:h-[137px] lg:w-[129px]">
         <div className="relative size-full">
           {imageUrl ? (
             <Image

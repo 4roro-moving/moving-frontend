@@ -181,12 +181,18 @@
   --spacing-31: 1.9375rem;
   --spacing-32: 2rem;
   --spacing-36: 2.25rem;
+  --spacing-38: 2.375rem;
   --spacing-40: 2.5rem;
+  --spacing-44: 2.75rem;
   --spacing-48: 3rem;
+  --spacing-50: 3.125rem;
   --spacing-57: 3.5625rem;
+  --spacing-60: 3.75rem;
   --spacing-64: 4rem;
   --spacing-72: 4.5rem;
   --spacing-80: 5rem;
+  --spacing-90: 5.625rem;
+  --spacing-120: 7.5rem;
   --spacing-160: 10rem;
 
   /* Layout - GNB, Tab, PageHeader 컴포넌트 height */
@@ -227,8 +233,6 @@
   --container-desktop-narrow: 70rem;
 
   /* Layout - Auth */
-  --container-desktop: 75rem;
-  --container-desktop-narrow: 70rem;
   --auth-container-radius: 2.5rem;
   --auth-container-width-tablet: 40rem;
   --auth-container-width-desktop: 46.25rem;
@@ -240,4 +244,11 @@
   /* Tailwind spacing aliases - px-margin-mobile, mt-margin-tablet 등으로 사용 가능 */
   --spacing-margin-mobile: var(--margin-mobile);
   --spacing-margin-tablet: var(--margin-tablet);
+  --spacing-tab-padding-x-desktop: var(--tab-padding-x-desktop);
+  --spacing-page-header-padding-x-desktop: var(--page-header-padding-x-desktop);
+  --spacing-gnb-padding-x-desktop: var(--gnb-padding-x-desktop);
+
+  /* Tailwind max-width aliases - max-w-container-desktop 등으로 사용 가능 */
+  --max-width-container-desktop: var(--container-desktop);
+  --max-width-container-desktop-narrow: var(--container-desktop-narrow);
 }

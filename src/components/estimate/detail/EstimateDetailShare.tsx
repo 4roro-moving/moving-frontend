@@ -44,13 +44,14 @@ export default function EstimateDetailShare() {
 
   return (
     <section className="flex w-full flex-col gap-12 md:gap-22" aria-label="견적서 공유하기">
-      <Text
-        as="h2"
-        variant="lg-semibold"
-        className="text-text-secondary md:text-[length:var(--font-size-20)] md:leading-[var(--line-height-32)]"
-      >
-        견적서 공유하기
-      </Text>
+      <h2 className="text-text-secondary">
+        <Text as="span" variant="lg-semibold" className="md:hidden">
+          견적서 공유하기
+        </Text>
+        <Text as="span" variant="xl-semibold" className="hidden md:inline">
+          견적서 공유하기
+        </Text>
+      </h2>
 
       <div className="flex items-start gap-10 md:gap-16">
         <button

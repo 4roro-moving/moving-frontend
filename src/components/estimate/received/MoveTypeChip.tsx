@@ -33,7 +33,8 @@ export function DesignatedChip({ className }: DesignatedChipProps) {
   return (
     <span
       className={cn(
-        "rounded-6 flex items-center justify-center gap-4 bg-[var(--color-red-100)] py-4 pr-8 pl-6 shadow-[4px_4px_4px_0_rgba(217,217,217,0.1)]",
+        // 2026.07.24 정슬기 - [수정] 지정 견적 칩 배경을 red-100 토큰 유틸로 교체
+        "rounded-6 flex items-center justify-center gap-4 bg-red-100 py-4 pr-8 pl-6 shadow-[4px_4px_4px_0_rgba(217,217,217,0.1)]",
         className,
       )}
     >
