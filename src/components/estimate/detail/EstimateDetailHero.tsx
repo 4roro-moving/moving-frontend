@@ -21,15 +21,16 @@ export default function EstimateDetailHero({ imageUrl, name }: EstimateDetailHer
 
       {/* 2026.07.24 정슬기 - [수정] margin 토큰 유틸(left-margin-*) 사용 */}
       {/* 2026.07.25 정슬기 - [수정] Desktop 아바타 x=359 (Figma 8091:47378), 129×137, r20, top=122 */}
-      {/* Tablet 96px = size-24. page-header 토큰과 의미 분리 */}
-      <div className="rounded-16 md:rounded-20 left-margin-mobile md:left-margin-tablet absolute bottom-0 size-21.5 overflow-hidden md:size-24 lg:top-30.5 lg:bottom-auto lg:left-[max(1rem,calc(50%-601px))] lg:h-34.25 lg:w-32.25">
+      {/* 2026.07.26 정슬기 - [수정] Tablet 프로필 Figma 100×100·r12 (1:9171 / 1:11975) — size-25 */}
+      {/* 프로필은 Figma처럼 둥근 네모(원형 X). 기본 아이콘도 사각 배경으로 맞춤 */}
+      <div className="bg-background-avatar rounded-16 md:rounded-12 left-margin-mobile md:left-margin-tablet lg:rounded-20 absolute bottom-0 size-21.5 overflow-hidden md:size-25 lg:top-30.5 lg:bottom-auto lg:left-[max(1rem,calc(50%-601px))] lg:h-34.25 lg:w-32.25">
         <div className="relative size-full">
           {imageUrl ? (
             <Image
               src={imageUrl}
               alt={`${name} 기사님 프로필`}
               fill
-              sizes="(max-width: 768px) 86px, (max-width: 1024px) 96px, 129px"
+              sizes="(max-width: 768px) 86px, (max-width: 1024px) 100px, 129px"
               className="object-cover"
             />
           ) : (

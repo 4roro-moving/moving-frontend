@@ -182,6 +182,8 @@
   /* 2026.07.25 정슬기 - [추가] Figma 인증배지 정렬 h23 / chip row h34 */
   --spacing-23: 1.4375rem;
   --spacing-24: 1.5rem;
+  /* 2026.07.26 정슬기 - [추가] Figma 견적 상세 Tablet 프로필 100×100 */
+  --spacing-25: 6.25rem;
   --spacing-26: 1.625rem;
   --spacing-28: 1.75rem;
   --spacing-30: 1.875rem;
