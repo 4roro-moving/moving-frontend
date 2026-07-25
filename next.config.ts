@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
-
-import { svgrOptions } from "./svgr.options";
+import { svgrColorOptions, svgrOptions } from "./svgr.options";
 
 const nextConfig: NextConfig = {
   images: {
@@ -13,6 +12,15 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     rules: {
+      "**/icons/color/*.svg": {
+        loaders: [
+          {
+            loader: "@svgr/webpack",
+            options: svgrColorOptions,
+          },
+        ],
+        as: "*.js",
+      },
       "*.svg": {
         loaders: [
           {
