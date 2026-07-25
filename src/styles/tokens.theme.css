@@ -165,35 +165,61 @@
   /* Spacing */
   --spacing-2: 0.125rem;
   --spacing-4: 0.25rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Chip padding pl5/pr7 */
+  --spacing-5: 0.3125rem;
   --spacing-6: 0.375rem;
+  --spacing-7: 0.4375rem;
   --spacing-8: 0.5rem;
   --spacing-10: 0.625rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Button CTA gap 11px */
+  --spacing-11: 0.6875rem;
   --spacing-12: 0.75rem;
   --spacing-14: 0.875rem;
   --spacing-16: 1rem;
   --spacing-18: 1.125rem;
   --spacing-20: 1.25rem;
   --spacing-22: 1.375rem;
+  /* 2026.07.25 정슬기 - [추가] Figma 인증배지 정렬 h23 / chip row h34 */
+  --spacing-23: 1.4375rem;
   --spacing-24: 1.5rem;
   --spacing-26: 1.625rem;
   --spacing-28: 1.75rem;
   --spacing-30: 1.875rem;
   --spacing-31: 1.9375rem;
   --spacing-32: 2rem;
+  /* 2026.07.25 정슬기 - [추가] Figma chip row height 34 */
+  --spacing-34: 2.125rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Mobile cards top offset 35 */
+  --spacing-35: 2.1875rem;
   --spacing-36: 2.25rem;
   --spacing-38: 2.375rem;
   --spacing-40: 2.5rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Tablet cards top offset 42 */
+  --spacing-42: 2.625rem;
   --spacing-44: 2.75rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Mobile price row h47 */
+  --spacing-47: 2.9375rem;
   --spacing-48: 3rem;
   --spacing-50: 3.125rem;
+  /* 2026.07.25 정슬기 - [추가] Figma card price row h52 / Button CTA h54 */
+  --spacing-52: 3.25rem;
+  --spacing-54: 3.375rem;
   --spacing-57: 3.5625rem;
   --spacing-60: 3.75rem;
   --spacing-64: 4rem;
   --spacing-72: 4.5rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Desktop cards top offset 78 */
+  --spacing-78: 4.875rem;
   --spacing-80: 5rem;
   --spacing-90: 5.625rem;
   --spacing-120: 7.5rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Desktop sub-header height 124 / Tablet 202 */
+  --spacing-124: 7.75rem;
+  --spacing-202: 12.625rem;
   --spacing-160: 10rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Empty illustration 200 / 280 */
+  --spacing-200: 12.5rem;
+  --spacing-280: 17.5rem;
 
   /* Layout - GNB, Tab, PageHeader 컴포넌트 height */
   --gnb-height-mobile: 3.375rem;
@@ -231,6 +257,10 @@
   /* Layout - container */
   --container-desktop: 75rem;
   --container-desktop-narrow: 70rem;
+  /* 2026.07.25 정슬기 - [추가] Figma 대기 중 견적 Desktop 1140 / Tablet 600 / Mobile 327 */
+  --container-pending-desktop: 71.25rem;
+  --container-pending-tablet: 37.5rem;
+  --container-pending-mobile: 20.4375rem;
 
   /* Layout - Auth */
   --auth-container-radius: 2.5rem;
@@ -251,4 +281,11 @@
   /* Tailwind max-width aliases - max-w-container-desktop 등으로 사용 가능 */
   --max-width-container-desktop: var(--container-desktop);
   --max-width-container-desktop-narrow: var(--container-desktop-narrow);
+  --max-width-container-pending-desktop: var(--container-pending-desktop);
+  --max-width-container-pending-tablet: var(--container-pending-tablet);
+  --max-width-container-pending-mobile: var(--container-pending-mobile);
+
+  /* Tailwind spacing aliases - sub-header desktop padding */
+  --spacing-sub-header-padding-left-desktop: var(--sub-header-padding-left-desktop);
+  --spacing-sub-header-padding-right-desktop: var(--sub-header-padding-right-desktop);
 }

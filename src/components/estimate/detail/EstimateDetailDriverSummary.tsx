@@ -35,6 +35,7 @@ export default function EstimateDetailDriverSummary({
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
 
   return (
+    // 2026.07.25 정슬기 - [수정] Desktop driver-summary: gap 20, badge gap 12, 하단 divider(Figma)
     <section className="flex w-full flex-col gap-16 md:gap-20" aria-label="기사 정보">
       <div className="flex w-full flex-col gap-12">
         <div className="flex flex-wrap items-center gap-8 md:gap-12">
@@ -51,18 +52,18 @@ export default function EstimateDetailDriverSummary({
           )}
         </div>
 
-        <div className="flex w-full items-start justify-between gap-12">
+        <div className="flex w-full items-center justify-between gap-12">
           <Text
             as="p"
             variant="2lg-semibold"
-            className="text-text-secondary min-w-0 break-words md:hidden"
+            className="text-text-secondary min-w-0 wrap-break-word md:hidden"
           >
             {intro}
           </Text>
           <Text
             as="p"
             variant="2xl-semibold"
-            className="text-text-secondary hidden min-w-0 break-words md:block"
+            className="text-text-secondary hidden min-w-0 wrap-break-word md:block"
           >
             {intro}
           </Text>
@@ -82,8 +83,8 @@ export default function EstimateDetailDriverSummary({
       <div className="border-border-subtle w-full border-t" aria-hidden="true" />
 
       <div className="flex w-full flex-col gap-8">
-        <div className="flex w-full items-start justify-between gap-8">
-          <Text as="p" variant="2lg-semibold" className="text-text-primary min-w-0 break-words">
+        <div className="flex w-full items-center justify-between gap-8">
+          <Text as="p" variant="2lg-semibold" className="text-text-primary min-w-0 wrap-break-word">
             {displayName} 기사님
           </Text>
           <button
@@ -118,7 +119,7 @@ export default function EstimateDetailDriverSummary({
               <Text as="span" variant="md-medium" className="text-text-secondary">
                 {formatRating(mover.averageRating)}
               </Text>
-              <Text as="span" variant="md-medium" className="text-text-weak">
+              <Text as="span" variant="md-medium" className="text-rating-count">
                 ({mover.reviewCount})
               </Text>
             </div>
@@ -147,6 +148,8 @@ export default function EstimateDetailDriverSummary({
           </div>
         </div>
       </div>
+
+      <div className="border-border-subtle w-full border-t" aria-hidden="true" />
     </section>
   );
 }

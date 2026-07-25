@@ -1,14 +1,39 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 import { addFavoriteMover, removeFavoriteMover } from "@/lib/api/favorites";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
-import type { EstimateDetail, EstimateMoverSummary, ReceivedEstimatePanel } from "@/types/estimate";
+import type {
+  EstimateDetail,
+  EstimateMoverSummary,
+  PendingEstimateSectionListResult,
+  ReceivedEstimatePanel,
+} from "@/types/estimate";
+
+const LOGIN_REQUIRED_MESSAGE = "로그인이 필요한 서비스입니다.";
+
+/** 토스트가 잠깐 보이도록 로그인 이동 전 대기 (ms) */
+const LOGIN_REDIRECT_DELAY_MS = 600;
 
 interface UseFavoriteMoverOptions {
   onError?: (message: string) => void;
+}
+
+interface FavoriteMoverVariables {
+  moverId: string;
+  isFavorite: boolean;
+}
+
+interface FavoriteMutationContext {
+  previousReceived: ReceivedEstimatePanel[] | undefined;
+  previousDetails: [readonly unknown[], EstimateDetail | undefined][];
+  previousPendingLists: [readonly unknown[], PendingEstimateSectionListResult | undefined][];
+  previousPendingDetails: [readonly unknown[], EstimateDetail | undefined][];
 }
 
 function patchMoverFavorite<T extends EstimateMoverSummary>(
@@ -31,31 +56,59 @@ function patchMoverFavorite<T extends EstimateMoverSummary>(
 
 // 2026.07.24 정슬기 - [추가] 찜 API 연동 후 받은 견적 목록·상세 캐시 갱신
 // 2026.07.24 정슬기 - [수정] 낙관적 업데이트 롤백을 previous 캐시가 undefined여도 복원하도록 교정
+// 2026.07.25 정슬기 - [수정] 비로그인 시 토스트 후 로그인 페이지 이동, API/낙관적 업데이트 미수행
+// 2026.07.26 정슬기 - [수정] pending MY_LIST·PENDING_DETAIL 캐시도 동일하게 낙관적 갱신/무효화
 export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const onErrorRef = useRef(options?.onError);
+  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  return useMutation({
-    mutationFn: async ({ moverId, isFavorite }: { moverId: string; isFavorite: boolean }) => {
+  useEffect(() => {
+    onErrorRef.current = options?.onError;
+  }, [options?.onError]);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current !== null) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const mutation = useMutation({
+    mutationFn: async ({ moverId, isFavorite }: FavoriteMoverVariables) => {
       if (isFavorite) {
         return removeFavoriteMover(moverId);
       }
       return addFavoriteMover(moverId);
     },
-    onMutate: async ({ moverId, isFavorite }) => {
+    onMutate: async ({ moverId, isFavorite }): Promise<FavoriteMutationContext> => {
       const nextIsFavorite = !isFavorite;
 
+      // 진행 중 refetch가 낙관적 패치를 덮어쓰지 않도록 관련 쿼리 취소
       await Promise.all([
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
+        queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
+        queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
       ]);
 
+      // 롤백용 스냅샷 (received + pending)
       const previousReceived = queryClient.getQueryData<ReceivedEstimatePanel[]>(
         QUERY_KEYS.ESTIMATES.RECEIVED,
       );
       const previousDetails = queryClient.getQueriesData<EstimateDetail>({
         queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT,
       });
+      const previousPendingLists = queryClient.getQueriesData<PendingEstimateSectionListResult>({
+        queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST,
+      });
+      const previousPendingDetails = queryClient.getQueriesData<EstimateDetail>({
+        queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT,
+      });
 
+      // 받은 견적 목록
       queryClient.setQueryData<ReceivedEstimatePanel[]>(QUERY_KEYS.ESTIMATES.RECEIVED, (panels) => {
         if (!panels) {
           return panels;
@@ -70,6 +123,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         }));
       });
 
+      // 받은 견적 상세들
       queryClient.setQueriesData<EstimateDetail>(
         { queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT },
         (detail) => {
@@ -84,24 +138,107 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         },
       );
 
-      return { previousReceived, previousDetails };
+      // 대기 중 견적 목록 (query 파라미터가 붙어도 MY_LIST prefix로 매칭)
+      queryClient.setQueriesData<PendingEstimateSectionListResult>(
+        { queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST },
+        (list) => {
+          if (!list) {
+            return list;
+          }
+
+          return {
+            ...list,
+            sections: list.sections.map((section) => ({
+              ...section,
+              estimates: section.estimates.map((estimate) => ({
+                ...estimate,
+                mover: patchMoverFavorite(estimate.mover, moverId, nextIsFavorite),
+              })),
+            })),
+          };
+        },
+      );
+
+      // 대기 견적 상세들
+      queryClient.setQueriesData<EstimateDetail>(
+        { queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT },
+        (detail) => {
+          if (!detail) {
+            return detail;
+          }
+
+          return {
+            ...detail,
+            mover: patchMoverFavorite(detail.mover, moverId, nextIsFavorite),
+          };
+        },
+      );
+
+      return {
+        previousReceived,
+        previousDetails,
+        previousPendingLists,
+        previousPendingDetails,
+      };
     },
     onError: (error, _variables, context) => {
+      // 실패 시 낙관적 패치 전부 롤백
       if (context) {
         queryClient.setQueryData(QUERY_KEYS.ESTIMATES.RECEIVED, context.previousReceived);
         context.previousDetails.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
         });
+        context.previousPendingLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+        context.previousPendingDetails.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
       }
 
-      options?.onError?.(getApiErrorMessage(error));
+      onErrorRef.current?.(getApiErrorMessage(error));
     },
     onSuccess: async () => {
-      // 2026.07.24 정슬기 - [수정] 찜 API는 estimateId가 없으므로 상세 키 invalidate로 동기화
+      // 서버 상태와 동기화 (낙관적 UI 이후 최종 정합)
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
       ]);
     },
   });
+
+  const redirectToLogin = () => {
+    onErrorRef.current?.(LOGIN_REQUIRED_MESSAGE);
+
+    if (redirectTimeoutRef.current !== null) {
+      clearTimeout(redirectTimeoutRef.current);
+    }
+
+    redirectTimeoutRef.current = setTimeout(() => {
+      redirectTimeoutRef.current = null;
+      router.push(getLoginRedirectPath());
+    }, LOGIN_REDIRECT_DELAY_MS);
+  };
+
+  const mutate: typeof mutation.mutate = (variables, mutateOptions) => {
+    if (!hasAuthSession()) {
+      redirectToLogin();
+      return;
+    }
+
+    mutation.mutate(variables, mutateOptions);
+  };
+
+  const mutateAsync: typeof mutation.mutateAsync = (variables, mutateOptions) => {
+    if (!hasAuthSession()) {
+      redirectToLogin();
+      return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
+    }
+
+    return mutation.mutateAsync(variables, mutateOptions);
+  };
+
+  return { ...mutation, mutate, mutateAsync };
 }

@@ -5,8 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Text } from "@/components/common/Text";
-import { cn } from "@/lib/utils/cn";
 import { AlarmIcon } from "@/icons";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { cn } from "@/lib/utils/cn";
 
 export interface HeaderProps {
   /** TODO: auth 연동 전 임시 prop. 추후 대체 */
@@ -72,7 +73,7 @@ const Header = ({ isLogin = false }: HeaderProps) => {
           </div>
         ) : (
           <Link
-            href="/login"
+            href={APP_ROUTES.LOGIN}
             className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 flex h-40 items-center px-20 transition-colors"
           >
             <Text variant="md-semibold">로그인</Text>

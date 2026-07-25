@@ -4,8 +4,9 @@ import { forwardRef, ReactNode, type ButtonHTMLAttributes } from "react";
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
+// 2026.07.25 정슬기 - [수정] size별 height/radius를 분리하고 Figma Button/*/CTA(h54,r12)용 cta 추가
 const buttonVariants = cva(
-  "inline-flex h-57 p-16 items-center justify-center gap-4 rounded-16 transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
+  "inline-flex items-center justify-center gap-4 transition-colors disabled:cursor-not-allowed disabled:bg-background-disabled disabled:text-text-disabled",
   {
     variants: {
       variant: {
@@ -14,14 +15,26 @@ const buttonVariants = cva(
           "border border-1 border-border-brand bg-background-surface text-text-brand hover:bg-background-brand-muted",
       },
       size: {
-        sm: "min-w-[300px]",
-        md: "min-w-[600px]",
+        sm: "h-57 min-w-[300px] rounded-16 p-16",
+        md: "h-57 min-w-[600px] rounded-16 p-16",
+        // Figma: Button/solid|outlined/CTA (대기 견적 카드)
+        cta: "h-54 min-w-0 rounded-12 p-16",
+        // Figma: 대기 견적 상세 Desktop sidebar CTA (320×64, r16, 18 semibold)
+        detail: "h-64 min-w-0 w-full rounded-16 p-16",
       },
       fullWidth: {
         true: "w-full",
         false: "",
       },
     },
+    compoundVariants: [
+      // Figma outlined/CTA: px24 py16 + soft shadow
+      {
+        variant: "outline",
+        size: "cta",
+        class: "px-24 py-16 shadow-[4px_4px_10px_0_rgba(195,217,242,0.2)]",
+      },
+    ],
     defaultVariants: {
       variant: "solid",
       size: "md",
@@ -33,6 +46,8 @@ const buttonVariants = cva(
 const buttonTextVariant = {
   sm: "lg-semibold",
   md: "2lg-semibold",
+  cta: "lg-semibold",
+  detail: "2lg-semibold",
 } as const;
 
 export interface ButtonProps
@@ -61,4 +76,5 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   );
 });
 
+export { buttonVariants };
 export default Button;

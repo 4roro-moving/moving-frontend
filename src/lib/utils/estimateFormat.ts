@@ -46,6 +46,15 @@ export function formatRequestDateLabel(value: string | Date): string {
   return `${yy}. ${mm}. ${dd}.`;
 }
 
+/**
+ * 대기 중 견적 sub-header용 신청일 표기 (예: 2024년 6월 24일)
+ * // 2026.07.25 정슬기 - [추가] Figma 대기 목록 요청일 포맷
+ */
+export function formatKoreanDateLong(value: string | Date): string {
+  const date = toDisplayDate(value);
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+}
+
 export function formatMoveDateLabel(value: string | Date): string {
   // moveDate: YYYY-MM-DD 또는 API/mock ISO datetime → parseDateOnly가 날짜 prefix로 정규화
   const date = parseDateOnly(value);

@@ -73,7 +73,7 @@ export async function createEstimateRequest(
   payload: CreateEstimateRequestPayload,
 ): Promise<CreateEstimateRequestResponse> {
   const { data } = await axiosInstance.post<CreateEstimateRequestResponse>(
-    API_ROUTES.ESTIMATE_REQUESTS,
+    API_ROUTES.ESTIMATE_REQUESTS.ROOT,
     payload,
   );
 
