@@ -1,4 +1,5 @@
-export type MoveType = "SMALL" | "HOME" | "OFFICE";
+import type { MoveType } from "@/types/move";
+
 export type RequestSort = "moveDate" | "requestedAt";
 
 export type MoverEstimateRequest = {

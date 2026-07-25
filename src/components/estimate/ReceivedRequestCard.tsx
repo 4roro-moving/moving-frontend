@@ -2,13 +2,8 @@ import Image from "next/image";
 
 import { Text } from "@/components/common/Text";
 import { formatKoreanDateTime } from "@/lib/utils/date";
-import type { MoveType, MoverEstimateRequest } from "@/types/moverEstimateRequest";
-
-const MOVE_TYPE_LABEL: Record<MoveType, string> = {
-  SMALL: "소형이사",
-  HOME: "가정이사",
-  OFFICE: "사무실이사",
-};
+import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
+import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
 
 function formatElapsedTime(date: string) {
   const minutes = Math.max(1, Math.floor((Date.now() - new Date(date).getTime()) / 60000));

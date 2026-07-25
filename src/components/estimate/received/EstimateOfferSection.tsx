@@ -5,7 +5,8 @@ import { useMemo, useState } from "react";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import { isConfirmedEstimate, isPendingEstimate } from "@/lib/utils/estimateFormat";
-import type { EstimateOfferFilter, MoveType, ReceivedEstimateListItem } from "@/types/estimate";
+import type { EstimateOfferFilter, ReceivedEstimateListItem } from "@/types/estimate";
+import type { MoveType } from "@/types/move";
 
 import EstimateOfferCard from "./EstimateOfferCard";
 

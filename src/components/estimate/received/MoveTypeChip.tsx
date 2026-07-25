@@ -2,7 +2,7 @@ import { Text } from "@/components/common/Text";
 import { BoxIcon, DocumentIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import { getMoveTypeLabel } from "@/lib/utils/estimateFormat";
-import type { MoveType } from "@/types/estimate";
+import type { MoveType } from "@/types/move";
 
 type ChipSize = "sm" | "md";
 

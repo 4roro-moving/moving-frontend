@@ -1,11 +1,7 @@
 import { parseDateOnly } from "@/lib/utils/date";
-import type { EstimateStatus, MoveType } from "@/types/estimate";
-
-const MOVE_TYPE_LABEL: Record<MoveType, string> = {
-  SMALL: "소형이사",
-  HOME: "가정이사",
-  OFFICE: "사무실이사",
-};
+import type { EstimateStatus } from "@/types/estimate";
+import type { MoveType } from "@/types/move";
+import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
 
 const WEEKDAY_LABEL = ["일", "월", "화", "수", "목", "금", "토"] as const;
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
