@@ -1,5 +1,5 @@
 import { Text } from "@/components/common/Text";
-import { BoxIcon, DocumentIcon } from "@/icons";
+import { BoxIcon, DocumentIcon, HomeIcon, CompanyIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import { getMoveTypeLabel } from "@/lib/utils/estimateFormat";
 import type { MoveType } from "@/types/move";
@@ -9,13 +9,18 @@ type ChipSize = "sm" | "md";
 interface MoveTypeChipProps {
   moveType: MoveType;
   className?: string;
-  /** Figma Chip size — default md (받은 견적·Tablet/Desktop). sm = Mobile pending */
   size?: ChipSize;
 }
 
-// 2026.07.25 정슬기 - [수정] Figma Chip sm/md size 지원 (default md — 기존 호출부 유지)
+const MOVE_TYPE_ICON = {
+  SMALL: BoxIcon,
+  HOME: HomeIcon,
+  OFFICE: CompanyIcon,
+};
+
 export default function MoveTypeChip({ moveType, className, size = "md" }: MoveTypeChipProps) {
   const isSm = size === "sm";
+  const Icon = MOVE_TYPE_ICON[moveType];
 
   return (
     <span
@@ -25,7 +30,7 @@ export default function MoveTypeChip({ moveType, className, size = "md" }: MoveT
         className,
       )}
     >
-      <BoxIcon className="text-icon-brand size-20 shrink-0" aria-hidden="true" />
+      <Icon className="text-icon-brand size-20 shrink-0" />
       <Text as="span" variant={isSm ? "sm-semibold" : "md-semibold"} className="text-text-brand">
         {getMoveTypeLabel(moveType)}
       </Text>
@@ -50,8 +55,8 @@ export function DesignatedChip({ className, size = "md" }: DesignatedChipProps) 
         className,
       )}
     >
-      <DocumentIcon className="text-text-error size-20 shrink-0" aria-hidden="true" />
-      <Text as="span" variant={isSm ? "sm-semibold" : "md-semibold"} className="text-text-error">
+      <DocumentIcon className="size-20 shrink-0 text-red-200" />
+      <Text as="span" variant={isSm ? "sm-semibold" : "md-semibold"} className="text-red-200">
         지정 견적 요청
       </Text>
     </span>
