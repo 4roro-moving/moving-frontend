@@ -18,7 +18,7 @@ const MOVE_TYPE_ICON = {
   OFFICE: CompanyIcon,
 };
 
-export default function MoveTypeChip({ moveType, className, size = "md" }: MoveTypeChipProps) {
+export function MoveTypeChip({ moveType, className, size = "md" }: MoveTypeChipProps) {
   const isSm = size === "sm";
   const Icon = MOVE_TYPE_ICON[moveType];
 

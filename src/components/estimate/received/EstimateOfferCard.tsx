@@ -11,7 +11,7 @@ import { formatPrice, formatRating } from "@/lib/utils/estimateFormat";
 import type { ReceivedEstimateListItem } from "@/types/estimate";
 import type { MoveType } from "@/types/move";
 
-import MoveTypeChip, { DesignatedChip } from "./MoveTypeChip";
+import { MoveTypeChip, DesignatedChip } from "./MoveTypeChip";
 
 interface EstimateOfferCardProps {
   offer: ReceivedEstimateListItem;
