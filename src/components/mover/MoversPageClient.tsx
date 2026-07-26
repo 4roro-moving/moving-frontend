@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import Pagination from "@/components/common/Pagination/Pagination";
+import { PageHeader } from "@/components/common/PageHeader";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
@@ -101,12 +102,8 @@ export function MoversPageClient() {
 
   return (
     <div className="bg-background-default flex w-full flex-col">
-      <div className="bg-background-default shadow-[0px_2px_10px_0px_rgba(248,248,248,0.1)]">
-        <div className="h-page-header-height-mobile px-margin-mobile min-[744px]:h-page-header-height-tablet lg:h-page-header-height-desktop mx-auto flex w-full max-w-[var(--container-desktop)] items-center min-[744px]:px-72 lg:px-0">
-          <Text as="h1" variant="2xl-semibold" className="text-text-primary">
-            기사님 찾기
-          </Text>
-        </div>
+      <div className="hidden lg:block">
+        <PageHeader title="기사님 찾기" />
       </div>
 
       <div className="px-margin-mobile mx-auto flex w-full max-w-[var(--container-desktop)] flex-col gap-40 pt-24 pb-80 min-[744px]:px-72 lg:flex-row lg:items-start lg:justify-between lg:gap-0 lg:px-0 lg:pt-0 lg:pb-[165px]">
@@ -121,7 +118,7 @@ export function MoversPageClient() {
               onChange={(event) => handleKeywordChange(event.target.value)}
               placeholder="텍스트를 입력해 주세요."
               aria-label="기사님 검색"
-              className="h-52 w-full gap-8 px-16 min-[744px]:h-64 min-[744px]:px-24"
+              className="h-[52px] w-full gap-8 px-16 min-[744px]:h-64 min-[744px]:px-24"
             />
           </div>
 
@@ -211,7 +208,7 @@ export function MoversPageClient() {
         </section>
 
         <aside
-          className="flex w-full flex-col gap-16 lg:w-[327px] lg:shrink-0 lg:self-stretch lg:pt-[192px]"
+          className="flex hidden w-full flex-col gap-16 lg:block lg:w-[327px] lg:shrink-0 lg:self-stretch lg:pt-[192px]"
           aria-label="찜한 기사님"
         >
           <Text as="h2" variant="xl-semibold" className="text-text-secondary">
