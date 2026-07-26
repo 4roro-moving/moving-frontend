@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { Text } from "@/components/common/Text";
+import { Text, type TextVariantProp } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useListboxKeyboardNav } from "@/hooks/useListboxKeyboardNav";
 import { cn } from "@/lib/utils/cn";
@@ -28,6 +28,10 @@ interface SelectContextValue {
 
 const SelectContext = createContext<SelectContextValue | null>(null);
 
+/**
+ * Figma dropdown size=sm → 모바일/태블릿(기본)
+ * Figma dropdown size=md → 데스크톱(lg:)
+ */
 const selectVariants = cva("relative", {
   variants: {
     size: {
@@ -48,17 +52,31 @@ const selectTriggerVariants = cva(
     variants: {
       variant: {
         default: [
-          "rounded-12 h-48 border px-12 py-16",
+          "rounded-8 gap-6 border py-6 pr-10 pl-14",
           "border-border-default bg-background-surface",
           "disabled:bg-background-disabled",
+          "lg:rounded-12 lg:h-[50px] lg:gap-0 lg:py-16 lg:pr-12 lg:pl-20",
         ],
         /** 정렬: 테두리·그림자 없이 텍스트 + 아이콘 */
-        sort: "gap-10 rounded-8 h-auto border-0 bg-transparent px-10 py-8 shadow-none",
+        sort: [
+          "gap-2 rounded-8 border-0 bg-transparent py-6 pr-6 pl-8 shadow-none",
+          "lg:gap-10 lg:px-10 lg:py-8",
+        ],
       },
     },
     defaultVariants: { variant: "default" },
   },
 );
+
+function getTriggerTextVariant(variant: SelectVariant, isOpen: boolean): TextVariantProp {
+  if (variant === "sort") {
+    return isOpen
+      ? { base: "xs-medium", lg: "md-medium" }
+      : { base: "xs-semibold", lg: "md-semibold" };
+  }
+
+  return { base: "md-medium", lg: "lg-medium" };
+}
 
 export interface SelectMainProps extends VariantProps<typeof selectVariants> {
   children: ReactNode;
@@ -70,7 +88,7 @@ export interface SelectMainProps extends VariantProps<typeof selectVariants> {
    * (예: 전체 선택 시 "지역"/"서비스" 유지)
    */
   placeholderValue?: string;
-  /** default: 카드형 / sort: 테두리·그림자 없음 + md-semibold */
+  /** default: 카드형 / sort: 테두리·그림자 없음 */
   variant?: SelectVariant;
   /** 옵션이 많을 때 다열 드롭다운 (예: 지역 2열) */
   columns?: 1 | 2;
@@ -134,18 +152,15 @@ const SelectMain = ({
   const triggerLabel =
     placeholderValue !== undefined && selected === placeholderValue ? desc : selectedLabel || desc;
 
-  const isLargeSize = size !== "sm";
   const isMultiColumn = columns > 1;
   const defaultShadowClass =
     variant === "default"
       ? isOpen
-        ? isLargeSize
-          ? "shadow-select-lg-open"
-          : "shadow-select-open"
-        : isLargeSize
-          ? "shadow-select-lg"
-          : "shadow-select"
+        ? "shadow-select-open lg:shadow-select-lg-open"
+        : "shadow-select lg:shadow-select-lg"
       : undefined;
+
+  const chevronClassName = variant === "sort" ? "size-20" : "size-20 lg:size-36";
 
   return (
     <SelectContext.Provider value={{ selected, handleChange, variant, columns }}>
@@ -172,15 +187,11 @@ const SelectMain = ({
             onClick={() => setIsOpen((prev) => !prev)}
             onKeyDown={handleTriggerKeyDown}
           >
-            <Text
-              variant={variant === "sort" ? (isOpen ? "md-medium" : "md-semibold") : "md-regular"}
-            >
-              {triggerLabel}
-            </Text>
+            <Text variant={getTriggerTextVariant(variant, isOpen)}>{triggerLabel}</Text>
             {isOpen ? (
-              <ChevronUpIcon className={variant === "sort" ? "size-20" : "size-24"} />
+              <ChevronUpIcon className={chevronClassName} />
             ) : (
-              <ChevronDownIcon className={variant === "sort" ? "size-20" : "size-24"} />
+              <ChevronDownIcon className={chevronClassName} />
             )}
           </button>
 
@@ -193,14 +204,14 @@ const SelectMain = ({
               className={cn(
                 "bg-background-surface absolute z-50 my-4",
                 variant === "sort" &&
-                  "rounded-8 border-border-subtle flex w-[114px] min-w-[114px] flex-col items-start border",
+                  "rounded-8 border-border-subtle flex w-[91px] min-w-[91px] flex-col items-start border lg:w-[114px] lg:min-w-[114px]",
                 variant === "default" &&
                   !isMultiColumn &&
-                  "rounded-12 border-border-default shadow-select flex w-full min-w-[128px] flex-col items-start border",
+                  "rounded-8 border-border-default shadow-select lg:rounded-12 flex w-full min-w-[106px] flex-col items-start border lg:min-w-[160px]",
                 variant === "default" &&
                   isMultiColumn &&
-                  // 옵션 셀 164px × 2열, 보이는 행 5개(64px) 기준
-                  "rounded-16 border-border-default shadow-select grid max-h-[320px] w-[328px] grid-cols-2 overflow-y-auto border",
+                  // sm: 75×36 × 2열 / md: 164×64 × 2열, 보이는 행 5개
+                  "rounded-8 border-border-default shadow-select lg:rounded-16 grid max-h-[180px] w-[150px] grid-cols-2 overflow-y-auto border lg:max-h-[320px] lg:w-[328px]",
               )}
             >
               {children}
