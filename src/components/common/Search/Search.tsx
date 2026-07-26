@@ -3,6 +3,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { forwardRef, type ComponentPropsWithoutRef } from "react";
 
+import { getTextVariantClass } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 import { SearchIcon } from "@/components/estimate/icons";
 
@@ -11,8 +12,8 @@ const searchVariants = cva(
   {
     variants: {
       size: {
-        sm: "w-[260px] text-sm leading-6",
-        md: "w-[560px] text-lg leading-6",
+        sm: "w-[260px]",
+        md: "w-[560px]",
       },
     },
     defaultVariants: { size: "md" },
@@ -37,7 +38,10 @@ const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
         ref={ref}
         type="text"
         placeholder={placeholder}
-        className="placeholder:text-text-placeholder w-full bg-transparent focus:outline-none"
+        className={cn(
+          getTextVariantClass({ base: "md-regular", md: "2lg-regular" }),
+          "placeholder:text-text-placeholder w-full bg-transparent focus:outline-none",
+        )}
         {...props}
       />
     </div>

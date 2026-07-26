@@ -101,7 +101,8 @@ function prefixBreakpointClasses(classNames: string, breakpoint: "md" | "lg") {
     .join(" ");
 }
 
-function resolveTextVariantClass(variant: TextVariantProp | undefined) {
+/** Text / input 등에서 Figma Text Style 클래스를 재사용할 때 사용 */
+export function getTextVariantClass(variant: TextVariantProp | undefined) {
   if (!variant) {
     return textVariants({ variant: "md-regular" });
   }
@@ -149,7 +150,7 @@ export function Text<T extends ElementType = "p">({
   const Component = as ?? "span";
 
   return (
-    <Component className={cn(resolveTextVariantClass(variant), className)} {...props}>
+    <Component className={cn(getTextVariantClass(variant), className)} {...props}>
       {children}
     </Component>
   );
