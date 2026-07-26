@@ -161,7 +161,8 @@ const SelectMain = ({
       : undefined;
 
   const chevronClassName = cn(
-    variant === "sort" ? "text-icon-muted size-20" : "text-icon-default size-20 lg:size-36",
+    variant === "sort" ? "size-20 text-icon-muted" : "size-20 lg:size-36",
+    variant === "default" && (isOpen ? "text-icon-brand" : "text-icon-default"),
   );
 
   return (
