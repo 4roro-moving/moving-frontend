@@ -17,7 +17,7 @@ export default function PendingEstimateRequestHeader({
 }: PendingEstimateRequestHeaderProps) {
   return (
     <section
-      className="bg-background-default flex w-full flex-col shadow-[0px_8px_10px_0_rgba(39,39,75,0.02)]"
+      className="bg-background-default shadow-sub-header flex w-full flex-col"
       aria-label="견적 요청 요약"
     >
       <div className="px-margin-mobile md:px-margin-tablet lg:px-sub-header-padding-left-desktop lg:pr-sub-header-padding-right-desktop py-24 md:flex md:min-h-202 md:flex-col md:justify-center md:py-0 lg:flex lg:min-h-124 lg:items-center lg:py-0">

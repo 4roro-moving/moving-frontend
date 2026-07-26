@@ -95,7 +95,13 @@ export default function EstimateOfferCard({
             >
               <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
                 {mover.imageUrl ? (
-                  <Image src={mover.imageUrl} alt="" fill sizes="50px" className="object-cover" />
+                  <Image
+                    src={mover.imageUrl}
+                    alt={`${displayName} 기사님 프로필`}
+                    fill
+                    sizes="50px"
+                    className="object-cover"
+                  />
                 ) : (
                   <ProfileDefaultIcon className="size-full" aria-hidden="true" />
                 )}

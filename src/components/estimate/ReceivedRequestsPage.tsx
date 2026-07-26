@@ -56,7 +56,7 @@ export default function ReceivedRequestsPage() {
         <section className="flex flex-col gap-24">
           <form
             onSubmit={submitSearch}
-            className="bg-background-muted mx-10 flex h-[52px] w-[calc(100%-20px)] items-center gap-8 rounded-2xl px-16 lg:mx-0 lg:h-64 lg:w-full lg:px-24"
+            className="bg-background-muted mx-10 flex h-[52px] w-[calc(100%_-_20px)] items-center gap-8 rounded-2xl px-16 lg:mx-0 lg:h-64 lg:w-full lg:px-24"
           >
             <Image
               src="/icons/search.svg"

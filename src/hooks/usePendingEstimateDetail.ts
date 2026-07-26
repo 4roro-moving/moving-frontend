@@ -27,7 +27,7 @@ interface UseConfirmPendingEstimateOptions {
 
 /**
  * 대기 목록 카드용 mock 확정
- * 목록 캐시(MY_LIST)만 invalidate 합니다.
+ * MY_LIST와 해당 PENDING_DETAIL 캐시를 invalidate 합니다.
  * // 2026.07.26 정슬기 - [추가] PendingEstimateCard 인라인 mutation을 훅으로 분리
  */
 export function useConfirmPendingEstimate(

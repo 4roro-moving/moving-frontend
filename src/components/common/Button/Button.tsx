@@ -32,7 +32,7 @@ const buttonVariants = cva(
       {
         variant: "outline",
         size: "cta",
-        class: "px-24 py-16 shadow-[4px_4px_10px_0_rgba(195,217,242,0.2)]",
+        class: "px-24 py-16 shadow-cta",
       },
     ],
     defaultVariants: {
@@ -59,13 +59,23 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { variant, size, fullWidth, type = "button", className, rightIcon, children, ...props },
   ref,
 ) {
+  // 2026.07.26 정슬기 - [수정] null이면 cva defaultVariants를 타지 않으므로 resolved*로 통일
+  const resolvedVariant = variant ?? "solid";
   const resolvedSize = size ?? "md";
+  const resolvedFullWidth = fullWidth ?? false;
 
   return (
     <button
       ref={ref}
       type={type}
-      className={cn(buttonVariants({ variant, size, fullWidth }), className)}
+      className={cn(
+        buttonVariants({
+          variant: resolvedVariant,
+          size: resolvedSize,
+          fullWidth: resolvedFullWidth,
+        }),
+        className,
+      )}
       {...props}
     >
       <Text as="span" variant={buttonTextVariant[resolvedSize]}>

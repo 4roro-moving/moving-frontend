@@ -111,6 +111,12 @@
 
   --shadow-input: 0 4px 4px -1px rgba(249, 80, 46, 0.2);
   --shadow-select: 4px 4px 10px 0px rgba(224, 224, 224, 0.25);
+  /* 2026.07.26 정슬기 - [추가] Figma 대기 견적 sub-header shadow */
+  --shadow-sub-header: 0px 8px 10px 0 rgba(39, 39, 75, 0.02);
+  /* 2026.07.26 정슬기 - [추가] Button outlined/CTA · 견적 카드 shadow */
+  --shadow-cta: 4px 4px 10px 0 rgba(195, 217, 242, 0.2);
+  --shadow-estimate-card:
+    -2px -2px 10px 0 rgba(220, 220, 220, 0.2), 2px 2px 10px 0 rgba(220, 220, 220, 0.2);
 
   /* Typography */
   --font-family-base: "Pretendard", sans-serif;

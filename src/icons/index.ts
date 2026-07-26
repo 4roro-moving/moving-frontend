@@ -24,17 +24,3 @@ export { default as StarIcon } from "./star.svg";
 export { default as VisibilityIcon } from "./visibility.svg";
 export { default as VisibilityOffIcon } from "./visibility_off.svg";
 export { default as WriteIcon } from "./write.svg";
-
-/*
-import { CloseIcon, ChevronDownIcon } from "@/icons";
-
-export default function Home() {
-  return (
-    <div>
-      <button className="group">
-        <CloseIcon className="text-icon-default group-hover:text-icon-strong size-24 transition-colors duration-200 ease-out" />
-      </button>
-    </div>
-  );
-}
-*/

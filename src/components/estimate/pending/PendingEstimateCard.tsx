@@ -58,7 +58,7 @@ export default function PendingEstimateCard({
     <article
       className={cn(
         // Figma: border 0.5 / radius 20 / shadow / sm: gap28 px20 py24 / lg: gap40 px40 py32
-        "bg-background-surface border-border-subtle rounded-20 flex w-full flex-col gap-28 border-[0.5px] px-20 py-24 shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.2),2px_2px_10px_0_rgba(220,220,220,0.2)]",
+        "bg-background-surface border-border-subtle shadow-estimate-card rounded-20 flex w-full flex-col gap-28 border-[0.5px] px-20 py-24",
         "md:gap-40 md:px-40 md:py-32",
       )}
     >
@@ -105,7 +105,13 @@ export default function PendingEstimateCard({
             <div className="border-border-muted flex w-full items-center gap-8 border-b pt-12 pb-20">
               <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
                 {mover.imageUrl ? (
-                  <Image src={mover.imageUrl} alt="" fill sizes="50px" className="object-cover" />
+                  <Image
+                    src={mover.imageUrl}
+                    alt={`${displayName} 기사님 프로필`}
+                    fill
+                    sizes="50px"
+                    className="object-cover"
+                  />
                 ) : (
                   <ProfileDefaultIcon className="size-full" aria-hidden="true" />
                 )}
@@ -206,7 +212,7 @@ export default function PendingEstimateCard({
       </div>
 
       {/* Mobile: 세로·확정 우선 / Tablet·Desktop: 가로 1:1 gap-11 (Figma Button CTA) */}
-      {/* 상세: 기존 /estimates/[estimateId] 재사용 — received·detail 코드 미수정 */}
+      {/* 상세: /estimates/pending/[estimateId] */}
       <div className="flex w-full flex-col-reverse gap-11 md:flex-row">
         <Link
           href={`/estimates/pending/${offer.id}`}
