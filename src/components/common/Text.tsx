@@ -2,6 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { type ComponentPropsWithoutRef, type ElementType, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils/cn";
+
 const textVariants = cva("tracking-[var(--letter-spacing-0)]", {
   variants: {
     variant: {
@@ -67,29 +68,77 @@ const textVariants = cva("tracking-[var(--letter-spacing-0)]", {
   },
 });
 
+export type TextVariant = NonNullable<VariantProps<typeof textVariants>["variant"]>;
+
+/** 모바일(base) / 태블릿(md) / 데스크톱(lg)별 Text Style */
+export interface ResponsiveTextVariant {
+  base: TextVariant;
+  md?: TextVariant;
+  lg?: TextVariant;
+}
+
+export type TextVariantProp = TextVariant | ResponsiveTextVariant;
+
 type TextOwnProps<T extends ElementType> = {
   as?: T;
   children: ReactNode;
   className?: string;
-} & VariantProps<typeof textVariants>;
+  variant?: TextVariantProp;
+};
 
 type TextProps<T extends ElementType> = TextOwnProps<T> &
   Omit<ComponentPropsWithoutRef<T>, keyof TextOwnProps<T>>;
+
+function isResponsiveTextVariant(variant: TextVariantProp): variant is ResponsiveTextVariant {
+  return typeof variant === "object" && variant !== null && "base" in variant;
+}
+
+function prefixBreakpointClasses(classNames: string, breakpoint: "md" | "lg") {
+  return classNames
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((className) => `${breakpoint}:${className}`)
+    .join(" ");
+}
+
+function resolveTextVariantClass(variant: TextVariantProp | undefined) {
+  if (!variant) {
+    return textVariants({ variant: "md-regular" });
+  }
+
+  if (!isResponsiveTextVariant(variant)) {
+    return textVariants({ variant });
+  }
+
+  return cn(
+    textVariants({ variant: variant.base }),
+    variant.md && prefixBreakpointClasses(textVariants({ variant: variant.md }), "md"),
+    variant.lg && prefixBreakpointClasses(textVariants({ variant: variant.lg }), "lg"),
+  );
+}
 
 /**
  * Figma Text Style을 코드에서 재사용하기 위한 공통 텍스트 컴포넌트
  *
  * - `variant`는 Figma의 Text Style 이름(Text/Lg/Semibold 등)에 대응합니다.
+ * - 반응형이 필요하면 `{ base, md?, lg? }` 객체를 넘깁니다.
  * - 색상은 포함하지 않고, 전역 기본 텍스트 색 또는 semantic color className으로 제어합니다.
  * - `as` prop으로 p, span, h1, strong, label 등 의미에 맞는 HTML 태그를 선택할 수 있습니다.
- * - 디자인 시스템에 정의되지 않은 size/weight 조합을 막기 위해 자유 조합 대신 variant 방식을 사용합니다.
  *
  * Example:
  * <Text as="span" variant="md-medium" className="text-text-muted">
  *   전체 결과 8건
  * </Text>
+ *
+ *  화면 사이즈에 따라 Text Style이 달라져야 할 경우
+ * <Text
+ *   as="h1"
+ *   variant={{ base: "2lg-semibold", lg: "2xl-semibold" }}
+ *   className="text-text-primary"
+ * >
+ *   기사님 찾기
+ * </Text>
  */
-
 export function Text<T extends ElementType = "p">({
   as,
   variant,
@@ -100,7 +149,7 @@ export function Text<T extends ElementType = "p">({
   const Component = as ?? "span";
 
   return (
-    <Component className={cn(textVariants({ variant }), className)} {...props}>
+    <Component className={cn(resolveTextVariantClass(variant), className)} {...props}>
       {children}
     </Component>
   );
