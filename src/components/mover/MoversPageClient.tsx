@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import Pagination from "@/components/common/Pagination/Pagination";
 import { PageHeader } from "@/components/common/PageHeader";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
@@ -68,7 +67,6 @@ export function MoversPageClient() {
   const [filterKey, setFilterKey] = useState(0);
 
   const movers = filterAndSortMovers(keyword, service, sort);
-  const pageCount = Math.max(1, Math.ceil(movers.length / PAGE_SIZE));
   const pagedMovers = movers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   function handleReset() {
@@ -122,16 +120,16 @@ export function MoversPageClient() {
             />
           </div>
 
-          <div className="flex flex-col gap-16 min-[744px]:flex-row min-[744px]:items-center min-[744px]:justify-between">
-            <div className="flex flex-wrap items-center gap-24">
-              <div className="flex flex-wrap items-center gap-12">
-                <div className="w-[160px]">
+          <div className="flex w-full flex-nowrap items-center justify-between gap-8">
+            <div className="flex min-w-0 flex-nowrap items-center gap-24">
+              <div className="flex flex-nowrap items-center gap-12">
+                <div className="w-fit shrink-0 lg:w-[160px]">
                   <Select
                     key={`region-${filterKey}`}
                     desc="지역"
                     size="lg"
                     columns={2}
-                    className="w-full"
+                    className="w-fit lg:w-full"
                     defaultValue={region}
                     placeholderValue={ALL_OPTION.value}
                     onChange={handleRegionChange}
@@ -143,12 +141,12 @@ export function MoversPageClient() {
                     ))}
                   </Select>
                 </div>
-                <div className="w-[160px]">
+                <div className="w-fit shrink-0 lg:w-[160px]">
                   <Select
                     key={`service-${filterKey}`}
                     desc="서비스"
                     size="lg"
-                    className="w-full"
+                    className="w-fit lg:w-full"
                     defaultValue={service}
                     placeholderValue={ALL_OPTION.value}
                     onChange={handleServiceChange}
@@ -164,21 +162,20 @@ export function MoversPageClient() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-text-weak hover:text-text-muted transition-colors"
+                className="text-text-weak hover:text-text-muted shrink-0 transition-colors"
               >
-                <Text as="span" variant="lg-medium">
+                <Text as="span" variant={{ base: "md-medium", lg: "lg-medium" }}>
                   초기화
                 </Text>
               </button>
             </div>
 
-            <div className="w-[114px]">
+            <div className="w-fit shrink-0">
               <Select
                 key={`sort-${filterKey}`}
                 desc="정렬"
-                size="lg"
                 variant="sort"
-                className="w-full"
+                className="w-fit"
                 defaultValue={sort}
                 onChange={handleSortChange}
               >
@@ -198,19 +195,9 @@ export function MoversPageClient() {
               </li>
             ))}
           </ul>
-
-          <Pagination
-            currentPage={currentPage}
-            pageCount={pageCount}
-            onPageChange={setCurrentPage}
-            className="flex justify-center"
-          />
         </section>
 
-        <aside
-          className="flex hidden w-full flex-col gap-16 lg:block lg:w-[327px] lg:shrink-0 lg:self-stretch lg:pt-[192px]"
-          aria-label="찜한 기사님"
-        >
+        <aside className="hidden w-full flex-col gap-16 lg:flex lg:w-[327px] lg:shrink-0 lg:self-stretch lg:pt-[192px]">
           <Text as="h2" variant="xl-semibold" className="text-text-secondary">
             찜한 기사님
           </Text>
