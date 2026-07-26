@@ -13,8 +13,10 @@ interface SelectOptionProps {
 }
 
 const SelectOption = ({ children, value }: SelectOptionProps) => {
-  const { selected, handleChange } = useSelectContext();
+  const { selected, handleChange, variant, columns } = useSelectContext();
   const isSelected = selected === value;
+  const isSort = variant === "sort";
+  const isMultiColumn = columns > 1;
 
   return (
     <button
@@ -22,13 +24,21 @@ const SelectOption = ({ children, value }: SelectOptionProps) => {
       role="option"
       aria-selected={isSelected}
       className={cn(
-        "hover:bg-background-hover text-text-secondary shadow-card w-full px-16 py-20 text-left whitespace-nowrap",
-        "first:rounded-t-12 last:rounded-b-12",
+        "hover:bg-background-hover w-full text-left whitespace-nowrap",
+        isSort && "first:rounded-t-8 last:rounded-b-8 px-12 py-8",
+        !isSort &&
+          !isMultiColumn &&
+          "text-text-secondary first:rounded-t-12 last:rounded-b-12 px-16 py-20",
+        isMultiColumn &&
+          "border-border-default h-64 border-r px-24 py-16 even:border-r-0 [&:nth-last-child(-n+2)]:border-b-0",
         isSelected && "bg-background-hover",
       )}
       onClick={() => handleChange(value)}
     >
-      <Text variant="lg-regular" className="text-text-primary">
+      <Text
+        variant={isSort ? "md-medium" : isMultiColumn ? "2lg-medium" : "lg-medium"}
+        className="text-text-secondary"
+      >
         {children}
       </Text>
     </button>
