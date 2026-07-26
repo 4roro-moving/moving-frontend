@@ -44,7 +44,7 @@ const selectVariants = cva("relative", {
 
 const selectTriggerVariants = cva(
   [
-    "flex w-full items-center justify-between transition-colors",
+    "flex w-fit items-center justify-between whitespace-nowrap transition-colors lg:w-full",
     "text-text-secondary",
     "disabled:cursor-not-allowed disabled:text-text-disabled",
   ],
@@ -59,8 +59,8 @@ const selectTriggerVariants = cva(
         ],
         /** 정렬: 테두리·그림자 없이 텍스트 + 아이콘 */
         sort: [
-          "gap-2 rounded-8 border-0 bg-transparent py-6 pr-6 pl-8 shadow-none",
-          "lg:gap-10 lg:px-10 lg:py-8",
+          "gap-2 rounded-8 border-0 bg-transparent py-6 pr-0 pl-8 shadow-none",
+          "lg:gap-10 lg:py-8 lg:pr-0 lg:pl-10",
         ],
       },
     },
@@ -160,7 +160,9 @@ const SelectMain = ({
         : "shadow-select lg:shadow-select-lg"
       : undefined;
 
-  const chevronClassName = variant === "sort" ? "size-20" : "size-20 lg:size-36";
+  const chevronClassName = cn(
+    variant === "sort" ? "text-icon-muted size-20" : "text-icon-default size-20 lg:size-36",
+  );
 
   return (
     <SelectContext.Provider value={{ selected, handleChange, variant, columns }}>
