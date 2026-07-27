@@ -152,16 +152,6 @@ const SelectMain = ({
   const triggerLabel =
     placeholderValue !== undefined && selected === placeholderValue ? desc : selectedLabel || desc;
 
-  const triggerAriaLabel = (() => {
-    if (typeof desc !== "string") {
-      return undefined;
-    }
-    if (typeof triggerLabel === "string" && triggerLabel !== desc) {
-      return `${desc}, ${triggerLabel}`;
-    }
-    return desc;
-  })();
-
   const isMultiColumn = columns > 1;
   const defaultShadowClass =
     variant === "default"
@@ -187,7 +177,7 @@ const SelectMain = ({
             aria-expanded={isOpen}
             aria-controls={listboxId}
             aria-invalid={!!error}
-            aria-label={triggerAriaLabel}
+            aria-label={typeof desc === "string" ? desc : undefined}
             disabled={disabled}
             className={cn(
               selectTriggerVariants({ variant }),
