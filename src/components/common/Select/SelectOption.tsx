@@ -43,7 +43,7 @@ const SelectOption = ({ children, value }: SelectOptionProps) => {
           !isMultiColumn &&
           "first:rounded-t-8 last:rounded-b-8 lg:first:rounded-t-12 lg:last:rounded-b-12 h-40 px-14 lg:h-60 lg:py-16 lg:pr-12 lg:pl-20",
         isMultiColumn &&
-          "border-border-default h-36 border-r px-14 even:border-r-0 lg:h-64 lg:px-24 lg:py-16 [&:nth-last-child(-n+2)]:border-b-0",
+          "border-border-default h-36 border-r px-14 even:border-r-0 lg:h-64 lg:px-24 lg:py-16",
         isSelected && "bg-background-hover",
       )}
       onClick={() => handleChange(value)}
