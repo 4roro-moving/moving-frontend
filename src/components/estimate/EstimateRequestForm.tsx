@@ -35,6 +35,7 @@ const TOAST_EXISTING_REQUEST_MESSAGE =
   "견적 요청에 실패하였습니다. 기존 견적이 있는지 확인해주세요.";
 const TOAST_INVALID_ZIP_MESSAGE = "우편번호 정보가 올바르지 않습니다. 주소를 다시 선택해주세요.";
 const TOAST_LOGIN_FAILURE_MESSAGE = "로그인에 실패하였습니다. 잠시 후 다시 시도해주세요.";
+const ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE = "고객님의 견적 정보를 불러오지 못했습니다.";
 
 const MOVE_TYPES = [
   {
@@ -203,10 +204,15 @@ export default function EstimateRequestForm() {
     };
   }, []);
 
-  const { data: activeRequest, isLoading: isActiveLoading } = useQuery({
+  const {
+    data: activeRequest,
+    isLoading: isActiveLoading,
+    isError: isActiveError,
+  } = useQuery({
     queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE,
     queryFn: getActiveEstimateRequest,
     enabled: authReady && Boolean(getAccessToken()),
+    retry: 1,
   });
 
   const createMutation = useMutation({
@@ -287,11 +293,31 @@ export default function EstimateRequestForm() {
     );
   }
 
+  if (isActiveError) {
+    return (
+      <>
+        <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+        <ActiveEstimateBlocked description={ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE} />
+      </>
+    );
+  }
+
   if (activeRequest) {
     return (
       <>
         <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
-        <ActiveEstimateBlocked />
+        <ActiveEstimateBlocked
+          imageSrc="/images/empty/moving-car.png"
+          description={
+            <>
+              현재 진행 중인 이사 견적이 있어요!
+              <br />
+              진행 중인 이사 완료 후 새로운 견적을 받아보세요.
+            </>
+          }
+          buttonLabel="받은 견적 보러가기"
+          href="/estimates"
+        />
       </>
     );
   }
