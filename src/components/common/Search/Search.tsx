@@ -8,7 +8,10 @@ import { cn } from "@/lib/utils/cn";
 import { SearchIcon } from "@/components/estimate/icons";
 
 const searchVariants = cva(
-  "flex items-center gap-10 rounded-16 p-14 bg-background-muted text-text-primary transition-colors focus-within:border-border-brand",
+  [
+    "flex items-center gap-10 rounded-16 border border-transparent bg-background-muted p-14 text-text-primary",
+    "transition-[border-color,box-shadow] focus-within:border-border-brand focus-within:shadow-input",
+  ],
   {
     variants: {
       size: {
@@ -40,7 +43,7 @@ const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
         placeholder={placeholder}
         className={cn(
           getTextVariantClass({ base: "md-regular", md: "2lg-regular" }),
-          "placeholder:text-text-placeholder w-full bg-transparent focus:outline-none",
+          "placeholder:text-text-placeholder w-full bg-transparent outline-none",
         )}
         {...props}
       />
