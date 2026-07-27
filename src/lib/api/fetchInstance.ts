@@ -125,12 +125,19 @@ const getRefreshPromise = (): Promise<void> => {
   return refreshPromise;
 };
 
-// fetch 요청 함수
-const request = async <T>(
+/** 일반 성공 응답 + 목록(pagination 포함) 성공 응답 */
+type SuccessBody<T> = ApiSuccessResponse<T> | PaginatedApiSuccessResponse<T>;
+
+/**
+ * 공통 fetch 함수 (인증·에러 처리 포함)
+ * 성공 시 body 전체 반환, 실패 시 401이면 refresh 후 1회 재시도, 아니면 ApiError throw
+ * 기존 request는 body.data만 반환해 pagination이 유실됨 → unwrap 전 단계로 분리
+ */
+const requestBody = async <T>(
   endpoint: string,
   options: RequestInit = {},
   retry = true,
-): Promise<T> => {
+): Promise<SuccessBody<T> | null> => {
   const isFormData = options.body instanceof FormData;
   const headers = await getRequestHeaders(options.headers, isFormData);
 
@@ -142,24 +149,37 @@ const request = async <T>(
   });
 
   if (res.status === 204) {
-    return null as T;
+    return null;
   }
 
   const body = (await res.json().catch(() => ({}))) as
-    ApiSuccessResponse<T> | ApiErrorResponse | Record<string, never>;
+    SuccessBody<T> | ApiErrorResponse | Record<string, never>;
 
   if (!res.ok || body.success === false) {
     const shouldRefresh = retry && res.status === 401 && !NO_REFRESH_ENDPOINTS.includes(endpoint);
 
     if (shouldRefresh) {
       await getRefreshPromise();
-      return request<T>(endpoint, options, false);
+      return requestBody<T>(endpoint, options, false);
     }
 
     throw setApiError(res.status, body);
   }
 
-  return (body as ApiSuccessResponse<T>).data;
+  return body as SuccessBody<T>;
+};
+
+/** 기존 request 역할: requestBody에서 data만 꺼내 get/post/patch/delete에 전달 */
+const request = async <T>(
+  endpoint: string,
+  options: RequestInit = {},
+  retry = true,
+): Promise<T> => {
+  const body = await requestBody<T>(endpoint, options, retry);
+  if (body === null) {
+    return null as T;
+  }
+  return body.data;
 };
 
 /** data + pagination 응답을 그대로 반환합니다. */
@@ -226,6 +246,21 @@ const fetchInstance = {
 
   delete: <TResponse>(endpoint: string, options?: RequestInit) =>
     request<TResponse>(endpoint, { ...options, method: "DELETE" }),
+
+  /**
+   * 목록 API용 GET — requestBody를 직접 사용해 { data, pagination }을 유지
+   * (get → request 경로를 타면 data만 남아 pagination이 유실)
+   */
+  getPaginated: async <TData>(
+    endpoint: string,
+    options?: RequestInit,
+  ): Promise<{ data: TData; pagination: Pagination }> => {
+    const body = await requestBody<TData>(endpoint, { ...options, method: "GET" });
+    if (body === null || !("pagination" in body) || body.pagination === undefined) {
+      throw new ApiError("페이지네이션 응답이 올바르지 않습니다.");
+    }
+    return { data: body.data, pagination: body.pagination };
+  },
 };
 
 export default fetchInstance;
