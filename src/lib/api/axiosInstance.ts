@@ -3,7 +3,13 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { clearAuthTokens, getAccessToken, setAccessToken } from "@/lib/auth/token";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
-import { clearDevAuthTokens, getDevAccessToken, isDevAuthEnabled } from "@/lib/dev-auth";
+import {
+  clearDevAuthTokens,
+  getDevAccessToken,
+  getDevRefreshToken,
+  isDevAuthEnabled,
+  setDevAuthTokens,
+} from "@/lib/dev-auth";
 
 type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -33,21 +39,43 @@ function isAuthPath(url?: string): boolean {
 
 async function refreshAccessToken(): Promise<string> {
   if (!refreshPromise) {
-    refreshPromise = axios
-      .post<{
-        success: boolean;
-        data?: { tokens?: { accessToken?: string } };
-      }>(`${API_BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {}, { withCredentials: true })
+    const refreshToken = isDevAuthEnabled() ? getDevRefreshToken() : null;
+
+    refreshPromise = (
+      refreshToken
+        ? axios.post<{
+            success: boolean;
+            data?: { tokens?: { accessToken?: string; refreshToken?: string } };
+          }>(
+            `${API_BASE_URL}${API_ROUTES.AUTH.REFRESH}`,
+            { refreshToken },
+            { withCredentials: true },
+          )
+        : Promise.reject(new Error("리프레시 토큰이 없습니다. 다시 로그인해 주세요."))
+    )
       .then((response) => {
-        const accessToken = response.data.data?.tokens?.accessToken;
+        const tokens = response.data.data?.tokens;
+        const accessToken = tokens?.accessToken;
         if (!response.data.success || !accessToken) {
           throw new Error("세션 갱신에 실패했습니다.");
         }
-        setAccessToken(accessToken);
+
+        if (isDevAuthEnabled() && refreshToken) {
+          setDevAuthTokens({
+            accessToken,
+            refreshToken: tokens.refreshToken ?? refreshToken,
+          });
+        } else {
+          setAccessToken(accessToken);
+        }
+
         return accessToken;
       })
       .catch((error) => {
         clearAuthTokens();
+        if (isDevAuthEnabled()) {
+          clearDevAuthTokens();
+        }
         throw error;
       })
       .finally(() => {

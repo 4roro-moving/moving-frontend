@@ -1,6 +1,11 @@
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { getAccessToken, setAccessToken } from "@/lib/auth/token";
-import { getDevAccessToken, isDevAuthEnabled } from "@/lib/dev-auth";
+import {
+  getDevAccessToken,
+  getDevRefreshToken,
+  isDevAuthEnabled,
+  setDevAuthTokens,
+} from "@/lib/dev-auth";
 import { ApiError, type ApiSuccessResponse, type ApiErrorResponse } from "@/types/api";
 import type { PaginatedApiSuccessResponse, Pagination } from "@/types/pagination";
 
@@ -97,22 +102,28 @@ const buildTimeoutSignal = (signal?: AbortSignal): AbortSignal => {
   return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
 };
 
-// 토큰 리프레시 요청 — 성공 시 새 accessToken을 메모리에 저장해 재시도에 사용
+// 토큰 리프레시 — 백엔드는 body.refreshToken 필수 (쿠키만으로는 VALIDATION_ERROR)
 const refreshAccessToken = async (): Promise<void> => {
-  // SSR 에서는 쿠키 헤더 추가
   const headers = await getRequestHeaders();
+
+  // development: sessionStorage의 refreshToken / 그 외: 아직 body 소스가 없으면 실패
+  const refreshToken = isDevAuthEnabled() ? getDevRefreshToken() : null;
+  if (!refreshToken) {
+    throw new ApiError("리프레시 토큰이 없습니다. 다시 로그인해 주세요.", 401, "UNAUTHORIZED");
+  }
 
   const res = await safeFetch(`${BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {
     method: "POST",
     credentials: "include",
     headers,
+    body: JSON.stringify({ refreshToken }),
     signal: buildTimeoutSignal(),
   });
 
   const body = (await res.json().catch(() => ({}))) as
     | {
         success?: boolean;
-        data?: { tokens?: { accessToken?: string } };
+        data?: { tokens?: { accessToken?: string; refreshToken?: string } };
       }
     | ApiErrorResponse
     | Record<string, never>;
@@ -121,14 +132,25 @@ const refreshAccessToken = async (): Promise<void> => {
     throw setApiError(res.status, body);
   }
 
-  const accessToken =
-    "data" in body && body.data && typeof body.data === "object"
-      ? body.data.tokens?.accessToken
-      : undefined;
+  const tokens =
+    "data" in body && body.data && typeof body.data === "object" ? body.data.tokens : undefined;
+  const accessToken = tokens?.accessToken;
+  const nextRefreshToken = tokens?.refreshToken;
 
-  if (accessToken) {
-    setAccessToken(accessToken);
+  if (!accessToken) {
+    throw new ApiError("세션 갱신에 실패했습니다.", 401, "UNAUTHORIZED");
   }
+
+  // 개발 로그인은 Bearer를 sessionStorage에서 읽으므로 둘 다 갱신 (refresh rotation 포함)
+  if (isDevAuthEnabled()) {
+    setDevAuthTokens({
+      accessToken,
+      refreshToken: nextRefreshToken ?? refreshToken,
+    });
+    return;
+  }
+
+  setAccessToken(accessToken);
 };
 
 // 401 동시 요청 제어
