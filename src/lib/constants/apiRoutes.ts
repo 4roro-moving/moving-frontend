@@ -12,6 +12,7 @@ export const API_ROUTES = {
   ESTIMATE_REQUESTS: {
     ROOT: "/estimate-requests",
     DETAIL: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
+    ACTIVE: "/estimate-requests/active",
   },
   // 2026.07.24 정슬기 - [추가] 받은 견적 목록·상세·확정 API 경로
   ESTIMATES: {

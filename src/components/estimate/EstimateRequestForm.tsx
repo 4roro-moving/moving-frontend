@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -9,6 +9,7 @@ import { login, refreshSession } from "@/lib/api/auth";
 import {
   buildCreateEstimateRequestPayload,
   createEstimateRequest,
+  getActiveEstimateRequest,
 } from "@/lib/api/estimateRequest";
 import { getApiError } from "@/lib/api/getApiError";
 import { getAccessToken } from "@/lib/auth/token";
@@ -16,6 +17,7 @@ import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
 
+import ActiveEstimateBlocked from "./ActiveEstimateBlocked";
 import AddressSelectModal, { type AddressItem } from "./AddressSelectModal";
 import Calendar from "./Calendar";
 import DatePickerField from "./DatePickerField";
@@ -33,6 +35,7 @@ const TOAST_EXISTING_REQUEST_MESSAGE =
   "견적 요청에 실패하였습니다. 기존 견적이 있는지 확인해주세요.";
 const TOAST_INVALID_ZIP_MESSAGE = "우편번호 정보가 올바르지 않습니다. 주소를 다시 선택해주세요.";
 const TOAST_LOGIN_FAILURE_MESSAGE = "로그인에 실패하였습니다. 잠시 후 다시 시도해주세요.";
+const ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE = "고객님의 견적 정보를 불러오지 못했습니다.";
 
 const MOVE_TYPES = [
   {
@@ -161,6 +164,7 @@ export default function EstimateRequestForm() {
   const [toAddress, setToAddress] = useState<AddressItem | null>(null);
   const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const canSubmit = Boolean(selectedType && fromAddress && toAddress);
@@ -175,19 +179,22 @@ export default function EstimateRequestForm() {
     let cancelled = false;
 
     async function ensureLogin() {
-      if (getAccessToken()) return;
-
       setIsLoggingIn(true);
       try {
-        try {
-          await refreshSession();
-        } catch {
-          await login(TEST_CUSTOMER);
+        if (!getAccessToken()) {
+          try {
+            await refreshSession();
+          } catch {
+            await login(TEST_CUSTOMER);
+          }
         }
       } catch {
         if (!cancelled) setToastMessage(TOAST_LOGIN_FAILURE_MESSAGE);
       } finally {
-        if (!cancelled) setIsLoggingIn(false);
+        if (!cancelled) {
+          setIsLoggingIn(false);
+          setAuthReady(true);
+        }
       }
     }
 
@@ -197,14 +204,31 @@ export default function EstimateRequestForm() {
     };
   }, []);
 
+  const {
+    data: activeRequest,
+    isLoading: isActiveLoading,
+    isError: isActiveError,
+  } = useQuery({
+    queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE,
+    queryFn: getActiveEstimateRequest,
+    enabled: authReady && Boolean(getAccessToken()),
+    retry: 1,
+  });
+
   // 2026.07.26 정슬기 - [수정] 생성 성공 시 내 견적 목록 캐시 무효화 (대기 목록이 stale하지 않도록)
   const createMutation = useMutation({
     mutationFn: createEstimateRequest,
-    onSuccess: async () => {
+    onSuccess: async (response) => {
       await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST });
       setToastMessage(TOAST_SUCCESS_MESSAGE);
+      queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, response.data ?? true);
     },
-    onError: (error) => {
+    onError: async (error) => {
+      const { code } = getApiError(error);
+      if (code === "ACTIVE_REQUEST_EXISTS") {
+        await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE });
+        return;
+      }
       setToastMessage(getCreateEstimateErrorMessage(error));
     },
   });
@@ -258,6 +282,47 @@ export default function EstimateRequestForm() {
   }
 
   const isBusy = createMutation.isPending || isLoggingIn;
+  const isCheckingActive = !authReady || isActiveLoading;
+
+  if (isCheckingActive) {
+    return (
+      <div className="flex min-h-[40vh] w-full items-center justify-center">
+        <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+        <Text as="p" variant="lg-regular" className="text-text-subtle">
+          불러오는 중...
+        </Text>
+      </div>
+    );
+  }
+
+  if (isActiveError) {
+    return (
+      <>
+        <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+        <ActiveEstimateBlocked description={ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE} />
+      </>
+    );
+  }
+
+  if (activeRequest) {
+    return (
+      <>
+        <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+        <ActiveEstimateBlocked
+          imageSrc="/images/empty/moving-car.png"
+          description={
+            <>
+              현재 진행 중인 이사 견적이 있어요!
+              <br />
+              진행 중인 이사 완료 후 새로운 견적을 받아보세요.
+            </>
+          }
+          buttonLabel="받은 견적 보러가기"
+          href="/estimates"
+        />
+      </>
+    );
+  }
 
   return (
     <div

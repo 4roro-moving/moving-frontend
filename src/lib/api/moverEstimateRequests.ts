@@ -112,7 +112,7 @@ export async function getMoverEstimateRequests(query: MoverEstimateRequestQuery)
 
   const mockUser = process.env.NEXT_PUBLIC_MOCK_USER_EMAIL;
   const response = await axiosInstance.get<MoverEstimateRequestResponse>(
-    `/api${API_ROUTES.ESTIMATES}/requests?${params.toString()}`,
+    `/api${API_ROUTES.ESTIMATES.ROOT}/requests?${params.toString()}`,
     {
       headers: mockUser ? { "x-mock-user": mockUser } : undefined,
     },
