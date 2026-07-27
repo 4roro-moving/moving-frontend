@@ -21,7 +21,7 @@ const ModalClose = ({ onClose, disabled = false }: ModalCloseProps) => {
       disabled={disabled}
       aria-label="모달 닫기"
     >
-      <CloseIcon className="size-18" aria-hidden="true" />
+      <CloseIcon className="size-18" />
     </button>
   );
 };
