@@ -22,8 +22,10 @@ import { defaultQueryRetry } from "@/lib/utils/queryDefaults";
  * @example
  * ```ts
  * useApiInfiniteQuery({
- *   queryKey: QUERY_KEYS.USERS.LIST(),
- *   queryFn: () => getUsers(), // fetchInstance 기반 함수
+ *   queryKey: [...QUERY_KEYS.ESTIMATES.ALL, query],
+ *   queryFn: ({ pageParam }) => getMoverEstimateRequests({ ...query, cursor: pageParam }),
+ *   initialPageParam: undefined as string | undefined,
+ *   getNextPageParam: (lastPage) => lastPage.pagination.nextCursor ?? undefined,
  * });
  * ```
  */
