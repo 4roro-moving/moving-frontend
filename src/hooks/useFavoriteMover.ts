@@ -26,7 +26,8 @@ interface UseFavoriteMoverOptions {
 
 interface FavoriteMoverVariables {
   moverId: string;
-  isFavorite: boolean;
+  /** 호출부가 원하는 최종 찜 상태 */
+  nextIsFavorite: boolean;
 }
 
 interface FavoriteMutationContext {
@@ -45,6 +46,11 @@ function patchMoverFavorite<T extends EstimateMoverSummary>(
     return mover;
   }
 
+  // 2026.07.27 정슬기 - [수정] 이미 목표 상태인 캐시는 count를 다시 증감하지 않음
+  if (mover.isFavorite === nextIsFavorite) {
+    return mover;
+  }
+
   const delta = nextIsFavorite ? 1 : -1;
 
   return {
@@ -54,10 +60,22 @@ function patchMoverFavorite<T extends EstimateMoverSummary>(
   };
 }
 
+async function invalidateFavoriteRelatedQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+): Promise<void> {
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
+  ]);
+}
+
 // 2026.07.24 정슬기 - [추가] 찜 API 연동 후 받은 견적 목록·상세 캐시 갱신
 // 2026.07.24 정슬기 - [수정] 낙관적 업데이트 롤백을 previous 캐시가 undefined여도 복원하도록 교정
 // 2026.07.25 정슬기 - [수정] 비로그인 시 토스트 후 로그인 페이지 이동, API/낙관적 업데이트 미수행
 // 2026.07.26 정슬기 - [수정] pending MY_LIST·PENDING_DETAIL 캐시도 동일하게 낙관적 갱신/무효화
+// 2026.07.27 정슬기 - [수정] nextIsFavorite 전달·count 가드·onSettled invalidate
 export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -77,15 +95,13 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   }, []);
 
   const mutation = useMutation({
-    mutationFn: async ({ moverId, isFavorite }: FavoriteMoverVariables) => {
-      if (isFavorite) {
-        return removeFavoriteMover(moverId);
+    mutationFn: async ({ moverId, nextIsFavorite }: FavoriteMoverVariables) => {
+      if (nextIsFavorite) {
+        return addFavoriteMover(moverId);
       }
-      return addFavoriteMover(moverId);
+      return removeFavoriteMover(moverId);
     },
-    onMutate: async ({ moverId, isFavorite }): Promise<FavoriteMutationContext> => {
-      const nextIsFavorite = !isFavorite;
-
+    onMutate: async ({ moverId, nextIsFavorite }): Promise<FavoriteMutationContext> => {
       // 진행 중 refetch가 낙관적 패치를 덮어쓰지 않도록 관련 쿼리 취소
       await Promise.all([
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
@@ -198,14 +214,9 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
 
       onErrorRef.current?.(getApiErrorMessage(error));
     },
-    onSuccess: async () => {
-      // 서버 상태와 동기화 (낙관적 UI 이후 최종 정합)
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
-      ]);
+    // 성공·실패 모두 서버 상태와 최종 동기화 (응답 유실 시 롤백 캐시와 서버 불일치 방지)
+    onSettled: async () => {
+      await invalidateFavoriteRelatedQueries(queryClient);
     },
   });
 

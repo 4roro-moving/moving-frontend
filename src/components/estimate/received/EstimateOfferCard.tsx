@@ -23,7 +23,7 @@ function EstimateStatusBadge({ status }: { status: ReceivedEstimateListItem["sta
   if (status === "CONFIRMED") {
     return (
       <span className="flex shrink-0 items-center gap-4">
-        <ConfirmedCheckIcon className="text-icon-brand size-20 shrink-0" aria-hidden="true" />
+        <ConfirmedCheckIcon className="text-icon-brand size-20 shrink-0" />
         <Text as="span" variant="lg-bold" className="text-text-brand">
           확정견적
         </Text>
@@ -103,7 +103,7 @@ export default function EstimateOfferCard({
                     className="object-cover"
                   />
                 ) : (
-                  <ProfileDefaultIcon className="size-full" aria-hidden="true" />
+                  <ProfileDefaultIcon className="size-full" />
                 )}
               </div>
 
@@ -125,13 +125,16 @@ export default function EstimateOfferCard({
 
                 <div className="flex w-full flex-wrap items-center gap-x-8 gap-y-4">
                   <div className="flex items-center gap-2">
-                    <StarIcon className="text-rating-fill size-20 shrink-0" aria-hidden="true" />
+                    <StarIcon className="text-rating-fill size-20 shrink-0" />
                     <div className="flex items-center gap-2">
                       <Text as="span" variant="sm-medium" className="text-text-secondary">
+                        <span className="sr-only">평점 </span>
                         {formatRating(mover.averageRating)}
+                        <span className="sr-only">점, 리뷰 </span>
                       </Text>
                       <Text as="span" variant="sm-medium" className="text-text-muted">
-                        ({mover.reviewCount})
+                        <span aria-hidden="true">({mover.reviewCount})</span>
+                        <span className="sr-only">{mover.reviewCount}개</span>
                       </Text>
                     </div>
                   </div>
@@ -168,15 +171,13 @@ export default function EstimateOfferCard({
             <button
               type="button"
               className="focus-visible:ring-border-brand rounded-8 flex min-h-44 min-w-44 shrink-0 items-center justify-center gap-2 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-              aria-label={
-                mover.isFavorite ? `${displayName} 기사님 찜 해제` : `${displayName} 기사님 찜하기`
-              }
+              aria-label={`${displayName} 기사님 찜, 현재 찜 ${mover.favoriteCount}개`}
               aria-pressed={mover.isFavorite}
               disabled={favoriteMutation.isPending}
               onClick={() =>
                 favoriteMutation.mutate({
                   moverId: mover.id,
-                  isFavorite: mover.isFavorite,
+                  nextIsFavorite: !mover.isFavorite,
                 })
               }
             >
@@ -188,7 +189,7 @@ export default function EstimateOfferCard({
                   mover.isFavorite ? "text-text-brand" : "text-icon-default",
                 )}
               />
-              <Text as="span" variant="md-regular" className="text-text-muted">
+              <Text as="span" variant="md-regular" className="text-text-muted" aria-hidden="true">
                 {mover.favoriteCount}
               </Text>
             </button>

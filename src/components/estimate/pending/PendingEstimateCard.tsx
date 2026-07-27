@@ -28,6 +28,7 @@ interface PendingEstimateCardProps {
 
 // 2026.07.25 정슬기 - [추가] Figma card/pending-estimate (510:43164 lg / 510:43215 sm)
 // 2026.07.26 정슬기 - [수정] 확정 mutation을 useConfirmPendingEstimate로 분리, 찜 invalidate는 훅이 담당
+// 2026.07.27 정슬기 - [수정] article 제목·찜 a11y·평점 sr-only·nextIsFavorite 반영
 export default function PendingEstimateCard({
   offer,
   moveType,
@@ -38,6 +39,7 @@ export default function PendingEstimateCard({
   const { mover, status, isDesignated, price } = offer;
   const displayName = mover.nickname || mover.name;
   const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
+  const moverTitleId = `offer-${offer.id}-mover`;
   // 찜 성공 시 MY_LIST·PENDING_DETAIL 캐시는 useFavoriteMover가 낙관적 갱신/무효화
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
   const canConfirm = isPendingEstimate(status);
@@ -56,6 +58,7 @@ export default function PendingEstimateCard({
 
   return (
     <article
+      aria-labelledby={moverTitleId}
       className={cn(
         // Figma: border 0.5 / radius 20 / shadow / sm: gap28 px20 py24 / lg: gap40 px40 py32
         "bg-background-surface border-border-subtle shadow-estimate-card rounded-20 flex w-full flex-col gap-28 border-[0.5px] px-20 py-24",
@@ -113,37 +116,34 @@ export default function PendingEstimateCard({
                     className="object-cover"
                   />
                 ) : (
-                  <ProfileDefaultIcon className="size-full" aria-hidden="true" />
+                  <ProfileDefaultIcon className="size-full" />
                 )}
               </div>
 
               <div className="flex min-w-0 flex-1 flex-col gap-4">
                 <div className="flex w-full items-center justify-between gap-8">
                   <div className="flex min-w-0 items-center gap-4">
-                    {/* Figma: 인증 배지 20×23 */}
-                    <ConfirmedCheckIcon
-                      className="text-icon-brand size-20 shrink-0"
-                      aria-hidden="true"
-                    />
-                    <Text as="p" variant="md-semibold" className="text-text-primary truncate">
+                    {/* Figma: 인증 배지 20×23 — SVGR 기본 aria-hidden 사용 */}
+                    <ConfirmedCheckIcon className="text-icon-brand size-20 shrink-0" />
+                    <Text
+                      as="h3"
+                      id={moverTitleId}
+                      variant="md-semibold"
+                      className="text-text-primary truncate"
+                    >
                       {displayName} 기사님
                     </Text>
                   </div>
                   <button
                     type="button"
                     className="focus-visible:ring-border-brand rounded-8 flex shrink-0 items-center gap-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-                    aria-label={
-                      mover.isFavorite
-                        ? `${displayName} 기사님 찜 해제`
-                        : `${displayName} 기사님 찜하기`
-                    }
+                    aria-label={`${displayName} 기사님 찜, 현재 찜 ${mover.favoriteCount}개`}
                     aria-pressed={mover.isFavorite}
                     disabled={favoriteMutation.isPending}
                     onClick={() => {
-                      // useFavoriteMover가 pending 목록/상세 캐시까지 함께 갱신
                       favoriteMutation.mutate({
                         moverId: mover.id,
-                        isFavorite: mover.isFavorite,
+                        nextIsFavorite: !mover.isFavorite,
                       });
                     }}
                   >
@@ -154,7 +154,12 @@ export default function PendingEstimateCard({
                         mover.isFavorite ? "text-text-brand" : "text-icon-default",
                       )}
                     />
-                    <Text as="span" variant="md-regular" className="text-text-muted">
+                    <Text
+                      as="span"
+                      variant="md-regular"
+                      className="text-text-muted"
+                      aria-hidden="true"
+                    >
                       {mover.favoriteCount}
                     </Text>
                   </button>
@@ -162,12 +167,15 @@ export default function PendingEstimateCard({
 
                 <div className="flex w-full flex-wrap items-center gap-x-8 gap-y-4">
                   <div className="flex items-center gap-2">
-                    <StarIcon className="text-rating-fill size-20 shrink-0" aria-hidden="true" />
+                    <StarIcon className="text-rating-fill size-20 shrink-0" />
                     <Text as="span" variant="sm-medium" className="text-text-secondary">
+                      <span className="sr-only">평점 </span>
                       {formatRating(mover.averageRating)}
+                      <span className="sr-only">점, 리뷰 </span>
                     </Text>
                     <Text as="span" variant="sm-medium" className="text-text-muted">
-                      ({mover.reviewCount})
+                      <span aria-hidden="true">({mover.reviewCount})</span>
+                      <span className="sr-only">{mover.reviewCount}개</span>
                     </Text>
                   </div>
                   <span className="bg-border-muted h-14 w-px shrink-0" aria-hidden="true" />
