@@ -5,5 +5,9 @@
  */
 export const APP_ROUTES = {
   LOGIN: "/login",
+  /** 기사님(mover) 전용 로그인 — 추후 구현 */
+  MOVER_LOGIN: "/mover/login",
+  /** 고객 이메일 회원가입 */
+  SIGN_UP: "/signup",
   DEV_LOGIN: "/dev-login",
 } as const;

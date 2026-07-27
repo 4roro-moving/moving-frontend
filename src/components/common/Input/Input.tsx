@@ -3,21 +3,36 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { forwardRef, type ChangeEvent, type ComponentPropsWithoutRef, type ReactNode } from "react";
 
-import { Text } from "@/components/common/Text";
+import { Text, getTextVariantClass, type TextVariantProp } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
+/**
+ * Figma input/text_field size
+ * - sm: Mobile (Lg/Regular 16)
+ * - md: Tablet·Desktop (Mobile에서는 sm 타이포, md:부터 2lg/Regular 18 + h64)
+ */
 const inputVariants = cva(
   "flex w-full items-center gap-8 rounded-16 border border-border-default bg-background-surface p-14 transition-colors has-[input:disabled]:bg-background-disabled",
   {
     variants: {
       size: {
-        sm: "text-[length:var(--font-size-13)] leading-[var(--line-height-22)]",
-        md: "text-[length:var(--font-size-14)] leading-[var(--line-height-24)]",
+        sm: "",
+        md: "md:h-64 md:pr-24",
       },
     },
-    defaultVariants: { size: "md" },
+    defaultVariants: { size: "sm" },
   },
 );
+
+const INPUT_TEXT_VARIANT = {
+  sm: "lg-regular",
+  md: { base: "lg-regular", md: "2lg-regular" },
+} as const satisfies Record<"sm" | "md", TextVariantProp>;
+
+const INPUT_ERROR_TEXT_VARIANT = {
+  sm: "sm-medium",
+  md: { base: "sm-medium", md: "lg-medium" },
+} as const satisfies Record<"sm" | "md", TextVariantProp>;
 
 export interface InputProps
   extends Omit<ComponentPropsWithoutRef<"input">, "size">, VariantProps<typeof inputVariants> {
@@ -34,6 +49,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   { size, error, leftSlot, rightSlot, numericOnly, className, onChange, type = "text", ...props },
   ref,
 ) {
+  const resolvedSize = size ?? "sm";
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (numericOnly) {
       const input = event.target;
@@ -56,10 +73,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   };
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className={cn("flex w-full flex-col", resolvedSize === "md" ? "gap-4 md:gap-8" : "gap-4")}>
       <div
         className={cn(
-          inputVariants({ size }),
+          inputVariants({ size: resolvedSize }),
           error
             ? "border-border-error"
             : "focus-within:shadow-input focus-within:border-border-brand",
@@ -72,14 +89,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           ref={ref}
           type={type}
           aria-invalid={!!error}
-          className="text-text-primary placeholder:text-text-placeholder disabled:text-text-disabled w-full bg-transparent focus:outline-none"
+          className={cn(
+            getTextVariantClass(INPUT_TEXT_VARIANT[resolvedSize]),
+            "text-text-primary placeholder:text-text-placeholder disabled:text-text-disabled w-full bg-transparent focus:outline-none",
+          )}
           onChange={handleChange}
           {...props}
         />
         {rightSlot}
       </div>
       {error && (
-        <Text variant="xs-regular" className="text-text-error">
+        <Text variant={INPUT_ERROR_TEXT_VARIANT[resolvedSize]} className="text-text-error">
           {error}
         </Text>
       )}

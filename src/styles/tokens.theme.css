@@ -220,6 +220,7 @@
   /* 2026.07.25 정슬기 - [추가] Figma card price row h52 / Button CTA h54 */
   --spacing-52: 3.25rem;
   --spacing-54: 3.375rem;
+  --spacing-56: 3.5rem;
   --spacing-57: 3.5625rem;
   --spacing-60: 3.75rem;
   --spacing-64: 4rem;
@@ -286,6 +287,35 @@
   --auth-container-padding-x-desktop: 3rem;
   --auth-container-padding-y-tablet: 4.25rem;
   --auth-container-padding-y-desktop: 3rem;
+  --auth-top-gap-mobile: 3.5rem;
+  --auth-bottom-gap-mobile: 3.25rem;
+  --auth-top-gap-tablet: 4.6875rem;
+  --auth-bottom-gap-tablet: 4.0625rem;
+  --auth-top-gap-desktop: 2.8125rem;
+  --auth-bottom-gap-desktop: 3.6875rem;
+  --auth-mascot-width-tablet: 15rem;
+  --auth-mascot-height-tablet: 15.375rem;
+  --auth-mascot-width-desktop: 23.875rem;
+  --auth-mascot-height-desktop: 24.5rem;
+
+  /* Tailwind aliases - Auth */
+  --radius-auth-container: var(--auth-container-radius);
+  --max-width-auth-container-tablet: var(--auth-container-width-tablet);
+  --max-width-auth-container-desktop: var(--auth-container-width-desktop);
+  --spacing-auth-container-padding-x-tablet: var(--auth-container-padding-x-tablet);
+  --spacing-auth-container-padding-x-desktop: var(--auth-container-padding-x-desktop);
+  --spacing-auth-container-padding-y-tablet: var(--auth-container-padding-y-tablet);
+  --spacing-auth-container-padding-y-desktop: var(--auth-container-padding-y-desktop);
+  --spacing-auth-top-gap-mobile: var(--auth-top-gap-mobile);
+  --spacing-auth-bottom-gap-mobile: var(--auth-bottom-gap-mobile);
+  --spacing-auth-top-gap-tablet: var(--auth-top-gap-tablet);
+  --spacing-auth-bottom-gap-tablet: var(--auth-bottom-gap-tablet);
+  --spacing-auth-top-gap-desktop: var(--auth-top-gap-desktop);
+  --spacing-auth-bottom-gap-desktop: var(--auth-bottom-gap-desktop);
+  --spacing-auth-mascot-width-tablet: var(--auth-mascot-width-tablet);
+  --spacing-auth-mascot-height-tablet: var(--auth-mascot-height-tablet);
+  --spacing-auth-mascot-width-desktop: var(--auth-mascot-width-desktop);
+  --spacing-auth-mascot-height-desktop: var(--auth-mascot-height-desktop);
 
   /* Tailwind spacing aliases - px-margin-mobile, mt-margin-tablet 등으로 사용 가능 */
   --spacing-margin-mobile: var(--margin-mobile);
