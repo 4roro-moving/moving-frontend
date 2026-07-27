@@ -105,7 +105,13 @@ export default function Modal({
     }
 
     const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
+    // 스크롤바 숨김으로 뷰포트가 넓어지며 레이아웃이 옆으로 밀리는 현상 보정
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
     document.addEventListener("keydown", handleKeyDown);
 
     requestAnimationFrame(() => {
@@ -121,6 +127,7 @@ export default function Modal({
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
       document.removeEventListener("keydown", handleKeyDown);
       previousActiveElement?.focus();
     };
@@ -158,9 +165,14 @@ export default function Modal({
             type="button"
             onClick={onClose}
             aria-label="닫기"
-            className="flex size-36 shrink-0 items-center justify-center"
+            className={cn(
+              "text-icon-subtle rounded-8 flex size-36 shrink-0 cursor-pointer items-center justify-center transition-colors",
+              "hover:bg-background-hover hover:text-icon-default",
+              "active:bg-background-hover active:text-icon-default",
+              "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+            )}
           >
-            <CloseIcon className="text-icon-subtle" />
+            <CloseIcon aria-hidden="true" />
           </button>
         </div>
 
