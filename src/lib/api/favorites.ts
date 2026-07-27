@@ -13,8 +13,11 @@ export interface FavoriteMoversListQuery {
   limit?: number;
 }
 
-/** 사이드바 등 찜 목록 기본 page size (백엔드 max 50, default 10) */
+/** 찜 목록 API 기본 page size */
 export const FAVORITE_MOVERS_PAGE_LIMIT = 10;
+
+/** PC 기사님 찾기 사이드바에 표시하는 최대 인원 */
+export const FAVORITE_MOVERS_SIDEBAR_LIMIT = 3;
 
 // 2026.07.24 정슬기 - [추가] 기사님 찜 추가/해제 API 연동
 // 2026.07.27 - [수정] axios → fetchInstance 전환 (Bearer·에러 타입 통일)
