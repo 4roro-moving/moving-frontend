@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-import { svgrOptions } from "./svgr.config";
+import { svgrOptions } from "./svgr.options";
 
 const nextConfig: NextConfig = {
   images: {
