@@ -1,5 +1,5 @@
 import type { MoveType } from "@/types/move";
-import type { MoverSort } from "@/types/mover";
+import type { MoverSort, MoversListQuery } from "@/types/mover";
 
 export const MOVERS_ALL_VALUE = "all" as const;
 
@@ -58,6 +58,17 @@ export function parseMoversSearchParams(searchParams: SearchParamsInput): Movers
       getParam(searchParams, "serviceArea")?.trim() || MOVERS_SEARCH_DEFAULTS.serviceArea,
     moveType: parseMoveType(getParam(searchParams, "moveType")?.trim()),
     sort: parseSort(getParam(searchParams, "sort")?.trim()),
+  };
+}
+
+/** 필터 → GET /movers 쿼리(페이지 제외). SSR prefetch와 useMovers가 동일 queryKey를 쓰도록 공유 */
+export function toMoversListQuery(filters: MoversSearchParamsState): Omit<MoversListQuery, "page"> {
+  return {
+    keyword: filters.keyword.trim() || undefined,
+    sort: filters.sort,
+    serviceArea: filters.serviceArea !== MOVERS_ALL_VALUE ? filters.serviceArea : undefined,
+    moveType: filters.moveType !== MOVERS_ALL_VALUE ? (filters.moveType as MoveType) : undefined,
+    limit: MOVERS_PAGE_LIMIT,
   };
 }
 

@@ -1,28 +1,19 @@
 "use client";
 
 import { getMovers } from "@/lib/api/movers";
+import { hasAuthSession } from "@/lib/auth/session";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
-import {
-  MOVERS_ALL_VALUE,
-  MOVERS_PAGE_LIMIT,
-  type MoversSearchParamsState,
-} from "@/lib/utils/moversSearchParams";
+import { toMoversListQuery, type MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
 import { useApiInfiniteQuery } from "@/hooks/queries/useApiInfiniteQuery";
-import type { MoveType } from "@/types/move";
-import type { MoversListQuery } from "@/types/mover";
+import { useIsClient } from "@/hooks/useIsClient";
 
-function toMoversListQuery(filters: MoversSearchParamsState): Omit<MoversListQuery, "page"> {
-  return {
-    keyword: filters.keyword.trim() || undefined,
-    sort: filters.sort,
-    serviceArea: filters.serviceArea !== MOVERS_ALL_VALUE ? filters.serviceArea : undefined,
-    moveType: filters.moveType !== MOVERS_ALL_VALUE ? (filters.moveType as MoveType) : undefined,
-    limit: MOVERS_PAGE_LIMIT,
-  };
-}
+const MOVERS_LIST_STALE_TIME_MS = 60 * 1000;
 
 export function useMovers(filters: MoversSearchParamsState) {
   const listQuery = toMoversListQuery(filters);
+  const isClient = useIsClient();
+  // SSR prefetch는 서버에 access token이 없어 비회원 응답일 수 있음 → 로그인 시 즉시 재검증
+  const staleTime = isClient && hasAuthSession() ? 0 : MOVERS_LIST_STALE_TIME_MS;
 
   return useApiInfiniteQuery({
     queryKey: [...QUERY_KEYS.MOVERS.LIST, listQuery],
@@ -30,5 +21,6 @@ export function useMovers(filters: MoversSearchParamsState) {
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.pagination.hasNext ? lastPage.pagination.page + 1 : undefined,
+    staleTime,
   });
 }
