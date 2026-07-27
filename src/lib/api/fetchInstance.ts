@@ -1,5 +1,6 @@
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { ApiError, type ApiSuccessResponse, type ApiErrorResponse } from "@/types/api";
+import type { PaginatedApiSuccessResponse, Pagination } from "@/types/pagination";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
 const DEFAULT_TIMEOUT_MS = 10_000;
@@ -161,10 +162,48 @@ const request = async <T>(
   return (body as ApiSuccessResponse<T>).data;
 };
 
+/** data + pagination 응답을 그대로 반환합니다. */
+const requestPaginated = async <T>(
+  endpoint: string,
+  options: RequestInit = {},
+  retry = true,
+): Promise<{ data: T; pagination: Pagination }> => {
+  const isFormData = options.body instanceof FormData;
+  const headers = await getRequestHeaders(options.headers, isFormData);
+
+  const res = await safeFetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    credentials: "include",
+    headers,
+    signal: buildTimeoutSignal(options.signal ?? undefined),
+  });
+
+  const body = (await res.json().catch(() => ({}))) as
+    PaginatedApiSuccessResponse<T> | ApiErrorResponse | Record<string, never>;
+
+  if (!res.ok || body.success === false) {
+    const shouldRefresh = retry && res.status === 401 && !NO_REFRESH_ENDPOINTS.includes(endpoint);
+
+    if (shouldRefresh) {
+      await getRefreshPromise();
+      return requestPaginated<T>(endpoint, options, false);
+    }
+
+    throw setApiError(res.status, body);
+  }
+
+  const successBody = body as PaginatedApiSuccessResponse<T>;
+  return { data: successBody.data, pagination: successBody.pagination };
+};
+
 // API 요청 함수 모음 (axios 대신 사용)
 const fetchInstance = {
   get: <TResponse>(endpoint: string, options?: RequestInit) =>
     request<TResponse>(endpoint, { ...options, method: "GET" }),
+
+  /** GET 목록 API처럼 data + pagination을 함께 받을 때 사용 */
+  getPaginated: <TResponse>(endpoint: string, options?: RequestInit) =>
+    requestPaginated<TResponse>(endpoint, { ...options, method: "GET" }),
 
   post: <TResponse, TBody = unknown>(endpoint: string, body?: TBody, options?: RequestInit) =>
     request<TResponse>(endpoint, {
