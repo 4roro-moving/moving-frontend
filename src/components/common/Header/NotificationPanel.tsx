@@ -2,17 +2,15 @@
 
 import { useState } from "react";
 
+import { buildNotificationMessageParts } from "@/components/common/Header/notificationMessages";
 import { Text } from "@/components/common/Text";
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon } from "@/icons";
-import {
-  MOCK_NOTIFICATIONS,
-  NOTIFICATION_PAGE_SIZE,
-  type NotificationMockItem,
-} from "@/lib/mocks/notifications.mock";
+import { MOCK_NOTIFICATIONS, NOTIFICATION_PAGE_SIZE } from "@/lib/mocks/notifications.mock";
+import type { NotificationItem } from "@/types/notification";
 import { cn } from "@/lib/utils/cn";
 
 interface NotificationPanelProps {
-  notifications?: NotificationMockItem[];
+  notifications?: NotificationItem[];
   onClose: () => void;
   className?: string;
 }
@@ -71,6 +69,11 @@ export default function NotificationPanel({
       <ul className="flex w-full flex-col">
         {pageItems.map((notification, index) => {
           const isLast = index === pageItems.length - 1;
+          const isRead = notification.isRead;
+          const messageParts = buildNotificationMessageParts(
+            notification.type,
+            notification.content,
+          );
 
           return (
             <li
@@ -80,19 +83,25 @@ export default function NotificationPanel({
                 !isLast && "border-border-default border-b",
               )}
             >
-              <p className="text-text-secondary">
+              <p className={isRead ? "text-text-weak" : "text-text-secondary"}>
                 <Text as="span" variant="lg-medium">
-                  {notification.parts.map((part, partIndex) => (
+                  {messageParts.map((part, partIndex) => (
                     <span
                       key={`${notification.id}-${partIndex}`}
-                      className={part.highlight ? "text-text-brand" : undefined}
+                      className={cn(
+                        isRead ? "text-text-weak" : part.highlight ? "text-text-brand" : undefined,
+                      )}
                     >
                       {part.text}
                     </span>
                   ))}
                 </Text>
               </p>
-              <Text as="p" variant="md-medium" className="text-text-muted">
+              <Text
+                as="p"
+                variant="md-medium"
+                className={isRead ? "text-text-weak" : "text-text-muted"}
+              >
                 {notification.createdAtLabel}
               </Text>
             </li>

@@ -10,6 +10,7 @@ import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { AlarmIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { getUnreadNotificationCount, MOCK_NOTIFICATIONS } from "@/lib/mocks/notifications.mock";
 import { cn } from "@/lib/utils/cn";
 
 export interface HeaderProps {
@@ -30,6 +31,7 @@ const Header = ({ isLogin = false }: HeaderProps) => {
   const navLinks = isLogin ? LOGGED_IN_LINKS : LOGGED_OUT_LINKS;
   const notificationPanelId = useId();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const unreadCount = getUnreadNotificationCount(MOCK_NOTIFICATIONS);
 
   const closeNotification = useCallback(() => {
     setIsNotificationOpen(false);
@@ -87,12 +89,21 @@ const Header = ({ isLogin = false }: HeaderProps) => {
             <div ref={notificationRef} className="relative">
               <button
                 type="button"
-                aria-label="알림"
+                aria-label={unreadCount > 0 ? `알림, 읽지 않은 알림 ${unreadCount}개` : "알림"}
                 aria-expanded={isNotificationOpen}
                 aria-controls={notificationPanelId}
+                className="relative"
                 onClick={() => setIsNotificationOpen((prev) => !prev)}
               >
-                <AlarmIcon className="text-icon-default size-24" />
+                <AlarmIcon className="text-icon-default size-24" aria-hidden="true" />
+                {unreadCount > 0 ? (
+                  <span
+                    aria-hidden="true"
+                    className="bg-status-error text-text-inverse absolute -top-4 -right-6 flex h-16 min-w-16 items-center justify-center rounded-full px-4 text-[length:var(--font-size-12)] leading-none font-semibold"
+                  >
+                    {unreadCount}
+                  </span>
+                ) : null}
               </button>
               {isNotificationOpen ? (
                 <div id={notificationPanelId}>
