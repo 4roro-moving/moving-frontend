@@ -42,6 +42,7 @@ export default function EstimateDetailShare({ onToastMessage }: EstimateDetailSh
   };
 
   return (
+    // 2026.07.25 정슬기 - [수정] Desktop 공유 제목↔아이콘 gap 22, 아이콘 64·gap 16 (Figma 8091:47356)
     <section className="flex w-full flex-col gap-12 md:gap-22" aria-label="견적서 공유하기">
       <h2 className="text-text-secondary">
         <Text as="span" variant="lg-semibold" className="md:hidden">
