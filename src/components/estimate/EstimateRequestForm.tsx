@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -12,6 +12,7 @@ import {
 } from "@/lib/api/estimateRequest";
 import { getApiError } from "@/lib/api/getApiError";
 import { getAccessToken } from "@/lib/auth/token";
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
 
@@ -152,6 +153,7 @@ function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
 }
 
 export default function EstimateRequestForm() {
+  const queryClient = useQueryClient();
   const [mobileStep, setMobileStep] = useState<MobileStep>(1);
   const [selectedType, setSelectedType] = useState<MoveTypeId | null>(null);
   const [moveDate, setMoveDate] = useState<Date>(() => new Date());
@@ -195,9 +197,11 @@ export default function EstimateRequestForm() {
     };
   }, []);
 
+  // 2026.07.26 정슬기 - [수정] 생성 성공 시 내 견적 목록 캐시 무효화 (대기 목록이 stale하지 않도록)
   const createMutation = useMutation({
     mutationFn: createEstimateRequest,
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST });
       setToastMessage(TOAST_SUCCESS_MESSAGE);
     },
     onError: (error) => {
