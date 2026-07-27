@@ -3,8 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useId, useState } from "react";
 
+import NotificationPanel from "@/components/common/Header/NotificationPanel";
 import { Text } from "@/components/common/Text";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import { AlarmIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
@@ -25,6 +28,27 @@ const LOGGED_IN_LINKS = [
 const Header = ({ isLogin = false }: HeaderProps) => {
   const pathname = usePathname();
   const navLinks = isLogin ? LOGGED_IN_LINKS : LOGGED_OUT_LINKS;
+  const notificationPanelId = useId();
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  const closeNotification = useCallback(() => {
+    setIsNotificationOpen(false);
+  }, []);
+
+  const notificationRef = useClickOutside<HTMLDivElement>(closeNotification);
+
+  useEffect(() => {
+    if (!isNotificationOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeNotification();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isNotificationOpen, closeNotification]);
 
   return (
     <header className="border-border-subtle bg-background-surface w-full border-b">
@@ -60,9 +84,22 @@ const Header = ({ isLogin = false }: HeaderProps) => {
 
         {isLogin ? (
           <div className="flex items-center gap-20">
-            <button type="button" aria-label="알림">
-              <AlarmIcon className="text-icon-default size-24" />
-            </button>
+            <div ref={notificationRef} className="relative">
+              <button
+                type="button"
+                aria-label="알림"
+                aria-expanded={isNotificationOpen}
+                aria-controls={notificationPanelId}
+                onClick={() => setIsNotificationOpen((prev) => !prev)}
+              >
+                <AlarmIcon className="text-icon-default size-24" />
+              </button>
+              {isNotificationOpen ? (
+                <div id={notificationPanelId}>
+                  <NotificationPanel onClose={closeNotification} />
+                </div>
+              ) : null}
+            </div>
             <button type="button" aria-label="프로필">
               <Image src="/icons/profile-default.svg" alt="" width={36} height={36} />
             </button>
