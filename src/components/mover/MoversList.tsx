@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
+import EmptyState from "@/components/common/EmptyState/EmptyState";
 import { Text } from "@/components/common/Text";
 import MoverCard from "@/components/mover/MoverCard";
 import { useMovers } from "@/hooks/useMovers";
@@ -11,6 +12,14 @@ import type { MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
 interface MoversListProps {
   filters: MoversSearchParamsState;
 }
+
+const MOVERS_EMPTY_DESCRIPTION = (
+  <>
+    검색 결과가 없어요.
+    <br />
+    다른 검색어나 필터로 다시 찾아보세요.
+  </>
+);
 
 export function MoversList({ filters }: MoversListProps) {
   const query = useMovers(filters);
@@ -57,9 +66,11 @@ export function MoversList({ filters }: MoversListProps) {
 
   if (movers.length === 0) {
     return (
-      <Text as="p" variant="lg-medium" className="text-text-muted py-40 text-center">
-        조건에 맞는 기사님이 없습니다.
-      </Text>
+      <EmptyState
+        size="sm"
+        imageSrc="/images/empty/character.png"
+        description={MOVERS_EMPTY_DESCRIPTION}
+      />
     );
   }
 
