@@ -3,7 +3,6 @@
 import { getFavoriteMovers, FAVORITE_MOVERS_PAGE_LIMIT } from "@/lib/api/favorites";
 import { hasAuthSession } from "@/lib/auth/session";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
-import { withTempLoadingDelay } from "@/lib/utils/tempLoadingDelay";
 import { useApiQuery } from "@/hooks/queries/useApiQuery";
 
 interface UseFavoriteMoversOptions {
@@ -20,7 +19,7 @@ export function useFavoriteMovers(options: UseFavoriteMoversOptions = {}) {
 
   return useApiQuery({
     queryKey: [...QUERY_KEYS.FAVORITES.MOVERS, { page, limit }],
-    queryFn: () => withTempLoadingDelay(getFavoriteMovers({ page, limit })),
+    queryFn: () => getFavoriteMovers({ page, limit }),
     enabled,
   });
 }

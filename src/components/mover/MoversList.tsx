@@ -6,6 +6,7 @@ import EmptyState from "@/components/common/EmptyState/EmptyState";
 import Toast from "@/components/common/Toast/Toast";
 import { Text } from "@/components/common/Text";
 import MoverCard from "@/components/mover/MoverCard";
+import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
 import { useMovers } from "@/hooks/useMovers";
 import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import type { MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
@@ -21,6 +22,11 @@ const MOVERS_EMPTY_DESCRIPTION = (
     다른 검색어나 필터로 다시 찾아보세요.
   </>
 );
+
+/** 초기 로딩 스켈레톤 카드 수 */
+const MOVERS_LIST_SKELETON_COUNT = 3;
+/** 다음 페이지 fetch 중 하단 스켈레톤 카드 수 */
+const MOVERS_NEXT_PAGE_SKELETON_COUNT = 2;
 
 export function MoversList({ filters }: MoversListProps) {
   const query = useMovers(filters);
@@ -52,9 +58,11 @@ export function MoversList({ filters }: MoversListProps) {
 
   if (query.isPending) {
     return (
-      <Text as="p" variant="lg-medium" className="text-text-muted py-40 text-center">
-        기사님 목록을 불러오는 중...
-      </Text>
+      <MoverCardSkeletonList
+        variant="full"
+        count={MOVERS_LIST_SKELETON_COUNT}
+        label="기사님 목록을 불러오는 중"
+      />
     );
   }
 
@@ -89,9 +97,11 @@ export function MoversList({ filters }: MoversListProps) {
       <div ref={sentinelRef} className="h-1 w-full" aria-hidden="true" />
 
       {query.isFetchingNextPage ? (
-        <Text as="p" variant="md-medium" className="text-text-muted text-center">
-          더 불러오는 중...
-        </Text>
+        <MoverCardSkeletonList
+          variant="full"
+          count={MOVERS_NEXT_PAGE_SKELETON_COUNT}
+          label="다음 기사님 목록을 불러오는 중"
+        />
       ) : null}
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
