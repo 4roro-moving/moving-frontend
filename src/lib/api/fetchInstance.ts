@@ -178,6 +178,11 @@ const requestPaginated = async <T>(
     signal: buildTimeoutSignal(options.signal ?? undefined),
   });
 
+  // 2026.07.27 정슬기 - [수정] request와 동일하게 204 가드 (빈 pagination 반환 방지)
+  if (res.status === 204) {
+    throw new ApiError("페이지네이션 응답이 비어 있습니다.", 204);
+  }
+
   const body = (await res.json().catch(() => ({}))) as
     PaginatedApiSuccessResponse<T> | ApiErrorResponse | Record<string, never>;
 

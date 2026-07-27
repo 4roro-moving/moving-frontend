@@ -26,7 +26,6 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
   return (
     <Link
       href={APP_ROUTES.MOVERS.DETAIL(mover.id)}
-      aria-labelledby={titleId}
       aria-label={`${displayName} 기사님 상세 보기`}
       className="bg-background-surface border-border-subtle shadow-estimate-card rounded-16 md:rounded-20 focus-visible:ring-border-brand flex w-full flex-col gap-12 border-[0.5px] px-16 py-20 focus-visible:ring-2 focus-visible:outline-none md:gap-16 md:px-24 md:py-28 lg:gap-20 lg:px-32 lg:py-32"
     >

@@ -53,6 +53,7 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
     setOpenMenuPath(pathname);
   }, [pathname]);
 
+  // 2026.07.27 정슬기 - [수정] Esc는 전역, 화살표·Home·End는 메뉴 내부 포커스일 때만 처리
   useEffect(() => {
     if (!isProfileMenuOpen) return;
 
@@ -69,6 +70,12 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
         event.key !== "Home" &&
         event.key !== "End"
       ) {
+        return;
+      }
+
+      const menuRoot = profileMenuRef.current;
+      const target = event.target;
+      if (!(target instanceof Node) || !menuRoot?.contains(target)) {
         return;
       }
 
@@ -100,7 +107,7 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeMenu, isProfileMenuOpen]);
+  }, [closeMenu, isProfileMenuOpen, profileMenuRef]);
 
   useEffect(() => {
     if (!isProfileMenuOpen) return;
@@ -166,6 +173,7 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
                 }}
               >
                 <Image src="/icons/profile-default.svg" alt="" width={36} height={36} />
+                {/* TODO: auth/프로필 연동 전 임시 표기 — 세션 닉네임으로 교체 */}
                 <Text as="span" variant="md-medium" className="text-text-primary">
                   닉네임
                 </Text>

@@ -6,7 +6,7 @@ import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import { ProfileDefaultIcon, StarIcon } from "@/icons";
-import { formatMoveDateLabel, formatPrice, formatRating } from "@/lib/utils/estimateFormat";
+import { formatMoveDateLabelSafe, formatPrice, formatRating } from "@/lib/utils/estimateFormat";
 import type { ReviewableEstimateItem } from "@/types/review";
 
 interface WritableReviewCardProps {
@@ -138,7 +138,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
               variant={{ base: "sm-medium", md: "md-medium" }}
               className="text-text-primary text-right"
             >
-              {formatMoveDateLabel(estimateRequest.moveDate)}
+              {formatMoveDateLabelSafe(estimateRequest.moveDate)}
             </Text>
           </div>
         </dl>

@@ -18,7 +18,8 @@ export const MY_REVIEW_PAGE_LIMIT = 5;
  * 작성 가능한 리뷰(확정·완료·미작성) 전체 목록을 조회합니다.
  * 백엔드는 페이지네이션을 지원하지 않으므로 FE에서 limit 단위로 슬라이스합니다.
  *
- * 현재는 mock을 반환하며, 이후 fetchInstance 호출로 교체하면 됩니다.
+ * 현재는 FE UI 검증용 mock을 반환합니다.
+ * 실제 연동은 백엔드/환경 준비 후 아래 TODO의 fetchInstance 호출로 교체합니다.
  * // 2026.07.27 정슬기 - [추가] 작성 가능 리뷰 service (mock)
  * // 2026.07.27 정슬기 - [수정] 연동 예시를 axios → fetchInstance로 변경
  */
@@ -33,7 +34,7 @@ export async function fetchReviewableEstimates(): Promise<ReviewableEstimateItem
 /**
  * 내가 작성한 리뷰 목록을 서버 페이지네이션으로 조회합니다.
  *
- * 현재는 mock을 반환하며, 이후 fetchInstance 호출로 교체하면 됩니다.
+ * 현재는 FE UI 검증용 mock을 반환합니다. 실연동은 환경 준비 후 TODO 주석을 해제합니다.
  * // 2026.07.27 정슬기 - [추가] 내 리뷰 목록 service (mock)
  * // 2026.07.27 정슬기 - [수정] 범위 밖 page 재요청 보정 주석 추가
  * // 2026.07.27 정슬기 - [수정] 연동 예시를 axios → fetchInstance.getPaginated로 변경
@@ -67,7 +68,7 @@ export async function fetchMyReviews(query: MyReviewListQuery = {}): Promise<MyR
 /**
  * 확정·완료 견적에 대한 리뷰를 등록합니다.
  *
- * 현재는 mock을 갱신하며, 이후 fetchInstance 호출로 교체하면 됩니다.
+ * 현재는 FE UI 검증용 mock을 갱신합니다. 실연동은 환경 준비 후 TODO 주석을 해제합니다.
  * // 2026.07.27 정슬기 - [추가] 리뷰 작성 service (mock)
  * // 2026.07.27 정슬기 - [수정] 연동 예시를 axios → fetchInstance로 변경
  */

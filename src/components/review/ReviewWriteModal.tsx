@@ -50,8 +50,13 @@ function ReviewWriteModalContent({
 
   const displayName = item.mover.nickname?.trim() || "기사님";
   const trimmedContent = content.trim();
-  const isSubmitDisabled =
-    createMutation.isPending || rating < 1 || trimmedContent.length < MIN_CONTENT_LENGTH;
+  const isPending = createMutation.isPending;
+  const isSubmitDisabled = isPending || rating < 1 || trimmedContent.length < MIN_CONTENT_LENGTH;
+
+  const handleClose = () => {
+    if (isPending) return;
+    onClose();
+  };
 
   const handleSubmit = () => {
     let hasError = false;
@@ -81,14 +86,14 @@ function ReviewWriteModalContent({
 
   return (
     <Modal
-      onClose={createMutation.isPending ? undefined : onClose}
+      onClose={handleClose}
       overlayClassName="items-end px-0 md:items-center md:px-margin-tablet lg:px-24"
       className="rounded-t-24 md:rounded-24 max-h-[90dvh] w-full max-w-[35rem] gap-24 overflow-y-auto p-20 pb-32 md:gap-32 md:p-32 lg:gap-40 lg:p-40"
       aria-label="리뷰 작성"
     >
       <div className="flex w-full items-start justify-between gap-12 md:gap-16">
         <Modal.Title>리뷰 작성</Modal.Title>
-        {!createMutation.isPending ? <Modal.Close onClose={onClose} /> : null}
+        <Modal.Close onClose={handleClose} disabled={isPending} />
       </div>
 
       <div className="flex w-full flex-col gap-20 md:gap-28 lg:gap-32">
@@ -142,7 +147,7 @@ function ReviewWriteModalContent({
             }}
             size="lg"
             label="별점"
-            disabled={createMutation.isPending}
+            disabled={isPending}
           />
           {ratingError ? (
             <Text as="p" variant="xs-regular" className="text-text-error" role="alert">
@@ -164,7 +169,7 @@ function ReviewWriteModalContent({
           <Textarea
             id="review-content"
             value={content}
-            disabled={createMutation.isPending}
+            disabled={isPending}
             placeholder={`최소 ${MIN_CONTENT_LENGTH}자 이상 작성해주세요.`}
             error={contentError}
             className="h-[140px] md:h-[180px]"
@@ -184,8 +189,8 @@ function ReviewWriteModalContent({
           variant="outline"
           size="cta"
           fullWidth
-          disabled={createMutation.isPending}
-          onClick={onClose}
+          disabled={isPending}
+          onClick={handleClose}
           className="md:flex-1"
         >
           취소
@@ -199,7 +204,7 @@ function ReviewWriteModalContent({
           onClick={handleSubmit}
           className="md:flex-1"
         >
-          {createMutation.isPending ? "등록 중..." : "등록하기"}
+          {isPending ? "등록 중..." : "등록하기"}
         </Button>
       </div>
     </Modal>

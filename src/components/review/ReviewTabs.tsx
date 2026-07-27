@@ -19,7 +19,7 @@ export default function ReviewTabs() {
   return (
     <nav
       aria-label="리뷰 관리"
-      className="bg-background-default border-border-subtle px-margin-mobile md:px-margin-tablet h-tab-height-mobile md:h-tab-height-tablet lg:h-tab-height-desktop lg:px-tab-padding-x-desktop flex w-full items-end overflow-x-auto border-b shadow-[0_2px_5px_0_rgba(248,248,248,0.1)]"
+      className="bg-background-default border-border-subtle shadow-tab px-margin-mobile md:px-margin-tablet h-tab-height-mobile md:h-tab-height-tablet lg:h-tab-height-desktop lg:px-tab-padding-x-desktop flex w-full items-end overflow-x-auto border-b"
     >
       <div className="flex h-full min-w-0 flex-1 items-end gap-16 pt-8 md:gap-24 md:pt-12 lg:gap-32 lg:pt-16">
         {TABS.map((tab) => {
