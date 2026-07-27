@@ -126,6 +126,7 @@ export function MoversPageClient() {
                 <div className="w-fit shrink-0 lg:w-[160px]">
                   <Select
                     key={`region-${filterKey}`}
+                    label="지역"
                     desc="지역"
                     size="lg"
                     columns={2}
@@ -144,6 +145,7 @@ export function MoversPageClient() {
                 <div className="w-fit shrink-0 lg:w-[160px]">
                   <Select
                     key={`service-${filterKey}`}
+                    label="서비스"
                     desc="서비스"
                     size="lg"
                     className="w-fit lg:w-full"
@@ -173,6 +175,7 @@ export function MoversPageClient() {
             <div className="w-fit shrink-0">
               <Select
                 key={`sort-${filterKey}`}
+                label="정렬"
                 desc="정렬"
                 variant="sort"
                 className="w-fit"

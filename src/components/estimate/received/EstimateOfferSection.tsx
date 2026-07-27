@@ -57,8 +57,8 @@ export default function EstimateOfferSection({
       </div>
 
       <div className="flex flex-col gap-4">
-        <span className="sr-only">견적 상태 필터</span>
         <Select
+          label="견적 상태 필터"
           desc="전체"
           defaultValue="all"
           size="lg"

@@ -80,7 +80,16 @@ function getTriggerTextVariant(variant: SelectVariant, isOpen: boolean): TextVar
 
 export interface SelectMainProps extends VariantProps<typeof selectVariants> {
   children: ReactNode;
+  /**
+   * 트리거에 보이는 문구 (미선택·placeholderValue일 때 표시)
+   * 접근성 이름과 다를 수 있으므로 접근성은 `label` 사용
+   */
   desc: ReactNode;
+  /**
+   * combobox의 고정 접근성 이름.
+   * 생략 시 `desc`가 문자열이면 그 값을 사용합니다.
+   */
+  label?: string;
   /** 수정 폼 등에서 이전 선택값을 미리 채워야 할 때 사용 */
   defaultValue?: string;
   /**
@@ -101,6 +110,7 @@ export interface SelectMainProps extends VariantProps<typeof selectVariants> {
 const SelectMain = ({
   children,
   desc,
+  label,
   size,
   defaultValue,
   placeholderValue,
@@ -152,6 +162,8 @@ const SelectMain = ({
   const triggerLabel =
     placeholderValue !== undefined && selected === placeholderValue ? desc : selectedLabel || desc;
 
+  const triggerAriaLabel = label ?? (typeof desc === "string" ? desc : undefined);
+
   const isMultiColumn = columns > 1;
   const defaultShadowClass =
     variant === "default"
@@ -177,7 +189,7 @@ const SelectMain = ({
             aria-expanded={isOpen}
             aria-controls={listboxId}
             aria-invalid={!!error}
-            aria-label={typeof desc === "string" ? desc : undefined}
+            aria-label={triggerAriaLabel}
             disabled={disabled}
             className={cn(
               selectTriggerVariants({ variant }),
