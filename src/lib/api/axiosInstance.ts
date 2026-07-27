@@ -7,9 +7,11 @@ import { clearDevAuthTokens, getDevAccessToken, isDevAuthEnabled } from "@/lib/d
 
 type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
+
 const axiosInstance = axios.create({
   // 프로젝트 .env는 NEXT_PUBLIC_API_BASE_URL 사용 (예: http://localhost:5000/api)
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -35,11 +37,7 @@ async function refreshAccessToken(): Promise<string> {
       .post<{
         success: boolean;
         data?: { tokens?: { accessToken?: string } };
-      }>(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}${API_ROUTES.AUTH.REFRESH}`,
-        {},
-        { withCredentials: true },
-      )
+      }>(`${API_BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {}, { withCredentials: true })
       .then((response) => {
         const accessToken = response.data.data?.tokens?.accessToken;
         if (!response.data.success || !accessToken) {

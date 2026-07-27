@@ -15,6 +15,7 @@ export const QUERY_KEYS = {
 
   ESTIMATE_REQUESTS: {
     ALL: ["estimateRequests"] as const,
+    ACTIVE: ["estimateRequests", "active"] as const,
     DETAIL: (requestId: number) => ["estimateRequests", requestId] as const,
     // 2026.07.25 정슬기 - [추가] 내 견적 요청 목록 쿼리 키
     MY_LIST: ["estimateRequests", "mine"] as const,

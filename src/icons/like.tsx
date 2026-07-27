@@ -25,6 +25,7 @@ export default function LikeIcon({ isActive, isFavorite, className, ...props }: 
     >
       <path
         d="M12.001 20.5c-.35 0-.69-.1-.98-.3C7.54 17.95 4.5 15.1 4.5 11.4c0-2.45 1.9-4.4 4.3-4.4 1.2 0 2.3.5 3.2 1.4.9-.9 2-1.4 3.2-1.4 2.4 0 4.3 1.95 4.3 4.4 0 3.7-3.04 6.55-6.52 8.8-.29.2-.63.3-.98.3Z"
+        transform="translate(0 -1.75)"
         stroke="currentColor"
         strokeWidth="1.5"
         fill={active ? "currentColor" : "none"}

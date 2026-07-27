@@ -13,7 +13,7 @@ interface FormFieldProps {
 const FormField = ({ label, labelFor, children, className }: FormFieldProps) => {
   return (
     <div className={cn("flex flex-col gap-10", className)}>
-      <Text as="label" htmlFor={labelFor} variant="md-medium" className="text-text-primary">
+      <Text as="label" htmlFor={labelFor} variant="fieldLabel" className="text-text-primary">
         {label}
       </Text>
       {children}

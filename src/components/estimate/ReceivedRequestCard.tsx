@@ -1,14 +1,9 @@
 import Image from "next/image";
 
 import { Text } from "@/components/common/Text";
+import { MoveTypeChip, DesignatedChip } from "@/components/estimate/received/MoveTypeChip";
 import { formatKoreanDateTime } from "@/lib/utils/date";
-import type { MoveType, MoverEstimateRequest } from "@/types/moverEstimateRequest";
-
-const MOVE_TYPE_LABEL: Record<MoveType, string> = {
-  SMALL: "소형이사",
-  HOME: "가정이사",
-  OFFICE: "사무실이사",
-};
+import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 function formatElapsedTime(date: string) {
   const minutes = Math.max(1, Math.floor((Date.now() - new Date(date).getTime()) / 60000));
@@ -29,16 +24,8 @@ export default function ReceivedRequestCard({ request, onSendEstimate }: Receive
       <div className="flex flex-col gap-16 min-[744px]:gap-24">
         <div className="flex min-h-32 items-center justify-between gap-12">
           <div className="flex flex-wrap gap-8">
-            <span className="bg-background-brand-muted text-text-brand flex items-center gap-4 rounded-md py-4 pr-8 pl-4 text-sm font-semibold">
-              <Image src="/icons/box.svg" alt="" width={20} height={20} />
-              {MOVE_TYPE_LABEL[request.moveType]}
-            </span>
-            {request.isDesignated && (
-              <span className="text-status-error flex items-center gap-4 rounded-md bg-red-100 py-4 pr-8 pl-4 text-sm font-semibold">
-                <Image src="/icons/document.svg" alt="" width={20} height={20} />
-                지정 견적 요청
-              </span>
-            )}
+            <MoveTypeChip moveType={request.moveType} />
+            {request.isDesignated ? <DesignatedChip /> : null}
           </div>
           <Text as="span" variant="md-regular" className="text-text-muted shrink-0">
             {formatElapsedTime(request.createdAt)}

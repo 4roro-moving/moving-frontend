@@ -7,16 +7,12 @@ import Modal from "@/components/common/Modal";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast";
 import { useMoverEstimateRequests, useSendMoverEstimate } from "@/hooks/useMoverEstimateRequests";
-import type { MoveType, MoverEstimateRequest, RequestSort } from "@/types/moverEstimateRequest";
+import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
+import type { MoveType } from "@/types/move";
+import type { MoverEstimateRequest, RequestSort } from "@/types/moverEstimateRequest";
 
 import ReceivedRequestCard from "./ReceivedRequestCard";
 import SendEstimateModal, { type SendEstimateInput } from "./SendEstimateModal";
-
-const MOVE_TYPES: { value: MoveType; label: string }[] = [
-  { value: "SMALL", label: "소형이사" },
-  { value: "HOME", label: "가정이사" },
-  { value: "OFFICE", label: "사무실이사" },
-];
 
 export default function ReceivedRequestsPage() {
   const [searchText, setSearchText] = useState("");
@@ -100,7 +96,7 @@ export default function ReceivedRequestsPage() {
           </form>
 
           <div className="hidden flex-wrap gap-12 lg:flex">
-            {MOVE_TYPES.map((moveType) => {
+            {MOVE_TYPE_OPTIONS.map((moveType) => {
               const isSelected = moveTypes.includes(moveType.value);
               return (
                 <button
@@ -251,7 +247,7 @@ export default function ReceivedRequestsPage() {
               이사 유형
             </Text>
             <div className="flex flex-wrap gap-12">
-              {MOVE_TYPES.map((moveType) => {
+              {MOVE_TYPE_OPTIONS.map((moveType) => {
                 const isSelected = moveTypes.includes(moveType.value);
                 return (
                   <button
