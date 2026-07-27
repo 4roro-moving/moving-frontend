@@ -10,8 +10,10 @@ import MoverCard from "@/components/mover/MoverCard";
 import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
 import { useFavoriteMovers } from "@/hooks/useFavoriteMovers";
 import { useIsClient } from "@/hooks/useIsClient";
+import { ChevronRightThinIcon } from "@/icons";
 import { FAVORITE_MOVERS_SIDEBAR_LIMIT } from "@/lib/api/favorites";
 import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import { cn } from "@/lib/utils/cn";
 
@@ -75,7 +77,7 @@ function FavoriteMoversSidebarStatus({
 }
 
 export function FavoriteMoversSidebar() {
-  // SSR/하이드레이션 전에는 토큰을 읽지 않아 서버·클라 HTML을 동일하게 맞춤
+  // SSR/하이드레이션 전에는 토큰을 읽지 않아 서버·클라이언트 HTML을 동일하게 맞춤
   const isClient = useIsClient();
   const isLoggedIn = isClient && hasAuthSession();
   const query = useFavoriteMovers({
@@ -87,12 +89,32 @@ export function FavoriteMoversSidebar() {
   const movers =
     query.data?.data.map(mapMoverListItemToMover).slice(0, FAVORITE_MOVERS_SIDEBAR_LIMIT) ?? [];
   const showSkeleton = !isClient || (isLoggedIn && query.isPending);
+  // 찜한 기사님이 1명 이상일 때부터 더보기 표시, 비로그인·빈 목록에서는 숨김
+  const showMoreLink = isLoggedIn && !query.isError && movers.length > 0;
 
   return (
     <aside className="hidden w-full flex-col gap-16 lg:flex lg:w-[327px] lg:shrink-0 lg:self-stretch lg:pt-[192px]">
-      <Text as="h2" variant="xl-semibold" className="text-text-secondary">
-        찜한 기사님
-      </Text>
+      <div className="flex w-full items-center justify-between gap-12">
+        <Text as="h2" variant="xl-semibold" className="text-text-secondary">
+          찜한 기사님
+        </Text>
+        {/*
+          더보기 → 찜한 기사님 전체 목록.
+          NOTE: 목적지 경로 미확정. 확정 시 APP_ROUTES.FAVORITE_MOVERS(및 app 디렉터리) 수정 필요.
+          // 2026.07.27
+        */}
+        {showMoreLink ? (
+          <Link
+            href={APP_ROUTES.FAVORITE_MOVERS}
+            className="text-text-muted hover:text-text-secondary focus-visible:ring-border-brand rounded-8 flex shrink-0 items-center gap-2 focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <Text as="span" variant="md-medium">
+              더보기
+            </Text>
+            <ChevronRightThinIcon className="size-16" aria-hidden="true" />
+          </Link>
+        ) : null}
+      </div>
 
       {showSkeleton ? (
         <MoverCardSkeletonList
