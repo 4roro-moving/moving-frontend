@@ -9,7 +9,7 @@ import { Text } from "@/components/common/Text";
 import MoverCard from "@/components/mover/MoverCard";
 import { MOCK_FAVORITE_MOVERS, MOCK_MOVERS, SORT_OPTIONS } from "@/components/mover/constants";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
-import { REGION_OPTIONS } from "@/lib/constants/region";
+import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
 import type { MoveType } from "@/types/move";
 import type { MoverSort } from "@/types/mover";
 
@@ -26,7 +26,7 @@ const REGION_FILTER_OPTIONS = [
 
 const SERVICE_FILTER_OPTIONS = [ALL_OPTION, ...MOVE_TYPE_OPTIONS];
 
-function filterAndSortMovers(keyword: string, service: string, sort: MoverSort) {
+function filterAndSortMovers(keyword: string, region: string, service: string, sort: MoverSort) {
   let filtered = MOCK_MOVERS;
 
   if (keyword.trim()) {
@@ -37,6 +37,11 @@ function filterAndSortMovers(keyword: string, service: string, sort: MoverSort) 
         mover.title.toLowerCase().includes(query) ||
         mover.description.toLowerCase().includes(query),
     );
+  }
+
+  if (region && region !== ALL_OPTION.value) {
+    const regionId = Number(region) as RegionId;
+    filtered = filtered.filter((mover) => mover.serviceAreas.includes(regionId));
   }
 
   if (service && service !== ALL_OPTION.value) {
@@ -66,7 +71,7 @@ export function MoversPageClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filterKey, setFilterKey] = useState(0);
 
-  const movers = filterAndSortMovers(keyword, service, sort);
+  const movers = filterAndSortMovers(keyword, region, service, sort);
   const pagedMovers = movers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   function handleReset() {
