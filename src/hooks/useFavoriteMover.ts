@@ -36,6 +36,7 @@ interface FavoriteMutationContext {
   previousPendingLists: [readonly unknown[], PendingEstimateSectionListResult | undefined][];
   previousPendingDetails: [readonly unknown[], EstimateDetail | undefined][];
   previousMoverLists: [readonly unknown[], InfiniteData<MoversListResult> | undefined][];
+  previousFavoriteMovers: [readonly unknown[], MoversListResult | undefined][];
 }
 
 function patchMoverFavorite<T extends { id: string; isFavorite: boolean; favoriteCount: number }>(
@@ -70,6 +71,7 @@ async function invalidateFavoriteRelatedQueries(
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS }),
   ]);
 }
 
@@ -79,6 +81,7 @@ async function invalidateFavoriteRelatedQueries(
 // 2026.07.26 정슬기 - [수정] pending MY_LIST·PENDING_DETAIL 캐시도 동일하게 낙관적 갱신/무효화
 // 2026.07.27 정슬기 - [수정] nextIsFavorite 전달·count 가드·onSettled invalidate
 // 2026.07.27 - [수정] 기사님 찾기 목록(MOVERS.LIST)도 낙관적 갱신/무효화 (fetchInstance Bearer 정렬)
+// 2026.07.27 - [수정] 찜한 기사님 목록(FAVORITES.MOVERS) 무효화·해제 시 낙관적 제거
 export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -112,9 +115,10 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
+        queryClient.cancelQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS }),
       ]);
 
-      // 롤백용 스냅샷 (received + pending + movers list)
+      // 롤백용 스냅샷 (received + pending + movers list + favorite movers)
       const previousReceived = queryClient.getQueryData<ReceivedEstimatePanel[]>(
         QUERY_KEYS.ESTIMATES.RECEIVED,
       );
@@ -129,6 +133,9 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       });
       const previousMoverLists = queryClient.getQueriesData<InfiniteData<MoversListResult>>({
         queryKey: QUERY_KEYS.MOVERS.LIST,
+      });
+      const previousFavoriteMovers = queryClient.getQueriesData<MoversListResult>({
+        queryKey: QUERY_KEYS.FAVORITES.MOVERS,
       });
 
       // 받은 견적 목록
@@ -215,12 +222,39 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         },
       );
 
+      // 찜한 기사님 사이드바: 해제 시 즉시 목록에서 제거 (등록은 onSettled invalidate로 동기화)
+      if (!nextIsFavorite) {
+        queryClient.setQueriesData<MoversListResult>(
+          { queryKey: QUERY_KEYS.FAVORITES.MOVERS },
+          (list) => {
+            if (!list) {
+              return list;
+            }
+
+            const data = list.data.filter((mover) => mover.id !== moverId);
+            if (data.length === list.data.length) {
+              return list;
+            }
+
+            return {
+              ...list,
+              data,
+              pagination: {
+                ...list.pagination,
+                totalCount: Math.max(0, list.pagination.totalCount - 1),
+              },
+            };
+          },
+        );
+      }
+
       return {
         previousReceived,
         previousDetails,
         previousPendingLists,
         previousPendingDetails,
         previousMoverLists,
+        previousFavoriteMovers,
       };
     },
     onError: (error, _variables, context) => {
@@ -237,6 +271,9 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
           queryClient.setQueryData(queryKey, data);
         });
         context.previousMoverLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+        context.previousFavoriteMovers.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
         });
       }
