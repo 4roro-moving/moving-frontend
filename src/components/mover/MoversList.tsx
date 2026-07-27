@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
+import Toast from "@/components/common/Toast/Toast";
 import { Text } from "@/components/common/Text";
 import MoverCard from "@/components/mover/MoverCard";
 import { useMovers } from "@/hooks/useMovers";
@@ -25,6 +26,7 @@ export function MoversList({ filters }: MoversListProps) {
   const query = useMovers(filters);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = query;
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const movers = query.data?.pages.flatMap((page) => page.data).map(mapMoverListItemToMover) ?? [];
 
@@ -79,7 +81,7 @@ export function MoversList({ filters }: MoversListProps) {
       <ul className="flex flex-col gap-20">
         {movers.map((mover) => (
           <li key={mover.id}>
-            <MoverCard mover={mover} variant="full" />
+            <MoverCard mover={mover} variant="full" onFavoriteError={setToastMessage} />
           </li>
         ))}
       </ul>
@@ -91,6 +93,8 @@ export function MoversList({ filters }: MoversListProps) {
           더 불러오는 중...
         </Text>
       ) : null}
+
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </div>
   );
 }

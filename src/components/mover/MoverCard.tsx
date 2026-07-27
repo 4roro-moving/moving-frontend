@@ -1,8 +1,11 @@
+"use client";
+
+import { Text } from "@/components/common/Text";
+import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { DriverBadgeIcon, LikeIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import type { Mover } from "@/types/mover";
-import { Text } from "@/components/common/Text";
-import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 
 import MoverMeta from "./MoverMeta";
 import { MoverProfileImage } from "./MoverProfileImage";
@@ -11,26 +14,34 @@ interface MoverCardProps {
   mover: Mover;
   variant?: "full" | "compact";
   className?: string;
+  onFavoriteError?: (message: string) => void;
 }
 
-function FavoriteButton({
-  isFavorite,
-  favoriteCount,
-  showCount,
-  iconClassName,
-}: {
+interface FavoriteButtonProps {
+  moverName: string;
   isFavorite: boolean;
   favoriteCount?: number;
   showCount?: boolean;
   iconClassName: string;
-}) {
+  onToggle: (nextIsFavorite: boolean) => void;
+}
+
+function FavoriteButton({
+  moverName,
+  isFavorite,
+  favoriteCount,
+  showCount,
+  iconClassName,
+  onToggle,
+}: FavoriteButtonProps) {
   return (
     <div className="flex shrink-0 items-center justify-center gap-2">
       <button
         type="button"
-        className="cursor-pointer"
-        aria-label={isFavorite ? "찜 해제" : "찜하기"}
+        className="focus-visible:ring-border-brand rounded-8 cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
+        aria-label={`${moverName} 기사님 ${isFavorite ? "찜 해제" : "찜하기"}`}
         aria-pressed={isFavorite}
+        onClick={() => onToggle(!isFavorite)}
       >
         <LikeIcon
           isFavorite={isFavorite}
@@ -42,14 +53,40 @@ function FavoriteButton({
       </button>
       {showCount && favoriteCount !== undefined ? (
         <Text as="span" variant="md-regular" className="text-text-muted">
-          {favoriteCount}
+          <span aria-hidden="true">{favoriteCount}</span>
+          <span className="sr-only">현재 찜 {favoriteCount}개</span>
         </Text>
       ) : null}
     </div>
   );
 }
 
-export default function MoverCard({ mover, variant = "full", className }: MoverCardProps) {
+export default function MoverCard({
+  mover,
+  variant = "full",
+  className,
+  onFavoriteError,
+}: MoverCardProps) {
+  const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
+
+  const toggleFavorite = (nextIsFavorite: boolean) => {
+    if (favoriteMutation.isPending || mover.isFavorite === nextIsFavorite) {
+      return;
+    }
+
+    favoriteMutation.mutate({
+      moverId: mover.id,
+      nextIsFavorite,
+    });
+  };
+
+  const favoriteButtonProps = {
+    moverName: mover.name,
+    isFavorite: mover.isFavorite,
+    favoriteCount: mover.favoriteCount,
+    onToggle: toggleFavorite,
+  };
+
   if (variant === "compact") {
     return (
       <article
@@ -83,7 +120,7 @@ export default function MoverCard({ mover, variant = "full", className }: MoverC
                       {mover.name} 기사님
                     </Text>
                   </div>
-                  <FavoriteButton isFavorite={mover.isFavorite} iconClassName="size-20" />
+                  <FavoriteButton {...favoriteButtonProps} iconClassName="size-20" />
                 </div>
                 <MoverMeta
                   rating={mover.rating}
@@ -109,7 +146,6 @@ export default function MoverCard({ mover, variant = "full", className }: MoverC
         className,
       )}
     >
-      {/* Mobile — Figma CardDriverProfile size=md */}
       <div className="flex flex-col gap-8 min-[744px]:hidden">
         <MoveTypeChip moveType={mover.serviceType} size="sm" />
 
@@ -150,12 +186,7 @@ export default function MoverCard({ mover, variant = "full", className }: MoverC
                     기사님
                   </Text>
                 </div>
-                <FavoriteButton
-                  isFavorite={mover.isFavorite}
-                  favoriteCount={mover.favoriteCount}
-                  showCount
-                  iconClassName="size-24"
-                />
+                <FavoriteButton {...favoriteButtonProps} showCount iconClassName="size-24" />
               </div>
 
               <MoverMeta
@@ -170,7 +201,6 @@ export default function MoverCard({ mover, variant = "full", className }: MoverC
         </div>
       </div>
 
-      {/* Tablet / Desktop */}
       <div className="hidden min-[744px]:contents">
         <div className="flex min-h-32 items-center">
           <MoveTypeChip moveType={mover.serviceType} size="md" />
@@ -220,12 +250,7 @@ export default function MoverCard({ mover, variant = "full", className }: MoverC
                 />
               </div>
 
-              <FavoriteButton
-                isFavorite={mover.isFavorite}
-                favoriteCount={mover.favoriteCount}
-                showCount
-                iconClassName="size-24"
-              />
+              <FavoriteButton {...favoriteButtonProps} showCount iconClassName="size-24" />
             </div>
           </div>
         </div>
