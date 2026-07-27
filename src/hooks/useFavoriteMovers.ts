@@ -1,7 +1,6 @@
 "use client";
 
 import { getFavoriteMovers, FAVORITE_MOVERS_PAGE_LIMIT } from "@/lib/api/favorites";
-import { hasAuthSession } from "@/lib/auth/session";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { useApiQuery } from "@/hooks/queries/useApiQuery";
 
@@ -15,7 +14,8 @@ interface UseFavoriteMoversOptions {
 export function useFavoriteMovers(options: UseFavoriteMoversOptions = {}) {
   const page = options.page ?? 1;
   const limit = options.limit ?? FAVORITE_MOVERS_PAGE_LIMIT;
-  const enabled = options.enabled ?? hasAuthSession();
+  // hasAuthSession()은 SSR에서 false라 기본값으로 쓰지 않음. 호출부에서 명시.
+  const enabled = options.enabled ?? false;
 
   return useApiQuery({
     queryKey: [...QUERY_KEYS.FAVORITES.MOVERS, { page, limit }],
