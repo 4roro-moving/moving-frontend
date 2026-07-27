@@ -4,6 +4,7 @@ import { useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
 import { addFavoriteMover, removeFavoriteMover } from "@/lib/api/favorites";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
@@ -16,9 +17,6 @@ import type {
 import type { MoversListResult } from "@/types/mover";
 
 const LOGIN_REQUIRED_MESSAGE = "로그인이 필요한 서비스입니다.";
-
-/** 토스트가 잠깐 보이도록 로그인 이동 전 대기 (ms) */
-const LOGIN_REDIRECT_DELAY_MS = 600;
 
 interface UseFavoriteMoverOptions {
   onError?: (message: string) => void;
@@ -77,28 +75,25 @@ async function invalidateFavoriteRelatedQueries(
 
 // 2026.07.24 정슬기 - [추가] 찜 API 연동 후 받은 견적 목록·상세 캐시 갱신
 // 2026.07.24 정슬기 - [수정] 낙관적 업데이트 롤백을 previous 캐시가 undefined여도 복원하도록 교정
-// 2026.07.25 정슬기 - [수정] 비로그인 시 토스트 후 로그인 페이지 이동, API/낙관적 업데이트 미수행
-// 2026.07.26 정슬기 - [수정] pending MY_LIST·PENDING_DETAIL 캐시도 동일하게 낙관적 갱신/무효화
-// 2026.07.27 정슬기 - [수정] nextIsFavorite 전달·count 가드·onSettled invalidate
-// 2026.07.27 - [수정] 기사님 찾기 목록(MOVERS.LIST)도 낙관적 갱신/무효화 (fetchInstance Bearer 정렬)
-// 2026.07.27 - [수정] 찜한 기사님 목록(FAVORITES.MOVERS) 무효화·해제 시 낙관적 제거
+// 2026.07.25 정슬기 - [수정] 비로그인 시 로그인 유도 모달 (토스트·자동 이동 제거)
 export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const loginRequiredModal = useLoginRequiredModal();
   const onErrorRef = useRef(options?.onError);
-  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     onErrorRef.current = options?.onError;
   }, [options?.onError]);
 
-  useEffect(() => {
-    return () => {
-      if (redirectTimeoutRef.current !== null) {
-        clearTimeout(redirectTimeoutRef.current);
-      }
-    };
-  }, []);
+  const requireLogin = () => {
+    // 기사님 찾기 등 Provider가 있는 곳에서만 모달, 그 외는 로그인 페이지로 이동
+    if (loginRequiredModal) {
+      loginRequiredModal.openLoginRequiredModal();
+      return;
+    }
+    router.push(getLoginRedirectPath());
+  };
 
   const mutation = useMutation({
     mutationFn: async ({ moverId, nextIsFavorite }: FavoriteMoverVariables) => {
@@ -286,22 +281,9 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
     },
   });
 
-  const redirectToLogin = () => {
-    onErrorRef.current?.(LOGIN_REQUIRED_MESSAGE);
-
-    if (redirectTimeoutRef.current !== null) {
-      clearTimeout(redirectTimeoutRef.current);
-    }
-
-    redirectTimeoutRef.current = setTimeout(() => {
-      redirectTimeoutRef.current = null;
-      router.push(getLoginRedirectPath());
-    }, LOGIN_REDIRECT_DELAY_MS);
-  };
-
   const mutate: typeof mutation.mutate = (variables, mutateOptions) => {
     if (!hasAuthSession()) {
-      redirectToLogin();
+      requireLogin();
       return;
     }
 
@@ -310,7 +292,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
 
   const mutateAsync: typeof mutation.mutateAsync = (variables, mutateOptions) => {
     if (!hasAuthSession()) {
-      redirectToLogin();
+      requireLogin();
       return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
     }
 
