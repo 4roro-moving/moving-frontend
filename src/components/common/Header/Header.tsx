@@ -2,29 +2,49 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
 
+import HeaderProfileMenu from "@/components/common/Header/HeaderProfileMenu";
 import { Text } from "@/components/common/Text";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import { AlarmIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
+import { useAuthStore } from "@/stores/useAuthStore";
 
-export interface HeaderProps {
-  /** TODO: auth 연동 전 임시 prop. 추후 대체 */
-  isLogin?: boolean;
-}
-
-const LOGGED_OUT_LINKS = [{ label: "기사님 찾기", href: "/movers" }];
+const LOGGED_OUT_LINKS = [{ label: "기사님 찾기", href: APP_ROUTES.MOVERS }];
 
 const LOGGED_IN_LINKS = [
-  { label: "견적 요청", href: "/estimate-request" },
-  { label: "기사님 찾기", href: "/movers" },
+  { label: "견적 요청", href: APP_ROUTES.ESTIMATE_REQUEST },
+  { label: "기사님 찾기", href: APP_ROUTES.MOVERS },
   { label: "내 견적 관리", href: "/estimates" },
 ];
 
-const Header = ({ isLogin = false }: HeaderProps) => {
+const Header = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const logout = useAuthStore((state) => state.logout);
+  // hydrate 전에는 SSR과 동일하게 비로그인 UI (mismatch 방지)
+  const isLogin = hasHydrated && isAuthenticated;
   const navLinks = isLogin ? LOGGED_IN_LINKS : LOGGED_OUT_LINKS;
+
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
+  const closeProfileMenu = useCallback(() => {
+    setIsProfileMenuOpen(false);
+  }, []);
+
+  const profileMenuRef = useClickOutside<HTMLDivElement>(closeProfileMenu);
+
+  const handleLogout = async () => {
+    closeProfileMenu();
+    await logout();
+    router.replace(APP_ROUTES.LOGIN);
+  };
 
   return (
     <header className="border-border-subtle bg-background-surface w-full border-b">
@@ -63,13 +83,32 @@ const Header = ({ isLogin = false }: HeaderProps) => {
             <button type="button" aria-label="알림">
               <AlarmIcon className="text-icon-default size-24" />
             </button>
-            <button type="button" aria-label="프로필">
-              <Image src="/icons/profile-default.svg" alt="" width={36} height={36} />
-            </button>
-            {/* TODO: 프로필 기능 연동 전까지 닉네임 placeholder */}
-            <button type="button" className="text-text-primary">
-              <Text variant="md-medium">닉네임</Text>
-            </button>
+
+            <div ref={profileMenuRef} className="relative flex items-center gap-20">
+              <button
+                type="button"
+                aria-label="마이페이지 메뉴"
+                aria-haspopup="menu"
+                aria-expanded={isProfileMenuOpen}
+                onClick={() => setIsProfileMenuOpen((prev) => !prev)}
+                className="flex items-center gap-20"
+              >
+                <Image src="/icons/profile-default.svg" alt="" width={36} height={36} />
+                <Text as="span" variant="md-medium" className="text-text-primary">
+                  {user?.name ?? "닉네임"}
+                </Text>
+              </button>
+
+              {isProfileMenuOpen ? (
+                <HeaderProfileMenu
+                  userName={user?.name ?? "닉네임"}
+                  onLogout={() => {
+                    void handleLogout();
+                  }}
+                  onNavigate={closeProfileMenu}
+                />
+              ) : null}
+            </div>
           </div>
         ) : (
           <Link

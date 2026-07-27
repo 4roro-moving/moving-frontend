@@ -1,3 +1,10 @@
+import {
+  clearAuthTokens,
+  getAccessToken,
+  getRefreshToken,
+  setAccessToken,
+  setAuthTokens,
+} from "@/lib/auth/token";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { ApiError, type ApiSuccessResponse, type ApiErrorResponse } from "@/types/api";
 
@@ -10,6 +17,7 @@ const NO_REFRESH_ENDPOINTS: readonly string[] = [
   API_ROUTES.AUTH.SIGN_UP_CUSTOMER,
   API_ROUTES.AUTH.SIGN_UP_MOVER,
   API_ROUTES.AUTH.REFRESH,
+  API_ROUTES.AUTH.LOGOUT,
 ];
 
 // 예외 처리 공통 함수
@@ -55,11 +63,19 @@ const setApiError = (status: number, body: unknown): ApiError => {
 const getRequestHeaders = async (
   customHeaders?: HeadersInit,
   isFormData = false,
+  options?: { skipAuth?: boolean },
 ): Promise<Headers> => {
   const headers = new Headers(customHeaders);
 
   if (!isFormData && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
+  }
+
+  if (typeof window !== "undefined" && !options?.skipAuth && !headers.has("Authorization")) {
+    const accessToken = getAccessToken();
+    if (accessToken) {
+      headers.set("Authorization", `Bearer ${accessToken}`);
+    }
   }
 
   if (typeof window === "undefined") {
@@ -81,28 +97,65 @@ const buildTimeoutSignal = (signal?: AbortSignal): AbortSignal => {
   return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
 };
 
-// 토큰 리프레시 요청
+interface RefreshTokenResponse {
+  tokens: {
+    accessToken: string;
+    refreshToken?: string;
+  };
+}
+
+interface RefreshInput {
+  refreshToken: string;
+}
+
+// 토큰 리프레시 요청 (body.refreshToken)
 const refreshAccessToken = async (): Promise<void> => {
-  // SSR 에서는 쿠키 헤더 추가
-  const headers = await getRequestHeaders();
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    clearAuthTokens();
+    throw new ApiError("리프레시 토큰이 없습니다.");
+  }
+
+  const headers = await getRequestHeaders(undefined, false, { skipAuth: true });
+  const payload: RefreshInput = { refreshToken };
 
   const res = await safeFetch(`${BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {
     method: "POST",
     credentials: "include",
     headers,
+    body: JSON.stringify(payload),
     signal: buildTimeoutSignal(),
   });
 
-  if (!res.ok) {
-    const body = (await res.json().catch(() => ({}))) as ApiErrorResponse | Record<string, never>;
+  const body = (await res.json().catch(() => ({}))) as
+    ApiSuccessResponse<RefreshTokenResponse> | ApiErrorResponse | Record<string, never>;
+
+  if (!res.ok || body.success === false) {
+    clearAuthTokens();
     throw setApiError(res.status, body);
+  }
+
+  const tokens = (body as ApiSuccessResponse<RefreshTokenResponse>).data?.tokens;
+  if (!tokens?.accessToken) {
+    clearAuthTokens();
+    throw new ApiError("세션 갱신에 실패했습니다.", res.status);
+  }
+
+  if (tokens.refreshToken) {
+    setAuthTokens({
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  } else {
+    setAccessToken(tokens.accessToken);
   }
 };
 
-// 401 동시 요청 제어
+// 401·세션 복구 시 refresh 동시 요청 제어
 let refreshPromise: Promise<void> | null = null;
 
-const getRefreshPromise = (): Promise<void> => {
+/** refresh 요청을 1회로 합칩니다. (Strict Mode·병렬 401 대비) */
+export const ensureAccessTokenRefreshed = (): Promise<void> => {
   // SSR 에서는 캐싱하지 않고 매번 새로 호출함.
   if (typeof window === "undefined") {
     return refreshAccessToken();
@@ -111,8 +164,7 @@ const getRefreshPromise = (): Promise<void> => {
   if (!refreshPromise) {
     refreshPromise = refreshAccessToken()
       .catch((err) => {
-        // token 발급 실패 시 에러 처리
-        // 추후 authProvider 에서 addEventListner로 처리할 예정
+        clearAuthTokens();
         window.dispatchEvent(new CustomEvent("auth:expired"));
         throw err;
       })
@@ -123,6 +175,8 @@ const getRefreshPromise = (): Promise<void> => {
 
   return refreshPromise;
 };
+
+const getRefreshPromise = ensureAccessTokenRefreshed;
 
 // fetch 요청 함수
 const request = async <T>(

@@ -3,7 +3,7 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { getDevAccessToken, isDevAuthEnabled } from "@/lib/dev-auth";
 
 /**
- * axiosInstance Authorization 주입과 동일한 기준으로 로그인 세션 존재 여부를 판단합니다.
+ * fetchInstance Authorization 주입과 동일한 기준으로 로그인 세션 존재 여부를 판단합니다.
  * // 2026.07.25 정슬기 - [추가] 찜 등 인증 필요 UI용 세션 판별
  */
 export function hasAuthSession(): boolean {

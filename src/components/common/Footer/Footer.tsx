@@ -2,10 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 import { Text } from "@/components/common/Text";
-import { AUTH_PAGE_PATHS } from "@/lib/constants/appRoutes";
 
 const FOOTER_LINKS = [
   { label: "자주 묻는 질문", href: "/" },
@@ -13,12 +11,6 @@ const FOOTER_LINKS = [
 ];
 
 const Footer = () => {
-  const pathname = usePathname();
-
-  if (AUTH_PAGE_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))) {
-    return null;
-  }
-
   return (
     <footer className="border-border-default bg-background-subtle w-full border-t">
       <div className="px-margin-mobile max-w-container-desktop mx-auto flex w-full flex-col items-center gap-16 py-40 md:px-40">

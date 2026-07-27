@@ -6,8 +6,15 @@ export const API_ROUTES = {
     LOGOUT: "/auth/logout",
     REFRESH: "/auth/refresh",
   },
-  USERS: "/users",
-  PROFILES: "/profiles",
+  USERS: {
+    ROOT: "/users",
+    ME: "/users/me",
+  },
+  PROFILES: {
+    ROOT: "/profiles",
+    CUSTOMER_STATUS: "/profiles/customer/status",
+    CUSTOMER_ME: "/profiles/customer/me",
+  },
   MOVERS: "/movers",
   ESTIMATE_REQUESTS: {
     ROOT: "/estimate-requests",

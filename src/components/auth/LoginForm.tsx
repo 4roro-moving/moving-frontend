@@ -3,27 +3,45 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import Button from "@/components/common/Button/Button";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
-import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { getCustomerProfileStatus } from "@/lib/api/profile";
+import { resolvePostLoginPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/loginSchema";
 import { cn } from "@/lib/utils/cn";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 const fieldLabelClass = cn(
   getTextVariantClass({ base: "md-regular", md: "xl-regular" }),
   "text-text-secondary",
 );
 
+const getRedirectParam = () => {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get("redirect");
+};
+
 const LoginForm = () => {
+  const router = useRouter();
+  const login = useAuthStore((state) => state.login);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
@@ -33,8 +51,25 @@ const LoginForm = () => {
     },
   });
 
-  const onSubmit = handleSubmit(() => {
-    // TODO: login() API 연동 후 리다이렉트 처리
+  useEffect(() => {
+    if (!hasHydrated || isCheckingAuth || !isAuthenticated || isSubmitting) return;
+    router.replace(APP_ROUTES.MOVERS);
+  }, [hasHydrated, isAuthenticated, isCheckingAuth, isSubmitting, router]);
+
+  const onSubmit = handleSubmit(async (values) => {
+    setSubmitError(null);
+
+    try {
+      await login(values);
+      const status = await getCustomerProfileStatus();
+      const nextPath = resolvePostLoginPath({
+        isProfileCompleted: status.isProfileCompleted,
+        returnPath: getRedirectParam(),
+      });
+      router.replace(nextPath);
+    } catch (error) {
+      setSubmitError(getApiErrorMessage(error));
+    }
   });
 
   return (
@@ -106,7 +141,19 @@ const LoginForm = () => {
             </div>
           </div>
 
-          <Button type="submit" variant="solid" size="auth" fullWidth disabled={!isValid}>
+          {submitError ? (
+            <Text as="p" variant="md-medium" className="text-text-error" role="alert">
+              {submitError}
+            </Text>
+          ) : null}
+
+          <Button
+            type="submit"
+            variant="solid"
+            size="auth"
+            fullWidth
+            disabled={!isValid || isSubmitting}
+          >
             로그인
           </Button>
         </form>
