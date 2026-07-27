@@ -215,9 +215,11 @@ export default function EstimateRequestForm() {
     retry: 1,
   });
 
+  // 2026.07.26 정슬기 - [수정] 생성 성공 시 내 견적 목록 캐시 무효화 (대기 목록이 stale하지 않도록)
   const createMutation = useMutation({
     mutationFn: createEstimateRequest,
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST });
       setToastMessage(TOAST_SUCCESS_MESSAGE);
       queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, response.data ?? true);
     },

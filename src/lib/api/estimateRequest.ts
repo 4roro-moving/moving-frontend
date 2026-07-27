@@ -73,7 +73,7 @@ export async function createEstimateRequest(
   payload: CreateEstimateRequestPayload,
 ): Promise<CreateEstimateRequestResponse> {
   const { data } = await axiosInstance.post<CreateEstimateRequestResponse>(
-    API_ROUTES.ESTIMATE_REQUESTS,
+    API_ROUTES.ESTIMATE_REQUESTS.ROOT,
     payload,
   );
 
@@ -97,7 +97,7 @@ export interface ActiveEstimateRequestResponse {
 /** 진행 중인 견적 요청 조회 — 없으면 null */
 export async function getActiveEstimateRequest(): Promise<unknown | null> {
   const { data } = await axiosInstance.get<ActiveEstimateRequestResponse>(
-    API_ROUTES.ESTIMATE_REQUEST_ACTIVE,
+    API_ROUTES.ESTIMATE_REQUESTS.ACTIVE,
   );
 
   if (!data.success) {

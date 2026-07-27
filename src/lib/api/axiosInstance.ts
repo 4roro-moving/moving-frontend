@@ -1,6 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 import { clearAuthTokens, getAccessToken, setAccessToken } from "@/lib/auth/token";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { clearDevAuthTokens, getDevAccessToken, isDevAuthEnabled } from "@/lib/dev-auth";
 
@@ -91,13 +92,13 @@ axiosInstance.interceptors.response.use(
       if (
         isDevAuthEnabled() &&
         typeof window !== "undefined" &&
-        !window.location.pathname.startsWith("/dev-login") &&
+        !window.location.pathname.startsWith(APP_ROUTES.DEV_LOGIN) &&
         !isRedirectingToDevLogin
       ) {
         isRedirectingToDevLogin = true;
         clearDevAuthTokens();
         clearAuthTokens();
-        window.location.assign("/dev-login");
+        window.location.assign(APP_ROUTES.DEV_LOGIN);
       }
 
       return Promise.reject(refreshError);

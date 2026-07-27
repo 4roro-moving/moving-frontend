@@ -16,7 +16,7 @@ interface EstimateDetailDriverSummaryProps {
 function ConfirmedStatus() {
   return (
     <span className="flex shrink-0 items-center gap-4">
-      <ConfirmedCheckIcon className="text-icon-brand size-20 shrink-0" aria-hidden="true" />
+      <ConfirmedCheckIcon className="text-icon-brand size-20 shrink-0" />
       <Text as="span" variant="lg-bold" className="text-text-brand">
         확정견적
       </Text>
@@ -35,6 +35,7 @@ export default function EstimateDetailDriverSummary({
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
 
   return (
+    // 2026.07.25 정슬기 - [수정] Desktop driver-summary: gap 20, badge gap 12, 하단 divider(Figma)
     <section className="flex w-full flex-col gap-16 md:gap-20" aria-label="기사 정보">
       <div className="flex w-full flex-col gap-12">
         <div className="flex flex-wrap items-center gap-8 md:gap-12">
@@ -51,18 +52,18 @@ export default function EstimateDetailDriverSummary({
           )}
         </div>
 
-        <div className="flex w-full items-start justify-between gap-12">
+        <div className="flex w-full items-center justify-between gap-12">
           <Text
             as="p"
             variant="2lg-semibold"
-            className="text-text-secondary min-w-0 break-words md:hidden"
+            className="text-text-secondary min-w-0 wrap-break-word md:hidden"
           >
             {intro}
           </Text>
           <Text
             as="p"
             variant="2xl-semibold"
-            className="text-text-secondary hidden min-w-0 break-words md:block"
+            className="text-text-secondary hidden min-w-0 wrap-break-word md:block"
           >
             {intro}
           </Text>
@@ -82,26 +83,24 @@ export default function EstimateDetailDriverSummary({
       <div className="border-border-subtle w-full border-t" aria-hidden="true" />
 
       <div className="flex w-full flex-col gap-8">
-        <div className="flex w-full items-start justify-between gap-8">
-          <Text as="p" variant="2lg-semibold" className="text-text-primary min-w-0 break-words">
+        <div className="flex w-full items-center justify-between gap-8">
+          <Text as="p" variant="2lg-semibold" className="text-text-primary min-w-0 wrap-break-word">
             {displayName} 기사님
           </Text>
           <button
             type="button"
             className="focus-visible:ring-border-brand rounded-8 flex min-h-44 min-w-44 shrink-0 items-center justify-center gap-4 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-            aria-label={
-              mover.isFavorite ? `${displayName} 기사님 찜 해제` : `${displayName} 기사님 찜하기`
-            }
+            aria-label={`${displayName} 기사님 찜, 현재 찜 ${mover.favoriteCount}개`}
             aria-pressed={mover.isFavorite}
             disabled={favoriteMutation.isPending}
             onClick={() =>
               favoriteMutation.mutate({
                 moverId: mover.id,
-                isFavorite: mover.isFavorite,
+                nextIsFavorite: !mover.isFavorite,
               })
             }
           >
-            <Text as="span" variant="2lg-medium" className="text-text-muted">
+            <Text as="span" variant="2lg-medium" className="text-text-muted" aria-hidden="true">
               {mover.favoriteCount}
             </Text>
             <LikeIcon
@@ -113,13 +112,16 @@ export default function EstimateDetailDriverSummary({
 
         <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
           <div className="flex items-center gap-2">
-            <StarIcon className="text-rating-fill size-20 shrink-0" aria-hidden="true" />
+            <StarIcon className="text-rating-fill size-20 shrink-0" />
             <div className="flex items-center gap-2">
               <Text as="span" variant="md-medium" className="text-text-secondary">
+                <span className="sr-only">평점 </span>
                 {formatRating(mover.averageRating)}
+                <span className="sr-only">점, 리뷰 </span>
               </Text>
-              <Text as="span" variant="md-medium" className="text-text-weak">
-                ({mover.reviewCount})
+              <Text as="span" variant="md-medium" className="text-rating-count">
+                <span aria-hidden="true">({mover.reviewCount})</span>
+                <span className="sr-only">{mover.reviewCount}개</span>
               </Text>
             </div>
           </div>
@@ -147,6 +149,8 @@ export default function EstimateDetailDriverSummary({
           </div>
         </div>
       </div>
+
+      <div className="border-border-subtle w-full border-t" aria-hidden="true" />
     </section>
   );
 }

@@ -9,8 +9,11 @@ export const API_ROUTES = {
   USERS: "/users",
   PROFILES: "/profiles",
   MOVERS: "/movers",
-  ESTIMATE_REQUESTS: "/estimate-requests",
-  ESTIMATE_REQUEST_ACTIVE: "/estimate-requests/active",
+  ESTIMATE_REQUESTS: {
+    ROOT: "/estimate-requests",
+    DETAIL: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
+    ACTIVE: "/estimate-requests/active",
+  },
   // 2026.07.24 정슬기 - [추가] 받은 견적 목록·상세·확정 API 경로
   ESTIMATES: {
     ROOT: "/estimates",
@@ -21,6 +24,11 @@ export const API_ROUTES = {
   FAVORITES: {
     MOVER: (moverId: string) => `/favorites/movers/${moverId}`,
   },
-  REVIEWS: "/reviews",
+  // 2026.07.25 정슬기 - [추가] 리뷰 API 경로
+  REVIEWS: {
+    ROOT: "/reviews",
+    ME: "/reviews/me",
+    REVIEWABLE: "/reviews/reviewable",
+  },
   NOTIFICATIONS: "/notifications",
 } as const;
