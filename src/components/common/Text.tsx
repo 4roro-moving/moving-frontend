@@ -4,10 +4,17 @@ import { type ComponentPropsWithoutRef, type ElementType, type ReactNode } from 
 import { cn } from "@/lib/utils/cn";
 
 /**
- * variant별 타이포 클래스.
- * 반응형(md:/lg:)은 런타임 문자열 연결이 아니라 아래에 리터럴로 두어야
- * Tailwind가 CSS를 생성합니다.
+ * Figma Text Style → Tailwind 클래스 맵
+ *
+ * `variant` 사용 방식 (우선순위: 역할명 → 반응형 객체 → 원자 스타일)
+ * 1. 역할(semantic): `pageTitle`, `fieldLabel` …
+ * 2. 반응형 객체: `{ base, md?, lg? }`
+ * 3. 원자 스타일: `lg-semibold` (Figma Text/Lg/Semibold)
+ *
+ * md:/lg: 클래스는 런타임 문자열 연결이 아니라 아래 맵에 리터럴로 둬야 Tailwind가 CSS를 생성합니다.
  */
+
+/** base (모바일 기본) */
 const TEXT_VARIANT_STYLES = {
   "xs-regular": "text-[length:var(--font-size-12)] leading-[var(--line-height-18)] font-regular",
   "xs-medium": "text-[length:var(--font-size-12)] leading-[var(--line-height-18)] font-medium",
@@ -52,6 +59,7 @@ const TEXT_VARIANT_STYLES = {
   "rating-score": "text-[length:var(--font-size-40)] leading-[var(--line-height-48)] font-bold",
 } as const;
 
+/** md: (태블릿) — 키는 TEXT_VARIANT_STYLES와 동일 */
 const TEXT_VARIANT_STYLES_MD = {
   "xs-regular":
     "md:text-[length:var(--font-size-12)] md:leading-[var(--line-height-18)] md:font-regular",
@@ -121,6 +129,7 @@ const TEXT_VARIANT_STYLES_MD = {
     "md:text-[length:var(--font-size-40)] md:leading-[var(--line-height-48)] md:font-bold",
 } as const;
 
+/** lg: (데스크톱) — 키는 TEXT_VARIANT_STYLES와 동일 */
 const TEXT_VARIANT_STYLES_LG = {
   "xs-regular":
     "lg:text-[length:var(--font-size-12)] lg:leading-[var(--line-height-18)] lg:font-regular",
@@ -199,16 +208,29 @@ const textVariants = cva("tracking-[var(--letter-spacing-0)]", {
   },
 });
 
+/** Figma 원자 Text Style 키 (예: Text/Lg/Semibold → `lg-semibold`) */
 export type TextVariant = keyof typeof TEXT_VARIANT_STYLES;
 
-/** 모바일(base) / 태블릿(md) / 데스크톱(lg)별 Text Style */
+/** breakpoint별 원자 스타일 조합 */
 export interface ResponsiveTextVariant {
   base: TextVariant;
   md?: TextVariant;
   lg?: TextVariant;
 }
 
-export type TextVariantProp = TextVariant | ResponsiveTextVariant;
+/**
+ * 같은 역할의 텍스트가 화면 크기마다 다른 Text Style을 사용할 때 쓰는 조합입니다.
+ * 여러 화면에서 반복되는 조합만 semantic variant로 등록합니다.
+ * 원자 Text Style과 구분하기 위해 역할 기반 camelCase 이름을 사용합니다.
+ */
+export const SEMANTIC_TEXT_VARIANTS = {
+  pageTitle: { base: "2lg-semibold", lg: "2xl-semibold" },
+  fieldLabel: { base: "lg-semibold", lg: "xl-semibold" },
+} as const satisfies Record<string, ResponsiveTextVariant>;
+
+export type SemanticTextVariant = keyof typeof SEMANTIC_TEXT_VARIANTS;
+
+export type TextVariantProp = TextVariant | ResponsiveTextVariant | SemanticTextVariant;
 
 type TextOwnProps<T extends ElementType> = {
   as?: T;
@@ -224,45 +246,47 @@ function isResponsiveTextVariant(variant: TextVariantProp): variant is Responsiv
   return typeof variant === "object" && variant !== null && "base" in variant;
 }
 
-/** Text / input 등에서 Figma Text Style 클래스를 재사용할 때 사용 */
+function isSemanticTextVariant(variant: TextVariantProp): variant is SemanticTextVariant {
+  return typeof variant === "string" && variant in SEMANTIC_TEXT_VARIANTS;
+}
+
+/** semantic 이름을 반응형 객체로 풀거나, 그대로 반환 */
+function resolveTextVariant(variant: TextVariantProp): TextVariant | ResponsiveTextVariant {
+  if (isSemanticTextVariant(variant)) {
+    return SEMANTIC_TEXT_VARIANTS[variant];
+  }
+  return variant;
+}
+
+/** Text / Input 등에서 타이포 클래스만 필요할 때 */
 export function getTextVariantClass(variant: TextVariantProp | undefined) {
   if (!variant) {
     return textVariants({ variant: "md-regular" });
   }
 
-  if (!isResponsiveTextVariant(variant)) {
-    return textVariants({ variant });
+  const resolved = resolveTextVariant(variant);
+
+  if (!isResponsiveTextVariant(resolved)) {
+    return textVariants({ variant: resolved });
   }
 
   return cn(
-    textVariants({ variant: variant.base }),
-    variant.md && TEXT_VARIANT_STYLES_MD[variant.md],
-    variant.lg && TEXT_VARIANT_STYLES_LG[variant.lg],
+    textVariants({ variant: resolved.base }),
+    resolved.md && TEXT_VARIANT_STYLES_MD[resolved.md],
+    resolved.lg && TEXT_VARIANT_STYLES_LG[resolved.lg],
   );
 }
 
 /**
- * Figma Text Style을 코드에서 재사용하기 위한 공통 텍스트 컴포넌트
+ * 공통 텍스트 컴포넌트
+ * `as`를 생략하면 기본적으로 span으로 렌더링합니다.
  *
- * - `variant`는 Figma의 Text Style 이름(Text/Lg/Semibold 등)에 대응합니다.
- * - 반응형이 필요하면 `{ base, md?, lg? }` 객체를 넘깁니다.
- * - 색상은 포함하지 않고, 전역 기본 텍스트 색 또는 semantic color className으로 제어합니다.
- * - `as` prop으로 p, span, h1, strong, label 등 의미에 맞는 HTML 태그를 선택할 수 있습니다.
- *
- * Example:
- * <Text as="span" variant="md-medium" className="text-text-muted">
- *   전체 결과 8건
- * </Text>
- *
- * <Text
- *   as="h1"
- *   variant={{ base: "2lg-semibold", lg: "2xl-semibold" }}
- *   className="text-text-primary"
- * >
- *   기사님 찾기
- * </Text>
+ * @example
+ * <Text variant="md-medium" className="text-text-muted">안내</Text>
+ * <Text as="h1" variant="pageTitle">기사님 찾기</Text>
+ * <Text as="label" variant="fieldLabel" htmlFor="email">이메일</Text>
  */
-export function Text<T extends ElementType = "p">({
+export function Text<T extends ElementType = "span">({
   as,
   variant,
   children,
