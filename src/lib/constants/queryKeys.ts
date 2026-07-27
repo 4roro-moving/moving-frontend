@@ -15,6 +15,7 @@ export const QUERY_KEYS = {
 
   ESTIMATE_REQUESTS: {
     ALL: ["estimateRequests"],
+    ACTIVE: ["estimateRequests", "active"],
     DETAIL: (requestId: number) => ["estimateRequests", requestId],
   },
 

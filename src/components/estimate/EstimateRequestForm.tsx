@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -9,12 +9,15 @@ import { login, refreshSession } from "@/lib/api/auth";
 import {
   buildCreateEstimateRequestPayload,
   createEstimateRequest,
+  getActiveEstimateRequest,
 } from "@/lib/api/estimateRequest";
 import { getApiError } from "@/lib/api/getApiError";
 import { getAccessToken } from "@/lib/auth/token";
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
 
+import ActiveEstimateBlocked from "./ActiveEstimateBlocked";
 import AddressSelectModal, { type AddressItem } from "./AddressSelectModal";
 import Calendar from "./Calendar";
 import DatePickerField from "./DatePickerField";
@@ -152,6 +155,7 @@ function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
 }
 
 export default function EstimateRequestForm() {
+  const queryClient = useQueryClient();
   const [mobileStep, setMobileStep] = useState<MobileStep>(1);
   const [selectedType, setSelectedType] = useState<MoveTypeId | null>(null);
   const [moveDate, setMoveDate] = useState<Date>(() => new Date());
@@ -159,6 +163,7 @@ export default function EstimateRequestForm() {
   const [toAddress, setToAddress] = useState<AddressItem | null>(null);
   const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const canSubmit = Boolean(selectedType && fromAddress && toAddress);
@@ -173,19 +178,22 @@ export default function EstimateRequestForm() {
     let cancelled = false;
 
     async function ensureLogin() {
-      if (getAccessToken()) return;
-
       setIsLoggingIn(true);
       try {
-        try {
-          await refreshSession();
-        } catch {
-          await login(TEST_CUSTOMER);
+        if (!getAccessToken()) {
+          try {
+            await refreshSession();
+          } catch {
+            await login(TEST_CUSTOMER);
+          }
         }
       } catch {
         if (!cancelled) setToastMessage(TOAST_LOGIN_FAILURE_MESSAGE);
       } finally {
-        if (!cancelled) setIsLoggingIn(false);
+        if (!cancelled) {
+          setIsLoggingIn(false);
+          setAuthReady(true);
+        }
       }
     }
 
@@ -195,12 +203,24 @@ export default function EstimateRequestForm() {
     };
   }, []);
 
+  const { data: activeRequest, isLoading: isActiveLoading } = useQuery({
+    queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE,
+    queryFn: getActiveEstimateRequest,
+    enabled: authReady && Boolean(getAccessToken()),
+  });
+
   const createMutation = useMutation({
     mutationFn: createEstimateRequest,
-    onSuccess: () => {
+    onSuccess: (response) => {
       setToastMessage(TOAST_SUCCESS_MESSAGE);
+      queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, response.data ?? true);
     },
-    onError: (error) => {
+    onError: async (error) => {
+      const { code } = getApiError(error);
+      if (code === "ACTIVE_REQUEST_EXISTS") {
+        await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE });
+        return;
+      }
       setToastMessage(getCreateEstimateErrorMessage(error));
     },
   });
@@ -254,6 +274,27 @@ export default function EstimateRequestForm() {
   }
 
   const isBusy = createMutation.isPending || isLoggingIn;
+  const isCheckingActive = !authReady || isActiveLoading;
+
+  if (isCheckingActive) {
+    return (
+      <div className="flex min-h-[40vh] w-full items-center justify-center">
+        <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+        <Text as="p" variant="lg-regular" className="text-text-subtle">
+          불러오는 중...
+        </Text>
+      </div>
+    );
+  }
+
+  if (activeRequest) {
+    return (
+      <>
+        <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+        <ActiveEstimateBlocked />
+      </>
+    );
+  }
 
   return (
     <div

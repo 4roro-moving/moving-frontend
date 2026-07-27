@@ -83,3 +83,26 @@ export async function createEstimateRequest(
 
   return data;
 }
+
+export interface ActiveEstimateRequestResponse {
+  success: boolean;
+  data: unknown | null;
+  message?: string;
+  error?: {
+    code?: string;
+    message?: string;
+  };
+}
+
+/** 진행 중인 견적 요청 조회 — 없으면 null */
+export async function getActiveEstimateRequest(): Promise<unknown | null> {
+  const { data } = await axiosInstance.get<ActiveEstimateRequestResponse>(
+    API_ROUTES.ESTIMATE_REQUEST_ACTIVE,
+  );
+
+  if (!data.success) {
+    throw new Error(data.error?.message || data.message || "진행 중인 견적 조회에 실패했습니다.");
+  }
+
+  return data.data ?? null;
+}

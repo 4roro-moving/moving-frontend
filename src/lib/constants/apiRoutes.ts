@@ -10,6 +10,7 @@ export const API_ROUTES = {
   PROFILES: "/profiles",
   MOVERS: "/movers",
   ESTIMATE_REQUESTS: "/estimate-requests",
+  ESTIMATE_REQUEST_ACTIVE: "/estimate-requests/active",
   ESTIMATES: "/estimates",
   REVIEWS: "/reviews",
   NOTIFICATIONS: "/notifications",
