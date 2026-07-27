@@ -5,7 +5,8 @@ import { useMemo, useState } from "react";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import { isConfirmedEstimate, isPendingEstimate } from "@/lib/utils/estimateFormat";
-import type { EstimateOfferFilter, MoveType, ReceivedEstimateListItem } from "@/types/estimate";
+import type { EstimateOfferFilter, ReceivedEstimateListItem } from "@/types/estimate";
+import type { MoveType } from "@/types/move";
 
 import EstimateOfferCard from "./EstimateOfferCard";
 
@@ -56,8 +57,8 @@ export default function EstimateOfferSection({
       </div>
 
       <div className="flex flex-col gap-4">
-        <span className="sr-only">견적 상태 필터</span>
         <Select
+          label="견적 상태 필터"
           desc="전체"
           defaultValue="all"
           size="lg"

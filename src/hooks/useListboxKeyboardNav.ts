@@ -6,6 +6,8 @@ interface UseListboxKeyboardNavParams {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
+  /** 다열 리스트일 때 세로 이동 간격 (기본 1) */
+  columns?: number;
 }
 
 /**
@@ -21,6 +23,7 @@ export const useListboxKeyboardNav = <
   isOpen,
   onOpen,
   onClose,
+  columns = 1,
 }: UseListboxKeyboardNavParams) => {
   const triggerRef = useRef<TTrigger>(null);
   const listboxRef = useRef<TListbox>(null);
@@ -54,14 +57,39 @@ export const useListboxKeyboardNav = <
     );
     if (options.length === 0) return;
 
-    const currentIndex = options.indexOf(document.activeElement as HTMLElement);
+    const currentIndex = Math.max(0, options.indexOf(document.activeElement as HTMLElement));
+    const columnIndex = currentIndex % columns;
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      options[(currentIndex + 1) % options.length]?.focus();
+      if (columns === 1) {
+        options[(currentIndex + 1) % options.length]?.focus();
+      } else {
+        const nextIndex = currentIndex + columns;
+        if (nextIndex < options.length) {
+          options[nextIndex]?.focus();
+        }
+      }
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      options[(currentIndex - 1 + options.length) % options.length]?.focus();
+      if (columns === 1) {
+        options[(currentIndex - 1 + options.length) % options.length]?.focus();
+      } else {
+        const nextIndex = currentIndex - columns;
+        if (nextIndex >= 0) {
+          options[nextIndex]?.focus();
+        }
+      }
+    } else if (event.key === "ArrowRight" && columns > 1) {
+      event.preventDefault();
+      if (columnIndex < columns - 1 && currentIndex + 1 < options.length) {
+        options[currentIndex + 1]?.focus();
+      }
+    } else if (event.key === "ArrowLeft" && columns > 1) {
+      event.preventDefault();
+      if (columnIndex > 0) {
+        options[currentIndex - 1]?.focus();
+      }
     } else if (event.key === "Escape") {
       event.preventDefault();
       onClose();

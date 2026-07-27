@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
-
-import { svgrOptions } from "./svgr.options";
+import { svgrColorOptions, svgrOptions } from "./svgr.options";
 
 const nextConfig: NextConfig = {
   images: {
@@ -13,7 +12,23 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     rules: {
+      // 다색: convertColors 없음 (원색 유지)
+      "**/icons/color/*.svg": {
+        loaders: [
+          {
+            loader: "@svgr/webpack",
+            options: svgrColorOptions,
+          },
+        ],
+        as: "*.js",
+      },
+      // 단색: currentColor 변환. icons/color는 위 규칙만 타도록 제외
       "*.svg": {
+        condition: {
+          not: {
+            path: "**/icons/color/**",
+          },
+        },
         loaders: [
           {
             loader: "@svgr/webpack",

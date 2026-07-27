@@ -8,9 +8,10 @@ import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import { formatPrice, formatRating } from "@/lib/utils/estimateFormat";
-import type { MoveType, ReceivedEstimateListItem } from "@/types/estimate";
+import type { ReceivedEstimateListItem } from "@/types/estimate";
+import type { MoveType } from "@/types/move";
 
-import MoveTypeChip, { DesignatedChip } from "./MoveTypeChip";
+import { MoveTypeChip, DesignatedChip } from "./MoveTypeChip";
 
 interface EstimateOfferCardProps {
   offer: ReceivedEstimateListItem;

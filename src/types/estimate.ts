@@ -1,6 +1,6 @@
 import type { Pagination } from "@/types/pagination";
 
-export type MoveType = "SMALL" | "HOME" | "OFFICE";
+import type { MoveType } from "@/types/move";
 
 // 2026.07.24 정슬기 - [수정] Mock pending/confirmed 대신 백엔드 EstimateStatus 응답 구조 적용
 export type EstimateStatus = "SENT" | "CONFIRMED" | "EXPIRED" | "CANCELED";

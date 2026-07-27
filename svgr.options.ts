@@ -1,6 +1,6 @@
 /** SVGR 공통 옵션 — turbopack/webpack 빌드 모두 동일하게 적용 */
 export const svgrOptions = {
-  // cosmiconfig가 svgr.config.ts를 잘못 로드하며 실패하는 것을 방지
+  /** next.config에서 options로 직접 주입하므로 cosmiconfig 파일 탐색 비활성화 */
   runtimeConfig: false,
   icon: true,
   svgProps: {
@@ -27,5 +27,14 @@ export const svgrOptions = {
         },
       },
     ],
+  },
+} satisfies Record<string, unknown>;
+/** 다색 아이콘: convertColors 없이 fill/stroke 그대로 */
+export const svgrColorOptions = {
+  runtimeConfig: false,
+  icon: true,
+  svgProps: {
+    focusable: "false",
+    "aria-hidden": "true",
   },
 } satisfies Record<string, unknown>;

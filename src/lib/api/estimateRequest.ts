@@ -3,8 +3,7 @@ import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { formatDateToISODate } from "@/lib/utils/date";
-
-export type MoveType = "SMALL" | "HOME" | "OFFICE";
+import type { MoveType } from "@/types/move";
 
 export interface EstimateAddressPayload {
   zipCode: string;
