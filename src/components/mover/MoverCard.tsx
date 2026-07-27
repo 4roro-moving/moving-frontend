@@ -6,6 +6,7 @@ import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { DriverBadgeIcon, LikeIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import type { Mover } from "@/types/mover";
+import type { MoveType } from "@/types/move";
 
 import MoverMeta from "./MoverMeta";
 import { MoverProfileImage } from "./MoverProfileImage";
@@ -15,6 +16,28 @@ interface MoverCardProps {
   variant?: "full" | "compact";
   className?: string;
   onFavoriteError?: (message: string) => void;
+}
+
+interface MoverServiceTypeChipsProps {
+  serviceTypes: MoveType[];
+  size: "sm" | "md";
+  className?: string;
+}
+
+/** Figma desktop: gap 12. compact·좁은 카드(sm 칩)는 더 촘촘하게 */
+function MoverServiceTypeChips({ serviceTypes, size, className }: MoverServiceTypeChipsProps) {
+  return (
+    <ul
+      className={cn("flex flex-wrap items-start", size === "sm" ? "gap-8" : "gap-12", className)}
+      aria-label="제공 이사 유형"
+    >
+      {serviceTypes.map((moveType) => (
+        <li key={moveType}>
+          <MoveTypeChip moveType={moveType} size={size} />
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 interface FavoriteButtonProps {
@@ -97,7 +120,7 @@ export default function MoverCard({
         )}
       >
         <div className="flex flex-col gap-12">
-          <MoveTypeChip moveType={mover.serviceType} size="sm" />
+          <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
           <div className="flex flex-col gap-16">
             <Text as="h3" variant="lg-semibold" className="text-text-secondary">
               {mover.title}
@@ -147,7 +170,7 @@ export default function MoverCard({
       )}
     >
       <div className="flex flex-col gap-8 min-[744px]:hidden">
-        <MoveTypeChip moveType={mover.serviceType} size="sm" />
+        <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
 
         <div className="flex w-full flex-col gap-16">
           <div className="flex flex-col">
@@ -203,7 +226,7 @@ export default function MoverCard({
 
       <div className="hidden min-[744px]:contents">
         <div className="flex min-h-32 items-center">
-          <MoveTypeChip moveType={mover.serviceType} size="md" />
+          <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="md" />
         </div>
 
         <div className="flex flex-row items-start gap-20">

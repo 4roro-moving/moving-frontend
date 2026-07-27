@@ -8,7 +8,8 @@ export type MoverSort = "reviewCount" | "rating" | "career" | "confirmedCount";
 export interface Mover {
   id: string;
   name: string;
-  serviceType: MoveType;
+  /** 제공 이사 유형 (소형/가정/사무실 등, 1개 이상) */
+  serviceTypes: MoveType[];
   /** 서비스 가능 지역 (시·도 id) */
   serviceAreas: RegionId[];
   title: string;
