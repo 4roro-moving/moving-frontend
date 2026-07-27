@@ -61,8 +61,8 @@ function FavoriteButton({
     <div className="flex shrink-0 items-center justify-center gap-2">
       <button
         type="button"
-        className="focus-visible:ring-border-brand rounded-8 cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
-        aria-label={`${moverName} 기사님 ${isFavorite ? "찜 해제" : "찜하기"}`}
+        className="focus-visible:ring-border-brand rounded-8 cursor-pointer focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+        aria-label={`${moverName} 기사님 찜하기`}
         aria-pressed={isFavorite}
         onClick={() => onToggle(!isFavorite)}
       >
