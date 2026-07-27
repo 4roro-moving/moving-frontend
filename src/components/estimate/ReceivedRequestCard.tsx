@@ -18,7 +18,12 @@ function formatElapsedTime(date: string) {
   return `${Math.floor(hours / 24)}일 전`;
 }
 
-export default function ReceivedRequestCard({ request }: { request: MoverEstimateRequest }) {
+interface ReceivedRequestCardProps {
+  request: MoverEstimateRequest;
+  onSendEstimate: (request: MoverEstimateRequest) => void;
+}
+
+export default function ReceivedRequestCard({ request, onSendEstimate }: ReceivedRequestCardProps) {
   return (
     <article className="border-border-subtle bg-background-surface rounded-20 flex flex-col gap-24 border px-20 py-24 shadow-[0_0_10px_rgba(220,220,220,0.2)] min-[744px]:gap-32 min-[744px]:px-40 min-[744px]:py-32 lg:px-40 lg:py-32">
       <div className="flex flex-col gap-16 min-[744px]:gap-24">
@@ -91,6 +96,7 @@ export default function ReceivedRequestCard({ request }: { request: MoverEstimat
         <button
           className="bg-background-brand text-text-inverse order-1 flex h-[54px] items-center justify-center gap-4 rounded-xl font-semibold"
           type="button"
+          onClick={() => onSendEstimate(request)}
         >
           견적 보내기
           <Image src="/icons/write.svg" alt="" width={24} height={24} />

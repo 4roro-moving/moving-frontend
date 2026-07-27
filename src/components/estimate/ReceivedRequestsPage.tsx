@@ -5,10 +5,12 @@ import { FormEvent, useState } from "react";
 
 import Modal from "@/components/common/Modal";
 import { Text } from "@/components/common/Text";
-import { useMoverEstimateRequests } from "@/hooks/useMoverEstimateRequests";
-import type { MoveType, RequestSort } from "@/types/moverEstimateRequest";
+import Toast from "@/components/common/Toast";
+import { useMoverEstimateRequests, useSendMoverEstimate } from "@/hooks/useMoverEstimateRequests";
+import type { MoveType, MoverEstimateRequest, RequestSort } from "@/types/moverEstimateRequest";
 
 import ReceivedRequestCard from "./ReceivedRequestCard";
+import SendEstimateModal, { type SendEstimateInput } from "./SendEstimateModal";
 
 const MOVE_TYPES: { value: MoveType; label: string }[] = [
   { value: "SMALL", label: "소형이사" },
@@ -24,6 +26,8 @@ export default function ReceivedRequestsPage() {
   const [serviceAreaOnly, setServiceAreaOnly] = useState(false);
   const [sort, setSort] = useState<RequestSort>("requestedAt");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<MoverEstimateRequest | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const query = useMoverEstimateRequests({
     keyword: keyword || undefined,
@@ -33,6 +37,7 @@ export default function ReceivedRequestsPage() {
     sort,
     limit: 10,
   });
+  const sendEstimateMutation = useSendMoverEstimate();
 
   function submitSearch(event: FormEvent) {
     event.preventDefault();
@@ -45,6 +50,26 @@ export default function ReceivedRequestsPage() {
     } else {
       setMoveTypes([...moveTypes, moveType]);
     }
+  }
+
+  function handleSendEstimate(input: SendEstimateInput) {
+    if (!selectedRequest) return;
+
+    sendEstimateMutation.mutate(
+      {
+        estimateRequestId: selectedRequest.id,
+        input,
+      },
+      {
+        onSuccess: () => {
+          setSelectedRequest(null);
+          setToastMessage("견적을 보냈습니다.");
+        },
+        onError: (error) => {
+          setToastMessage(error instanceof Error ? error.message : "견적 전송에 실패했습니다.");
+        },
+      },
+    );
   }
 
   const items = query.data?.pages.flatMap((page) => page.items) ?? [];
@@ -189,7 +214,11 @@ export default function ReceivedRequestsPage() {
             <>
               <div className="grid w-full grid-cols-1 gap-24 min-[744px]:max-w-[588px] lg:max-w-none lg:grid-cols-2">
                 {items.map((request) => (
-                  <ReceivedRequestCard key={request.id} request={request} />
+                  <ReceivedRequestCard
+                    key={request.id}
+                    request={request}
+                    onSendEstimate={setSelectedRequest}
+                  />
                 ))}
               </div>
               {query.hasNextPage && (
@@ -286,6 +315,21 @@ export default function ReceivedRequestsPage() {
           </section>
         </div>
       </Modal>
+
+      {selectedRequest && (
+        <SendEstimateModal
+          request={selectedRequest}
+          isPending={sendEstimateMutation.isPending}
+          onSubmit={handleSendEstimate}
+          onClose={() => setSelectedRequest(null)}
+        />
+      )}
+
+      <Toast
+        open={Boolean(toastMessage)}
+        message={toastMessage ?? ""}
+        onClose={() => setToastMessage(null)}
+      />
     </>
   );
 }
