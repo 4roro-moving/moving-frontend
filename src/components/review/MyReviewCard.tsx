@@ -1,11 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { ProfileDefaultIcon } from "@/icons";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { formatKoreanDateLong } from "@/lib/utils/estimateFormat";
 import type { MyReviewItem } from "@/types/review";
 
@@ -15,15 +17,18 @@ interface MyReviewCardProps {
 
 // 2026.07.27 정슬기 - [추가] 내가 작성한 리뷰 카드
 // 2026.07.27 정슬기 - [수정] Mobile 주소 줄바꿈·타이포 / Desktop 작성일 우측 배치
+// 2026.07.27 정슬기 - [수정] 카드 클릭 시 기사님 상세 페이지로 이동
 export default function MyReviewCard({ review }: MyReviewCardProps) {
   const { mover, estimateRequest, rating, content, createdAt } = review;
   const displayName = mover.nickname?.trim() || mover.name;
   const titleId = `my-review-${review.id}-title`;
 
   return (
-    <article
+    <Link
+      href={APP_ROUTES.MOVERS.DETAIL(mover.id)}
       aria-labelledby={titleId}
-      className="bg-background-surface border-border-subtle shadow-estimate-card rounded-16 md:rounded-20 flex w-full flex-col gap-12 border-[0.5px] px-16 py-20 md:gap-16 md:px-24 md:py-28 lg:gap-20 lg:px-32 lg:py-32"
+      aria-label={`${displayName} 기사님 상세 보기`}
+      className="bg-background-surface border-border-subtle shadow-estimate-card rounded-16 md:rounded-20 focus-visible:ring-border-brand flex w-full flex-col gap-12 border-[0.5px] px-16 py-20 focus-visible:ring-2 focus-visible:outline-none md:gap-16 md:px-24 md:py-28 lg:gap-20 lg:px-32 lg:py-32"
     >
       <div className="flex w-full flex-col gap-12 md:gap-16">
         <div className="flex flex-wrap items-center gap-8">
@@ -101,6 +106,6 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
       >
         {formatKoreanDateLong(createdAt)}
       </Text>
-    </article>
+    </Link>
   );
 }
