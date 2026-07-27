@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import Search from "@/components/common/Search/Search";
@@ -40,33 +40,51 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
   const [keyword, setKeyword] = useState(filters.keyword);
   const [prevKeyword, setPrevKeyword] = useState(filters.keyword);
   const [filterKey, setFilterKey] = useState(0);
+  const searchDebounceTimerRef = useRef<number | null>(null);
 
   if (filters.keyword !== prevKeyword) {
     setPrevKeyword(filters.keyword);
     setKeyword(filters.keyword);
   }
 
+  const clearSearchDebounceTimer = useCallback(() => {
+    if (searchDebounceTimerRef.current === null) {
+      return;
+    }
+    window.clearTimeout(searchDebounceTimerRef.current);
+    searchDebounceTimerRef.current = null;
+  }, []);
+
+  const replaceUrl = useCallback(
+    (next: MoversSearchParamsState) => {
+      const query = buildMoversQueryString(next);
+      router.replace(query ? `${pathname}?${query}` : pathname);
+    },
+    [pathname, router],
+  );
+
   useEffect(() => {
     if (keyword === filters.keyword) {
       return;
     }
 
-    const timer = window.setTimeout(() => {
-      const next: MoversSearchParamsState = { ...filters, keyword };
-      const query = buildMoversQueryString(next);
-      router.replace(query ? `${pathname}?${query}` : pathname);
+    clearSearchDebounceTimer();
+    searchDebounceTimerRef.current = window.setTimeout(() => {
+      searchDebounceTimerRef.current = null;
+      replaceUrl({ ...filters, keyword });
     }, SEARCH_DEBOUNCE_MS);
 
-    return () => window.clearTimeout(timer);
-  }, [keyword, filters, pathname, router]);
+    return () => clearSearchDebounceTimer();
+  }, [keyword, filters, replaceUrl, clearSearchDebounceTimer]);
 
+  /** 지역·서비스·정렬은 즉시 반영. 대기 중인 검색 디바운스는 취소하고 현재 keyword와 합친다. */
   function replaceFilters(patch: Partial<MoversSearchParamsState>) {
-    const next: MoversSearchParamsState = { ...filters, ...patch };
-    const query = buildMoversQueryString(next);
-    router.replace(query ? `${pathname}?${query}` : pathname);
+    clearSearchDebounceTimer();
+    replaceUrl({ ...filters, keyword, ...patch });
   }
 
   function handleReset() {
+    clearSearchDebounceTimer();
     setKeyword(MOVERS_SEARCH_DEFAULTS.keyword);
     setFilterKey((prev) => prev + 1);
     router.replace(pathname);
