@@ -1,3 +1,4 @@
+import { REGION_OPTIONS } from "@/lib/constants/region";
 import type { MoveType } from "@/types/move";
 import type { MoverSort, MoversListQuery } from "@/types/mover";
 
@@ -15,6 +16,9 @@ export const MOVERS_SEARCH_DEFAULTS = {
 export const MOVER_SORT_VALUES: MoverSort[] = ["rating", "reviewCount", "career", "confirmedCount"];
 
 export const MOVE_TYPE_VALUES: MoveType[] = ["SMALL", "HOME", "OFFICE"];
+
+/** URL·필터에서 허용하는 지역 id 문자열 (REGION_OPTIONS와 동일) */
+const MOVER_SERVICE_AREA_VALUES = new Set(REGION_OPTIONS.map((region) => String(region.value)));
 
 export interface MoversSearchParamsState {
   keyword: string;
@@ -50,12 +54,21 @@ function parseMoveType(value: string | undefined): string {
   return MOVERS_ALL_VALUE;
 }
 
+function parseServiceArea(value: string | undefined): string {
+  if (!value || value === MOVERS_ALL_VALUE) {
+    return MOVERS_ALL_VALUE;
+  }
+  if (MOVER_SERVICE_AREA_VALUES.has(value)) {
+    return value;
+  }
+  return MOVERS_ALL_VALUE;
+}
+
 /** URL query params를 기사님 찾기 필터 상태로 변환 */
 export function parseMoversSearchParams(searchParams: SearchParamsInput): MoversSearchParamsState {
   return {
     keyword: getParam(searchParams, "keyword")?.trim() ?? MOVERS_SEARCH_DEFAULTS.keyword,
-    serviceArea:
-      getParam(searchParams, "serviceArea")?.trim() || MOVERS_SEARCH_DEFAULTS.serviceArea,
+    serviceArea: parseServiceArea(getParam(searchParams, "serviceArea")?.trim()),
     moveType: parseMoveType(getParam(searchParams, "moveType")?.trim()),
     sort: parseSort(getParam(searchParams, "sort")?.trim()),
   };
