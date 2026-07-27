@@ -7,18 +7,13 @@ import Input from "@/components/common/Input/Input";
 import Modal from "@/components/common/Modal";
 import { Text } from "@/components/common/Text";
 import Textarea from "@/components/common/Input/Textarea";
+import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
 import { formatKoreanDateTime } from "@/lib/utils/date";
-import type { MoveType, MoverEstimateRequest } from "@/types/moverEstimateRequest";
+import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 const MAX_PRICE = 100_000_000;
 const MIN_COMMENT_LENGTH = 10;
 const MAX_COMMENT_LENGTH = 1000;
-
-const MOVE_TYPE_LABEL: Record<MoveType, string> = {
-  SMALL: "소형이사",
-  HOME: "가정이사",
-  OFFICE: "사무실이사",
-};
 
 export interface SendEstimateInput {
   price: number;
