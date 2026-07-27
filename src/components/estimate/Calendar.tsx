@@ -15,9 +15,10 @@ interface CalendarProps {
   onSelect: (date: Date) => void;
   /** 이 날짜 이전은 선택 불가 (기본: 오늘) */
   minDate?: Date;
+  className?: string;
 }
 
-export default function Calendar({ selected, onSelect, minDate }: CalendarProps) {
+export default function Calendar({ selected, onSelect, minDate, className }: CalendarProps) {
   const selectedMonthKey = selected.getFullYear() * 12 + selected.getMonth();
   const [viewMonth, setViewMonth] = useState<Date>(
     () => new Date(selected.getFullYear(), selected.getMonth(), 1),
@@ -37,7 +38,12 @@ export default function Calendar({ selected, onSelect, minDate }: CalendarProps)
   const isPrevDisabled = viewMonth.getTime() <= minMonth.getTime();
 
   return (
-    <div className="rounded-16 border-border-muted bg-background-surface flex h-[352px] w-full flex-col gap-16 overflow-hidden border p-16 shadow-[2px_2px_10px_0_rgba(224,224,224,0.20)]">
+    <div
+      className={cn(
+        "rounded-16 border-border-muted bg-background-surface flex h-[352px] w-full flex-col gap-16 overflow-hidden border p-16 shadow-[2px_2px_10px_0_rgba(224,224,224,0.20)]",
+        className,
+      )}
+    >
       {/* Header: 월 이동 */}
       <div className="flex shrink-0 items-center justify-between">
         <button

@@ -27,7 +27,7 @@ const Header = ({ isLogin = false }: HeaderProps) => {
 
   return (
     <header className="border-border-subtle bg-background-surface w-full border-b">
-      <div className="h-gnb-height-desktop flex items-center justify-between px-[var(--gnb-padding-x-desktop)] py-26">
+      <div className="h-gnb-height-desktop px-gnb-padding-x-desktop flex items-center justify-between py-26">
         <div className="flex items-center gap-80">
           <Link href="/" className="shrink-0">
             <Image src="/icons/logo_full.svg" alt="4roro-moving" width={100} height={37} priority />
