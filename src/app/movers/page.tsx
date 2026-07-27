@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { MoversPageView } from "@/components/mover/MoversPageView";
-import { parseMoversSearchParams } from "@/lib/movers/searchParams";
+import { parseMoversSearchParams } from "@/lib/utils/moversSearchParams";
 
 export const metadata: Metadata = {
   title: "기사님 찾기",

@@ -9,8 +9,9 @@ export const QUERY_KEYS = {
   },
 
   MOVERS: {
-    ALL: ["movers"],
-    DETAIL: (moverId: string) => ["movers", moverId],
+    ALL: ["movers"] as const,
+    LIST: ["movers", "list"] as const,
+    DETAIL: (moverId: string) => ["movers", "detail", moverId] as const,
   },
 
   ESTIMATE_REQUESTS: {

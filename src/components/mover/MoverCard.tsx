@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 import { DriverBadgeIcon, LikeIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import type { Mover } from "@/types/mover";
@@ -7,6 +5,7 @@ import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 
 import MoverMeta from "./MoverMeta";
+import { MoverProfileImage } from "./MoverProfileImage";
 
 interface MoverCardProps {
   mover: Mover;
@@ -68,9 +67,8 @@ export default function MoverCard({ mover, variant = "full", className }: MoverC
             </Text>
             <div className="flex items-center gap-8">
               <div className="bg-background-avatar rounded-12 relative size-48 shrink-0 overflow-hidden">
-                <Image
+                <MoverProfileImage
                   src={mover.profileImageSrc}
-                  alt=""
                   width={75}
                   height={75}
                   className="absolute top-[-7px] left-[-12px] size-[75px] max-w-none object-cover"
@@ -133,9 +131,8 @@ export default function MoverCard({ mover, variant = "full", className }: MoverC
 
           <div className="flex items-center gap-8">
             <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
-              <Image
+              <MoverProfileImage
                 src={mover.profileImageSrc}
-                alt=""
                 width={75}
                 height={75}
                 className="absolute top-[-7px] left-[-12.5px] size-[75px] max-w-none object-cover"
@@ -181,9 +178,8 @@ export default function MoverCard({ mover, variant = "full", className }: MoverC
 
         <div className="flex flex-row items-start gap-20">
           <div className="bg-background-avatar rounded-12 relative size-[134px] shrink-0 overflow-hidden">
-            <Image
+            <MoverProfileImage
               src={mover.profileImageSrc}
-              alt=""
               width={192}
               height={192}
               className="absolute top-[-16px] left-[-29px] size-[192px] max-w-none object-cover"

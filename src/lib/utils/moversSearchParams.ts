@@ -1,11 +1,9 @@
 import type { MoveType } from "@/types/move";
 import type { MoverSort } from "@/types/mover";
 
-/**
- * 기사님 찾기 페이지의 필터 상태와 URL query params를 서로 변환합니다.
- * 기본값은 query string에서 생략해 URL을 간결하게 유지합니다.
- */
 export const MOVERS_ALL_VALUE = "all" as const;
+
+export const MOVERS_PAGE_LIMIT = 10;
 
 export const MOVERS_SEARCH_DEFAULTS = {
   keyword: "",

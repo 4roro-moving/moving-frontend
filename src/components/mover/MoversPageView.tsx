@@ -4,7 +4,7 @@ import MoverCard from "@/components/mover/MoverCard";
 import { MoversFilters } from "@/components/mover/MoversFilters";
 import { MoversList } from "@/components/mover/MoversList";
 import { MOCK_FAVORITE_MOVERS } from "@/components/mover/constants";
-import type { MoversSearchParamsState } from "@/lib/movers/searchParams";
+import type { MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
 
 interface MoversPageViewProps {
   filters: MoversSearchParamsState;

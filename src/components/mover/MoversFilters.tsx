@@ -14,7 +14,7 @@ import {
   MOVERS_ALL_VALUE,
   MOVERS_SEARCH_DEFAULTS,
   type MoversSearchParamsState,
-} from "@/lib/movers/searchParams";
+} from "@/lib/utils/moversSearchParams";
 import type { MoverSort } from "@/types/mover";
 
 const ALL_OPTION = { value: MOVERS_ALL_VALUE, label: "전체" } as const;
