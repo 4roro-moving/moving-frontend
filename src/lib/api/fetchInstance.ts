@@ -1,4 +1,6 @@
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
+import { getAccessToken, setAccessToken } from "@/lib/auth/token";
+import { getDevAccessToken, isDevAuthEnabled } from "@/lib/dev-auth";
 import { ApiError, type ApiSuccessResponse, type ApiErrorResponse } from "@/types/api";
 import type { PaginatedApiSuccessResponse, Pagination } from "@/types/pagination";
 
@@ -52,6 +54,11 @@ const setApiError = (status: number, body: unknown): ApiError => {
   );
 };
 
+/** axiosInstance와 동일 기준으로 Access Token을 고른다. */
+function resolveAccessToken(): string | null {
+  return isDevAuthEnabled() ? getDevAccessToken() : getAccessToken();
+}
+
 // 서버(Server Component 등)에서 실행 중이면 브라우저 쿠키가 자동으로 안 실리므로 직접 포워딩한다.
 const getRequestHeaders = async (
   customHeaders?: HeadersInit,
@@ -61,6 +68,14 @@ const getRequestHeaders = async (
 
   if (!isFormData && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
+  }
+
+  // 백엔드 authenticate는 Authorization: Bearer 만 본다 (axiosInstance와 동일)
+  if (!headers.has("Authorization")) {
+    const accessToken = resolveAccessToken();
+    if (accessToken) {
+      headers.set("Authorization", `Bearer ${accessToken}`);
+    }
   }
 
   if (typeof window === "undefined") {
@@ -82,7 +97,7 @@ const buildTimeoutSignal = (signal?: AbortSignal): AbortSignal => {
   return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
 };
 
-// 토큰 리프레시 요청
+// 토큰 리프레시 요청 — 성공 시 새 accessToken을 메모리에 저장해 재시도에 사용
 const refreshAccessToken = async (): Promise<void> => {
   // SSR 에서는 쿠키 헤더 추가
   const headers = await getRequestHeaders();
@@ -94,9 +109,25 @@ const refreshAccessToken = async (): Promise<void> => {
     signal: buildTimeoutSignal(),
   });
 
-  if (!res.ok) {
-    const body = (await res.json().catch(() => ({}))) as ApiErrorResponse | Record<string, never>;
+  const body = (await res.json().catch(() => ({}))) as
+    | {
+        success?: boolean;
+        data?: { tokens?: { accessToken?: string } };
+      }
+    | ApiErrorResponse
+    | Record<string, never>;
+
+  if (!res.ok || body.success === false) {
     throw setApiError(res.status, body);
+  }
+
+  const accessToken =
+    "data" in body && body.data && typeof body.data === "object"
+      ? body.data.tokens?.accessToken
+      : undefined;
+
+  if (accessToken) {
+    setAccessToken(accessToken);
   }
 };
 
