@@ -37,14 +37,14 @@ const Toast = ({ children, onClose }: ToastProps) => {
       aria-live="polite"
       className={cn(
         "pointer-events-none fixed inset-x-0 z-[9999] flex justify-center",
-        "top-70 lg:top-[103px]",
+        "top-70 lg:top-103",
         "px-8 md:px-52 lg:px-0",
       )}
     >
       <div
         className={cn(
           "bg-toast-background text-toast-text pointer-events-auto flex w-full items-center",
-          "shadow-[-2px_-2px_10px_0_rgba(46,46,46,0.04),2px_2px_10px_0_rgba(46,46,46,0.04)]",
+          "shadow-toast",
           "rounded-12 max-w-[360px] px-24 py-14",
           "md:max-w-[640px]",
           "lg:max-w-container-desktop lg:rounded-16 lg:px-32 lg:py-20",
