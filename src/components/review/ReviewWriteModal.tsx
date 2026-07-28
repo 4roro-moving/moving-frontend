@@ -53,7 +53,8 @@ function ReviewWriteModalContent({
     },
   });
 
-  const displayName = item.mover.nickname?.trim() || item.mover.name;
+  // GET /reviews/reviewable 응답 mover에는 name이 없고 nickname만 존재
+  const displayName = item.mover.nickname?.trim() ?? "";
   const trimmedContent = content.trim();
   const isPending = createMutation.isPending;
   const isSubmitDisabled = isPending || rating < 1 || trimmedContent.length < MIN_CONTENT_LENGTH;

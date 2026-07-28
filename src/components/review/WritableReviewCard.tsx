@@ -18,7 +18,8 @@ interface WritableReviewCardProps {
 // 2026.07.27 정슬기 - [수정] Mobile 세로 / Tablet 강화 / Desktop 가로 CTA 반응형
 export default function WritableReviewCard({ item, onWriteClick }: WritableReviewCardProps) {
   const { mover, estimateRequest, price } = item;
-  const displayName = mover.nickname?.trim() || mover.name;
+  // GET /reviews/reviewable 응답 mover에는 name이 없고 nickname만 존재
+  const displayName = mover.nickname?.trim() ?? "";
   const titleId = `writable-review-${item.estimateId}-title`;
   const careerLabel = mover.career == null ? "-" : `${mover.career}년`;
   const ratingValue = mover.averageRating ?? 0;
