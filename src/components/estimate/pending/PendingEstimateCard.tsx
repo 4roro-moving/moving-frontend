@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import Button, { buttonVariants } from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
-import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip, DesignatedChip } from "@/components/estimate/received/MoveTypeChip";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { useConfirmPendingEstimate } from "@/hooks/usePendingEstimateDetail";
 import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
@@ -16,6 +16,7 @@ import {
   isConfirmedEstimate,
   isPendingEstimate,
 } from "@/lib/utils/estimateFormat";
+import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 import type { MyPendingEstimateOffer } from "@/types/estimate";
 import type { MoveType } from "@/types/move";
 
@@ -110,7 +111,7 @@ export default function PendingEstimateCard({
               <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
                 {mover.imageUrl ? (
                   <Image
-                    src={mover.imageUrl}
+                    src={resolveMoverProfileImageSrc(mover.imageUrl)}
                     alt={`${displayName} 기사님 프로필`}
                     fill
                     sizes="50px"

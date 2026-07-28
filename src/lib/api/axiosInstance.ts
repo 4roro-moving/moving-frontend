@@ -1,9 +1,15 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 import { clearAuthTokens, getAccessToken, setAccessToken } from "@/lib/auth/token";
+import { notifyAuthSessionChange } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
-import { clearDevAuthTokens, getDevAccessToken, isDevAuthEnabled } from "@/lib/dev-auth";
+import {
+  clearDevAuthTokens,
+  getDevAccessToken,
+  isDevAuthEnabled,
+  setDevAuthTokens,
+} from "@/lib/dev-auth";
 
 type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -33,21 +39,35 @@ function isAuthPath(url?: string): boolean {
 
 async function refreshAccessToken(): Promise<string> {
   if (!refreshPromise) {
+    // Refresh Token은 HttpOnly Cookie — body 없이 withCredentials로 전송
     refreshPromise = axios
       .post<{
         success: boolean;
         data?: { tokens?: { accessToken?: string } };
-      }>(`${API_BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {}, { withCredentials: true })
+      }>(`${API_BASE_URL}${API_ROUTES.AUTH.REFRESH}`, undefined, {
+        withCredentials: true,
+      })
       .then((response) => {
         const accessToken = response.data.data?.tokens?.accessToken;
         if (!response.data.success || !accessToken) {
           throw new Error("세션 갱신에 실패했습니다.");
         }
-        setAccessToken(accessToken);
+
+        if (isDevAuthEnabled()) {
+          setDevAuthTokens({ accessToken });
+        } else {
+          setAccessToken(accessToken);
+        }
+
         return accessToken;
       })
       .catch((error) => {
         clearAuthTokens();
+        if (isDevAuthEnabled()) {
+          clearDevAuthTokens();
+        } else {
+          notifyAuthSessionChange();
+        }
         throw error;
       })
       .finally(() => {

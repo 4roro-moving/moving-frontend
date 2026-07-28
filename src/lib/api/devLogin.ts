@@ -25,7 +25,8 @@ export interface DevLoginResponse {
   };
   tokens: {
     accessToken: string;
-    refreshToken: string;
+    /** HttpOnly Cookie 전환 후에는 생략될 수 있음 */
+    refreshToken?: string;
   };
 }
 

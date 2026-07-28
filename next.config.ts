@@ -1,14 +1,11 @@
 import type { NextConfig } from "next";
+import { getAllowedImageRemotePatterns } from "./src/lib/constants/allowedImageHosts";
 import { svgrColorOptions, svgrOptions } from "./svgr.options";
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**",
-      },
-    ],
+    // https://** 제거. seed picsum + NEXT_PUBLIC_PROFILE_IMAGE_HOSTS만 허용
+    remotePatterns: getAllowedImageRemotePatterns(),
   },
   turbopack: {
     rules: {
