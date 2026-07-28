@@ -49,7 +49,7 @@ function MoverProfileImageInner({
 
 /**
  * 프로필 이미지.
- * picsum 등은 요청 전에 기본 이미지로 바꾸고, 그 외 원격 실패 시 onError로 폴백합니다.
+ * allowlist(로컬·seed picsum·CDN env)만 통과시키고, 그 외·로드 실패 시 기본 이미지로 폴백합니다.
  */
 export function MoverProfileImage({ src, ...props }: MoverProfileImageProps) {
   const resolvedSrc = resolveMoverProfileImageSrc(src);
