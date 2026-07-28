@@ -12,6 +12,7 @@ import Button from "@/components/common/Button/Button";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
+import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getCustomerProfileStatus } from "@/lib/api/profile";
 import { resolvePostLoginPath } from "@/lib/auth/redirect";
@@ -32,7 +33,7 @@ const getRedirectParam = () => {
 
 const LoginForm = () => {
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
+  const { mutateAsync: login, isPending } = useLoginMutation();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
@@ -52,9 +53,9 @@ const LoginForm = () => {
   });
 
   useEffect(() => {
-    if (!hasHydrated || isCheckingAuth || !isAuthenticated || isSubmitting) return;
+    if (!hasHydrated || isCheckingAuth || !isAuthenticated || isSubmitting || isPending) return;
     router.replace(APP_ROUTES.MOVERS.ROOT);
-  }, [hasHydrated, isAuthenticated, isCheckingAuth, isSubmitting, router]);
+  }, [hasHydrated, isAuthenticated, isCheckingAuth, isSubmitting, isPending, router]);
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
@@ -152,7 +153,7 @@ const LoginForm = () => {
             variant="solid"
             size="auth"
             fullWidth
-            disabled={!isValid || isSubmitting}
+            disabled={!isValid || isSubmitting || isPending}
           >
             로그인
           </Button>

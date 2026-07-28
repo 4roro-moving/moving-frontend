@@ -2,8 +2,8 @@
 
 import { create } from "zustand";
 
-import { login as loginApi, logout as logoutApi, refreshSession } from "@/lib/api/auth";
-import type { AuthUser, LoginInput } from "@/lib/api/auth";
+import { logout as logoutApi, refreshSession } from "@/lib/api/auth";
+import type { AuthUser } from "@/lib/api/auth";
 import { getCustomerProfileMe, toAuthUserFromCustomerProfile } from "@/lib/api/profile";
 import { clearNickname, loadNickname, saveNickname } from "@/lib/auth/nickname";
 import { runWithSessionCheck } from "@/lib/auth/refreshAccessToken";
@@ -20,7 +20,8 @@ interface AuthState {
   hasHydrated: boolean;
   hydrateFromStorage: () => void;
   checkAuth: () => Promise<void>;
-  login: (input: LoginInput) => Promise<AuthUser>;
+  /** 로그인/회원가입 성공 후 세션 상태만 반영 */
+  establishSession: (user: AuthUser) => void;
   logout: () => Promise<void>;
   /** access + nickname 삭제 — logout에서만 사용 */
   clearSession: () => void;
@@ -87,6 +88,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
   },
 
+  establishSession: (user) => {
+    setAuthenticatedUser(set, user, false);
+  },
+
   checkAuth: async () => {
     if (checkAuthPromise) {
       await checkAuthPromise;
@@ -118,7 +123,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const displayName = loadNickname();
         const status = error instanceof ApiError ? error.status : undefined;
 
-        // 일시적 오류: access·nickname 유지, 전체 user는 API 재시도까지 비울 수 있음
         if (token && status !== 401) {
           set({
             displayName,
@@ -146,12 +150,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     })();
 
     await checkAuthPromise;
-  },
-
-  login: async (input) => {
-    const { user } = await loginApi(input);
-    setAuthenticatedUser(set, user, false);
-    return user;
   },
 
   logout: async () => {

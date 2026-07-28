@@ -41,12 +41,25 @@ export interface InputProps
   leftSlot?: ReactNode;
   /* input 내부에 들어갈 요소 (오른쪽) */
   rightSlot?: ReactNode;
-  /** 숫자만 입력받도록 자동 필터링 (선행 0 제거) */
+  /** 숫자만 입력받도록 자동 필터링 */
   numericOnly?: boolean;
+  /** numericOnly일 때 선행 0 제거. 기본 true (금액 등). 전화번호는 false */
+  stripLeadingZeros?: boolean;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { size, error, leftSlot, rightSlot, numericOnly, className, onChange, type = "text", ...props },
+  {
+    size,
+    error,
+    leftSlot,
+    rightSlot,
+    numericOnly,
+    stripLeadingZeros = true,
+    className,
+    onChange,
+    type = "text",
+    ...props
+  },
   ref,
 ) {
   const resolvedSize = size ?? "sm";
@@ -60,12 +73,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       // 커서 앞 구간 개수 세기
       const digitsBeforeCursor = prevValue.slice(0, cursorPos).replace(/[^0-9]/g, "").length;
       const digitsOnly = prevValue.replace(/[^0-9]/g, "");
-      const nextValue = digitsOnly.replace(/^0+(?=\d)/, "");
+      const nextValue = stripLeadingZeros ? digitsOnly.replace(/^0+(?=\d)/, "") : digitsOnly;
       // 선행 0 제거로 앞쪽에서 사라진 글자 수
-      const strippedLeadingZeros = digitsOnly.length - nextValue.length;
+      const strippedCount = digitsOnly.length - nextValue.length;
       if (nextValue !== prevValue) {
         input.value = nextValue;
-        const nextCursorPos = Math.max(0, digitsBeforeCursor - strippedLeadingZeros);
+        const nextCursorPos = Math.max(0, digitsBeforeCursor - strippedCount);
         input.setSelectionRange(nextCursorPos, nextCursorPos);
       }
     }

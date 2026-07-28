@@ -10,6 +10,13 @@ export interface LoginInput {
   password: string;
 }
 
+export interface SignUpCustomerInput {
+  email: string;
+  password: string;
+  name: string;
+  phone: string;
+}
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -37,6 +44,16 @@ const authBffOptions = {
 export const login = async (input: LoginInput): Promise<LoginResult> => {
   const data = await fetchInstance.post<LoginResult, LoginInput>(
     API_ROUTES.AUTH.LOGIN,
+    input,
+    authBffOptions,
+  );
+  setAccessToken(data.tokens.accessToken);
+  return data;
+};
+
+export const signUpCustomer = async (input: SignUpCustomerInput): Promise<LoginResult> => {
+  const data = await fetchInstance.post<LoginResult, SignUpCustomerInput>(
+    API_ROUTES.AUTH.SIGN_UP_CUSTOMER,
     input,
     authBffOptions,
   );

@@ -3,6 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
@@ -10,6 +12,10 @@ import Button from "@/components/common/Button/Button";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
+import { useSignUpMutation } from "@/hooks/auth/useSignUpMutation";
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { getCustomerProfileStatus } from "@/lib/api/profile";
+import { resolvePostLoginPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { signUpSchema, type SignUpFormValues } from "@/lib/schemas/signUpSchema";
 import { cn } from "@/lib/utils/cn";
@@ -20,10 +26,14 @@ const fieldLabelClass = cn(
 );
 
 const SignUpForm = () => {
+  const router = useRouter();
+  const { mutateAsync: signUp, isPending } = useSignUpMutation();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
     mode: "onChange",
@@ -36,8 +46,26 @@ const SignUpForm = () => {
     },
   });
 
-  const onSubmit = handleSubmit(() => {
-    // TODO: signUp() API 연동 후 리다이렉트 처리
+  const onSubmit = handleSubmit(async (values) => {
+    setSubmitError(null);
+
+    try {
+      await signUp({
+        email: values.email,
+        password: values.password,
+        name: values.name,
+        phone: values.phone,
+      });
+
+      const status = await getCustomerProfileStatus();
+      const nextPath = resolvePostLoginPath({
+        isProfileCompleted: status.isProfileCompleted,
+        returnPath: null,
+      });
+      router.replace(nextPath);
+    } catch (error) {
+      setSubmitError(getApiErrorMessage(error));
+    }
   });
 
   return (
@@ -121,6 +149,7 @@ const SignUpForm = () => {
                 autoComplete="tel"
                 placeholder="숫자만 입력해 주세요"
                 numericOnly
+                stripLeadingZeros={false}
                 error={errors.phone?.message}
                 {...register("phone")}
               />
@@ -155,7 +184,19 @@ const SignUpForm = () => {
             </div>
           </div>
 
-          <Button type="submit" variant="solid" size="auth" fullWidth disabled={!isValid}>
+          {submitError ? (
+            <Text as="p" variant="md-medium" className="text-text-error" role="alert">
+              {submitError}
+            </Text>
+          ) : null}
+
+          <Button
+            type="submit"
+            variant="solid"
+            size="auth"
+            fullWidth
+            disabled={!isValid || isSubmitting || isPending}
+          >
             시작하기
           </Button>
         </form>
