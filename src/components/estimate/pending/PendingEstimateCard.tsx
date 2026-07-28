@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import Button, { buttonVariants } from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
-import MoveTypeChip, { DesignatedChip } from "@/components/estimate/received/MoveTypeChip";
+import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { useConfirmPendingEstimate } from "@/hooks/usePendingEstimateDetail";
 import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
@@ -16,7 +16,8 @@ import {
   isConfirmedEstimate,
   isPendingEstimate,
 } from "@/lib/utils/estimateFormat";
-import type { MoveType, MyPendingEstimateOffer } from "@/types/estimate";
+import type { MyPendingEstimateOffer } from "@/types/estimate";
+import type { MoveType } from "@/types/move";
 
 interface PendingEstimateCardProps {
   offer: MyPendingEstimateOffer;

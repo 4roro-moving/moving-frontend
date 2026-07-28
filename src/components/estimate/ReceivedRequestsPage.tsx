@@ -4,13 +4,17 @@ import Image from "next/image";
 import { FormEvent, useState } from "react";
 
 import Modal from "@/components/common/Modal";
+import Search from "@/components/common/Search/Search";
+import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
-import { useMoverEstimateRequests } from "@/hooks/useMoverEstimateRequests";
-import type { RequestSort } from "@/types/moverEstimateRequest";
-import type { MoveType } from "@/types/move";
+import Toast from "@/components/common/Toast";
+import { useMoverEstimateRequests, useSendMoverEstimate } from "@/hooks/useMoverEstimateRequests";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
+import type { MoveType } from "@/types/move";
+import type { MoverEstimateRequest, RequestSort } from "@/types/moverEstimateRequest";
 
 import ReceivedRequestCard from "./ReceivedRequestCard";
+import SendEstimateModal, { type SendEstimateInput } from "./SendEstimateModal";
 
 export default function ReceivedRequestsPage() {
   const [searchText, setSearchText] = useState("");
@@ -20,6 +24,8 @@ export default function ReceivedRequestsPage() {
   const [serviceAreaOnly, setServiceAreaOnly] = useState(false);
   const [sort, setSort] = useState<RequestSort>("requestedAt");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<MoverEstimateRequest | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const query = useMoverEstimateRequests({
     keyword: keyword || undefined,
@@ -29,6 +35,7 @@ export default function ReceivedRequestsPage() {
     sort,
     limit: 10,
   });
+  const sendEstimateMutation = useSendMoverEstimate();
 
   function submitSearch(event: FormEvent) {
     event.preventDefault();
@@ -43,6 +50,26 @@ export default function ReceivedRequestsPage() {
     }
   }
 
+  function handleSendEstimate(input: SendEstimateInput) {
+    if (!selectedRequest) return;
+
+    sendEstimateMutation.mutate(
+      {
+        estimateRequestId: selectedRequest.id,
+        input,
+      },
+      {
+        onSuccess: () => {
+          setSelectedRequest(null);
+          setToastMessage("견적을 보냈습니다.");
+        },
+        onError: (error) => {
+          setToastMessage(error instanceof Error ? error.message : "견적 전송에 실패했습니다.");
+        },
+      },
+    );
+  }
+
   const items = query.data?.pages.flatMap((page) => page.items) ?? [];
   const totalCount = query.data?.pages[0]?.pagination.totalCount ?? 0;
 
@@ -50,21 +77,12 @@ export default function ReceivedRequestsPage() {
     <>
       <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-24 pb-80 min-[744px]:px-[72px] lg:gap-40 lg:px-0">
         <section className="flex flex-col gap-24">
-          <form
-            onSubmit={submitSearch}
-            className="bg-background-muted mx-10 flex h-[52px] w-[calc(100%_-_20px)] items-center gap-8 rounded-2xl px-16 lg:mx-0 lg:h-64 lg:w-full lg:px-24"
-          >
-            <Image
-              src="/icons/search.svg"
-              alt=""
-              width={36}
-              height={36}
-              className="h-24 w-24 lg:h-36 lg:w-36"
-            />
-            <input
+          <form onSubmit={submitSearch} className="mx-10 w-[calc(100%_-_20px)] lg:mx-0 lg:w-full">
+            <Search
+              size="md"
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
-              className="placeholder:text-text-placeholder w-full bg-transparent text-base outline-none lg:text-lg"
+              className="h-[52px] w-full border-0 px-16 lg:h-64 lg:px-24"
               placeholder="어떤 고객님을 찾고 계세요?"
               aria-label="고객명 검색"
             />
@@ -138,14 +156,17 @@ export default function ReceivedRequestsPage() {
               </label>
             </div>
             <div className="flex items-center gap-4">
-              <select
-                value={sort}
-                onChange={(event) => setSort(event.target.value as RequestSort)}
-                className="bg-background-surface text-text-muted rounded-lg px-8 py-8 text-sm outline-none"
+              <Select
+                desc="정렬"
+                label="요청 정렬"
+                variant="sort"
+                size="lg"
+                defaultValue={sort}
+                onChange={(value) => setSort(value as RequestSort)}
               >
-                <option value="requestedAt">요청일 빠른순</option>
-                <option value="moveDate">이사 빠른순</option>
-              </select>
+                <Select.Option value="requestedAt">요청일 빠른순</Select.Option>
+                <Select.Option value="moveDate">이사 빠른순</Select.Option>
+              </Select>
               <button
                 type="button"
                 aria-label="필터 열기"
@@ -185,7 +206,11 @@ export default function ReceivedRequestsPage() {
             <>
               <div className="grid w-full grid-cols-1 gap-24 min-[744px]:max-w-[588px] lg:max-w-none lg:grid-cols-2">
                 {items.map((request) => (
-                  <ReceivedRequestCard key={request.id} request={request} />
+                  <ReceivedRequestCard
+                    key={request.id}
+                    request={request}
+                    onSendEstimate={setSelectedRequest}
+                  />
                 ))}
               </div>
               {query.hasNextPage && (
@@ -282,6 +307,21 @@ export default function ReceivedRequestsPage() {
           </section>
         </div>
       </Modal>
+
+      {selectedRequest && (
+        <SendEstimateModal
+          request={selectedRequest}
+          isPending={sendEstimateMutation.isPending}
+          onSubmit={handleSendEstimate}
+          onClose={() => setSelectedRequest(null)}
+        />
+      )}
+
+      <Toast
+        open={Boolean(toastMessage)}
+        message={toastMessage ?? ""}
+        onClose={() => setToastMessage(null)}
+      />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip, DesignatedChip } from "@/components/estimate/received/MoveTypeChip";
 import { formatKoreanDateTime } from "@/lib/utils/date";
@@ -13,7 +14,12 @@ function formatElapsedTime(date: string) {
   return `${Math.floor(hours / 24)}일 전`;
 }
 
-export default function ReceivedRequestCard({ request }: { request: MoverEstimateRequest }) {
+interface ReceivedRequestCardProps {
+  request: MoverEstimateRequest;
+  onSendEstimate: (request: MoverEstimateRequest) => void;
+}
+
+export default function ReceivedRequestCard({ request, onSendEstimate }: ReceivedRequestCardProps) {
   return (
     <article className="border-border-subtle bg-background-surface rounded-20 flex flex-col gap-24 border px-20 py-24 shadow-[0_0_10px_rgba(220,220,220,0.2)] min-[744px]:gap-32 min-[744px]:px-40 min-[744px]:py-32 lg:px-40 lg:py-32">
       <div className="flex flex-col gap-16 min-[744px]:gap-24">
@@ -34,13 +40,13 @@ export default function ReceivedRequestCard({ request }: { request: MoverEstimat
           <div className="bg-border-subtle h-px" />
         </div>
 
-        <div className="flex flex-col gap-12 sm:flex-row sm:justify-between sm:gap-20">
+        <dl className="flex flex-col gap-12 sm:flex-row sm:justify-between sm:gap-20">
           <div className="flex items-end gap-12">
             <div>
-              <Text as="p" variant="md-regular" className="text-text-muted">
+              <Text as="dt" variant="md-regular" className="text-text-muted">
                 출발지
               </Text>
-              <Text as="p" variant="lg-semibold" className="text-text-primary">
+              <Text as="dd" variant="lg-semibold" className="text-text-primary">
                 {request.fromRegion}
               </Text>
             </div>
@@ -49,39 +55,38 @@ export default function ReceivedRequestCard({ request }: { request: MoverEstimat
               <span className="border-text-secondary -ml-1 h-1.5 w-1.5 rotate-45 border-t border-r" />
             </span>
             <div>
-              <Text as="p" variant="md-regular" className="text-text-muted">
+              <Text as="dt" variant="md-regular" className="text-text-muted">
                 도착지
               </Text>
-              <Text as="p" variant="lg-semibold" className="text-text-primary">
+              <Text as="dd" variant="lg-semibold" className="text-text-primary">
                 {request.toRegion}
               </Text>
             </div>
           </div>
           <div>
-            <Text as="p" variant="md-regular" className="text-text-muted">
+            <Text as="dt" variant="md-regular" className="text-text-muted">
               이사일
             </Text>
-            <Text as="p" variant="lg-semibold" className="text-text-primary whitespace-nowrap">
+            <Text as="dd" variant="lg-semibold" className="text-text-primary whitespace-nowrap">
               {formatKoreanDateTime(request.moveDate)}
             </Text>
           </div>
-        </div>
+        </dl>
       </div>
 
       <div className="flex flex-col gap-[11px] sm:grid sm:grid-cols-2 sm:gap-[11px]">
-        <button
-          className="border-border-brand text-text-brand order-2 h-[54px] rounded-xl border font-semibold sm:order-1"
-          type="button"
-        >
+        <Button variant="outline" size="cta" fullWidth className="order-2 sm:order-1">
           반려하기
-        </button>
-        <button
-          className="bg-background-brand text-text-inverse order-1 flex h-[54px] items-center justify-center gap-4 rounded-xl font-semibold"
-          type="button"
+        </Button>
+        <Button
+          size="cta"
+          fullWidth
+          className="order-1"
+          onClick={() => onSendEstimate(request)}
+          rightIcon={<Image src="/icons/write.svg" alt="" width={24} height={24} />}
         >
           견적 보내기
-          <Image src="/icons/write.svg" alt="" width={24} height={24} />
-        </button>
+        </Button>
       </div>
     </article>
   );
