@@ -74,6 +74,16 @@ const getPageItems = (currentPage: number, pageCount: number, rangeSize: number)
     end = currentPage + (rangeSize - 1 - radius);
   }
 
+  // 경계와 창 사이 간격이 1이면 별도 페이지 대신 창을 경계까지 확장해 rangeSize 유지
+  if (start === 2) {
+    start = 1;
+    end = rangeSize;
+  }
+  if (end === pageCount - 1) {
+    end = pageCount;
+    start = pageCount - rangeSize + 1;
+  }
+
   const items: PageItem[] = [];
 
   if (start > 1) {
