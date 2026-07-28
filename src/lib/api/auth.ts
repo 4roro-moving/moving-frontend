@@ -1,7 +1,9 @@
-import fetchInstance, { ensureAccessTokenRefreshed } from "@/lib/api/fetchInstance";
+import fetchInstance from "@/lib/api/fetchInstance";
+import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
+import type { EnsureAccessTokenOptions } from "@/lib/auth/refreshAccessToken";
 import { clearAuthTokens, setAccessToken } from "@/lib/auth/token";
+import { AUTH_BFF_BASE } from "@/lib/constants/authBff";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
-import { isDevAuthEnabled, setDevAuthTokens } from "@/lib/dev-auth";
 
 export interface LoginInput {
   email: string;
@@ -27,22 +29,30 @@ export interface LoginResult {
   tokens: PublicAuthTokens;
 }
 
+const authBffOptions = {
+  baseURL: AUTH_BFF_BASE,
+  skipAuth: true,
+} as const;
+
 export const login = async (input: LoginInput): Promise<LoginResult> => {
-  const data = await fetchInstance.post<LoginResult, LoginInput>(API_ROUTES.AUTH.LOGIN, input);
+  const data = await fetchInstance.post<LoginResult, LoginInput>(
+    API_ROUTES.AUTH.LOGIN,
+    input,
+    authBffOptions,
+  );
   setAccessToken(data.tokens.accessToken);
   return data;
 };
 
-/** HttpOnly refresh cookie로 access 재발급 */
-export const refreshSession = async (options?: { notifyOnFailure?: boolean }): Promise<void> => {
+/** HttpOnly refresh cookie로 access 재발급 (Next auth BFF) */
+export const refreshSession = async (options?: EnsureAccessTokenOptions): Promise<void> => {
   await ensureAccessTokenRefreshed(options);
 };
 
-export async function logout(): Promise<void> {
+export const logout = async (): Promise<void> => {
   try {
-    // refresh는 cookie로 전달됨 (credentials: include)
-    await fetchInstance.post(API_ROUTES.AUTH.LOGOUT);
+    await fetchInstance.post(API_ROUTES.AUTH.LOGOUT, undefined, authBffOptions);
   } finally {
     clearAuthTokens();
   }
-}
+};

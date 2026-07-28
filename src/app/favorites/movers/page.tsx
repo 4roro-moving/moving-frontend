@@ -32,7 +32,7 @@ export default function FavoriteMoversPage() {
             </>
           }
           buttonLabel="기사님 찾기로 돌아가기"
-          href={APP_ROUTES.MOVERS}
+          href={APP_ROUTES.MOVERS.ROOT}
         />
       </div>
     </div>

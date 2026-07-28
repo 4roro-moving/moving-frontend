@@ -4,7 +4,6 @@ const AUTH_PATH_PREFIXES = [
   APP_ROUTES.LOGIN,
   APP_ROUTES.SIGN_UP,
   APP_ROUTES.MOVER_LOGIN,
-  APP_ROUTES.DEV_LOGIN,
   APP_ROUTES.PROFILE,
 ] as const;
 
@@ -29,7 +28,7 @@ export const resolvePostLoginPath = (params: {
     return APP_ROUTES.PROFILE;
   }
 
-  return getSafeReturnPath(params.returnPath) ?? APP_ROUTES.MOVERS;
+  return getSafeReturnPath(params.returnPath) ?? APP_ROUTES.MOVERS.ROOT;
 };
 
 /** 토큰 만료 등으로 로그인 페이지로 보낼 때 */

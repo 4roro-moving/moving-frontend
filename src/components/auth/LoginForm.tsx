@@ -53,7 +53,7 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (!hasHydrated || isCheckingAuth || !isAuthenticated || isSubmitting) return;
-    router.replace(APP_ROUTES.MOVERS);
+    router.replace(APP_ROUTES.MOVERS.ROOT);
   }, [hasHydrated, isAuthenticated, isCheckingAuth, isSubmitting, router]);
 
   const onSubmit = handleSubmit(async (values) => {

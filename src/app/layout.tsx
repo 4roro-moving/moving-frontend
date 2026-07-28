@@ -1,10 +1,8 @@
-"use client";
-
 import { type ReactNode } from "react";
+import { cookies } from "next/headers";
 
-import Footer from "@/components/common/Footer/Footer";
-import Header from "@/components/common/Header/Header";
-import { AppProviders } from "@/providers/AppProviders";
+import { AppShell } from "@/components/layout/AppShell";
+import { NICKNAME_STORAGE_KEY } from "@/lib/auth/nickname";
 
 import "./globals.css";
 
@@ -12,16 +10,21 @@ interface RootLayoutProps {
   children: ReactNode;
 }
 
-export default function RootLayout({ children }: RootLayoutProps) {
+const RootLayout = async ({ children }: RootLayoutProps) => {
+  const cookieStore = await cookies();
+  const initialIsLogin = Boolean(cookieStore.get("refreshToken"));
+  const rawNickname = cookieStore.get(NICKNAME_STORAGE_KEY)?.value;
+  const initialNickname = rawNickname ? decodeURIComponent(rawNickname) : null;
+
   return (
     <html lang="ko">
       <body className="flex min-h-screen flex-col">
-        <AppProviders>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </AppProviders>
+        <AppShell initialIsLogin={initialIsLogin} initialNickname={initialNickname}>
+          {children}
+        </AppShell>
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;

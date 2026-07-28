@@ -12,20 +12,20 @@ import { useAuthStore } from "@/stores/useAuthStore";
 export const useAuthInit = () => {
   const hydrateFromStorage = useAuthStore((state) => state.hydrateFromStorage);
   const checkAuth = useAuthStore((state) => state.checkAuth);
-  const clearSession = useAuthStore((state) => state.clearSession);
+  const markUnauthenticated = useAuthStore((state) => state.markUnauthenticated);
 
-  // paint 전에 storage hydrate → Header 깜빡임·hydration mismatch 방지
   useLayoutEffect(() => {
     hydrateFromStorage();
   }, [hydrateFromStorage]);
 
   useEffect(() => {
-    void checkAuth();
+    checkAuth();
   }, [checkAuth]);
 
   useEffect(() => {
     const handleExpired = () => {
-      clearSession();
+      // cookie·storage hard clear는 logout만 — 여기선 메모리 상태만 정리
+      markUnauthenticated();
 
       const { pathname, search } = window.location;
       const isAuthPage = [APP_ROUTES.LOGIN, APP_ROUTES.SIGN_UP, APP_ROUTES.MOVER_LOGIN].some(
@@ -38,5 +38,5 @@ export const useAuthInit = () => {
 
     window.addEventListener("auth:expired", handleExpired);
     return () => window.removeEventListener("auth:expired", handleExpired);
-  }, [clearSession]);
+  }, [markUnauthenticated]);
 };

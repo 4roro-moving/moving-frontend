@@ -22,8 +22,10 @@ const LOGGED_IN_LINKS = [
 ];
 
 export interface HeaderProps {
-  /** TODO: auth 연동 전 임시 prop. 추후 대체 */
+  /** Server에서 refresh 쿠키로 전달. hydrate 전 깜빡임 방지용 */
   isLogin?: boolean;
+  /** Server에서 nickname 쿠키로 전달. hydrate 전 이름 표시용 */
+  initialNickname?: string | null;
 }
 
 const PROFILE_MENU_ITEMS = [
@@ -31,14 +33,14 @@ const PROFILE_MENU_ITEMS = [
   { label: "내가 작성한 리뷰", href: APP_ROUTES.REVIEWS.ME },
 ] as const;
 
-const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
+const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps) => {
   const pathname = usePathname();
   const router = useRouter();
 
   const hasSession = useSyncExternalStore(subscribeAuthSession, hasAuthSession, () => false);
 
   const user = useAuthStore((state) => state.user);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const displayName = useAuthStore((state) => state.displayName);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const logout = useAuthStore((state) => state.logout);
 
@@ -50,8 +52,12 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
   const profileMenuRef = useClickOutside<HTMLDivElement>(() => setOpenMenuPath(null));
 
   const isProfileMenuOpen = openMenuPath === pathname;
-  const isLogin = hasHydrated && (isLoginProp ?? hasSession);
+  // hydrate 전: SSR 쿠키 힌트 / hydrate 후: 클라이언트 세션(로그아웃 반영)
+  const isLogin = hasHydrated ? hasSession : Boolean(initialIsLogin);
   const navLinks = isLogin ? LOGGED_IN_LINKS : LOGGED_OUT_LINKS;
+  // hydrate 전·SSR 비로그인 힌트면 스켈레톤 (로그인 버튼 깜빡임 방지)
+  const showAuthSkeleton = !hasHydrated && !initialIsLogin;
+  const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
   const handleLogout = async () => {
     setOpenMenuPath(null);
@@ -161,8 +167,7 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
           </nav>
         </div>
 
-        {!hasHydrated ? (
-          // 임시: cookie SSR 전 — SSR/CSR 동일 스켈레톤 (잘못된 로그인 UI 깜빡임 방지)
+        {showAuthSkeleton ? (
           <div className="flex items-center gap-20" aria-hidden>
             <div className="bg-background-subtle size-24 animate-pulse rounded-full" />
             <div className="flex items-center gap-20">
@@ -197,9 +202,8 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
                 }}
               >
                 <Image src="/icons/profile-default.svg" alt="" width={36} height={36} />
-                {/* TODO: auth/프로필 연동 전 임시 표기 — 세션 닉네임으로 교체 */}
                 <Text as="span" variant="md-medium" className="text-text-primary">
-                  {user?.name ?? "닉네임"}
+                  {nickname}
                 </Text>
               </button>
 
@@ -235,6 +239,19 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
                       </Link>
                     );
                   })}
+
+                  <div className="border-border-subtle flex w-full items-center justify-center border-t px-12 pt-12 pb-8 md:pt-14">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={handleLogout}
+                      className="text-text-muted hover:text-text-secondary transition-colors"
+                    >
+                      <Text as="span" variant={{ base: "xs-regular", md: "md-medium" }}>
+                        로그아웃
+                      </Text>
+                    </button>
+                  </div>
                 </div>
               ) : null}
             </div>
