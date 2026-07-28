@@ -235,53 +235,32 @@ const request = async <T>(
   return body.data;
 };
 
-/** data + pagination 응답을 그대로 반환합니다. */
-const requestPaginated = async <T>(
-  endpoint: string,
-  options: RequestInit = {},
-  retry = true,
-): Promise<{ data: T; pagination: Pagination }> => {
-  const isFormData = options.body instanceof FormData;
-  const headers = await getRequestHeaders(options.headers, isFormData);
-
-  const res = await safeFetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    credentials: "include",
-    headers,
-    signal: buildTimeoutSignal(options.signal ?? undefined),
-  });
-
-  // 2026.07.27 정슬기 - [수정] request와 동일하게 204 가드 (빈 pagination 반환 방지)
-  if (res.status === 204) {
-    throw new ApiError("페이지네이션 응답이 비어 있습니다.", 204);
-  }
-
-  const body = (await res.json().catch(() => ({}))) as
-    PaginatedApiSuccessResponse<T> | ApiErrorResponse | Record<string, never>;
-
-  if (!res.ok || body.success === false) {
-    const shouldRefresh = retry && res.status === 401 && !NO_REFRESH_ENDPOINTS.includes(endpoint);
-
-    if (shouldRefresh) {
-      await getRefreshPromise();
-      return requestPaginated<T>(endpoint, options, false);
-    }
-
-    throw setApiError(res.status, body);
-  }
-
-  const successBody = body as PaginatedApiSuccessResponse<T>;
-  return { data: successBody.data, pagination: successBody.pagination };
-};
-
 // API 요청 함수 모음 (axios 대신 사용)
 const fetchInstance = {
   get: <TResponse>(endpoint: string, options?: RequestInit) =>
     request<TResponse>(endpoint, { ...options, method: "GET" }),
 
-  /** GET 목록 API처럼 data + pagination을 함께 받을 때 사용 */
-  getPaginated: <TResponse>(endpoint: string, options?: RequestInit) =>
-    requestPaginated<TResponse>(endpoint, { ...options, method: "GET" }),
+  /**
+   * 목록 API용 GET — requestBody로 body를 유지해 { data, pagination } 반환
+   * (get → request 경로를 타면 data만 남아 pagination이 유실됨)
+   */
+  getPaginated: async <TResponse>(
+    endpoint: string,
+    options?: RequestInit,
+  ): Promise<{ data: TResponse; pagination: Pagination }> => {
+    const body = await requestBody<TResponse>(endpoint, { ...options, method: "GET" });
+
+    // 2026.07.27 정슬기 - [수정] request와 동일하게 204 가드 (빈 pagination 반환 방지)
+    if (body === null) {
+      throw new ApiError("페이지네이션 응답이 비어 있습니다.", 204);
+    }
+
+    if (!("pagination" in body) || body.pagination === undefined) {
+      throw new ApiError("페이지네이션 응답이 올바르지 않습니다.");
+    }
+
+    return { data: body.data, pagination: body.pagination };
+  },
 
   post: <TResponse, TBody = unknown>(endpoint: string, body?: TBody, options?: RequestInit) =>
     request<TResponse>(endpoint, {
@@ -299,21 +278,6 @@ const fetchInstance = {
 
   delete: <TResponse>(endpoint: string, options?: RequestInit) =>
     request<TResponse>(endpoint, { ...options, method: "DELETE" }),
-
-  /**
-   * 목록 API용 GET — requestBody를 직접 사용해 { data, pagination }을 유지
-   * (get → request 경로를 타면 data만 남아 pagination이 유실)
-   */
-  getPaginated: async <TData>(
-    endpoint: string,
-    options?: RequestInit,
-  ): Promise<{ data: TData; pagination: Pagination }> => {
-    const body = await requestBody<TData>(endpoint, { ...options, method: "GET" });
-    if (body === null || !("pagination" in body) || body.pagination === undefined) {
-      throw new ApiError("페이지네이션 응답이 올바르지 않습니다.");
-    }
-    return { data: body.data, pagination: body.pagination };
-  },
 };
 
 export default fetchInstance;
