@@ -48,6 +48,9 @@ export default function MoverDetailReviews({
   const hasReviews = reviews.length > 0;
   const hasDistribution = ratingDistribution.some((item) => item.count > 0);
   const maxCount = Math.max(...ratingDistribution.map((item) => item.count), 1);
+  // 동점이면 더 높은 점수(5→1 순) 하나만 강조
+  const topScore =
+    ratingDistribution.find((item) => item.count === maxCount && item.count > 0)?.score ?? null;
 
   return (
     <section className="flex w-full flex-col gap-24 md:gap-32" aria-labelledby="mover-reviews">
@@ -89,35 +92,39 @@ export default function MoverDetailReviews({
                 className="flex w-full max-w-[284px] flex-col gap-4 md:shrink-0"
                 aria-label="별점 분포"
               >
-                {ratingDistribution.map((item) => (
-                  <li key={item.score} className="flex items-center gap-16">
-                    <Text
-                      as="span"
-                      variant={item.count > 0 ? "md-bold" : "md-medium"}
-                      className="text-text-tertiary w-36 shrink-0"
-                    >
-                      {item.score}점
-                    </Text>
-                    <div
-                      className="bg-rating-track relative h-8 w-full max-w-[180px] overflow-hidden rounded-full"
-                      role="img"
-                      aria-label={`${item.score}점 ${item.count}개`}
-                    >
+                {ratingDistribution.map((item) => {
+                  const isTop = item.score === topScore;
+
+                  return (
+                    <li key={item.score} className="flex items-center gap-16">
+                      <Text
+                        as="span"
+                        variant={isTop ? "md-bold" : "md-medium"}
+                        className="text-text-tertiary w-36 shrink-0"
+                      >
+                        {item.score}점
+                      </Text>
                       <div
-                        className="bg-rating-fill absolute inset-y-0 left-0 rounded-full"
-                        // 동적 비율(리뷰 분포) — 토큰 고정 width로 표현 불가
-                        style={{ width: `${(item.count / maxCount) * 100}%` }}
-                      />
-                    </div>
-                    <Text
-                      as="span"
-                      variant={item.count > 0 ? "md-bold" : "md-medium"}
-                      className="text-rating-count w-36 shrink-0"
-                    >
-                      {item.count}
-                    </Text>
-                  </li>
-                ))}
+                        className="bg-rating-track relative h-8 w-full max-w-[180px] overflow-hidden rounded-full"
+                        role="img"
+                        aria-label={`${item.score}점 ${item.count}개`}
+                      >
+                        <div
+                          className="bg-rating-fill absolute inset-y-0 left-0 rounded-full"
+                          // 동적 비율(리뷰 분포) — 토큰 고정 width로 표현 불가
+                          style={{ width: `${(item.count / maxCount) * 100}%` }}
+                        />
+                      </div>
+                      <Text
+                        as="span"
+                        variant={isTop ? "md-bold" : "md-medium"}
+                        className="text-rating-count w-36 shrink-0"
+                      >
+                        {item.count}
+                      </Text>
+                    </li>
+                  );
+                })}
               </ul>
             ) : null}
           </div>

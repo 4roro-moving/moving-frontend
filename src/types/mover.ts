@@ -46,8 +46,16 @@ export interface MoverDetailServiceArea {
   name: string;
 }
 
+/** 별점 분포 항목 (5점 → 1점) */
+export interface MoverRatingDistributionItem {
+  score: number;
+  count: number;
+}
+
 export interface MoverDetailItem extends MoverListItem {
   serviceAreas: MoverDetailServiceArea[];
+  /** 리뷰 별점 분포 요약 (상세 API) */
+  ratingDistribution: MoverRatingDistributionItem[];
 }
 
 export interface MoversPagination {
