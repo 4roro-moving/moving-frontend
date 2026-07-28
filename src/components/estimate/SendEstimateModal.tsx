@@ -1,13 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 
 import Input from "@/components/common/Input/Input";
 import Modal from "@/components/common/Modal";
 import { Text } from "@/components/common/Text";
 import Textarea from "@/components/common/Input/Textarea";
-import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
+import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import { formatKoreanDateTime } from "@/lib/utils/date";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
@@ -82,20 +81,8 @@ export default function SendEstimateModal({
       <div className="flex min-h-0 flex-col gap-32 overflow-y-auto">
         <section className="flex flex-col gap-20">
           <div className="flex flex-wrap gap-8">
-            <span className="bg-background-brand-muted text-text-brand rounded-6 flex items-center gap-4 py-4 pr-8 pl-4">
-              <Image src="/icons/box.svg" alt="" width={20} height={20} />
-              <Text as="span" variant="md-semibold">
-                {MOVE_TYPE_LABEL[request.moveType]}
-              </Text>
-            </span>
-            {request.isDesignated && (
-              <span className="text-status-error rounded-6 flex items-center gap-4 bg-red-100 py-4 pr-8 pl-4">
-                <Image src="/icons/document.svg" alt="" width={20} height={20} />
-                <Text as="span" variant="md-semibold">
-                  지정 견적 요청
-                </Text>
-              </span>
-            )}
+            <MoveTypeChip moveType={request.moveType} />
+            {request.isDesignated ? <DesignatedChip /> : null}
           </div>
 
           <Text as="p" variant="xl-semibold" className="text-text-tertiary">

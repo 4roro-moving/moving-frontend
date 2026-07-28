@@ -4,6 +4,8 @@ import Image from "next/image";
 import { FormEvent, useState } from "react";
 
 import Modal from "@/components/common/Modal";
+import Search from "@/components/common/Search/Search";
+import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast";
 import { useMoverEstimateRequests, useSendMoverEstimate } from "@/hooks/useMoverEstimateRequests";
@@ -75,21 +77,12 @@ export default function ReceivedRequestsPage() {
     <>
       <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-24 pb-80 min-[744px]:px-[72px] lg:gap-40 lg:px-0">
         <section className="flex flex-col gap-24">
-          <form
-            onSubmit={submitSearch}
-            className="bg-background-muted mx-10 flex h-[52px] w-[calc(100%_-_20px)] items-center gap-8 rounded-2xl px-16 lg:mx-0 lg:h-64 lg:w-full lg:px-24"
-          >
-            <Image
-              src="/icons/search.svg"
-              alt=""
-              width={36}
-              height={36}
-              className="h-24 w-24 lg:h-36 lg:w-36"
-            />
-            <input
+          <form onSubmit={submitSearch} className="mx-10 w-[calc(100%_-_20px)] lg:mx-0 lg:w-full">
+            <Search
+              size="md"
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
-              className="placeholder:text-text-placeholder w-full bg-transparent text-base outline-none lg:text-lg"
+              className="h-[52px] w-full border-0 px-16 lg:h-64 lg:px-24"
               placeholder="어떤 고객님을 찾고 계세요?"
               aria-label="고객명 검색"
             />
@@ -163,14 +156,17 @@ export default function ReceivedRequestsPage() {
               </label>
             </div>
             <div className="flex items-center gap-4">
-              <select
-                value={sort}
-                onChange={(event) => setSort(event.target.value as RequestSort)}
-                className="bg-background-surface text-text-muted rounded-lg px-8 py-8 text-sm outline-none"
+              <Select
+                desc="정렬"
+                label="요청 정렬"
+                variant="sort"
+                size="lg"
+                defaultValue={sort}
+                onChange={(value) => setSort(value as RequestSort)}
               >
-                <option value="requestedAt">요청일 빠른순</option>
-                <option value="moveDate">이사 빠른순</option>
-              </select>
+                <Select.Option value="requestedAt">요청일 빠른순</Select.Option>
+                <Select.Option value="moveDate">이사 빠른순</Select.Option>
+              </Select>
               <button
                 type="button"
                 aria-label="필터 열기"
