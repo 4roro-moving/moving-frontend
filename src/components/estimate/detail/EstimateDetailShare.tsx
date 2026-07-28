@@ -27,15 +27,22 @@ function FacebookIcon({ className }: { className?: string }) {
 }
 
 interface EstimateDetailShareProps {
+  /** 공유 섹션 제목. 미지정 시 견적 상세 기본 문구 */
+  title?: string;
   onToastMessage?: (message: string) => void;
 }
 
+const DEFAULT_SHARE_TITLE = "견적서 공유하기";
+
 // 2026.07.24 정슬기 - [수정] Toast를 부모로 올려 상세 페이지에서 단일 Toast로 관리
-export default function EstimateDetailShare({ onToastMessage }: EstimateDetailShareProps) {
+export default function EstimateDetailShare({
+  title = DEFAULT_SHARE_TITLE,
+  onToastMessage,
+}: EstimateDetailShareProps) {
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      onToastMessage?.("견적 링크가 복사되었습니다.");
+      onToastMessage?.("링크가 복사되었습니다.");
     } catch {
       onToastMessage?.("링크 복사에 실패했습니다.");
     }
@@ -43,15 +50,14 @@ export default function EstimateDetailShare({ onToastMessage }: EstimateDetailSh
 
   return (
     // 2026.07.25 정슬기 - [수정] Desktop 공유 제목↔아이콘 gap 22, 아이콘 64·gap 16 (Figma 8091:47356)
-    <section className="flex w-full flex-col gap-12 md:gap-22" aria-label="견적서 공유하기">
-      <h2 className="text-text-secondary">
-        <Text as="span" variant="lg-semibold" className="md:hidden">
-          견적서 공유하기
-        </Text>
-        <Text as="span" variant="xl-semibold" className="hidden md:inline">
-          견적서 공유하기
-        </Text>
-      </h2>
+    <section className="flex w-full flex-col gap-12 md:gap-22" aria-label={title}>
+      <Text
+        as="h2"
+        variant={{ base: "lg-semibold", lg: "xl-semibold" }}
+        className="text-text-secondary"
+      >
+        {title}
+      </Text>
 
       <div className="flex items-start gap-10 md:gap-16">
         <button
@@ -60,9 +66,14 @@ export default function EstimateDetailShare({ onToastMessage }: EstimateDetailSh
           onClick={() => {
             void handleCopyLink();
           }}
-          className="bg-background-surface border-border-default focus-visible:ring-border-brand rounded-8 md:rounded-16 flex size-40 shrink-0 items-center justify-center border p-10 focus-visible:ring-2 focus-visible:outline-none md:size-64"
+          className={cn(
+            "bg-background-surface border-border-default text-icon-default rounded-8 md:rounded-16",
+            "flex size-40 shrink-0 items-center justify-center border p-10 transition-colors md:size-64",
+            "hover:bg-background-subtle active:bg-background-hover",
+            "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+          )}
         >
-          <ClipIcon className="size-24 md:size-36" aria-hidden="true" />
+          <ClipIcon className="text-icon-default size-24 md:size-28" aria-hidden="true" />
         </button>
 
         <button

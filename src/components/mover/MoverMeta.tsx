@@ -20,7 +20,7 @@ const dividerClassName = cn(
 const metaTextClassName = "leading-none";
 
 /** 기사님 평점·경력·확정 건수 요약 행 */
-export default function MoverMeta({
+export function MoverMeta({
   rating,
   reviewCount,
   careerYears,
