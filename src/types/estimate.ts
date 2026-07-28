@@ -148,9 +148,10 @@ export interface MyEstimateRequestListResult {
 }
 
 /**
- * 대기 중 견적 목록 UI ViewModel
- * API 계약(`MyEstimateRequestItem`)과 분리합니다.
+ * GET /estimates/pending 섹션 응답
+ * request: MyEstimateRequestItem과 동일 필드, estimates: mapListEstimate(+isFavorite)
  * // 2026.07.25 정슬기 - [추가] 요청+견적서 섹션 ViewModel
+ * // 2026.07.28 정슬기 - [수정] BE pending 실 API 계약 기준으로 정리
  */
 export interface PendingEstimateSection {
   request: MyEstimateRequestItem;
