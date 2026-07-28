@@ -7,8 +7,6 @@ import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
 import { mapMoverDetailItemToMoverDetail } from "@/lib/utils/mapMover";
 
-export { isMoverDetailId };
-
 export function useMoverDetail(moverId: string) {
   return useQuery({
     queryKey: QUERY_KEYS.MOVERS.DETAIL(moverId),
