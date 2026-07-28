@@ -47,3 +47,35 @@ export type MoverEstimateRequestResponse =
         message: string;
       };
     };
+
+// 기사 견적 전송 요청 Body
+export type SendEstimateRequest = {
+  price: number;
+  comment: string;
+};
+
+// 기사 견적 전송 성공 데이터
+export type SentEstimate = {
+  id: number;
+  estimateRequestId: number;
+  moverId: string;
+  price: number;
+  comment: string;
+  status: "SENT";
+  isDesignated: boolean;
+  createdAt: string;
+};
+
+// 기사 견적 전송 API 응답
+export type SendEstimateResponse =
+  | {
+      success: true;
+      data: SentEstimate;
+    }
+  | {
+      success: false;
+      error: {
+        code: string;
+        message: string;
+      };
+    };

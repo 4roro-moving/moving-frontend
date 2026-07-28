@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { HeroDecorationLeftIcon, HeroDecorationRightIcon, ProfileDefaultIcon } from "@/icons";
+import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 
 interface EstimateDetailHeroProps {
   imageUrl: string | null;
@@ -28,7 +29,7 @@ export default function EstimateDetailHero({ imageUrl, name }: EstimateDetailHer
         <div className="relative size-full">
           {imageUrl ? (
             <Image
-              src={imageUrl}
+              src={resolveMoverProfileImageSrc(imageUrl)}
               alt={`${name} 기사님 프로필`}
               fill
               sizes="(max-width: 768px) 86px, (max-width: 1024px) 100px, 129px"

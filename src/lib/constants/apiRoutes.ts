@@ -29,6 +29,8 @@ export const API_ROUTES = {
     CONFIRM: (estimateId: number) => `/estimates/${estimateId}/confirm`,
   },
   FAVORITES: {
+    /** GET 찜한 기사님 목록 */
+    MOVERS: "/favorites/movers",
     MOVER: (moverId: string) => `/favorites/movers/${moverId}`,
   },
   // 2026.07.25 정슬기 - [추가] 리뷰 API 경로

@@ -13,13 +13,23 @@ export const APP_ROUTES = {
   PROFILE: "/profile",
   /** 견적 요청 */
   ESTIMATE_REQUEST: "/estimate-request",
-  /** 기사님 찾기 */
-  MOVERS: "/movers",
   /** 프로필 수정 — 추후 페이지 연동 */
   PROFILE_EDIT: "/profile/edit",
-  /** 찜한 기사님 — 추후 페이지 연동 */
-  FAVORITE_MOVERS: "/favorites",
-  /** 이사 리뷰 — 추후 페이지 연동 */
-  REVIEWS: "/reviews",
+  // 2026.07.27 정슬기 - [추가] 기사님 찾기·상세 페이지 경로
+  MOVERS: {
+    ROOT: "/movers",
+    DETAIL: (moverId: string) => `/movers/${moverId}`,
+  },
+  // 2026.07.27 정슬기 - [추가] 고객 리뷰 관리 페이지 경로
+  REVIEWS: {
+    ROOT: "/reviews",
+    WRITABLE: "/reviews/writable",
+    ME: "/reviews/me",
+  },
+  /**
+   * NOTE: 찜한 기사님 전체 목록 페이지. 경로 확정 시 현재 상수값,  `src/app/favorites/movers/` 디렉터리 수정 필요
+   */
+  FAVORITE_MOVERS: "/favorites/movers",
+  // 임시 로그인
   DEV_LOGIN: "/dev-login",
 } as const;

@@ -1,6 +1,14 @@
 import { clearAuthTokens, getAccessToken, setAccessToken } from "@/lib/auth/token";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
+import { notifyAuthSessionChange } from "@/lib/auth/session";
+import {
+  clearDevAuthTokens,
+  getDevAccessToken,
+  isDevAuthEnabled,
+  setDevAuthTokens,
+} from "@/lib/dev-auth";
 import { ApiError, type ApiSuccessResponse, type ApiErrorResponse } from "@/types/api";
+import type { PaginatedApiSuccessResponse, Pagination } from "@/types/pagination";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
 const DEFAULT_TIMEOUT_MS = 10_000;
@@ -53,6 +61,11 @@ const setApiError = (status: number, body: unknown): ApiError => {
   );
 };
 
+/** axiosInstance와 동일 기준으로 Access Token을 고른다. */
+function resolveAccessToken(): string | null {
+  return isDevAuthEnabled() ? getDevAccessToken() : getAccessToken();
+}
+
 // 서버(Server Component 등)에서 실행 중이면 브라우저 쿠키가 자동으로 안 실리므로 직접 포워딩한다.
 const getRequestHeaders = async (
   customHeaders?: HeadersInit,
@@ -64,9 +77,10 @@ const getRequestHeaders = async (
   if (!isFormData && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
+  // 백엔드 authenticate는 Authorization: Bearer 만 본다 (axiosInstance와 동일)
 
   if (typeof window !== "undefined" && !options?.skipAuth && !headers.has("Authorization")) {
-    const accessToken = getAccessToken();
+    const accessToken = resolveAccessToken();
     if (accessToken) {
       headers.set("Authorization", `Bearer ${accessToken}`);
     }
@@ -109,7 +123,6 @@ const refreshAccessToken = async (): Promise<void> => {
   const res = await safeFetch(`${BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {
     method: "POST",
     credentials: "include",
-    headers,
     signal: buildTimeoutSignal(),
   });
 
@@ -125,6 +138,11 @@ const refreshAccessToken = async (): Promise<void> => {
   if (!accessToken) {
     clearAuthTokens();
     throw new ApiError("세션 갱신에 실패했습니다.", res.status);
+  }
+
+  if (isDevAuthEnabled()) {
+    setDevAuthTokens({ accessToken });
+    return;
   }
 
   setAccessToken(accessToken);
@@ -145,9 +163,12 @@ export const ensureAccessTokenRefreshed = (options?: EnsureAccessTokenOptions): 
   if (!refreshPromise) {
     refreshPromise = refreshAccessToken()
       .catch((err) => {
+        // refresh 실패 = 세션 종료. 잔여 Access만 남으면 비로그인인데 찜 API를 치는 상태가 됨
         clearAuthTokens();
-        if (notifyOnFailure) {
-          window.dispatchEvent(new CustomEvent("auth:expired"));
+        if (isDevAuthEnabled()) {
+          clearDevAuthTokens();
+        } else {
+          notifyAuthSessionChange();
         }
         throw err;
       })
@@ -161,12 +182,19 @@ export const ensureAccessTokenRefreshed = (options?: EnsureAccessTokenOptions): 
 
 const getRefreshPromise = ensureAccessTokenRefreshed;
 
-// fetch 요청 함수
-const request = async <T>(
+/** 일반 성공 응답 + 목록(pagination 포함) 성공 응답 */
+type SuccessBody<T> = ApiSuccessResponse<T> | PaginatedApiSuccessResponse<T>;
+
+/**
+ * 공통 fetch 함수 (인증·에러 처리 포함)
+ * 성공 시 body 전체 반환, 실패 시 401이면 refresh 후 1회 재시도, 아니면 ApiError throw
+ * 기존 request는 body.data만 반환해 pagination이 유실됨 → unwrap 전 단계로 분리
+ */
+const requestBody = async <T>(
   endpoint: string,
   options: RequestInit = {},
   retry = true,
-): Promise<T> => {
+): Promise<SuccessBody<T> | null> => {
   const isFormData = options.body instanceof FormData;
   const headers = await getRequestHeaders(options.headers, isFormData);
 
@@ -178,30 +206,65 @@ const request = async <T>(
   });
 
   if (res.status === 204) {
-    return null as T;
+    return null;
   }
 
   const body = (await res.json().catch(() => ({}))) as
-    ApiSuccessResponse<T> | ApiErrorResponse | Record<string, never>;
+    SuccessBody<T> | ApiErrorResponse | Record<string, never>;
 
   if (!res.ok || body.success === false) {
     const shouldRefresh = retry && res.status === 401 && !NO_REFRESH_ENDPOINTS.includes(endpoint);
 
     if (shouldRefresh) {
       await getRefreshPromise();
-      return request<T>(endpoint, options, false);
+      return requestBody<T>(endpoint, options, false);
     }
 
     throw setApiError(res.status, body);
   }
 
-  return (body as ApiSuccessResponse<T>).data;
+  return body as SuccessBody<T>;
+};
+
+/** 기존 request 역할: requestBody에서 data만 꺼내 get/post/patch/delete에 전달 */
+const request = async <T>(
+  endpoint: string,
+  options: RequestInit = {},
+  retry = true,
+): Promise<T> => {
+  const body = await requestBody<T>(endpoint, options, retry);
+  if (body === null) {
+    return null as T;
+  }
+  return body.data;
 };
 
 // API 요청 함수 모음 (axios 대신 사용)
 const fetchInstance = {
   get: <TResponse>(endpoint: string, options?: RequestInit) =>
     request<TResponse>(endpoint, { ...options, method: "GET" }),
+
+  /**
+   * 목록 API용 GET — requestBody로 body를 유지해 { data, pagination } 반환
+   * (get → request 경로를 타면 data만 남아 pagination이 유실됨)
+   */
+  getPaginated: async <TResponse>(
+    endpoint: string,
+    options?: RequestInit,
+  ): Promise<{ data: TResponse; pagination: Pagination }> => {
+    const body = await requestBody<TResponse>(endpoint, { ...options, method: "GET" });
+
+    // 2026.07.27 정슬기 - [수정] request와 동일하게 204 가드 (빈 pagination 반환 방지)
+    if (body === null) {
+      throw new ApiError("페이지네이션 응답이 비어 있습니다.", 204);
+    }
+
+    if (!("pagination" in body) || body.pagination === undefined) {
+      throw new ApiError("페이지네이션 응답이 올바르지 않습니다.");
+    }
+
+    return { data: body.data, pagination: body.pagination };
+  },
 
   post: <TResponse, TBody = unknown>(endpoint: string, body?: TBody, options?: RequestInit) =>
     request<TResponse>(endpoint, {
