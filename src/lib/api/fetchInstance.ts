@@ -1,8 +1,9 @@
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
-import { getAccessToken, setAccessToken } from "@/lib/auth/token";
+import { notifyAuthSessionChange } from "@/lib/auth/session";
+import { clearAuthTokens, getAccessToken, setAccessToken } from "@/lib/auth/token";
 import {
+  clearDevAuthTokens,
   getDevAccessToken,
-  getDevRefreshToken,
   isDevAuthEnabled,
   setDevAuthTokens,
 } from "@/lib/dev-auth";
@@ -102,28 +103,21 @@ const buildTimeoutSignal = (signal?: AbortSignal): AbortSignal => {
   return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
 };
 
-// 토큰 리프레시 — 백엔드는 body.refreshToken 필수 (쿠키만으로는 VALIDATION_ERROR)
+// 토큰 리프레시 — Refresh Token은 HttpOnly Cookie (body 없이 credentials로 전송)
 const refreshAccessToken = async (): Promise<void> => {
   const headers = await getRequestHeaders();
-
-  // development: sessionStorage의 refreshToken / 그 외: 아직 body 소스가 없으면 실패
-  const refreshToken = isDevAuthEnabled() ? getDevRefreshToken() : null;
-  if (!refreshToken) {
-    throw new ApiError("리프레시 토큰이 없습니다. 다시 로그인해 주세요.", 401, "UNAUTHORIZED");
-  }
 
   const res = await safeFetch(`${BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {
     method: "POST",
     credentials: "include",
     headers,
-    body: JSON.stringify({ refreshToken }),
     signal: buildTimeoutSignal(),
   });
 
   const body = (await res.json().catch(() => ({}))) as
     | {
         success?: boolean;
-        data?: { tokens?: { accessToken?: string; refreshToken?: string } };
+        data?: { tokens?: { accessToken?: string } };
       }
     | ApiErrorResponse
     | Record<string, never>;
@@ -135,18 +129,13 @@ const refreshAccessToken = async (): Promise<void> => {
   const tokens =
     "data" in body && body.data && typeof body.data === "object" ? body.data.tokens : undefined;
   const accessToken = tokens?.accessToken;
-  const nextRefreshToken = tokens?.refreshToken;
 
   if (!accessToken) {
     throw new ApiError("세션 갱신에 실패했습니다.", 401, "UNAUTHORIZED");
   }
 
-  // 개발 로그인은 Bearer를 sessionStorage에서 읽으므로 둘 다 갱신 (refresh rotation 포함)
   if (isDevAuthEnabled()) {
-    setDevAuthTokens({
-      accessToken,
-      refreshToken: nextRefreshToken ?? refreshToken,
-    });
+    setDevAuthTokens({ accessToken });
     return;
   }
 
@@ -165,9 +154,13 @@ const getRefreshPromise = (): Promise<void> => {
   if (!refreshPromise) {
     refreshPromise = refreshAccessToken()
       .catch((err) => {
-        // token 발급 실패 시 에러 처리
-        // 추후 authProvider 에서 addEventListner로 처리할 예정
-        window.dispatchEvent(new CustomEvent("auth:expired"));
+        // refresh 실패 = 세션 종료. 잔여 Access만 남으면 비로그인인데 찜 API를 치는 상태가 됨
+        clearAuthTokens();
+        if (isDevAuthEnabled()) {
+          clearDevAuthTokens();
+        } else {
+          notifyAuthSessionChange();
+        }
         throw err;
       })
       .finally(() => {

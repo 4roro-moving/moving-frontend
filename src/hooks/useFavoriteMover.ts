@@ -9,6 +9,7 @@ import { addFavoriteMover, removeFavoriteMover } from "@/lib/api/favorites";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { ApiError } from "@/types/api";
 import type {
   EstimateDetail,
   PendingEstimateSectionListResult,
@@ -17,6 +18,14 @@ import type {
 import type { MoversListResult } from "@/types/mover";
 
 const LOGIN_REQUIRED_MESSAGE = "로그인이 필요한 서비스입니다.";
+
+function isUnauthorizedError(error: unknown): boolean {
+  if (error instanceof ApiError) {
+    return error.status === 401 || error.code === "UNAUTHORIZED";
+  }
+
+  return false;
+}
 
 interface UseFavoriteMoverOptions {
   onError?: (message: string) => void;
@@ -271,6 +280,12 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         context.previousFavoriteMovers.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
         });
+      }
+
+      // Access만 있고 refresh 쿠키가 없는 잔여 세션 → 로그인 유도 (토큰 없음 메시지 대신)
+      if (isUnauthorizedError(error)) {
+        requireLogin();
+        return;
       }
 
       onErrorRef.current?.(getApiErrorMessage(error));

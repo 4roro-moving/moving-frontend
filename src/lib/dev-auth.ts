@@ -14,7 +14,8 @@ const REFRESH_TOKEN_KEY = "dev.refreshToken";
 
 export interface DevAuthTokens {
   accessToken: string;
-  refreshToken: string;
+  /** Cookie 전환 후에는 응답에 없을 수 있음. 있으면 sessionStorage에만 보관 */
+  refreshToken?: string;
 }
 
 export function isDevAuthEnabled(): boolean {
@@ -43,7 +44,9 @@ export function setDevAuthTokens(tokens: DevAuthTokens): void {
   }
 
   sessionStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
-  sessionStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+  if (tokens.refreshToken) {
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+  }
   // 동적 import로 순환 참조를 피합니다.
   void import("@/lib/auth/session").then(({ notifyAuthSessionChange }) => {
     notifyAuthSessionChange();
