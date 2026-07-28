@@ -1,5 +1,5 @@
 import fetchInstance, { ensureAccessTokenRefreshed } from "@/lib/api/fetchInstance";
-import { clearAuthTokens, setAuthTokens } from "@/lib/auth/token";
+import { clearAuthTokens, setAccessToken } from "@/lib/auth/token";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 
 export interface LoginInput {
@@ -17,7 +17,6 @@ export interface AuthUser {
 
 export interface PublicAuthTokens {
   accessToken: string;
-  refreshToken: string;
 }
 
 export interface LoginResult {
@@ -27,17 +26,18 @@ export interface LoginResult {
 
 export const login = async (input: LoginInput): Promise<LoginResult> => {
   const data = await fetchInstance.post<LoginResult, LoginInput>(API_ROUTES.AUTH.LOGIN, input);
-  setAuthTokens(data.tokens);
+  setAccessToken(data.tokens.accessToken);
   return data;
 };
 
-/** body.refreshToken으로 access 재발급 (동시 호출 시 1회로 합침) */
-export const refreshSession = async (): Promise<void> => {
-  await ensureAccessTokenRefreshed();
+/** HttpOnly refresh cookie로 access 재발급 */
+export const refreshSession = async (options?: { notifyOnFailure?: boolean }): Promise<void> => {
+  await ensureAccessTokenRefreshed(options);
 };
 
 export const logout = async (): Promise<void> => {
   try {
+    // refresh는 cookie로 전달됨 (credentials: include)
     await fetchInstance.post(API_ROUTES.AUTH.LOGOUT);
   } finally {
     clearAuthTokens();

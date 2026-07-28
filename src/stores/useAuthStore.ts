@@ -76,7 +76,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       try {
         if (!getAccessToken()) {
-          await refreshSession();
+          // cookie 세션 복구 시도 — 게스트면 401, 로그인 리다이렉트는 하지 않음
+          await refreshSession({ notifyOnFailure: false });
         }
 
         const profile = await getCustomerProfileMe();
@@ -84,7 +85,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         setAuthenticatedUser(set, me, false);
       } catch (error) {
         if (process.env.NODE_ENV === "development") {
-          console.error("[checkAuth] 세션 복구 실패", error);
+          const status = error instanceof ApiError ? error.status : undefined;
+          // 비로그인(401)은 정상 케이스로 조용히 처리
+          if (status !== 401) {
+            console.error("[checkAuth] 세션 복구 실패", error);
+          }
         }
 
         const token = getAccessToken();

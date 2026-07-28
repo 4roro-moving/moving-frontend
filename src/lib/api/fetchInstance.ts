@@ -1,10 +1,4 @@
-import {
-  clearAuthTokens,
-  getAccessToken,
-  getRefreshToken,
-  setAccessToken,
-  setAuthTokens,
-} from "@/lib/auth/token";
+import { clearAuthTokens, getAccessToken, setAccessToken } from "@/lib/auth/token";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { ApiError, type ApiSuccessResponse, type ApiErrorResponse } from "@/types/api";
 
@@ -100,30 +94,22 @@ const buildTimeoutSignal = (signal?: AbortSignal): AbortSignal => {
 interface RefreshTokenResponse {
   tokens: {
     accessToken: string;
-    refreshToken?: string;
   };
 }
 
-interface RefreshInput {
-  refreshToken: string;
+interface EnsureAccessTokenOptions {
+  /** false면 실패 시 auth:expired 미발송 (앱 시작 세션 복구용) */
+  notifyOnFailure?: boolean;
 }
 
-// 토큰 리프레시 요청 (body.refreshToken)
+/** Refresh Cookie 기반 재발급 — body 없음 */
 const refreshAccessToken = async (): Promise<void> => {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) {
-    clearAuthTokens();
-    throw new ApiError("리프레시 토큰이 없습니다.");
-  }
-
   const headers = await getRequestHeaders(undefined, false, { skipAuth: true });
-  const payload: RefreshInput = { refreshToken };
 
   const res = await safeFetch(`${BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {
     method: "POST",
     credentials: "include",
     headers,
-    body: JSON.stringify(payload),
     signal: buildTimeoutSignal(),
   });
 
@@ -135,27 +121,22 @@ const refreshAccessToken = async (): Promise<void> => {
     throw setApiError(res.status, body);
   }
 
-  const tokens = (body as ApiSuccessResponse<RefreshTokenResponse>).data?.tokens;
-  if (!tokens?.accessToken) {
+  const accessToken = (body as ApiSuccessResponse<RefreshTokenResponse>).data?.tokens?.accessToken;
+  if (!accessToken) {
     clearAuthTokens();
     throw new ApiError("세션 갱신에 실패했습니다.", res.status);
   }
 
-  if (tokens.refreshToken) {
-    setAuthTokens({
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    });
-  } else {
-    setAccessToken(tokens.accessToken);
-  }
+  setAccessToken(accessToken);
 };
 
 // 401·세션 복구 시 refresh 동시 요청 제어
 let refreshPromise: Promise<void> | null = null;
 
 /** refresh 요청을 1회로 합칩니다. (Strict Mode·병렬 401 대비) */
-export const ensureAccessTokenRefreshed = (): Promise<void> => {
+export const ensureAccessTokenRefreshed = (options?: EnsureAccessTokenOptions): Promise<void> => {
+  const notifyOnFailure = options?.notifyOnFailure ?? true;
+
   // SSR 에서는 캐싱하지 않고 매번 새로 호출함.
   if (typeof window === "undefined") {
     return refreshAccessToken();
@@ -165,7 +146,9 @@ export const ensureAccessTokenRefreshed = (): Promise<void> => {
     refreshPromise = refreshAccessToken()
       .catch((err) => {
         clearAuthTokens();
-        window.dispatchEvent(new CustomEvent("auth:expired"));
+        if (notifyOnFailure) {
+          window.dispatchEvent(new CustomEvent("auth:expired"));
+        }
         throw err;
       })
       .finally(() => {

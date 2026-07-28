@@ -28,7 +28,7 @@ const Header = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const logout = useAuthStore((state) => state.logout);
-  // hydrate 전에는 SSR과 동일하게 비로그인 UI (mismatch 방지)
+  // hydrate 전에는 스켈레톤 — SSR/CSR 동일 (잘못된 로그인 UI 깜빡임 방지)
   const isLogin = hasHydrated && isAuthenticated;
   const navLinks = isLogin ? LOGGED_IN_LINKS : LOGGED_OUT_LINKS;
 
@@ -78,7 +78,16 @@ const Header = () => {
           </nav>
         </div>
 
-        {isLogin ? (
+        {!hasHydrated ? (
+          // 임시: cookie SSR 전 — SSR/CSR 동일 스켈레톤 (잘못된 로그인 UI 깜빡임 방지)
+          <div className="flex items-center gap-20" aria-hidden>
+            <div className="bg-background-subtle size-24 animate-pulse rounded-full" />
+            <div className="flex items-center gap-20">
+              <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
+              <div className="bg-background-subtle rounded-4 h-20 w-64 animate-pulse" />
+            </div>
+          </div>
+        ) : isLogin ? (
           <div className="flex items-center gap-20">
             <button type="button" aria-label="알림">
               <AlarmIcon className="text-icon-default size-24" />
