@@ -35,7 +35,6 @@ const PROFILE_MENU_ITEMS = [
 const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
   const pathname = usePathname();
   const hasSession = useSyncExternalStore(subscribeAuthSession, hasAuthSession, () => false);
-  // 경로별로 열린 메뉴를 추적해 pathname 변경 시 별도 setState 없이 자동으로 닫힘
   const [openMenuPath, setOpenMenuPath] = useState<string | null>(null);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -77,7 +76,6 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
     setOpenMenuPath(pathname);
   }, [pathname]);
 
-  // 2026.07.27 정슬기 - [수정] Esc는 전역, 화살표·Home·End는 메뉴 내부 포커스일 때만 처리
   useEffect(() => {
     if (!isProfileMenuOpen) return;
 
@@ -197,8 +195,7 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
                 </div>
               ) : null}
             </div>
-            {/* 2026.07.27 정슬기 - [추가] 프로필 드롭다운 (리뷰 메뉴 진입) */}
-            {/* 2026.07.27 정슬기 - [수정] 경로 기반 열림 상태·키보드(Esc/화살표) 접근성 */}
+
             <div ref={profileMenuRef} className="relative flex items-center gap-12">
               <button
                 ref={triggerRef}
@@ -218,7 +215,6 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
                 }}
               >
                 <Image src="/icons/profile-default.svg" alt="" width={36} height={36} />
-                {/* TODO: auth/프로필 연동 전 임시 표기 — 세션 닉네임으로 교체 */}
                 <Text as="span" variant="md-medium" className="text-text-primary">
                   닉네임
                 </Text>
