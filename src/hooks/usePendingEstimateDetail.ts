@@ -1,8 +1,10 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
+import { useApiMutation } from "@/hooks/queries/useApiMutation";
+import { useApiQuery } from "@/hooks/queries/useApiQuery";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
   confirmPendingEstimate,
@@ -11,9 +13,13 @@ import {
 } from "@/lib/api/myEstimateRequests";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 
-// 2026.07.25 정슬기 - [추가] 대기 견적 상세 ViewModel 조회 (mock service)
+/**
+ * 대기 견적 상세 — GET /estimates/:estimateId (받은 상세와 동일)
+ * // 2026.07.25 정슬기 - [추가]
+ * // 2026.07.28 정슬기 - [수정] mock → 실 API
+ */
 export function usePendingEstimateDetail(estimateId: number) {
-  return useQuery({
+  return useApiQuery({
     queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL(estimateId),
     queryFn: () => fetchPendingEstimateDetail(estimateId),
     enabled: Number.isInteger(estimateId) && estimateId > 0,
@@ -26,9 +32,7 @@ interface UseConfirmPendingEstimateOptions {
 }
 
 /**
- * 대기 목록 카드용 mock 확정
- * MY_LIST와 해당 PENDING_DETAIL 캐시를 invalidate 합니다.
- * // 2026.07.26 정슬기 - [추가] PendingEstimateCard 인라인 mutation을 훅으로 분리
+ * 대기 목록 카드 확정 — POST /estimates/:estimateId/confirm
  */
 export function useConfirmPendingEstimate(
   estimateId: number,
@@ -43,15 +47,16 @@ export function useConfirmPendingEstimate(
     onErrorRef.current = options?.onError;
   }, [options?.onSuccess, options?.onError]);
 
-  return useMutation({
+  return useApiMutation({
     mutationFn: () => confirmPendingEstimate(estimateId),
-    onSuccess: async () => {
-      // 목록 섹션의 견적 상태가 바뀌므로 MY_LIST prefix 전체 무효화
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST });
-      // 열려 있을 수 있는 대기 상세도 함께 맞춤
-      await queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL(estimateId),
-      });
+    onSuccess: async (detail) => {
+      queryClient.setQueryData(QUERY_KEYS.ESTIMATES.PENDING_DETAIL(estimateId), detail);
+      queryClient.setQueryData(QUERY_KEYS.ESTIMATES.DETAIL(estimateId), detail);
+      await Promise.all([
+        // Query Key 분리 전: pending 목록은 MY_LIST 사용
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
+      ]);
       onSuccessRef.current?.();
     },
     onError: (error) => {
@@ -65,8 +70,9 @@ interface UseConfirmPendingEstimateDetailOptions {
   onError?: (message: string) => void;
 }
 
-// 2026.07.25 정슬기 - [추가] 대기 상세 mock 확정 — 실 confirm API 미호출
-// 2026.07.26 정슬기 - [수정] 콜백 stale closure 방지 + getApiErrorMessage 통일
+/**
+ * 대기 상세 확정 — POST /estimates/:estimateId/confirm
+ */
 export function useConfirmPendingEstimateDetail(
   estimateId: number,
   options?: UseConfirmPendingEstimateDetailOptions,
@@ -80,13 +86,15 @@ export function useConfirmPendingEstimateDetail(
     onErrorRef.current = options?.onError;
   }, [options?.onSuccess, options?.onError]);
 
-  return useMutation({
+  return useApiMutation({
     mutationFn: () => confirmPendingEstimateDetail(estimateId),
     onSuccess: async (detail) => {
-      // 상세는 응답 ViewModel로 즉시 반영
       queryClient.setQueryData(QUERY_KEYS.ESTIMATES.PENDING_DETAIL(estimateId), detail);
-      // 목록 상태(확정/대기) 동기화
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST });
+      queryClient.setQueryData(QUERY_KEYS.ESTIMATES.DETAIL(estimateId), detail);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
+      ]);
       onSuccessRef.current?.();
     },
     onError: (error) => {
