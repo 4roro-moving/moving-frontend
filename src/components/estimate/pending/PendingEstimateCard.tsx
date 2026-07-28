@@ -42,11 +42,11 @@ export default function PendingEstimateCard({
   const displayName = mover.nickname || mover.name;
   const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
   const moverTitleId = `offer-${offer.id}-mover`;
-  // 찜 성공 시 MY_LIST·PENDING_DETAIL 캐시는 useFavoriteMover가 낙관적 갱신/무효화
+  // 찜: PENDING_LIST / PENDING_DETAIL / RECEIVED / DETAIL 캐시는 useFavoriteMover가 갱신
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
+  // BE mapListEstimate에는 canConfirm 없음 — SENT만 확정 후보 (pending 목록은 SENT-only)
   const canConfirm = isPendingEstimate(status);
 
-  // mock confirm — 목록·해당 상세 캐시 무효화는 훅 내부에서 처리
   const confirmMutation = useConfirmPendingEstimate(offer.id, {
     onSuccess: onConfirmSuccess,
     onError: onConfirmError,

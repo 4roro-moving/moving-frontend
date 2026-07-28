@@ -8,7 +8,8 @@ import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEsti
 import { useMyEstimateRequests } from "@/hooks/useMyEstimateRequests";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 
-// 2026.07.25 정슬기 - [추가] 대기 중 견적 목록 Page Client (service → mock)
+// 2026.07.25 정슬기 - [추가] 대기 중 견적 목록 Page Client
+// 2026.07.28 정슬기 - [수정] GET /estimates/pending 실 API 연동
 export default function PendingEstimatesPageClient() {
   const { data, isLoading, isError, error, refetch } = useMyEstimateRequests();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
