@@ -39,6 +39,32 @@ export const MOCK_MOVER_DETAILS: Record<string, MoverDetail> = {
     })),
     reviewPageCount: 9,
   },
+  /** 리뷰 빈 상태 확인용 — `/movers/empty` */
+  empty: {
+    id: "empty",
+    name: "김코드",
+    serviceTypes: ["SMALL", "HOME"],
+    serviceAreas: [1, 9],
+    title: "고객님의 물품을 안전하게 운송해 드립니다.",
+    description:
+      "안녕하세요. 이사업계 경력 7년으로 안전한 이사를 도와드리는 김코드입니다. 고객님의 물품을 소중하고 안전하게 운송하여 드립니다. 소형이사 및 가정이사 서비스를 제공하며 서비스 가능 지역은 서울과 경기권입니다.",
+    rating: 0,
+    reviewCount: 0,
+    careerYears: 7,
+    confirmedCount: 334,
+    favoriteCount: 136,
+    isFavorite: false,
+    profileImageSrc: DEFAULT_PROFILE,
+    ratingDistribution: [
+      { score: 5, count: 0 },
+      { score: 4, count: 0 },
+      { score: 3, count: 0 },
+      { score: 2, count: 0 },
+      { score: 1, count: 0 },
+    ],
+    reviews: [],
+    reviewPageCount: 0,
+  },
 };
 
 export function getMockMoverDetail(moverId: string): MoverDetail | null {
