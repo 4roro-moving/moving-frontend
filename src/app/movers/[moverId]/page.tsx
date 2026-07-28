@@ -21,5 +21,5 @@ export async function generateMetadata({ params }: MoverDetailPageProps): Promis
 export default async function MoverDetailPage({ params }: MoverDetailPageProps) {
   const { moverId } = await params;
 
-  return <MoverDetailView moverId={moverId} />;
+  return <MoverDetailView key={moverId} moverId={moverId} />;
 }
