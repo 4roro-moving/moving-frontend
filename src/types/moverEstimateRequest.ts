@@ -54,6 +54,10 @@ export type SendEstimateRequest = {
   comment: string;
 };
 
+export type RejectEstimateRequest = {
+  reason: string;
+};
+
 // 기사 견적 전송 성공 데이터
 export type SentEstimate = {
   id: number;
@@ -71,6 +75,27 @@ export type SendEstimateResponse =
   | {
       success: true;
       data: SentEstimate;
+    }
+  | {
+      success: false;
+      error: {
+        code: string;
+        message: string;
+      };
+    };
+
+export type RejectedEstimate = {
+  id: number;
+  estimateRequestId: number;
+  moverId: string;
+  reason: string;
+  createdAt: string;
+};
+
+export type RejectEstimateResponse =
+  | {
+      success: true;
+      data: RejectedEstimate;
     }
   | {
       success: false;

@@ -17,9 +17,14 @@ function formatElapsedTime(date: string) {
 interface ReceivedRequestCardProps {
   request: MoverEstimateRequest;
   onSendEstimate: (request: MoverEstimateRequest) => void;
+  onRejectEstimate: (request: MoverEstimateRequest) => void;
 }
 
-export default function ReceivedRequestCard({ request, onSendEstimate }: ReceivedRequestCardProps) {
+export default function ReceivedRequestCard({
+  request,
+  onSendEstimate,
+  onRejectEstimate,
+}: ReceivedRequestCardProps) {
   return (
     <article className="border-border-subtle bg-background-surface rounded-20 flex flex-col gap-24 border px-20 py-24 shadow-[0_0_10px_rgba(220,220,220,0.2)] min-[744px]:gap-32 min-[744px]:px-40 min-[744px]:py-32 lg:px-40 lg:py-32">
       <div className="flex flex-col gap-16 min-[744px]:gap-24">
@@ -75,7 +80,13 @@ export default function ReceivedRequestCard({ request, onSendEstimate }: Receive
       </div>
 
       <div className="flex flex-col gap-[11px] sm:grid sm:grid-cols-2 sm:gap-[11px]">
-        <Button variant="outline" size="cta" fullWidth className="order-2 sm:order-1">
+        <Button
+          variant="outline"
+          size="cta"
+          fullWidth
+          className="order-2 sm:order-1"
+          onClick={() => onRejectEstimate(request)}
+        >
           반려하기
         </Button>
         <Button

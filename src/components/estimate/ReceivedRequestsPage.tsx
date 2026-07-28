@@ -8,12 +8,17 @@ import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast";
-import { useMoverEstimateRequests, useSendMoverEstimate } from "@/hooks/useMoverEstimateRequests";
+import {
+  useMoverEstimateRequests,
+  useRejectMoverEstimate,
+  useSendMoverEstimate,
+} from "@/hooks/useMoverEstimateRequests";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import type { MoveType } from "@/types/move";
 import type { MoverEstimateRequest, RequestSort } from "@/types/moverEstimateRequest";
 
 import ReceivedRequestCard from "./ReceivedRequestCard";
+import RejectEstimateModal from "./RejectEstimateModal";
 import SendEstimateModal, { type SendEstimateInput } from "./SendEstimateModal";
 
 export default function ReceivedRequestsPage() {
@@ -25,6 +30,7 @@ export default function ReceivedRequestsPage() {
   const [sort, setSort] = useState<RequestSort>("requestedAt");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<MoverEstimateRequest | null>(null);
+  const [requestToReject, setRequestToReject] = useState<MoverEstimateRequest | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const query = useMoverEstimateRequests({
@@ -36,6 +42,7 @@ export default function ReceivedRequestsPage() {
     limit: 10,
   });
   const sendEstimateMutation = useSendMoverEstimate();
+  const rejectEstimateMutation = useRejectMoverEstimate();
 
   function submitSearch(event: FormEvent) {
     event.preventDefault();
@@ -65,6 +72,26 @@ export default function ReceivedRequestsPage() {
         },
         onError: (error) => {
           setToastMessage(error instanceof Error ? error.message : "견적 전송에 실패했습니다.");
+        },
+      },
+    );
+  }
+
+  function handleRejectEstimate(reason: string) {
+    if (!requestToReject) return;
+
+    rejectEstimateMutation.mutate(
+      {
+        estimateRequestId: requestToReject.id,
+        input: { reason },
+      },
+      {
+        onSuccess: () => {
+          setRequestToReject(null);
+          setToastMessage("요청을 반려했습니다.");
+        },
+        onError: (error) => {
+          setToastMessage(error instanceof Error ? error.message : "요청 반려에 실패했습니다.");
         },
       },
     );
@@ -210,6 +237,7 @@ export default function ReceivedRequestsPage() {
                     key={request.id}
                     request={request}
                     onSendEstimate={setSelectedRequest}
+                    onRejectEstimate={setRequestToReject}
                   />
                 ))}
               </div>
@@ -314,6 +342,15 @@ export default function ReceivedRequestsPage() {
           isPending={sendEstimateMutation.isPending}
           onSubmit={handleSendEstimate}
           onClose={() => setSelectedRequest(null)}
+        />
+      )}
+
+      {requestToReject && (
+        <RejectEstimateModal
+          request={requestToReject}
+          isPending={rejectEstimateMutation.isPending}
+          onSubmit={handleRejectEstimate}
+          onClose={() => setRequestToReject(null)}
         />
       )}
 
