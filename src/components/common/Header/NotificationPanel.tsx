@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { buildNotificationMessageParts } from "@/components/common/Header/notificationMessages";
@@ -25,6 +26,7 @@ export default function NotificationPanel({
 }: NotificationPanelProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
+  const isEmpty = notifications.length === 0;
   const pageCount = Math.max(1, Math.ceil(notifications.length / NOTIFICATION_PAGE_SIZE));
   const safePage = Math.min(currentPage, pageCount);
   const startIndex = (safePage - 1) * NOTIFICATION_PAGE_SIZE;
@@ -66,50 +68,98 @@ export default function NotificationPanel({
         </button>
       </div>
 
-      <ul className="flex w-full flex-col">
-        {pageItems.map((notification, index) => {
-          const isLast = index === pageItems.length - 1;
-          const isRead = notification.isRead;
-          const messageParts = buildNotificationMessageParts(
-            notification.type,
-            notification.content,
-          );
+      {isEmpty ? (
+        <div className="flex h-[220px] w-full items-center justify-center px-24">
+          <Text as="p" variant="md-medium" className="text-text-subtle text-center">
+            새로운 알림이 없습니다
+          </Text>
+        </div>
+      ) : (
+        <ul className="flex w-full flex-col">
+          {pageItems.map((notification, index) => {
+            const isLast = index === pageItems.length - 1;
+            const isRead = notification.isRead;
+            const messageParts = buildNotificationMessageParts(
+              notification.type,
+              notification.content,
+            );
 
-          return (
-            <li
-              key={notification.id}
-              className={cn(
-                "flex w-full flex-col gap-2 px-24 py-16",
-                !isLast && "border-border-default border-b",
-              )}
-            >
-              <p className={isRead ? "text-text-weak" : "text-text-secondary"}>
-                <Text as="span" variant="lg-medium">
-                  {messageParts.map((part, partIndex) => (
-                    <span
-                      key={`${notification.id}-${partIndex}`}
-                      className={cn(
-                        isRead ? "text-text-weak" : part.highlight ? "text-text-brand" : undefined,
-                      )}
-                    >
-                      {part.text}
-                    </span>
-                  ))}
-                </Text>
-              </p>
-              <Text
-                as="p"
-                variant="md-medium"
-                className={isRead ? "text-text-weak" : "text-text-muted"}
+            return (
+              <li
+                key={notification.id}
+                className={cn(
+                  "flex w-full flex-col gap-2 px-24 py-16",
+                  !isLast && "border-border-default border-b",
+                )}
               >
-                {notification.createdAtLabel}
-              </Text>
-            </li>
-          );
-        })}
-      </ul>
+                {notification.linkUrl ? (
+                  <Link
+                    href={notification.linkUrl}
+                    onClick={onClose}
+                    className="hover:bg-background-hover focus-visible:ring-border-brand rounded-8 -mx-8 -my-4 flex flex-col gap-2 px-8 py-4 transition focus-visible:ring-1 focus-visible:outline-none"
+                  >
+                    <p className={isRead ? "text-text-weak" : "text-text-secondary"}>
+                      <Text as="span" variant="lg-medium">
+                        {messageParts.map((part, partIndex) => (
+                          <span
+                            key={`${notification.id}-${partIndex}`}
+                            className={cn(
+                              isRead
+                                ? "text-text-weak"
+                                : part.highlight
+                                  ? "text-text-brand"
+                                  : undefined,
+                            )}
+                          >
+                            {part.text}
+                          </span>
+                        ))}
+                      </Text>
+                    </p>
+                    <Text
+                      as="p"
+                      variant="md-medium"
+                      className={isRead ? "text-text-weak" : "text-text-muted"}
+                    >
+                      {notification.createdAtLabel}
+                    </Text>
+                  </Link>
+                ) : (
+                  <>
+                    <p className={isRead ? "text-text-weak" : "text-text-secondary"}>
+                      <Text as="span" variant="lg-medium">
+                        {messageParts.map((part, partIndex) => (
+                          <span
+                            key={`${notification.id}-${partIndex}`}
+                            className={cn(
+                              isRead
+                                ? "text-text-weak"
+                                : part.highlight
+                                  ? "text-text-brand"
+                                  : undefined,
+                            )}
+                          >
+                            {part.text}
+                          </span>
+                        ))}
+                      </Text>
+                    </p>
+                    <Text
+                      as="p"
+                      variant="md-medium"
+                      className={isRead ? "text-text-weak" : "text-text-muted"}
+                    >
+                      {notification.createdAtLabel}
+                    </Text>
+                  </>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-      {pageCount > 1 ? (
+      {!isEmpty && pageCount > 1 ? (
         <nav
           aria-label="알림 페이지네이션"
           className="flex w-full items-center justify-center py-12"

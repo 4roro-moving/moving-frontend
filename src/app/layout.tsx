@@ -33,8 +33,7 @@ export default function QueryProvider({ children }: QueryProviderProps) {
     <html lang="ko">
       <body className="flex min-h-screen flex-col">
         <QueryClientProvider client={queryClient}>
-          {/* TODO: auth 연동 전 임시 — 알림 패널 확인용 */}
-          <Header isLogin />
+          <Header />
           <main className="flex-1">{children}</main>
           <Footer />
         </QueryClientProvider>
