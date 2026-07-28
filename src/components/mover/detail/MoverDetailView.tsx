@@ -7,6 +7,7 @@ import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero"
 import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
 import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
 import MoverDetailActions from "@/components/mover/detail/MoverDetailActions";
+import MoverDetailPageSkeleton from "@/components/mover/detail/MoverDetailPageSkeleton";
 import MoverDetailProfile from "@/components/mover/detail/MoverDetailProfile";
 import MoverDetailReviews from "@/components/mover/detail/MoverDetailReviews";
 import MoverDetailServices from "@/components/mover/detail/MoverDetailServices";
@@ -33,11 +34,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   }
 
   if (isLoading) {
-    return (
-      <div className="bg-background-default flex w-full flex-col">
-        <ReceivedEstimatesStatus message="기사님 정보를 불러오는 중입니다." />
-      </div>
-    );
+    return <MoverDetailPageSkeleton />;
   }
 
   if (isError || !detail) {

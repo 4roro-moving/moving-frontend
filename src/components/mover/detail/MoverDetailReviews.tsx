@@ -4,8 +4,10 @@ import { useState } from "react";
 
 import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
+import { MoverDetailReviewsSkeleton } from "@/components/mover/detail/MoverDetailPageSkeleton";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { useMoverReviews } from "@/hooks/useMoverReviews";
+import { MOVER_REVIEW_PAGE_LIMIT } from "@/lib/api/movers";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { cn } from "@/lib/utils/cn";
 import { formatKoreanDateLong, formatRating } from "@/lib/utils/estimateFormat";
@@ -120,10 +122,8 @@ export default function MoverDetailReviews({
             ) : null}
           </div>
 
-          {isLoading && !data ? (
-            <Text as="p" variant="md-regular" className="text-text-muted py-24 text-center">
-              리뷰를 불러오는 중입니다.
-            </Text>
+          {!isError && (isLoading || isFetching) ? (
+            <MoverDetailReviewsSkeleton count={MOVER_REVIEW_PAGE_LIMIT} />
           ) : null}
 
           {isError ? (
@@ -145,34 +145,29 @@ export default function MoverDetailReviews({
             </div>
           ) : null}
 
-          {!isError && hasReviews ? (
-            <>
-              <ul
-                className={cn("flex w-full flex-col", isFetching && "opacity-70")}
-                aria-busy={isFetching}
-              >
-                {reviews.map((review, index) => (
-                  <li
-                    key={review.id}
-                    className={cn(
-                      "border-border-subtle py-20 md:py-24",
-                      index < reviews.length - 1 && "border-b",
-                    )}
-                  >
-                    <ReviewItem review={review} />
-                  </li>
-                ))}
-              </ul>
+          {!isError && !isLoading && !isFetching && hasReviews ? (
+            <ul className="flex w-full flex-col">
+              {reviews.map((review, index) => (
+                <li
+                  key={review.id}
+                  className={cn(
+                    "border-border-subtle py-20 md:py-24",
+                    index < reviews.length - 1 && "border-b",
+                  )}
+                >
+                  <ReviewItem review={review} />
+                </li>
+              ))}
+            </ul>
+          ) : null}
 
-              {pageCount > 1 ? (
-                <Pagination
-                  currentPage={currentPage}
-                  pageCount={pageCount}
-                  onPageChange={setCurrentPage}
-                  className="self-center"
-                />
-              ) : null}
-            </>
+          {!isError && pageCount > 1 ? (
+            <Pagination
+              currentPage={currentPage}
+              pageCount={pageCount}
+              onPageChange={setCurrentPage}
+              className="self-center"
+            />
           ) : null}
         </>
       )}
