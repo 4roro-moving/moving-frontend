@@ -1,125 +1,74 @@
-import axiosInstance from "./axiosInstance";
-import { API_ROUTES } from "../constants/apiRoutes";
 import type {
-  MoverEstimateRequest,
   MoverEstimateRequestQuery,
   MoverEstimateRequestResponse,
+  RejectEstimateRequest,
+  RejectEstimateResponse,
+  SendEstimateRequest,
+  SendEstimateResponse,
 } from "@/types/moverEstimateRequest";
 
-type MockRequest = MoverEstimateRequest & { isServiceArea: boolean };
+import { API_ROUTES } from "../constants/apiRoutes";
+import axiosInstance from "./axiosInstance";
 
-//빠르게 테스트하려고 넣어놓은 데이터입니다.
-//추후에 제거하고 연결하겠습니다.
-const MOCK_REQUESTS: MockRequest[] = [
-  {
-    id: 1,
-    customer: { id: "mock-customer-1", name: "김고객" },
-    moveType: "HOME",
-    moveDate: "2026-09-01",
-    fromAddress: "서울 중구 삼일대로 343",
-    toAddress: "경기 성남시 분당구 판교역로 235",
-    fromRegion: "서울",
-    toRegion: "경기",
-    isDesignated: false,
-    isServiceArea: true,
-    createdAt: "2026-07-21T02:15:08.867Z",
-  },
-  {
-    id: 2,
-    customer: { id: "mock-customer-2", name: "이무빙" },
-    moveType: "SMALL",
-    moveDate: "2026-08-12",
-    fromAddress: "서울 마포구 월드컵북로 120",
-    toAddress: "서울 강남구 테헤란로 152",
-    fromRegion: "서울",
-    toRegion: "서울",
-    isDesignated: true,
-    isServiceArea: true,
-    createdAt: "2026-07-22T04:30:00.000Z",
-  },
-  {
-    id: 3,
-    customer: { id: "mock-customer-3", name: "박이사" },
-    moveType: "OFFICE",
-    moveDate: "2026-10-05",
-    fromAddress: "인천 연수구 센트럴로 123",
-    toAddress: "부산 해운대구 센텀중앙로 90",
-    fromRegion: "인천",
-    toRegion: "부산",
-    isDesignated: false,
-    isServiceArea: false,
-    createdAt: "2026-07-20T09:00:00.000Z",
-  },
-];
-
-function getMockMoverEstimateRequests(query: MoverEstimateRequestQuery) {
-  const keyword = query.keyword?.trim().toLowerCase();
-  const filtered = MOCK_REQUESTS.filter((request) => {
-    if (keyword && !request.customer.name.toLowerCase().includes(keyword)) return false;
-
-    const hasActiveFilter =
-      Boolean(query.moveType?.length) ||
-      query.isDesignated === true ||
-      query.isServiceArea === true;
-
-    if (!hasActiveFilter) return true;
-
-    return (
-      Boolean(query.moveType?.includes(request.moveType)) ||
-      (query.isDesignated === true && request.isDesignated) ||
-      (query.isServiceArea === true && request.isServiceArea)
-    );
-  }).sort((a, b) => {
-    const field = query.sort === "moveDate" ? "moveDate" : "createdAt";
-    return new Date(a[field]).getTime() - new Date(b[field]).getTime();
-  });
-  const cursorIndex = query.cursor
-    ? filtered.findIndex((request) => String(request.id) === query.cursor) + 1
-    : 0;
-  const pageItems = filtered.slice(cursorIndex, cursorIndex + query.limit);
-  const hasNextPage = cursorIndex + query.limit < filtered.length;
-
-  return {
-    items: pageItems,
-    pagination: {
-      nextCursor: hasNextPage ? String(pageItems.at(-1)?.id) : null,
-      hasNextPage,
-      totalCount: filtered.length,
-    },
-  };
-}
-
+// 기사 견적 요청 목록 조회
+// GET /api/estimates/requests
 export async function getMoverEstimateRequests(query: MoverEstimateRequestQuery) {
-  if (process.env.NEXT_PUBLIC_USE_MOCK_ESTIMATE_REQUESTS === "true") {
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    return getMockMoverEstimateRequests(query);
-  }
-
   const params = new URLSearchParams();
 
   params.set("limit", String(query.limit));
   params.set("sort", query.sort);
 
+  //다음 페이지 조회 기준
   if (query.cursor) params.set("cursor", query.cursor);
+  //키워드
   if (query.keyword) params.set("keyword", query.keyword);
+  //지정 견적 요청 여부
   if (query.isDesignated !== undefined) {
     params.set("isDesignated", String(query.isDesignated));
   }
+  //서비스 가능 지역
   if (query.isServiceArea !== undefined) {
     params.set("isServiceArea", String(query.isServiceArea));
   }
+  //이사 유형 필터
   query.moveType?.forEach((moveType) => params.append("moveType", moveType));
 
-  const mockUser = process.env.NEXT_PUBLIC_MOCK_USER_EMAIL;
   const response = await axiosInstance.get<MoverEstimateRequestResponse>(
     `/api${API_ROUTES.ESTIMATES.ROOT}/requests?${params.toString()}`,
-    {
-      headers: mockUser ? { "x-mock-user": mockUser } : undefined,
-    },
   );
 
   if (!response.data.success) {
     throw new Error(response.data.error.code);
+  }
+
+  return response.data.data;
+}
+
+// 기사가 고객의 견적 요청에 견적 전송
+// POST /api/estimates/requests/:estimateRequestId
+export async function sendMoverEstimate(estimateRequestId: number, input: SendEstimateRequest) {
+  const response = await axiosInstance.post<SendEstimateResponse>(
+    `/api${API_ROUTES.ESTIMATES.ROOT}/requests/${estimateRequestId}`,
+    input,
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.error.message);
+  }
+
+  return response.data.data;
+}
+
+// 기사 견적 반려
+// POST /api/estimates/requests/:id/reject
+export async function rejectMoverEstimate(estimateRequestId: number, input: RejectEstimateRequest) {
+  const response = await axiosInstance.post<RejectEstimateResponse>(
+    `/api${API_ROUTES.ESTIMATES.ROOT}/requests/${estimateRequestId}/reject`,
+    input,
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.error.message);
   }
 
   return response.data.data;

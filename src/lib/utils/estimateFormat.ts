@@ -103,6 +103,18 @@ export function formatMoveDateLabel(value: string | Date): string {
   return `${year}년 ${month}월 ${day}일 (${weekday})`;
 }
 
+/**
+ * 잘못된 날짜 값에서도 렌더가 깨지지 않도록 fallback을 반환합니다.
+ * // 2026.07.27 정슬기 - [추가] 리뷰 카드 등 목록 UI용 안전 포맷
+ */
+export function formatMoveDateLabelSafe(value: string | Date, fallback = "-"): string {
+  try {
+    return formatMoveDateLabel(value);
+  } catch {
+    return fallback;
+  }
+}
+
 export function formatDetailDateLabel(value: string | Date): string {
   // 2026.07.26 정슬기 - [수정] ISO datetime은 KST 기준으로 표기
   if (isDateOnlyValue(value)) {
