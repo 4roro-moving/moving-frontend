@@ -17,8 +17,9 @@ export interface MoverRatingDistributionItem {
 }
 
 /**
- * 기사님 상세 화면 데이터 (API 연동 전 목업)
- * 목록용 `Mover`에 상세 전용 필드를 확장합니다.
+ * 기사님 상세 화면 데이터
+ * 목록용 `Mover`에 상세·리뷰 UI용 필드를 확장합니다.
+ * (리뷰 목록/분포는 후속 API 연동 전까지 비울 수 있음)
  */
 export interface MoverDetail extends Mover {
   /** 제공 서비스 (칩 복수) */

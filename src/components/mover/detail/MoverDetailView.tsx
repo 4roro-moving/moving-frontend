@@ -1,47 +1,68 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import Toast from "@/components/common/Toast/Toast";
 import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
 import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
+import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
 import MoverDetailActions from "@/components/mover/detail/MoverDetailActions";
 import MoverDetailProfile from "@/components/mover/detail/MoverDetailProfile";
 import MoverDetailReviews from "@/components/mover/detail/MoverDetailReviews";
 import MoverDetailServices from "@/components/mover/detail/MoverDetailServices";
-import { getMockMoverDetail } from "@/components/mover/detail/moverDetailMock";
-import type { MoverDetail } from "@/types/moverDetail";
+import { useFavoriteMover } from "@/hooks/useFavoriteMover";
+import { isMoverDetailId, useMoverDetail } from "@/hooks/useMoverDetail";
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 
 interface MoverDetailViewProps {
   moverId: string;
 }
 
 export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
-  const initialDetail = useMemo(() => getMockMoverDetail(moverId), [moverId]);
-  const [detail, setDetail] = useState<MoverDetail | null>(initialDetail);
   const [reviewPage, setReviewPage] = useState(1);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  if (!detail) {
+  const { data: detail, isLoading, isError, error, refetch } = useMoverDetail(moverId);
+  const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
+
+  if (!isMoverDetailId(moverId)) {
     return (
-      <div className="bg-background-default px-margin-mobile flex w-full flex-col items-center py-80">
-        <p className="text-text-muted">기사님 정보를 찾을 수 없습니다.</p>
+      <div className="bg-background-default flex w-full flex-col">
+        <ReceivedEstimatesStatus message="유효하지 않은 기사님 ID입니다." />
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="bg-background-default flex w-full flex-col">
+        <ReceivedEstimatesStatus message="기사님 정보를 불러오는 중입니다." />
+      </div>
+    );
+  }
+
+  if (isError || !detail) {
+    return (
+      <div className="bg-background-default flex w-full flex-col">
+        <ReceivedEstimatesStatus
+          message={getApiErrorMessage(error, "기사님 정보를 불러오지 못했습니다.")}
+          actionLabel="다시 시도"
+          onAction={() => {
+            void refetch();
+          }}
+        />
       </div>
     );
   }
 
   const toggleFavorite = () => {
-    setDetail((prev) => {
-      if (!prev) {
-        return prev;
-      }
+    if (favoriteMutation.isPending) {
+      return;
+    }
 
-      const nextIsFavorite = !prev.isFavorite;
-      return {
-        ...prev,
-        isFavorite: nextIsFavorite,
-        favoriteCount: Math.max(0, prev.favoriteCount + (nextIsFavorite ? 1 : -1)),
-      };
+    favoriteMutation.mutate({
+      moverId: detail.id,
+      nextIsFavorite: !detail.isFavorite,
     });
   };
 

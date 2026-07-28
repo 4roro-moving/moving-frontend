@@ -8,7 +8,10 @@ export const API_ROUTES = {
   },
   USERS: "/users",
   PROFILES: "/profiles",
-  MOVERS: "/movers",
+  MOVERS: {
+    ROOT: "/movers",
+    DETAIL: (moverId: string) => `/movers/${moverId}`,
+  },
   ESTIMATE_REQUESTS: {
     ROOT: "/estimate-requests",
     DETAIL: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,

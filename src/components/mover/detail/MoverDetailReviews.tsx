@@ -2,7 +2,6 @@
 
 import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
-import { MOVER_DETAIL_REVIEW_PAGE_LIMIT } from "@/components/mover/detail/moverDetailMock";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { cn } from "@/lib/utils/cn";
 import { formatRating } from "@/lib/utils/estimateFormat";
@@ -19,10 +18,10 @@ export default function MoverDetailReviews({
   currentPage,
   onPageChange,
 }: MoverDetailReviewsProps) {
-  const isEmpty = detail.reviewCount === 0 || detail.reviews.length === 0;
+  const isEmpty = detail.reviewCount === 0;
+  const hasReviews = detail.reviews.length > 0;
+  const hasDistribution = detail.ratingDistribution.some((item) => item.count > 0);
   const maxCount = Math.max(...detail.ratingDistribution.map((item) => item.count), 1);
-  const pageStart = (currentPage - 1) * MOVER_DETAIL_REVIEW_PAGE_LIMIT;
-  const pagedReviews = detail.reviews.slice(pageStart, pageStart + MOVER_DETAIL_REVIEW_PAGE_LIMIT);
 
   return (
     <section className="flex w-full flex-col gap-24 md:gap-32" aria-labelledby="mover-reviews">
@@ -59,63 +58,69 @@ export default function MoverDetailReviews({
               </div>
             </div>
 
-            <ul
-              className="flex w-full max-w-[284px] flex-col gap-4 md:shrink-0"
-              aria-label="별점 분포"
-            >
-              {detail.ratingDistribution.map((item) => (
-                <li key={item.score} className="flex items-center gap-16">
-                  <Text
-                    as="span"
-                    variant={item.count > 0 ? "md-bold" : "md-medium"}
-                    className="text-text-tertiary w-36 shrink-0"
-                  >
-                    {item.score}점
-                  </Text>
-                  <div
-                    className="bg-rating-track relative h-8 w-full max-w-[180px] overflow-hidden rounded-full"
-                    role="img"
-                    aria-label={`${item.score}점 ${item.count}개`}
-                  >
+            {hasDistribution ? (
+              <ul
+                className="flex w-full max-w-[284px] flex-col gap-4 md:shrink-0"
+                aria-label="별점 분포"
+              >
+                {detail.ratingDistribution.map((item) => (
+                  <li key={item.score} className="flex items-center gap-16">
+                    <Text
+                      as="span"
+                      variant={item.count > 0 ? "md-bold" : "md-medium"}
+                      className="text-text-tertiary w-36 shrink-0"
+                    >
+                      {item.score}점
+                    </Text>
                     <div
-                      className="bg-rating-fill absolute inset-y-0 left-0 rounded-full"
-                      // 동적 비율(리뷰 분포) — 토큰 고정 width로 표현 불가
-                      style={{ width: `${(item.count / maxCount) * 100}%` }}
-                    />
-                  </div>
-                  <Text
-                    as="span"
-                    variant={item.count > 0 ? "md-bold" : "md-medium"}
-                    className="text-rating-count w-36 shrink-0"
-                  >
-                    {item.count}
-                  </Text>
-                </li>
-              ))}
-            </ul>
+                      className="bg-rating-track relative h-8 w-full max-w-[180px] overflow-hidden rounded-full"
+                      role="img"
+                      aria-label={`${item.score}점 ${item.count}개`}
+                    >
+                      <div
+                        className="bg-rating-fill absolute inset-y-0 left-0 rounded-full"
+                        // 동적 비율(리뷰 분포) — 토큰 고정 width로 표현 불가
+                        style={{ width: `${(item.count / maxCount) * 100}%` }}
+                      />
+                    </div>
+                    <Text
+                      as="span"
+                      variant={item.count > 0 ? "md-bold" : "md-medium"}
+                      className="text-rating-count w-36 shrink-0"
+                    >
+                      {item.count}
+                    </Text>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
 
-          <ul className="flex w-full flex-col">
-            {pagedReviews.map((review, index) => (
-              <li
-                key={review.id}
-                className={cn(
-                  "border-border-subtle py-20 md:py-24",
-                  index < pagedReviews.length - 1 && "border-b",
-                )}
-              >
-                <ReviewItem review={review} />
-              </li>
-            ))}
-          </ul>
+          {hasReviews ? (
+            <>
+              <ul className="flex w-full flex-col">
+                {detail.reviews.map((review, index) => (
+                  <li
+                    key={review.id}
+                    className={cn(
+                      "border-border-subtle py-20 md:py-24",
+                      index < detail.reviews.length - 1 && "border-b",
+                    )}
+                  >
+                    <ReviewItem review={review} />
+                  </li>
+                ))}
+              </ul>
 
-          {detail.reviewPageCount > 1 ? (
-            <Pagination
-              currentPage={currentPage}
-              pageCount={detail.reviewPageCount}
-              onPageChange={onPageChange}
-              className="self-center"
-            />
+              {detail.reviewPageCount > 1 ? (
+                <Pagination
+                  currentPage={currentPage}
+                  pageCount={detail.reviewPageCount}
+                  onPageChange={onPageChange}
+                  className="self-center"
+                />
+              ) : null}
+            </>
           ) : null}
         </>
       )}
