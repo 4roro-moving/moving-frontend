@@ -127,6 +127,8 @@
   --shadow-page-header: 0 2px 10px 0 rgba(248, 248, 248, 0.1);
   /* 2026.07.27 정슬기 - [추가] 견적/리뷰 탭 하단 shadow */
   --shadow-tab: 0 2px 5px 0 rgba(248, 248, 248, 0.1);
+  /* 2026.07.28 정슬기 - [추가] Header 알림 패널 shadow */
+  --shadow-notification: 2px 2px 8px 0 rgba(0, 0, 0, 0.06);
 
   /* Typography */
   --font-family-base: "Pretendard", sans-serif;

@@ -45,7 +45,7 @@ export default function NotificationPanel({
       aria-modal="false"
       aria-labelledby="notification-panel-title"
       className={cn(
-        "border-border-default bg-background-surface rounded-24 absolute top-full right-0 z-50 mt-8 w-[359px] border px-16 py-10 shadow-[2px_2px_8px_0_rgba(0,0,0,0.06)]",
+        "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-0 z-50 mt-8 w-[359px] border px-16 py-10",
         className,
       )}
     >

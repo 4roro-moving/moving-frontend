@@ -181,12 +181,14 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
               >
                 <AlarmIcon className="text-icon-default size-24" aria-hidden="true" />
                 {unreadCount > 0 ? (
-                  <span
+                  <Text
+                    as="span"
+                    variant="xs-semibold"
                     aria-hidden="true"
-                    className="bg-status-error text-text-inverse absolute -top-4 -right-6 flex h-16 min-w-16 items-center justify-center rounded-full px-4 text-[length:var(--font-size-12)] leading-none font-semibold"
+                    className="bg-status-error text-text-inverse absolute -top-4 -right-6 flex h-16 min-w-16 items-center justify-center rounded-full px-4 leading-none"
                   >
                     {unreadCount}
-                  </span>
+                  </Text>
                 ) : null}
               </button>
               {isNotificationOpen ? (
