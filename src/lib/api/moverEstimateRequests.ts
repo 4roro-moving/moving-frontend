@@ -1,6 +1,8 @@
 import type {
   MoverEstimateRequestQuery,
   MoverEstimateRequestResponse,
+  RejectEstimateRequest,
+  RejectEstimateResponse,
   SendEstimateRequest,
   SendEstimateResponse,
 } from "@/types/moverEstimateRequest";
@@ -47,6 +49,21 @@ export async function getMoverEstimateRequests(query: MoverEstimateRequestQuery)
 export async function sendMoverEstimate(estimateRequestId: number, input: SendEstimateRequest) {
   const response = await axiosInstance.post<SendEstimateResponse>(
     `/api${API_ROUTES.ESTIMATES.ROOT}/requests/${estimateRequestId}`,
+    input,
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.error.message);
+  }
+
+  return response.data.data;
+}
+
+// 기사 견적 반려
+// POST /api/estimates/requests/:id/reject
+export async function rejectMoverEstimate(estimateRequestId: number, input: RejectEstimateRequest) {
+  const response = await axiosInstance.post<RejectEstimateResponse>(
+    `/api${API_ROUTES.ESTIMATES.ROOT}/requests/${estimateRequestId}/reject`,
     input,
   );
 
