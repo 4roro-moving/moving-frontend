@@ -5,45 +5,48 @@ import { useState } from "react";
 import Toast from "@/components/common/Toast/Toast";
 import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
 import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
-import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
 import MoverDetailActions from "@/components/mover/detail/MoverDetailActions";
+import MoverDetailNotFoundStatus from "@/components/mover/detail/MoverDetailNotFoundStatus";
 import MoverDetailPageSkeleton from "@/components/mover/detail/MoverDetailPageSkeleton";
 import MoverDetailProfile from "@/components/mover/detail/MoverDetailProfile";
 import MoverDetailReviews from "@/components/mover/detail/MoverDetailReviews";
 import MoverDetailServices from "@/components/mover/detail/MoverDetailServices";
+import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { isMoverDetailId, useMoverDetail } from "@/hooks/useMoverDetail";
-import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { useMoverDetail } from "@/hooks/useMoverDetail";
+import { ApiError } from "@/types/api";
 
 interface MoverDetailViewProps {
   moverId: string;
 }
 
+function isMoverNotFoundError(error: unknown): boolean {
+  return error instanceof ApiError && (error.status === 404 || error.code === "MOVER_NOT_FOUND");
+}
+
 export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const { data: detail, isLoading, isError, error, refetch } = useMoverDetail(moverId);
+  const { data: detail, isLoading, isError, error, isFetching, refetch } = useMoverDetail(moverId);
   const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
-
-  if (!isMoverDetailId(moverId)) {
-    return (
-      <div className="bg-background-default flex w-full flex-col">
-        <ReceivedEstimatesStatus message="유효하지 않은 기사님 ID입니다." />
-      </div>
-    );
-  }
 
   if (isLoading) {
     return <MoverDetailPageSkeleton />;
   }
 
   if (isError || !detail) {
+    if (isMoverNotFoundError(error)) {
+      return <MoverDetailNotFoundStatus />;
+    }
+
     return (
-      <div className="bg-background-default flex w-full flex-col">
-        <ReceivedEstimatesStatus
-          message={getApiErrorMessage(error, "기사님 정보를 불러오지 못했습니다.")}
+      <div className="bg-background-default flex w-full flex-1 flex-col items-center justify-center">
+        <MoversErrorPanel
+          title="불러오지 못했어요"
+          description="기사님 정보를 가져오는 중 문제가 발생했습니다."
           actionLabel="다시 시도"
-          onAction={() => {
+          isRetrying={isFetching}
+          onRetry={() => {
             void refetch();
           }}
         />

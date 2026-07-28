@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import MoverDetailView from "@/components/mover/detail/MoverDetailView";
+import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
 
 interface MoverDetailPageProps {
   params: Promise<{ moverId: string }>;
@@ -13,6 +15,10 @@ export const metadata: Metadata = {
 
 export default async function MoverDetailPage({ params }: MoverDetailPageProps) {
   const { moverId } = await params;
+
+  if (!isMoverDetailId(moverId)) {
+    notFound();
+  }
 
   return <MoverDetailView key={moverId} moverId={moverId} />;
 }

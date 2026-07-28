@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { isMoverDetailId } from "@/hooks/useMoverDetail";
+import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
 import { getMoverReviews, MOVER_REVIEW_PAGE_LIMIT } from "@/lib/api/movers";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import type { MoverReviewListQuery } from "@/types/review";
