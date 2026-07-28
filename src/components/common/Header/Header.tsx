@@ -175,7 +175,7 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
                 type="button"
                 aria-label={unreadCount > 0 ? `알림, 읽지 않은 알림 ${unreadCount}개` : "알림"}
                 aria-expanded={isNotificationOpen}
-                aria-controls={notificationPanelId}
+                aria-controls={isNotificationOpen ? notificationPanelId : undefined}
                 className="relative"
                 onClick={() => setIsNotificationOpen((prev) => !prev)}
               >
