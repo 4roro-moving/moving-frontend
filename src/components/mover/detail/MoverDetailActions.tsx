@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/components/common/Button/Button";
-import { LikeOutlineButton } from "@/components/common/Button/LikeOutlineButton";
+import { LikeOutlineButton } from "@/components/mover/detail/LikeOutlineButton";
 import { Text } from "@/components/common/Text";
 
 interface MoverDetailActionsProps {
