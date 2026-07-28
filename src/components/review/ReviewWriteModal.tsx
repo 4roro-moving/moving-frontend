@@ -150,6 +150,7 @@ function ReviewWriteModalContent({
             onChange={(next) => {
               setRating(next);
               setRatingError(undefined);
+              setSubmitError(undefined);
             }}
             size="lg"
             label="별점"
@@ -181,6 +182,7 @@ function ReviewWriteModalContent({
             className="h-[140px] md:h-[180px]"
             onChange={(event) => {
               setContent(event.target.value);
+              setSubmitError(undefined);
               if (event.target.value.trim().length >= MIN_CONTENT_LENGTH) {
                 setContentError(undefined);
               }
