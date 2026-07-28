@@ -127,6 +127,8 @@
   --shadow-page-header: 0 2px 10px 0 rgba(248, 248, 248, 0.1);
   /* 2026.07.27 정슬기 - [추가] 견적/리뷰 탭 하단 shadow */
   --shadow-tab: 0 2px 5px 0 rgba(248, 248, 248, 0.1);
+  /* Toast soft (Figma) */
+  --shadow-toast: -2px -2px 10px 0 rgba(46, 46, 46, 0.04), 2px 2px 10px 0 rgba(46, 46, 46, 0.04);
 
   /* Typography */
   --font-family-base: "Pretendard", sans-serif;
@@ -225,11 +227,14 @@
   --spacing-57: 3.5625rem;
   --spacing-60: 3.75rem;
   --spacing-64: 4rem;
+  --spacing-70: 4.375rem;
   --spacing-72: 4.5rem;
   /* 2026.07.25 정슬기 - [추가] Figma Desktop cards top offset 78 */
   --spacing-78: 4.875rem;
   --spacing-80: 5rem;
   --spacing-90: 5.625rem;
+  /* Toast Desktop top offset (Figma 103) */
+  --spacing-103: 6.4375rem;
   --spacing-120: 7.5rem;
   /* 2026.07.25 정슬기 - [추가] Figma Desktop sub-header height 124 / Tablet 202 */
   --spacing-124: 7.75rem;
