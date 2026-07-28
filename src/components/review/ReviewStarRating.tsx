@@ -24,6 +24,7 @@ const SIZE_CLASS = {
 /**
  * 별점 표시/선택 공통 컴포넌트
  * // 2026.07.27 정슬기 - [추가] 리뷰 별점 UI
+ * // 2026.07.28 정슬기 - [수정] radiogroup/radio 제거 → group + aria-pressed (키보드 패턴 미구현 대응)
  */
 export default function ReviewStarRating({
   value,
@@ -39,7 +40,7 @@ export default function ReviewStarRating({
   return (
     <div
       className={cn("flex items-center gap-2", className)}
-      role={isInteractive ? "radiogroup" : "img"}
+      role={isInteractive ? "group" : "img"}
       aria-label={isInteractive ? label : `${label} ${clamped}점`}
     >
       {Array.from({ length: 5 }, (_, index) => {
@@ -59,13 +60,14 @@ export default function ReviewStarRating({
           );
         }
 
+        const isSelected = starValue === clamped;
+
         return (
           <button
             key={starValue}
             type="button"
-            role="radio"
-            aria-checked={starValue === clamped}
             aria-label={`${label} ${starValue}점`}
+            aria-pressed={isSelected}
             disabled={disabled}
             className="focus-visible:ring-border-brand rounded-4 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed"
             onClick={() => onChange(starValue)}

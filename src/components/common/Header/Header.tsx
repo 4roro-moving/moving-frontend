@@ -137,7 +137,7 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
                         isActive ? "text-text-primary" : "text-text-subtle hover:text-text-primary",
                       )}
                     >
-                      <Text variant="md-bold">{link.label}</Text>
+                      <Text variant="2lg-bold">{link.label}</Text>
                     </Link>
                   </li>
                 );

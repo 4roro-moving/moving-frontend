@@ -93,7 +93,6 @@ export default function WritableReviewsPageClient() {
         item={selectedItem}
         onClose={() => setSelectedItem(null)}
         onSuccess={() => setToastMessage("리뷰가 등록되었습니다.")}
-        onError={setToastMessage}
       />
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}

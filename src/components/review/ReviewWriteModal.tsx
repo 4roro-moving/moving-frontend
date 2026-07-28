@@ -39,13 +39,18 @@ function ReviewWriteModalContent({
   const [content, setContent] = useState("");
   const [contentError, setContentError] = useState<string | undefined>();
   const [ratingError, setRatingError] = useState<string | undefined>();
+  const [submitError, setSubmitError] = useState<string | undefined>();
 
   const createMutation = useCreateReview({
     onSuccess: () => {
       onSuccess?.();
       onClose();
     },
-    onError,
+    onError: (message) => {
+      // Modal과 Toast가 동일 z-index라 실패 시 Toast가 가려질 수 있어 모달 내 인라인 표시
+      setSubmitError(message);
+      onError?.(message);
+    },
   });
 
   const displayName = item.mover.nickname?.trim() || "기사님";
@@ -77,6 +82,7 @@ function ReviewWriteModalContent({
 
     if (hasError) return;
 
+    setSubmitError(undefined);
     createMutation.mutate({
       estimateId: item.estimateId,
       rating,
@@ -182,6 +188,12 @@ function ReviewWriteModalContent({
           />
         </div>
       </div>
+
+      {submitError ? (
+        <Text as="p" variant="sm-medium" className="text-text-error w-full" role="alert">
+          {submitError}
+        </Text>
+      ) : null}
 
       <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
         <Button
