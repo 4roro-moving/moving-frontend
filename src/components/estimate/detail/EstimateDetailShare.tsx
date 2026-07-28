@@ -66,7 +66,12 @@ export default function EstimateDetailShare({
           onClick={() => {
             void handleCopyLink();
           }}
-          className="bg-background-surface border-border-default focus-visible:ring-border-brand rounded-8 md:rounded-16 flex size-40 shrink-0 items-center justify-center border p-10 focus-visible:ring-2 focus-visible:outline-none md:size-64"
+          className={cn(
+            "bg-background-surface border-border-default text-icon-default rounded-8 md:rounded-16",
+            "flex size-40 shrink-0 items-center justify-center border p-10 transition-colors md:size-64",
+            "hover:bg-background-subtle active:bg-background-hover",
+            "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+          )}
         >
           <ClipIcon className="text-icon-default size-24 md:size-28" aria-hidden="true" />
         </button>
