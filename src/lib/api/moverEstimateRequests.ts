@@ -31,14 +31,8 @@ export async function getMoverEstimateRequests(query: MoverEstimateRequestQuery)
   //이사 유형 필터
   query.moveType?.forEach((moveType) => params.append("moveType", moveType));
 
-  const accessToken =
-    typeof window === "undefined" ? null : window.localStorage.getItem("accessToken");
-
   const response = await axiosInstance.get<MoverEstimateRequestResponse>(
     `/api${API_ROUTES.ESTIMATES.ROOT}/requests?${params.toString()}`,
-    {
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
-    },
   );
 
   if (!response.data.success) {
@@ -51,16 +45,9 @@ export async function getMoverEstimateRequests(query: MoverEstimateRequestQuery)
 // 기사가 고객의 견적 요청에 견적 전송
 // POST /api/estimates/requests/:estimateRequestId
 export async function sendMoverEstimate(estimateRequestId: number, input: SendEstimateRequest) {
-  // 기사 인증에 사용할 AccessToken 조회
-  const accessToken =
-    typeof window === "undefined" ? null : window.localStorage.getItem("accessToken");
-
   const response = await axiosInstance.post<SendEstimateResponse>(
     `/api${API_ROUTES.ESTIMATES.ROOT}/requests/${estimateRequestId}`,
     input,
-    {
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
-    },
   );
 
   if (!response.data.success) {
