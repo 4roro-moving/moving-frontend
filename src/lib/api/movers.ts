@@ -7,6 +7,10 @@ import type {
   MoversListQuery,
   MoversListResult,
 } from "@/types/mover";
+import type { MoverReviewListQuery, MoverReviewListResult } from "@/types/review";
+
+/** 기사 상세 리뷰 목록 — 백엔드 listMoverReviewQuerySchema default */
+export const MOVER_REVIEW_PAGE_LIMIT = 5;
 
 /** 백엔드 listMoverQuerySchema와 동일한 쿼리 키/값 */
 function buildMoversQueryParams(query: MoversListQuery): URLSearchParams {
@@ -44,4 +48,31 @@ export async function getMovers(query: MoversListQuery): Promise<MoversListResul
 /** GET /movers/:moverId — 기사님 상세 */
 export async function getMoverDetail(moverId: string): Promise<MoverDetailItem> {
   return fetchInstance.get<MoverDetailItem>(API_ROUTES.MOVERS.DETAIL(moverId));
+}
+
+/** GET /movers/:moverId/reviews — 기사님 리뷰 목록 */
+export async function getMoverReviews(
+  moverId: string,
+  query: MoverReviewListQuery = {},
+): Promise<MoverReviewListResult> {
+  // TODO: 시드에 Review row 추가 후 mock 제거하고 실 API 호출로 교체
+  const { getMockMoverReviews } = await import("@/lib/mocks/moverReviews.mock");
+  await Promise.resolve();
+  return getMockMoverReviews(moverId, query);
+
+  // const page = query.page ?? 1;
+  // const limit = query.limit ?? MOVER_REVIEW_PAGE_LIMIT;
+  // const params = new URLSearchParams({
+  //   page: String(page),
+  //   limit: String(limit),
+  // });
+  //
+  // const result = await fetchInstance.getPaginated<MoverReviewItem[]>(
+  //   `${API_ROUTES.MOVERS.REVIEWS(moverId)}?${params.toString()}`,
+  // );
+  //
+  // return {
+  //   reviews: result.data,
+  //   pagination: result.pagination,
+  // };
 }

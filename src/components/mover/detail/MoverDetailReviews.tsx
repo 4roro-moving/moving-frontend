@@ -1,27 +1,51 @@
 "use client";
 
+import { useState } from "react";
+
 import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
+import { useMoverReviews } from "@/hooks/useMoverReviews";
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { cn } from "@/lib/utils/cn";
-import { formatRating } from "@/lib/utils/estimateFormat";
+import { formatKoreanDateLong, formatRating } from "@/lib/utils/estimateFormat";
 import type { MoverDetail, MoverDetailReview } from "@/types/moverDetail";
+import type { MoverReviewItem } from "@/types/review";
 
 interface MoverDetailReviewsProps {
-  detail: MoverDetail;
-  currentPage: number;
-  onPageChange: (page: number) => void;
+  moverId: string;
+  rating: number;
+  reviewCount: number;
+  ratingDistribution: MoverDetail["ratingDistribution"];
+}
+
+function mapMoverReviewItemToDetailReview(item: MoverReviewItem): MoverDetailReview {
+  return {
+    id: String(item.id),
+    authorMasked: item.customer.displayName,
+    createdAt: formatKoreanDateLong(item.createdAt),
+    rating: item.rating,
+    content: item.content,
+  };
 }
 
 export default function MoverDetailReviews({
-  detail,
-  currentPage,
-  onPageChange,
+  moverId,
+  rating,
+  reviewCount,
+  ratingDistribution,
 }: MoverDetailReviewsProps) {
-  const isEmpty = detail.reviewCount === 0;
-  const hasReviews = detail.reviews.length > 0;
-  const hasDistribution = detail.ratingDistribution.some((item) => item.count > 0);
-  const maxCount = Math.max(...detail.ratingDistribution.map((item) => item.count), 1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const { data, isLoading, isError, error, isFetching, refetch } = useMoverReviews(moverId, {
+    page: currentPage,
+  });
+
+  const isEmpty = reviewCount === 0;
+  const reviews = data?.reviews.map(mapMoverReviewItemToDetailReview) ?? [];
+  const pageCount = Math.max(1, data?.pagination.totalPages ?? 0);
+  const hasReviews = reviews.length > 0;
+  const hasDistribution = ratingDistribution.some((item) => item.count > 0);
+  const maxCount = Math.max(...ratingDistribution.map((item) => item.count), 1);
 
   return (
     <section className="flex w-full flex-col gap-24 md:gap-32" aria-labelledby="mover-reviews">
@@ -48,12 +72,12 @@ export default function MoverDetailReviews({
           <div className="flex w-full flex-col gap-24 md:flex-row md:items-start md:justify-between">
             <div className="flex items-center gap-16">
               <Text as="p" variant="rating-score" className="text-text-primary">
-                {formatRating(detail.rating)}
+                {formatRating(rating)}
               </Text>
               <div className="flex flex-col gap-2">
-                <ReviewStarRating value={Math.round(detail.rating)} size="sm" />
+                <ReviewStarRating value={Math.round(rating)} size="sm" />
                 <Text as="p" variant="md-regular" className="text-text-muted">
-                  {detail.reviewCount}개의 리뷰
+                  {reviewCount}개의 리뷰
                 </Text>
               </div>
             </div>
@@ -63,7 +87,7 @@ export default function MoverDetailReviews({
                 className="flex w-full max-w-[284px] flex-col gap-4 md:shrink-0"
                 aria-label="별점 분포"
               >
-                {detail.ratingDistribution.map((item) => (
+                {ratingDistribution.map((item) => (
                   <li key={item.score} className="flex items-center gap-16">
                     <Text
                       as="span"
@@ -96,15 +120,43 @@ export default function MoverDetailReviews({
             ) : null}
           </div>
 
-          {hasReviews ? (
+          {isLoading && !data ? (
+            <Text as="p" variant="md-regular" className="text-text-muted py-24 text-center">
+              리뷰를 불러오는 중입니다.
+            </Text>
+          ) : null}
+
+          {isError ? (
+            <div className="flex w-full flex-col items-center gap-12 py-24 text-center">
+              <Text as="p" variant="md-regular" className="text-text-muted">
+                {getApiErrorMessage(error, "리뷰를 불러오지 못했습니다.")}
+              </Text>
+              <button
+                type="button"
+                onClick={() => {
+                  void refetch();
+                }}
+                className="text-text-brand focus-visible:ring-border-brand rounded-4 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <Text as="span" variant="md-semibold" className="text-text-brand">
+                  다시 시도
+                </Text>
+              </button>
+            </div>
+          ) : null}
+
+          {!isError && hasReviews ? (
             <>
-              <ul className="flex w-full flex-col">
-                {detail.reviews.map((review, index) => (
+              <ul
+                className={cn("flex w-full flex-col", isFetching && "opacity-70")}
+                aria-busy={isFetching}
+              >
+                {reviews.map((review, index) => (
                   <li
                     key={review.id}
                     className={cn(
                       "border-border-subtle py-20 md:py-24",
-                      index < detail.reviews.length - 1 && "border-b",
+                      index < reviews.length - 1 && "border-b",
                     )}
                   >
                     <ReviewItem review={review} />
@@ -112,11 +164,11 @@ export default function MoverDetailReviews({
                 ))}
               </ul>
 
-              {detail.reviewPageCount > 1 ? (
+              {pageCount > 1 ? (
                 <Pagination
                   currentPage={currentPage}
-                  pageCount={detail.reviewPageCount}
-                  onPageChange={onPageChange}
+                  pageCount={pageCount}
+                  onPageChange={setCurrentPage}
                   className="self-center"
                 />
               ) : null}

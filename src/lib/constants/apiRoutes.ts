@@ -11,6 +11,7 @@ export const API_ROUTES = {
   MOVERS: {
     ROOT: "/movers",
     DETAIL: (moverId: string) => `/movers/${moverId}`,
+    REVIEWS: (moverId: string) => `/movers/${moverId}/reviews`,
   },
   ESTIMATE_REQUESTS: {
     ROOT: "/estimate-requests",

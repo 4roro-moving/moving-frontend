@@ -40,7 +40,7 @@ export function mapMoverListItemToMover(item: MoverListItem): Mover {
   };
 }
 
-/** API 상세 응답을 상세 화면용 데이터로 변환 (리뷰 목록/분포는 후속 연동) */
+/** API 상세 응답을 상세 화면용 데이터로 변환 */
 export function mapMoverDetailItemToMoverDetail(item: MoverDetailItem): MoverDetail {
   const base = mapMoverListItemToMover(item);
 
@@ -48,7 +48,5 @@ export function mapMoverDetailItemToMoverDetail(item: MoverDetailItem): MoverDet
     ...base,
     serviceAreas: item.serviceAreas.map((area) => area.id).filter(isRegionId),
     ratingDistribution: [...EMPTY_RATING_DISTRIBUTION],
-    reviews: [],
-    reviewPageCount: 0,
   };
 }

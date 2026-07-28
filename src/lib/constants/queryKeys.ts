@@ -46,6 +46,7 @@ export const QUERY_KEYS = {
     ALL: ["reviews"] as const,
     ME: ["reviews", "me"] as const,
     REVIEWABLE: ["reviews", "reviewable"] as const,
+    BY_MOVER: (moverId: string) => ["reviews", "mover", moverId] as const,
   },
 
   NOTIFICATIONS: {

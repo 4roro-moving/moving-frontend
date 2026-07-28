@@ -19,7 +19,6 @@ interface MoverDetailViewProps {
 }
 
 export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
-  const [reviewPage, setReviewPage] = useState(1);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const { data: detail, isLoading, isError, error, refetch } = useMoverDetail(moverId);
@@ -92,9 +91,10 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
             <div className="border-border-subtle w-full border-t" aria-hidden="true" />
 
             <MoverDetailReviews
-              detail={detail}
-              currentPage={reviewPage}
-              onPageChange={setReviewPage}
+              moverId={detail.id}
+              rating={detail.rating}
+              reviewCount={detail.reviewCount}
+              ratingDistribution={detail.ratingDistribution}
             />
           </div>
 

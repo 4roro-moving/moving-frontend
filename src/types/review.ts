@@ -64,6 +64,36 @@ export interface MyReviewListQuery {
   limit?: number;
 }
 
+/**
+ * 백엔드 `GET /movers/:moverId/reviews` 응답 아이템
+ */
+export interface MoverReviewItem {
+  id: number;
+  rating: number;
+  content: string;
+  createdAt: string;
+  customer: {
+    id: string;
+    displayName: string;
+    imageUrl: string | null;
+  };
+  estimateRequest: {
+    id: number;
+    moveType: MoveType;
+    moveDate: string;
+  };
+}
+
+export interface MoverReviewListResult {
+  reviews: MoverReviewItem[];
+  pagination: Pagination;
+}
+
+export interface MoverReviewListQuery {
+  page?: number;
+  limit?: number;
+}
+
 export interface CreateReviewInput {
   estimateId: number;
   rating: number;
