@@ -2,6 +2,7 @@
 
 import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
+import { MOVER_DETAIL_REVIEW_PAGE_LIMIT } from "@/components/mover/detail/moverDetailMock";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { cn } from "@/lib/utils/cn";
 import { formatRating } from "@/lib/utils/estimateFormat";
@@ -20,6 +21,8 @@ export default function MoverDetailReviews({
 }: MoverDetailReviewsProps) {
   const isEmpty = detail.reviewCount === 0 || detail.reviews.length === 0;
   const maxCount = Math.max(...detail.ratingDistribution.map((item) => item.count), 1);
+  const pageStart = (currentPage - 1) * MOVER_DETAIL_REVIEW_PAGE_LIMIT;
+  const pagedReviews = detail.reviews.slice(pageStart, pageStart + MOVER_DETAIL_REVIEW_PAGE_LIMIT);
 
   return (
     <section className="flex w-full flex-col gap-24 md:gap-32" aria-labelledby="mover-reviews">
@@ -93,12 +96,12 @@ export default function MoverDetailReviews({
           </div>
 
           <ul className="flex w-full flex-col">
-            {detail.reviews.map((review, index) => (
+            {pagedReviews.map((review, index) => (
               <li
                 key={review.id}
                 className={cn(
                   "border-border-subtle py-20 md:py-24",
-                  index < detail.reviews.length - 1 && "border-b",
+                  index < pagedReviews.length - 1 && "border-b",
                 )}
               >
                 <ReviewItem review={review} />
