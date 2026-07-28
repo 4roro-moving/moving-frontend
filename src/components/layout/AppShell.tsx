@@ -22,7 +22,7 @@ export const AppShell = ({ children, initialIsLogin, initialNickname }: AppShell
   return (
     <AppProviders>
       <Header isLogin={initialIsLogin} initialNickname={initialNickname} />
-      <main className="flex-1">{children}</main>
+      <main className="flex flex-1 flex-col">{children}</main>
       <Footer />
     </AppProviders>
   );
