@@ -44,6 +44,10 @@ export function setDevAuthTokens(tokens: DevAuthTokens): void {
 
   sessionStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
   sessionStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+  // 동적 import로 순환 참조를 피합니다.
+  void import("@/lib/auth/session").then(({ notifyAuthSessionChange }) => {
+    notifyAuthSessionChange();
+  });
 }
 
 export function clearDevAuthTokens(): void {
@@ -53,6 +57,9 @@ export function clearDevAuthTokens(): void {
 
   sessionStorage.removeItem(ACCESS_TOKEN_KEY);
   sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  void import("@/lib/auth/session").then(({ notifyAuthSessionChange }) => {
+    notifyAuthSessionChange();
+  });
 }
 
 /** 개발 로그인 폼 기본 이메일 (비밀번호는 코드/공개 env에 두지 않음) */
