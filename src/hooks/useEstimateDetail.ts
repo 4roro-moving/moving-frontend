@@ -31,7 +31,7 @@ interface UseConfirmEstimateOptions {
 /**
  * 견적 확정 (POST /estimates/:estimateId/confirm)
  * // 2026.07.24 정슬기 - [추가]
- * // 2026.07.28 정슬기 - [수정] useApiMutation + received/pending 목록 캐시 무효화
+ * // 2026.07.28 정슬기 - [수정] useApiMutation + pending/received 캐시 동시 무효화
  */
 export function useConfirmEstimate(estimateId: number, options?: UseConfirmEstimateOptions) {
   const queryClient = useQueryClient();
@@ -50,8 +50,7 @@ export function useConfirmEstimate(estimateId: number, options?: UseConfirmEstim
       queryClient.setQueryData(QUERY_KEYS.ESTIMATES.PENDING_DETAIL(estimateId), detail);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
-        // Query Key 분리 전: pending 목록은 MY_LIST 사용
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
       ]);
       onSuccessRef.current?.(detail);
     },

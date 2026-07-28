@@ -53,8 +53,7 @@ export function useConfirmPendingEstimate(
       queryClient.setQueryData(QUERY_KEYS.ESTIMATES.PENDING_DETAIL(estimateId), detail);
       queryClient.setQueryData(QUERY_KEYS.ESTIMATES.DETAIL(estimateId), detail);
       await Promise.all([
-        // Query Key 분리 전: pending 목록은 MY_LIST 사용
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
       ]);
       onSuccessRef.current?.();
@@ -92,7 +91,7 @@ export function useConfirmPendingEstimateDetail(
       queryClient.setQueryData(QUERY_KEYS.ESTIMATES.PENDING_DETAIL(estimateId), detail);
       queryClient.setQueryData(QUERY_KEYS.ESTIMATES.DETAIL(estimateId), detail);
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
       ]);
       onSuccessRef.current?.();
