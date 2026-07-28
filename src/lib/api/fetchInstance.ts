@@ -105,12 +105,9 @@ const buildTimeoutSignal = (signal?: AbortSignal): AbortSignal => {
 
 // 토큰 리프레시 — Refresh Token은 HttpOnly Cookie (body 없이 credentials로 전송)
 const refreshAccessToken = async (): Promise<void> => {
-  const headers = await getRequestHeaders();
-
   const res = await safeFetch(`${BASE_URL}${API_ROUTES.AUTH.REFRESH}`, {
     method: "POST",
     credentials: "include",
-    headers,
     signal: buildTimeoutSignal(),
   });
 
