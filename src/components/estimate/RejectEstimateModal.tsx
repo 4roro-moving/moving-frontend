@@ -63,7 +63,7 @@ export default function RejectEstimateModal({
             className="h-[160px] resize-none px-24 py-14 text-lg"
           />
           <Text as="span" variant="xs-regular" className="text-text-muted self-end">
-            {reason.length}/{MAX_REASON_LENGTH}
+            {trimmedReason.length}/{MAX_REASON_LENGTH}
           </Text>
         </div>
       </div>
