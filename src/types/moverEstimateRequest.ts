@@ -104,3 +104,37 @@ export type RejectEstimateResponse =
         message: string;
       };
     };
+
+//기사 견적 반려 조회
+export type RejectedEstimateRequestItem = {
+  id: number;
+  reason: string;
+  rejectedAt: string;
+  request: {
+    id: number;
+    customer: {
+      id: string;
+      name: string;
+    };
+    moveType: MoveType;
+    moveDate: string;
+    fromAddress: string;
+    toAddress: string;
+    fromRegion: string;
+    toRegion: string;
+    isDesignated: boolean;
+  };
+};
+
+export type RejectedEstimateRequestListResponse =
+  | {
+      success: true;
+      data: RejectedEstimateRequestItem[];
+    }
+  | {
+      success: false;
+      error: {
+        code: string;
+        message: string;
+      };
+    };

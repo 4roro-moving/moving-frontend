@@ -26,6 +26,8 @@ export const QUERY_KEYS = {
   ESTIMATES: {
     ALL: ["estimates"],
     RECEIVED: ["estimates", "received"] as const,
+    //2026.07.28 윤소정 - [추가] 기사 반려 내역 조회
+    REJECTED: ["estimates", "rejected"] as const,
     DETAIL_ROOT: ["estimates", "detail"] as const,
     DETAIL: (estimateId: number) => ["estimates", "detail", estimateId] as const,
     // 2026.07.25 정슬기 - [추가] 대기 견적 상세(mock ViewModel) 쿼리 키
