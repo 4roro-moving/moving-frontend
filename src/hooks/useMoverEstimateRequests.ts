@@ -1,8 +1,16 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { getMoverEstimateRequests, sendMoverEstimate } from "@/lib/api/moverEstimateRequests";
+import {
+  getMoverEstimateRequests,
+  rejectMoverEstimate,
+  sendMoverEstimate,
+} from "@/lib/api/moverEstimateRequests";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
-import type { MoverEstimateRequestQuery, SendEstimateRequest } from "@/types/moverEstimateRequest";
+import type {
+  MoverEstimateRequestQuery,
+  RejectEstimateRequest,
+  SendEstimateRequest,
+} from "@/types/moverEstimateRequest";
 
 export function useMoverEstimateRequests(query: MoverEstimateRequestQuery) {
   return useInfiniteQuery({
@@ -29,6 +37,25 @@ export function useSendMoverEstimate() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.ESTIMATES.ALL,
+      });
+    },
+  });
+}
+
+type RejectMoverEstimateVariables = {
+  estimateRequestId: number;
+  input: RejectEstimateRequest;
+};
+
+export function useRejectMoverEstimate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ estimateRequestId, input }: RejectMoverEstimateVariables) =>
+      rejectMoverEstimate(estimateRequestId, input),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.ESTIMATES.RECEIVED,
       });
     },
   });

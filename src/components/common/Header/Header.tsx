@@ -5,11 +5,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 
+import NotificationPanel from "@/components/common/Header/NotificationPanel";
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { AlarmIcon } from "@/icons";
 import { getLoginRedirectPath, hasAuthSession, subscribeAuthSession } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { getUnreadNotificationCount, MOCK_NOTIFICATIONS } from "@/lib/mocks/notifications.mock";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -64,6 +66,28 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
     await logout();
     router.replace(APP_ROUTES.LOGIN);
   };
+  const notificationPanelId = useId();
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const unreadCount = getUnreadNotificationCount(MOCK_NOTIFICATIONS);
+
+  const closeNotification = useCallback(() => {
+    setIsNotificationOpen(false);
+  }, []);
+
+  const notificationRef = useClickOutside<HTMLDivElement>(closeNotification);
+
+  useEffect(() => {
+    if (!isNotificationOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeNotification();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isNotificationOpen, closeNotification]);
 
   const closeMenu = useCallback(() => {
     setOpenMenuPath(null);
@@ -74,7 +98,6 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
     setOpenMenuPath(pathname);
   }, [pathname]);
 
-  // 2026.07.27 정슬기 - [수정] Esc는 전역, 화살표·Home·End는 메뉴 내부 포커스일 때만 처리
   useEffect(() => {
     if (!isProfileMenuOpen) return;
 
@@ -177,12 +200,34 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
           </div>
         ) : isLogin ? (
           <div className="flex items-center gap-20">
-            <button type="button" aria-label="알림">
-              <AlarmIcon className="text-icon-default size-24" aria-hidden="true" />
-            </button>
+            <div ref={notificationRef} className="relative">
+              <button
+                type="button"
+                aria-label={unreadCount > 0 ? `알림, 읽지 않은 알림 ${unreadCount}개` : "알림"}
+                aria-expanded={isNotificationOpen}
+                aria-controls={isNotificationOpen ? notificationPanelId : undefined}
+                className="relative"
+                onClick={() => setIsNotificationOpen((prev) => !prev)}
+              >
+                <AlarmIcon className="text-icon-default size-24" aria-hidden="true" />
+                {unreadCount > 0 ? (
+                  <Text
+                    as="span"
+                    variant="xs-semibold"
+                    aria-hidden="true"
+                    className="bg-status-error text-text-inverse absolute -top-4 -right-6 flex h-16 min-w-16 items-center justify-center rounded-full px-4 leading-none"
+                  >
+                    {unreadCount}
+                  </Text>
+                ) : null}
+              </button>
+              {isNotificationOpen ? (
+                <div id={notificationPanelId}>
+                  <NotificationPanel onClose={closeNotification} />
+                </div>
+              ) : null}
+            </div>
 
-            {/* 2026.07.27 정슬기 - [추가] 프로필 드롭다운 (리뷰 메뉴 진입) */}
-            {/* 2026.07.27 정슬기 - [수정] 경로 기반 열림 상태·키보드(Esc/화살표) 접근성 */}
             <div ref={profileMenuRef} className="relative flex items-center gap-12">
               <button
                 ref={triggerRef}

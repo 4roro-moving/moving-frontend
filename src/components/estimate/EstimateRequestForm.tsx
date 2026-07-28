@@ -318,7 +318,7 @@ export default function EstimateRequestForm() {
             </>
           }
           buttonLabel="받은 견적 보러가기"
-          href="/estimates"
+          href="/estimates/pending"
         />
       </>
     );

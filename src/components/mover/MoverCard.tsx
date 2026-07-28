@@ -1,43 +1,20 @@
 "use client";
 
 import { Text } from "@/components/common/Text";
-import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { DriverBadgeIcon, LikeIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import type { Mover } from "@/types/mover";
-import type { MoveType } from "@/types/move";
 
-import MoverMeta from "./MoverMeta";
-import { MoverProfileImage } from "./MoverProfileImage";
+import { MoverMeta } from "@/components/mover/MoverMeta";
+import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
+import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips";
 
 interface MoverCardProps {
   mover: Mover;
   variant?: "full" | "compact";
   className?: string;
   onFavoriteError?: (message: string) => void;
-}
-
-interface MoverServiceTypeChipsProps {
-  serviceTypes: MoveType[];
-  size: "sm" | "md";
-  className?: string;
-}
-
-/** Figma desktop: gap 12. compact·좁은 카드(sm 칩)는 더 촘촘하게 */
-function MoverServiceTypeChips({ serviceTypes, size, className }: MoverServiceTypeChipsProps) {
-  return (
-    <ul
-      className={cn("flex flex-wrap items-start", size === "sm" ? "gap-8" : "gap-12", className)}
-      aria-label="제공 이사 유형"
-    >
-      {serviceTypes.map((moveType) => (
-        <li key={moveType}>
-          <MoveTypeChip moveType={moveType} size={size} />
-        </li>
-      ))}
-    </ul>
-  );
 }
 
 interface FavoriteButtonProps {
