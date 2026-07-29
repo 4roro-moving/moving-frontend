@@ -30,10 +30,15 @@ export interface HeaderProps {
   initialNickname?: string | null;
 }
 
-const PROFILE_MENU_ITEMS = [
-  { label: "작성 가능한 리뷰", href: APP_ROUTES.REVIEWS.WRITABLE },
-  { label: "내가 작성한 리뷰", href: APP_ROUTES.REVIEWS.ME },
-] as const;
+type ProfileMenuItem =
+  | { type: "link"; label: string; href: string }
+  | { type: "action"; label: string; action: "logout" };
+
+const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
+  { type: "link", label: "작성 가능한 리뷰", href: APP_ROUTES.REVIEWS.WRITABLE },
+  { type: "link", label: "내가 작성한 리뷰", href: APP_ROUTES.REVIEWS.ME },
+  { type: "action", label: "로그아웃", action: "logout" },
+];
 
 const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps) => {
   const pathname = usePathname();
@@ -51,7 +56,7 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
   const [openMenuPath, setOpenMenuPath] = useState<string | null>(null);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const itemRefs = useRef<Array<HTMLAnchorElement | null>>([]);
+  const itemRefs = useRef<Array<HTMLAnchorElement | HTMLButtonElement | null>>([]);
   const profileMenuRef = useClickOutside<HTMLDivElement>(() => setOpenMenuPath(null));
 
   const isProfileMenuOpen = openMenuPath === pathname;
@@ -63,11 +68,6 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
   const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
-  const handleLogout = async () => {
-    setOpenMenuPath(null);
-    await logout();
-    router.replace(APP_ROUTES.LOGIN);
-  };
   const notificationPanelId = useId();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const unreadCount = getUnreadNotificationCount(MOCK_NOTIFICATIONS);
@@ -90,6 +90,17 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isNotificationOpen, closeNotification]);
+
+  const handleLogout = async () => {
+    setOpenMenuPath(null);
+
+    try {
+      await logout();
+      router.replace(APP_ROUTES.LOGIN);
+    } catch (error) {
+      router.replace(APP_ROUTES.LOGIN);
+    }
+  };
 
   const closeMenu = useCallback(() => {
     setOpenMenuPath(null);
@@ -126,7 +137,9 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
       }
 
       event.preventDefault();
-      const items = itemRefs.current.filter((item): item is HTMLAnchorElement => item !== null);
+      const items = itemRefs.current.filter(
+        (item): item is HTMLAnchorElement | HTMLButtonElement => item !== null,
+      );
       if (items.length === 0) return;
 
       const activeIndex = items.findIndex((item) => item === document.activeElement);
@@ -262,6 +275,26 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
                   className="border-border-subtle bg-background-surface shadow-estimate-card rounded-12 absolute top-[calc(100%+8px)] right-0 z-50 flex min-w-[200px] flex-col overflow-hidden border py-8"
                 >
                   {PROFILE_MENU_ITEMS.map((item, index) => {
+                    if (item.type === "action") {
+                      return (
+                        <button
+                          key={item.action}
+                          ref={(node) => {
+                            itemRefs.current[index] = node;
+                          }}
+                          tabIndex={-1}
+                          type="button"
+                          role="menuitem"
+                          className="focus-visible:bg-background-hover text-text-muted hover:text-text-secondary border-border-subtle border-t px-16 py-12 text-center transition-colors focus-visible:outline-none"
+                          onClick={handleLogout}
+                        >
+                          <Text as="span" variant="md-medium">
+                            {item.label}
+                          </Text>
+                        </button>
+                      );
+                    }
+
                     const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                     return (
@@ -286,19 +319,6 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
                       </Link>
                     );
                   })}
-
-                  <div className="border-border-subtle flex w-full items-center justify-center border-t px-12 pt-12 pb-8 md:pt-14">
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={handleLogout}
-                      className="text-text-muted hover:text-text-secondary transition-colors"
-                    >
-                      <Text as="span" variant={{ base: "xs-regular", md: "md-medium" }}>
-                        로그아웃
-                      </Text>
-                    </button>
-                  </div>
                 </div>
               ) : null}
             </div>
