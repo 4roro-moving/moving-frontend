@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 
+import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
 import Toast from "@/components/common/Toast/Toast";
 import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
 import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
+import EstimateRequestRequiredModal from "@/components/estimate/EstimateRequestRequiredModal";
 import MoverDetailActions from "@/components/mover/detail/MoverDetailActions";
 import MoverDetailNotFoundStatus from "@/components/mover/detail/MoverDetailNotFoundStatus";
 import MoverDetailPageSkeleton from "@/components/mover/detail/MoverDetailPageSkeleton";
@@ -12,13 +14,20 @@ import MoverDetailProfile from "@/components/mover/detail/MoverDetailProfile";
 import MoverDetailReviews from "@/components/mover/detail/MoverDetailReviews";
 import MoverDetailServices from "@/components/mover/detail/MoverDetailServices";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
+import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
+import { useDesignateMover } from "@/hooks/useDesignateMover";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
+import { useIsClient } from "@/hooks/useIsClient";
 import { useMoverDetail } from "@/hooks/useMoverDetail";
+import { hasAuthSession } from "@/lib/auth/session";
+import { getDesignateCtaState } from "@/lib/utils/getDesignateCtaState";
 import { ApiError } from "@/types/api";
 
 interface MoverDetailViewProps {
   moverId: string;
 }
+
+const DESIGNATE_SUCCESS_MESSAGE = "지정 견적 요청이 완료되었습니다.";
 
 function isMoverNotFoundError(error: unknown): boolean {
   return error instanceof ApiError && (error.status === 404 || error.code === "MOVER_NOT_FOUND");
@@ -26,9 +35,25 @@ function isMoverNotFoundError(error: unknown): boolean {
 
 export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isEstimateRequestModalOpen, setIsEstimateRequestModalOpen] = useState(false);
+
+  const isClient = useIsClient();
+  const isLoggedIn = isClient && hasAuthSession();
+  const loginRequiredModal = useLoginRequiredModal();
 
   const { data: detail, isLoading, error, isFetching, refetch } = useMoverDetail(moverId);
   const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
+
+  const { data: activeRequest, isLoading: isActiveLoading } = useActiveEstimateRequest({
+    enabled: isLoggedIn,
+  });
+
+  const designateMutation = useDesignateMover({
+    onSuccess: () => {
+      setToastMessage(DESIGNATE_SUCCESS_MESSAGE);
+    },
+    onError: setToastMessage,
+  });
 
   if (isLoading) {
     return <MoverDetailPageSkeleton />;
@@ -54,6 +79,22 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     );
   }
 
+  const ctaState =
+    isLoggedIn && !isActiveLoading ? getDesignateCtaState(activeRequest ?? null, detail.id) : null;
+
+  // 이미 지정 완료만 버튼 비활성. 한도·확정 등은 클릭 후 toast
+  const isRequestDisabled =
+    designateMutation.isPending ||
+    (isLoggedIn && isActiveLoading) ||
+    ctaState?.status === "alreadyDesignated";
+
+  const requestButtonLabel =
+    ctaState?.status === "alreadyDesignated"
+      ? "지정 견적 요청 완료"
+      : designateMutation.isPending
+        ? "요청 중..."
+        : "지정 견적 요청하기";
+
   const toggleFavorite = () => {
     if (favoriteMutation.isPending) {
       return;
@@ -66,7 +107,48 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   };
 
   const handleRequestEstimate = () => {
-    setToastMessage("지정 견적 요청은 준비 중입니다.");
+    if (!hasAuthSession()) {
+      loginRequiredModal?.openLoginRequiredModal("지정 견적 요청은 로그인 후 이용할 수 있어요.");
+      return;
+    }
+
+    if (isActiveLoading || designateMutation.isPending) {
+      return;
+    }
+
+    const nextCtaState = getDesignateCtaState(activeRequest ?? null, detail.id);
+
+    if (nextCtaState.status === "needEstimateRequest") {
+      setIsEstimateRequestModalOpen(true);
+      return;
+    }
+
+    if (nextCtaState.status === "alreadyDesignated") {
+      return;
+    }
+
+    if (nextCtaState.message) {
+      setToastMessage(nextCtaState.message);
+      return;
+    }
+
+    if (!nextCtaState.canSubmit || nextCtaState.estimateRequestId === null) {
+      return;
+    }
+
+    designateMutation.mutate({
+      estimateRequestId: nextCtaState.estimateRequestId,
+      moverId: detail.id,
+    });
+  };
+
+  const actionsProps = {
+    moverName: detail.name,
+    isFavorite: detail.isFavorite,
+    onToggleFavorite: toggleFavorite,
+    onRequestEstimate: handleRequestEstimate,
+    requestDisabled: isRequestDisabled,
+    requestButtonLabel,
   };
 
   return (
@@ -99,13 +181,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
           </div>
 
           <aside className="hidden w-full min-w-0 flex-col items-start gap-40 lg:flex lg:w-[320px] lg:gap-70 lg:pt-40">
-            <MoverDetailActions
-              layout="sidebar"
-              moverName={detail.name}
-              isFavorite={detail.isFavorite}
-              onToggleFavorite={toggleFavorite}
-              onRequestEstimate={handleRequestEstimate}
-            />
+            <MoverDetailActions layout="sidebar" {...actionsProps} />
             <EstimateDetailShare
               title="나만 알기엔 아쉬운 기사님인가요?"
               onToastMessage={setToastMessage}
@@ -114,12 +190,11 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
         </div>
       </div>
 
-      <MoverDetailActions
-        layout="sticky"
-        moverName={detail.name}
-        isFavorite={detail.isFavorite}
-        onToggleFavorite={toggleFavorite}
-        onRequestEstimate={handleRequestEstimate}
+      <MoverDetailActions layout="sticky" {...actionsProps} />
+
+      <EstimateRequestRequiredModal
+        open={isEstimateRequestModalOpen}
+        onClose={() => setIsEstimateRequestModalOpen(false)}
       />
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}

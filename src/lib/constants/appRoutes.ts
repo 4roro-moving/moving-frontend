@@ -21,4 +21,6 @@ export const APP_ROUTES = {
    * NOTE: 찜한 기사님 전체 목록 페이지. 경로 확정 시 현재 상수값,  `src/app/favorites/movers/` 디렉터리 수정 필요
    */
   FAVORITE_MOVERS: "/favorites/movers",
+  /** 고객 일반 견적 요청 */
+  ESTIMATE_REQUEST: "/estimate-request",
 } as const;
