@@ -27,14 +27,14 @@ function isMoverNotFoundError(error: unknown): boolean {
 export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const { data: detail, isLoading, isError, error, isFetching, refetch } = useMoverDetail(moverId);
+  const { data: detail, isLoading, error, isFetching, refetch } = useMoverDetail(moverId);
   const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
 
   if (isLoading) {
     return <MoverDetailPageSkeleton />;
   }
 
-  if (isError || !detail) {
+  if (!detail) {
     if (isMoverNotFoundError(error)) {
       return <MoverDetailNotFoundStatus />;
     }
