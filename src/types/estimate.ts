@@ -8,8 +8,9 @@ export type EstimateStatus = "SENT" | "CONFIRMED" | "EXPIRED" | "CANCELED";
 export type EstimateRequestStatus =
   "PENDING" | "OPEN" | "CONFIRMED" | "COMPLETED" | "EXPIRED" | "CANCELED";
 
-/** UI 필터/표시용 */
-export type EstimateOfferFilter = "all" | "confirmed" | "pending";
+/** 받았던 견적 목록 드롭다운 필터 (Figma: 전체 / 확정견적) */
+// 2026.07.29 정슬기 - [수정] pending 옵션 제거 — 카드 라벨의 견적대기는 유지
+export type EstimateOfferFilter = "all" | "confirmed";
 
 export interface EstimateMoverSummary {
   id: string;
@@ -162,10 +163,3 @@ export interface PendingEstimateSectionListResult {
   sections: PendingEstimateSection[];
   pagination: Pagination;
 }
-
-/**
- * 대기 견적 상세 UI ViewModel
- * 기존 `EstimateDetail` API DTO와 분리하며, 화면 재사용을 위해 동일 필드를 조립합니다.
- * // 2026.07.25 정슬기 - [추가] 대기 견적 상세 ViewModel
- */
-export type PendingEstimateDetailViewModel = EstimateDetail;

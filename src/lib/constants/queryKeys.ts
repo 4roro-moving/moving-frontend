@@ -19,24 +19,25 @@ export const QUERY_KEYS = {
     ACTIVE: ["estimateRequests", "active"] as const,
     DETAIL: (requestId: number) => ["estimateRequests", requestId] as const,
     // 2026.07.25 정슬기 - [추가] 내 견적 요청 목록 쿼리 키
-    MY_LIST: ["estimateRequests", "mine"] as const,
+    // 2026.07.29 정슬기 - [수정] page·limit 포함 — 보낸 견적 요청 목록 페이지네이션
+    MY_LIST_ROOT: ["estimateRequests", "mine"] as const,
+    MY_LIST: (page: number, limit: number) =>
+      ["estimateRequests", "mine", { page, limit }] as const,
   },
 
   // 2026.07.24 정슬기 - [추가] 받은 견적 목록·상세 React Query 키
   ESTIMATES: {
     ALL: ["estimates"],
     RECEIVED: ["estimates", "received"] as const,
+    // 받았던/대기 상세 모두 GET /estimates/:estimateId — 동일 DETAIL 키 공유
+    // 2026.07.29 정슬기 - [수정] PENDING_DETAIL 제거, DETAIL로 통합
     DETAIL_ROOT: ["estimates", "detail"] as const,
     DETAIL: (estimateId: number) => ["estimates", "detail", estimateId] as const,
-    // 2026.07.28 정슬기 - [수정] pending 목록/상세 prefix 분리 (찜 낙관적 업데이트 충돌 방지)
+    // 2026.07.28 정슬기 - [수정] pending 목록 prefix (상세와 분리 — 찜 낙관적 업데이트 충돌 방지)
     // 2026.07.29 정슬기 - [수정] 사용처가 없던 PENDING_ROOT 제거
     PENDING_LIST_ROOT: ["estimates", "pending", "list"] as const,
     PENDING_LIST: (page: number, limit: number) =>
       ["estimates", "pending", "list", { page, limit }] as const,
-    // 2026.07.25 정슬기 - [추가] 대기 견적 상세 쿼리 키
-    // 2026.07.26 정슬기 - [수정] PENDING_DETAIL_ROOT로 prefix invalidate/낙관적 업데이트 지원
-    PENDING_DETAIL_ROOT: ["estimates", "pending", "detail"] as const,
-    PENDING_DETAIL: (estimateId: number) => ["estimates", "pending", "detail", estimateId] as const,
   },
 
   FAVORITES: {
