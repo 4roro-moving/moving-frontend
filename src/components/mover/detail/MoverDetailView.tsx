@@ -6,6 +6,7 @@ import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvi
 import Toast from "@/components/common/Toast/Toast";
 import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
 import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
+import DesignateSuccessModal from "@/components/estimate/DesignateSuccessModal";
 import EstimateRequestRequiredModal from "@/components/estimate/EstimateRequestRequiredModal";
 import MoverDetailActions from "@/components/mover/detail/MoverDetailActions";
 import MoverDetailNotFoundStatus from "@/components/mover/detail/MoverDetailNotFoundStatus";
@@ -27,8 +28,6 @@ interface MoverDetailViewProps {
   moverId: string;
 }
 
-const DESIGNATE_SUCCESS_MESSAGE = "지정 견적 요청이 완료되었습니다.";
-
 function isMoverNotFoundError(error: unknown): boolean {
   return error instanceof ApiError && (error.status === 404 || error.code === "MOVER_NOT_FOUND");
 }
@@ -36,6 +35,7 @@ function isMoverNotFoundError(error: unknown): boolean {
 export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isEstimateRequestModalOpen, setIsEstimateRequestModalOpen] = useState(false);
+  const [isDesignateSuccessModalOpen, setIsDesignateSuccessModalOpen] = useState(false);
 
   const isClient = useIsClient();
   const isLoggedIn = isClient && hasAuthSession();
@@ -54,7 +54,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
 
   const designateMutation = useDesignateMover({
     onSuccess: () => {
-      setToastMessage(DESIGNATE_SUCCESS_MESSAGE);
+      setIsDesignateSuccessModalOpen(true);
     },
     onError: setToastMessage,
   });
@@ -206,6 +206,11 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
       <EstimateRequestRequiredModal
         open={isEstimateRequestModalOpen}
         onClose={() => setIsEstimateRequestModalOpen(false)}
+      />
+
+      <DesignateSuccessModal
+        open={isDesignateSuccessModalOpen}
+        onClose={() => setIsDesignateSuccessModalOpen(false)}
       />
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
