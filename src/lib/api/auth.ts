@@ -4,6 +4,7 @@ import type { EnsureAccessTokenOptions } from "@/lib/auth/refreshAccessToken";
 import { clearAuthTokens, setAccessToken } from "@/lib/auth/token";
 import { AUTH_BFF_BASE } from "@/lib/constants/authBff";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
+import { ApiError } from "@/types/api";
 
 export interface LoginInput {
   email: string;
@@ -41,13 +42,24 @@ const authBffOptions = {
   skipAuth: true,
 } as const;
 
+const applyAccessTokenFromAuthResult = (
+  data: { tokens?: { accessToken?: string } },
+  fallbackMessage: string,
+): void => {
+  const accessToken = data.tokens?.accessToken;
+  if (!accessToken) {
+    throw new ApiError(fallbackMessage);
+  }
+  setAccessToken(accessToken);
+};
+
 export const login = async (input: LoginInput): Promise<LoginResult> => {
   const data = await fetchInstance.post<LoginResult, LoginInput>(
     API_ROUTES.AUTH.LOGIN,
     input,
     authBffOptions,
   );
-  setAccessToken(data.tokens.accessToken);
+  applyAccessTokenFromAuthResult(data, "로그인에 실패했습니다.");
   return data;
 };
 
@@ -57,7 +69,7 @@ export const signUpCustomer = async (input: SignUpCustomerInput): Promise<LoginR
     input,
     authBffOptions,
   );
-  setAccessToken(data.tokens.accessToken);
+  applyAccessTokenFromAuthResult(data, "회원가입에 실패했습니다.");
   return data;
 };
 
