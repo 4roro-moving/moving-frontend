@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
+
 import { Text } from "@/components/common/Text";
+
+export const metadata: Metadata = {
+  title: "내가 보낸 견적 요청",
+  description: "내가 보낸 견적 요청 목록을 확인합니다.",
+};
 
 /** NOTE: 내가 보낸 견적 요청 페이지. 추후 수정이 필요 */
 export default function EstimateRequestsPage() {
