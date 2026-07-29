@@ -46,7 +46,13 @@ export default function MoverDetailReviews({
   const pageCount = Math.max(1, data?.pagination.totalPages ?? 0);
   const hasReviews = reviews.length > 0;
 
-  // NOTE: 시드 데이터 오류로 인한 임시 조치, totalCount === 0 이면 기존 empty UI를 보이게 함
+  // 초기 조회 시에만 스켈레톤 노출 (페이지 전환 중에는 keepPreviousData로 이전 페이지 데이터가 보임)
+  const isInitialLoading = isLoading && data === undefined;
+  const shouldShowError = isError && !hasReviews;
+  const shouldShowReviews = hasReviews;
+  const shouldShowPagination = pageCount > 1 && hasReviews;
+
+  // TODO: 시드 데이터 오류로 인한 임시 조치, 시드 데이터 수정 후 삭제 예정
   const isEmpty =
     reviewCount === 0 ||
     (!isLoading && !isError && data !== undefined && data.pagination.totalCount === 0);
@@ -134,11 +140,11 @@ export default function MoverDetailReviews({
             ) : null}
           </div>
 
-          {!isError && (isLoading || isFetching) ? (
+          {!isError && isInitialLoading ? (
             <MoverDetailReviewsSkeleton count={MOVER_REVIEW_PAGE_LIMIT} />
           ) : null}
 
-          {isError ? (
+          {shouldShowError ? (
             <div className="flex w-full flex-col items-center gap-12 py-24 text-center">
               <Text as="p" variant="md-regular" className="text-text-muted">
                 {getApiErrorMessage(error, "리뷰를 불러오지 못했습니다.")}
@@ -157,8 +163,8 @@ export default function MoverDetailReviews({
             </div>
           ) : null}
 
-          {!isError && !isLoading && !isFetching && hasReviews ? (
-            <ul className="flex w-full flex-col">
+          {shouldShowReviews ? (
+            <ul className="flex w-full flex-col" aria-busy={isFetching}>
               {reviews.map((review, index) => (
                 <li
                   key={review.id}
@@ -173,7 +179,7 @@ export default function MoverDetailReviews({
             </ul>
           ) : null}
 
-          {!isError && pageCount > 1 ? (
+          {shouldShowPagination ? (
             <Pagination
               currentPage={currentPage}
               pageCount={pageCount}
