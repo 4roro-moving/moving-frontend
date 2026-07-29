@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
@@ -13,29 +13,36 @@ export default function NotificationTrigger() {
   const notificationPanelId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const unreadCount = getUnreadNotificationCount(MOCK_NOTIFICATIONS);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
-  const close = useCallback(() => {
+  const closeWithFocus = useCallback(() => {
+    setIsOpen(false);
+    triggerRef.current?.focus();
+  }, []);
+
+  const closeQuiet = useCallback(() => {
     setIsOpen(false);
   }, []);
 
-  const ref = useClickOutside<HTMLDivElement>(close);
+  const ref = useClickOutside<HTMLDivElement>(closeQuiet);
 
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        close();
+        closeWithFocus();
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, close]);
+  }, [isOpen, closeWithFocus]);
 
   return (
     <div ref={ref} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         aria-label={unreadCount > 0 ? `알림, 읽지 않은 알림 ${unreadCount}개` : "알림"}
         aria-expanded={isOpen}
@@ -57,7 +64,7 @@ export default function NotificationTrigger() {
       </button>
       {isOpen ? (
         <div id={notificationPanelId}>
-          <NotificationPanel onClose={close} />
+          <NotificationPanel onClose={closeWithFocus} />
         </div>
       ) : null}
     </div>
