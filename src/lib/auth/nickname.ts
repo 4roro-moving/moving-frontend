@@ -9,6 +9,16 @@ const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 /** 이전 전체 user 캐시 키 — 마이그레이션 시 제거 */
 const LEGACY_AUTH_USER_CACHE_KEY = "moving_auth_user";
 
+/** 쿠키 값 decode. 잘못된 % 시퀀스면 null (Layout 500 방지) */
+export const safeDecodeCookieValue = (raw: string): string | null => {
+  try {
+    const decoded = decodeURIComponent(raw).trim();
+    return decoded.length > 0 ? decoded : null;
+  } catch {
+    return null;
+  }
+};
+
 export const saveNickname = (name: string): void => {
   if (typeof window === "undefined") return;
 

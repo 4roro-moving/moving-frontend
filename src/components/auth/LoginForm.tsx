@@ -34,7 +34,7 @@ const getRedirectParam = () => {
 const LoginForm = () => {
   const router = useRouter();
   const { mutateAsync: login, isPending } = useLoginMutation();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLogin = useAuthStore((state) => state.isAuthenticated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -53,9 +53,9 @@ const LoginForm = () => {
   });
 
   useEffect(() => {
-    if (!hasHydrated || isCheckingAuth || !isAuthenticated || isSubmitting || isPending) return;
+    if (!hasHydrated || isCheckingAuth || !isLogin || isSubmitting || isPending) return;
     router.replace(APP_ROUTES.MOVERS.ROOT);
-  }, [hasHydrated, isAuthenticated, isCheckingAuth, isSubmitting, isPending, router]);
+  }, [hasHydrated, isLogin, isCheckingAuth, isSubmitting, isPending, router]);
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);

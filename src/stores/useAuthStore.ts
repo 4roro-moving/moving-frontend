@@ -12,20 +12,24 @@ import { ApiError } from "@/types/api";
 
 interface AuthState {
   user: AuthUser | null;
-  /** Header 등 표시용. nickname storage / login·checkAuth 로 채움 */
   displayName: string | null;
+  /** 로그인 상태 여부 */
   isAuthenticated: boolean;
+  /** 인증 중 여부 */
   isCheckingAuth: boolean;
   /** localStorage hydrate 완료 여부 — SSR/CSR 첫 페인트 일치용 */
   hasHydrated: boolean;
+  /** localStorage에서 인증 상태 초기화 */
   hydrateFromStorage: () => void;
+  /** 인증 상태 확인 */
   checkAuth: () => Promise<void>;
-  /** 로그인/회원가입 성공 후 세션 상태만 반영 */
+  /** 세션 생성 */
   establishSession: (user: AuthUser) => void;
+  /** 로그인/회원가입 성공 후 세션 상태만 반영 */
   logout: () => Promise<void>;
-  /** access + nickname 삭제 — logout에서만 사용 */
+  /** 세션 초기화 */
   clearSession: () => void;
-  /** 저장소는 유지하고 메모리 상태만 비로그인 */
+  /** 비로그인 상태 설정 */
   markUnauthenticated: () => void;
 }
 
@@ -46,6 +50,9 @@ const setAuthenticatedUser = (
   });
 };
 
+/**
+ * 인증 상태 관리 스토어
+ */
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   displayName: null,
@@ -103,6 +110,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       try {
         await runWithSessionCheck(async () => {
+          // Access 없음 → 선제 refresh 후 profile 1회 시도
           if (!getAccessToken()) {
             await refreshSession({ notifyOnFailure: false });
           }
@@ -124,16 +132,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const status = error instanceof ApiError ? error.status : undefined;
 
         if (token && status !== 401) {
-          set({
-            displayName,
-            isAuthenticated: true,
-            isCheckingAuth: false,
-            hasHydrated: true,
-          });
-          return;
-        }
-
-        if (token) {
           set({
             displayName,
             isAuthenticated: true,

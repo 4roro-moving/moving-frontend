@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { NICKNAME_STORAGE_KEY } from "@/lib/auth/nickname";
+import { REFRESH_TOKEN_COOKIE_BACKEND_PATH, REFRESH_TOKEN_COOKIE_NAME } from "@/lib/auth/token";
 import {
   buildBackendHeaders,
   forwardBackendResponse,
@@ -38,9 +39,14 @@ export const POST = async (request: Request, context: { params: Promise<{ path: 
     const res = await forwardBackendResponse(backendRes);
 
     if (authPath === "logout") {
-      res.cookies.set("refreshToken", "", {
+      res.cookies.set(REFRESH_TOKEN_COOKIE_NAME, "", {
         httpOnly: true,
         path: "/",
+        maxAge: 0,
+      });
+      res.cookies.set(REFRESH_TOKEN_COOKIE_NAME, "", {
+        httpOnly: true,
+        path: REFRESH_TOKEN_COOKIE_BACKEND_PATH,
         maxAge: 0,
       });
       res.cookies.set(NICKNAME_STORAGE_KEY, "", {
