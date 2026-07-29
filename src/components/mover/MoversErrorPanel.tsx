@@ -20,7 +20,7 @@ export default function MoversErrorPanel({
   onRetry,
 }: MoversErrorPanelProps) {
   return (
-    <div className="flex w-full flex-col items-center gap-16 py-40 text-center">
+    <div role="alert" className="flex w-full flex-col items-center gap-16 py-40 text-center">
       <div className="flex flex-col gap-8">
         <Text as="p" variant="lg-semibold" className="text-text-secondary">
           {title}
