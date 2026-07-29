@@ -1,25 +1,24 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import MoverDetailView from "@/components/mover/detail/MoverDetailView";
-import { getMockMoverDetail } from "@/components/mover/detail/moverDetailMock";
+import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
 
 interface MoverDetailPageProps {
   params: Promise<{ moverId: string }>;
 }
 
-export async function generateMetadata({ params }: MoverDetailPageProps): Promise<Metadata> {
-  const { moverId } = await params;
-  const detail = getMockMoverDetail(moverId);
-  const name = detail?.name ?? "기사님";
-
-  return {
-    title: `${name} 기사님 상세`,
-    description: detail?.title ?? "이사 기사님 상세 정보를 확인하세요.",
-  };
-}
+export const metadata: Metadata = {
+  title: "기사님 상세",
+  description: "이사 기사님 상세 정보를 확인하세요.",
+};
 
 export default async function MoverDetailPage({ params }: MoverDetailPageProps) {
   const { moverId } = await params;
+
+  if (!isMoverDetailId(moverId)) {
+    notFound();
+  }
 
   return <MoverDetailView key={moverId} moverId={moverId} />;
 }
