@@ -13,26 +13,11 @@ interface RefreshTokenResponse {
 }
 
 export interface EnsureAccessTokenOptions {
-  /** false면 실패 시 auth:expired 미발송 (앱 시작 세션 복구용) */
+  /** false면 실패 시 auth:expired 미발송 (checkAuth 세션 복구용). 기본 true */
   notifyOnFailure?: boolean;
 }
 
 let refreshPromise: Promise<string> | null = null;
-
-/** checkAuth(세션 복구) 중에는 access soft clear / auth:expired 를 하지 않음 */
-let isSessionCheckInProgress = false;
-
-/**
- * 앱 시작 세션 복구 구간.
- */
-export const runWithSessionCheck = async <T>(fn: () => Promise<T>): Promise<T> => {
-  isSessionCheckInProgress = true;
-  try {
-    return await fn();
-  } finally {
-    isSessionCheckInProgress = false;
-  }
-};
 
 /**
  * Next auth BFF(`/api/auth/refresh`)로 access를 재발급합니다.
@@ -79,6 +64,7 @@ const refreshAccessTokenOnce = async (): Promise<string> => {
 
 /**
  * refresh 요청을 1회로 합칩니다.
+ * 실패 시 부수효과는 호출부 options(notifyOnFailure)로만 제어합니다.
  */
 export const ensureAccessTokenRefreshed = async (
   options?: EnsureAccessTokenOptions,
@@ -100,17 +86,15 @@ export const ensureAccessTokenRefreshed = async (
   } catch (error) {
     const status = error instanceof ApiError ? error.status : undefined;
 
-    if (!isSessionCheckInProgress) {
-      if (status === 401) {
-        clearAuthTokens();
-        notifyAuthSessionChange();
-      }
+    if (status === 401) {
+      clearAuthTokens();
+      notifyAuthSessionChange();
+    }
 
-      if (notifyOnFailure) {
-        window.dispatchEvent(new CustomEvent("auth:expired"));
-      } else if (status !== 401) {
-        notifyAuthSessionChange();
-      }
+    if (notifyOnFailure) {
+      window.dispatchEvent(new CustomEvent("auth:expired"));
+    } else if (status !== 401) {
+      notifyAuthSessionChange();
     }
 
     throw error;

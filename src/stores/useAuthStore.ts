@@ -6,7 +6,6 @@ import { logout as logoutApi, refreshSession } from "@/lib/api/auth";
 import type { AuthUser } from "@/lib/api/auth";
 import { getCustomerProfileMe, toAuthUserFromCustomerProfile } from "@/lib/api/profile";
 import { clearNickname, loadNickname, saveNickname } from "@/lib/auth/nickname";
-import { runWithSessionCheck } from "@/lib/auth/refreshAccessToken";
 import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
 import { ApiError } from "@/types/api";
 
@@ -109,16 +108,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isCheckingAuth: true });
 
       try {
-        await runWithSessionCheck(async () => {
-          // Access 없음 → 선제 refresh 후 profile 1회 시도
-          if (!getAccessToken()) {
-            await refreshSession({ notifyOnFailure: false });
-          }
+        // Access 없음 → 선제 refresh 후 profile 1회 시도
+        if (!getAccessToken()) {
+          await refreshSession({ notifyOnFailure: false });
+        }
 
-          const profile = await getCustomerProfileMe();
-          const me = toAuthUserFromCustomerProfile(profile);
-          setAuthenticatedUser(set, me, false);
-        });
+        const profile = await getCustomerProfileMe();
+        const me = toAuthUserFromCustomerProfile(profile);
+        setAuthenticatedUser(set, me, false);
       } catch (error) {
         if (process.env.NODE_ENV === "development") {
           const status = error instanceof ApiError ? error.status : undefined;
@@ -131,6 +128,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const displayName = loadNickname();
         const status = error instanceof ApiError ? error.status : undefined;
 
+        // 네트워크·서버 오류(비 401)면 기존 토큰을 신뢰해 낙관적으로 유지
         if (token && status !== 401) {
           set({
             displayName,
