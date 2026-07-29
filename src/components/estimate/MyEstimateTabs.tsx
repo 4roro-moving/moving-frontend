@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils/cn";
 const TABS = [
   { href: "/estimates/pending", label: "대기 중인 견적" },
   { href: "/estimates/received", label: "받았던 견적" },
+  { href: "/estimates/requests", label: "보낸 견적 요청" },
 ] as const;
 
 export default function MyEstimateTabs() {

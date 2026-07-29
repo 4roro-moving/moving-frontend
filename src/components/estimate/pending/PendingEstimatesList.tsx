@@ -1,7 +1,7 @@
+import EstimatesListEmptyState from "@/components/estimate/EstimatesListEmptyState";
 import PendingEstimateCard from "@/components/estimate/pending/PendingEstimateCard";
 import PendingEstimateRequestHeader from "@/components/estimate/pending/PendingEstimateRequestHeader";
 import PendingEstimatesEmpty from "@/components/estimate/pending/PendingEstimatesEmpty";
-import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
 import type { PendingEstimateSection } from "@/types/estimate";
 
 interface PendingEstimatesListProps {
@@ -19,6 +19,7 @@ function isWaitingSection(section: PendingEstimateSection): boolean {
 // 2026.07.25 정슬기 - [추가] 대기 중 견적 요청별 요약+견적서 그리드
 // 2026.07.25 정슬기 - [수정] ViewModel 기준 + Empty(견적 미도착) + Tablet 1열/Desktop 2열
 // 2026.07.27 정슬기 - [수정] 요청 묶음 section에 aria-labelledby로 header 제목 연결
+// 2026.07.29 정슬기 - [수정] 목록 전체 empty를 EstimatesListEmptyState로 위치·규격 통일
 export default function PendingEstimatesList({
   sections,
   onFavoriteError,
@@ -28,7 +29,7 @@ export default function PendingEstimatesList({
   const waitingSections = sections.filter(isWaitingSection);
 
   if (waitingSections.length === 0) {
-    return <ReceivedEstimatesStatus message="대기 중인 견적이 없습니다." />;
+    return <EstimatesListEmptyState description="대기 중인 견적이 없습니다." />;
   }
 
   return (
