@@ -29,7 +29,7 @@ export const QUERY_KEYS = {
     DETAIL_ROOT: ["estimates", "detail"] as const,
     DETAIL: (estimateId: number) => ["estimates", "detail", estimateId] as const,
     // 2026.07.28 정슬기 - [수정] pending 목록/상세 prefix 분리 (찜 낙관적 업데이트 충돌 방지)
-    PENDING_ROOT: ["estimates", "pending"] as const,
+    // 2026.07.29 정슬기 - [수정] 사용처가 없던 PENDING_ROOT 제거
     PENDING_LIST_ROOT: ["estimates", "pending", "list"] as const,
     PENDING_LIST: (page: number, limit: number) =>
       ["estimates", "pending", "list", { page, limit }] as const,
