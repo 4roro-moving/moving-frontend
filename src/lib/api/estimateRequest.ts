@@ -85,31 +85,14 @@ export async function createEstimateRequest(
   return data;
 }
 
-export interface ActiveEstimateRequestResponse {
-  success: boolean;
-  data: MyEstimateRequestItem | null;
-  message?: string;
-  error?: {
-    code?: string;
-    message?: string;
-  };
-}
-
 /** 진행 중인 견적 요청 조회 — 없으면 null */
+// NOTE: fetchInstance 사용. create는 axios — 추후 fetchInstance로 통일 예정
 export async function getActiveEstimateRequest(): Promise<MyEstimateRequestItem | null> {
-  const { data } = await axiosInstance.get<ActiveEstimateRequestResponse>(
-    API_ROUTES.ESTIMATE_REQUESTS.ACTIVE,
-  );
-
-  if (!data.success) {
-    throw new Error(data.error?.message || data.message || "진행 중인 견적 조회에 실패했습니다.");
-  }
-
-  return data.data ?? null;
+  return fetchInstance.get<MyEstimateRequestItem | null>(API_ROUTES.ESTIMATE_REQUESTS.ACTIVE);
 }
 
 /** POST /estimate-requests/:id/designate — 지정 견적 요청 */
-// NOTE: designateMover에서만 fetchInstance 사용 중 — 추후 fetchInstance로 통일 필요
+// NOTE: fetchInstance 사용. create는 axios — 추후 fetchInstance로 통일 예정
 export async function designateMover(
   estimateRequestId: number,
   moverId: string,
