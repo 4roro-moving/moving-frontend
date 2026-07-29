@@ -1,3 +1,4 @@
+import { getCustomerProfileStatus } from "@/lib/api/profile";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
 const AUTH_PATH_PREFIXES = [
@@ -29,6 +30,33 @@ export const resolvePostLoginPath = (params: {
   }
 
   return getSafeReturnPath(params.returnPath) ?? APP_ROUTES.MOVERS.ROOT;
+};
+
+/** 로그인 페이지 ?redirect= 쿼리 */
+export const getLoginRedirectParam = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get("redirect");
+};
+
+/**
+ * 인증 성공 후 이동 경로.
+ * 프로필 상태 조회 실패 시 fallbackPath 사용.
+ */
+export const getPostAuthRedirectPath = async (params?: {
+  returnPath?: string | null;
+  fallbackPath?: string;
+}): Promise<string> => {
+  const fallbackPath = params?.fallbackPath ?? APP_ROUTES.PROFILE;
+
+  try {
+    const status = await getCustomerProfileStatus();
+    return resolvePostLoginPath({
+      isProfileCompleted: status.isProfileCompleted,
+      returnPath: params?.returnPath,
+    });
+  } catch {
+    return fallbackPath;
+  }
 };
 
 /** 토큰 만료 등으로 로그인 페이지로 보낼 때 */

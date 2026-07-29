@@ -1,29 +1,24 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
+import AuthHeader from "@/components/auth/AuthHeader";
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import Button from "@/components/common/Button/Button";
+import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
 import { useSignUpMutation } from "@/hooks/auth/useSignUpMutation";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { getCustomerProfileStatus } from "@/lib/api/profile";
-import { resolvePostLoginPath } from "@/lib/auth/redirect";
+import { getPostAuthRedirectPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { signUpSchema, type SignUpFormValues } from "@/lib/schemas/signUpSchema";
 import { cn } from "@/lib/utils/cn";
-
-const fieldLabelClass = cn(
-  getTextVariantClass({ base: "md-regular", md: "xl-regular" }),
-  "text-text-secondary",
-);
 
 const SignUpForm = () => {
   const router = useRouter();
@@ -56,61 +51,27 @@ const SignUpForm = () => {
         name: values.name,
         phone: values.phone,
       });
-
-      const status = await getCustomerProfileStatus();
-      const nextPath = resolvePostLoginPath({
-        isProfileCompleted: status.isProfileCompleted,
-        returnPath: null,
-      });
-      router.replace(nextPath);
     } catch (error) {
       setSubmitError(getApiErrorMessage(error));
+      return;
     }
+
+    router.replace(
+      await getPostAuthRedirectPath({
+        returnPath: null,
+        fallbackPath: APP_ROUTES.PROFILE,
+      }),
+    );
   });
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
-      <header className="flex w-full flex-col items-center gap-0 md:gap-8">
-        <div className="flex h-104 w-full items-center justify-center py-20 md:h-auto">
-          <Link href="/" aria-label="무빙 홈으로 이동">
-            <Image
-              src="/icons/moving-logo-text.svg"
-              alt="무빙"
-              width={112}
-              height={44}
-              priority
-              className="h-44 w-auto md:h-[55px] md:w-[107px]"
-            />
-          </Link>
-        </div>
-
-        <p className="flex items-center justify-center gap-4 md:gap-8">
-          <Text
-            as="span"
-            variant={{ base: "xs-regular", md: "xl-regular" }}
-            className="text-text-description"
-          >
-            기사님이신가요?
-          </Text>
-          <Link
-            href={APP_ROUTES.MOVER_LOGIN}
-            className={cn(
-              getTextVariantClass({ base: "link-xs", md: "link-xl" }),
-              "text-text-brand",
-            )}
-          >
-            기사님 전용 페이지
-          </Link>
-        </p>
-      </header>
+      <AuthHeader />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
         <form className="flex w-full flex-col gap-32 md:gap-56" onSubmit={onSubmit} noValidate>
           <div className="flex w-full flex-col gap-16 md:gap-32">
-            <div className="flex w-full flex-col gap-8 md:gap-16">
-              <label htmlFor="name" className={fieldLabelClass}>
-                이름
-              </label>
+            <FormField label="이름" labelFor="name" variant="auth">
               <Input
                 id="name"
                 size="md"
@@ -120,12 +81,9 @@ const SignUpForm = () => {
                 error={errors.name?.message}
                 {...register("name")}
               />
-            </div>
+            </FormField>
 
-            <div className="flex w-full flex-col gap-8 md:gap-16">
-              <label htmlFor="email" className={fieldLabelClass}>
-                이메일
-              </label>
+            <FormField label="이메일" labelFor="email" variant="auth">
               <Input
                 id="email"
                 size="md"
@@ -135,12 +93,9 @@ const SignUpForm = () => {
                 error={errors.email?.message}
                 {...register("email")}
               />
-            </div>
+            </FormField>
 
-            <div className="flex w-full flex-col gap-8 md:gap-16">
-              <label htmlFor="phone" className={fieldLabelClass}>
-                전화번호
-              </label>
+            <FormField label="전화번호" labelFor="phone" variant="auth">
               <Input
                 id="phone"
                 size="md"
@@ -153,12 +108,9 @@ const SignUpForm = () => {
                 error={errors.phone?.message}
                 {...register("phone")}
               />
-            </div>
+            </FormField>
 
-            <div className="flex w-full flex-col gap-8 md:gap-16">
-              <label htmlFor="password" className={fieldLabelClass}>
-                비밀번호
-              </label>
+            <FormField label="비밀번호" labelFor="password" variant="auth">
               <PasswordInput
                 id="password"
                 size="md"
@@ -167,12 +119,9 @@ const SignUpForm = () => {
                 error={errors.password?.message}
                 {...register("password")}
               />
-            </div>
+            </FormField>
 
-            <div className="flex w-full flex-col gap-8 md:gap-16">
-              <label htmlFor="passwordConfirm" className={fieldLabelClass}>
-                비밀번호 확인
-              </label>
+            <FormField label="비밀번호 확인" labelFor="passwordConfirm" variant="auth">
               <PasswordInput
                 id="passwordConfirm"
                 size="md"
@@ -181,7 +130,7 @@ const SignUpForm = () => {
                 error={errors.passwordConfirm?.message}
                 {...register("passwordConfirm")}
               />
-            </div>
+            </FormField>
           </div>
 
           {submitError ? (

@@ -1,35 +1,25 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import AuthHeader from "@/components/auth/AuthHeader";
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import Button from "@/components/common/Button/Button";
+import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
 import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { getCustomerProfileStatus } from "@/lib/api/profile";
-import { resolvePostLoginPath } from "@/lib/auth/redirect";
+import { getLoginRedirectParam, getPostAuthRedirectPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/loginSchema";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
-
-const fieldLabelClass = cn(
-  getTextVariantClass({ base: "md-regular", md: "xl-regular" }),
-  "text-text-secondary",
-);
-
-const getRedirectParam = () => {
-  if (typeof window === "undefined") return null;
-  return new URLSearchParams(window.location.search).get("redirect");
-};
 
 const LoginForm = () => {
   const router = useRouter();
@@ -54,7 +44,26 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (!hasHydrated || isCheckingAuth || !isLogin || isSubmitting || isPending) return;
-    router.replace(APP_ROUTES.MOVERS.ROOT);
+
+    let cancelled = false;
+
+    // 로그인 성공 시 리다이렉트
+    const redirectAuthenticatedUser = async () => {
+      const nextPath = await getPostAuthRedirectPath({
+        returnPath: getLoginRedirectParam(),
+        fallbackPath: APP_ROUTES.MOVERS.ROOT,
+      });
+
+      if (cancelled) return;
+
+      router.replace(nextPath);
+    };
+
+    void redirectAuthenticatedUser();
+
+    return () => {
+      cancelled = true;
+    };
   }, [hasHydrated, isLogin, isCheckingAuth, isSubmitting, isPending, router]);
 
   const onSubmit = handleSubmit(async (values) => {
@@ -62,60 +71,27 @@ const LoginForm = () => {
 
     try {
       await login(values);
-      const status = await getCustomerProfileStatus();
-      const nextPath = resolvePostLoginPath({
-        isProfileCompleted: status.isProfileCompleted,
-        returnPath: getRedirectParam(),
-      });
-      router.replace(nextPath);
     } catch (error) {
       setSubmitError(getApiErrorMessage(error));
+      return;
     }
+
+    router.replace(
+      await getPostAuthRedirectPath({
+        returnPath: getLoginRedirectParam(),
+        fallbackPath: APP_ROUTES.PROFILE,
+      }),
+    );
   });
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
-      <header className="flex w-full flex-col items-center gap-0 md:gap-8">
-        <div className="flex h-104 w-full items-center justify-center py-20 md:h-auto">
-          <Link href="/" aria-label="무빙 홈으로 이동">
-            <Image
-              src="/icons/moving-logo-text.svg"
-              alt="무빙"
-              width={112}
-              height={44}
-              priority
-              className="h-44 w-auto md:h-[55px] md:w-[107px]"
-            />
-          </Link>
-        </div>
-
-        <p className="flex items-center justify-center gap-4 md:gap-8">
-          <Text
-            as="span"
-            variant={{ base: "xs-regular", md: "xl-regular" }}
-            className="text-text-description"
-          >
-            기사님이신가요?
-          </Text>
-          <Link
-            href={APP_ROUTES.MOVER_LOGIN}
-            className={cn(
-              getTextVariantClass({ base: "link-xs", md: "link-xl" }),
-              "text-text-brand",
-            )}
-          >
-            기사님 전용 페이지
-          </Link>
-        </p>
-      </header>
+      <AuthHeader />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
         <form className="flex w-full flex-col gap-32 md:gap-56" onSubmit={onSubmit} noValidate>
           <div className="flex w-full flex-col gap-16 md:gap-32">
-            <div className="flex w-full flex-col gap-8 md:gap-16">
-              <label htmlFor="email" className={fieldLabelClass}>
-                이메일
-              </label>
+            <FormField label="이메일" labelFor="email" variant="auth">
               <Input
                 id="email"
                 size="md"
@@ -125,12 +101,9 @@ const LoginForm = () => {
                 error={errors.email?.message}
                 {...register("email")}
               />
-            </div>
+            </FormField>
 
-            <div className="flex w-full flex-col gap-8 md:gap-16">
-              <label htmlFor="password" className={fieldLabelClass}>
-                비밀번호
-              </label>
+            <FormField label="비밀번호" labelFor="password" variant="auth">
               <PasswordInput
                 id="password"
                 size="md"
@@ -139,7 +112,7 @@ const LoginForm = () => {
                 error={errors.password?.message}
                 {...register("password")}
               />
-            </div>
+            </FormField>
           </div>
 
           {submitError ? (
