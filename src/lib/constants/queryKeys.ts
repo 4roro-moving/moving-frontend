@@ -26,6 +26,8 @@ export const QUERY_KEYS = {
   ESTIMATES: {
     ALL: ["estimates"],
     RECEIVED: ["estimates", "received"] as const,
+    //2026.07.28 윤소정 - [추가] 기사 반려 내역 조회
+    REJECTED: ["estimates", "rejected"] as const,
     DETAIL_ROOT: ["estimates", "detail"] as const,
     DETAIL: (estimateId: number) => ["estimates", "detail", estimateId] as const,
     // 2026.07.28 정슬기 - [수정] pending 목록/상세 prefix 분리 (찜 낙관적 업데이트 충돌 방지)
