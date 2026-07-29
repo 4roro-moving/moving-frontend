@@ -18,7 +18,9 @@ interface WritableReviewCardProps {
 // 2026.07.27 정슬기 - [수정] Mobile 세로 / Tablet 강화 / Desktop 가로 CTA 반응형
 export default function WritableReviewCard({ item, onWriteClick }: WritableReviewCardProps) {
   const { mover, estimateRequest, price } = item;
-  const displayName = mover.nickname?.trim() || "기사님";
+  // GET /reviews/reviewable 응답 mover에는 name이 없고 nickname만 존재 (null 가능)
+  const nickname = mover.nickname?.trim();
+  const moverLabel = nickname ? `${nickname} 기사님` : "기사님";
   const titleId = `writable-review-${item.estimateId}-title`;
   const careerLabel = mover.career == null ? "-" : `${mover.career}년`;
   const ratingValue = mover.averageRating ?? 0;
@@ -44,7 +46,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
             {mover.imageUrl ? (
               <Image
                 src={mover.imageUrl}
-                alt={`${displayName} 기사님 프로필`}
+                alt={`${moverLabel} 프로필`}
                 fill
                 sizes="50px"
                 className="object-cover"
@@ -61,7 +63,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
               variant={{ base: "md-semibold", md: "lg-semibold" }}
               className="text-text-primary truncate"
             >
-              {displayName} 기사님
+              {moverLabel}
             </Text>
             <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
               <div className="flex items-center gap-2">
@@ -163,7 +165,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
           size="cta"
           fullWidth
           onClick={() => onWriteClick(item)}
-          aria-label={`${displayName} 기사님 리뷰 작성하기`}
+          aria-label={`${moverLabel} 리뷰 작성하기`}
         >
           리뷰 작성하기
         </Button>

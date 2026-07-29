@@ -56,7 +56,7 @@ const TEXT_VARIANT_STYLES = {
   "link-xl":
     "text-[length:var(--font-size-20)] leading-[var(--line-height-32)] font-semibold underline",
 
-  "rating-score": "text-[length:var(--font-size-40)] leading-[var(--line-height-48)] font-bold",
+  "rating-score": "text-[length:var(--font-size-40)] leading-[var(--line-height-48)] font-medium",
 } as const;
 
 /** md: (태블릿) — 키는 TEXT_VARIANT_STYLES와 동일 */
@@ -126,7 +126,7 @@ const TEXT_VARIANT_STYLES_MD = {
     "md:text-[length:var(--font-size-20)] md:leading-[var(--line-height-32)] md:font-semibold md:underline",
 
   "rating-score":
-    "md:text-[length:var(--font-size-40)] md:leading-[var(--line-height-48)] md:font-bold",
+    "md:text-[length:var(--font-size-40)] md:leading-[var(--line-height-48)] md:font-medium",
 } as const;
 
 /** lg: (데스크톱) — 키는 TEXT_VARIANT_STYLES와 동일 */
@@ -196,7 +196,7 @@ const TEXT_VARIANT_STYLES_LG = {
     "lg:text-[length:var(--font-size-20)] lg:leading-[var(--line-height-32)] lg:font-semibold lg:underline",
 
   "rating-score":
-    "lg:text-[length:var(--font-size-40)] lg:leading-[var(--line-height-48)] lg:font-bold",
+    "lg:text-[length:var(--font-size-40)] lg:leading-[var(--line-height-48)] lg:font-medium",
 } as const;
 
 const textVariants = cva("tracking-[var(--letter-spacing-0)]", {

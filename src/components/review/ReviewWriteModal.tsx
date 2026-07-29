@@ -53,7 +53,9 @@ function ReviewWriteModalContent({
     },
   });
 
-  const displayName = item.mover.nickname?.trim() || "기사님";
+  // GET /reviews/reviewable 응답 mover에는 name이 없고 nickname만 존재 (null 가능)
+  const nickname = item.mover.nickname?.trim();
+  const moverLabel = nickname ? `${nickname} 기사님` : "기사님";
   const trimmedContent = content.trim();
   const isPending = createMutation.isPending;
   const isSubmitDisabled = isPending || rating < 1 || trimmedContent.length < MIN_CONTENT_LENGTH;
@@ -108,7 +110,7 @@ function ReviewWriteModalContent({
             {item.mover.imageUrl ? (
               <Image
                 src={item.mover.imageUrl}
-                alt={`${displayName} 기사님 프로필`}
+                alt={`${moverLabel} 프로필`}
                 fill
                 sizes="50px"
                 className="object-cover"
@@ -123,7 +125,7 @@ function ReviewWriteModalContent({
               variant={{ base: "md-semibold", md: "lg-semibold" }}
               className="text-text-primary break-words"
             >
-              {displayName} 기사님
+              {moverLabel}
             </Text>
             <Text
               as="p"

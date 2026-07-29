@@ -2,26 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import Button from "@/components/common/Button/Button";
 import EmptyState from "@/components/common/EmptyState/EmptyState";
 import Toast from "@/components/common/Toast/Toast";
-import { Text } from "@/components/common/Text";
 import MoverCard from "@/components/mover/MoverCard";
 import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
+import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useMovers } from "@/hooks/useMovers";
 import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import type { MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
 
 interface MoversListProps {
   filters: MoversSearchParamsState;
-}
-
-interface MoversListErrorPanelProps {
-  title: string;
-  description: string;
-  actionLabel: string;
-  isRetrying: boolean;
-  onRetry: () => void;
 }
 
 const MOVERS_EMPTY_DESCRIPTION = (
@@ -36,37 +27,6 @@ const MOVERS_EMPTY_DESCRIPTION = (
 const MOVERS_LIST_SKELETON_COUNT = 3;
 /** 다음 페이지 fetch 중 하단 스켈레톤 카드 수 */
 const MOVERS_NEXT_PAGE_SKELETON_COUNT = 2;
-
-function MoversListErrorPanel({
-  title,
-  description,
-  actionLabel,
-  isRetrying,
-  onRetry,
-}: MoversListErrorPanelProps) {
-  return (
-    <div className="flex w-full flex-col items-center gap-16 py-40 text-center">
-      <div className="flex flex-col gap-8">
-        <Text as="p" variant="lg-semibold" className="text-text-secondary">
-          {title}
-        </Text>
-        <Text as="p" variant="md-regular" className="text-text-muted">
-          {description}
-        </Text>
-      </div>
-      <Button
-        type="button"
-        variant="outline"
-        size="cta"
-        disabled={isRetrying}
-        onClick={onRetry}
-        className="min-w-[160px]"
-      >
-        {isRetrying ? "다시 시도 중..." : actionLabel}
-      </Button>
-    </div>
-  );
-}
 
 export function MoversList({ filters }: MoversListProps) {
   const query = useMovers(filters);
@@ -109,7 +69,7 @@ export function MoversList({ filters }: MoversListProps) {
 
   if (query.isError) {
     return (
-      <MoversListErrorPanel
+      <MoversErrorPanel
         title="불러오지 못했어요"
         description="기사님 목록을 가져오는 중 문제가 발생했습니다."
         actionLabel="다시 시도"
@@ -153,7 +113,7 @@ export function MoversList({ filters }: MoversListProps) {
 
       {/* 재시도 중에는 스켈레톤만 보여 패널·스켈레톤이 겹치지 않게 함 */}
       {isFetchNextPageError && !isFetchingNextPage ? (
-        <MoversListErrorPanel
+        <MoversErrorPanel
           title="더 불러오지 못했어요"
           description="다음 기사님 목록을 가져오는 중 문제가 발생했습니다."
           actionLabel="다시 시도"
