@@ -16,6 +16,7 @@ import type {
   ReceivedEstimatePanel,
 } from "@/types/estimate";
 import type { MoversListResult } from "@/types/mover";
+import type { MoverDetail } from "@/types/moverDetail";
 
 const LOGIN_REQUIRED_MESSAGE = "로그인이 필요한 서비스입니다.";
 
@@ -44,6 +45,7 @@ interface FavoriteMutationContext {
   previousPendingDetails: [readonly unknown[], EstimateDetail | undefined][];
   previousMoverLists: [readonly unknown[], InfiniteData<MoversListResult> | undefined][];
   previousFavoriteMovers: [readonly unknown[], MoversListResult | undefined][];
+  previousMoverDetail: MoverDetail | undefined;
 }
 
 function patchMoverFavorite<T extends { id: string; isFavorite: boolean; favoriteCount: number }>(
@@ -79,6 +81,7 @@ async function invalidateFavoriteRelatedQueries(
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
+    queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.MOVERS.ALL, "detail"] }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS }),
   ]);
 }
@@ -120,6 +123,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
+        queryClient.cancelQueries({ queryKey: QUERY_KEYS.MOVERS.DETAIL(moverId) }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS }),
       ]);
 
@@ -142,6 +146,9 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       const previousFavoriteMovers = queryClient.getQueriesData<MoversListResult>({
         queryKey: QUERY_KEYS.FAVORITES.MOVERS,
       });
+      const previousMoverDetail = queryClient.getQueryData<MoverDetail>(
+        QUERY_KEYS.MOVERS.DETAIL(moverId),
+      );
 
       // 받은 견적 목록
       queryClient.setQueryData<ReceivedEstimatePanel[]>(QUERY_KEYS.ESTIMATES.RECEIVED, (panels) => {
@@ -254,6 +261,15 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         );
       }
 
+      // 기사님 상세
+      queryClient.setQueryData<MoverDetail>(QUERY_KEYS.MOVERS.DETAIL(moverId), (detail) => {
+        if (!detail) {
+          return detail;
+        }
+
+        return patchMoverFavorite(detail, moverId, nextIsFavorite);
+      });
+
       return {
         previousReceived,
         previousDetails,
@@ -261,9 +277,10 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         previousPendingDetails,
         previousMoverLists,
         previousFavoriteMovers,
+        previousMoverDetail,
       };
     },
-    onError: (error, _variables, context) => {
+    onError: (error, variables, context) => {
       // 실패 시 낙관적 패치 전부 롤백
       if (context) {
         queryClient.setQueryData(QUERY_KEYS.ESTIMATES.RECEIVED, context.previousReceived);
@@ -282,6 +299,10 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         context.previousFavoriteMovers.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
         });
+        queryClient.setQueryData(
+          QUERY_KEYS.MOVERS.DETAIL(variables.moverId),
+          context.previousMoverDetail,
+        );
       }
 
       // Access만 있고 refresh 쿠키가 없는 잔여 세션 → 로그인 유도 (토큰 없음 메시지 대신)
