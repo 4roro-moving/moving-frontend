@@ -1,14 +1,16 @@
 "use client";
 
-import { Text } from "@/components/common/Text";
-import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { DriverBadgeIcon, LikeIcon } from "@/icons";
-import { cn } from "@/lib/utils/cn";
-import type { Mover } from "@/types/mover";
+import Link from "next/link";
 
+import { Text } from "@/components/common/Text";
 import { MoverMeta } from "@/components/mover/MoverMeta";
 import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
 import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips";
+import { useFavoriteMover } from "@/hooks/useFavoriteMover";
+import { DriverBadgeIcon, LikeIcon } from "@/icons";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { cn } from "@/lib/utils/cn";
+import type { Mover } from "@/types/mover";
 
 interface MoverCardProps {
   mover: Mover;
@@ -35,13 +37,17 @@ function FavoriteButton({
   onToggle,
 }: FavoriteButtonProps) {
   return (
-    <div className="flex shrink-0 items-center justify-center gap-2">
+    <div className="pointer-events-auto flex shrink-0 items-center justify-center gap-2">
       <button
         type="button"
         className="focus-visible:ring-border-brand rounded-8 cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
         aria-label={`${moverName} 기사님 찜하기`}
         aria-pressed={isFavorite}
-        onClick={() => onToggle(!isFavorite)}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onToggle(!isFavorite);
+        }}
       >
         <LikeIcon
           isFavorite={isFavorite}
@@ -87,16 +93,24 @@ export default function MoverCard({
     onToggle: toggleFavorite,
   };
 
+  const detailHref = APP_ROUTES.MOVERS.DETAIL(mover.id);
+  const detailLabel = `${mover.name} 기사님 상세 보기`;
+
   if (variant === "compact") {
     return (
       <article
         className={cn(
-          "border-border-subtle bg-background-surface rounded-16 flex w-full flex-col gap-20 border-[0.5px] p-20",
+          "border-border-subtle bg-background-surface rounded-16 relative flex w-full flex-col gap-20 border-[0.5px] p-20",
           "shadow-[-2px_-2px_10px_0px_rgba(220,220,220,0.2),2px_2px_10px_0px_rgba(220,220,220,0.2)]",
           className,
         )}
       >
-        <div className="flex flex-col gap-12">
+        <Link
+          href={detailHref}
+          aria-label={detailLabel}
+          className="focus-visible:ring-border-brand rounded-16 absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none"
+        />
+        <div className="pointer-events-none relative z-10 flex flex-col gap-12">
           <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
           <div className="flex flex-col gap-16">
             <Text as="h3" variant="lg-semibold" className="text-text-secondary">
@@ -139,14 +153,19 @@ export default function MoverCard({
   return (
     <article
       className={cn(
-        "border-border-subtle bg-background-surface flex w-full flex-col border-[0.5px]",
+        "border-border-subtle bg-background-surface relative flex w-full flex-col border-[0.5px]",
         "rounded-16 gap-8 p-20",
         "min-[744px]:rounded-20 min-[744px]:gap-20 min-[744px]:px-28 min-[744px]:py-24",
         "shadow-[-2px_-2px_10px_0px_rgba(220,220,220,0.2),2px_2px_10px_0px_rgba(220,220,220,0.2)]",
         className,
       )}
     >
-      <div className="flex flex-col gap-8 min-[744px]:hidden">
+      <Link
+        href={detailHref}
+        aria-label={detailLabel}
+        className="focus-visible:ring-border-brand rounded-16 min-[744px]:rounded-20 absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none"
+      />
+      <div className="pointer-events-none relative z-10 flex flex-col gap-8 min-[744px]:hidden">
         <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
 
         <div className="flex w-full flex-col gap-16">
@@ -201,7 +220,7 @@ export default function MoverCard({
         </div>
       </div>
 
-      <div className="hidden min-[744px]:contents">
+      <div className="pointer-events-none relative z-10 hidden min-[744px]:flex min-[744px]:flex-col min-[744px]:gap-20">
         <div className="flex min-h-32 items-center">
           <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="md" />
         </div>

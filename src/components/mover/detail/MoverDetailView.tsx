@@ -1,47 +1,67 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import Toast from "@/components/common/Toast/Toast";
 import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
 import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
 import MoverDetailActions from "@/components/mover/detail/MoverDetailActions";
+import MoverDetailNotFoundStatus from "@/components/mover/detail/MoverDetailNotFoundStatus";
+import MoverDetailPageSkeleton from "@/components/mover/detail/MoverDetailPageSkeleton";
 import MoverDetailProfile from "@/components/mover/detail/MoverDetailProfile";
 import MoverDetailReviews from "@/components/mover/detail/MoverDetailReviews";
 import MoverDetailServices from "@/components/mover/detail/MoverDetailServices";
-import { getMockMoverDetail } from "@/components/mover/detail/moverDetailMock";
-import type { MoverDetail } from "@/types/moverDetail";
+import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
+import { useFavoriteMover } from "@/hooks/useFavoriteMover";
+import { useMoverDetail } from "@/hooks/useMoverDetail";
+import { ApiError } from "@/types/api";
 
 interface MoverDetailViewProps {
   moverId: string;
 }
 
+function isMoverNotFoundError(error: unknown): boolean {
+  return error instanceof ApiError && (error.status === 404 || error.code === "MOVER_NOT_FOUND");
+}
+
 export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
-  const initialDetail = useMemo(() => getMockMoverDetail(moverId), [moverId]);
-  const [detail, setDetail] = useState<MoverDetail | null>(initialDetail);
-  const [reviewPage, setReviewPage] = useState(1);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  const { data: detail, isLoading, error, isFetching, refetch } = useMoverDetail(moverId);
+  const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
+
+  if (isLoading) {
+    return <MoverDetailPageSkeleton />;
+  }
+
   if (!detail) {
+    if (isMoverNotFoundError(error)) {
+      return <MoverDetailNotFoundStatus />;
+    }
+
     return (
-      <div className="bg-background-default px-margin-mobile flex w-full flex-col items-center py-80">
-        <p className="text-text-muted">기사님 정보를 찾을 수 없습니다.</p>
+      <div className="bg-background-default flex w-full flex-1 flex-col items-center justify-center">
+        <MoversErrorPanel
+          title="불러오지 못했어요"
+          description="기사님 정보를 가져오는 중 문제가 발생했습니다."
+          actionLabel="다시 시도"
+          isRetrying={isFetching}
+          onRetry={() => {
+            void refetch();
+          }}
+        />
       </div>
     );
   }
 
   const toggleFavorite = () => {
-    setDetail((prev) => {
-      if (!prev) {
-        return prev;
-      }
+    if (favoriteMutation.isPending) {
+      return;
+    }
 
-      const nextIsFavorite = !prev.isFavorite;
-      return {
-        ...prev,
-        isFavorite: nextIsFavorite,
-        favoriteCount: Math.max(0, prev.favoriteCount + (nextIsFavorite ? 1 : -1)),
-      };
+    favoriteMutation.mutate({
+      moverId: detail.id,
+      nextIsFavorite: !detail.isFavorite,
     });
   };
 
@@ -71,9 +91,10 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
             <div className="border-border-subtle w-full border-t" aria-hidden="true" />
 
             <MoverDetailReviews
-              detail={detail}
-              currentPage={reviewPage}
-              onPageChange={setReviewPage}
+              moverId={detail.id}
+              rating={detail.rating}
+              reviewCount={detail.reviewCount}
+              ratingDistribution={detail.ratingDistribution}
             />
           </div>
 

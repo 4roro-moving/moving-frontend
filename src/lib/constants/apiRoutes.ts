@@ -15,15 +15,21 @@ export const API_ROUTES = {
     CUSTOMER_STATUS: "/profiles/customer/status",
     CUSTOMER_ME: "/profiles/customer/me",
   },
-  MOVERS: "/movers",
+  MOVERS: {
+    ROOT: "/movers",
+    DETAIL: (moverId: string) => `/movers/${moverId}`,
+    REVIEWS: (moverId: string) => `/movers/${moverId}/reviews`,
+  },
   ESTIMATE_REQUESTS: {
     ROOT: "/estimate-requests",
     DETAIL: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
     ACTIVE: "/estimate-requests/active",
   },
   // 2026.07.24 정슬기 - [추가] 받은 견적 목록·상세·확정 API 경로
+  // 2026.07.28 정슬기 - [수정] 대기 중인 견적 목록 경로 추가 (BE GET /estimates/pending)
   ESTIMATES: {
     ROOT: "/estimates",
+    PENDING: "/estimates/pending",
     RECEIVED: "/estimates/received",
     DETAIL: (estimateId: number) => `/estimates/${estimateId}`,
     CONFIRM: (estimateId: number) => `/estimates/${estimateId}/confirm`,

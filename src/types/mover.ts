@@ -40,6 +40,24 @@ export interface MoverListItem {
   isFavorite: boolean;
 }
 
+/** GET /movers/:moverId 상세 — 목록 필드 + 서비스 가능 지역 */
+export interface MoverDetailServiceArea {
+  id: number;
+  name: string;
+}
+
+/** 별점 분포 항목 (5점 → 1점) */
+export interface MoverRatingDistributionItem {
+  score: number;
+  count: number;
+}
+
+export interface MoverDetailItem extends MoverListItem {
+  serviceAreas: MoverDetailServiceArea[];
+  /** 리뷰 별점 분포 요약 (상세 API) */
+  ratingDistribution: MoverRatingDistributionItem[];
+}
+
 export interface MoversPagination {
   page: number;
   limit: number;

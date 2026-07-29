@@ -11,10 +11,8 @@ import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPric
 import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
 import PendingEstimateDetailActions from "@/components/estimate/pending/PendingEstimateDetailActions";
 import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
-import {
-  useConfirmPendingEstimateDetail,
-  usePendingEstimateDetail,
-} from "@/hooks/usePendingEstimateDetail";
+import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
+import { usePendingEstimateDetail } from "@/hooks/usePendingEstimateDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 
 interface PendingEstimateDetailViewProps {
@@ -30,7 +28,7 @@ export default function PendingEstimateDetailView({ estimateId }: PendingEstimat
   const { data, isLoading, isError, error, refetch } = usePendingEstimateDetail(estimateId);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const confirmMutation = useConfirmPendingEstimateDetail(estimateId, {
+  const confirmMutation = useConfirmEstimate(estimateId, {
     onSuccess: () => setToastMessage("견적이 확정되었습니다."),
     onError: setToastMessage,
   });

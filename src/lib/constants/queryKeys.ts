@@ -26,9 +26,16 @@ export const QUERY_KEYS = {
   ESTIMATES: {
     ALL: ["estimates"],
     RECEIVED: ["estimates", "received"] as const,
+    //2026.07.28 윤소정 - [추가] 기사 반려 내역 조회
+    REJECTED: ["estimates", "rejected"] as const,
     DETAIL_ROOT: ["estimates", "detail"] as const,
     DETAIL: (estimateId: number) => ["estimates", "detail", estimateId] as const,
-    // 2026.07.25 정슬기 - [추가] 대기 견적 상세(mock ViewModel) 쿼리 키
+    // 2026.07.28 정슬기 - [수정] pending 목록/상세 prefix 분리 (찜 낙관적 업데이트 충돌 방지)
+    // 2026.07.29 정슬기 - [수정] 사용처가 없던 PENDING_ROOT 제거
+    PENDING_LIST_ROOT: ["estimates", "pending", "list"] as const,
+    PENDING_LIST: (page: number, limit: number) =>
+      ["estimates", "pending", "list", { page, limit }] as const,
+    // 2026.07.25 정슬기 - [추가] 대기 견적 상세 쿼리 키
     // 2026.07.26 정슬기 - [수정] PENDING_DETAIL_ROOT로 prefix invalidate/낙관적 업데이트 지원
     PENDING_DETAIL_ROOT: ["estimates", "pending", "detail"] as const,
     PENDING_DETAIL: (estimateId: number) => ["estimates", "pending", "detail", estimateId] as const,
@@ -46,6 +53,7 @@ export const QUERY_KEYS = {
     ALL: ["reviews"] as const,
     ME: ["reviews", "me"] as const,
     REVIEWABLE: ["reviews", "reviewable"] as const,
+    BY_MOVER: (moverId: string) => ["reviews", "mover", moverId] as const,
   },
 
   NOTIFICATIONS: {

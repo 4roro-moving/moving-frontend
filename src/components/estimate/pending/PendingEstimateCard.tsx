@@ -6,8 +6,8 @@ import Link from "next/link";
 import Button, { buttonVariants } from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip, DesignatedChip } from "@/components/estimate/received/MoveTypeChip";
+import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { useConfirmPendingEstimate } from "@/hooks/usePendingEstimateDetail";
 import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -29,8 +29,9 @@ interface PendingEstimateCardProps {
 }
 
 // 2026.07.25 정슬기 - [추가] Figma card/pending-estimate (510:43164 lg / 510:43215 sm)
-// 2026.07.26 정슬기 - [수정] 확정 mutation을 useConfirmPendingEstimate로 분리, 찜 invalidate는 훅이 담당
+// 2026.07.26 정슬기 - [수정] 확정 mutation을 훅으로 분리, 찜 invalidate는 훅이 담당
 // 2026.07.27 정슬기 - [수정] article 제목·찜 a11y·평점 sr-only·nextIsFavorite 반영
+// 2026.07.29 정슬기 - [수정] 확정 훅을 공통 useConfirmEstimate로 교체
 export default function PendingEstimateCard({
   offer,
   moveType,
@@ -42,12 +43,12 @@ export default function PendingEstimateCard({
   const displayName = mover.nickname || mover.name;
   const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
   const moverTitleId = `offer-${offer.id}-mover`;
-  // 찜 성공 시 MY_LIST·PENDING_DETAIL 캐시는 useFavoriteMover가 낙관적 갱신/무효화
+  // 찜: PENDING_LIST / PENDING_DETAIL / RECEIVED / DETAIL 캐시는 useFavoriteMover가 갱신
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
+  // BE mapListEstimate에는 canConfirm 없음 — SENT만 확정 후보 (pending 목록은 SENT-only)
   const canConfirm = isPendingEstimate(status);
 
-  // mock confirm — 목록·해당 상세 캐시 무효화는 훅 내부에서 처리
-  const confirmMutation = useConfirmPendingEstimate(offer.id, {
+  const confirmMutation = useConfirmEstimate(offer.id, {
     onSuccess: onConfirmSuccess,
     onError: onConfirmError,
   });
