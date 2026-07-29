@@ -128,8 +128,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const displayName = loadNickname();
         const status = error instanceof ApiError ? error.status : undefined;
 
-        // 네트워크·서버 오류(비 401)면 기존 토큰을 신뢰해 낙관적으로 유지
-        if (token && status !== 401) {
+        // 인증 만료 → 토큰·닉네임 정리 후 비로그인
+        if (status === 401) {
+          get().clearSession(); // clearAuthTokens + clearNickname + 비로그인 상태
+          set({ isCheckingAuth: false });
+          return;
+        }
+
+        // 네트워크·5xx 등 → 기존 access가 있으면 화면만 낙관 유지
+        if (token) {
           set({
             displayName,
             isAuthenticated: true,
