@@ -20,9 +20,10 @@ export const QUERY_KEYS = {
     DETAIL: (requestId: number) => ["estimateRequests", requestId] as const,
     // 2026.07.25 정슬기 - [추가] 내 견적 요청 목록 쿼리 키
     // 2026.07.29 정슬기 - [수정] page·limit 포함 — 보낸 견적 요청 목록 페이지네이션
+    // 2026.07.29 정슬기 - [수정] status 포함 — 전체는 "all"
     MY_LIST_ROOT: ["estimateRequests", "mine"] as const,
-    MY_LIST: (page: number, limit: number) =>
-      ["estimateRequests", "mine", { page, limit }] as const,
+    MY_LIST: (page: number, limit: number, status: string = "all") =>
+      ["estimateRequests", "mine", { page, limit, status }] as const,
   },
 
   // 2026.07.24 정슬기 - [추가] 받은 견적 목록·상세 React Query 키

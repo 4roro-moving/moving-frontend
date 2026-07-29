@@ -10,9 +10,11 @@ export const ESTIMATE_REQUEST_LIST_PAGE_LIMIT = 10;
 
 /**
  * 고객이 보낸 견적 요청 목록
- * BE: GET /api/estimate-requests?page&limit
+ * BE: GET /api/estimate-requests?page&limit&status?
+ * 정렬: BE createdAt DESC, id DESC (프론트 재정렬 없음)
  * 응답: { success, data: MyEstimateRequestItem[], pagination }
  * // 2026.07.29 정슬기 - [추가] 보낸 견적 요청 목록 API
+ * // 2026.07.29 정슬기 - [수정] optional status query 연결
  */
 export async function fetchMyEstimateRequestList(
   query: MyEstimateRequestListQuery = {},
@@ -23,6 +25,11 @@ export async function fetchMyEstimateRequestList(
     page: String(page),
     limit: String(limit),
   });
+
+  // 전체 조회 시 status 미전달
+  if (query.status !== undefined) {
+    params.set("status", query.status);
+  }
 
   const result = await fetchInstance.getPaginated<MyEstimateRequestItem[]>(
     `${API_ROUTES.ESTIMATE_REQUESTS.ROOT}?${params.toString()}`,

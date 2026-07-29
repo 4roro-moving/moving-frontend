@@ -138,9 +138,19 @@ export interface MyEstimateRequestItem {
   _count: { estimates: number };
 }
 
+/**
+ * 보낸 견적 요청 목록 UI 상태 필터
+ * all → status 미전달 / OPEN → 진행 중 / COMPLETED → 이사 완료
+ * // 2026.07.29 정슬기 - [추가]
+ */
+export type EstimateRequestListStatusFilter = "all" | "OPEN" | "COMPLETED";
+
 export interface MyEstimateRequestListQuery {
   page?: number;
   limit?: number;
+  /** 미전달 시 전체. BE: PENDING|OPEN|CONFIRMED|COMPLETED|EXPIRED|CANCELED */
+  // 2026.07.29 정슬기 - [추가] GET /estimate-requests?status=
+  status?: EstimateRequestStatus;
 }
 
 export interface MyEstimateRequestListResult {
