@@ -225,7 +225,7 @@ export default function EstimateRequestForm() {
         refetchType: "none",
       });
       setToastMessage(TOAST_SUCCESS_MESSAGE);
-      queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, response.data ?? true);
+      queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, response ?? true);
     },
     onError: async (error) => {
       const { code } = getApiError(error);
