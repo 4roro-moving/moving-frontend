@@ -4,11 +4,30 @@ import { HeroDecorationLeftIcon, HeroDecorationRightIcon, ProfileDefaultIcon } f
 import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 
 interface EstimateDetailHeroProps {
-  imageUrl: string | null;
-  name: string;
+  /** false면 주황 배너만 (프로필 없음). 보낸 견적 요청 상세 등 */
+  showProfile?: boolean;
+  imageUrl?: string | null;
+  name?: string;
 }
 
-export default function EstimateDetailHero({ imageUrl, name }: EstimateDetailHeroProps) {
+/**
+ * 견적 상세 히어로 배너
+ * // 2026.07.29 정슬기 - [수정] showProfile=false 배너 전용 모드 (Figma 8093:49327)
+ */
+export default function EstimateDetailHero({
+  showProfile = true,
+  imageUrl = null,
+  name = "",
+}: EstimateDetailHeroProps) {
+  if (!showProfile) {
+    return (
+      <div className="bg-background-brand relative h-30.5 w-full shrink-0 overflow-hidden md:h-42.5 lg:h-56.25">
+        <HeroDecorationRightIcon className="text-icon-brand-tertiary pointer-events-none absolute bottom-0 left-[calc(50%_+_152px)] hidden h-37 w-81.25 lg:block" />
+        <HeroDecorationLeftIcon className="text-icon-brand-tertiary pointer-events-none absolute top-[79.39px] left-[calc(50%_-_750px)] hidden h-28.75 w-42.5 lg:block" />
+      </div>
+    );
+  }
+
   return (
     // 2026.07.24 정슬기 - [수정] Figma Mobile/Tablet 히어로·아바타 크기, Desktop(lg) 기존 유지
     // 2026.07.25 정슬기 - [수정] 임의 px 클래스를 spacing 토큰 유틸로 교체

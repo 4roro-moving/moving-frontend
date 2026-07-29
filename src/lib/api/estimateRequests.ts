@@ -40,3 +40,17 @@ export async function fetchMyEstimateRequestList(
     pagination: result.pagination,
   };
 }
+
+/**
+ * 보낸 견적 요청 상세
+ * BE: GET /api/estimate-requests/:estimateRequestId
+ * 응답 data 형태는 목록 아이템(MyEstimateRequestItem)과 동일
+ * // 2026.07.29 정슬기 - [추가]
+ */
+export async function fetchEstimateRequestDetail(
+  estimateRequestId: number,
+): Promise<MyEstimateRequestItem> {
+  return fetchInstance.get<MyEstimateRequestItem>(
+    API_ROUTES.ESTIMATE_REQUESTS.DETAIL(estimateRequestId),
+  );
+}
