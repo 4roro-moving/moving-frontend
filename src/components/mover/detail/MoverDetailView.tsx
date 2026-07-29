@@ -44,7 +44,11 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   const { data: detail, isLoading, error, isFetching, refetch } = useMoverDetail(moverId);
   const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
 
-  const { data: activeRequest, isLoading: isActiveLoading } = useActiveEstimateRequest({
+  const {
+    data: activeRequest,
+    isLoading: isActiveLoading,
+    isError: isActiveError,
+  } = useActiveEstimateRequest({
     enabled: isLoggedIn,
   });
 
@@ -80,7 +84,9 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   }
 
   const ctaState =
-    isLoggedIn && !isActiveLoading ? getDesignateCtaState(activeRequest ?? null, detail.id) : null;
+    isLoggedIn && !isActiveLoading && !isActiveError
+      ? getDesignateCtaState(activeRequest ?? null, detail.id)
+      : null;
 
   // 이미 지정 완료만 버튼 비활성. 한도·확정 등은 클릭 후 toast
   const isRequestDisabled =
@@ -113,6 +119,11 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     }
 
     if (isActiveLoading || designateMutation.isPending) {
+      return;
+    }
+
+    if (isActiveError) {
+      setToastMessage("견적 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
       return;
     }
 
