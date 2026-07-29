@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 
-import { Text } from "@/components/common/Text";
+import { Text, type TextVariantProp } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
 import { useModalContext } from "./ModalMain";
@@ -10,9 +10,14 @@ import { useModalContext } from "./ModalMain";
 interface ModalDescriptionProps {
   children: ReactNode;
   className?: string;
+  variant?: TextVariantProp;
 }
 
-const ModalDescription = ({ children, className }: ModalDescriptionProps) => {
+const ModalDescription = ({
+  children,
+  className,
+  variant = "md-regular",
+}: ModalDescriptionProps) => {
   const { descriptionId, setHasDescription } = useModalContext();
 
   useEffect(() => {
@@ -24,7 +29,7 @@ const ModalDescription = ({ children, className }: ModalDescriptionProps) => {
     <Text
       as="p"
       id={descriptionId}
-      variant="md-regular"
+      variant={variant}
       className={cn("text-text-secondary", className)}
     >
       {children}
