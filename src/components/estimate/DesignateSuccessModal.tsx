@@ -38,9 +38,7 @@ export default function DesignateSuccessModal({ open, onClose }: DesignateSucces
         <Modal.Close onClose={onClose} />
       </div>
       <div className="flex w-full flex-col items-stretch gap-30 md:gap-40">
-        <Modal.Desc variant="2lg-medium" className="whitespace-nowrap">
-          지정 견적 요청이 완료되었습니다.
-        </Modal.Desc>
+        <Modal.Desc variant="2lg-medium">지정 견적 요청이 완료되었습니다.</Modal.Desc>
         <Modal.Button fullWidth size="cta" className="md:hidden" onClick={handleGoToEstimates}>
           지정 견적서 보러가기
         </Modal.Button>
