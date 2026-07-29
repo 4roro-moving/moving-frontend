@@ -5,19 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 
-import NotificationPanel from "@/components/common/Header/NotificationPanel";
+import NotificationTrigger from "@/components/common/Header/NotificationTrigger";
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { AlarmIcon } from "@/icons";
 import { getLoginRedirectPath, hasAuthSession, subscribeAuthSession } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { getUnreadNotificationCount, MOCK_NOTIFICATIONS } from "@/lib/mocks/notifications.mock";
 import { cn } from "@/lib/utils/cn";
-
-export interface HeaderProps {
-  /** TODO: auth 연동 전 임시 prop. 추후 대체 */
-  isLogin?: boolean;
-}
 
 const LOGGED_OUT_LINKS = [{ label: "기사님 찾기", href: "/movers" }];
 
@@ -32,9 +25,9 @@ const PROFILE_MENU_ITEMS = [
   { label: "내가 작성한 리뷰", href: APP_ROUTES.REVIEWS.ME },
 ] as const;
 
-const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
+const Header = () => {
   const pathname = usePathname();
-  const hasSession = useSyncExternalStore(subscribeAuthSession, hasAuthSession, () => false);
+  const isLogin = useSyncExternalStore(subscribeAuthSession, hasAuthSession, () => false);
   const [openMenuPath, setOpenMenuPath] = useState<string | null>(null);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -42,30 +35,7 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
   const profileMenuRef = useClickOutside<HTMLDivElement>(() => setOpenMenuPath(null));
 
   const isProfileMenuOpen = openMenuPath === pathname;
-  const isLogin = isLoginProp ?? hasSession;
   const navLinks = isLogin ? LOGGED_IN_LINKS : LOGGED_OUT_LINKS;
-  const notificationPanelId = useId();
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const unreadCount = getUnreadNotificationCount(MOCK_NOTIFICATIONS);
-
-  const closeNotification = useCallback(() => {
-    setIsNotificationOpen(false);
-  }, []);
-
-  const notificationRef = useClickOutside<HTMLDivElement>(closeNotification);
-
-  useEffect(() => {
-    if (!isNotificationOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeNotification();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isNotificationOpen, closeNotification]);
 
   const closeMenu = useCallback(() => {
     setOpenMenuPath(null);
@@ -170,33 +140,7 @@ const Header = ({ isLogin: isLoginProp }: HeaderProps) => {
 
         {isLogin ? (
           <div className="flex items-center gap-20">
-            <div ref={notificationRef} className="relative">
-              <button
-                type="button"
-                aria-label={unreadCount > 0 ? `알림, 읽지 않은 알림 ${unreadCount}개` : "알림"}
-                aria-expanded={isNotificationOpen}
-                aria-controls={isNotificationOpen ? notificationPanelId : undefined}
-                className="relative"
-                onClick={() => setIsNotificationOpen((prev) => !prev)}
-              >
-                <AlarmIcon className="text-icon-default size-24" aria-hidden="true" />
-                {unreadCount > 0 ? (
-                  <Text
-                    as="span"
-                    variant="xs-semibold"
-                    aria-hidden="true"
-                    className="bg-status-error text-text-inverse absolute -top-4 -right-6 flex h-16 min-w-16 items-center justify-center rounded-full px-4 leading-none"
-                  >
-                    {unreadCount}
-                  </Text>
-                ) : null}
-              </button>
-              {isNotificationOpen ? (
-                <div id={notificationPanelId}>
-                  <NotificationPanel onClose={closeNotification} />
-                </div>
-              ) : null}
-            </div>
+            <NotificationTrigger />
 
             <div ref={profileMenuRef} className="relative flex items-center gap-12">
               <button
