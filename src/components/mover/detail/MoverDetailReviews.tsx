@@ -42,11 +42,16 @@ export default function MoverDetailReviews({
     page: currentPage,
   });
 
-  const isEmpty = reviewCount === 0;
   const reviews = data?.reviews.map(mapMoverReviewItemToDetailReview) ?? [];
   const pageCount = Math.max(1, data?.pagination.totalPages ?? 0);
   const hasReviews = reviews.length > 0;
+
+  // NOTE: 시드 데이터 오류로 인한 임시 조치, totalCount === 0 이면 기존 empty UI를 보이게 함
+  const isEmpty =
+    reviewCount === 0 ||
+    (!isLoading && !isError && data !== undefined && data.pagination.totalCount === 0);
   const hasDistribution = ratingDistribution.some((item) => item.count > 0);
+
   const maxCount = Math.max(...ratingDistribution.map((item) => item.count), 1);
   // 동점이면 더 높은 점수(5→1 순) 하나만 강조
   const topScore =
