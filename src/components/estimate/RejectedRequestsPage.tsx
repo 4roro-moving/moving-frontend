@@ -3,6 +3,7 @@
 import { Text } from "@/components/common/Text";
 import MoverEstimateTabs from "@/components/estimate/MoverEstimateTabs";
 import RejectedRequestCard from "@/components/estimate/RejectedRequestCard";
+import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
 import { useRejectedEstimateRequests } from "@/hooks/useMoverEstimateRequests";
 
 export default function RejectedRequestsPage() {
@@ -12,6 +13,8 @@ export default function RejectedRequestsPage() {
     <>
       <MoverEstimateTabs />
       <main className="bg-background-subtle min-h-[calc(100vh-108px)] px-24 pt-24 pb-40 md:min-h-[calc(100vh-142px)] md:px-72 md:pt-32 lg:min-h-[calc(100vh-168px)] lg:px-0 lg:pt-[59px] lg:pb-[107px]">
+        <h1 className="sr-only">반려 요청</h1>
+
         {query.isPending ? (
           <Text variant="lg-regular" className="text-text-muted py-80 text-center">
             반려 요청을 불러오는 중이에요.
@@ -19,9 +22,13 @@ export default function RejectedRequestsPage() {
         ) : null}
 
         {query.isError ? (
-          <Text variant="lg-regular" className="text-text-error py-80 text-center">
-            반려 요청을 불러오지 못했어요.
-          </Text>
+          <ReceivedEstimatesStatus
+            message="반려 요청을 불러오지 못했어요."
+            actionLabel={query.isFetching ? "다시 시도 중..." : "다시 시도"}
+            onAction={() => {
+              void query.refetch();
+            }}
+          />
         ) : null}
 
         {query.data?.length === 0 ? (
