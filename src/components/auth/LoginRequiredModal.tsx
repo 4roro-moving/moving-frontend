@@ -50,9 +50,7 @@ export function LoginRequiredModal({
         <Modal.Close onClose={onClose} />
       </div>
       <div className="flex w-full flex-col items-stretch gap-30 md:gap-40">
-        <Modal.Desc variant="2lg-medium" className="whitespace-nowrap">
-          {description}
-        </Modal.Desc>
+        <Modal.Desc variant="2lg-medium">{description}</Modal.Desc>
         <Modal.Button fullWidth size="cta" className="md:hidden" onClick={handleLogin}>
           로그인하기
         </Modal.Button>

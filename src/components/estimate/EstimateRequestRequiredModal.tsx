@@ -44,9 +44,7 @@ export default function EstimateRequestRequiredModal({
         <Modal.Close onClose={onClose} />
       </div>
       <div className="flex w-full flex-col items-stretch gap-30 md:gap-40">
-        <Modal.Desc variant="2lg-medium" className="whitespace-nowrap">
-          일반 견적 요청을 먼저 진행해 주세요.
-        </Modal.Desc>
+        <Modal.Desc variant="2lg-medium">일반 견적 요청을 먼저 진행해 주세요.</Modal.Desc>
         <Modal.Button
           fullWidth
           size="cta"
