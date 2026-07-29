@@ -26,7 +26,8 @@ export const saveNickname = (name: string): void => {
   if (!trimmed) return;
 
   localStorage.setItem(NICKNAME_STORAGE_KEY, trimmed);
-  document.cookie = `${NICKNAME_STORAGE_KEY}=${encodeURIComponent(trimmed)}; Path=/; SameSite=Lax; Max-Age=${ONE_YEAR_SECONDS}`;
+  const secureFlag = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${NICKNAME_STORAGE_KEY}=${encodeURIComponent(trimmed)}; Path=/; SameSite=Lax; Max-Age=${ONE_YEAR_SECONDS}${secureFlag}`;
 };
 
 export const loadNickname = (): string | null => {
