@@ -77,7 +77,8 @@ async function invalidateFavoriteRelatedQueries(
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
+    // 2026.07.28 정슬기 - [수정] 목록은 PENDING_LIST_ROOT만 — detail prefix와 분리
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
     queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.MOVERS.ALL, "detail"] }),
@@ -119,14 +120,14 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       await Promise.all([
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST }),
+        queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.MOVERS.DETAIL(moverId) }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS }),
       ]);
 
-      // 롤백용 스냅샷 (received + pending + movers list + mover detail + favorite movers)
+      // 롤백용 스냅샷 (received + pending list/detail + movers list + favorite movers)
       const previousReceived = queryClient.getQueryData<ReceivedEstimatePanel[]>(
         QUERY_KEYS.ESTIMATES.RECEIVED,
       );
@@ -134,7 +135,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT,
       });
       const previousPendingLists = queryClient.getQueriesData<PendingEstimateSectionListResult>({
-        queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST,
+        queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
       });
       const previousPendingDetails = queryClient.getQueriesData<EstimateDetail>({
         queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT,
@@ -179,11 +180,12 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         },
       );
 
-      // 대기 중 견적 목록 (query 파라미터가 붙어도 MY_LIST prefix로 매칭)
+      // 대기 중 견적 목록만 (PENDING_LIST_ROOT — detail과 prefix 분리)
       queryClient.setQueriesData<PendingEstimateSectionListResult>(
-        { queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST },
+        { queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT },
         (list) => {
-          if (!list) {
+          // 목록 전용 구조 가드: sections 없는 캐시는 건드리지 않음
+          if (!list || !Array.isArray(list.sections)) {
             return list;
           }
 
@@ -200,11 +202,11 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         },
       );
 
-      // 대기 견적 상세들
+      // 대기 견적 상세들 (단일 detail.mover 패치)
       queryClient.setQueriesData<EstimateDetail>(
         { queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT },
         (detail) => {
-          if (!detail) {
+          if (!detail || !detail.mover) {
             return detail;
           }
 

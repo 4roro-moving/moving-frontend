@@ -11,7 +11,8 @@ import EstimateDetailInfo from "@/components/estimate/detail/EstimateDetailInfo"
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
 import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
 import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
-import { useConfirmEstimate, useEstimateDetail } from "@/hooks/useEstimateDetail";
+import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
+import { useEstimateDetail } from "@/hooks/useEstimateDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 
 interface EstimateDetailViewProps {
