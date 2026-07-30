@@ -53,12 +53,13 @@ const itemInteractiveClassName =
 
 export default function NotificationPanel({ onClose, className }: NotificationPanelProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [pendingReadIds, setPendingReadIds] = useState<number[]>([]);
 
   const { data, isPending, isError, isFetching } = useNotifications({
     page: currentPage,
     limit: NOTIFICATION_PAGE_SIZE,
   });
-  const { mutate: markAsRead } = useReadNotification();
+  const { mutateAsync: markAsRead } = useReadNotification();
 
   const notifications = data?.notifications ?? [];
   const pageCount = Math.max(1, data?.pagination.totalPages ?? 1);
@@ -73,12 +74,20 @@ export default function NotificationPanel({ onClose, className }: NotificationPa
   };
 
   const handleNotificationActivate = useCallback(
-    (notification: NotificationItem) => {
-      if (!notification.isRead) {
-        markAsRead(notification.id);
+    async (notification: NotificationItem) => {
+      if (notification.isRead || pendingReadIds.includes(notification.id)) {
+        return;
+      }
+
+      setPendingReadIds((prev) => [...prev, notification.id]);
+
+      try {
+        await markAsRead(notification.id);
+      } finally {
+        setPendingReadIds((prev) => prev.filter((id) => id !== notification.id));
       }
     },
-    [markAsRead],
+    [markAsRead, pendingReadIds],
   );
 
   return (
@@ -145,7 +154,7 @@ export default function NotificationPanel({ onClose, className }: NotificationPa
                 {notification.linkUrl ? (
                   <Link
                     href={notification.linkUrl}
-                    onClick={() => {
+                    onClick={async () => {
                       handleNotificationActivate(notification);
                       onClose();
                     }}
@@ -156,11 +165,12 @@ export default function NotificationPanel({ onClose, className }: NotificationPa
                 ) : (
                   <button
                     type="button"
-                    onClick={() => handleNotificationActivate(notification)}
+                    onClick={async () => handleNotificationActivate(notification)}
                     className={itemInteractiveClassName}
                     aria-label={
                       notification.isRead ? notification.title : `${notification.title}, 읽지 않음`
                     }
+                    disabled={notification.isRead || pendingReadIds.includes(notification.id)}
                   >
                     <NotificationContent notification={notification} />
                   </button>

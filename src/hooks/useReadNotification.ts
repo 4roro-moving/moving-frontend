@@ -13,8 +13,11 @@ import type {
 } from "@/types/notification";
 
 interface ReadNotificationContext {
-  previousLists: [readonly unknown[], NotificationListResponse | undefined][];
-  previousUnread: UnreadNotificationCountResponse | undefined;
+  previousByQuery: Array<{
+    queryKey: readonly unknown[];
+    previousNotification: NotificationItem | null;
+  }>;
+  unreadDecremented: boolean;
 }
 
 function markNotificationAsRead(notification: NotificationItem, readAt: string): NotificationItem {
@@ -44,9 +47,11 @@ export function useReadNotification() {
       const previousLists = queryClient.getQueriesData<NotificationListResponse>({
         queryKey: QUERY_KEYS.NOTIFICATIONS.LIST_ROOT,
       });
-      const previousUnread = queryClient.getQueryData<UnreadNotificationCountResponse>(
-        QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT,
-      );
+      const previousByQuery = previousLists.map(([queryKey, current]) => ({
+        queryKey,
+        previousNotification:
+          current?.notifications.find((notification) => notification.id === notificationId) ?? null,
+      }));
 
       const wasUnread = previousLists.some(([, current]) =>
         current?.notifications.some(
@@ -55,7 +60,7 @@ export function useReadNotification() {
       );
 
       if (!wasUnread) {
-        return { previousLists, previousUnread };
+        return { previousByQuery, unreadDecremented: false };
       }
 
       const readAt = new Date().toISOString();
@@ -91,18 +96,44 @@ export function useReadNotification() {
         },
       );
 
-      return { previousLists, previousUnread };
+      return { previousByQuery, unreadDecremented: true };
     },
     onError: (_error, _notificationId, context) => {
       if (!context) {
         return;
       }
 
-      for (const [queryKey, data] of context.previousLists) {
-        queryClient.setQueryData(queryKey, data);
+      for (const { queryKey, previousNotification } of context.previousByQuery) {
+        if (!previousNotification) continue;
+
+        queryClient.setQueryData<NotificationListResponse | undefined>(queryKey, (current) => {
+          if (!current) {
+            return current;
+          }
+
+          return {
+            ...current,
+            notifications: current.notifications.map((notification) =>
+              notification.id === previousNotification.id ? previousNotification : notification,
+            ),
+          };
+        });
       }
 
-      queryClient.setQueryData(QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT, context.previousUnread);
+      if (context.unreadDecremented) {
+        queryClient.setQueryData<UnreadNotificationCountResponse>(
+          QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT,
+          (current) => {
+            if (!current) {
+              return current;
+            }
+
+            return {
+              unreadCount: current.unreadCount + 1,
+            };
+          },
+        );
+      }
     },
     onSuccess: (data) => {
       const updated = data.notification;
