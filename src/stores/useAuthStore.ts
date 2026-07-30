@@ -4,8 +4,15 @@ import { create } from "zustand";
 
 import { logout as logoutApi, refreshSession } from "@/lib/api/auth";
 import type { AuthUser } from "@/lib/api/auth";
-import { getCustomerProfileMe, toAuthUserFromCustomerProfile } from "@/lib/api/profile";
+import {
+  getCustomerProfileMe,
+  getMoverProfileMe,
+  toAuthUserFromCustomerProfile,
+  toAuthUserFromMoverProfile,
+} from "@/lib/api/profile";
+import { getAccessTokenRole } from "@/lib/auth/accessTokenPayload";
 import { clearNickname, loadNickname, saveNickname } from "@/lib/auth/nickname";
+import { clearRole, loadRole, saveRole } from "@/lib/auth/role";
 import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
 import { ApiError } from "@/types/api";
 
@@ -49,6 +56,7 @@ const setAuthenticatedUser = (
   isCheckingAuth = false,
 ) => {
   saveNickname(user.name);
+  saveRole(user.role);
   set({
     user,
     displayName: user.name,
@@ -56,6 +64,23 @@ const setAuthenticatedUser = (
     isCheckingAuth,
     hasHydrated: true,
   });
+};
+
+const resolveAuthUser = async (): Promise<AuthUser> => {
+  const accessToken = getAccessToken();
+  if (!accessToken) {
+    throw new ApiError("인증 정보가 없습니다.", 401);
+  }
+
+  const role = getAccessTokenRole(accessToken) ?? loadRole();
+
+  if (role === "MOVER") {
+    const profile = await getMoverProfileMe();
+    return toAuthUserFromMoverProfile(profile);
+  }
+
+  const profile = await getCustomerProfileMe();
+  return toAuthUserFromCustomerProfile(profile);
 };
 
 // 세션 세대 관리
@@ -90,6 +115,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     curSessionGeneration++;
     clearAuthTokens();
     clearNickname();
+    clearRole();
     set({ ...UNAUTHENTICATED_STATE });
   },
 
@@ -119,8 +145,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           await refreshSession({ notifyOnFailure: false });
         }
 
-        const profile = await getCustomerProfileMe();
-        const me = toAuthUserFromCustomerProfile(profile);
+        const me = await resolveAuthUser();
 
         // 새 세션 생성 중 다른 세션 생성 요청 시 취소
         if (startSessionGeneration !== curSessionGeneration) {
@@ -145,9 +170,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const displayName = loadNickname();
         const status = error instanceof ApiError ? error.status : undefined;
 
-        // 인증 만료 → 토큰·닉네임 정리 후 비로그인
-        if (status === 401) {
-          get().clearSession(); // clearAuthTokens + clearNickname + 비로그인 상태
+        // 인증 만료·역할 불일치 → 토큰·닉네임·role 정리 후 비로그인
+        if (status === 401 || status === 403) {
+          get().clearSession();
           set({ isCheckingAuth: false });
           return;
         }
@@ -178,7 +203,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await logoutApi(logoutGeneration);
     } finally {
-      if (logoutGeneration !== curSessionGeneration) {
+      if (logoutGeneration === curSessionGeneration) {
         get().clearSession();
       }
     }

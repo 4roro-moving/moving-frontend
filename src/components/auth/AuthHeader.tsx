@@ -2,14 +2,20 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Text, getTextVariantClass } from "@/components/common/Text";
+import type { AuthAudience } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 
+interface AuthHeaderProps {
+  audience?: AuthAudience;
+}
+
 /**
- * 로그인·회원가입 공통 헤더 (로고 + 기사님 전용 안내)
- * 사용자, 기사님 구분 추가할 예정
+ * 로그인·회원가입 공통 헤더 (로고 + 역할 전환 안내)
  */
-const AuthHeader = () => {
+const AuthHeader = ({ audience = "customer" }: AuthHeaderProps) => {
+  const isMoverAudience = audience === "mover";
+
   return (
     <header className="flex w-full flex-col items-center gap-0 md:gap-8">
       <div className="flex h-104 w-full items-center justify-center py-20 md:h-auto">
@@ -31,13 +37,13 @@ const AuthHeader = () => {
           variant={{ base: "xs-regular", md: "xl-regular" }}
           className="text-text-description"
         >
-          기사님이신가요?
+          {isMoverAudience ? "일반 유저라면?" : "기사님이신가요?"}
         </Text>
         <Link
-          href={APP_ROUTES.MOVER_LOGIN}
+          href={isMoverAudience ? APP_ROUTES.LOGIN : APP_ROUTES.MOVER_LOGIN}
           className={cn(getTextVariantClass({ base: "link-xs", md: "link-xl" }), "text-text-brand")}
         >
-          기사님 전용 페이지
+          {isMoverAudience ? "일반 유저 전용 페이지" : "기사님 전용 페이지"}
         </Link>
       </p>
     </header>

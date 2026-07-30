@@ -4,16 +4,16 @@ import AuthLayout from "@/components/auth/AuthLayout";
 import SignUpForm from "@/components/auth/SignUpForm";
 
 export const metadata: Metadata = {
-  title: "회원가입 | 무빙",
-  description: "무빙 고객 회원가입",
+  title: "기사님 회원가입 | 무빙",
+  description: "무빙 기사님 회원가입",
 };
 
-const SignUpPage = () => {
+const MoverSignUpPage = () => {
   return (
     <AuthLayout>
-      <SignUpForm audience="customer" />
+      <SignUpForm audience="mover" />
     </AuthLayout>
   );
 };
 
-export default SignUpPage;
+export default MoverSignUpPage;

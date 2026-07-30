@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { NICKNAME_STORAGE_KEY } from "@/lib/auth/nickname";
+import { ROLE_STORAGE_KEY } from "@/lib/auth/role";
 import { REFRESH_TOKEN_COOKIE_BACKEND_PATH, REFRESH_TOKEN_COOKIE_NAME } from "@/lib/auth/token";
 import {
   buildBackendHeaders,
@@ -8,12 +9,12 @@ import {
   getBackendApiBaseUrl,
 } from "@/lib/server/forwardBackendResponse";
 
-const ALLOWED_PATHS = new Set(["login", "refresh", "logout", "signup/customer"]);
-const BODY_PATHS = new Set(["login", "signup/customer"]);
+const ALLOWED_PATHS = new Set(["login", "refresh", "logout", "signup/customer", "signup/mover"]);
+const BODY_PATHS = new Set(["login", "signup/customer", "signup/mover"]);
 
 /**
  * Auth BFF — 브라우저 same-origin 요청을 백엔드로 프록시하고 Set-Cookie를 재부착합니다.
- * 예: POST /api/auth/login, /api/auth/signup/customer
+ * 예: POST /api/auth/login, /api/auth/signup/customer, /api/auth/signup/mover
  */
 export const POST = async (request: Request, context: { params: Promise<{ path: string[] }> }) => {
   const { path } = await context.params;
@@ -50,6 +51,10 @@ export const POST = async (request: Request, context: { params: Promise<{ path: 
         maxAge: 0,
       });
       res.cookies.set(NICKNAME_STORAGE_KEY, "", {
+        path: "/",
+        maxAge: 0,
+      });
+      res.cookies.set(ROLE_STORAGE_KEY, "", {
         path: "/",
         maxAge: 0,
       });

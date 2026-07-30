@@ -14,15 +14,22 @@ import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
 import { useSignUpMutation } from "@/hooks/auth/useSignUpMutation";
+import { useSignUpMoverMutation } from "@/hooks/auth/useSignUpMoverMutation";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { getPostAuthRedirectPath } from "@/lib/auth/redirect";
+import { getPostAuthRedirectPath, type AuthAudience } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { signUpSchema, type SignUpFormValues } from "@/lib/schemas/signUpSchema";
 import { cn } from "@/lib/utils/cn";
 
-const SignUpForm = () => {
+interface SignUpFormProps {
+  audience?: AuthAudience;
+}
+
+const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
   const router = useRouter();
-  const { mutateAsync: signUp, isPending } = useSignUpMutation();
+  const customerSignUp = useSignUpMutation();
+  const moverSignUp = useSignUpMoverMutation();
+  const { mutateAsync: signUp, isPending } = audience === "mover" ? moverSignUp : customerSignUp;
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -41,6 +48,9 @@ const SignUpForm = () => {
     },
   });
 
+  const loginHref = audience === "mover" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
+  const fallbackPath = audience === "mover" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.PROFILE;
+
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
 
@@ -58,15 +68,16 @@ const SignUpForm = () => {
 
     router.replace(
       await getPostAuthRedirectPath({
+        audience,
         returnPath: null,
-        fallbackPath: APP_ROUTES.PROFILE,
+        fallbackPath,
       }),
     );
   });
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
-      <AuthHeader />
+      <AuthHeader audience={audience} />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
         <form className="flex w-full flex-col gap-32 md:gap-56" onSubmit={onSubmit} noValidate>
@@ -159,7 +170,7 @@ const SignUpForm = () => {
             이미 무빙 회원이신가요?
           </Text>
           <Link
-            href={APP_ROUTES.LOGIN}
+            href={loginHref}
             className={cn(
               getTextVariantClass({ base: "link-xs", md: "link-xl" }),
               "text-text-brand",

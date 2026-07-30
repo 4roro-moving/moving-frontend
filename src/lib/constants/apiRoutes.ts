@@ -14,6 +14,8 @@ export const API_ROUTES = {
     ROOT: "/profiles",
     CUSTOMER_STATUS: "/profiles/customer/status",
     CUSTOMER_ME: "/profiles/customer/me",
+    MOVER_STATUS: "/profiles/mover/status",
+    MOVER_ME: "/profiles/mover/me",
   },
   MOVERS: {
     ROOT: "/movers",

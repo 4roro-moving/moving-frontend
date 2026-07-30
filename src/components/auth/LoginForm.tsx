@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import AuthHeader from "@/components/auth/AuthHeader";
@@ -15,18 +15,23 @@ import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
 import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { getLoginRedirectParam, getPostAuthRedirectPath } from "@/lib/auth/redirect";
+import {
+  getAuthAudienceFromRole,
+  getLoginRedirectParam,
+  getPostAuthRedirectPath,
+  type AuthAudience,
+} from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/loginSchema";
 import { cn } from "@/lib/utils/cn";
-import { useAuthStore } from "@/stores/useAuthStore";
 
-const LoginForm = () => {
+interface LoginFormProps {
+  audience?: AuthAudience;
+}
+
+const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const router = useRouter();
   const { mutateAsync: login, isPending } = useLoginMutation();
-  const isLogin = useAuthStore((state) => state.isAuthenticated);
-  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
-  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -42,51 +47,29 @@ const LoginForm = () => {
     },
   });
 
-  useEffect(() => {
-    if (!hasHydrated || isCheckingAuth || !isLogin || isSubmitting || isPending) return;
-
-    let cancelled = false;
-
-    // 로그인 성공 시 리다이렉트
-    const redirectAuthenticatedUser = async () => {
-      const nextPath = await getPostAuthRedirectPath({
-        returnPath: getLoginRedirectParam(),
-        fallbackPath: APP_ROUTES.MOVERS.ROOT,
-      });
-
-      if (cancelled) return;
-
-      router.replace(nextPath);
-    };
-
-    void redirectAuthenticatedUser();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [hasHydrated, isLogin, isCheckingAuth, isSubmitting, isPending, router]);
+  const signUpHref = audience === "mover" ? APP_ROUTES.MOVER_SIGN_UP : APP_ROUTES.SIGN_UP;
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
 
     try {
-      await login(values);
+      const result = await login(values);
+      router.replace(
+        await getPostAuthRedirectPath({
+          audience: getAuthAudienceFromRole(result.user.role),
+          returnPath: getLoginRedirectParam(),
+          fallbackPath:
+            result.user.role === "MOVER" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.PROFILE,
+        }),
+      );
     } catch (error) {
       setSubmitError(getApiErrorMessage(error));
-      return;
     }
-
-    router.replace(
-      await getPostAuthRedirectPath({
-        returnPath: getLoginRedirectParam(),
-        fallbackPath: APP_ROUTES.PROFILE,
-      }),
-    );
   });
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
-      <AuthHeader />
+      <AuthHeader audience={audience} />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
         <form className="flex w-full flex-col gap-32 md:gap-56" onSubmit={onSubmit} noValidate>
@@ -141,7 +124,7 @@ const LoginForm = () => {
             아직 무빙 회원이 아니신가요?
           </Text>
           <Link
-            href={APP_ROUTES.SIGN_UP}
+            href={signUpHref}
             className={cn(
               getTextVariantClass({ base: "link-xs", md: "link-xl" }),
               "text-text-brand",

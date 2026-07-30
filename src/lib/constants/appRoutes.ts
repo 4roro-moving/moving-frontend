@@ -9,8 +9,12 @@ export const APP_ROUTES = {
   MOVER_LOGIN: "/mover/login",
   /** 고객 이메일 회원가입 */
   SIGN_UP: "/signup",
+  /** 기사님 이메일 회원가입 */
+  MOVER_SIGN_UP: "/mover/signup",
   /** 고객 프로필 등록 */
   PROFILE: "/profile",
+  /** 기사님 프로필 등록 */
+  MOVER_PROFILE: "/mover/profile",
   /** 견적 요청 */
   ESTIMATE_REQUEST: "/estimate-request",
   /** 프로필 수정 — 추후 페이지 연동 */
