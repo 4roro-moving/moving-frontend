@@ -5,7 +5,16 @@
  */
 export const APP_ROUTES = {
   LOGIN: "/login",
-  DEV_LOGIN: "/dev-login",
+  /** 기사님(mover) 전용 로그인 */
+  MOVER_LOGIN: "/mover/login",
+  /** 고객 이메일 회원가입 */
+  SIGN_UP: "/signup",
+  /** 고객 프로필 등록 */
+  PROFILE: "/profile",
+  /** 견적 요청 */
+  ESTIMATE_REQUEST: "/estimate-request",
+  /** 프로필 수정 — 추후 페이지 연동 */
+  PROFILE_EDIT: "/profile/edit",
   // 2026.07.27 정슬기 - [추가] 기사님 찾기·상세 페이지 경로
   MOVERS: {
     ROOT: "/movers",

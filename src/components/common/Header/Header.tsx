@@ -2,40 +2,79 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import NotificationTrigger from "@/components/common/Header/NotificationTrigger";
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { getLoginRedirectPath, hasAuthSession, subscribeAuthSession } from "@/lib/auth/session";
+import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
+import { useAuthStore } from "@/stores/useAuthStore";
 
-const LOGGED_OUT_LINKS = [{ label: "기사님 찾기", href: "/movers" }];
+const LOGGED_OUT_LINKS = [{ label: "기사님 찾기", href: APP_ROUTES.MOVERS.ROOT }];
 
 const LOGGED_IN_LINKS = [
-  { label: "견적 요청", href: "/estimate-request" },
-  { label: "기사님 찾기", href: "/movers" },
+  { label: "견적 요청", href: APP_ROUTES.ESTIMATE_REQUEST },
+  { label: "기사님 찾기", href: APP_ROUTES.MOVERS.ROOT },
   { label: "내 견적 관리", href: "/estimates" },
 ];
 
-const PROFILE_MENU_ITEMS = [
-  { label: "작성 가능한 리뷰", href: APP_ROUTES.REVIEWS.WRITABLE },
-  { label: "내가 작성한 리뷰", href: APP_ROUTES.REVIEWS.ME },
-] as const;
+export interface HeaderProps {
+  /** Server에서 refresh 쿠키로 전달. hydrate 전 깜빡임 방지용 */
+  isLogin?: boolean;
+  /** Server에서 nickname 쿠키로 전달. hydrate 전 이름 표시용 */
+  initialNickname?: string | null;
+}
 
-const Header = () => {
+type ProfileMenuItem =
+  | { type: "link"; label: string; href: string }
+  | { type: "action"; label: string; action: "logout" };
+
+const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
+  { type: "link", label: "작성 가능한 리뷰", href: APP_ROUTES.REVIEWS.WRITABLE },
+  { type: "link", label: "내가 작성한 리뷰", href: APP_ROUTES.REVIEWS.ME },
+  { type: "action", label: "로그아웃", action: "logout" },
+];
+
+const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps) => {
   const pathname = usePathname();
-  const isLogin = useSyncExternalStore(subscribeAuthSession, hasAuthSession, () => false);
+  const router = useRouter();
+
+  const user = useAuthStore((state) => state.user);
+  const displayName = useAuthStore((state) => state.displayName);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const logout = useAuthStore((state) => state.logout);
+
+  // 경로별로 열린 메뉴를 추적해 pathname 변경 시 별도 setState 없이 자동으로 닫힘
   const [openMenuPath, setOpenMenuPath] = useState<string | null>(null);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const itemRefs = useRef<Array<HTMLAnchorElement | null>>([]);
+  const itemRefs = useRef<Array<HTMLAnchorElement | HTMLButtonElement | null>>([]);
   const profileMenuRef = useClickOutside<HTMLDivElement>(() => setOpenMenuPath(null));
 
   const isProfileMenuOpen = openMenuPath === pathname;
+  // hydrate 전·checkAuth 중: SSR refresh 쿠키 힌트 유지 (Access 메모리 공백 깜빡임 방지)
+  // checkAuth 완료 후: 실제 세션(access) 기준
+  const isLogin = !hasHydrated || isCheckingAuth ? Boolean(initialIsLogin) : isAuthenticated;
   const navLinks = isLogin ? LOGGED_IN_LINKS : LOGGED_OUT_LINKS;
+  // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
+  const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;
+  const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
+
+  const handleLogout = async () => {
+    setOpenMenuPath(null);
+
+    try {
+      await logout();
+      router.replace(APP_ROUTES.LOGIN);
+    } catch {
+      router.replace(APP_ROUTES.LOGIN);
+    }
+  };
 
   const closeMenu = useCallback(() => {
     setOpenMenuPath(null);
@@ -72,7 +111,9 @@ const Header = () => {
       }
 
       event.preventDefault();
-      const items = itemRefs.current.filter((item): item is HTMLAnchorElement => item !== null);
+      const items = itemRefs.current.filter(
+        (item): item is HTMLAnchorElement | HTMLButtonElement => item !== null,
+      );
       if (items.length === 0) return;
 
       const activeIndex = items.findIndex((item) => item === document.activeElement);
@@ -138,7 +179,15 @@ const Header = () => {
           </nav>
         </div>
 
-        {isLogin ? (
+        {showAuthSkeleton ? (
+          <div className="flex items-center gap-20" aria-hidden>
+            <div className="bg-background-subtle size-24 animate-pulse rounded-full" />
+            <div className="flex items-center gap-20">
+              <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
+              <div className="bg-background-subtle rounded-4 h-20 w-64 animate-pulse" />
+            </div>
+          </div>
+        ) : isLogin ? (
           <div className="flex items-center gap-20">
             <NotificationTrigger />
 
@@ -162,7 +211,7 @@ const Header = () => {
               >
                 <Image src="/icons/profile-default.svg" alt="" width={36} height={36} />
                 <Text as="span" variant="md-medium" className="text-text-primary">
-                  닉네임
+                  {nickname}
                 </Text>
               </button>
 
@@ -174,6 +223,26 @@ const Header = () => {
                   className="border-border-subtle bg-background-surface shadow-estimate-card rounded-12 absolute top-[calc(100%+8px)] right-0 z-50 flex min-w-[200px] flex-col overflow-hidden border py-8"
                 >
                   {PROFILE_MENU_ITEMS.map((item, index) => {
+                    if (item.type === "action") {
+                      return (
+                        <button
+                          key={item.action}
+                          ref={(node) => {
+                            itemRefs.current[index] = node;
+                          }}
+                          tabIndex={-1}
+                          type="button"
+                          role="menuitem"
+                          className="focus-visible:bg-background-hover text-text-muted hover:text-text-secondary border-border-subtle border-t px-16 py-12 text-center transition-colors focus-visible:outline-none"
+                          onClick={handleLogout}
+                        >
+                          <Text as="span" variant="md-medium">
+                            {item.label}
+                          </Text>
+                        </button>
+                      );
+                    }
+
                     const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                     return (
