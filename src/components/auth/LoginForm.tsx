@@ -25,14 +25,23 @@ import {
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/loginSchema";
 import { cn } from "@/lib/utils/cn";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 interface LoginFormProps {
   audience?: AuthAudience;
 }
 
+const getAudienceMismatchMessage = (pageAudience: AuthAudience): string => {
+  return pageAudience === "customer"
+    ? "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요."
+    : "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
+};
+
 const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const router = useRouter();
   const { mutateAsync: login, isPending } = useLoginMutation();
+  const establishSession = useAuthStore((state) => state.establishSession);
+  const logout = useAuthStore((state) => state.logout);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -55,9 +64,20 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
 
     try {
       const result = await login(values);
+      const resultAudience = getAuthAudienceFromRole(result.user.role);
+
+      // audience 불일치: establishSession 전에 롤백 (GuestOnly 홈 이동 방지)
+      if (resultAudience !== audience) {
+        await logout();
+        setSubmitError(getAudienceMismatchMessage(audience));
+        return;
+      }
+
+      establishSession(result.user);
+
       router.replace(
         await getPostAuthRedirectPath({
-          audience: getAuthAudienceFromRole(result.user.role),
+          audience: resultAudience,
           returnPath: getLoginRedirectParam(),
           fallbackPath: getRoleHomePath(result.user.role),
         }),

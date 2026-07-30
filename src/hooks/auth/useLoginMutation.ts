@@ -1,17 +1,12 @@
 import { login, type LoginInput, type LoginResult } from "@/lib/api/auth";
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
-import { useAuthStore } from "@/stores/useAuthStore";
 
 /**
- * 고객 로그인 — fetchInstance(BFF) + 성공 시 store 세션 반영
+ * 로그인 — fetchInstance(BFF).
+ * 세션 반영은 audience 검증 후 LoginForm에서 establishSession 호출.
  */
 export const useLoginMutation = () => {
-  const establishSession = useAuthStore((state) => state.establishSession);
-
   return useApiMutation<LoginResult, LoginInput>({
     mutationFn: login,
-    onSuccess: (data) => {
-      establishSession(data.user);
-    },
   });
 };
