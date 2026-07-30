@@ -13,10 +13,11 @@ import {
 } from "@/lib/api/estimateRequest";
 import { getApiError } from "@/lib/api/getApiError";
 import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
-import { MOVE_TYPE_CARDS, type MoveTypeCardInfo } from "@/lib/constants/moveType";
+import { MOVE_TYPE_CARDS } from "@/lib/constants/moveType";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
+import type { MoveType } from "@/types/move";
 
 import ActiveEstimateBlocked from "./ActiveEstimateBlocked";
 import AddressSelectModal, { type AddressItem } from "./AddressSelectModal";
@@ -37,7 +38,6 @@ const MOBILE_STEP_TITLES = {
   3: "이사 지역을 선택해주세요",
 } as const;
 
-type MoveTypeId = MoveTypeCardInfo["id"];
 type RegionKind = "출발지" | "도착지";
 type MobileStep = 1 | 2 | 3;
 
@@ -132,7 +132,7 @@ export default function EstimateRequestForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [mobileStep, setMobileStep] = useState<MobileStep>(1);
-  const [selectedType, setSelectedType] = useState<MoveTypeId | null>(null);
+  const [selectedType, setSelectedType] = useState<MoveType | null>(null);
   const [moveDate, setMoveDate] = useState<Date>(() => new Date());
   const [fromAddress, setFromAddress] = useState<AddressItem | null>(null);
   const [toAddress, setToAddress] = useState<AddressItem | null>(null);
@@ -218,7 +218,7 @@ export default function EstimateRequestForm() {
     }
 
     const payload = buildCreateEstimateRequestPayload({
-      moveTypeId: selectedType,
+      moveType: selectedType,
       moveDate,
       from: fromAddress,
       to: toAddress,
