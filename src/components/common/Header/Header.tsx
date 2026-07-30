@@ -25,7 +25,10 @@ const CUSTOMER_LOGGED_IN_LINKS = [
   { label: "내 견적 관리", href: "/estimates" },
 ];
 
-const MOVER_LOGGED_IN_LINKS = [{ label: "프로필", href: APP_ROUTES.MOVER_PROFILE }];
+const MOVER_LOGGED_IN_LINKS = [
+  { label: "받은 요청", href: APP_ROUTES.MOVER_PROFILE },
+  { label: "내 견적 관리", href: APP_ROUTES.MOVER_PROFILE },
+];
 
 export interface HeaderProps {
   /** Server에서 refresh 쿠키로 전달. hydrate 전 깜빡임 방지용 */
@@ -43,6 +46,7 @@ type ProfileMenuItem =
 const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   { type: "link", label: "작성 가능한 리뷰", href: APP_ROUTES.REVIEWS.WRITABLE },
   { type: "link", label: "내가 작성한 리뷰", href: APP_ROUTES.REVIEWS.ME },
+  { type: "link", label: "프로필", href: APP_ROUTES.PROFILE },
   { type: "action", label: "로그아웃", action: "logout" },
 ];
 
