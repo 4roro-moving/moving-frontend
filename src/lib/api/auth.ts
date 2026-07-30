@@ -78,10 +78,6 @@ export const refreshSession = async (options?: EnsureAccessTokenOptions): Promis
   await ensureAccessTokenRefreshed(options);
 };
 
-export const logout = async (): Promise<void> => {
-  try {
-    await fetchInstance.post(API_ROUTES.AUTH.LOGOUT, undefined, authBffOptions);
-  } finally {
-    clearAuthTokens();
-  }
+export const logout = async (sessionGeneration: number): Promise<void> => {
+  await fetchInstance.post(API_ROUTES.AUTH.LOGOUT, undefined, authBffOptions);
 };

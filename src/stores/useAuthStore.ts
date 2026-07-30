@@ -32,6 +32,15 @@ interface AuthState {
   markUnauthenticated: () => void;
 }
 
+// 비로그인 상태
+const UNAUTHENTICATED_STATE = {
+  user: null,
+  displayName: null,
+  isAuthenticated: false,
+  isCheckingAuth: false,
+  hasHydrated: true,
+} as const satisfies Partial<AuthState>;
+
 let checkAuthPromise: Promise<void> | null = null;
 
 const setAuthenticatedUser = (
@@ -49,7 +58,8 @@ const setAuthenticatedUser = (
   });
 };
 
-let curSessionGeneration = 0;
+// 세션 세대 관리
+let curSessionGeneration: number = 0;
 
 /**
  * 인증 상태 관리 스토어
@@ -80,22 +90,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     curSessionGeneration++;
     clearAuthTokens();
     clearNickname();
-    set({
-      user: null,
-      displayName: null,
-      isAuthenticated: false,
-      isCheckingAuth: false,
-      hasHydrated: true,
-    });
+    set({ ...UNAUTHENTICATED_STATE });
   },
 
   markUnauthenticated: () => {
-    set({
-      user: null,
-      isAuthenticated: false,
-      isCheckingAuth: false,
-      hasHydrated: true,
-    });
+    set({ ...UNAUTHENTICATED_STATE });
   },
 
   establishSession: (user) => {
@@ -174,9 +173,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
+    const logoutGeneration = curSessionGeneration;
+
     try {
-      await logoutApi();
+      await logoutApi(logoutGeneration);
     } finally {
+      if (logoutGeneration !== curSessionGeneration) {
+        return;
+      }
+
       get().clearSession();
     }
   },
