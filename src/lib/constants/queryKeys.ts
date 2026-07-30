@@ -59,6 +59,9 @@ export const QUERY_KEYS = {
   },
 
   NOTIFICATIONS: {
-    ALL: ["notifications"],
+    ALL: ["notifications"] as const,
+    LIST_ROOT: ["notifications", "list"] as const,
+    LIST: (page: number, limit: number) => ["notifications", "list", { page, limit }] as const,
+    UNREAD_COUNT: ["notifications", "unread-count"] as const,
   },
 } as const;

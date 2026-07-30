@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { buildNotificationMessageParts } from "@/components/common/Header/notificationMessages";
 import { Text } from "@/components/common/Text";
+import { useNotifications } from "@/hooks/useNotifications";
+import { useReadNotification } from "@/hooks/useReadNotification";
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon } from "@/icons";
-import { MOCK_NOTIFICATIONS, NOTIFICATION_PAGE_SIZE } from "@/lib/mocks/notifications.mock";
+import { NOTIFICATION_PAGE_SIZE } from "@/lib/api/notifications";
+import { formatRelativeTime } from "@/lib/utils/date";
 import type { NotificationItem } from "@/types/notification";
 import { cn } from "@/lib/utils/cn";
 
@@ -31,14 +34,13 @@ function NotificationContent({ notification }: { notification: NotificationItem 
         </Text>
       </p>
       <Text as="p" variant="md-medium" className={isRead ? "text-text-weak" : "text-text-muted"}>
-        {notification.createdAtLabel}
+        {formatRelativeTime(notification.createdAt)}
       </Text>
     </>
   );
 }
 
 interface NotificationPanelProps {
-  notifications?: NotificationItem[];
   onClose: () => void;
   className?: string;
 }
@@ -46,31 +48,62 @@ interface NotificationPanelProps {
 const pageButtonClassName =
   "flex size-32 items-center justify-center rounded-6 border border-border-dimmed bg-background-surface transition disabled:cursor-not-allowed";
 
-export default function NotificationPanel({
-  notifications = MOCK_NOTIFICATIONS,
-  onClose,
-  className,
-}: NotificationPanelProps) {
+const itemInteractiveClassName =
+  "hover:bg-background-hover focus-visible:ring-border-brand rounded-8 -mx-8 -my-4 flex w-full flex-col gap-2 px-8 py-4 text-left transition focus-visible:ring-1 focus-visible:outline-none";
+
+function getNotificationA11yLabel(notification: NotificationItem): string {
+  const message = buildNotificationMessageParts(notification.type, notification.content)
+    .map((part) => part.text)
+    .join("");
+
+  return notification.isRead ? message : `${message}, 읽지 않음`;
+}
+
+export default function NotificationPanel({ onClose, className }: NotificationPanelProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [pendingReadIds, setPendingReadIds] = useState<number[]>([]);
 
-  const isEmpty = notifications.length === 0;
-  const pageCount = Math.max(1, Math.ceil(notifications.length / NOTIFICATION_PAGE_SIZE));
+  const { data, isPending, isError, isFetching } = useNotifications({
+    page: currentPage,
+    limit: NOTIFICATION_PAGE_SIZE,
+  });
+  const { mutateAsync: markAsRead } = useReadNotification();
+
+  const notifications = data?.notifications ?? [];
+  const pageCount = Math.max(1, data?.pagination.totalPages ?? 1);
   const safePage = Math.min(currentPage, pageCount);
-  const startIndex = (safePage - 1) * NOTIFICATION_PAGE_SIZE;
-  const pageItems = notifications.slice(startIndex, startIndex + NOTIFICATION_PAGE_SIZE);
+  const isEmpty = !isPending && !isError && notifications.length === 0;
 
-  const isPrevDisabled = safePage <= 1;
-  const isNextDisabled = safePage >= pageCount;
+  const isPrevDisabled = safePage <= 1 || isFetching;
+  const isNextDisabled = safePage >= pageCount || isFetching;
 
   const goToPage = (page: number) => {
     setCurrentPage(Math.min(Math.max(page, 1), pageCount));
   };
+
+  const handleNotificationActivate = useCallback(
+    async (notification: NotificationItem) => {
+      if (notification.isRead || pendingReadIds.includes(notification.id)) {
+        return;
+      }
+
+      setPendingReadIds((prev) => [...prev, notification.id]);
+
+      try {
+        await markAsRead(notification.id);
+      } finally {
+        setPendingReadIds((prev) => prev.filter((id) => id !== notification.id));
+      }
+    },
+    [markAsRead, pendingReadIds],
+  );
 
   return (
     <div
       role="dialog"
       aria-modal="false"
       aria-labelledby="notification-panel-title"
+      aria-busy={isPending || isFetching}
       className={cn(
         "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-0 z-50 mt-8 w-[359px] border px-16 py-10",
         className,
@@ -95,7 +128,19 @@ export default function NotificationPanel({
         </button>
       </div>
 
-      {isEmpty ? (
+      {isPending ? (
+        <div className="flex h-[220px] w-full items-center justify-center px-24">
+          <Text as="p" variant="md-medium" className="text-text-subtle text-center">
+            알림을 불러오는 중이에요
+          </Text>
+        </div>
+      ) : isError ? (
+        <div className="flex h-[220px] w-full items-center justify-center px-24">
+          <Text as="p" variant="md-medium" className="text-text-subtle text-center">
+            알림을 불러오지 못했어요
+          </Text>
+        </div>
+      ) : isEmpty ? (
         <div className="flex h-[220px] w-full items-center justify-center px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
             새로운 알림이 없습니다
@@ -103,8 +148,8 @@ export default function NotificationPanel({
         </div>
       ) : (
         <ul className="flex w-full flex-col">
-          {pageItems.map((notification, index) => {
-            const isLast = index === pageItems.length - 1;
+          {notifications.map((notification, index) => {
+            const isLast = index === notifications.length - 1;
 
             return (
               <li
@@ -117,13 +162,25 @@ export default function NotificationPanel({
                 {notification.linkUrl ? (
                   <Link
                     href={notification.linkUrl}
-                    onClick={onClose}
-                    className="hover:bg-background-hover focus-visible:ring-border-brand rounded-8 -mx-8 -my-4 flex flex-col gap-2 px-8 py-4 transition focus-visible:ring-1 focus-visible:outline-none"
+                    onClick={async () => {
+                      handleNotificationActivate(notification);
+                      onClose();
+                    }}
+                    className={itemInteractiveClassName}
+                    aria-label={getNotificationA11yLabel(notification)}
                   >
                     <NotificationContent notification={notification} />
                   </Link>
                 ) : (
-                  <NotificationContent notification={notification} />
+                  <button
+                    type="button"
+                    onClick={async () => handleNotificationActivate(notification)}
+                    className={itemInteractiveClassName}
+                    aria-label={getNotificationA11yLabel(notification)}
+                    disabled={notification.isRead || pendingReadIds.includes(notification.id)}
+                  >
+                    <NotificationContent notification={notification} />
+                  </button>
                 )}
               </li>
             );
@@ -131,7 +188,7 @@ export default function NotificationPanel({
         </ul>
       )}
 
-      {!isEmpty && pageCount > 1 ? (
+      {!isPending && !isError && !isEmpty && pageCount > 1 ? (
         <nav
           aria-label="알림 페이지네이션"
           className="flex w-full items-center justify-center py-12"
@@ -167,7 +224,7 @@ export default function NotificationPanel({
                         : "text-text-weak hover:bg-background-hover cursor-pointer",
                     )}
                     onClick={() => goToPage(page)}
-                    disabled={isCurrent}
+                    disabled={isCurrent || isFetching}
                     aria-label={`${page} 페이지`}
                     aria-current={isCurrent ? "page" : undefined}
                   >
