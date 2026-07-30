@@ -7,6 +7,7 @@ import EstimateDetailActions from "@/components/estimate/detail/EstimateDetailAc
 import EstimateDetailDriverSummary from "@/components/estimate/detail/EstimateDetailDriverSummary";
 import EstimateDetailInfo from "@/components/estimate/detail/EstimateDetailInfo";
 import EstimateDetailLayout, {
+  ESTIMATE_DETAIL_LAYOUT_CLASSES,
   EstimateDetailQueryState,
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import EstimateDetailNotice from "@/components/estimate/detail/EstimateDetailNotice";
@@ -15,6 +16,7 @@ import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShar
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useEstimateDetail } from "@/hooks/useEstimateDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { cn } from "@/lib/utils/cn";
 
 interface EstimateDetailViewProps {
   estimateId: number;
@@ -57,10 +59,10 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
       <EstimateDetailLayout
         heroImageUrl={data.mover.imageUrl}
         heroName={displayName}
-        contentClassName="pt-24 pb-64 md:pt-28 md:pb-80 lg:pb-[150px]"
-        rowClassName="gap-32 md:gap-40"
-        mainClassName="gap-24 md:gap-30 lg:w-[740px]"
-        asideClassName="gap-28 md:gap-40 lg:w-[320px] lg:overflow-clip lg:pt-40"
+        contentClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName}
+        rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
+        mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
+        asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "lg:pt-40")}
         main={
           <>
             <div className="flex w-full flex-col gap-20 md:gap-26">

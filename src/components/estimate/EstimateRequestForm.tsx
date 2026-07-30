@@ -31,7 +31,6 @@ const TOAST_FAILURE_MESSAGE = "견적 요청이 실패하였습니다.";
 const TOAST_EXISTING_REQUEST_MESSAGE =
   "견적 요청에 실패하였습니다. 기존 견적이 있는지 확인해주세요.";
 const TOAST_INVALID_ZIP_MESSAGE = "우편번호 정보가 올바르지 않습니다. 주소를 다시 선택해주세요.";
-const TOAST_LOGIN_REQUIRED_MESSAGE = "견적 요청은 로그인 후 이용할 수 있어요.";
 const ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE = "고객님의 견적 정보를 불러오지 못했습니다.";
 
 const MOVE_TYPES = [
@@ -245,15 +244,11 @@ export default function EstimateRequestForm() {
       return;
     }
 
-    try {
-      if (!getAccessToken()) {
-        setToastMessage(TOAST_LOGIN_REQUIRED_MESSAGE);
-        const search = typeof window !== "undefined" ? window.location.search : "";
-        window.location.assign(buildLoginPath(`${pathname}${search}`));
-        return;
-      }
-    } catch {
-      setToastMessage(TOAST_LOGIN_REQUIRED_MESSAGE);
+    // 리디렉션 직전 토스트는 렌더 전에 페이지가 바뀌어 보이지 않음 → 안내 없이 로그인으로 이동
+    // 2026.07.30 정슬기 - [수정] 로그인 유도 토스트 제거
+    if (!getAccessToken()) {
+      const search = typeof window !== "undefined" ? window.location.search : "";
+      window.location.assign(buildLoginPath(`${pathname}${search}`));
       return;
     }
 

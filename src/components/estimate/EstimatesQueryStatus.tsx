@@ -19,7 +19,7 @@ export default function EstimatesQueryStatus({
     <div
       className="px-margin-mobile flex w-full flex-col items-center justify-center gap-16 py-64 md:px-0 md:py-80"
       role={actionLabel ? "alert" : "status"}
-      aria-live="polite"
+      {...(actionLabel ? {} : { "aria-live": "polite" as const })}
     >
       <Text as="p" variant="lg-regular" className="text-text-muted text-center">
         {message}

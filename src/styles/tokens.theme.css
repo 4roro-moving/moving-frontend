@@ -214,6 +214,8 @@
   /* 2026.07.25 정슬기 - [추가] Figma Mobile cards top offset 35 */
   --spacing-35: 2.1875rem;
   --spacing-36: 2.25rem;
+  /* 2026.07.30 정슬기 - [추가] Figma 견적 상세 Desktop bottom padding 150 */
+  --spacing-37.5: 9.375rem;
   --spacing-38: 2.375rem;
   --spacing-40: 2.5rem;
   /* 2026.07.25 정슬기 - [추가] Figma Tablet cards top offset 42 */
@@ -243,6 +245,8 @@
   --spacing-124: 7.75rem;
   --spacing-202: 12.625rem;
   --spacing-160: 10rem;
+  /* 2026.07.30 정슬기 - [추가] Figma 견적 상세 Desktop main column 740 */
+  --spacing-185: 46.25rem;
   /* 2026.07.25 정슬기 - [추가] Figma Empty illustration 200 / 280 */
   --spacing-200: 12.5rem;
   --spacing-280: 17.5rem;

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import EstimateDetailLayout, {
+  ESTIMATE_DETAIL_LAYOUT_CLASSES,
   EstimateDetailQueryState,
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import { EstimateDetailInfoSection } from "@/components/estimate/detail/EstimateDetailInfoSection";
@@ -116,10 +117,10 @@ export default function EstimateRequestDetailView({
       <EstimateDetailLayout
         title="견적 상세"
         showProfile={false}
-        contentClassName="pt-24 pb-64 md:pt-28 md:pb-80 lg:pb-[150px]"
-        rowClassName="gap-32 md:gap-40"
-        mainClassName="gap-24 md:gap-30 lg:w-[740px]"
-        asideClassName="gap-28 md:gap-40 lg:w-[320px] lg:overflow-clip"
+        contentClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName}
+        rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
+        mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
+        asideClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName}
         main={
           <>
             <EstimateRequestDetailSummary

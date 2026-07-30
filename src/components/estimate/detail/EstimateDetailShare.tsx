@@ -56,8 +56,10 @@ export default function EstimateDetailShare({
     onToastMessage,
   });
 
+  // 모바일은 시각 size-40 유지 + min 44 터치 영역 확보 (찜 버튼과 동일)
+  // 2026.07.30 정슬기 - [수정] 모바일 최소 터치 타깃 44px
   const iconButtonClassName = cn(
-    "rounded-8 md:rounded-16 flex size-40 shrink-0 items-center justify-center transition-colors md:size-64",
+    "rounded-8 md:rounded-16 flex size-40 min-h-44 min-w-44 shrink-0 items-center justify-center transition-colors md:size-64 md:min-h-64 md:min-w-64",
     "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
     "disabled:cursor-not-allowed disabled:opacity-60",
   );
