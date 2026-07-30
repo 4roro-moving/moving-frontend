@@ -47,11 +47,9 @@ export default function MoverDetailReviews({
   const shouldShowReviews = hasReviews;
   const shouldShowPagination = pageCount > 1 && hasReviews;
 
-  const isEmpty =
-    !isLoading &&
-    !isError &&
-    data !== undefined &&
-    (reviewCount === 0 || data.pagination.totalCount === 0);
+  // 목록 응답 기준으로만 empty 판정 (상세 reviewCount와 목록 캐시 시점 불일치 가능)
+  // 2026.07.30 정슬기 - [수정] reviewCount OR 조건 제거 → pagination.totalCount만 사용
+  const isEmpty = !isLoading && !isError && data !== undefined && data.pagination.totalCount === 0;
   const hasDistribution = ratingDistribution.some((item) => item.count > 0);
 
   const maxCount = Math.max(...ratingDistribution.map((item) => item.count), 1);

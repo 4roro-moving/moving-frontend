@@ -24,29 +24,19 @@ export async function fetchReviewableEstimates(): Promise<ReviewableEstimateItem
 
 /**
  * 내가 작성한 리뷰 목록 (서버 페이지네이션)
+ * 범위 밖 page 보정은 호출부에서 page 상태를 totalPages로 맞춘 뒤 해당 키로 재조회합니다.
  * // 2026.07.27 정슬기 - [추가]
  * // 2026.07.30 정슬기 - [수정] mock → fetchInstance.getPaginated 실연동
+ * // 2026.07.30 정슬기 - [수정] 서비스 내부 재요청 제거 (쿼리 키·응답 page 불일치 방지)
  */
 export async function fetchMyReviews(query: MyReviewListQuery = {}): Promise<MyReviewListResult> {
   const page = query.page ?? 1;
   const limit = query.limit ?? MY_REVIEW_PAGE_LIMIT;
   const search = new URLSearchParams({ page: String(page), limit: String(limit) });
 
-  let result = await fetchInstance.getPaginated<MyReviewItem[]>(
+  const result = await fetchInstance.getPaginated<MyReviewItem[]>(
     `${API_ROUTES.REVIEWS.ME}?${search.toString()}`,
   );
-
-  // 백엔드 totalPages=0/범위 밖 page 대응: 빈 페이지면 마지막 페이지로 재요청
-  const totalPages = Math.max(1, result.pagination.totalPages);
-  if (result.pagination.totalCount > 0 && result.data.length === 0 && page > totalPages) {
-    const retrySearch = new URLSearchParams({
-      page: String(totalPages),
-      limit: String(limit),
-    });
-    result = await fetchInstance.getPaginated<MyReviewItem[]>(
-      `${API_ROUTES.REVIEWS.ME}?${retrySearch.toString()}`,
-    );
-  }
 
   return { reviews: result.data, pagination: result.pagination };
 }

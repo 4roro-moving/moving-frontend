@@ -31,7 +31,7 @@ export default function ReviewEmptyState({ variant }: ReviewEmptyStateProps) {
           {copy.line2}
         </>
       }
-      imageAlt="빈 상태 일러스트"
+      imageAlt=""
     />
   );
 }

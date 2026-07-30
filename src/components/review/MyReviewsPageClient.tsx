@@ -11,8 +11,11 @@ import { useMyReviews } from "@/hooks/useMyReviews";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { MY_REVIEW_PAGE_LIMIT } from "@/lib/api/reviews";
 
-// 2026.07.27 정슬기 - [추가] 내가 작성한 리뷰 목록 Page Client
-// 2026.07.27 정슬기 - [수정] 페이지 범위 보정은 service/mock에서 처리, UI는 파생값만 사용
+/**
+ * 내가 작성한 리뷰 목록 Page Client
+ * // 2026.07.27 정슬기 - [추가]
+ * // 2026.07.30 정슬기 - [수정] 범위 밖 page는 상태를 totalPages로 보정 후 해당 쿼리 키로 재조회
+ */
 export default function MyReviewsPageClient() {
   const [page, setPage] = useState(1);
   const { data, isLoading, isError, error, refetch, isFetching } = useMyReviews({
@@ -24,8 +27,14 @@ export default function MyReviewsPageClient() {
   const pagination = data?.pagination;
   const totalCount = pagination?.totalCount ?? 0;
   const totalPages = Math.max(1, pagination?.totalPages ?? 1);
-  // 응답 pagination.page를 우선해 표시 (service가 보정한 페이지)
-  const currentPage = pagination?.page ?? Math.min(Math.max(1, page), totalPages);
+
+  // 범위 밖 page → 마지막 페이지로 상태 보정 (ME(last, limit) 키로 재조회)
+  // React: props/서버 응답 기반 상태 조정은 렌더 중 setState 허용
+  if (pagination && pagination.totalCount > 0 && page > totalPages) {
+    setPage(totalPages);
+  }
+
+  const currentPage = Math.min(Math.max(1, page), totalPages);
   const isEmpty = !isLoading && !isError && Boolean(pagination) && totalCount === 0;
   const hasList = !isLoading && !isError && reviews.length > 0;
 
