@@ -3,6 +3,7 @@ import type {
   MoverEstimateRequestResponse,
   RejectEstimateRequest,
   RejectEstimateResponse,
+  RejectedEstimateRequestListResponse,
   SendEstimateRequest,
   SendEstimateResponse,
 } from "@/types/moverEstimateRequest";
@@ -65,6 +66,20 @@ export async function rejectMoverEstimate(estimateRequestId: number, input: Reje
   const response = await axiosInstance.post<RejectEstimateResponse>(
     `/api${API_ROUTES.ESTIMATES.ROOT}/requests/${estimateRequestId}/reject`,
     input,
+  );
+
+  if (!response.data.success) {
+    throw new Error(response.data.error.message);
+  }
+
+  return response.data.data;
+}
+
+//기사님 반려 내역 조회
+//GET /api/estimates/rejections
+export async function getRejectedEstimateRequests() {
+  const response = await axiosInstance.get<RejectedEstimateRequestListResponse>(
+    `/api${API_ROUTES.ESTIMATES.ROOT}/rejections`,
   );
 
   if (!response.data.success) {

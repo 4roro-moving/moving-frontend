@@ -1,7 +1,8 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   getMoverEstimateRequests,
+  getRejectedEstimateRequests,
   rejectMoverEstimate,
   sendMoverEstimate,
 } from "@/lib/api/moverEstimateRequests";
@@ -18,6 +19,14 @@ export function useMoverEstimateRequests(query: MoverEstimateRequestQuery) {
     queryFn: ({ pageParam }) => getMoverEstimateRequests({ ...query, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.pagination.nextCursor ?? undefined,
+  });
+}
+
+//견적 반려 조회
+export function useRejectedEstimateRequests() {
+  return useQuery({
+    queryKey: QUERY_KEYS.ESTIMATES.REJECTED,
+    queryFn: getRejectedEstimateRequests,
   });
 }
 
@@ -54,9 +63,14 @@ export function useRejectMoverEstimate() {
     mutationFn: ({ estimateRequestId, input }: RejectMoverEstimateVariables) =>
       rejectMoverEstimate(estimateRequestId, input),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.ESTIMATES.RECEIVED,
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.ESTIMATES.RECEIVED,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.ESTIMATES.REJECTED,
+        }),
+      ]);
     },
   });
 }

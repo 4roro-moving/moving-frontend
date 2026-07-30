@@ -98,6 +98,7 @@ export default function SendEstimateModal({
           <Input
             id="estimate-price"
             inputMode="numeric"
+            size="md"
             numericOnly
             value={price ? Number(price).toLocaleString("ko-KR") : ""}
             placeholder="견적가 입력"

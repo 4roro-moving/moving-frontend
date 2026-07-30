@@ -32,6 +32,8 @@ export const QUERY_KEYS = {
     RECEIVED: ["estimates", "received"] as const,
     // 받았던/대기 상세 모두 GET /estimates/:estimateId — 동일 DETAIL 키 공유
     // 2026.07.29 정슬기 - [수정] PENDING_DETAIL 제거, DETAIL로 통합
+    //2026.07.28 윤소정 - [추가] 기사 반려 내역 조회
+    REJECTED: ["estimates", "rejected"] as const,
     DETAIL_ROOT: ["estimates", "detail"] as const,
     DETAIL: (estimateId: number) => ["estimates", "detail", estimateId] as const,
     // 2026.07.28 정슬기 - [수정] pending 목록 prefix (상세와 분리 — 찜 낙관적 업데이트 충돌 방지)
