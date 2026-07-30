@@ -49,6 +49,8 @@ const setAuthenticatedUser = (
   });
 };
 
+let curSessionGeneration = 0;
+
 /**
  * 인증 상태 관리 스토어
  */
@@ -75,6 +77,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   clearSession: () => {
+    curSessionGeneration++;
     clearAuthTokens();
     clearNickname();
     set({
@@ -105,6 +108,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     checkAuthPromise = (async () => {
+      const startSessionGeneration = curSessionGeneration;
+
       set({ isCheckingAuth: true });
 
       try {
@@ -115,8 +120,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         const profile = await getCustomerProfileMe();
         const me = toAuthUserFromCustomerProfile(profile);
+
+        // 새 세션 생성 중 다른 세션 생성 요청 시 취소
+        if (startSessionGeneration !== curSessionGeneration) {
+          return;
+        }
+
         setAuthenticatedUser(set, me, false);
       } catch (error) {
+        // 새 세션 생성 중 다른 세션 생성 요청 시 취소
+        if (startSessionGeneration !== curSessionGeneration) {
+          return;
+        }
+
         if (process.env.NODE_ENV === "development") {
           const status = error instanceof ApiError ? error.status : undefined;
           if (status !== 401) {
