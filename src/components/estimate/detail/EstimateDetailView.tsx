@@ -8,6 +8,7 @@ import EstimateDetailDriverSummary from "@/components/estimate/detail/EstimateDe
 import EstimateDetailHeader from "@/components/estimate/detail/EstimateDetailHeader";
 import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
 import EstimateDetailInfo from "@/components/estimate/detail/EstimateDetailInfo";
+import EstimateDetailNotice from "@/components/estimate/detail/EstimateDetailNotice";
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
 import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
 import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
@@ -72,6 +73,8 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
               <EstimateDetailPrice price={data.price} />
             </div>
             <EstimateDetailInfo detail={data} />
+            {/* 2026.07.29 정슬기 - [추가] 미확정 상세 Figma notice 배너 (확정 CTA는 aside 유지) */}
+            {!data.isConfirmed ? <EstimateDetailNotice /> : null}
           </div>
 
           <aside className="flex w-full min-w-0 flex-col items-start gap-28 md:gap-40 lg:w-[320px] lg:overflow-clip lg:pt-40">

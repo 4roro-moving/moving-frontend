@@ -1,7 +1,17 @@
 import { parseDateOnly } from "@/lib/utils/date";
-import type { EstimateStatus } from "@/types/estimate";
+import type { EstimateRequestStatus, EstimateStatus } from "@/types/estimate";
 import type { MoveType } from "@/types/move";
 import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
+
+/** EstimateRequestStatus → 화면 표기 (API enum만 매핑) */
+const ESTIMATE_REQUEST_STATUS_LABEL: Record<EstimateRequestStatus, string> = {
+  PENDING: "대기중",
+  OPEN: "견적 모집중",
+  CONFIRMED: "견적 확정",
+  COMPLETED: "이사 완료",
+  EXPIRED: "만료",
+  CANCELED: "취소됨",
+};
 
 const WEEKDAY_LABEL = ["일", "월", "화", "수", "목", "금", "토"] as const;
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -56,6 +66,23 @@ function isDateOnlyValue(value: string | Date): boolean {
 
 export function getMoveTypeLabel(moveType: MoveType): string {
   return MOVE_TYPE_LABEL[moveType];
+}
+
+/** // 2026.07.29 정슬기 - [추가] 보낸 견적 요청 상태 라벨 */
+export function getEstimateRequestStatusLabel(status: EstimateRequestStatus): string {
+  return ESTIMATE_REQUEST_STATUS_LABEL[status];
+}
+
+/**
+ * 보낸 견적 요청 상태 배지 텍스트 색상
+ * 이사 완료는 status-error(빨간) 계열, 그 외는 brand
+ * // 2026.07.30 정슬기 - [추가]
+ */
+export function getEstimateRequestStatusTextClassName(status: EstimateRequestStatus): string {
+  if (status === "COMPLETED") {
+    return "text-text-error";
+  }
+  return "text-text-brand";
 }
 
 export function formatRequestDateLabel(value: string | Date): string {

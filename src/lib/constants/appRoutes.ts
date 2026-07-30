@@ -30,12 +30,14 @@ export const APP_ROUTES = {
    * NOTE: 찜한 기사님 전체 목록 페이지. 경로 확정 시 현재 상수값,  `src/app/favorites/movers/` 디렉터리 수정 필요
    */
   FAVORITE_MOVERS: "/favorites/movers",
-  /** 내 견적 관리 */
-  ESTIMATES: {
-    ROOT: "/estimates",
-    /** NOTE: 내가 보낸 견적 요청 페이지. 임시 주소로 추후 수정이 필요 */
-    REQUESTS: "/estimates/requests",
-  },
-  /** 고객 일반 견적 요청 */
-  ESTIMATE_REQUEST: "/estimate-request",
+  
+  // 2026.07.30 정슬기 - [추가] 견적 요청 작성·보낸 요청 상세 페이지 경로
+ESTIMATES: {
+  ROOT: "/estimates",
+  REQUESTS: "/estimates/requests",
+  REQUEST_DETAIL: (estimateRequestId: number) =>
+    `/estimates/requests/${estimateRequestId}`,
+},
+
+ESTIMATE_REQUEST: "/estimate-request",
 } as const;

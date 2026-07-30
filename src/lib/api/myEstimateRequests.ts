@@ -1,9 +1,7 @@
-import { fetchReceivedEstimateDetail } from "@/lib/api/receivedEstimates";
 import fetchInstance from "@/lib/api/fetchInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import type {
   MyEstimateRequestListQuery,
-  PendingEstimateDetailViewModel,
   PendingEstimateSection,
   PendingEstimateSectionListResult,
 } from "@/types/estimate";
@@ -34,16 +32,4 @@ export async function fetchPendingEstimateSections(
     sections: result.data,
     pagination: result.pagination,
   };
-}
-
-/**
- * 대기 견적 상세 — 받은 견적 상세와 동일 계약 (GET /estimates/:estimateId)
- *
- * 확정은 받은 견적과 완전히 같은 API라 별도 래퍼 없이 confirmReceivedEstimate를 직접 사용합니다.
- * // 2026.07.29 정슬기 - [수정] confirmPendingEstimate·confirmPendingEstimateDetail 래퍼 제거
- */
-export async function fetchPendingEstimateDetail(
-  estimateId: number,
-): Promise<PendingEstimateDetailViewModel> {
-  return fetchReceivedEstimateDetail(estimateId);
 }
