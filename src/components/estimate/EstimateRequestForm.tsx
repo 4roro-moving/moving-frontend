@@ -1,18 +1,21 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast";
 import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
-import { login, refreshSession } from "@/lib/api/auth";
+import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import {
   buildCreateEstimateRequestPayload,
   createEstimateRequest,
 } from "@/lib/api/estimateRequest";
 import { getApiError } from "@/lib/api/getApiError";
+import { buildLoginPath } from "@/lib/auth/redirect";
 import { getAccessToken } from "@/lib/auth/token";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
@@ -23,18 +26,12 @@ import Calendar from "./Calendar";
 import DatePickerField from "./DatePickerField";
 import MoveTypeCard from "./MoveTypeCard";
 
-// 로컬 테스트용 고객 계정 (로그인 화면 연동 전 임시)
-const TEST_CUSTOMER = {
-  email: "customer1@test.com",
-  password: "Moving123!",
-} as const;
-
 const TOAST_SUCCESS_MESSAGE = "견적 요청이 완료되었습니다.";
 const TOAST_FAILURE_MESSAGE = "견적 요청이 실패하였습니다.";
 const TOAST_EXISTING_REQUEST_MESSAGE =
   "견적 요청에 실패하였습니다. 기존 견적이 있는지 확인해주세요.";
 const TOAST_INVALID_ZIP_MESSAGE = "우편번호 정보가 올바르지 않습니다. 주소를 다시 선택해주세요.";
-const TOAST_LOGIN_FAILURE_MESSAGE = "로그인에 실패하였습니다. 잠시 후 다시 시도해주세요.";
+const TOAST_LOGIN_REQUIRED_MESSAGE = "견적 요청은 로그인 후 이용할 수 있어요.";
 const ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE = "고객님의 견적 정보를 불러오지 못했습니다.";
 
 const MOVE_TYPES = [
@@ -157,14 +154,14 @@ function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
 
 export default function EstimateRequestForm() {
   const queryClient = useQueryClient();
+  const pathname = usePathname();
+  const { isPending: isAuthPending, canFetch, isAuthenticated, isMover } = useCustomerAuthReady();
   const [mobileStep, setMobileStep] = useState<MobileStep>(1);
   const [selectedType, setSelectedType] = useState<MoveTypeId | null>(null);
   const [moveDate, setMoveDate] = useState<Date>(() => new Date());
   const [fromAddress, setFromAddress] = useState<AddressItem | null>(null);
   const [toAddress, setToAddress] = useState<AddressItem | null>(null);
   const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [authReady, setAuthReady] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const canSubmit = Boolean(selectedType && fromAddress && toAddress);
@@ -175,41 +172,28 @@ export default function EstimateRequestForm() {
     setToastMessage(null);
   }, []);
 
+  // AuthProvider 세션 복구 후 비로그인·기사님은 로그인/기사 영역으로 보냄 (임시 계정 로그인 제거)
+  // 2026.07.30 정슬기 - [수정] TEST_CUSTOMER 제거, useCustomerAuthReady 연동
   useEffect(() => {
-    let cancelled = false;
+    if (isAuthPending) return;
 
-    async function ensureLogin() {
-      setIsLoggingIn(true);
-      try {
-        if (!getAccessToken()) {
-          try {
-            await refreshSession();
-          } catch {
-            await login(TEST_CUSTOMER);
-          }
-        }
-      } catch {
-        if (!cancelled) setToastMessage(TOAST_LOGIN_FAILURE_MESSAGE);
-      } finally {
-        if (!cancelled) {
-          setIsLoggingIn(false);
-          setAuthReady(true);
-        }
-      }
+    if (!isAuthenticated) {
+      const search = typeof window !== "undefined" ? window.location.search : "";
+      window.location.assign(buildLoginPath(`${pathname}${search}`));
+      return;
     }
 
-    void ensureLogin();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (isMover) {
+      window.location.assign("/estimate/received-requests");
+    }
+  }, [isAuthPending, isAuthenticated, isMover, pathname]);
 
   const {
     data: activeRequest,
     isLoading: isActiveLoading,
     isError: isActiveError,
   } = useActiveEstimateRequest({
-    enabled: authReady && Boolean(getAccessToken()),
+    enabled: canFetch,
   });
 
   // 2026.07.26 정슬기 - [수정] 생성 성공 시 내 견적 목록 캐시 무효화 (대기 목록이 stale하지 않도록)
@@ -263,18 +247,14 @@ export default function EstimateRequestForm() {
 
     try {
       if (!getAccessToken()) {
-        setIsLoggingIn(true);
-        try {
-          await refreshSession();
-        } catch {
-          await login(TEST_CUSTOMER);
-        }
+        setToastMessage(TOAST_LOGIN_REQUIRED_MESSAGE);
+        const search = typeof window !== "undefined" ? window.location.search : "";
+        window.location.assign(buildLoginPath(`${pathname}${search}`));
+        return;
       }
     } catch {
-      setToastMessage(TOAST_LOGIN_FAILURE_MESSAGE);
+      setToastMessage(TOAST_LOGIN_REQUIRED_MESSAGE);
       return;
-    } finally {
-      setIsLoggingIn(false);
     }
 
     const payload = buildCreateEstimateRequestPayload({
@@ -295,8 +275,8 @@ export default function EstimateRequestForm() {
     void handleSubmit();
   }
 
-  const isBusy = createMutation.isPending || isLoggingIn;
-  const isCheckingActive = !authReady || isActiveLoading;
+  const isBusy = createMutation.isPending;
+  const isCheckingActive = isAuthPending || !canFetch || isActiveLoading;
 
   if (isCheckingActive) {
     return (
@@ -332,7 +312,7 @@ export default function EstimateRequestForm() {
             </>
           }
           buttonLabel="받은 견적 보러가기"
-          href="/estimates/pending"
+          href={APP_ROUTES.ESTIMATES.PENDING}
         />
       </>
     );

@@ -3,6 +3,7 @@
 import { keepPreviousData } from "@tanstack/react-query";
 
 import { useApiQuery } from "@/hooks/queries/useApiQuery";
+import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import {
   fetchPendingEstimateSections,
   PENDING_ESTIMATE_PAGE_LIMIT,
@@ -15,14 +16,17 @@ import type { MyEstimateRequestListQuery } from "@/types/estimate";
  * // 2026.07.25 정슬기 - [추가]
  * // 2026.07.28 정슬기 - [수정] mock → 실 API, Query Key를 PENDING_LIST로 분리
  * // 2026.07.30 정슬기 - [수정] useMyEstimateRequests → usePendingEstimateSections
+ * // 2026.07.30 정슬기 - [수정] 인증 준비 후 조회
  */
 export function usePendingEstimateSections(query: MyEstimateRequestListQuery = {}) {
   const page = query.page ?? 1;
   const limit = query.limit ?? PENDING_ESTIMATE_PAGE_LIMIT;
+  const { canFetch } = useCustomerAuthReady();
 
   return useApiQuery({
     queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST(page, limit),
     queryFn: () => fetchPendingEstimateSections({ page, limit }),
     placeholderData: keepPreviousData,
+    enabled: canFetch,
   });
 }

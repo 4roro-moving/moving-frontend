@@ -3,6 +3,7 @@
 import { keepPreviousData } from "@tanstack/react-query";
 
 import { useApiQuery } from "@/hooks/queries/useApiQuery";
+import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import {
   ESTIMATE_REQUEST_LIST_PAGE_LIMIT,
   fetchMyEstimateRequestList,
@@ -15,12 +16,14 @@ import type { MyEstimateRequestListQuery } from "@/types/estimate";
  * pending용 usePendingEstimateSections와 분리
  * // 2026.07.29 정슬기 - [추가]
  * // 2026.07.29 정슬기 - [수정] status를 Query Key·API에 포함
+ * // 2026.07.30 정슬기 - [수정] 인증 준비 후 조회
  */
 export function useEstimateRequestList(query: MyEstimateRequestListQuery = {}) {
   const page = query.page ?? 1;
   const limit = query.limit ?? ESTIMATE_REQUEST_LIST_PAGE_LIMIT;
   const status = query.status;
   const statusKey = status ?? "all";
+  const { canFetch } = useCustomerAuthReady();
 
   return useApiQuery({
     queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST(page, limit, statusKey),
@@ -31,5 +34,6 @@ export function useEstimateRequestList(query: MyEstimateRequestListQuery = {}) {
         ...(status !== undefined ? { status } : {}),
       }),
     placeholderData: keepPreviousData,
+    enabled: canFetch,
   });
 }

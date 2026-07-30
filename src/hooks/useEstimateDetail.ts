@@ -1,6 +1,7 @@
 "use client";
 
 import { useApiQuery } from "@/hooks/queries/useApiQuery";
+import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { fetchReceivedEstimateDetail } from "@/lib/api/receivedEstimates";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 
@@ -10,11 +11,14 @@ import { QUERY_KEYS } from "@/lib/constants/queryKeys";
  * // 2026.07.28 정슬기 - [수정] useApiQuery 적용
  * // 2026.07.29 정슬기 - [수정] 확정 훅 분리, 대기 상세와 DETAIL 키 공유
  * // 2026.07.30 정슬기 - [수정] usePendingEstimateDetail 제거 후 이 훅으로 통합
+ * // 2026.07.30 정슬기 - [수정] 인증 준비 후 조회
  */
 export function useEstimateDetail(estimateId: number) {
+  const { canFetch } = useCustomerAuthReady();
+
   return useApiQuery({
     queryKey: QUERY_KEYS.ESTIMATES.DETAIL(estimateId),
     queryFn: () => fetchReceivedEstimateDetail(estimateId),
-    enabled: Number.isInteger(estimateId) && estimateId > 0,
+    enabled: canFetch && Number.isInteger(estimateId) && estimateId > 0,
   });
 }

@@ -14,6 +14,7 @@ import EstimateRequestDesignatedMovers from "@/components/estimate/requests/Esti
 import EstimateRequestDetailSummary from "@/components/estimate/requests/EstimateRequestDetailSummary";
 import { useEstimateRequestDetail } from "@/hooks/useEstimateRequestDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import {
   formatDetailDateLabel,
   formatMoveDateLabel,
@@ -94,7 +95,7 @@ export default function EstimateRequestDetailView({
         secondaryAction={
           <div className="flex w-full justify-center pb-40">
             <Link
-              href="/estimates/requests"
+              href={APP_ROUTES.ESTIMATES.REQUESTS}
               className="text-text-brand focus-visible:ring-border-brand rounded-4 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-none"
             >
               <Text as="span" variant="md-semibold" className="text-text-brand">

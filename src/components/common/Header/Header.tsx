@@ -3,13 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import NotificationPanel from "@/components/common/Header/NotificationPanel";
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { AlarmIcon } from "@/icons";
-import { getLoginRedirectPath, hasAuthSession, subscribeAuthSession } from "@/lib/auth/session";
+import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { getUnreadNotificationCount, MOCK_NOTIFICATIONS } from "@/lib/mocks/notifications.mock";
 import { cn } from "@/lib/utils/cn";
@@ -20,7 +20,7 @@ const LOGGED_OUT_LINKS = [{ label: "기사님 찾기", href: APP_ROUTES.MOVERS.R
 const LOGGED_IN_LINKS = [
   { label: "견적 요청", href: APP_ROUTES.ESTIMATE_REQUEST },
   { label: "기사님 찾기", href: APP_ROUTES.MOVERS.ROOT },
-  { label: "내 견적 관리", href: "/estimates" },
+  { label: "내 견적 관리", href: APP_ROUTES.ESTIMATES.ROOT },
 ];
 
 export interface HeaderProps {
@@ -96,7 +96,7 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
     try {
       await logout();
       router.replace(APP_ROUTES.LOGIN);
-    } catch (error) {
+    } catch {
       router.replace(APP_ROUTES.LOGIN);
     }
   };
