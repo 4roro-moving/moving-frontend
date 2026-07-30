@@ -50,6 +50,9 @@ export default function MoverDetailReviews({
   // 목록 응답 기준으로만 empty 판정 (상세 reviewCount와 목록 캐시 시점 불일치 가능)
   // 2026.07.30 정슬기 - [수정] reviewCount OR 조건 제거 → pagination.totalCount만 사용
   const isEmpty = !isLoading && !isError && data !== undefined && data.pagination.totalCount === 0;
+  // 헤더 개수도 목록 totalCount와 맞춤 (없을 때만 상세 reviewCount fallback)
+  // 2026.07.30 정슬기 - [수정]
+  const displayedReviewCount = data?.pagination.totalCount ?? reviewCount;
   const hasDistribution = ratingDistribution.some((item) => item.count > 0);
 
   const maxCount = Math.max(...ratingDistribution.map((item) => item.count), 1);
@@ -87,7 +90,7 @@ export default function MoverDetailReviews({
               <div className="flex flex-col gap-2">
                 <ReviewStarRating value={Math.round(rating)} size="sm" label="평균 별점" />
                 <Text as="p" variant="md-regular" className="text-text-muted">
-                  {reviewCount}개의 리뷰
+                  {displayedReviewCount}개의 리뷰
                 </Text>
               </div>
             </div>
