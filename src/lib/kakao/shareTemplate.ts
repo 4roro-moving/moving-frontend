@@ -45,7 +45,12 @@ export function hasKakaoJavascriptKey(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_KAKAO_JS_KEY?.trim());
 }
 
-/**프로필 이미지를 카카오 템플릿용 URL로 변환, 상대 경로는 origin이 있을 때만 절대 URL로 변환 */
+export function getKakaoJavascriptKey(): string | null {
+  const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY?.trim();
+  return key || null;
+}
+
+/** 프로필 이미지를 카카오 템플릿용 URL로 변환, 상대 경로는 origin이 있을 때만 절대 URL로 변환 */
 export function buildKakaoShareImageUrl(src: string | null | undefined, origin?: string): string {
   const trimmed = src?.trim() || DEFAULT_MOVER_PROFILE_IMAGE;
 

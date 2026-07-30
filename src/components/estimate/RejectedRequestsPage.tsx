@@ -76,15 +76,13 @@ export default function RejectedRequestsPage() {
             ) : null}
 
             {isFetchNextPageError ? (
-              <fieldset disabled={isFetchingNextPage}>
-                <ReceivedEstimatesStatus
-                  message="다음 반려 요청을 불러오지 못했어요."
-                  actionLabel={isFetchingNextPage ? "다시 시도 중..." : "다시 시도"}
-                  onAction={() => {
-                    void fetchNextPage();
-                  }}
-                />
-              </fieldset>
+              <EstimatesQueryStatus
+                message="다음 반려 요청을 불러오지 못했어요."
+                actionLabel="다시 시도"
+                onAction={() => {
+                  void fetchNextPage();
+                }}
+              />
             ) : null}
           </div>
         ) : null}

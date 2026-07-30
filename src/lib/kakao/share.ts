@@ -1,11 +1,8 @@
+import { getKakaoJavascriptKey } from "@/lib/kakao/shareTemplate";
+
 const KAKAO_SDK_SRC = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js";
 
 let sdkLoadPromise: Promise<void> | null = null;
-
-function getKakaoJavascriptKey(): string | null {
-  const key = process.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY?.trim();
-  return key ? key : null;
-}
 
 function loadKakaoSdkScript(): Promise<void> {
   if (typeof window === "undefined") {

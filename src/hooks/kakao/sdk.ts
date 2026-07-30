@@ -1,3 +1,5 @@
+import { getKakaoJavascriptKey } from "@/lib/kakao/shareTemplate";
+
 const KAKAO_SDK_SCRIPT_ID = "kakao-js-sdk";
 const KAKAO_SDK_SRC = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.5/kakao.min.js";
 const KAKAO_SDK_LOAD_ERROR = "Kakao SDK 로드에 실패했습니다.";
@@ -42,7 +44,7 @@ function loadKakaoSdkScript(): Promise<void> {
 
 /** Kakao JS SDK 로드 후 JavaScript 키로 초기화 (브라우저 전용) */
 export async function ensureKakaoSdk(): Promise<KakaoSDK> {
-  const javascriptKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY?.trim();
+  const javascriptKey = getKakaoJavascriptKey();
   if (!javascriptKey) {
     throw new Error("NEXT_PUBLIC_KAKAO_JS_KEY가 필요합니다.");
   }
