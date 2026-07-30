@@ -19,6 +19,7 @@ interface CustomerAuthGateProps {
  * - 비로그인: 로그인 페이지로 이동 (?redirect=)
  * - 기사님: 받은 견적 요청 목록으로 이동
  * // 2026.07.30 정슬기 - [추가]
+ * // 2026.07.30 정슬기 - [수정] 리다이렉트를 router.replace로 통일 (하드 새로고침 불필요)
  */
 export default function CustomerAuthGate({
   children,
@@ -26,14 +27,17 @@ export default function CustomerAuthGate({
 }: CustomerAuthGateProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isPending, isAuthenticated, isMover, canAccess } = useCustomerAuthReady();
+  const { isPending, isAuthenticated, isMover, canFetch } = useCustomerAuthReady();
 
   useEffect(() => {
     if (isPending) return;
 
+    // AuthProvider hydrate·checkAuth가 끝난 뒤의 역할/세션 분기이므로
+    // 전체 새로고침(window.location.assign) 없이 App Router soft navigate로 충분합니다.
+    // 로그인만 buildLoginPath로 ?redirect= 복귀 경로를 유지합니다.
     if (!isAuthenticated) {
       const search = typeof window !== "undefined" ? window.location.search : "";
-      window.location.assign(buildLoginPath(`${pathname}${search}`));
+      router.replace(buildLoginPath(`${pathname}${search}`));
       return;
     }
 
@@ -42,7 +46,7 @@ export default function CustomerAuthGate({
     }
   }, [isPending, isAuthenticated, isMover, pathname, router]);
 
-  if (isPending || !canAccess) {
+  if (isPending || !canFetch) {
     return <EstimatesQueryStatus message={loadingMessage} />;
   }
 

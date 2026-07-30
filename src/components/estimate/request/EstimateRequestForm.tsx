@@ -278,7 +278,9 @@ export default function EstimateRequestForm() {
               진행 중인 이사 완료 후 새로운 견적을 받아보세요.
             </>
           }
-          buttonLabel="받은 견적 보러가기"
+          // 요청 직후엔 견적 미도착이 일반적 → '받은 견적'보다 대기 탭으로 안내
+          // 2026.07.30 정슬기 - [수정] 버튼 문구·경로를 대기 중인 견적 흐름에 맞춤
+          buttonLabel="대기 중인 견적 보기"
           href={APP_ROUTES.ESTIMATES.PENDING}
         />
       </>

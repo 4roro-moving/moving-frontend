@@ -30,14 +30,13 @@ export default function EstimateRequestDesignatedMovers({
         <Text as="p" variant="md-semibold" className="text-text-brand">
           지정 견적 요청
         </Text>
-        <h2 className="text-text-primary">
-          <Text as="span" variant="lg-semibold" className="md:hidden">
-            요청한 기사님
-          </Text>
-          <Text as="span" variant="xl-semibold" className="hidden md:inline">
-            요청한 기사님
-          </Text>
-        </h2>
+        <Text
+          as="h2"
+          variant={{ base: "lg-semibold", md: "xl-semibold" }}
+          className="text-text-primary"
+        >
+          요청한 기사님
+        </Text>
       </div>
 
       <ul className="flex w-full flex-col gap-16">
