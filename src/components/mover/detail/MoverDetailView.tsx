@@ -22,7 +22,7 @@ import { useIsClient } from "@/hooks/useIsClient";
 import { useMoverDetail } from "@/hooks/useMoverDetail";
 import { hasAuthSession } from "@/lib/auth/session";
 import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
-import { toKakaoShareImageUrl } from "@/lib/kakao/shareCustom";
+import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
 import { ApiError } from "@/types/api";
 
 interface MoverDetailViewProps {

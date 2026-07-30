@@ -1,0 +1,78 @@
+import { ensureKakaoSdk } from "@/hooks/kakao/sdk";
+import {
+  buildKakaoShareImageUrl,
+  getEstimateShareTemplateId,
+  getMoverShareTemplateId,
+  hasKakaoJavascriptKey,
+  type KakaoEstimateShareTemplateArgs,
+  type KakaoMoverShareTemplateArgs,
+} from "@/lib/kakao/shareTemplate";
+
+export type { KakaoEstimateShareTemplateArgs, KakaoMoverShareTemplateArgs };
+
+interface ShareKakaoHandlers {
+  onMissingConfig?: () => void;
+  onError?: (message: string) => void;
+}
+
+async function sendKakaoCustomShare({
+  templateId,
+  templateArgs,
+  onMissingConfig,
+  onError,
+}: {
+  templateId: number | null;
+  templateArgs: KakaoMoverShareTemplateArgs | KakaoEstimateShareTemplateArgs;
+  onMissingConfig?: () => void;
+  onError?: (message: string) => void;
+}): Promise<void> {
+  if (!hasKakaoJavascriptKey() || templateId === null) {
+    onMissingConfig?.();
+    return;
+  }
+
+  try {
+    const kakao = await ensureKakaoSdk();
+    kakao.Share.sendCustom({
+      templateId,
+      templateArgs: { ...templateArgs },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "카카오톡 공유에 실패했습니다.";
+    onError?.(message);
+  }
+}
+
+/** 기사님 상세 — NEXT_PUBLIC_KAKAO_MOVER_SHARE_TEMPLATE_ID */
+export async function shareKakaoMoverCustom({
+  templateArgs,
+  onMissingConfig,
+  onError,
+}: ShareKakaoHandlers & { templateArgs: KakaoMoverShareTemplateArgs }): Promise<void> {
+  return sendKakaoCustomShare({
+    templateId: getMoverShareTemplateId(),
+    templateArgs,
+    onMissingConfig,
+    onError,
+  });
+}
+
+/** 견적 상세 — NEXT_PUBLIC_KAKAO_ESTIMATE_SHARE_TEMPLATE_ID */
+export async function shareKakaoEstimateCustom({
+  templateArgs,
+  onMissingConfig,
+  onError,
+}: ShareKakaoHandlers & { templateArgs: KakaoEstimateShareTemplateArgs }): Promise<void> {
+  return sendKakaoCustomShare({
+    templateId: getEstimateShareTemplateId(),
+    templateArgs,
+    onMissingConfig,
+    onError,
+  });
+}
+
+/** 클라이언트에서 프로필 이미지를 카카오 템플릿용 절대 URL로 변환 */
+export function toKakaoShareImageUrl(src: string | null | undefined): string {
+  const origin = typeof window !== "undefined" ? window.location.origin : undefined;
+  return buildKakaoShareImageUrl(src, origin);
+}

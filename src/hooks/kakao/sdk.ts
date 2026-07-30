@@ -35,7 +35,7 @@ function loadKakaoSdkScript(): Promise<void> {
   });
 }
 
-/** Kakao JS SDK 로드 후 JavaScript 키로 초기화 */
+/** Kakao JS SDK 로드 후 JavaScript 키로 초기화 (브라우저 전용) */
 export async function ensureKakaoSdk(): Promise<KakaoSDK> {
   const javascriptKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY?.trim();
   if (!javascriptKey) {

@@ -14,7 +14,7 @@ import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShar
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useEstimateDetail } from "@/hooks/useEstimateDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { toKakaoShareImageUrl } from "@/lib/kakao/shareCustom";
+import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
 import { buildEstimateShareLine } from "@/lib/share/copy";
 
 interface PendingEstimateDetailViewProps {

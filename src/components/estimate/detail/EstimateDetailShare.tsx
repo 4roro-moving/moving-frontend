@@ -8,7 +8,7 @@ import {
   shareKakaoMoverCustom,
   type KakaoEstimateShareTemplateArgs,
   type KakaoMoverShareTemplateArgs,
-} from "@/lib/kakao/shareCustom";
+} from "@/hooks/kakao/share";
 import type { ShareLinkAccess } from "@/lib/share/shareUrl";
 import { cn } from "@/lib/utils/cn";
 

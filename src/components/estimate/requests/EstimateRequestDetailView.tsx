@@ -16,7 +16,7 @@ import EstimateRequestDetailSummary from "@/components/estimate/requests/Estimat
 import { useEstimateRequestDetail } from "@/hooks/useEstimateRequestDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { toKakaoShareImageUrl } from "@/lib/kakao/shareCustom";
+import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
 import { buildEstimateShareLine } from "@/lib/share/copy";
 import {
   formatDetailDateLabel,
