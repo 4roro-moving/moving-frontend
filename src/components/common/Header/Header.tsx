@@ -24,8 +24,8 @@ const CUSTOMER_LOGGED_IN_LINKS = [
 ];
 
 const MOVER_LOGGED_IN_LINKS = [
-  { label: "받은 요청", href: APP_ROUTES.ESTIMATES.RECEIVED },
-  { label: "내 견적 관리", href: APP_ROUTES.MOVER_ESTIMATES.ROOT },
+  { label: "받은 요청", href: APP_ROUTES.MOVER_ESTIMATES.ROOT },
+  { label: "내 견적 관리", href: APP_ROUTES.ESTIMATES.ROOT },
 ];
 
 export interface HeaderProps {
