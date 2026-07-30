@@ -80,15 +80,114 @@ function extractSido(value: string): string {
   return value.trim().split(/\s+/)[0] ?? "";
 }
 
+export function extractZipCodeFromAddressDocument(
+  document: Pick<KakaoAddressDocument, "road_address" | "address">,
+): string {
+  return document.road_address?.zone_no || document.address?.zip_code || "";
+}
+
 export function extractZipCodeFromCoordDocument(
   document: KakaoCoord2AddressDocument | undefined,
 ): string {
   if (!document) return "";
-  return document.road_address?.zone_no || document.address?.zip_code || "";
+  return extractZipCodeFromAddressDocument(document);
 }
 
 export function toCoordinateKey(x: string, y: string): string {
   return `${x},${y}`;
+}
+
+export interface ZipCodeLookups {
+  byCoordinate: Map<string, string>;
+  byJibun: Map<string, string>;
+  byRoad: Map<string, string>;
+}
+
+export function setZipLookup(map: Map<string, string>, key: string, zipCode: string): void {
+  const normalizedKey = key.trim();
+  if (!normalizedKey || !zipCode || map.has(normalizedKey)) return;
+  map.set(normalizedKey, zipCode);
+}
+
+/** 주소 검색 문서에서 좌표/지번/도로명 → 우편번호 룩업 테이블 생성 */
+export function collectZipCodeLookups(documents: KakaoAddressDocument[]): ZipCodeLookups {
+  const lookups: ZipCodeLookups = {
+    byCoordinate: new Map(),
+    byJibun: new Map(),
+    byRoad: new Map(),
+  };
+
+  for (const document of documents) {
+    mergeAddressDocumentIntoZipLookups(lookups, document);
+  }
+
+  return lookups;
+}
+
+/** 주소 검색 문서를 룩업에 반영 (이미 있는 키는 유지) */
+export function mergeAddressDocumentIntoZipLookups(
+  lookups: ZipCodeLookups,
+  document: KakaoAddressDocument,
+): string {
+  const zipCode = extractZipCodeFromAddressDocument(document);
+  if (!zipCode) return "";
+
+  setZipLookup(lookups.byCoordinate, toCoordinateKey(document.x, document.y), zipCode);
+  setZipLookup(lookups.byJibun, document.address?.address_name ?? "", zipCode);
+  setZipLookup(lookups.byJibun, document.address_name, zipCode);
+  setZipLookup(lookups.byRoad, document.road_address?.address_name ?? "", zipCode);
+  return zipCode;
+}
+
+/** coord2address 결과도 같은 룩업에 반영 */
+export function mergeCoordDocumentIntoZipLookups(
+  lookups: ZipCodeLookups,
+  coordinateKey: string,
+  document: KakaoCoord2AddressDocument | undefined,
+): void {
+  if (!document) return;
+
+  const zipCode = extractZipCodeFromCoordDocument(document);
+  if (!zipCode) return;
+
+  setZipLookup(lookups.byCoordinate, coordinateKey, zipCode);
+  setZipLookup(lookups.byJibun, document.address?.address_name ?? "", zipCode);
+  setZipLookup(lookups.byRoad, document.road_address?.address_name ?? "", zipCode);
+}
+
+/** 키워드 문서의 우편번호 조회 우선순위: 좌표 → 지번 → 도로명 */
+export function resolveKeywordZipCode(
+  document: KakaoKeywordDocument,
+  lookups: ZipCodeLookups,
+): string {
+  const road = document.road_address_name.trim();
+  const jibun = document.address_name.trim();
+
+  return (
+    lookups.byCoordinate.get(toCoordinateKey(document.x, document.y)) ||
+    lookups.byJibun.get(jibun) ||
+    lookups.byRoad.get(road) ||
+    ""
+  );
+}
+
+/** 우편번호가 아직 없는 키워드에 대해 주소 재검색용 쿼리 목록 */
+export function collectAddressQueriesForMissingZip(
+  documents: KakaoKeywordDocument[],
+  lookups: ZipCodeLookups,
+): string[] {
+  const queries = new Set<string>();
+
+  for (const document of documents) {
+    if (resolveKeywordZipCode(document, lookups)) continue;
+
+    const road = document.road_address_name.trim();
+    const jibun = document.address_name.trim();
+    if (road) queries.add(road);
+    else if (jibun) queries.add(jibun);
+  }
+
+  return [...queries];
 }
 
 export function mapKakaoDocumentToAddressItem(
@@ -105,7 +204,7 @@ export function mapKakaoDocumentToAddressItem(
 
   return {
     id: `address-${document.x}-${document.y}-${index}`,
-    zipCode: road?.zone_no || jibun?.zip_code || "",
+    zipCode: extractZipCodeFromAddressDocument(document),
     roadAddress,
     jibunAddress: jibun?.address_name || "",
     sido: extractSido(jibun?.address_name || roadBase),

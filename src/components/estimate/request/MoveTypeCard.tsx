@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
-import { CheckIcon } from "./icons";
+import { CheckIcon } from "../icons";
 
 interface MoveTypeCardProps {
   title: string;

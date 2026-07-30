@@ -6,7 +6,7 @@ import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 import { addMonths, getMonthMatrix, isBeforeDay, isSameDay, startOfDay } from "@/lib/utils/date";
 
-import { ChevronLeftIcon, ChevronRightIcon } from "./icons";
+import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 

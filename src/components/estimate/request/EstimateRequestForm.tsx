@@ -1,21 +1,20 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast";
 import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
-import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import {
   buildCreateEstimateRequestPayload,
   createEstimateRequest,
 } from "@/lib/api/estimateRequest";
 import { getApiError } from "@/lib/api/getApiError";
-import { buildLoginPath } from "@/lib/auth/redirect";
-import { getAccessToken } from "@/lib/auth/token";
+import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { MOVE_TYPE_CARDS, type MoveTypeCardInfo } from "@/lib/constants/moveType";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
@@ -33,34 +32,13 @@ const TOAST_EXISTING_REQUEST_MESSAGE =
 const TOAST_INVALID_ZIP_MESSAGE = "우편번호 정보가 올바르지 않습니다. 주소를 다시 선택해주세요.";
 const ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE = "고객님의 견적 정보를 불러오지 못했습니다.";
 
-const MOVE_TYPES = [
-  {
-    id: "small",
-    title: "소형이사",
-    description: "원룸, 투룸, 20평대 미만",
-    imageSrc: "/images/move-type/small.svg",
-  },
-  {
-    id: "home",
-    title: "가정이사",
-    description: "쓰리룸, 20평대 이상",
-    imageSrc: "/images/move-type/home.svg",
-  },
-  {
-    id: "office",
-    title: "사무실이사",
-    description: "사무실, 상업공간",
-    imageSrc: "/images/move-type/office.svg",
-  },
-] as const;
-
 const MOBILE_STEP_TITLES = {
   1: "이사 유형을 선택해주세요",
   2: "이사 예정일을 선택해주세요",
   3: "이사 지역을 선택해주세요",
 } as const;
 
-type MoveTypeId = (typeof MOVE_TYPES)[number]["id"];
+type MoveTypeId = MoveTypeCardInfo["id"];
 type RegionKind = "출발지" | "도착지";
 type MobileStep = 1 | 2 | 3;
 
@@ -152,9 +130,8 @@ function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
 }
 
 export default function EstimateRequestForm() {
+  const router = useRouter();
   const queryClient = useQueryClient();
-  const pathname = usePathname();
-  const { isPending: isAuthPending, canFetch, isAuthenticated, isMover } = useCustomerAuthReady();
   const [mobileStep, setMobileStep] = useState<MobileStep>(1);
   const [selectedType, setSelectedType] = useState<MoveTypeId | null>(null);
   const [moveDate, setMoveDate] = useState<Date>(() => new Date());
@@ -162,6 +139,8 @@ export default function EstimateRequestForm() {
   const [toAddress, setToAddress] = useState<AddressItem | null>(null);
   const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const isLoggedIn = hasAuthSession();
 
   const canSubmit = Boolean(selectedType && fromAddress && toAddress);
   const canGoNext =
@@ -171,28 +150,19 @@ export default function EstimateRequestForm() {
     setToastMessage(null);
   }, []);
 
-  // AuthProvider 세션 복구 후 비로그인·기사님은 로그인/기사 영역으로 보냄 (임시 계정 로그인 제거)
-  // 2026.07.30 정슬기 - [수정] TEST_CUSTOMER 제거, useCustomerAuthReady 연동
+  // 2026.07.30 정슬기 - [수정] hasAuthSession + getLoginRedirectPath (dev 로그인 연동)
   useEffect(() => {
-    if (isAuthPending) return;
-
-    if (!isAuthenticated) {
-      const search = typeof window !== "undefined" ? window.location.search : "";
-      window.location.assign(buildLoginPath(`${pathname}${search}`));
-      return;
+    if (!isLoggedIn) {
+      router.replace(getLoginRedirectPath());
     }
-
-    if (isMover) {
-      window.location.assign("/estimate/received-requests");
-    }
-  }, [isAuthPending, isAuthenticated, isMover, pathname]);
+  }, [isLoggedIn, router]);
 
   const {
     data: activeRequest,
     isLoading: isActiveLoading,
     isError: isActiveError,
   } = useActiveEstimateRequest({
-    enabled: canFetch,
+    enabled: isLoggedIn,
   });
 
   // 2026.07.26 정슬기 - [수정] 생성 성공 시 내 견적 목록 캐시 무효화 (대기 목록이 stale하지 않도록)
@@ -236,19 +206,17 @@ export default function EstimateRequestForm() {
     setAddressModalKind(null);
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     if (!selectedType || !fromAddress || !toAddress) return;
+    if (createMutation.isPending) return;
 
-    if (!/^\d{5}$/.test(fromAddress.zipCode) || !/^\d{5}$/.test(toAddress.zipCode)) {
-      setToastMessage(TOAST_INVALID_ZIP_MESSAGE);
+    if (!isLoggedIn) {
+      router.replace(getLoginRedirectPath());
       return;
     }
 
-    // 리디렉션 직전 토스트는 렌더 전에 페이지가 바뀌어 보이지 않음 → 안내 없이 로그인으로 이동
-    // 2026.07.30 정슬기 - [수정] 로그인 유도 토스트 제거
-    if (!getAccessToken()) {
-      const search = typeof window !== "undefined" ? window.location.search : "";
-      window.location.assign(buildLoginPath(`${pathname}${search}`));
+    if (!/^\d{5}$/.test(fromAddress.zipCode) || !/^\d{5}$/.test(toAddress.zipCode)) {
+      setToastMessage(TOAST_INVALID_ZIP_MESSAGE);
       return;
     }
 
@@ -267,16 +235,20 @@ export default function EstimateRequestForm() {
       setMobileStep((step) => (step + 1) as MobileStep);
       return;
     }
-    void handleSubmit();
+    handleSubmit();
   }
 
   const isBusy = createMutation.isPending;
-  const isCheckingActive = isAuthPending || !canFetch || isActiveLoading;
+  const isCheckingActive = !isLoggedIn || isActiveLoading;
+
+  const toastElement = (
+    <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+  );
 
   if (isCheckingActive) {
     return (
       <div className="flex min-h-[40vh] w-full items-center justify-center">
-        <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+        {toastElement}
         <Text as="p" variant="lg-regular" className="text-text-subtle">
           불러오는 중...
         </Text>
@@ -287,7 +259,7 @@ export default function EstimateRequestForm() {
   if (isActiveError) {
     return (
       <>
-        <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+        {toastElement}
         <ActiveEstimateBlocked description={ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE} />
       </>
     );
@@ -296,7 +268,7 @@ export default function EstimateRequestForm() {
   if (activeRequest) {
     return (
       <>
-        <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+        {toastElement}
         <ActiveEstimateBlocked
           imageSrc="/images/empty/moving-car.png"
           description={
@@ -321,7 +293,7 @@ export default function EstimateRequestForm() {
         "min-h-[100dvh] md:min-h-0",
       )}
     >
-      <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+      {toastElement}
 
       {/* Desktop title */}
       <div className="hidden flex-col items-center gap-8 text-center md:flex">
@@ -355,7 +327,7 @@ export default function EstimateRequestForm() {
             이사 유형
           </Text>
           <div className="flex flex-col gap-16 md:flex-row">
-            {MOVE_TYPES.map((type) => (
+            {MOVE_TYPE_CARDS.map((type) => (
               <MoveTypeCard
                 key={type.id}
                 title={type.title}
@@ -463,9 +435,7 @@ export default function EstimateRequestForm() {
         <button
           type="button"
           disabled={!canSubmit || isBusy}
-          onClick={() => {
-            void handleSubmit();
-          }}
+          onClick={handleSubmit}
           className={cn(
             "rounded-16 flex h-64 w-[200px] items-center justify-center px-16 transition-colors",
             canSubmit && !isBusy
