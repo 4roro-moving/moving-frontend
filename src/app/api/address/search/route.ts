@@ -3,12 +3,13 @@ import { NextResponse } from "next/server";
 import {
   collectAddressQueriesForMissingZip,
   collectZipCodeLookups,
-  extractZipCodeFromAddressDocument,
   mapKakaoDocumentToAddressItem,
   mapKakaoKeywordToAddressItem,
+  mergeAddressDocumentIntoZipLookups,
   mergeAddressSearchResults,
   mergeCoordDocumentIntoZipLookups,
   resolveKeywordZipCode,
+  setZipLookup,
   toCoordinateKey,
   type KakaoAddressDocument,
   type KakaoCoord2AddressDocument,
@@ -78,6 +79,7 @@ async function enrichZipCodesByCoordinates(
 /**
  * coord2address로도 못 채운 키워드는 지번/도로명으로 주소 검색을 다시 호출해 우편번호를 보강한다.
  * (키워드 좌표가 도로명 매칭이 안 되는 지번-only 케이스 대응)
+ * 이미 확정된 룩업 값은 덮어쓰지 않고, query→zip 매핑은 첫 유효 문서만 사용한다.
  */
 async function enrichZipCodesByAddressQueries(
   queries: string[],
@@ -87,23 +89,19 @@ async function enrichZipCodesByAddressQueries(
   await Promise.allSettled(
     queries.map(async (query) => {
       const documents = await searchAddressDocuments(query, apiKey);
-      for (const document of documents) {
-        const zipCode = extractZipCodeFromAddressDocument(document);
-        if (!zipCode) continue;
+      let queryZipCode = "";
 
-        lookups.byCoordinate.set(toCoordinateKey(document.x, document.y), zipCode);
-        if (document.address?.address_name) {
-          lookups.byJibun.set(document.address.address_name.trim(), zipCode);
+      for (const document of documents) {
+        const zipCode = mergeAddressDocumentIntoZipLookups(lookups, document);
+        // analyze_type=similar 상위 결과(첫 유효 문서)만 query 문자열 매핑에 사용
+        if (!queryZipCode && zipCode) {
+          queryZipCode = zipCode;
         }
-        if (document.address_name.trim()) {
-          lookups.byJibun.set(document.address_name.trim(), zipCode);
-        }
-        if (document.road_address?.address_name) {
-          lookups.byRoad.set(document.road_address.address_name.trim(), zipCode);
-        }
-        // 재검색 쿼리 자체(지번/도로명 문자열)에도 매핑
-        lookups.byJibun.set(query, zipCode);
-        lookups.byRoad.set(query, zipCode);
+      }
+
+      if (queryZipCode) {
+        setZipLookup(lookups.byJibun, query, queryZipCode);
+        setZipLookup(lookups.byRoad, query, queryZipCode);
       }
     }),
   );

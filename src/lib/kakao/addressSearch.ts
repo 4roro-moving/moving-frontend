@@ -103,7 +103,7 @@ export interface ZipCodeLookups {
   byRoad: Map<string, string>;
 }
 
-function setZipLookup(map: Map<string, string>, key: string, zipCode: string): void {
+export function setZipLookup(map: Map<string, string>, key: string, zipCode: string): void {
   const normalizedKey = key.trim();
   if (!normalizedKey || !zipCode || map.has(normalizedKey)) return;
   map.set(normalizedKey, zipCode);
@@ -118,16 +118,25 @@ export function collectZipCodeLookups(documents: KakaoAddressDocument[]): ZipCod
   };
 
   for (const document of documents) {
-    const zipCode = extractZipCodeFromAddressDocument(document);
-    if (!zipCode) continue;
-
-    setZipLookup(lookups.byCoordinate, toCoordinateKey(document.x, document.y), zipCode);
-    setZipLookup(lookups.byJibun, document.address?.address_name ?? "", zipCode);
-    setZipLookup(lookups.byJibun, document.address_name, zipCode);
-    setZipLookup(lookups.byRoad, document.road_address?.address_name ?? "", zipCode);
+    mergeAddressDocumentIntoZipLookups(lookups, document);
   }
 
   return lookups;
+}
+
+/** 주소 검색 문서를 룩업에 반영 (이미 있는 키는 유지) */
+export function mergeAddressDocumentIntoZipLookups(
+  lookups: ZipCodeLookups,
+  document: KakaoAddressDocument,
+): string {
+  const zipCode = extractZipCodeFromAddressDocument(document);
+  if (!zipCode) return "";
+
+  setZipLookup(lookups.byCoordinate, toCoordinateKey(document.x, document.y), zipCode);
+  setZipLookup(lookups.byJibun, document.address?.address_name ?? "", zipCode);
+  setZipLookup(lookups.byJibun, document.address_name, zipCode);
+  setZipLookup(lookups.byRoad, document.road_address?.address_name ?? "", zipCode);
+  return zipCode;
 }
 
 /** coord2address 결과도 같은 룩업에 반영 */
