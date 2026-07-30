@@ -1,15 +1,21 @@
 import { NextResponse } from "next/server";
 
 import {
-  extractZipCodeFromCoordDocument,
+  collectAddressQueriesForMissingZip,
+  collectZipCodeLookups,
   mapKakaoDocumentToAddressItem,
   mapKakaoKeywordToAddressItem,
+  mergeAddressDocumentIntoZipLookups,
   mergeAddressSearchResults,
+  mergeCoordDocumentIntoZipLookups,
+  resolveKeywordZipCode,
+  setZipLookup,
   toCoordinateKey,
   type KakaoAddressDocument,
   type KakaoCoord2AddressDocument,
   type KakaoKeywordDocument,
   type KakaoSearchResponse,
+  type ZipCodeLookups,
 } from "@/lib/kakao/addressSearch";
 
 const KAKAO_ADDRESS_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/address.json";
@@ -34,31 +40,71 @@ async function fetchKakao<T>(url: URL, apiKey: string): Promise<KakaoSearchRespo
   return payload;
 }
 
-async function resolveZipCodesByCoordinates(
+async function searchAddressDocuments(
+  query: string,
+  apiKey: string,
+): Promise<KakaoAddressDocument[]> {
+  const addressUrl = new URL(KAKAO_ADDRESS_SEARCH_URL);
+  addressUrl.searchParams.set("query", query);
+  addressUrl.searchParams.set("analyze_type", "similar");
+  addressUrl.searchParams.set("size", "15");
+
+  const payload = await fetchKakao<KakaoAddressDocument>(addressUrl, apiKey);
+  return payload.documents ?? [];
+}
+
+/** coord2address로 좌표별 우편번호 보강. 지번/도로명 룩업도 함께 채운다. */
+async function enrichZipCodesByCoordinates(
   coordinates: string[],
   apiKey: string,
-  zipCodeByCoordinates: Map<string, string>,
-): Promise<Map<string, string>> {
-  const resolvedZipCodes = new Map(zipCodeByCoordinates);
-
+  lookups: ZipCodeLookups,
+): Promise<void> {
   await Promise.allSettled(
     coordinates.map(async (coordinateKey) => {
-      if (resolvedZipCodes.has(coordinateKey)) return;
+      if (lookups.byCoordinate.has(coordinateKey)) return;
 
       const [x, y] = coordinateKey.split(",");
+      if (!x || !y) return;
+
       const coordUrl = new URL(KAKAO_COORD2ADDRESS_URL);
       coordUrl.searchParams.set("x", x);
       coordUrl.searchParams.set("y", y);
 
       const payload = await fetchKakao<KakaoCoord2AddressDocument>(coordUrl, apiKey);
-      const zipCode = extractZipCodeFromCoordDocument(payload.documents?.[0]);
-      if (zipCode) {
-        resolvedZipCodes.set(coordinateKey, zipCode);
+      mergeCoordDocumentIntoZipLookups(lookups, coordinateKey, payload.documents?.[0]);
+    }),
+  );
+}
+
+/**
+ * coord2address로도 못 채운 키워드는 지번/도로명으로 주소 검색을 다시 호출해 우편번호를 보강한다.
+ * (키워드 좌표가 도로명 매칭이 안 되는 지번-only 케이스 대응)
+ * 이미 확정된 룩업 값은 덮어쓰지 않고, query→zip 매핑은 첫 유효 문서만 사용한다.
+ */
+async function enrichZipCodesByAddressQueries(
+  queries: string[],
+  apiKey: string,
+  lookups: ZipCodeLookups,
+): Promise<void> {
+  await Promise.allSettled(
+    queries.map(async (query) => {
+      const documents = await searchAddressDocuments(query, apiKey);
+      let queryZipCode = "";
+
+      for (const document of documents) {
+        const zipCode = mergeAddressDocumentIntoZipLookups(lookups, document);
+        // analyze_type=similar 상위 결과(첫 유효 문서)만 query 문자열 매핑에 사용
+        if (!queryZipCode && zipCode) {
+          queryZipCode = zipCode;
+        }
+      }
+
+      if (queryZipCode) {
+        setZipLookup(lookups.byJibun, query, queryZipCode);
+        setZipLookup(lookups.byRoad, query, queryZipCode);
       }
     }),
   );
-
-  return resolvedZipCodes;
 }
 
 export async function GET(request: Request) {
@@ -77,24 +123,19 @@ export async function GET(request: Request) {
     );
   }
 
-  const addressUrl = new URL(KAKAO_ADDRESS_SEARCH_URL);
-  addressUrl.searchParams.set("query", query);
-  addressUrl.searchParams.set("analyze_type", "similar");
-  addressUrl.searchParams.set("size", "15");
-
   const keywordUrl = new URL(KAKAO_KEYWORD_SEARCH_URL);
   keywordUrl.searchParams.set("query", query);
   keywordUrl.searchParams.set("size", "15");
 
   const [addressResult, keywordResult] = await Promise.allSettled([
-    fetchKakao<KakaoAddressDocument>(addressUrl, apiKey),
+    searchAddressDocuments(query, apiKey),
     fetchKakao<KakaoKeywordDocument>(keywordUrl, apiKey),
   ]);
 
-  const addressPayload = addressResult.status === "fulfilled" ? addressResult.value : null;
+  const addressDocuments = addressResult.status === "fulfilled" ? addressResult.value : null;
   const keywordPayload = keywordResult.status === "fulfilled" ? keywordResult.value : null;
 
-  if (!addressPayload && !keywordPayload) {
+  if (!addressDocuments && !keywordPayload) {
     const reason =
       addressResult.status === "rejected"
         ? addressResult.reason
@@ -105,32 +146,30 @@ export async function GET(request: Request) {
     return NextResponse.json({ message }, { status: 502 });
   }
 
-  const zipCodeByCoordinates = new Map<string, string>();
-  for (const document of addressPayload?.documents ?? []) {
-    const zipCode = document.road_address?.zone_no || document.address?.zip_code || "";
-    if (!zipCode) continue;
-    zipCodeByCoordinates.set(toCoordinateKey(document.x, document.y), zipCode);
-  }
-
+  const lookups = collectZipCodeLookups(addressDocuments ?? []);
   const keywordDocuments = keywordPayload?.documents ?? [];
+
   const missingCoordinateKeys = [
     ...new Set(
       keywordDocuments
         .map((document) => toCoordinateKey(document.x, document.y))
-        .filter((coordinateKey) => !zipCodeByCoordinates.has(coordinateKey)),
+        .filter((coordinateKey) => !lookups.byCoordinate.has(coordinateKey)),
     ),
   ];
 
-  const resolvedZipCodeByCoordinates =
-    missingCoordinateKeys.length > 0
-      ? await resolveZipCodesByCoordinates(missingCoordinateKeys, apiKey, zipCodeByCoordinates)
-      : zipCodeByCoordinates;
+  if (missingCoordinateKeys.length > 0) {
+    await enrichZipCodesByCoordinates(missingCoordinateKeys, apiKey, lookups);
+  }
 
-  const addressResults = (addressPayload?.documents ?? []).map(mapKakaoDocumentToAddressItem);
-  const keywordResults = keywordDocuments.map((document, index) => {
-    const zipCode = resolvedZipCodeByCoordinates.get(toCoordinateKey(document.x, document.y)) || "";
-    return mapKakaoKeywordToAddressItem(document, index, zipCode);
-  });
+  const missingAddressQueries = collectAddressQueriesForMissingZip(keywordDocuments, lookups);
+  if (missingAddressQueries.length > 0) {
+    await enrichZipCodesByAddressQueries(missingAddressQueries, apiKey, lookups);
+  }
+
+  const addressResults = (addressDocuments ?? []).map(mapKakaoDocumentToAddressItem);
+  const keywordResults = keywordDocuments.map((document, index) =>
+    mapKakaoKeywordToAddressItem(document, index, resolveKeywordZipCode(document, lookups)),
+  );
   const results = mergeAddressSearchResults(addressResults, keywordResults);
 
   return NextResponse.json({ results });

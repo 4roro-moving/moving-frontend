@@ -10,6 +10,33 @@ import { MOCK_NOTIFICATIONS, NOTIFICATION_PAGE_SIZE } from "@/lib/mocks/notifica
 import type { NotificationItem } from "@/types/notification";
 import { cn } from "@/lib/utils/cn";
 
+function NotificationContent({ notification }: { notification: NotificationItem }) {
+  const isRead = notification.isRead;
+  const messageParts = buildNotificationMessageParts(notification.type, notification.content);
+
+  return (
+    <>
+      <p className={isRead ? "text-text-weak" : "text-text-secondary"}>
+        <Text as="span" variant="lg-medium">
+          {messageParts.map((part, partIndex) => (
+            <span
+              key={`${notification.id}-${partIndex}`}
+              className={cn(
+                isRead ? "text-text-weak" : part.highlight ? "text-text-brand" : undefined,
+              )}
+            >
+              {part.text}
+            </span>
+          ))}
+        </Text>
+      </p>
+      <Text as="p" variant="md-medium" className={isRead ? "text-text-weak" : "text-text-muted"}>
+        {notification.createdAtLabel}
+      </Text>
+    </>
+  );
+}
+
 interface NotificationPanelProps {
   notifications?: NotificationItem[];
   onClose: () => void;
@@ -78,11 +105,6 @@ export default function NotificationPanel({
         <ul className="flex w-full flex-col">
           {pageItems.map((notification, index) => {
             const isLast = index === pageItems.length - 1;
-            const isRead = notification.isRead;
-            const messageParts = buildNotificationMessageParts(
-              notification.type,
-              notification.content,
-            );
 
             return (
               <li
@@ -98,60 +120,10 @@ export default function NotificationPanel({
                     onClick={onClose}
                     className="hover:bg-background-hover focus-visible:ring-border-brand rounded-8 -mx-8 -my-4 flex flex-col gap-2 px-8 py-4 transition focus-visible:ring-1 focus-visible:outline-none"
                   >
-                    <p className={isRead ? "text-text-weak" : "text-text-secondary"}>
-                      <Text as="span" variant="lg-medium">
-                        {messageParts.map((part, partIndex) => (
-                          <span
-                            key={`${notification.id}-${partIndex}`}
-                            className={cn(
-                              isRead
-                                ? "text-text-weak"
-                                : part.highlight
-                                  ? "text-text-brand"
-                                  : undefined,
-                            )}
-                          >
-                            {part.text}
-                          </span>
-                        ))}
-                      </Text>
-                    </p>
-                    <Text
-                      as="p"
-                      variant="md-medium"
-                      className={isRead ? "text-text-weak" : "text-text-muted"}
-                    >
-                      {notification.createdAtLabel}
-                    </Text>
+                    <NotificationContent notification={notification} />
                   </Link>
                 ) : (
-                  <>
-                    <p className={isRead ? "text-text-weak" : "text-text-secondary"}>
-                      <Text as="span" variant="lg-medium">
-                        {messageParts.map((part, partIndex) => (
-                          <span
-                            key={`${notification.id}-${partIndex}`}
-                            className={cn(
-                              isRead
-                                ? "text-text-weak"
-                                : part.highlight
-                                  ? "text-text-brand"
-                                  : undefined,
-                            )}
-                          >
-                            {part.text}
-                          </span>
-                        ))}
-                      </Text>
-                    </p>
-                    <Text
-                      as="p"
-                      variant="md-medium"
-                      className={isRead ? "text-text-weak" : "text-text-muted"}
-                    >
-                      {notification.createdAtLabel}
-                    </Text>
-                  </>
+                  <NotificationContent notification={notification} />
                 )}
               </li>
             );
