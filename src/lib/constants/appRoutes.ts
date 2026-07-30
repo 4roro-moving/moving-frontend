@@ -45,4 +45,8 @@ export const APP_ROUTES = {
     DETAIL: (estimateId: number) => `/estimates/${estimateId}`,
     PENDING_DETAIL: (estimateId: number) => `/estimates/pending/${estimateId}`,
   },
+  /** 기사님 내 견적 관리 (임시 추가) */
+  MOVER_ESTIMATES: {
+    ROOT: "/estimate/received-requests",
+  },
 } as const;
