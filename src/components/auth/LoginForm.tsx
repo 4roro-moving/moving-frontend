@@ -19,6 +19,7 @@ import {
   getAuthAudienceFromRole,
   getLoginRedirectParam,
   getPostAuthRedirectPath,
+  getRoleHomePath,
   type AuthAudience,
 } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
@@ -58,8 +59,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
         await getPostAuthRedirectPath({
           audience: getAuthAudienceFromRole(result.user.role),
           returnPath: getLoginRedirectParam(),
-          fallbackPath:
-            result.user.role === "MOVER" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.PROFILE,
+          fallbackPath: getRoleHomePath(result.user.role),
         }),
       );
     } catch (error) {

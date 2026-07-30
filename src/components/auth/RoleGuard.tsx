@@ -3,19 +3,14 @@
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-import { buildLoginPath, type AuthAudience } from "@/lib/auth/redirect";
+import { buildLoginPath, getRoleHomePath, type AuthAudience } from "@/lib/auth/redirect";
 import type { AuthRole } from "@/lib/auth/role";
-import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 interface RoleGuardProps {
   allowedRole: Extract<AuthRole, "CUSTOMER" | "MOVER">;
   children: ReactNode;
 }
-
-const getHomePathForRole = (role: AuthRole): string => {
-  return role === "MOVER" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.MOVERS.ROOT;
-};
 
 /**
  * 역할 전용 페이지 가드 — (protected) layout에서 사용
@@ -39,7 +34,7 @@ const RoleGuard = ({ allowedRole, children }: RoleGuardProps) => {
     }
 
     if (role && role !== allowedRole) {
-      router.replace(getHomePathForRole(role));
+      router.replace(getRoleHomePath(role));
     }
   }, [hasHydrated, isCheckingAuth, isAuthenticated, role, allowedRole, pathname, router]);
 

@@ -30,21 +30,30 @@ export const getAuthAudienceFromRole = (role: AuthRole | null | undefined): Auth
   return role === "MOVER" ? "mover" : "customer";
 };
 
+/** 역할별 홈 — 잘못된 role 접근·auth 재진입 */
+export const getRoleHomePath = (role: AuthRole | null | undefined): string => {
+  return role === "MOVER" ? APP_ROUTES.MOVER_ESTIMATES.ROOT : APP_ROUTES.MOVERS.ROOT;
+};
+
+export const getProfilePath = (audience: AuthAudience): string => {
+  return audience === "mover" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.PROFILE;
+};
+
 export const resolvePostLoginPath = (params: {
   isProfileCompleted: boolean;
   returnPath?: string | null;
   audience?: AuthAudience;
 }): string => {
   const audience = params.audience ?? "customer";
-  const incompleteProfilePath =
-    audience === "mover" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.PROFILE;
-  const defaultHomePath = audience === "mover" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.MOVERS.ROOT;
 
   if (!params.isProfileCompleted) {
-    return incompleteProfilePath;
+    return getProfilePath(audience);
   }
 
-  return getSafeReturnPath(params.returnPath) ?? defaultHomePath;
+  return (
+    getSafeReturnPath(params.returnPath) ??
+    getRoleHomePath(audience === "mover" ? "MOVER" : "CUSTOMER")
+  );
 };
 
 /** 로그인 페이지 ?redirect= 쿼리 */
@@ -54,8 +63,8 @@ export const getLoginRedirectParam = (): string | null => {
 };
 
 /**
- * 인증 성공 후 이동 경로.
- * 프로필 상태 조회 실패 시 fallbackPath 사용.
+ * login / signup 성공 후 전용.
+ * 프로필 미완료일 때만 profile, 그 외·조회 실패 시 역할 홈.
  */
 export const getPostAuthRedirectPath = async (params?: {
   audience?: AuthAudience;
@@ -64,7 +73,7 @@ export const getPostAuthRedirectPath = async (params?: {
 }): Promise<string> => {
   const audience = params?.audience ?? "customer";
   const fallbackPath =
-    params?.fallbackPath ?? (audience === "mover" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.PROFILE);
+    params?.fallbackPath ?? getRoleHomePath(audience === "mover" ? "MOVER" : "CUSTOMER");
 
   try {
     const status =
@@ -78,6 +87,11 @@ export const getPostAuthRedirectPath = async (params?: {
   } catch {
     return fallbackPath;
   }
+};
+
+/** 이미 로그인된 채 auth 페이지 재진입 — API 없이 역할 홈 */
+export const getAuthenticatedAuthPageRedirectPath = (role: AuthRole | null | undefined): string => {
+  return getRoleHomePath(role);
 };
 
 /** 토큰 만료 등으로 로그인 페이지로 보낼 때 */

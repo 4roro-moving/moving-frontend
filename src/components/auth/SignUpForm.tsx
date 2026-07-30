@@ -16,7 +16,7 @@ import { Text, getTextVariantClass } from "@/components/common/Text";
 import { useSignUpMutation } from "@/hooks/auth/useSignUpMutation";
 import { useSignUpMoverMutation } from "@/hooks/auth/useSignUpMoverMutation";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { getPostAuthRedirectPath, type AuthAudience } from "@/lib/auth/redirect";
+import { getProfilePath, type AuthAudience } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { signUpSchema, type SignUpFormValues } from "@/lib/schemas/signUpSchema";
 import { cn } from "@/lib/utils/cn";
@@ -49,7 +49,6 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
   });
 
   const loginHref = audience === "mover" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
-  const fallbackPath = audience === "mover" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.PROFILE;
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
@@ -66,13 +65,8 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
       return;
     }
 
-    router.replace(
-      await getPostAuthRedirectPath({
-        audience,
-        returnPath: null,
-        fallbackPath,
-      }),
-    );
+    // 회원가입 직후엔 프로필이 없음 → status 조회 없이 profile로 이동
+    router.replace(getProfilePath(audience));
   });
 
   return (

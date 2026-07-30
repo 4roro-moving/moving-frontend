@@ -12,6 +12,40 @@ import {
 const ALLOWED_PATHS = new Set(["login", "refresh", "logout", "signup/customer", "signup/mover"]);
 const BODY_PATHS = new Set(["login", "signup/customer", "signup/mover"]);
 
+const isProduction = process.env.NODE_ENV === "production";
+
+/** login 시 심은 쿠키와 동일한 속성으로 지워야 브라우저가 삭제합니다. */
+const clearClientAuthCookies = (res: NextResponse): void => {
+  const refreshCookieBase = {
+    httpOnly: true,
+    maxAge: 0,
+    expires: new Date(0),
+    sameSite: (isProduction ? "none" : "lax") as "none" | "lax",
+    secure: isProduction,
+  };
+
+  res.cookies.set(REFRESH_TOKEN_COOKIE_NAME, "", {
+    ...refreshCookieBase,
+    path: "/",
+  });
+  res.cookies.set(REFRESH_TOKEN_COOKIE_NAME, "", {
+    ...refreshCookieBase,
+    path: REFRESH_TOKEN_COOKIE_BACKEND_PATH,
+  });
+  res.cookies.set(NICKNAME_STORAGE_KEY, "", {
+    path: "/",
+    maxAge: 0,
+    expires: new Date(0),
+    sameSite: "lax",
+  });
+  res.cookies.set(ROLE_STORAGE_KEY, "", {
+    path: "/",
+    maxAge: 0,
+    expires: new Date(0),
+    sameSite: "lax",
+  });
+};
+
 /**
  * Auth BFF — 브라우저 same-origin 요청을 백엔드로 프록시하고 Set-Cookie를 재부착합니다.
  * 예: POST /api/auth/login, /api/auth/signup/customer, /api/auth/signup/mover
@@ -40,31 +74,21 @@ export const POST = async (request: Request, context: { params: Promise<{ path: 
     const res = await forwardBackendResponse(backendRes);
 
     if (authPath === "logout") {
-      res.cookies.set(REFRESH_TOKEN_COOKIE_NAME, "", {
-        httpOnly: true,
-        path: "/",
-        maxAge: 0,
-      });
-      res.cookies.set(REFRESH_TOKEN_COOKIE_NAME, "", {
-        httpOnly: true,
-        path: REFRESH_TOKEN_COOKIE_BACKEND_PATH,
-        maxAge: 0,
-      });
-      res.cookies.set(NICKNAME_STORAGE_KEY, "", {
-        path: "/",
-        maxAge: 0,
-      });
-      res.cookies.set(ROLE_STORAGE_KEY, "", {
-        path: "/",
-        maxAge: 0,
-      });
+      clearClientAuthCookies(res);
     }
 
     return res;
   } catch {
-    return NextResponse.json(
+    const res = NextResponse.json(
       { success: false, error: { message: "인증 요청에 실패했습니다." } },
       { status: 502 },
     );
+
+    // 백엔드 실패 시에도 클라이언트 쿠키는 정리
+    if (authPath === "logout") {
+      clearClientAuthCookies(res);
+    }
+
+    return res;
   }
 };

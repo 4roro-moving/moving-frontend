@@ -10,7 +10,8 @@ import {
   toAuthUserFromCustomerProfile,
   toAuthUserFromMoverProfile,
 } from "@/lib/api/profile";
-import { getAccessTokenRole } from "@/lib/auth/accessTokenPayload";
+import { getAccessTokenPayload, getAccessTokenRole } from "@/lib/auth/accessTokenPayload";
+import { isAuthPagePath } from "@/lib/auth/redirect";
 import { clearNickname, loadNickname, saveNickname } from "@/lib/auth/nickname";
 import { clearRole, loadRole, saveRole } from "@/lib/auth/role";
 import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
@@ -83,6 +84,26 @@ const resolveAuthUser = async (): Promise<AuthUser> => {
   return toAuthUserFromCustomerProfile(profile);
 };
 
+/** auth 페이지 재진입용 — profile/me 없이 JWT·쿠키만으로 세션 힌트 */
+const resolveAuthUserFromTokenHint = (): AuthUser | null => {
+  const accessToken = getAccessToken();
+  if (!accessToken) return null;
+
+  const payload = getAccessTokenPayload(accessToken);
+  const role = payload.role ?? loadRole();
+  if (!role) return null;
+
+  const name = loadNickname() ?? "";
+
+  return {
+    id: payload.userId ?? "",
+    email: "",
+    name,
+    phone: null,
+    role,
+  };
+};
+
 // 세션 세대 관리
 let curSessionGeneration: number = 0;
 
@@ -143,6 +164,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // Access 없음 → 선제 refresh 후 profile 1회 시도
         if (!getAccessToken()) {
           await refreshSession({ notifyOnFailure: false });
+        }
+
+        // login/signup 재진입: profile/me 생략 (GuestOnly가 역할 홈으로 보냄)
+        const onAuthPage =
+          typeof window !== "undefined" && isAuthPagePath(window.location.pathname);
+
+        if (onAuthPage) {
+          const hintedUser = resolveAuthUserFromTokenHint();
+          if (startSessionGeneration !== curSessionGeneration) {
+            return;
+          }
+
+          if (hintedUser) {
+            setAuthenticatedUser(set, hintedUser, false);
+            return;
+          }
+
+          get().markUnauthenticated();
+          return;
         }
 
         const me = await resolveAuthUser();

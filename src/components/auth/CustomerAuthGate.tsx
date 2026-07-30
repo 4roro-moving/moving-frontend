@@ -5,7 +5,7 @@ import { useEffect, type ReactNode } from "react";
 
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
-import { buildLoginPath } from "@/lib/auth/redirect";
+import { buildLoginPath, getRoleHomePath } from "@/lib/auth/redirect";
 
 interface CustomerAuthGateProps {
   children: ReactNode;
@@ -42,7 +42,7 @@ export default function CustomerAuthGate({
     }
 
     if (isMover) {
-      router.replace("/estimate/received-requests");
+      router.replace(getRoleHomePath("MOVER"));
     }
   }, [isPending, isAuthenticated, isMover, pathname, router]);
 
