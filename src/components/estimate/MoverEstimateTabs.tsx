@@ -7,8 +7,8 @@ import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
 const TABS = [
-  { href: "/estimate/received-requests", label: "보낸 견적 조회" },
-  { href: "/estimates/rejected", label: "반려 요청" },
+  { href: "/estimate/sent", label: "보낸 견적 조회" },
+  { href: "/estimate/rejected", label: "반려 요청" },
 ] as const;
 
 export default function MoverEstimateTabs() {
