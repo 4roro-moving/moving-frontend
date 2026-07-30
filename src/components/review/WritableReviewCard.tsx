@@ -6,7 +6,12 @@ import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import { ProfileDefaultIcon, StarIcon } from "@/icons";
-import { formatMoveDateLabelSafe, formatPrice, formatRating } from "@/lib/utils/estimateFormat";
+import {
+  formatMoveDateLabelSafe,
+  formatPrice,
+  formatRating,
+  getReviewMoverDisplayName,
+} from "@/lib/utils/estimateFormat";
 import type { ReviewableEstimateItem } from "@/types/review";
 
 interface WritableReviewCardProps {
@@ -16,11 +21,10 @@ interface WritableReviewCardProps {
 
 // 2026.07.27 정슬기 - [추가] 작성 가능 리뷰 카드
 // 2026.07.27 정슬기 - [수정] Mobile 세로 / Tablet 강화 / Desktop 가로 CTA 반응형
+// 2026.07.30 정슬기 - [수정] 기사님 표시명 공통 헬퍼 사용
 export default function WritableReviewCard({ item, onWriteClick }: WritableReviewCardProps) {
   const { mover, estimateRequest, price } = item;
-  // GET /reviews/reviewable 응답 mover에는 name이 없고 nickname만 존재 (null 가능)
-  const nickname = mover.nickname?.trim();
-  const moverLabel = nickname ? `${nickname} 기사님` : "기사님";
+  const moverLabel = getReviewMoverDisplayName(mover);
   const titleId = `writable-review-${item.estimateId}-title`;
   const careerLabel = mover.career == null ? "-" : `${mover.career}년`;
   const ratingValue = mover.averageRating ?? 0;

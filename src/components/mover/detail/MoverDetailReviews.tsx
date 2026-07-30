@@ -4,14 +4,15 @@ import { useState } from "react";
 
 import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
+import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { MoverDetailReviewsSkeleton } from "@/components/mover/detail/MoverDetailPageSkeleton";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { useMoverReviews } from "@/hooks/useMoverReviews";
-import { MOVER_REVIEW_PAGE_LIMIT } from "@/lib/api/movers";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { MOVER_REVIEW_PAGE_LIMIT } from "@/lib/api/movers";
 import { cn } from "@/lib/utils/cn";
 import { formatDateOnlyLabel, formatRating } from "@/lib/utils/estimateFormat";
-import type { MoverDetail, MoverDetailReview } from "@/types/moverDetail";
+import type { MoverDetail } from "@/types/moverDetail";
 import type { MoverReviewItem } from "@/types/review";
 
 interface MoverDetailReviewsProps {
@@ -21,16 +22,10 @@ interface MoverDetailReviewsProps {
   ratingDistribution: MoverDetail["ratingDistribution"];
 }
 
-function mapMoverReviewItemToDetailReview(item: MoverReviewItem): MoverDetailReview {
-  return {
-    id: String(item.id),
-    authorMasked: item.customer.displayName,
-    createdAt: formatDateOnlyLabel(item.createdAt),
-    rating: item.rating,
-    content: item.content,
-  };
-}
-
+/**
+ * 기사님 상세 — 리뷰 요약·분포·목록
+ * // 2026.07.30 정슬기 - [수정] MoverReviewItem 직접 사용, EstimatesQueryStatus·빈 상태 정리
+ */
 export default function MoverDetailReviews({
   moverId,
   rating,
@@ -42,7 +37,7 @@ export default function MoverDetailReviews({
     page: currentPage,
   });
 
-  const reviews = data?.reviews.map(mapMoverReviewItemToDetailReview) ?? [];
+  const reviews = data?.reviews ?? [];
   const pageCount = Math.max(1, data?.pagination.totalPages ?? 0);
   const hasReviews = reviews.length > 0;
 
@@ -52,10 +47,11 @@ export default function MoverDetailReviews({
   const shouldShowReviews = hasReviews;
   const shouldShowPagination = pageCount > 1 && hasReviews;
 
-  // TODO: 시드 데이터 오류로 인한 임시 조치, 시드 데이터 수정 후 삭제 예정
   const isEmpty =
-    reviewCount === 0 ||
-    (!isLoading && !isError && data !== undefined && data.pagination.totalCount === 0);
+    !isLoading &&
+    !isError &&
+    data !== undefined &&
+    (reviewCount === 0 || data.pagination.totalCount === 0);
   const hasDistribution = ratingDistribution.some((item) => item.count > 0);
 
   const maxCount = Math.max(...ratingDistribution.map((item) => item.count), 1);
@@ -91,7 +87,7 @@ export default function MoverDetailReviews({
                 {formatRating(rating)}
               </Text>
               <div className="flex flex-col gap-2">
-                <ReviewStarRating value={Math.round(rating)} size="sm" />
+                <ReviewStarRating value={Math.round(rating)} size="sm" label="평균 별점" />
                 <Text as="p" variant="md-regular" className="text-text-muted">
                   {reviewCount}개의 리뷰
                 </Text>
@@ -145,22 +141,13 @@ export default function MoverDetailReviews({
           ) : null}
 
           {shouldShowError ? (
-            <div className="flex w-full flex-col items-center gap-12 py-24 text-center">
-              <Text as="p" variant="md-regular" className="text-text-muted">
-                {getApiErrorMessage(error, "리뷰를 불러오지 못했습니다.")}
-              </Text>
-              <button
-                type="button"
-                onClick={() => {
-                  void refetch();
-                }}
-                className="text-text-brand focus-visible:ring-border-brand rounded-4 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-none"
-              >
-                <Text as="span" variant="md-semibold" className="text-text-brand">
-                  다시 시도
-                </Text>
-              </button>
-            </div>
+            <EstimatesQueryStatus
+              message={getApiErrorMessage(error, "리뷰를 불러오지 못했습니다.")}
+              actionLabel="다시 시도"
+              onAction={() => {
+                void refetch();
+              }}
+            />
           ) : null}
 
           {shouldShowReviews ? (
@@ -173,7 +160,7 @@ export default function MoverDetailReviews({
                     index < reviews.length - 1 && "border-b",
                   )}
                 >
-                  <ReviewItem review={review} />
+                  <MoverReviewListItem review={review} />
                 </li>
               ))}
             </ul>
@@ -193,7 +180,7 @@ export default function MoverDetailReviews({
   );
 }
 
-function ReviewItem({ review }: { review: MoverDetailReview }) {
+function MoverReviewListItem({ review }: { review: MoverReviewItem }) {
   return (
     <article className="flex w-full flex-col gap-16 md:gap-24">
       <div className="flex flex-col gap-8">
@@ -203,18 +190,19 @@ function ReviewItem({ review }: { review: MoverDetailReview }) {
             variant={{ base: "md-regular", md: "2lg-regular" }}
             className="text-text-secondary"
           >
-            {review.authorMasked}
+            {review.customer.displayName}
           </Text>
           <span className="bg-border-subtle h-12 w-px" aria-hidden="true" />
           <Text
-            as="p"
+            as="time"
+            dateTime={review.createdAt}
             variant={{ base: "md-regular", md: "2lg-regular" }}
             className="text-text-muted"
           >
-            {review.createdAt}
+            {formatDateOnlyLabel(review.createdAt)}
           </Text>
         </div>
-        <ReviewStarRating value={review.rating} size="sm" />
+        <ReviewStarRating value={review.rating} size="sm" label="리뷰 별점" />
       </div>
       <Text
         as="p"
