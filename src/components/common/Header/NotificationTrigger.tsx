@@ -4,15 +4,16 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useUnreadNotificationCount } from "@/hooks/useUnreadNotificationCount";
 import { AlarmIcon } from "@/icons";
-import { getUnreadNotificationCount, MOCK_NOTIFICATIONS } from "@/lib/mocks/notifications.mock";
 
 import NotificationPanel from "./NotificationPanel";
 
 export default function NotificationTrigger() {
   const notificationPanelId = useId();
   const [isOpen, setIsOpen] = useState(false);
-  const unreadCount = getUnreadNotificationCount(MOCK_NOTIFICATIONS);
+  const { data } = useUnreadNotificationCount();
+  const unreadCount = data?.unreadCount ?? 0;
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const closeWithFocus = useCallback(() => {

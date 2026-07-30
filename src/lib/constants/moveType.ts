@@ -11,7 +11,7 @@ export const MOVE_TYPE_OPTIONS = (Object.entries(MOVE_TYPE_LABEL) as [MoveType, 
 );
 
 export interface MoveTypeCardInfo {
-  id: "small" | "home" | "office";
+  id: MoveType;
   title: string;
   description: string;
   imageSrc: string;
@@ -19,19 +19,19 @@ export interface MoveTypeCardInfo {
 
 export const MOVE_TYPE_CARDS: MoveTypeCardInfo[] = [
   {
-    id: "small",
+    id: "SMALL",
     title: "소형이사",
     description: "원룸, 투룸, 20평대 미만",
     imageSrc: "/images/move-type/small.svg",
   },
   {
-    id: "home",
+    id: "HOME",
     title: "가정이사",
     description: "쓰리룸, 20평대 이상",
     imageSrc: "/images/move-type/home.svg",
   },
   {
-    id: "office",
+    id: "OFFICE",
     title: "사무실이사",
     description: "사무실, 상업공간",
     imageSrc: "/images/move-type/office.svg",

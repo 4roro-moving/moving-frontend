@@ -76,7 +76,7 @@ export default function RejectedRequestsPage() {
             ) : null}
 
             {isFetchNextPageError ? (
-              <ReceivedEstimatesStatus
+              <EstimatesQueryStatus
                 message="다음 반려 요청을 불러오지 못했어요."
                 actionLabel="다시 시도"
                 onAction={() => {
