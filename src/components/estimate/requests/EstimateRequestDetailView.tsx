@@ -42,7 +42,9 @@ function toRequestInfoRows(request: MyEstimateRequestItem) {
 }
 
 function toStatusPresentation(request: MyEstimateRequestItem) {
-  const showConfirmedIcon = request.status === "CONFIRMED" || request.status === "COMPLETED";
+  // 체크 아이콘은 CONFIRMED(확정견적)만 — COMPLETED(이사 완료)는 라벨만
+  // 2026.07.30 정슬기 - [수정] COMPLETED에 확정 아이콘이 붙지 않도록 분리
+  const showConfirmedIcon = request.status === "CONFIRMED";
   // Figma 확정 칩 문구 "확정견적" — 요청 CONFIRMED에 동일 표기
   const statusLabel =
     request.status === "CONFIRMED" ? "확정견적" : getEstimateRequestStatusLabel(request.status);
