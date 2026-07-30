@@ -84,6 +84,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       user: null,
       displayName: null,
       isAuthenticated: false,
+      isCheckingAuth: false,
       hasHydrated: true,
     });
   },
@@ -98,6 +99,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   establishSession: (user) => {
+    curSessionGeneration++;
     setAuthenticatedUser(set, user, false);
   },
 
