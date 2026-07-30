@@ -48,6 +48,8 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     data: activeRequest,
     isLoading: isActiveLoading,
     isError: isActiveError,
+    isFetching: isActiveFetching,
+    refetch: refetchActiveRequest,
   } = useActiveEstimateRequest({
     enabled: isLoggedIn,
   });
@@ -92,12 +94,13 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   const isRequestDisabled =
     designateMutation.isPending ||
     (isLoggedIn && isActiveLoading) ||
+    (isLoggedIn && isActiveError && isActiveFetching) ||
     ctaState?.status === "alreadyDesignated";
 
   const requestButtonLabel =
     ctaState?.status === "alreadyDesignated"
       ? "지정 견적 요청 완료"
-      : designateMutation.isPending
+      : designateMutation.isPending || (isActiveError && isActiveFetching)
         ? "요청 중..."
         : "지정 견적 요청하기";
 
@@ -112,22 +115,29 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     });
   };
 
-  const handleRequestEstimate = () => {
+  const handleRequestEstimate = async () => {
     if (!hasAuthSession()) {
       loginRequiredModal?.openLoginRequiredModal("지정 견적 요청은 로그인 후 이용할 수 있어요.");
       return;
     }
 
-    if (isActiveLoading || designateMutation.isPending) {
+    if (isActiveLoading || designateMutation.isPending || (isActiveError && isActiveFetching)) {
       return;
     }
 
+    let request = activeRequest ?? null;
+
+    // 조회 실패 상태면 재클릭 시 refetch 후 최신 결과로 CTA 판단
     if (isActiveError) {
-      setToastMessage("견적 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
-      return;
+      const result = await refetchActiveRequest();
+      if (result.error) {
+        setToastMessage("견적 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
+        return;
+      }
+      request = result.data ?? null;
     }
 
-    const nextCtaState = getDesignateCtaState(activeRequest ?? null, detail.id);
+    const nextCtaState = getDesignateCtaState(request, detail.id);
 
     if (nextCtaState.status === "needEstimateRequest") {
       setIsEstimateRequestModalOpen(true);
