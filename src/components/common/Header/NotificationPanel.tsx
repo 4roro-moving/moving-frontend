@@ -51,6 +51,14 @@ const pageButtonClassName =
 const itemInteractiveClassName =
   "hover:bg-background-hover focus-visible:ring-border-brand rounded-8 -mx-8 -my-4 flex w-full flex-col gap-2 px-8 py-4 text-left transition focus-visible:ring-1 focus-visible:outline-none";
 
+function getNotificationA11yLabel(notification: NotificationItem): string {
+  const message = buildNotificationMessageParts(notification.type, notification.content)
+    .map((part) => part.text)
+    .join("");
+
+  return notification.isRead ? message : `${message}, 읽지 않음`;
+}
+
 export default function NotificationPanel({ onClose, className }: NotificationPanelProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pendingReadIds, setPendingReadIds] = useState<number[]>([]);
@@ -159,6 +167,7 @@ export default function NotificationPanel({ onClose, className }: NotificationPa
                       onClose();
                     }}
                     className={itemInteractiveClassName}
+                    aria-label={getNotificationA11yLabel(notification)}
                   >
                     <NotificationContent notification={notification} />
                   </Link>
@@ -167,9 +176,7 @@ export default function NotificationPanel({ onClose, className }: NotificationPa
                     type="button"
                     onClick={async () => handleNotificationActivate(notification)}
                     className={itemInteractiveClassName}
-                    aria-label={
-                      notification.isRead ? notification.title : `${notification.title}, 읽지 않음`
-                    }
+                    aria-label={getNotificationA11yLabel(notification)}
                     disabled={notification.isRead || pendingReadIds.includes(notification.id)}
                   >
                     <NotificationContent notification={notification} />
