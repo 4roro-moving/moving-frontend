@@ -77,9 +77,12 @@ export async function rejectMoverEstimate(estimateRequestId: number, input: Reje
 
 //기사님 반려 내역 조회
 //GET /api/estimates/rejections
-export async function getRejectedEstimateRequests() {
+export async function getRejectedEstimateRequests(cursor?: string, limit = 10) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (cursor) params.set("cursor", cursor);
+
   const response = await axiosInstance.get<RejectedEstimateRequestListResponse>(
-    `/api${API_ROUTES.ESTIMATES.ROOT}/rejections`,
+    `/api${API_ROUTES.ESTIMATES.ROOT}/rejections?${params.toString()}`,
   );
 
   if (!response.data.success) {

@@ -129,7 +129,13 @@ export type RejectedEstimateRequestItem = {
 export type RejectedEstimateRequestListResponse =
   | {
       success: true;
-      data: RejectedEstimateRequestItem[];
+      data: {
+        items: RejectedEstimateRequestItem[];
+        pagination: {
+          nextCursor: string | null;
+          hasNextPage: boolean;
+        };
+      };
     }
   | {
       success: false;
