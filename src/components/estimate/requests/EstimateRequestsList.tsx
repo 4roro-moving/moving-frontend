@@ -1,6 +1,7 @@
 import Pagination from "@/components/common/Pagination/Pagination";
 import Select from "@/components/common/Select/Select";
 import EstimatesListEmptyState from "@/components/estimate/EstimatesListEmptyState";
+import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import EstimateRequestCard from "@/components/estimate/requests/EstimateRequestCard";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import type { EstimateRequestListStatusFilter, MyEstimateRequestItem } from "@/types/estimate";
@@ -8,6 +9,7 @@ import type { Pagination as PaginationMeta } from "@/types/pagination";
 
 const STATUS_FILTER_OPTIONS: { value: EstimateRequestListStatusFilter; label: string }[] = [
   { value: "all", label: "전체" },
+  // Figma·Badge·필터 동일 표기: OPEN = 진행 중
   { value: "OPEN", label: "진행 중" },
   { value: "COMPLETED", label: "이사 완료" },
 ];
@@ -28,6 +30,8 @@ interface EstimateRequestsListProps {
   statusFilter: EstimateRequestListStatusFilter;
   onStatusFilterChange: (filter: EstimateRequestListStatusFilter) => void;
   isFetching?: boolean;
+  /** keepPreviousData 잔상 — 필터/페이지 전환 중 이전 카드 숨김 */
+  isPlaceholderData?: boolean;
 }
 
 /**
@@ -35,6 +39,7 @@ interface EstimateRequestsListProps {
  * // 2026.07.29 정슬기 - [추가]
  * // 2026.07.29 정슬기 - [수정] Empty 카피·목록 gap을 받았던 견적 목록에 맞춤
  * // 2026.07.29 정슬기 - [수정] status 필터·필터 Empty 분기
+ * // 2026.07.30 정슬기 - [수정] placeholder 시 필터 유지·카드 잔상 제거
  */
 export default function EstimateRequestsList({
   estimateRequests,
@@ -44,6 +49,7 @@ export default function EstimateRequestsList({
   statusFilter,
   onStatusFilterChange,
   isFetching = false,
+  isPlaceholderData = false,
 }: EstimateRequestsListProps) {
   const isAllFilter = statusFilter === "all";
   const selectedLabel =
@@ -71,6 +77,18 @@ export default function EstimateRequestsList({
       </Select>
     </div>
   );
+
+  if (isPlaceholderData) {
+    return (
+      <div
+        className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow flex w-full flex-col gap-24 md:gap-40 lg:px-0"
+        aria-busy="true"
+      >
+        {filterSelect}
+        <EstimatesQueryStatus message="보낸 견적 요청을 불러오는 중입니다." />
+      </div>
+    );
+  }
 
   if (pagination.totalCount === 0) {
     return (

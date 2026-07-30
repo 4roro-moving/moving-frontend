@@ -1,6 +1,7 @@
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import { ConfirmedCheckIcon } from "@/icons";
+import { formatPrice } from "@/lib/utils/estimateFormat";
 
 interface EstimateDetailActionsProps {
   isConfirmed: boolean;
@@ -8,19 +9,43 @@ interface EstimateDetailActionsProps {
   confirmDisabledReason: string | null;
   isConfirming: boolean;
   onConfirm: () => void;
+  /** 대기 상세 Figma: CTA 위 견적가 재표시 */
+  price?: number;
+  /** received: sm / pending: detail */
+  buttonSize?: "sm" | "detail";
 }
 
+/**
+ * 견적 상세 확정 CTA (받았던·대기 상세 공통)
+ * // 2026.07.24 정슬기 - [추가]
+ * // 2026.07.30 정슬기 - [수정] PendingEstimateDetailActions 통합 (optional price·buttonSize)
+ */
 export default function EstimateDetailActions({
   isConfirmed,
   canConfirm,
   confirmDisabledReason,
   isConfirming,
   onConfirm,
+  price,
+  buttonSize = "sm",
 }: EstimateDetailActionsProps) {
-  // 2026.07.24 정슬기 - [수정] 확정 완료 시 확정 버튼을 숨기고 완료 상태만 표시
+  const showPrice = typeof price === "number";
+
+  const priceBlock = showPrice ? (
+    <div className="flex w-full flex-col gap-0">
+      <Text as="p" variant="2lg-semibold" className="text-text-weak">
+        견적가
+      </Text>
+      <Text as="p" variant="2xl-bold" className="text-text-primary">
+        {formatPrice(price)}
+      </Text>
+    </div>
+  ) : null;
+
   if (isConfirmed) {
     return (
       <div className="flex w-full flex-col gap-16">
+        {priceBlock}
         <div className="flex items-center justify-center gap-6">
           <ConfirmedCheckIcon className="text-icon-brand size-24 shrink-0" aria-hidden="true" />
           <Text as="p" variant="2lg-semibold" className="text-text-brand">
@@ -31,31 +56,34 @@ export default function EstimateDetailActions({
     );
   }
 
-  // 2026.07.24 정슬기 - [추가] 확정 견적 존재 시 대기 견적 확정 버튼 비활성화
   const disabled = !canConfirm || isConfirming;
   const reason =
     confirmDisabledReason ??
     (!canConfirm ? "이미 확정된 견적이 있어 추가로 확정할 수 없습니다." : null);
 
   return (
-    <div className="flex w-full flex-col gap-12">
-      <Button
-        type="button"
-        variant="solid"
-        size="sm"
-        fullWidth
-        disabled={disabled}
-        onClick={onConfirm}
-        // 2026.07.24 정슬기 - [수정] 좁은 Mobile 폭에서 min-width 오버플로우 방지
-        className="max-w-full min-w-0"
-      >
-        {isConfirming ? "확정 중..." : "견적 확정하기"}
-      </Button>
-      {disabled && reason ? (
-        <Text as="p" variant="md-regular" className="text-text-muted text-center">
-          {reason}
-        </Text>
-      ) : null}
+    <div className={showPrice ? "flex w-full flex-col gap-30" : "flex w-full flex-col gap-12"}>
+      {priceBlock}
+
+      <div className="flex w-full flex-col gap-12">
+        <Button
+          type="button"
+          variant="solid"
+          size={buttonSize}
+          fullWidth
+          disabled={disabled}
+          onClick={onConfirm}
+          className="max-w-full min-w-0"
+          aria-busy={isConfirming}
+        >
+          {isConfirming ? "확정 중..." : "견적 확정하기"}
+        </Button>
+        {disabled && reason ? (
+          <Text as="p" variant="md-regular" className="text-text-muted text-center">
+            {reason}
+          </Text>
+        ) : null}
+      </div>
     </div>
   );
 }

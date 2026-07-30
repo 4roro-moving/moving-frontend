@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/estimateRequest";
 import { getApiError } from "@/lib/api/getApiError";
 import { getLoginRedirectPath } from "@/lib/auth/session";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { MOVE_TYPE_CARDS } from "@/lib/constants/moveType";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
@@ -159,6 +160,7 @@ export default function EstimateRequestForm() {
     setToastMessage(null);
   }, []);
 
+  // 2026.07.30 정슬기 - [수정] hasAuthSession + getLoginRedirectPath (dev 로그인 연동)
   useEffect(() => {
     if (!isAuthReady) return;
 
@@ -228,6 +230,7 @@ export default function EstimateRequestForm() {
 
   function handleSubmit() {
     if (!selectedType || !fromAddress || !toAddress) return;
+    if (createMutation.isPending) return;
 
     if (!isAuthReady) return;
 
@@ -314,8 +317,10 @@ export default function EstimateRequestForm() {
               진행 중인 이사 완료 후 새로운 견적을 받아보세요.
             </>
           }
-          buttonLabel="받은 견적 보러가기"
-          href="/estimates/pending"
+          // 요청 직후엔 견적 미도착이 일반적 → '받은 견적'보다 대기 탭으로 안내
+          // 2026.07.30 정슬기 - [수정] 버튼 문구·경로를 대기 중인 견적 흐름에 맞춤
+          buttonLabel="대기 중인 견적 보기"
+          href={APP_ROUTES.ESTIMATES.PENDING}
         />
       </>
     );

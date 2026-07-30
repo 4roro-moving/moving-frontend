@@ -1,3 +1,7 @@
+/**
+ * 보낸 견적 요청 목록·상세 API (복수 리소스 읽기 경로)
+ * 생성·활성 조회는 estimateRequest.ts 를 사용합니다.
+ */
 import fetchInstance from "@/lib/api/fetchInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import type {

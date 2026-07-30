@@ -22,6 +22,7 @@ interface EstimateRequestCardProps {
  * 받았던 견적 패널(EstimateDetailPanel)과 동일 border/radius/padding/shadow 토큰을 사용합니다.
  * // 2026.07.29 정슬기 - [추가]
  * // 2026.07.29 정슬기 - [수정] 패널 스타일 정합·상세 Link·표시 필드를 API 실존 값으로 정리
+ * // 2026.07.30 정슬기 - [유지] 목록은 DesignatedChip만 표시, 기사님 이름은 상세에서 확인
  */
 export default function EstimateRequestCard({ request }: EstimateRequestCardProps) {
   const designatedCount = request.designatedMovers.length;
