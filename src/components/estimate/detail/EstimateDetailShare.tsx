@@ -1,8 +1,10 @@
 "use client";
 
 import { Text } from "@/components/common/Text";
+import { usePageShare } from "@/hooks/usePageShare";
 import { ClipIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
+import type { ShareLinkAccess } from "@/lib/share/shareUrl";
 
 function KakaoIcon({ className }: { className?: string }) {
   return (
@@ -30,27 +32,42 @@ interface EstimateDetailShareProps {
   /** 공유 섹션 제목. 미지정 시 견적 상세 기본 문구 */
   title?: string;
   onToastMessage?: (message: string) => void;
+  /**
+   * public: 기사님 상세처럼 외부 열람 가능
+   * owner: 견적 상세처럼 소유자 로그인 시에만 확인 가능 — 공유 후 안내
+   */
+  linkAccess?: ShareLinkAccess;
 }
 
 const DEFAULT_SHARE_TITLE = "견적서 공유하기";
 
-// 2026.07.24 정슬기 - [수정] Toast를 부모로 올려 상세 페이지에서 단일 Toast로 관리
+/**
+ * 견적/기사 상세 공유 버튼 그룹
+ * // 2026.07.24 정슬기 - [수정] Toast를 부모로 올려 상세 페이지에서 단일 Toast로 관리
+ * // 2026.07.30 정슬기 - [수정] 카카오·Facebook·링크 복사 실제 연동
+ */
 export default function EstimateDetailShare({
   title = DEFAULT_SHARE_TITLE,
   onToastMessage,
+  linkAccess = "public",
 }: EstimateDetailShareProps) {
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      onToastMessage?.("링크가 복사되었습니다.");
-    } catch {
-      onToastMessage?.("링크 복사에 실패했습니다.");
-    }
-  };
+  const { busyAction, isBusy, shareCopy, shareKakao, shareFacebook } = usePageShare({
+    linkAccess,
+    onToastMessage,
+  });
+
+  const iconButtonClassName = cn(
+    "rounded-8 md:rounded-16 flex size-40 shrink-0 items-center justify-center transition-colors md:size-64",
+    "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+    "disabled:cursor-not-allowed disabled:opacity-60",
+  );
 
   return (
-    // 2026.07.25 정슬기 - [수정] Desktop 공유 제목↔아이콘 gap 22, 아이콘 64·gap 16 (Figma 8091:47356)
-    <section className="flex w-full flex-col gap-12 md:gap-22" aria-label={title}>
+    <section
+      className="flex w-full flex-col gap-12 md:gap-22"
+      aria-label={title}
+      aria-busy={isBusy}
+    >
       <Text
         as="h2"
         variant={{ base: "lg-semibold", lg: "xl-semibold" }}
@@ -63,14 +80,13 @@ export default function EstimateDetailShare({
         <button
           type="button"
           aria-label="링크 복사"
-          onClick={() => {
-            void handleCopyLink();
-          }}
+          aria-busy={busyAction === "copy"}
+          disabled={isBusy}
+          onClick={shareCopy}
           className={cn(
-            "bg-background-surface border-border-default text-icon-default rounded-8 md:rounded-16",
-            "flex size-40 shrink-0 items-center justify-center border p-10 transition-colors md:size-64",
+            iconButtonClassName,
+            "bg-background-surface border-border-default text-icon-default border p-10 md:p-10",
             "hover:bg-background-subtle active:bg-background-hover",
-            "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
           )}
         >
           <ClipIcon className="text-icon-default size-24 md:size-28" aria-hidden="true" />
@@ -78,12 +94,14 @@ export default function EstimateDetailShare({
 
         <button
           type="button"
-          aria-label="카카오톡 공유 (준비 중)"
-          disabled
-          title="준비 중"
+          aria-label="카카오톡 공유"
+          aria-busy={busyAction === "kakao"}
+          disabled={isBusy}
+          onClick={shareKakao}
           className={cn(
-            "bg-social-kakao-background text-social-kakao-icon rounded-8 md:rounded-16 flex size-40 shrink-0 items-center justify-center p-8 md:size-64 md:p-14",
-            "cursor-not-allowed opacity-60",
+            iconButtonClassName,
+            "bg-social-kakao-background text-social-kakao-icon p-8 md:p-14",
+            "hover:opacity-90 active:opacity-80",
           )}
         >
           <KakaoIcon className="size-24 md:size-28" />
@@ -91,12 +109,14 @@ export default function EstimateDetailShare({
 
         <button
           type="button"
-          aria-label="페이스북 공유 (준비 중)"
-          disabled
-          title="준비 중"
+          aria-label="페이스북 공유"
+          aria-busy={busyAction === "facebook"}
+          disabled={isBusy}
+          onClick={shareFacebook}
           className={cn(
-            "bg-social-facebook-background text-social-facebook-icon rounded-8 md:rounded-16 flex size-40 shrink-0 items-center justify-center p-8 md:size-64 md:p-14",
-            "cursor-not-allowed opacity-60",
+            iconButtonClassName,
+            "bg-social-facebook-background text-social-facebook-icon p-8 md:p-14",
+            "hover:opacity-90 active:opacity-80",
           )}
         >
           <FacebookIcon className="size-24 md:size-28" />

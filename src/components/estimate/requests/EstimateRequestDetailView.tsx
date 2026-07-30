@@ -134,7 +134,7 @@ export default function EstimateRequestDetailView({
             <EstimateRequestDesignatedMovers designatedMovers={data.designatedMovers} />
           </>
         }
-        aside={<EstimateDetailShare onToastMessage={setToastMessage} />}
+        aside={<EstimateDetailShare linkAccess="owner" onToastMessage={setToastMessage} />}
       />
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </>

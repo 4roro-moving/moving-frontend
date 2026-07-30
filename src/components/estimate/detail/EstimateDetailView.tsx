@@ -80,7 +80,7 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
               isConfirming={confirmMutation.isPending}
               onConfirm={() => confirmMutation.mutate()}
             />
-            <EstimateDetailShare onToastMessage={setToastMessage} />
+            <EstimateDetailShare linkAccess="owner" onToastMessage={setToastMessage} />
           </>
         }
       />
