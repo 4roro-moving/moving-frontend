@@ -5,7 +5,7 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import { LoginRequiredModal } from "@/components/auth/LoginRequiredModal";
 
 interface LoginRequiredModalContextValue {
-  openLoginRequiredModal: () => void;
+  openLoginRequiredModal: (description?: string) => void;
 }
 
 const LoginRequiredModalContext = createContext<LoginRequiredModalContextValue | null>(null);
@@ -17,8 +17,10 @@ interface LoginRequiredModalProviderProps {
 /** 비회원이 찜 등 인증 액션에 닿을 수 있는 라우트(기사님 찾기)에만 감싼다. */
 export function LoginRequiredModalProvider({ children }: LoginRequiredModalProviderProps) {
   const [open, setOpen] = useState(false);
+  const [description, setDescription] = useState<string | undefined>();
 
-  const openLoginRequiredModal = useCallback(() => {
+  const openLoginRequiredModal = useCallback((desc?: string) => {
+    setDescription(desc);
     setOpen(true);
   }, []);
 
@@ -32,7 +34,7 @@ export function LoginRequiredModalProvider({ children }: LoginRequiredModalProvi
   return (
     <LoginRequiredModalContext.Provider value={value}>
       {children}
-      <LoginRequiredModal open={open} onClose={() => setOpen(false)} />
+      <LoginRequiredModal open={open} onClose={() => setOpen(false)} description={description} />
     </LoginRequiredModalContext.Provider>
   );
 }

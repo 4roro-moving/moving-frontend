@@ -11,6 +11,8 @@ interface MoverDetailActionsProps {
   onRequestEstimate: () => void;
   /** Desktop 사이드바용 / Mobile·Tablet 하단 sticky용 */
   layout: "sidebar" | "sticky";
+  requestDisabled?: boolean;
+  requestButtonLabel?: string;
 }
 
 export default function MoverDetailActions({
@@ -19,6 +21,8 @@ export default function MoverDetailActions({
   onToggleFavorite,
   onRequestEstimate,
   layout,
+  requestDisabled = false,
+  requestButtonLabel = "지정 견적 요청하기",
 }: MoverDetailActionsProps) {
   if (layout === "sticky") {
     return (
@@ -37,9 +41,10 @@ export default function MoverDetailActions({
             size="cta"
             fullWidth
             className="min-w-0 flex-1"
+            disabled={requestDisabled}
             onClick={onRequestEstimate}
           >
-            지정 견적 요청하기
+            {requestButtonLabel}
           </Button>
         </div>
       </div>
@@ -52,9 +57,18 @@ export default function MoverDetailActions({
         {moverName} 기사님에게
         <br /> 지정 견적을 요청해보세요!
       </Text>
-      <Button type="button" variant="solid" size="detail" fullWidth onClick={onRequestEstimate}>
-        지정 견적 요청하기
+
+      <Button
+        type="button"
+        variant="solid"
+        size="detail"
+        fullWidth
+        disabled={requestDisabled}
+        onClick={onRequestEstimate}
+      >
+        {requestButtonLabel}
       </Button>
+
       <LikeOutlineButton
         size="lg"
         moverName={moverName}

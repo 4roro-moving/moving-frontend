@@ -5,7 +5,16 @@
  */
 export const APP_ROUTES = {
   LOGIN: "/login",
-  DEV_LOGIN: "/dev-login",
+  /** 기사님(mover) 전용 로그인 */
+  MOVER_LOGIN: "/mover/login",
+  /** 고객 이메일 회원가입 */
+  SIGN_UP: "/signup",
+  /** 고객 프로필 등록 */
+  PROFILE: "/profile",
+  /** 견적 요청 */
+  ESTIMATE_REQUEST: "/estimate-request",
+  /** 프로필 수정 — 추후 페이지 연동 */
+  PROFILE_EDIT: "/profile/edit",
   // 2026.07.27 정슬기 - [추가] 기사님 찾기·상세 페이지 경로
   MOVERS: {
     ROOT: "/movers",
@@ -21,10 +30,14 @@ export const APP_ROUTES = {
    * NOTE: 찜한 기사님 전체 목록 페이지. 경로 확정 시 현재 상수값,  `src/app/favorites/movers/` 디렉터리 수정 필요
    */
   FAVORITE_MOVERS: "/favorites/movers",
+  
   // 2026.07.30 정슬기 - [추가] 견적 요청 작성·보낸 요청 상세 페이지 경로
-  ESTIMATE_REQUEST: "/estimate-request",
-  ESTIMATES: {
-    REQUESTS: "/estimates/requests",
-    REQUEST_DETAIL: (estimateRequestId: number) => `/estimates/requests/${estimateRequestId}`,
-  },
+ESTIMATES: {
+  ROOT: "/estimates",
+  REQUESTS: "/estimates/requests",
+  REQUEST_DETAIL: (estimateRequestId: number) =>
+    `/estimates/requests/${estimateRequestId}`,
+},
+
+ESTIMATE_REQUEST: "/estimate-request",
 } as const;
