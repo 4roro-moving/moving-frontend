@@ -2,14 +2,14 @@
 
 import { Text } from "@/components/common/Text";
 import { usePageShare } from "@/hooks/usePageShare";
-import { ClipIcon } from "@/icons";
+import { ClipIcon, InfoIcon } from "@/icons";
 import {
   shareKakaoEstimateCustom,
   shareKakaoMoverCustom,
   type KakaoEstimateShareTemplateArgs,
   type KakaoMoverShareTemplateArgs,
 } from "@/hooks/kakao/share";
-import type { ShareLinkAccess } from "@/lib/share/shareUrl";
+import { getOwnerOnlyShareNotice, type ShareLinkAccess } from "@/lib/share/shareUrl";
 import { cn } from "@/lib/utils/cn";
 
 function KakaoIcon({ className }: { className?: string }) {
@@ -40,7 +40,7 @@ interface EstimateDetailShareProps {
   onToastMessage?: (message: string) => void;
   /**
    * public: 기사님 상세처럼 외부 열람 가능
-   * owner: 견적 상세처럼 소유자 로그인 시에만 확인 가능 — 공유 후 안내
+   * owner: 견적 상세처럼 소유자 로그인 시에만 확인 가능 — 공유 섹션에 인라인 안내 표시
    */
   linkAccess?: ShareLinkAccess;
   /** 기사님 상세 카카오 커스텀 템플릿 */
@@ -50,6 +50,9 @@ interface EstimateDetailShareProps {
 }
 
 const DEFAULT_SHARE_TITLE = "견적서 공유하기";
+
+/** NOTE: 배포 URL 준비 전까지 페이스북 공유 버튼 비활성. 연동 코드(usePageShare.shareFacebook)는 유지 */
+const FACEBOOK_SHARE_UI_ENABLED = false;
 
 /**
  * 견적/기사 상세 공유 버튼 그룹
@@ -63,12 +66,11 @@ export default function EstimateDetailShare({
   kakaoMoverShare,
   kakaoEstimateShare,
 }: EstimateDetailShareProps) {
-  const { busyAction, isBusy, shareCopy, shareKakao, shareFacebook } = usePageShare({
-    linkAccess,
+  const { busyAction, isBusy, shareCopy, shareFacebook } = usePageShare({
     onToastMessage,
   });
 
-  const hasCustomKakaoShare = Boolean(kakaoMoverShare || kakaoEstimateShare);
+  const hasKakaoShare = Boolean(kakaoMoverShare || kakaoEstimateShare);
 
   const iconButtonClassName = cn(
     "rounded-8 md:rounded-16 flex size-40 min-h-44 min-w-44 shrink-0 items-center justify-center transition-colors md:size-64 md:min-h-64 md:min-w-64",
@@ -77,8 +79,8 @@ export default function EstimateDetailShare({
   );
 
   const handleKakaoShare = () => {
-    if (!hasCustomKakaoShare) {
-      shareKakao();
+    if (!hasKakaoShare) {
+      onToastMessage?.("카카오톡 공유 설정이 필요합니다.");
       return;
     }
 
@@ -121,51 +123,67 @@ export default function EstimateDetailShare({
         {title}
       </Text>
 
-      <div className="flex items-start gap-10 md:gap-16">
-        <button
-          type="button"
-          aria-label="링크 복사"
-          aria-busy={busyAction === "copy"}
-          disabled={isBusy}
-          onClick={shareCopy}
-          className={cn(
-            iconButtonClassName,
-            "bg-background-surface border-border-default text-icon-default border p-10 md:p-10",
-            "hover:bg-background-subtle active:bg-background-hover",
-          )}
-        >
-          <ClipIcon className="text-icon-default size-24 md:size-28" aria-hidden="true" />
-        </button>
+      <div className="flex flex-col gap-20 md:gap-24">
+        <div className="flex items-start gap-10 md:gap-16">
+          <button
+            type="button"
+            aria-label="링크 복사"
+            aria-busy={busyAction === "copy"}
+            disabled={isBusy}
+            onClick={shareCopy}
+            className={cn(
+              iconButtonClassName,
+              "bg-background-surface border-border-default text-icon-default border p-10 md:p-10",
+              "hover:bg-background-subtle active:bg-background-hover",
+            )}
+          >
+            <ClipIcon className="text-icon-default size-24 md:size-28" aria-hidden="true" />
+          </button>
 
-        <button
-          type="button"
-          aria-label="카카오톡 공유"
-          aria-busy={busyAction === "kakao"}
-          disabled={isBusy}
-          onClick={handleKakaoShare}
-          className={cn(
-            iconButtonClassName,
-            "bg-social-kakao-background text-social-kakao-icon p-8 md:p-14",
-            "hover:opacity-90 active:opacity-80",
-          )}
-        >
-          <KakaoIcon className="size-24 md:size-28" />
-        </button>
+          <button
+            type="button"
+            aria-label="카카오톡 공유"
+            disabled={isBusy}
+            onClick={handleKakaoShare}
+            className={cn(
+              iconButtonClassName,
+              "bg-social-kakao-background text-social-kakao-icon p-8 md:p-14",
+              "hover:opacity-90 active:opacity-80",
+            )}
+          >
+            <KakaoIcon className="size-24 md:size-28" />
+          </button>
 
-        <button
-          type="button"
-          aria-label="페이스북 공유"
-          aria-busy={busyAction === "facebook"}
-          disabled={isBusy}
-          onClick={shareFacebook}
-          className={cn(
-            iconButtonClassName,
-            "bg-social-facebook-background text-social-facebook-icon p-8 md:p-14",
-            "hover:opacity-90 active:opacity-80",
-          )}
-        >
-          <FacebookIcon className="size-24 md:size-28" />
-        </button>
+          <button
+            type="button"
+            aria-label={FACEBOOK_SHARE_UI_ENABLED ? "페이스북 공유" : "페이스북 공유 (준비 중)"}
+            aria-busy={busyAction === "facebook"}
+            disabled={!FACEBOOK_SHARE_UI_ENABLED || isBusy}
+            title={FACEBOOK_SHARE_UI_ENABLED ? undefined : "준비 중"}
+            onClick={shareFacebook}
+            className={cn(
+              iconButtonClassName,
+              "bg-social-facebook-background text-social-facebook-icon p-8 md:p-14",
+              FACEBOOK_SHARE_UI_ENABLED
+                ? "hover:opacity-90 active:opacity-80"
+                : "cursor-not-allowed opacity-60",
+            )}
+          >
+            <FacebookIcon className="size-24 md:size-28" />
+          </button>
+        </div>
+
+        {linkAccess === "owner" ? (
+          <div
+            role="status"
+            className="bg-notice-background rounded-12 flex w-full items-center gap-12 px-20 py-16 md:px-28 md:py-20"
+          >
+            <InfoIcon className="text-notice-text size-18 shrink-0 md:size-20" aria-hidden="true" />
+            <Text as="p" variant="md-medium" className="text-notice-text min-w-0 wrap-break-word">
+              {getOwnerOnlyShareNotice()}
+            </Text>
+          </div>
+        ) : null}
       </div>
     </section>
   );
