@@ -7,6 +7,7 @@ import {
   formatMoveDateLabelSafe,
   formatRequestDateLabel,
   getEstimateRequestStatusLabel,
+  getEstimateRequestStatusTextClassName,
   getMoveTypeLabel,
 } from "@/lib/utils/estimateFormat";
 import type { MyEstimateRequestItem } from "@/types/estimate";
@@ -56,7 +57,11 @@ export default function EstimateRequestCard({ request }: EstimateRequestCardProp
               </>
             ) : null}
           </div>
-          <Text as="span" variant="md-semibold" className="text-text-brand shrink-0">
+          <Text
+            as="span"
+            variant="md-semibold"
+            className={cn("shrink-0", getEstimateRequestStatusTextClassName(request.status))}
+          >
             {getEstimateRequestStatusLabel(request.status)}
           </Text>
         </div>

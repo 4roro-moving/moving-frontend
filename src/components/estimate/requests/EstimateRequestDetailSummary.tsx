@@ -1,8 +1,10 @@
+import type { ReactNode } from "react";
+
 import { Text } from "@/components/common/Text";
 import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import { ConfirmedCheckIcon } from "@/icons";
+import { cn } from "@/lib/utils/cn";
 import type { MoveType } from "@/types/move";
-import type { ReactNode } from "react";
 
 interface EstimateRequestDetailSummaryProps {
   moveType: MoveType;
@@ -11,6 +13,8 @@ interface EstimateRequestDetailSummaryProps {
   title: ReactNode;
   /** 우측 상태 문구 */
   statusLabel: string;
+  /** 상태 라벨 색상 클래스 (예: text-text-brand / text-text-error) */
+  statusClassName?: string;
   /** Figma 확정견적처럼 체크 아이콘 표시 */
   showConfirmedIcon?: boolean;
 }
@@ -26,17 +30,18 @@ export default function EstimateRequestDetailSummary({
   isDesignated,
   title,
   statusLabel,
+  statusClassName = "text-text-brand",
   showConfirmedIcon = false,
 }: EstimateRequestDetailSummaryProps) {
   const statusBadge = showConfirmedIcon ? (
     <span className="flex shrink-0 items-center gap-4">
       <ConfirmedCheckIcon className="text-icon-brand size-20 shrink-0" />
-      <Text as="span" variant="lg-bold" className="text-text-brand">
+      <Text as="span" variant="lg-bold" className={statusClassName}>
         {statusLabel}
       </Text>
     </span>
   ) : (
-    <Text as="span" variant="lg-semibold" className="text-text-brand shrink-0">
+    <Text as="span" variant="lg-semibold" className={cn("shrink-0", statusClassName)}>
       {statusLabel}
     </Text>
   );

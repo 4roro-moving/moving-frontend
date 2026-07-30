@@ -17,6 +17,7 @@ import {
   formatDetailDateLabel,
   formatMoveDateLabel,
   getEstimateRequestStatusLabel,
+  getEstimateRequestStatusTextClassName,
   getMoveTypeLabel,
 } from "@/lib/utils/estimateFormat";
 import { ApiError } from "@/types/api";
@@ -48,8 +49,11 @@ function toStatusPresentation(request: MyEstimateRequestItem) {
   // Figma 확정 칩 문구 "확정견적" — 요청 CONFIRMED에 동일 표기
   const statusLabel =
     request.status === "CONFIRMED" ? "확정견적" : getEstimateRequestStatusLabel(request.status);
+  // 이사 완료는 text-text-error(status-error), 그 외 brand
+  // 2026.07.30 정슬기 - [수정] COMPLETED 배지 색상 분기
+  const statusClassName = getEstimateRequestStatusTextClassName(request.status);
 
-  return { statusLabel, showConfirmedIcon };
+  return { statusLabel, showConfirmedIcon, statusClassName };
 }
 
 /**
@@ -117,7 +121,7 @@ export default function EstimateRequestDetailView({
   }
 
   const isDesignated = data.designatedMovers.length > 0;
-  const { statusLabel, showConfirmedIcon } = toStatusPresentation(data);
+  const { statusLabel, showConfirmedIcon, statusClassName } = toStatusPresentation(data);
 
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
@@ -134,6 +138,7 @@ export default function EstimateRequestDetailView({
               isDesignated={isDesignated}
               title={getMoveTypeLabel(data.moveType)}
               statusLabel={statusLabel}
+              statusClassName={statusClassName}
               showConfirmedIcon={showConfirmedIcon}
             />
             <EstimateDetailInfoSection rows={toRequestInfoRows(data)} />

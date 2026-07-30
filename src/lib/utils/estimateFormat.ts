@@ -73,6 +73,18 @@ export function getEstimateRequestStatusLabel(status: EstimateRequestStatus): st
   return ESTIMATE_REQUEST_STATUS_LABEL[status];
 }
 
+/**
+ * 보낸 견적 요청 상태 배지 텍스트 색상
+ * 이사 완료는 status-error(빨간) 계열, 그 외는 brand
+ * // 2026.07.30 정슬기 - [추가]
+ */
+export function getEstimateRequestStatusTextClassName(status: EstimateRequestStatus): string {
+  if (status === "COMPLETED") {
+    return "text-text-error";
+  }
+  return "text-text-brand";
+}
+
 export function formatRequestDateLabel(value: string | Date): string {
   // 2026.07.26 정슬기 - [수정] ISO datetime은 KST 기준으로 표기 (로컬 TZ 일자 밀림 방지)
   if (isDateOnlyValue(value)) {
