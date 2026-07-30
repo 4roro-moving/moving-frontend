@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef, useState } from "react";
+
 import { Text } from "@/components/common/Text";
 import { usePageShare } from "@/hooks/usePageShare";
 import { ClipIcon, InfoIcon } from "@/icons";
@@ -70,6 +72,10 @@ export default function EstimateDetailShare({
     onToastMessage,
   });
 
+  const [isKakaoSharing, setIsKakaoSharing] = useState(false);
+  const kakaoSharingRef = useRef(false);
+  const isShareBusy = isBusy || isKakaoSharing;
+
   const hasKakaoShare = Boolean(kakaoMoverShare || kakaoEstimateShare);
 
   const iconButtonClassName = cn(
@@ -79,6 +85,10 @@ export default function EstimateDetailShare({
   );
 
   const handleKakaoShare = () => {
+    if (isShareBusy || kakaoSharingRef.current) {
+      return;
+    }
+
     if (!hasKakaoShare) {
       onToastMessage?.("카카오톡 공유 설정이 필요합니다.");
       return;
@@ -93,19 +103,34 @@ export default function EstimateDetailShare({
       },
     };
 
+    const runKakaoShare = async (share: () => Promise<void>) => {
+      kakaoSharingRef.current = true;
+      setIsKakaoSharing(true);
+      try {
+        await share();
+      } finally {
+        kakaoSharingRef.current = false;
+        setIsKakaoSharing(false);
+      }
+    };
+
     if (kakaoEstimateShare) {
-      void shareKakaoEstimateCustom({
-        templateArgs: kakaoEstimateShare,
-        ...commonHandlers,
-      });
+      void runKakaoShare(() =>
+        shareKakaoEstimateCustom({
+          templateArgs: kakaoEstimateShare,
+          ...commonHandlers,
+        }),
+      );
       return;
     }
 
     if (kakaoMoverShare) {
-      void shareKakaoMoverCustom({
-        templateArgs: kakaoMoverShare,
-        ...commonHandlers,
-      });
+      void runKakaoShare(() =>
+        shareKakaoMoverCustom({
+          templateArgs: kakaoMoverShare,
+          ...commonHandlers,
+        }),
+      );
     }
   };
 
@@ -113,7 +138,7 @@ export default function EstimateDetailShare({
     <section
       className="flex w-full flex-col gap-12 md:gap-22"
       aria-label={title}
-      aria-busy={isBusy}
+      aria-busy={isShareBusy}
     >
       <Text
         as="h2"
@@ -129,7 +154,7 @@ export default function EstimateDetailShare({
             type="button"
             aria-label="링크 복사"
             aria-busy={busyAction === "copy"}
-            disabled={isBusy}
+            disabled={isShareBusy}
             onClick={shareCopy}
             className={cn(
               iconButtonClassName,
@@ -143,7 +168,8 @@ export default function EstimateDetailShare({
           <button
             type="button"
             aria-label="카카오톡 공유"
-            disabled={isBusy}
+            aria-busy={isKakaoSharing}
+            disabled={isShareBusy}
             onClick={handleKakaoShare}
             className={cn(
               iconButtonClassName,
@@ -158,7 +184,7 @@ export default function EstimateDetailShare({
             type="button"
             aria-label={FACEBOOK_SHARE_UI_ENABLED ? "페이스북 공유" : "페이스북 공유 (준비 중)"}
             aria-busy={busyAction === "facebook"}
-            disabled={!FACEBOOK_SHARE_UI_ENABLED || isBusy}
+            disabled={!FACEBOOK_SHARE_UI_ENABLED || isShareBusy}
             title={FACEBOOK_SHARE_UI_ENABLED ? undefined : "준비 중"}
             onClick={shareFacebook}
             className={cn(
