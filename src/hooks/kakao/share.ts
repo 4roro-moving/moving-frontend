@@ -12,6 +12,7 @@ export type { KakaoEstimateShareTemplateArgs, KakaoMoverShareTemplateArgs };
 
 interface ShareKakaoHandlers {
   onMissingConfig?: () => void;
+  onSuccess?: () => void;
   onError?: (message: string) => void;
 }
 
@@ -19,11 +20,13 @@ async function sendKakaoCustomShare({
   templateId,
   templateArgs,
   onMissingConfig,
+  onSuccess,
   onError,
 }: {
   templateId: number | null;
   templateArgs: KakaoMoverShareTemplateArgs | KakaoEstimateShareTemplateArgs;
   onMissingConfig?: () => void;
+  onSuccess?: () => void;
   onError?: (message: string) => void;
 }): Promise<void> {
   if (!hasKakaoJavascriptKey() || templateId === null) {
@@ -37,6 +40,7 @@ async function sendKakaoCustomShare({
       templateId,
       templateArgs: { ...templateArgs },
     });
+    onSuccess?.();
   } catch (error) {
     const message = error instanceof Error ? error.message : "카카오톡 공유에 실패했습니다.";
     onError?.(message);
@@ -47,12 +51,14 @@ async function sendKakaoCustomShare({
 export async function shareKakaoMoverCustom({
   templateArgs,
   onMissingConfig,
+  onSuccess,
   onError,
 }: ShareKakaoHandlers & { templateArgs: KakaoMoverShareTemplateArgs }): Promise<void> {
   return sendKakaoCustomShare({
     templateId: getMoverShareTemplateId(),
     templateArgs,
     onMissingConfig,
+    onSuccess,
     onError,
   });
 }
@@ -61,12 +67,14 @@ export async function shareKakaoMoverCustom({
 export async function shareKakaoEstimateCustom({
   templateArgs,
   onMissingConfig,
+  onSuccess,
   onError,
 }: ShareKakaoHandlers & { templateArgs: KakaoEstimateShareTemplateArgs }): Promise<void> {
   return sendKakaoCustomShare({
     templateId: getEstimateShareTemplateId(),
     templateArgs,
     onMissingConfig,
+    onSuccess,
     onError,
   });
 }
