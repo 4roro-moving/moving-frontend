@@ -12,8 +12,8 @@ interface GuestOnlyProps {
 }
 
 /**
- * 로그인·회원가입 전용 — 이미 인증된 사용자는 역할 홈으로 보냄 (profile API 없음)
- * access 토큰만 있고 establishSession 전인 구간에서는 이동하지 않음 (audience 검증 레이스 방지)
+ * 로그인·회원가입 전용 — 이미 인증된 사용자는 예약 경로 또는 역할 홈으로 보냄
+ * 로그인/가입 폼은 establishSession 전에 setPostAuthRedirectPath로 목적지를 예약합니다.
  */
 const GuestOnly = ({ children }: GuestOnlyProps) => {
   const router = useRouter();
@@ -25,7 +25,11 @@ const GuestOnly = ({ children }: GuestOnlyProps) => {
   useEffect(() => {
     if (!hasHydrated || isCheckingAuth || !isAuthenticated) return;
 
-    router.replace(getAuthenticatedAuthPageRedirectPath(role ?? loadRole()));
+    const intentPath =
+      useAuthStore.getState().consumePostAuthRedirectPath() ??
+      getAuthenticatedAuthPageRedirectPath(role ?? loadRole());
+
+    router.replace(intentPath);
   }, [hasHydrated, isCheckingAuth, isAuthenticated, role, router]);
 
   if (!hasHydrated || isCheckingAuth) {

@@ -26,12 +26,21 @@ interface AuthState {
   isCheckingAuth: boolean;
   /** localStorage hydrate 완료 여부 — SSR/CSR 첫 페인트 일치용 */
   hasHydrated: boolean;
+  /**
+   * 로그인/가입 직후 GuestOnly가 사용할 목적지.
+   * consume 시 한 번만 읽고 null로 비웁니다.
+   */
+  postAuthRedirectPath: string | null;
   /** localStorage에서 인증 상태 초기화 */
   hydrateFromStorage: () => void;
   /** 인증 상태 확인 */
   checkAuth: () => Promise<void>;
   /** 세션 생성 */
   establishSession: (user: AuthUser) => void;
+  /** 로그인/회원가입 성공 후 이동 경로 예약 (establishSession 전에 호출) */
+  setPostAuthRedirectPath: (path: string) => void;
+  /** 예약된 이동 경로를 읽고 비웁니다 */
+  consumePostAuthRedirectPath: () => string | null;
   /** 로그인/회원가입 성공 후 세션 상태만 반영 */
   logout: () => Promise<void>;
   /** 세션 초기화 */
@@ -47,6 +56,7 @@ const UNAUTHENTICATED_STATE = {
   isAuthenticated: false,
   isCheckingAuth: false,
   hasHydrated: true,
+  postAuthRedirectPath: null,
 } as const satisfies Partial<AuthState>;
 
 let checkAuthPromise: Promise<void> | null = null;
@@ -116,6 +126,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   isCheckingAuth: true,
   hasHydrated: false,
+  postAuthRedirectPath: null,
 
   hydrateFromStorage: () => {
     if (get().hasHydrated) return;
@@ -142,6 +153,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   markUnauthenticated: () => {
     set({ ...UNAUTHENTICATED_STATE });
+  },
+
+  setPostAuthRedirectPath: (path) => {
+    set({ postAuthRedirectPath: path });
+  },
+
+  consumePostAuthRedirectPath: () => {
+    const path = get().postAuthRedirectPath;
+    if (path) {
+      set({ postAuthRedirectPath: null });
+    }
+    return path;
   },
 
   establishSession: (user) => {

@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -38,9 +37,9 @@ const getAudienceMismatchMessage = (pageAudience: AuthAudience): string => {
 };
 
 const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
-  const router = useRouter();
   const { mutateAsync: login, isPending } = useLoginMutation();
   const establishSession = useAuthStore((state) => state.establishSession);
+  const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const logout = useAuthStore((state) => state.logout);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -73,15 +72,14 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
         return;
       }
 
-      establishSession(result.user);
+      const nextPath = await getPostAuthRedirectPath({
+        audience: resultAudience,
+        returnPath: getLoginRedirectParam(),
+        fallbackPath: getRoleHomePath(result.user.role),
+      });
 
-      router.replace(
-        await getPostAuthRedirectPath({
-          audience: resultAudience,
-          returnPath: getLoginRedirectParam(),
-          fallbackPath: getRoleHomePath(result.user.role),
-        }),
-      );
+      setPostAuthRedirectPath(nextPath);
+      establishSession(result.user);
     } catch (error) {
       setSubmitError(getApiErrorMessage(error));
     }

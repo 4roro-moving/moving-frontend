@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -20,16 +19,17 @@ import { getProfilePath, type AuthAudience } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { signUpSchema, type SignUpFormValues } from "@/lib/schemas/signUpSchema";
 import { cn } from "@/lib/utils/cn";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 interface SignUpFormProps {
   audience?: AuthAudience;
 }
 
 const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
-  const router = useRouter();
   const customerSignUp = useSignUpMutation();
   const moverSignUp = useSignUpMoverMutation();
   const { mutateAsync: signUp, isPending } = audience === "mover" ? moverSignUp : customerSignUp;
+  const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -54,6 +54,8 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
     setSubmitError(null);
 
     try {
+      // establishSession(onSuccess) 전에 목적지 예약 — GuestOnly가 profile로 이동
+      setPostAuthRedirectPath(getProfilePath(audience));
       await signUp({
         email: values.email,
         password: values.password,
@@ -61,12 +63,9 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
         phone: values.phone,
       });
     } catch (error) {
+      useAuthStore.getState().consumePostAuthRedirectPath();
       setSubmitError(getApiErrorMessage(error));
-      return;
     }
-
-    // 회원가입 직후엔 프로필이 없음 → status 조회 없이 profile로 이동
-    router.replace(getProfilePath(audience));
   });
 
   return (
