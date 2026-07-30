@@ -35,7 +35,9 @@ export function useDesignateMover(options?: UseDesignateMoverOptions) {
       designateMover(estimateRequestId, moverId),
     onSuccess: async (data) => {
       queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, data);
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST });
+      await queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
+      });
       onSuccessRef.current?.(data);
     },
     onError: (error) => {
