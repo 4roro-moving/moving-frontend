@@ -22,7 +22,11 @@ export function parseKakaoTemplateId(raw: string | undefined): number | null {
   }
 
   const templateId = Number(trimmed);
-  return Number.isFinite(templateId) ? templateId : null;
+  if (!Number.isInteger(templateId) || templateId <= 0) {
+    return null;
+  }
+
+  return templateId;
 }
 
 /** NEXT_PUBLIC_* 는 정적 접근만 클라이언트 번들에 인라인됨 */
