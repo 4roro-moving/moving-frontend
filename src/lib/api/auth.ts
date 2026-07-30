@@ -1,7 +1,7 @@
 import fetchInstance from "@/lib/api/fetchInstance";
 import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
 import type { EnsureAccessTokenOptions } from "@/lib/auth/refreshAccessToken";
-import { clearAuthTokens, setAccessToken } from "@/lib/auth/token";
+import { setAccessToken } from "@/lib/auth/token";
 import { AUTH_BFF_BASE } from "@/lib/constants/authBff";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { ApiError } from "@/types/api";

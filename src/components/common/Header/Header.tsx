@@ -44,12 +44,11 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
   const pathname = usePathname();
   const router = useRouter();
 
-  const hasSession = useSyncExternalStore(subscribeAuthSession, hasAuthSession, () => false);
-
   const user = useAuthStore((state) => state.user);
   const displayName = useAuthStore((state) => state.displayName);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const logout = useAuthStore((state) => state.logout);
 
   // 경로별로 열린 메뉴를 추적해 pathname 변경 시 별도 setState 없이 자동으로 닫힘
@@ -62,7 +61,7 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
   const isProfileMenuOpen = openMenuPath === pathname;
   // hydrate 전·checkAuth 중: SSR refresh 쿠키 힌트 유지 (Access 메모리 공백 깜빡임 방지)
   // checkAuth 완료 후: 실제 세션(access) 기준
-  const isLogin = !hasHydrated || isCheckingAuth ? Boolean(initialIsLogin) : hasSession;
+  const isLogin = !hasHydrated || isCheckingAuth ? Boolean(initialIsLogin) : isAuthenticated;
   const navLinks = isLogin ? LOGGED_IN_LINKS : LOGGED_OUT_LINKS;
   // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
   const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;

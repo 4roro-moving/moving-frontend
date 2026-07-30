@@ -179,10 +179,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await logoutApi(logoutGeneration);
     } finally {
       if (logoutGeneration !== curSessionGeneration) {
-        return;
+        get().clearSession();
       }
-
-      get().clearSession();
     }
   },
 }));
