@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
 import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import {
   formatMoveDateLabelSafe,
@@ -25,7 +26,7 @@ interface EstimateRequestCardProps {
 export default function EstimateRequestCard({ request }: EstimateRequestCardProps) {
   const designatedCount = request.designatedMovers.length;
   const titleId = `estimate-request-${request.id}-title`;
-  const href = `/estimates/requests/${request.id}`;
+  const href = APP_ROUTES.ESTIMATES.REQUEST_DETAIL(request.id);
 
   return (
     <Link

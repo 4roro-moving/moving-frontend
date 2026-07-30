@@ -2,6 +2,7 @@ import Pagination from "@/components/common/Pagination/Pagination";
 import Select from "@/components/common/Select/Select";
 import EstimatesListEmptyState from "@/components/estimate/EstimatesListEmptyState";
 import EstimateRequestCard from "@/components/estimate/requests/EstimateRequestCard";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import type { EstimateRequestListStatusFilter, MyEstimateRequestItem } from "@/types/estimate";
 import type { Pagination as PaginationMeta } from "@/types/pagination";
 
@@ -87,7 +88,7 @@ export default function EstimateRequestsList({
               </>
             }
             buttonLabel="견적 요청하기"
-            href="/estimate-request"
+            href={APP_ROUTES.ESTIMATE_REQUEST}
           />
         ) : (
           <EstimatesListEmptyState
