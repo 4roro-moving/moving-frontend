@@ -17,7 +17,7 @@ import { useEstimateRequestDetail } from "@/hooks/useEstimateRequestDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
-import { buildEstimateShareLine } from "@/lib/share/copy";
+import { buildEstimateShareLine } from "@/lib/share/shareText";
 import {
   formatDetailDateLabel,
   formatMoveDateLabel,

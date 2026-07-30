@@ -6,7 +6,7 @@ import {
   buildMoverShareTitle,
   ESTIMATE_SHARE_OG_TITLE,
   MOVER_SHARE_DESCRIPTION,
-} from "@/lib/share/copy";
+} from "@/lib/share/shareText";
 import { buildSharePageMetadata } from "@/lib/share/openGraph";
 import { ApiError } from "@/types/api";
 import type { MoverDetailItem } from "@/types/mover";

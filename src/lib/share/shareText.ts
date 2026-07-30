@@ -1,4 +1,4 @@
-/** 기사님 상세 공유 / OG description */
+/** 기사님 상세 OG description */
 export const MOVER_SHARE_DESCRIPTION = "무빙에서 확인해 보세요!";
 
 export function buildMoverShareTitle(nickname: string): string {
