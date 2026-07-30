@@ -169,6 +169,25 @@ export function formatRating(rating: number): string {
   return rating.toFixed(1);
 }
 
+/**
+ * 지정 요청 대상 기사님 표시명 (nickname 우선, 없으면 name)
+ * 값에 "기사님"이 이미 있으면 중복 접미사를 붙이지 않습니다.
+ * // 2026.07.30 정슬기 - [추가]
+ */
+export function getDesignatedMoverDisplayName(mover: {
+  name: string;
+  moverProfile: { nickname: string | null } | null;
+}): string {
+  const base = (mover.moverProfile?.nickname?.trim() || mover.name.trim()).trim();
+  if (!base) {
+    return "기사님";
+  }
+  if (base.endsWith("기사님")) {
+    return base;
+  }
+  return `${base} 기사님`;
+}
+
 export function isPendingEstimate(status: EstimateStatus): boolean {
   return status === "SENT";
 }

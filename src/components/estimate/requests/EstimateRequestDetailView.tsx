@@ -10,6 +10,7 @@ import EstimateDetailLayout, {
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import { EstimateDetailInfoSection } from "@/components/estimate/detail/EstimateDetailInfoSection";
 import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
+import EstimateRequestDesignatedMovers from "@/components/estimate/requests/EstimateRequestDesignatedMovers";
 import EstimateRequestDetailSummary from "@/components/estimate/requests/EstimateRequestDetailSummary";
 import { useEstimateRequestDetail } from "@/hooks/useEstimateRequestDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
@@ -30,7 +31,7 @@ interface EstimateRequestDetailViewProps {
 /**
  * Figma 견적 상세(8093:49323) 정보 행 adapter.
  * 표시: 요청일·서비스·이용일·출발지·도착지
- * 제외: 견적가(API 없음), 만료일·받은 견적 수·지정 텍스트 행·취소일(Figma 미요구, 지정은 칩)
+ * 지정 요청 대상 기사님은 EstimateRequestDesignatedMovers에서 별도 표시
  */
 function toRequestInfoRows(request: MyEstimateRequestItem) {
   return [
@@ -59,6 +60,7 @@ function toStatusPresentation(request: MyEstimateRequestItem) {
  * Header/Hero/InfoRow/Share는 견적 상세 공통 재사용.
  * 기사님용 EstimateRequestSummaryContent(카드/모달)는 건드리지 않음.
  * // 2026.07.30 정슬기 - [수정] EstimateDetailLayout 적용
+ * // 2026.07.30 정슬기 - [추가] 지정 요청 대상 기사님 정보 표시
  */
 export default function EstimateRequestDetailView({
   estimateRequestId,
@@ -128,6 +130,7 @@ export default function EstimateRequestDetailView({
               showConfirmedIcon={showConfirmedIcon}
             />
             <EstimateDetailInfoSection rows={toRequestInfoRows(data)} />
+            <EstimateRequestDesignatedMovers designatedMovers={data.designatedMovers} />
           </>
         }
         aside={<EstimateDetailShare onToastMessage={setToastMessage} />}
