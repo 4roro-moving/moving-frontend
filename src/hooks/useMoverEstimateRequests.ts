@@ -65,14 +65,9 @@ export function useRejectMoverEstimate() {
     mutationFn: ({ estimateRequestId, input }: RejectMoverEstimateVariables) =>
       rejectMoverEstimate(estimateRequestId, input),
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.ESTIMATES.RECEIVED,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.ESTIMATES.REJECTED,
-        }),
-      ]);
+      await queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.ESTIMATES.ALL,
+      });
     },
   });
 }
