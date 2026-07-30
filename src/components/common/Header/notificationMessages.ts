@@ -25,7 +25,7 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
     },
     ESTIMATE_CONFIRMED: {
       prefix: "",
-      suffix: "되었어요",
+      suffix: "견적이 확정 되었어요",
     },
     ESTIMATE_REQUEST_REJECTED: {
       prefix: "",
@@ -62,6 +62,10 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
     ESTIMATE_REVISION_REJECTED: {
       prefix: "",
       suffix: " 견적 수정 요청이 거절되었어요",
+    },
+    NOTICE_RECEIVED: {
+      prefix: "",
+      suffix: "",
     },
   };
 
