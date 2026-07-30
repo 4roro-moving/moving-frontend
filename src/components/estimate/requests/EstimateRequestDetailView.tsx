@@ -16,6 +16,8 @@ import EstimateRequestDetailSummary from "@/components/estimate/requests/Estimat
 import { useEstimateRequestDetail } from "@/hooks/useEstimateRequestDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { toKakaoShareImageUrl } from "@/lib/kakao/shareCustom";
+import { buildEstimateShareLine } from "@/lib/share/copy";
 import {
   formatDetailDateLabel,
   formatMoveDateLabel,
@@ -111,6 +113,11 @@ export default function EstimateRequestDetailView({
 
   const isDesignated = data.designatedMovers.length > 0;
   const { statusLabel, showConfirmedIcon, statusClassName } = toStatusPresentation(data);
+  const kakaoEstimateShare = {
+    share_line: buildEstimateShareLine(null),
+    profile_image: toKakaoShareImageUrl(null),
+    like_count: "",
+  };
 
   return (
     <>
@@ -135,7 +142,13 @@ export default function EstimateRequestDetailView({
             <EstimateRequestDesignatedMovers designatedMovers={data.designatedMovers} />
           </>
         }
-        aside={<EstimateDetailShare linkAccess="owner" onToastMessage={setToastMessage} />}
+        aside={
+          <EstimateDetailShare
+            linkAccess="owner"
+            kakaoEstimateShare={kakaoEstimateShare}
+            onToastMessage={setToastMessage}
+          />
+        }
       />
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </>
