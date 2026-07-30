@@ -42,7 +42,6 @@ interface FavoriteMutationContext {
   previousReceived: ReceivedEstimatePanel[] | undefined;
   previousDetails: [readonly unknown[], EstimateDetail | undefined][];
   previousPendingLists: [readonly unknown[], PendingEstimateSectionListResult | undefined][];
-  previousPendingDetails: [readonly unknown[], EstimateDetail | undefined][];
   previousMoverLists: [readonly unknown[], InfiniteData<MoversListResult> | undefined][];
   previousFavoriteMovers: [readonly unknown[], MoversListResult | undefined][];
   previousMoverDetail: MoverDetail | undefined;
@@ -76,10 +75,11 @@ async function invalidateFavoriteRelatedQueries(
 ): Promise<void> {
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
+    // 받았던/대기 상세 공통 DETAIL 캐시
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
     // 2026.07.28 정슬기 - [수정] 목록은 PENDING_LIST_ROOT만 — detail prefix와 분리
+    // 2026.07.29 정슬기 - [수정] PENDING_DETAIL 제거 — 상세는 DETAIL_ROOT만 무효화
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
     queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.MOVERS.ALL, "detail"] }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS }),
@@ -121,13 +121,12 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.MOVERS.DETAIL(moverId) }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS }),
       ]);
 
-      // 롤백용 스냅샷 (received + pending list/detail + movers list + favorite movers)
+      // 롤백용 스냅샷 (received + detail + pending list + movers list + favorite movers)
       const previousReceived = queryClient.getQueryData<ReceivedEstimatePanel[]>(
         QUERY_KEYS.ESTIMATES.RECEIVED,
       );
@@ -136,9 +135,6 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       });
       const previousPendingLists = queryClient.getQueriesData<PendingEstimateSectionListResult>({
         queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
-      });
-      const previousPendingDetails = queryClient.getQueriesData<EstimateDetail>({
-        queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT,
       });
       const previousMoverLists = queryClient.getQueriesData<InfiniteData<MoversListResult>>({
         queryKey: QUERY_KEYS.MOVERS.LIST,
@@ -165,11 +161,11 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         }));
       });
 
-      // 받은 견적 상세들
+      // 견적 상세 (받았던/대기 공통 DETAIL)
       queryClient.setQueriesData<EstimateDetail>(
         { queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT },
         (detail) => {
-          if (!detail) {
+          if (!detail?.mover) {
             return detail;
           }
 
@@ -198,21 +194,6 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
                 mover: patchMoverFavorite(estimate.mover, moverId, nextIsFavorite),
               })),
             })),
-          };
-        },
-      );
-
-      // 대기 견적 상세들 (단일 detail.mover 패치)
-      queryClient.setQueriesData<EstimateDetail>(
-        { queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT },
-        (detail) => {
-          if (!detail || !detail.mover) {
-            return detail;
-          }
-
-          return {
-            ...detail,
-            mover: patchMoverFavorite(detail.mover, moverId, nextIsFavorite),
           };
         },
       );
@@ -274,7 +255,6 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         previousReceived,
         previousDetails,
         previousPendingLists,
-        previousPendingDetails,
         previousMoverLists,
         previousFavoriteMovers,
         previousMoverDetail,
@@ -288,9 +268,6 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
           queryClient.setQueryData(queryKey, data);
         });
         context.previousPendingLists.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-        context.previousPendingDetails.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
         });
         context.previousMoverLists.forEach(([queryKey, data]) => {

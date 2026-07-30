@@ -6,8 +6,7 @@ import Input from "@/components/common/Input/Input";
 import Modal from "@/components/common/Modal";
 import { Text } from "@/components/common/Text";
 import Textarea from "@/components/common/Input/Textarea";
-import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
-import { formatKoreanDateTime } from "@/lib/utils/date";
+import EstimateRequestSummaryContent from "@/components/estimate/EstimateRequestSummaryContent";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 const MAX_PRICE = 100_000_000;
@@ -79,51 +78,17 @@ export default function SendEstimateModal({
       className="min-[744px]:rounded-32 max-h-[calc(100dvh-104px)] max-w-none rounded-b-none min-[744px]:w-[375px] lg:w-full lg:max-w-[608px]"
     >
       <div className="flex min-h-0 flex-col gap-32 overflow-y-auto">
-        <section className="flex flex-col gap-20">
-          <div className="flex flex-wrap gap-8">
-            <MoveTypeChip moveType={request.moveType} />
-            {request.isDesignated ? <DesignatedChip /> : null}
-          </div>
-
-          <Text as="p" variant="xl-semibold" className="text-text-tertiary">
-            {request.customer.name} 고객님
-          </Text>
-
-          <div className="flex flex-col gap-16 sm:flex-row sm:items-end sm:gap-48">
-            <div className="flex items-end gap-12">
-              <div>
-                <Text as="p" variant="md-regular" className="text-text-muted">
-                  출발지
-                </Text>
-                <Text as="p" variant="lg-medium" className="text-text-secondary">
-                  {request.fromRegion}
-                </Text>
-              </div>
-              <span className="mb-[9px] flex w-16 items-center" aria-hidden="true">
-                <span className="bg-text-secondary h-px flex-1" />
-                <span className="border-text-secondary -ml-1 h-1.5 w-1.5 rotate-45 border-t border-r" />
-              </span>
-              <div>
-                <Text as="p" variant="md-regular" className="text-text-muted">
-                  도착지
-                </Text>
-                <Text as="p" variant="lg-medium" className="text-text-secondary">
-                  {request.toRegion}
-                </Text>
-              </div>
-            </div>
-
-            <div>
-              <Text as="p" variant="md-regular" className="text-text-muted">
-                이사일
-              </Text>
-              <Text as="p" variant="lg-medium" className="text-text-secondary whitespace-nowrap">
-                {formatKoreanDateTime(request.moveDate)}
-              </Text>
-            </div>
-          </div>
-
-          <div className="bg-border-subtle h-px" />
+        <section>
+          {/* 2026.07.29 정슬기 - [수정] 요청 요약 공통 컴포넌트 재사용 */}
+          <EstimateRequestSummaryContent
+            density="modal"
+            moveType={request.moveType}
+            isDesignated={request.isDesignated}
+            title={`${request.customer.name} 고객님`}
+            fromLabel={request.fromRegion}
+            toLabel={request.toRegion}
+            moveDate={request.moveDate}
+          />
         </section>
 
         <div className="flex flex-col gap-16">

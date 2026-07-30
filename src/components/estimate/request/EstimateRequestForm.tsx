@@ -164,17 +164,23 @@ export default function EstimateRequestForm() {
   });
 
   // 2026.07.26 정슬기 - [수정] 생성 성공 시 내 견적 목록 캐시 무효화 (대기 목록이 stale하지 않도록)
-  // 2026.07.29 정슬기 - [수정] 조회 훅이 없는 MY_LIST 대신 실제 대기 목록 키를 무효화
+  // 2026.07.29 정슬기 - [수정] PENDING_LIST + 보낸 견적 요청 MY_LIST_ROOT 무효화
   const createMutation = useMutation({
     mutationFn: createEstimateRequest,
     onSuccess: async (response) => {
       // BE GET /estimates/pending은 견적 도착 여부와 무관하게 미확정·미만료 요청을 내려주므로
       // 새 요청은 "견적 못 받은" 섹션으로 바로 노출된다. 목록이 열려 있지 않은 시점이라
       // refetchType: "none"으로 재요청 없이 stale 표시만 하고 다음 진입 때 갱신한다.
-      await queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
-        refetchType: "none",
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
+          refetchType: "none",
+        }),
+        queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST_ROOT,
+          refetchType: "none",
+        }),
+      ]);
       setToastMessage(TOAST_SUCCESS_MESSAGE);
       if (response) {
         queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, response);

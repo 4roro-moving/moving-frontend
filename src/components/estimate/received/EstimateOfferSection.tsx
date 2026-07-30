@@ -4,16 +4,16 @@ import { useMemo, useState } from "react";
 
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
-import { isConfirmedEstimate, isPendingEstimate } from "@/lib/utils/estimateFormat";
+import { isConfirmedEstimate } from "@/lib/utils/estimateFormat";
 import type { EstimateOfferFilter, ReceivedEstimateListItem } from "@/types/estimate";
 import type { MoveType } from "@/types/move";
 
 import EstimateOfferCard from "./EstimateOfferCard";
 
+// 2026.07.29 정슬기 - [수정] Figma 드롭다운과 동일하게 전체 / 확정견적만 유지
 const FILTER_OPTIONS: { value: EstimateOfferFilter; label: string }[] = [
   { value: "all", label: "전체" },
   { value: "confirmed", label: "확정견적" },
-  { value: "pending", label: "견적대기" },
 ];
 
 const FILTER_VALUES = new Set<EstimateOfferFilter>(FILTER_OPTIONS.map((option) => option.value));
@@ -36,12 +36,12 @@ export default function EstimateOfferSection({
   const [filter, setFilter] = useState<EstimateOfferFilter>("all");
 
   // 2026.07.24 정슬기 - [수정] SENT/CONFIRMED 상태로 대기·확정 견적 분리
+  // 2026.07.29 정슬기 - [수정] pending 필터 분기 제거 — 확정견적만 필터
   const filteredOffers = useMemo(() => {
-    if (filter === "all") return offers;
     if (filter === "confirmed") {
       return offers.filter((offer) => isConfirmedEstimate(offer.status));
     }
-    return offers.filter((offer) => isPendingEstimate(offer.status));
+    return offers;
   }, [filter, offers]);
 
   return (
