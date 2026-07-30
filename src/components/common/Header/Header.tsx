@@ -5,15 +5,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
-import NotificationPanel from "@/components/common/Header/NotificationPanel";
+import NotificationTrigger from "@/components/common/Header/NotificationTrigger";
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { AlarmIcon } from "@/icons";
 import { getLoginRedirectPath } from "@/lib/auth/session";
 import type { AuthRole } from "@/lib/auth/role";
 import { loadRole } from "@/lib/auth/role";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { getUnreadNotificationCount, MOCK_NOTIFICATIONS } from "@/lib/mocks/notifications.mock";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -22,7 +20,7 @@ const LOGGED_OUT_LINKS = [{ label: "기사님 찾기", href: APP_ROUTES.MOVERS.R
 const CUSTOMER_LOGGED_IN_LINKS = [
   { label: "견적 요청", href: APP_ROUTES.ESTIMATE_REQUEST },
   { label: "기사님 찾기", href: APP_ROUTES.MOVERS.ROOT },
-  { label: "내 견적 관리", href: "/estimates" },
+  { label: "내 견적 관리", href: APP_ROUTES.ESTIMATES.ROOT },
 ];
 
 const MOVER_LOGGED_IN_LINKS = [
@@ -93,29 +91,6 @@ const Header = ({
   // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
   const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
-
-  const notificationPanelId = useId();
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const unreadCount = getUnreadNotificationCount(MOCK_NOTIFICATIONS);
-
-  const closeNotification = useCallback(() => {
-    setIsNotificationOpen(false);
-  }, []);
-
-  const notificationRef = useClickOutside<HTMLDivElement>(closeNotification);
-
-  useEffect(() => {
-    if (!isNotificationOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeNotification();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isNotificationOpen, closeNotification]);
 
   const handleLogout = async () => {
     setOpenMenuPath(null);
@@ -242,33 +217,7 @@ const Header = ({
           </div>
         ) : isLogin ? (
           <div className="flex items-center gap-20">
-            <div ref={notificationRef} className="relative">
-              <button
-                type="button"
-                aria-label={unreadCount > 0 ? `알림, 읽지 않은 알림 ${unreadCount}개` : "알림"}
-                aria-expanded={isNotificationOpen}
-                aria-controls={isNotificationOpen ? notificationPanelId : undefined}
-                className="relative"
-                onClick={() => setIsNotificationOpen((prev) => !prev)}
-              >
-                <AlarmIcon className="text-icon-default size-24" aria-hidden="true" />
-                {unreadCount > 0 ? (
-                  <Text
-                    as="span"
-                    variant="xs-semibold"
-                    aria-hidden="true"
-                    className="bg-status-error text-text-inverse absolute -top-4 -right-6 flex h-16 min-w-16 items-center justify-center rounded-full px-4 leading-none"
-                  >
-                    {unreadCount}
-                  </Text>
-                ) : null}
-              </button>
-              {isNotificationOpen ? (
-                <div id={notificationPanelId}>
-                  <NotificationPanel onClose={closeNotification} />
-                </div>
-              ) : null}
-            </div>
+            <NotificationTrigger />
 
             <div ref={profileMenuRef} className="relative flex items-center gap-12">
               <button

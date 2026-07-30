@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils/cn";
 import { formatKoreanDate } from "@/lib/utils/date";
 
 import Calendar from "./Calendar";
-import { CalendarIcon, ChevronDownIcon } from "./icons";
+import { CalendarIcon, ChevronDownIcon } from "../icons";
 
 interface DatePickerFieldProps {
   value: Date;

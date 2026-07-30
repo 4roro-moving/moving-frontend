@@ -1,9 +1,12 @@
+"use client";
+
 import Image from "next/image";
+import { useSyncExternalStore } from "react";
 
 import Button from "@/components/common/Button/Button";
-import { Text } from "@/components/common/Text";
-import { MoveTypeChip, DesignatedChip } from "@/components/estimate/received/MoveTypeChip";
-import { formatKoreanDateTime } from "@/lib/utils/date";
+import EstimateRequestSummaryContent, {
+  ESTIMATE_REQUEST_DETAIL_CARD_CLASSNAME,
+} from "@/components/estimate/EstimateRequestSummaryContent";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 function formatElapsedTime(date: string) {
@@ -14,70 +17,58 @@ function formatElapsedTime(date: string) {
   return `${Math.floor(hours / 24)}일 전`;
 }
 
+const ELAPSED_TICK_MS = 60_000;
+
+function subscribeElapsedTick(onStoreChange: () => void) {
+  const intervalId = window.setInterval(onStoreChange, ELAPSED_TICK_MS);
+  return () => {
+    window.clearInterval(intervalId);
+  };
+}
+
+/**
+ * 서버 스냅샷은 비워 두고, 클라이언트에서만 상대 시각을 계산해 hydration mismatch를 피합니다.
+ * 분 단위 타이머로 구독해 카드가 열린 동안 라벨이 갱신됩니다.
+ * // 2026.07.30 정슬기 - [수정] 경과 시간 분 단위 갱신 구독 추가
+ */
+function useElapsedLabel(createdAt: string): string | undefined {
+  return useSyncExternalStore(
+    subscribeElapsedTick,
+    () => formatElapsedTime(createdAt),
+    () => undefined,
+  );
+}
+
 interface ReceivedRequestCardProps {
   request: MoverEstimateRequest;
   onSendEstimate: (request: MoverEstimateRequest) => void;
   onRejectEstimate: (request: MoverEstimateRequest) => void;
 }
 
+/**
+ * 기사님 받은 견적 요청 카드
+ * 요약 UI는 EstimateRequestSummaryContent 공통 사용, 액션만 기사 전용
+ * // 2026.07.29 정슬기 - [수정] 요청 요약 공통 컴포넌트 분리
+ * // 2026.07.30 정슬기 - [수정] elapsed time을 클라이언트 전용으로 계산해 hydration mismatch 방지
+ */
 export default function ReceivedRequestCard({
   request,
   onSendEstimate,
   onRejectEstimate,
 }: ReceivedRequestCardProps) {
+  const elapsedLabel = useElapsedLabel(request.createdAt);
+
   return (
-    <article className="border-border-subtle bg-background-surface rounded-20 flex flex-col gap-24 border px-20 py-24 shadow-[0_0_10px_rgba(220,220,220,0.2)] min-[744px]:gap-32 min-[744px]:px-40 min-[744px]:py-32 lg:px-40 lg:py-32">
-      <div className="flex flex-col gap-16 min-[744px]:gap-24">
-        <div className="flex min-h-32 items-center justify-between gap-12">
-          <div className="flex flex-wrap gap-8">
-            <MoveTypeChip moveType={request.moveType} />
-            {request.isDesignated ? <DesignatedChip /> : null}
-          </div>
-          <Text as="span" variant="md-regular" className="text-text-muted shrink-0">
-            {formatElapsedTime(request.createdAt)}
-          </Text>
-        </div>
-
-        <div className="flex flex-col gap-12">
-          <Text as="h2" variant="xl-semibold" className="text-text-tertiary">
-            {request.customer.name} 고객님
-          </Text>
-          <div className="bg-border-subtle h-px" />
-        </div>
-
-        <dl className="flex flex-col gap-12 sm:flex-row sm:justify-between sm:gap-20">
-          <div className="flex items-end gap-12">
-            <div>
-              <Text as="dt" variant="md-regular" className="text-text-muted">
-                출발지
-              </Text>
-              <Text as="dd" variant="lg-semibold" className="text-text-primary">
-                {request.fromRegion}
-              </Text>
-            </div>
-            <span className="mb-[9px] flex w-[18px] items-center" aria-hidden="true">
-              <span className="bg-text-secondary h-px flex-1" />
-              <span className="border-text-secondary -ml-1 h-1.5 w-1.5 rotate-45 border-t border-r" />
-            </span>
-            <div>
-              <Text as="dt" variant="md-regular" className="text-text-muted">
-                도착지
-              </Text>
-              <Text as="dd" variant="lg-semibold" className="text-text-primary">
-                {request.toRegion}
-              </Text>
-            </div>
-          </div>
-          <div>
-            <Text as="dt" variant="md-regular" className="text-text-muted">
-              이사일
-            </Text>
-            <Text as="dd" variant="lg-semibold" className="text-text-primary whitespace-nowrap">
-              {formatKoreanDateTime(request.moveDate)}
-            </Text>
-          </div>
-        </dl>
-      </div>
+    <article className={ESTIMATE_REQUEST_DETAIL_CARD_CLASSNAME}>
+      <EstimateRequestSummaryContent
+        moveType={request.moveType}
+        isDesignated={request.isDesignated}
+        title={`${request.customer.name} 고객님`}
+        headerMeta={elapsedLabel}
+        fromLabel={request.fromRegion}
+        toLabel={request.toRegion}
+        moveDate={request.moveDate}
+      />
 
       <div className="flex flex-col gap-[11px] sm:grid sm:grid-cols-2 sm:gap-[11px]">
         <Button

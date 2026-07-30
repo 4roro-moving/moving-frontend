@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
   getMoverEstimateRequests,
@@ -24,9 +24,11 @@ export function useMoverEstimateRequests(query: MoverEstimateRequestQuery) {
 
 //견적 반려 조회
 export function useRejectedEstimateRequests() {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: QUERY_KEYS.ESTIMATES.REJECTED,
-    queryFn: getRejectedEstimateRequests,
+    queryFn: ({ pageParam }) => getRejectedEstimateRequests(pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.pagination.nextCursor ?? undefined,
   });
 }
 

@@ -2,11 +2,18 @@
 
 import { useEffect, type ReactNode } from "react";
 
-import { Text } from "@/components/common/Text";
+import { Text, type TextVariantProp } from "@/components/common/Text";
+import { cn } from "@/lib/utils/cn";
 
 import { useModalContext } from "./ModalMain";
 
-const ModalTitle = ({ children }: { children: ReactNode }) => {
+interface ModalTitleProps {
+  children: ReactNode;
+  className?: string;
+  variant?: TextVariantProp;
+}
+
+const ModalTitle = ({ children, className, variant = "xl-bold" }: ModalTitleProps) => {
   const { titleId, setHasTitle } = useModalContext();
 
   useEffect(() => {
@@ -15,7 +22,12 @@ const ModalTitle = ({ children }: { children: ReactNode }) => {
   }, [setHasTitle]);
 
   return (
-    <Text as="h2" id={titleId} variant="xl-bold" className="text-text-primary">
+    <Text
+      as="h2"
+      id={titleId}
+      variant={variant}
+      className={cn("text-text-primary min-w-0", className)}
+    >
       {children}
     </Text>
   );

@@ -19,9 +19,7 @@ interface UseConfirmEstimateOptions {
  *
  * 받았던 견적 상세 / 대기 목록 카드 / 대기 상세가 모두 같은 API를 호출하므로 확정 훅을 하나로 둡니다.
  * // 2026.07.29 정슬기 - [추가] useConfirmEstimate·useConfirmPendingEstimate·useConfirmPendingEstimateDetail 통합
- *
- * TODO: ESTIMATES.DETAIL과 ESTIMATES.PENDING_DETAIL은 같은 리소스(GET /estimates/:estimateId)를
- * 두 번 캐시하고 있습니다. 후속 작업에서 Query Key를 하나로 합치고 받은 견적/대기 구분은 UI에서만 둡니다.
+ * // 2026.07.29 정슬기 - [수정] DETAIL 캐시 키 통합에 맞춰 setQueryData·invalidate 정리
  */
 export function useConfirmEstimate(estimateId: number, options?: UseConfirmEstimateOptions) {
   const queryClient = useQueryClient();
@@ -37,15 +35,15 @@ export function useConfirmEstimate(estimateId: number, options?: UseConfirmEstim
     mutationFn: () => confirmReceivedEstimate(estimateId),
     onSuccess: async (detail) => {
       queryClient.setQueryData(QUERY_KEYS.ESTIMATES.DETAIL(estimateId), detail);
-      queryClient.setQueryData(QUERY_KEYS.ESTIMATES.PENDING_DETAIL(estimateId), detail);
 
       // BE는 확정 시 같은 요청의 다른 SENT 견적을 EXPIRED로 바꾸므로 형제 견적 상세까지 stale 처리한다.
       // 상세 prefix는 마운트된 쿼리만 재요청되고(refetchType 기본값 active) 나머지는 다음 진입 시 갱신된다.
+      // 2026.07.29 정슬기 - [수정] 보낸 견적 요청 목록(MY_LIST)도 확정 후 stale 처리
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_DETAIL_ROOT }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST_ROOT }),
       ]);
 
       onSuccessRef.current?.(detail);

@@ -1,19 +1,26 @@
 import { Text } from "@/components/common/Text";
 
-interface ReceivedEstimatesStatusProps {
+interface EstimatesQueryStatusProps {
   message: string;
   actionLabel?: string;
   onAction?: () => void;
 }
 
-// 2026.07.24 정슬기 - [추가] 받은 견적 도메인 전용 로딩·빈·에러 상태 UI
-export default function ReceivedEstimatesStatus({
+/**
+ * 견적·리뷰 목록/상세 공통 로딩·에러 상태 UI
+ * // 2026.07.30 정슬기 - [수정] ReceivedEstimatesStatus → EstimatesQueryStatus (도메인 중립화)
+ */
+export default function EstimatesQueryStatus({
   message,
   actionLabel,
   onAction,
-}: ReceivedEstimatesStatusProps) {
+}: EstimatesQueryStatusProps) {
   return (
-    <div className="px-margin-mobile flex w-full flex-col items-center justify-center gap-16 py-64 md:px-0 md:py-80">
+    <div
+      className="px-margin-mobile flex w-full flex-col items-center justify-center gap-16 py-64 md:px-0 md:py-80"
+      role={actionLabel ? "alert" : "status"}
+      {...(actionLabel ? {} : { "aria-live": "polite" as const })}
+    >
       <Text as="p" variant="lg-regular" className="text-text-muted text-center">
         {message}
       </Text>

@@ -43,7 +43,7 @@ export default function PendingEstimateCard({
   const displayName = mover.nickname || mover.name;
   const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
   const moverTitleId = `offer-${offer.id}-mover`;
-  // 찜: PENDING_LIST / PENDING_DETAIL / RECEIVED / DETAIL 캐시는 useFavoriteMover가 갱신
+  // 찜: PENDING_LIST / RECEIVED / DETAIL 캐시는 useFavoriteMover가 갱신
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
   // BE mapListEstimate에는 canConfirm 없음 — SENT만 확정 후보 (pending 목록은 SENT-only)
   const canConfirm = isPendingEstimate(status);
@@ -242,6 +242,7 @@ export default function PendingEstimateCard({
           size="cta"
           fullWidth
           disabled={!canConfirm || confirmMutation.isPending}
+          aria-busy={confirmMutation.isPending}
           onClick={() => confirmMutation.mutate()}
           className="md:flex-1"
         >

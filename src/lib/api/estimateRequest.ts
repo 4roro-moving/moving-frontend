@@ -1,8 +1,13 @@
-import axiosInstance from "@/lib/api/axiosInstance";
+/**
+ * 견적 요청 생성·활성 조회·지정 API (단수 리소스 쓰기 경로)
+ * 목록·상세는 estimateRequests.ts 를 사용합니다.
+ */
+import fetchInstance from "@/lib/api/fetchInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { formatDateToISODate } from "@/lib/utils/date";
+import type { MyEstimateRequestItem } from "@/types/estimate";
 import type { MoveType } from "@/types/move";
 
 export interface EstimateAddressPayload {
@@ -18,16 +23,6 @@ export interface CreateEstimateRequestPayload {
   moveDate: string;
   from: EstimateAddressPayload;
   to: EstimateAddressPayload;
-}
-
-export interface CreateEstimateRequestResponse {
-  success: boolean;
-  data?: unknown;
-  message?: string;
-  error?: {
-    code?: string;
-    message?: string;
-  };
 }
 
 const MOVE_TYPE_MAP = {
@@ -70,38 +65,22 @@ export function buildCreateEstimateRequestPayload(params: {
 
 export async function createEstimateRequest(
   payload: CreateEstimateRequestPayload,
-): Promise<CreateEstimateRequestResponse> {
-  const { data } = await axiosInstance.post<CreateEstimateRequestResponse>(
-    API_ROUTES.ESTIMATE_REQUESTS.ROOT,
-    payload,
-  );
-
-  if (!data.success) {
-    throw new Error(data.error?.message || data.message || "견적 요청이 실패하였습니다.");
-  }
-
-  return data;
-}
-
-export interface ActiveEstimateRequestResponse {
-  success: boolean;
-  data: unknown | null;
-  message?: string;
-  error?: {
-    code?: string;
-    message?: string;
-  };
+): Promise<MyEstimateRequestItem> {
+  return fetchInstance.post<MyEstimateRequestItem>(API_ROUTES.ESTIMATE_REQUESTS.ROOT, payload);
 }
 
 /** 진행 중인 견적 요청 조회 — 없으면 null */
-export async function getActiveEstimateRequest(): Promise<unknown | null> {
-  const { data } = await axiosInstance.get<ActiveEstimateRequestResponse>(
-    API_ROUTES.ESTIMATE_REQUESTS.ACTIVE,
+export async function getActiveEstimateRequest(): Promise<MyEstimateRequestItem | null> {
+  return fetchInstance.get<MyEstimateRequestItem | null>(API_ROUTES.ESTIMATE_REQUESTS.ACTIVE);
+}
+
+/** POST /estimate-requests/:id/designate — 지정 견적 요청 */
+export async function designateMover(
+  estimateRequestId: number,
+  moverId: string,
+): Promise<MyEstimateRequestItem> {
+  return fetchInstance.post<MyEstimateRequestItem>(
+    API_ROUTES.ESTIMATE_REQUESTS.DESIGNATE(estimateRequestId),
+    { moverId },
   );
-
-  if (!data.success) {
-    throw new Error(data.error?.message || data.message || "진행 중인 견적 조회에 실패했습니다.");
-  }
-
-  return data.data ?? null;
 }

@@ -7,7 +7,7 @@ import { Text } from "@/components/common/Text";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
 
-import { ClearCircleIcon, SearchIcon } from "./icons";
+import { ClearCircleIcon, SearchIcon } from "../icons";
 
 export type AddressItem = AddressSearchItem;
 
@@ -20,7 +20,7 @@ interface AddressSelectModalProps {
   onConfirm: (address: AddressItem) => void;
 }
 
-const RESULT_AREA_HEIGHT = 280;
+const RESULT_AREA_HEIGHT_CLASS = "h-[280px] max-h-[280px]";
 
 function AddressChip({ label }: { label: string }) {
   return (
@@ -186,10 +186,7 @@ export default function AddressSelectModal({
           </div>
         </div>
 
-        <div
-          className="min-h-0 w-full flex-1 overflow-y-auto"
-          style={{ maxHeight: RESULT_AREA_HEIGHT, height: RESULT_AREA_HEIGHT }}
-        >
+        <div className={cn("min-h-0 w-full flex-1 overflow-y-auto", RESULT_AREA_HEIGHT_CLASS)}>
           {isSearching ? (
             <div className="flex h-full items-center justify-center">
               <Text as="p" variant="md-regular" className="text-text-placeholder">

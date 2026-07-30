@@ -1,7 +1,19 @@
 import { parseDateOnly } from "@/lib/utils/date";
-import type { EstimateStatus } from "@/types/estimate";
+import type { EstimateRequestStatus, EstimateStatus } from "@/types/estimate";
 import type { MoveType } from "@/types/move";
 import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
+
+/** EstimateRequestStatus → 화면 표기 (API enum만 매핑) */
+const ESTIMATE_REQUEST_STATUS_LABEL: Record<EstimateRequestStatus, string> = {
+  PENDING: "대기중",
+  // 목록 필터·상태 Badge 동일 표기 (Figma 필터: 진행 중)
+  // 2026.07.30 정슬기 - [수정] 견적 모집중 → 진행 중
+  OPEN: "진행 중",
+  CONFIRMED: "견적 확정",
+  COMPLETED: "이사 완료",
+  EXPIRED: "만료",
+  CANCELED: "취소됨",
+};
 
 const WEEKDAY_LABEL = ["일", "월", "화", "수", "목", "금", "토"] as const;
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -56,6 +68,23 @@ function isDateOnlyValue(value: string | Date): boolean {
 
 export function getMoveTypeLabel(moveType: MoveType): string {
   return MOVE_TYPE_LABEL[moveType];
+}
+
+/** // 2026.07.29 정슬기 - [추가] 보낸 견적 요청 상태 라벨 */
+export function getEstimateRequestStatusLabel(status: EstimateRequestStatus): string {
+  return ESTIMATE_REQUEST_STATUS_LABEL[status];
+}
+
+/**
+ * 보낸 견적 요청 상태 배지 텍스트 색상
+ * 이사 완료는 status-error(빨간) 계열, 그 외는 brand
+ * // 2026.07.30 정슬기 - [추가]
+ */
+export function getEstimateRequestStatusTextClassName(status: EstimateRequestStatus): string {
+  if (status === "COMPLETED") {
+    return "text-text-error";
+  }
+  return "text-text-brand";
 }
 
 export function formatRequestDateLabel(value: string | Date): string {
@@ -140,10 +169,50 @@ export function formatRating(rating: number): string {
   return rating.toFixed(1);
 }
 
+/**
+ * 지정 요청 대상 기사님 표시명 (nickname 우선, 없으면 name)
+ * 값에 "기사님"이 이미 있으면 중복 접미사를 붙이지 않습니다.
+ * // 2026.07.30 정슬기 - [추가]
+ */
+export function getDesignatedMoverDisplayName(mover: {
+  name: string;
+  moverProfile: { nickname: string | null } | null;
+}): string {
+  const base = (mover.moverProfile?.nickname?.trim() || mover.name.trim()).trim();
+  if (!base) {
+    return "기사님";
+  }
+  if (base.endsWith("기사님")) {
+    return base;
+  }
+  return `${base} 기사님`;
+}
+
 export function isPendingEstimate(status: EstimateStatus): boolean {
   return status === "SENT";
 }
 
 export function isConfirmedEstimate(status: EstimateStatus): boolean {
   return status === "CONFIRMED";
+}
+
+/**
+ * ISO datetime은 KST 기준 날짜로, date-only 문자열은 그대로 날짜값으로 해석해 YYYY-MM-DD 형식으로 표시
+ * 기사 상세 페이지에서 리뷰 작성일 표시에 사용됨
+ */
+export function formatDateOnlyLabel(value: string | Date): string {
+  if (isDateOnlyValue(value)) {
+    const date = parseDateOnly(value);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
+  const { year, month, day } = getKstYmdParts(toDisplayDate(value));
+  const mm = month.padStart(2, "0");
+  const dd = day.padStart(2, "0");
+
+  return `${year}-${mm}-${dd}`;
 }
