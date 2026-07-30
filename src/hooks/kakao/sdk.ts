@@ -1,5 +1,6 @@
 const KAKAO_SDK_SCRIPT_ID = "kakao-js-sdk";
 const KAKAO_SDK_SRC = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.5/kakao.min.js";
+const KAKAO_SDK_LOAD_ERROR = "Kakao SDK 로드에 실패했습니다.";
 
 function loadKakaoSdkScript(): Promise<void> {
   if (typeof window === "undefined") {
@@ -16,10 +17,11 @@ function loadKakaoSdkScript(): Promise<void> {
       existing.addEventListener("load", () => resolve(), { once: true });
       existing.addEventListener(
         "error",
-        () => reject(new Error("Kakao SDK 로드에 실패했습니다.")),
-        {
-          once: true,
+        () => {
+          existing.remove();
+          reject(new Error(KAKAO_SDK_LOAD_ERROR));
         },
+        { once: true },
       );
     });
   }
@@ -30,7 +32,10 @@ function loadKakaoSdkScript(): Promise<void> {
     script.src = KAKAO_SDK_SRC;
     script.async = true;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Kakao SDK 로드에 실패했습니다."));
+    script.onerror = () => {
+      script.remove();
+      reject(new Error(KAKAO_SDK_LOAD_ERROR));
+    };
     document.head.appendChild(script);
   });
 }
