@@ -1,11 +1,21 @@
-import axiosInstance from "@/lib/api/axiosInstance";
-import { clearAuthTokens, setAccessToken } from "@/lib/auth/token";
+import fetchInstance from "@/lib/api/fetchInstance";
+import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
+import type { EnsureAccessTokenOptions } from "@/lib/auth/refreshAccessToken";
+import { setAccessToken } from "@/lib/auth/token";
+import { AUTH_BFF_BASE } from "@/lib/constants/authBff";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
-import { isDevAuthEnabled, setDevAuthTokens } from "@/lib/dev-auth";
+import { ApiError } from "@/types/api";
 
 export interface LoginInput {
   email: string;
   password: string;
+}
+
+export interface SignUpCustomerInput {
+  email: string;
+  password: string;
+  name: string;
+  phone: string;
 }
 
 export interface AuthUser {
@@ -22,75 +32,52 @@ export interface PublicAuthTokens {
   refreshToken?: string;
 }
 
-export interface LoginResponse {
-  success: boolean;
-  data?: {
-    user: AuthUser;
-    tokens: PublicAuthTokens;
-  };
-  error?: {
-    code?: string;
-    message?: string;
-  };
-  message?: string;
+export interface LoginResult {
+  user: AuthUser;
+  tokens: PublicAuthTokens;
 }
 
-export interface RefreshResponse {
-  success: boolean;
-  data?: {
-    tokens: PublicAuthTokens;
-  };
-  error?: {
-    code?: string;
-    message?: string;
-  };
-  message?: string;
-}
+const authBffOptions = {
+  baseURL: AUTH_BFF_BASE,
+  skipAuth: true,
+} as const;
 
-function assertAccessToken(
-  data: {
-    success: boolean;
-    data?: { tokens?: PublicAuthTokens };
-    error?: { message?: string };
-    message?: string;
-  },
+const applyAccessTokenFromAuthResult = (
+  data: { tokens?: { accessToken?: string } },
   fallbackMessage: string,
-): string {
-  const accessToken = data.data?.tokens?.accessToken;
-
-  if (!data.success || !accessToken) {
-    throw new Error(data.error?.message || data.message || fallbackMessage);
+): void => {
+  const accessToken = data.tokens?.accessToken;
+  if (!accessToken) {
+    throw new ApiError(fallbackMessage);
   }
-
-  return accessToken;
-}
-
-export async function login(input: LoginInput): Promise<NonNullable<LoginResponse["data"]>> {
-  const { data } = await axiosInstance.post<LoginResponse>(API_ROUTES.AUTH.LOGIN, input);
-  const accessToken = assertAccessToken(data, "로그인에 실패했습니다.");
-
   setAccessToken(accessToken);
-  return data.data!;
-}
+};
 
-/** Refresh Token은 HttpOnly Cookie. body 없이 credentials로 갱신 */
-export async function refreshSession(): Promise<string> {
-  const { data } = await axiosInstance.post<RefreshResponse>(API_ROUTES.AUTH.REFRESH);
-  const accessToken = assertAccessToken(data, "세션 갱신에 실패했습니다.");
+export const login = async (input: LoginInput): Promise<LoginResult> => {
+  const data = await fetchInstance.post<LoginResult, LoginInput>(
+    API_ROUTES.AUTH.LOGIN,
+    input,
+    authBffOptions,
+  );
+  applyAccessTokenFromAuthResult(data, "로그인에 실패했습니다.");
+  return data;
+};
 
-  if (isDevAuthEnabled()) {
-    setDevAuthTokens({ accessToken });
-  } else {
-    setAccessToken(accessToken);
-  }
+export const signUpCustomer = async (input: SignUpCustomerInput): Promise<LoginResult> => {
+  const data = await fetchInstance.post<LoginResult, SignUpCustomerInput>(
+    API_ROUTES.AUTH.SIGN_UP_CUSTOMER,
+    input,
+    authBffOptions,
+  );
+  applyAccessTokenFromAuthResult(data, "회원가입에 실패했습니다.");
+  return data;
+};
 
-  return accessToken;
-}
+/** HttpOnly refresh cookie로 access 재발급 (Next auth BFF) */
+export const refreshSession = async (options?: EnsureAccessTokenOptions): Promise<void> => {
+  await ensureAccessTokenRefreshed(options);
+};
 
-export async function logout(): Promise<void> {
-  try {
-    await axiosInstance.post(API_ROUTES.AUTH.LOGOUT);
-  } finally {
-    clearAuthTokens();
-  }
-}
+export const logout = async (sessionGeneration: number): Promise<void> => {
+  await fetchInstance.post(API_ROUTES.AUTH.LOGOUT, undefined, authBffOptions);
+};

@@ -1,43 +1,37 @@
-"use client";
+import { type ReactNode } from "react";
+import { type Metadata } from "next";
+import { cookies } from "next/headers";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { type ReactNode, useState } from "react";
-
-import Footer from "@/components/common/Footer/Footer";
-import Header from "@/components/common/Header/Header";
+import { AppShell } from "@/components/layout/AppShell";
+import { NICKNAME_STORAGE_KEY, safeDecodeCookieValue } from "@/lib/auth/nickname";
+import { REFRESH_TOKEN_COOKIE_NAME } from "@/lib/auth/token";
 
 import "./globals.css";
 
-interface QueryProviderProps {
+export const metadata: Metadata = {
+  title: "무빙",
+  description: "이사 견적을 비교하고 믿을 수 있는 기사님을 찾는 플랫폼, 무빙",
+};
+
+interface RootLayoutProps {
   children: ReactNode;
 }
 
-export default function QueryProvider({ children }: QueryProviderProps) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 60 * 1000,
-            retry: 1,
-            refetchOnWindowFocus: false,
-          },
-          mutations: {
-            retry: 0,
-          },
-        },
-      }),
-  );
+const RootLayout = async ({ children }: RootLayoutProps) => {
+  const cookieStore = await cookies();
+  const initialIsLogin = Boolean(cookieStore.get(REFRESH_TOKEN_COOKIE_NAME));
+  const rawNickname = cookieStore.get(NICKNAME_STORAGE_KEY)?.value;
+  const initialNickname = rawNickname ? safeDecodeCookieValue(rawNickname) : null;
 
   return (
     <html lang="ko">
       <body className="flex min-h-screen flex-col">
-        <QueryClientProvider client={queryClient}>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </QueryClientProvider>
+        <AppShell initialIsLogin={initialIsLogin} initialNickname={initialNickname}>
+          {children}
+        </AppShell>
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;
