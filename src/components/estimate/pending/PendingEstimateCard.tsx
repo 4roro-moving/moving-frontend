@@ -242,6 +242,7 @@ export default function PendingEstimateCard({
           size="cta"
           fullWidth
           disabled={!canConfirm || confirmMutation.isPending}
+          aria-busy={confirmMutation.isPending}
           onClick={() => confirmMutation.mutate()}
           className="md:flex-1"
         >

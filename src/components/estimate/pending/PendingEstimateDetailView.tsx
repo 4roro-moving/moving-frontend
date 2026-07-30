@@ -3,16 +3,16 @@
 import { useState } from "react";
 
 import Toast from "@/components/common/Toast/Toast";
+import EstimateDetailActions from "@/components/estimate/detail/EstimateDetailActions";
 import EstimateDetailDriverSummary from "@/components/estimate/detail/EstimateDetailDriverSummary";
-import EstimateDetailHeader from "@/components/estimate/detail/EstimateDetailHeader";
-import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
 import EstimateDetailInfo from "@/components/estimate/detail/EstimateDetailInfo";
+import EstimateDetailLayout, {
+  EstimateDetailQueryState,
+} from "@/components/estimate/detail/EstimateDetailLayout";
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
 import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
-import PendingEstimateDetailActions from "@/components/estimate/pending/PendingEstimateDetailActions";
-import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
-import { usePendingEstimateDetail } from "@/hooks/usePendingEstimateDetail";
+import { useEstimateDetail } from "@/hooks/useEstimateDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 
 interface PendingEstimateDetailViewProps {
@@ -21,11 +21,11 @@ interface PendingEstimateDetailViewProps {
 
 /**
  * 대기 견적 상세 Desktop (Figma 8091:47263)
- * 기존 received `/estimates/[estimateId]` View와 분리 — 받은 상세 코드 미수정
- * // 2026.07.25 정슬기 - [추가] pending detail Page Client
+ * // 2026.07.25 정슬기 - [추가]
+ * // 2026.07.30 정슬기 - [수정] useEstimateDetail·Layout·Actions 통합
  */
 export default function PendingEstimateDetailView({ estimateId }: PendingEstimateDetailViewProps) {
-  const { data, isLoading, isError, error, refetch } = usePendingEstimateDetail(estimateId);
+  const { data, isLoading, isError, error, refetch } = useEstimateDetail(estimateId);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const confirmMutation = useConfirmEstimate(estimateId, {
@@ -34,50 +34,46 @@ export default function PendingEstimateDetailView({ estimateId }: PendingEstimat
   });
 
   if (isLoading) {
-    return (
-      <div className="bg-background-default flex w-full flex-col">
-        <EstimateDetailHeader />
-        <ReceivedEstimatesStatus message="견적 상세를 불러오는 중입니다." />
-      </div>
-    );
+    return <EstimateDetailQueryState message="견적 상세를 불러오는 중입니다." />;
   }
 
   if (isError || !data) {
     return (
-      <div className="bg-background-default flex w-full flex-col">
-        <EstimateDetailHeader />
-        <ReceivedEstimatesStatus
-          message={getApiErrorMessage(error, "견적 상세를 불러오지 못했습니다.")}
-          actionLabel="다시 시도"
-          onAction={() => {
-            void refetch();
-          }}
-        />
-      </div>
+      <EstimateDetailQueryState
+        message={getApiErrorMessage(error, "견적 상세를 불러오지 못했습니다.")}
+        actionLabel="다시 시도"
+        onAction={() => {
+          void refetch();
+        }}
+      />
     );
   }
 
   const displayName = data.mover.nickname || data.mover.name;
 
   return (
-    <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
-      <EstimateDetailHeader />
-      <EstimateDetailHero imageUrl={data.mover.imageUrl} name={displayName} />
-
-      {/* Desktop Figma 8091:47265 — 1200 / 740+140+320, main pt 28, action pt 40 / gap 80 */}
-      <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-28 pb-80 lg:px-0 lg:pb-37.5">
-        <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-40 lg:flex-row lg:items-start lg:justify-between lg:gap-0">
-          <div className="flex w-full min-w-0 flex-col gap-30 lg:w-185 lg:shrink-0">
+    <>
+      <EstimateDetailLayout
+        heroImageUrl={data.mover.imageUrl}
+        heroName={displayName}
+        contentClassName="pt-28 pb-80 lg:pb-37.5"
+        rowClassName="gap-40 lg:gap-0"
+        mainClassName="gap-30 lg:w-185 lg:shrink-0"
+        asideClassName="gap-40 lg:w-xs lg:shrink-0 lg:gap-80 lg:overflow-clip lg:pt-40"
+        main={
+          <>
             <div className="flex w-full flex-col gap-26">
               <EstimateDetailDriverSummary detail={data} onFavoriteError={setToastMessage} />
               <EstimateDetailPrice price={data.price} />
             </div>
             <EstimateDetailInfo detail={data} />
-          </div>
-
-          <aside className="flex w-full min-w-0 flex-col items-start gap-40 lg:w-xs lg:shrink-0 lg:gap-80 lg:overflow-clip lg:pt-40">
-            <PendingEstimateDetailActions
+          </>
+        }
+        aside={
+          <>
+            <EstimateDetailActions
               price={data.price}
+              buttonSize="detail"
               isConfirmed={data.isConfirmed}
               canConfirm={data.canConfirm}
               confirmDisabledReason={data.confirmDisabledReason}
@@ -85,11 +81,10 @@ export default function PendingEstimateDetailView({ estimateId }: PendingEstimat
               onConfirm={() => confirmMutation.mutate()}
             />
             <EstimateDetailShare onToastMessage={setToastMessage} />
-          </aside>
-        </div>
-      </div>
-
+          </>
+        }
+      />
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
-    </div>
+    </>
   );
 }

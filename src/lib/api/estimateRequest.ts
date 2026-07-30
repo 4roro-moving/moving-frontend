@@ -1,3 +1,7 @@
+/**
+ * 견적 요청 생성·활성 조회 API (단수 리소스 쓰기 경로)
+ * 목록·상세는 estimateRequests.ts 를 사용합니다.
+ */
 import axiosInstance from "@/lib/api/axiosInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";

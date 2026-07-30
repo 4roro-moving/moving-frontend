@@ -6,7 +6,9 @@ import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
 /** EstimateRequestStatus → 화면 표기 (API enum만 매핑) */
 const ESTIMATE_REQUEST_STATUS_LABEL: Record<EstimateRequestStatus, string> = {
   PENDING: "대기중",
-  OPEN: "견적 모집중",
+  // 목록 필터·상태 Badge 동일 표기 (Figma 필터: 진행 중)
+  // 2026.07.30 정슬기 - [수정] 견적 모집중 → 진행 중
+  OPEN: "진행 중",
   CONFIRMED: "견적 확정",
   COMPLETED: "이사 완료",
   EXPIRED: "만료",

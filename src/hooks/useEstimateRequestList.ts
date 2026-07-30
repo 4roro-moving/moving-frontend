@@ -12,7 +12,7 @@ import type { MyEstimateRequestListQuery } from "@/types/estimate";
 
 /**
  * 보낸 견적 요청 목록 (GET /estimate-requests)
- * pending용 useMyEstimateRequests와 분리
+ * pending용 usePendingEstimateSections와 분리
  * // 2026.07.29 정슬기 - [추가]
  * // 2026.07.29 정슬기 - [수정] status를 Query Key·API에 포함
  */
