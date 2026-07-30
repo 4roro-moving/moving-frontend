@@ -10,35 +10,26 @@ import type { MoveType } from "@/types/move";
 export const ESTIMATE_REQUEST_DETAIL_CARD_CLASSNAME =
   "border-border-subtle bg-background-surface rounded-20 flex w-full flex-col gap-24 border px-20 py-24 shadow-[0_0_10px_rgba(220,220,220,0.2)] min-[744px]:gap-32 min-[744px]:px-40 min-[744px]:py-32 lg:px-40 lg:py-32";
 
-/** 기사님 받은 요청 목록 main과 동일한 콘텐츠 폭·여백 */
-export const ESTIMATE_REQUEST_DETAIL_PAGE_CLASSNAME =
-  "mx-auto flex w-full max-w-[1200px] flex-col gap-24 px-24 pb-80 min-[744px]:px-[72px] lg:gap-40 lg:px-0";
-
-export interface EstimateRequestSummaryRow {
-  label: string;
-  value: string;
-}
-
 interface EstimateRequestSummaryContentProps {
   moveType: MoveType;
   isDesignated: boolean;
-  /** 제목 (기사: 고객명 / 고객: 상태·이사유형 등) */
+  /** 제목 (기사: 고객명) */
   title: ReactNode;
-  /** 우측 메타 (기사: N분 전 / 고객: 요청일 등) */
+  /** 우측 메타 (기사: N분 전) */
   headerMeta?: ReactNode;
   fromLabel: string;
   toLabel: string;
   moveDate: string;
-  /** 출발·도착·이사일 외 추가 행 (고객 상세용) */
-  extraRows?: EstimateRequestSummaryRow[];
   className?: string;
   /** 모달 요약은 타이포·간격이 약간 다름 */
   density?: "card" | "modal";
 }
 
 /**
- * EstimateRequest 요약 블록 — 기사님 받은 요청 카드/모달과 고객 보낸 요청 상세 공통
+ * EstimateRequest 요약 블록 — 기사님 받은 요청 카드·모달 전용
+ * (고객 보낸 요청 상세는 EstimateDetail 셸 + EstimateRequestDetailSummary 사용)
  * // 2026.07.29 정슬기 - [추가]
+ * // 2026.07.30 정슬기 - [수정] 미사용 PAGE_CLASSNAME·extraRows 제거
  */
 export default function EstimateRequestSummaryContent({
   moveType,
@@ -48,7 +39,6 @@ export default function EstimateRequestSummaryContent({
   fromLabel,
   toLabel,
   moveDate,
-  extraRows,
   className,
   density = "card",
 }: EstimateRequestSummaryContentProps) {
@@ -135,25 +125,6 @@ export default function EstimateRequestSummaryContent({
       </dl>
 
       {isModal ? <div className="bg-border-subtle h-px" /> : null}
-
-      {extraRows && extraRows.length > 0 ? (
-        <dl className="flex flex-col gap-12">
-          {extraRows.map((row) => (
-            <div key={row.label} className="flex w-full items-start justify-between gap-12">
-              <Text as="dt" variant="md-regular" className="text-text-muted shrink-0">
-                {row.label}
-              </Text>
-              <Text
-                as="dd"
-                variant="lg-semibold"
-                className="text-text-primary m-0 min-w-0 text-right wrap-break-word"
-              >
-                {row.value}
-              </Text>
-            </div>
-          ))}
-        </dl>
-      ) : null}
     </div>
   );
 }
