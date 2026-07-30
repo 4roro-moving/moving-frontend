@@ -21,7 +21,7 @@ import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { useIsClient } from "@/hooks/useIsClient";
 import { useMoverDetail } from "@/hooks/useMoverDetail";
 import { hasAuthSession } from "@/lib/auth/session";
-import { getDesignateCtaState } from "@/lib/utils/getDesignateCtaState";
+import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
 import { ApiError } from "@/types/api";
 
 interface MoverDetailViewProps {
@@ -90,19 +90,18 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
       ? getDesignateCtaState(activeRequest ?? null, detail.id)
       : null;
 
-  // 이미 지정 완료만 버튼 비활성. 한도·확정 등은 클릭 후 toast
+  // 지정 불가 상태(완료·불가·만료·한도)는 버튼 비활성. 안내 모달만 클릭으로 처리
   const isRequestDisabled =
     designateMutation.isPending ||
     (isLoggedIn && isActiveLoading) ||
     (isLoggedIn && isActiveError && isActiveFetching) ||
-    ctaState?.status === "alreadyDesignated";
+    (ctaState !== null && isDesignateCtaDisabled(ctaState.status));
 
   const requestButtonLabel =
-    ctaState?.status === "alreadyDesignated"
-      ? "지정 견적 요청 완료"
-      : designateMutation.isPending || (isActiveError && isActiveFetching)
-        ? "요청 중..."
-        : "지정 견적 요청하기";
+    ctaState?.buttonLabel ??
+    (designateMutation.isPending || (isActiveError && isActiveFetching)
+      ? "요청 중..."
+      : "지정 견적 요청하기");
 
   const toggleFavorite = () => {
     if (favoriteMutation.isPending) {
@@ -144,7 +143,8 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
       return;
     }
 
-    if (nextCtaState.status === "alreadyDesignated") {
+    // 비활성 CTA — 클릭해도 Toast 없이 무시 (버튼 disabled가 1차 방어)
+    if (isDesignateCtaDisabled(nextCtaState.status)) {
       return;
     }
 
