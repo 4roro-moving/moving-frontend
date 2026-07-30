@@ -17,12 +17,23 @@ function formatElapsedTime(date: string) {
   return `${Math.floor(hours / 24)}일 전`;
 }
 
-const subscribeNoop = () => () => {};
+const ELAPSED_TICK_MS = 60_000;
 
-/** 서버 스냅샷은 비워 두고, 클라이언트에서만 상대 시각을 계산해 hydration mismatch를 피합니다. */
+function subscribeElapsedTick(onStoreChange: () => void) {
+  const intervalId = window.setInterval(onStoreChange, ELAPSED_TICK_MS);
+  return () => {
+    window.clearInterval(intervalId);
+  };
+}
+
+/**
+ * 서버 스냅샷은 비워 두고, 클라이언트에서만 상대 시각을 계산해 hydration mismatch를 피합니다.
+ * 분 단위 타이머로 구독해 카드가 열린 동안 라벨이 갱신됩니다.
+ * // 2026.07.30 정슬기 - [수정] 경과 시간 분 단위 갱신 구독 추가
+ */
 function useElapsedLabel(createdAt: string): string | undefined {
   return useSyncExternalStore(
-    subscribeNoop,
+    subscribeElapsedTick,
     () => formatElapsedTime(createdAt),
     () => undefined,
   );
