@@ -147,3 +147,24 @@ export function isPendingEstimate(status: EstimateStatus): boolean {
 export function isConfirmedEstimate(status: EstimateStatus): boolean {
   return status === "CONFIRMED";
 }
+
+/**
+ * ISO datetime은 KST 기준 날짜로, date-only 문자열은 그대로 날짜값으로 해석해 YYYY-MM-DD 형식으로 표시
+ * 기사 상세 페이지에서 리뷰 작성일 표시에 사용됨
+ */
+export function formatDateOnlyLabel(value: string | Date): string {
+  if (isDateOnlyValue(value)) {
+    const date = parseDateOnly(value);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
+  const { year, month, day } = getKstYmdParts(toDisplayDate(value));
+  const mm = month.padStart(2, "0");
+  const dd = day.padStart(2, "0");
+
+  return `${year}-${mm}-${dd}`;
+}

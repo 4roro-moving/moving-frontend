@@ -10,7 +10,7 @@ import { useMoverReviews } from "@/hooks/useMoverReviews";
 import { MOVER_REVIEW_PAGE_LIMIT } from "@/lib/api/movers";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { cn } from "@/lib/utils/cn";
-import { formatKoreanDateLong, formatRating } from "@/lib/utils/estimateFormat";
+import { formatDateOnlyLabel, formatRating } from "@/lib/utils/estimateFormat";
 import type { MoverDetail, MoverDetailReview } from "@/types/moverDetail";
 import type { MoverReviewItem } from "@/types/review";
 
@@ -25,7 +25,7 @@ function mapMoverReviewItemToDetailReview(item: MoverReviewItem): MoverDetailRev
   return {
     id: String(item.id),
     authorMasked: item.customer.displayName,
-    createdAt: formatKoreanDateLong(item.createdAt),
+    createdAt: formatDateOnlyLabel(item.createdAt),
     rating: item.rating,
     content: item.content,
   };

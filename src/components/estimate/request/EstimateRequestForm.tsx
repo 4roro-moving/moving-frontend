@@ -1,15 +1,15 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast";
+import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
 import {
   buildCreateEstimateRequestPayload,
   createEstimateRequest,
-  getActiveEstimateRequest,
 } from "@/lib/api/estimateRequest";
 import { getApiError } from "@/lib/api/getApiError";
 import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
@@ -159,11 +159,8 @@ export default function EstimateRequestForm() {
     data: activeRequest,
     isLoading: isActiveLoading,
     isError: isActiveError,
-  } = useQuery({
-    queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE,
-    queryFn: getActiveEstimateRequest,
+  } = useActiveEstimateRequest({
     enabled: isLoggedIn,
-    retry: 1,
   });
 
   // 2026.07.26 정슬기 - [수정] 생성 성공 시 내 견적 목록 캐시 무효화 (대기 목록이 stale하지 않도록)
@@ -179,7 +176,11 @@ export default function EstimateRequestForm() {
         refetchType: "none",
       });
       setToastMessage(TOAST_SUCCESS_MESSAGE);
-      queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, response.data ?? true);
+      if (response) {
+        queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, response);
+      } else {
+        await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE });
+      }
     },
     onError: async (error) => {
       const { code } = getApiError(error);
