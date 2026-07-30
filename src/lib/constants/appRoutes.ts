@@ -4,6 +4,8 @@
  * // 2026.07.25 정슬기 - [추가]
  */
 export const APP_ROUTES = {
+  /** 홈 */
+  HOME: "/",
   LOGIN: "/login",
   /** 기사님(mover) 전용 로그인 */
   MOVER_LOGIN: "/mover/login",
