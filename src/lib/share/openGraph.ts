@@ -27,7 +27,9 @@ export function resolveShareOgImageUrl(profileImageUrl: string | null | undefine
 
   try {
     const url = new URL(src);
-    if (url.hostname.endsWith("picsum.photos")) {
+    const { hostname } = url;
+    const isPicsumHost = hostname === "picsum.photos" || hostname.endsWith(".picsum.photos");
+    if (isPicsumHost) {
       return toAbsoluteAppUrl(DEFAULT_MOVER_PROFILE_IMAGE);
     }
   } catch {
