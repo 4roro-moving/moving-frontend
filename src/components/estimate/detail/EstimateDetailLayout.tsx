@@ -6,11 +6,11 @@ import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { cn } from "@/lib/utils/cn";
 
 /**
- * 받은 견적·견적요청 상세 공통 레이아웃 프리셋 (tokens: pb-37.5 / w-185 / w-xs)
+ * 받은 견적·견적요청 상세 공통 레이아웃 프리셋 (tokens: pb-37-5 / w-185 / w-xs)
  * // 2026.07.30 정슬기 - [추가] 호출부 임의 px·클래스 중복 제거
  */
 export const ESTIMATE_DETAIL_LAYOUT_CLASSES = {
-  contentClassName: "pt-24 pb-64 md:pt-28 md:pb-80 lg:pb-37.5",
+  contentClassName: "pt-24 pb-64 md:pt-28 md:pb-80 lg:pb-37-5",
   rowClassName: "gap-32 md:gap-40",
   mainClassName: "gap-24 md:gap-30 lg:w-185",
   asideClassName: "gap-28 md:gap-40 lg:w-xs lg:overflow-clip",

@@ -56,7 +56,7 @@ export default function PendingEstimateDetailView({ estimateId }: PendingEstimat
       <EstimateDetailLayout
         heroImageUrl={data.mover.imageUrl}
         heroName={displayName}
-        contentClassName="pt-28 pb-80 lg:pb-37.5"
+        contentClassName="pt-28 pb-80 lg:pb-37-5"
         rowClassName="gap-40 lg:gap-0"
         mainClassName="gap-30 lg:w-185 lg:shrink-0"
         asideClassName="gap-40 lg:w-xs lg:shrink-0 lg:gap-80 lg:overflow-clip lg:pt-40"
