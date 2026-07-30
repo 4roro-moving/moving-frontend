@@ -22,7 +22,7 @@ export function parseKakaoTemplateId(raw: string | undefined): number | null {
   }
 
   const templateId = Number(trimmed);
-  if (!Number.isInteger(templateId) || templateId <= 0) {
+  if (!Number.isSafeInteger(templateId) || templateId <= 0) {
     return null;
   }
 
