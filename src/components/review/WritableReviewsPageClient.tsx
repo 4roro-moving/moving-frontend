@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import Pagination from "@/components/common/Pagination/Pagination";
 import Toast from "@/components/common/Toast/Toast";
-import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
+import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import ReviewEmptyState from "@/components/review/ReviewEmptyState";
 import ReviewPageFrame from "@/components/review/ReviewPageFrame";
 import ReviewWriteModal from "@/components/review/ReviewWriteModal";
@@ -45,12 +45,10 @@ export default function WritableReviewsPageClient() {
 
   return (
     <ReviewPageFrame title="작성 가능한 리뷰">
-      {isLoading ? (
-        <ReceivedEstimatesStatus message="작성 가능한 리뷰를 불러오는 중입니다." />
-      ) : null}
+      {isLoading ? <EstimatesQueryStatus message="작성 가능한 리뷰를 불러오는 중입니다." /> : null}
 
       {isError ? (
-        <ReceivedEstimatesStatus
+        <EstimatesQueryStatus
           message={getApiErrorMessage(
             error,
             "리뷰 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",

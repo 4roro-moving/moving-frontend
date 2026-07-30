@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import Pagination from "@/components/common/Pagination/Pagination";
-import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
+import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import MyReviewCard from "@/components/review/MyReviewCard";
 import ReviewEmptyState from "@/components/review/ReviewEmptyState";
 import ReviewPageFrame from "@/components/review/ReviewPageFrame";
@@ -36,10 +36,10 @@ export default function MyReviewsPageClient() {
 
   return (
     <ReviewPageFrame title="내가 작성한 리뷰">
-      {isLoading ? <ReceivedEstimatesStatus message="작성한 리뷰를 불러오는 중입니다." /> : null}
+      {isLoading ? <EstimatesQueryStatus message="작성한 리뷰를 불러오는 중입니다." /> : null}
 
       {isError ? (
-        <ReceivedEstimatesStatus
+        <EstimatesQueryStatus
           message={getApiErrorMessage(
             error,
             "리뷰 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",

@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import { Text } from "@/components/common/Text";
 import MoverEstimateTabs from "@/components/estimate/MoverEstimateTabs";
 import RejectedRequestCard from "@/components/estimate/RejectedRequestCard";
-import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
+import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { useRejectedEstimateRequests } from "@/hooks/useMoverEstimateRequests";
 
 export default function RejectedRequestsPage() {
@@ -44,7 +44,7 @@ export default function RejectedRequestsPage() {
         ) : null}
 
         {query.isError ? (
-          <ReceivedEstimatesStatus
+          <EstimatesQueryStatus
             message="반려 요청을 불러오지 못했어요."
             actionLabel={query.isFetching ? "다시 시도 중..." : "다시 시도"}
             onAction={() => {

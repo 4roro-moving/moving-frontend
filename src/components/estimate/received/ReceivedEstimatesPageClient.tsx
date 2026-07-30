@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 import Toast from "@/components/common/Toast/Toast";
+import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import ReceivedEstimatesList from "@/components/estimate/received/ReceivedEstimatesList";
-import ReceivedEstimatesStatus from "@/components/estimate/received/ReceivedEstimatesStatus";
 import { useReceivedEstimates } from "@/hooks/useReceivedEstimates";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { cn } from "@/lib/utils/cn";
@@ -25,11 +25,10 @@ export default function ReceivedEstimatesPageClient() {
         !isEmpty && "py-38 md:py-32 lg:py-64",
       )}
     >
-      {/* 2026.07.24 정슬기 - [추가] 목록 로딩·에러·성공 상태 분기 */}
-      {isLoading ? <ReceivedEstimatesStatus message="받은 견적을 불러오는 중입니다." /> : null}
+      {isLoading ? <EstimatesQueryStatus message="받은 견적을 불러오는 중입니다." /> : null}
 
       {isError ? (
-        <ReceivedEstimatesStatus
+        <EstimatesQueryStatus
           message={getApiErrorMessage(error, "받은 견적을 불러오지 못했습니다.")}
           actionLabel="다시 시도"
           onAction={() => {

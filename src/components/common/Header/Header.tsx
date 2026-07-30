@@ -18,7 +18,7 @@ const LOGGED_OUT_LINKS = [{ label: "기사님 찾기", href: APP_ROUTES.MOVERS.R
 const LOGGED_IN_LINKS = [
   { label: "견적 요청", href: APP_ROUTES.ESTIMATE_REQUEST },
   { label: "기사님 찾기", href: APP_ROUTES.MOVERS.ROOT },
-  { label: "내 견적 관리", href: "/estimates" },
+  { label: "내 견적 관리", href: APP_ROUTES.ESTIMATES.ROOT },
 ];
 
 export interface HeaderProps {
