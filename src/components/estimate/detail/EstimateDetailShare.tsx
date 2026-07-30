@@ -3,8 +3,14 @@
 import { Text } from "@/components/common/Text";
 import { usePageShare } from "@/hooks/usePageShare";
 import { ClipIcon } from "@/icons";
-import { cn } from "@/lib/utils/cn";
+import {
+  shareKakaoEstimateCustom,
+  shareKakaoMoverCustom,
+  type KakaoEstimateShareTemplateArgs,
+  type KakaoMoverShareTemplateArgs,
+} from "@/lib/kakao/shareCustom";
 import type { ShareLinkAccess } from "@/lib/share/shareUrl";
+import { cn } from "@/lib/utils/cn";
 
 function KakaoIcon({ className }: { className?: string }) {
   return (
@@ -37,6 +43,10 @@ interface EstimateDetailShareProps {
    * owner: 견적 상세처럼 소유자 로그인 시에만 확인 가능 — 공유 후 안내
    */
   linkAccess?: ShareLinkAccess;
+  /** 기사님 상세 카카오 커스텀 템플릿 */
+  kakaoMoverShare?: KakaoMoverShareTemplateArgs;
+  /** 견적 상세 카카오 커스텀 템플릿 */
+  kakaoEstimateShare?: KakaoEstimateShareTemplateArgs;
 }
 
 const DEFAULT_SHARE_TITLE = "견적서 공유하기";
@@ -50,19 +60,52 @@ export default function EstimateDetailShare({
   title = DEFAULT_SHARE_TITLE,
   onToastMessage,
   linkAccess = "public",
+  kakaoMoverShare,
+  kakaoEstimateShare,
 }: EstimateDetailShareProps) {
   const { busyAction, isBusy, shareCopy, shareKakao, shareFacebook } = usePageShare({
     linkAccess,
     onToastMessage,
   });
 
-  // 모바일은 시각 size-40 유지 + min 44 터치 영역 확보 (찜 버튼과 동일)
-  // 2026.07.30 정슬기 - [수정] 모바일 최소 터치 타깃 44px
+  const hasCustomKakaoShare = Boolean(kakaoMoverShare || kakaoEstimateShare);
+
   const iconButtonClassName = cn(
     "rounded-8 md:rounded-16 flex size-40 min-h-44 min-w-44 shrink-0 items-center justify-center transition-colors md:size-64 md:min-h-64 md:min-w-64",
     "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
     "disabled:cursor-not-allowed disabled:opacity-60",
   );
+
+  const handleKakaoShare = () => {
+    if (!hasCustomKakaoShare) {
+      shareKakao();
+      return;
+    }
+
+    const commonHandlers = {
+      onMissingConfig: () => {
+        onToastMessage?.("카카오톡 공유 설정이 필요합니다.");
+      },
+      onError: (message: string) => {
+        onToastMessage?.(message);
+      },
+    };
+
+    if (kakaoEstimateShare) {
+      void shareKakaoEstimateCustom({
+        templateArgs: kakaoEstimateShare,
+        ...commonHandlers,
+      });
+      return;
+    }
+
+    if (kakaoMoverShare) {
+      void shareKakaoMoverCustom({
+        templateArgs: kakaoMoverShare,
+        ...commonHandlers,
+      });
+    }
+  };
 
   return (
     <section
@@ -99,7 +142,7 @@ export default function EstimateDetailShare({
           aria-label="카카오톡 공유"
           aria-busy={busyAction === "kakao"}
           disabled={isBusy}
-          onClick={shareKakao}
+          onClick={handleKakaoShare}
           className={cn(
             iconButtonClassName,
             "bg-social-kakao-background text-social-kakao-icon p-8 md:p-14",
