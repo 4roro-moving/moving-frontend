@@ -31,9 +31,14 @@ interface LoginFormProps {
 }
 
 const getAudienceMismatchMessage = (pageAudience: AuthAudience): string => {
-  return pageAudience === "customer"
-    ? "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요."
-    : "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
+  switch (pageAudience) {
+    case "customer":
+      return "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요.";
+    case "mover":
+      return "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
+    case "admin":
+      return "관리자 계정입니다. 관리자 로그인을 이용해 주세요.";
+  }
 };
 
 const LoginForm = ({ audience = "customer" }: LoginFormProps) => {

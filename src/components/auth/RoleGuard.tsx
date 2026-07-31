@@ -4,13 +4,18 @@ import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { getAccessTokenRole } from "@/lib/auth/accessTokenPayload";
-import { buildLoginPath, getRoleHomePath, type AuthAudience } from "@/lib/auth/redirect";
+import {
+  buildLoginPath,
+  getAuthAudienceFromRole,
+  getRoleHomePath,
+  type AuthAudience,
+} from "@/lib/auth/redirect";
 import { loadRole, type AuthRole } from "@/lib/auth/role";
 import { getAccessToken } from "@/lib/auth/token";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 interface RoleGuardProps {
-  allowedRole: Extract<AuthRole, "CUSTOMER" | "MOVER">;
+  allowedRole: Extract<AuthRole, "CUSTOMER" | "MOVER" | "ADMIN">;
   children: ReactNode;
 }
 
@@ -59,7 +64,7 @@ const RoleGuard = ({ allowedRole, children }: RoleGuardProps) => {
 
     if (isCheckingAuth) return;
 
-    const audience: AuthAudience = allowedRole === "MOVER" ? "mover" : "customer";
+    const audience: AuthAudience = getAuthAudienceFromRole(allowedRole);
 
     if (!isAuthenticated) {
       router.replace(buildLoginPath(`${pathname}${window.location.search}`, audience));

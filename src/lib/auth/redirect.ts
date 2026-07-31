@@ -2,7 +2,7 @@ import { getCustomerProfileStatus, getMoverProfileStatus } from "@/lib/api/profi
 import type { AuthRole } from "@/lib/auth/role";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
-export type AuthAudience = "customer" | "mover";
+export type AuthAudience = "customer" | "mover" | "admin";
 
 const AUTH_PATH_PREFIXES = [
   APP_ROUTES.LOGIN,
@@ -27,12 +27,33 @@ export const getSafeReturnPath = (candidate?: string | null): string | null => {
 };
 
 export const getAuthAudienceFromRole = (role: AuthRole | null | undefined): AuthAudience => {
-  return role === "MOVER" ? "mover" : "customer";
+  // 기본 customer
+  switch (role) {
+    case "ADMIN":
+      return "admin";
+    case "MOVER":
+      return "mover";
+    case "CUSTOMER":
+      return "customer";
+    default:
+      return "customer";
+  }
 };
 
 /** 역할별 홈 — 잘못된 role 접근·auth 재진입 */
 export const getRoleHomePath = (role: AuthRole | null | undefined): string => {
-  return role === "MOVER" ? APP_ROUTES.MOVER_ESTIMATES.ROOT : APP_ROUTES.MOVERS.ROOT;
+  // 기본 customer
+  // admin home page 임시 설정. 추후 변경 필요
+  switch (role) {
+    case "ADMIN":
+      return APP_ROUTES.MOVERS.ROOT;
+    case "MOVER":
+      return APP_ROUTES.MOVER_ESTIMATES.ROOT;
+    case "CUSTOMER":
+      return APP_ROUTES.MOVERS.ROOT;
+    default:
+      return APP_ROUTES.MOVERS.ROOT;
+  }
 };
 
 export const getProfilePath = (audience: AuthAudience): string => {
