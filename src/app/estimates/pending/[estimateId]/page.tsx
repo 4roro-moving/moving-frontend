@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import CustomerAuthGate from "@/components/auth/CustomerAuthGate";
 import PendingEstimateDetailView from "@/components/estimate/pending/PendingEstimateDetailView";
 
 interface PendingEstimateDetailPageProps {
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
 };
 
 // 2026.07.25 정슬기 - [추가] /estimates/pending/[estimateId] — 받은 견적 상세와 라우트 분리
+// 2026.07.31 정슬기 - [수정] notFound 시 AuthGate 미마운트 → 404 유지
 export default async function PendingEstimateDetailPage({
   params,
 }: PendingEstimateDetailPageProps) {
@@ -24,5 +26,9 @@ export default async function PendingEstimateDetailPage({
     notFound();
   }
 
-  return <PendingEstimateDetailView estimateId={id} />;
+  return (
+    <CustomerAuthGate loadingMessage="견적 관리를 불러오는 중입니다.">
+      <PendingEstimateDetailView estimateId={id} />
+    </CustomerAuthGate>
+  );
 }

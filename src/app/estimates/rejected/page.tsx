@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import CustomerAuthGate from "@/components/auth/CustomerAuthGate";
 import RejectedRequestsPage from "@/components/estimate/RejectedRequestsPage";
 
 export const metadata: Metadata = {
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function RejectedRequestsRoute() {
-  return <RejectedRequestsPage />;
+  return (
+    <CustomerAuthGate loadingMessage="견적 관리를 불러오는 중입니다.">
+      <RejectedRequestsPage />
+    </CustomerAuthGate>
+  );
 }
