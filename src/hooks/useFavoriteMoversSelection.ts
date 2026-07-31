@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { useBulkRemoveFavoriteMovers } from "@/hooks/useBulkRemoveFavoriteMovers";
 import { fetchAllFavoriteMoverIds } from "@/lib/api/favorites";
@@ -41,59 +41,70 @@ export function useFavoriteMoversSelection({
   const hasSelection = selectedCount > 0;
   const isBulkDeleting = bulkRemoveMutation.isPending || isResolvingAllIds;
 
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     setSelectedIds([]);
     setExcludedIds([]);
     setIsSelectAll(false);
-  };
+  }, []);
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setIsSelectAll(true);
-      setExcludedIds([]);
-      setSelectedIds(loadedIds);
-      return;
-    }
-    clearSelection();
-  };
-
-  const handleToggleMover = (moverId: string, checked: boolean) => {
-    if (isSelectAll) {
-      setExcludedIds((prev) => {
-        if (checked) {
-          return prev.filter((id) => id !== moverId);
-        }
-        return prev.includes(moverId) ? prev : [...prev, moverId];
-      });
-      return;
-    }
-
-    setSelectedIds((prev) => {
+  const handleSelectAll = useCallback(
+    (checked: boolean) => {
       if (checked) {
-        return prev.includes(moverId) ? prev : [...prev, moverId];
+        setIsSelectAll(true);
+        setExcludedIds([]);
+        setSelectedIds(loadedIds);
+        return;
       }
-      return prev.filter((id) => id !== moverId);
-    });
-  };
-
-  const removeFavorites = async (idsToRemove: string[]) => {
-    if (idsToRemove.length === 0) {
-      return;
-    }
-
-    const result = await bulkRemoveMutation.mutateAsync(idsToRemove);
-
-    if (result.failedIds.length > 0) {
-      setIsSelectAll(false);
+      setSelectedIds([]);
       setExcludedIds([]);
-      setSelectedIds(result.failedIds);
-      return;
-    }
+      setIsSelectAll(false);
+    },
+    [loadedIds],
+  );
 
-    clearSelection();
-  };
+  const handleToggleMover = useCallback(
+    (moverId: string, checked: boolean) => {
+      if (isSelectAll) {
+        setExcludedIds((prev) => {
+          if (checked) {
+            return prev.filter((id) => id !== moverId);
+          }
+          return prev.includes(moverId) ? prev : [...prev, moverId];
+        });
+        return;
+      }
 
-  const handleBulkDelete = () => {
+      setSelectedIds((prev) => {
+        if (checked) {
+          return prev.includes(moverId) ? prev : [...prev, moverId];
+        }
+        return prev.filter((id) => id !== moverId);
+      });
+    },
+    [isSelectAll],
+  );
+
+  const removeFavorites = useCallback(
+    async (idsToRemove: string[]) => {
+      if (idsToRemove.length === 0) {
+        return;
+      }
+
+      const result = await bulkRemoveMutation.mutateAsync(idsToRemove);
+
+      if (result.failedIds.length > 0) {
+        setIsSelectAll(false);
+        setExcludedIds([]);
+        setSelectedIds(result.failedIds);
+        return;
+      }
+
+      clearSelection();
+    },
+    [bulkRemoveMutation, clearSelection],
+  );
+
+  const handleBulkDelete = useCallback(() => {
     if (!hasSelection || isBulkDeleting) {
       return;
     }
@@ -112,9 +123,17 @@ export function useFavoriteMoversSelection({
         // 전부 실패 시 useBulkRemoveFavoriteMovers onError에서 토스트 처리
       }
     })();
-  };
+  }, [
+    hasSelection,
+    isBulkDeleting,
+    isSelectAll,
+    selectedCount,
+    totalCount,
+    removeFavorites,
+    selectedIds,
+  ]);
 
-  const handleConfirmDeleteAll = () => {
+  const handleConfirmDeleteAll = useCallback(() => {
     void (async () => {
       setIsResolvingAllIds(true);
       try {
@@ -134,16 +153,19 @@ export function useFavoriteMoversSelection({
         setIsResolvingAllIds(false);
       }
     })();
-  };
+  }, [excludedIds, isSelectAll, removeFavorites]);
 
-  const handleCloseDeleteConfirm = () => {
+  const handleCloseDeleteConfirm = useCallback(() => {
     if (!isBulkDeleting) {
       setIsDeleteConfirmOpen(false);
     }
-  };
+  }, [isBulkDeleting]);
 
-  const isMoverSelected = (moverId: string) =>
-    isSelectAll ? !excludedIds.includes(moverId) : selectedIds.includes(moverId);
+  const isMoverSelected = useCallback(
+    (moverId: string) =>
+      isSelectAll ? !excludedIds.includes(moverId) : selectedIds.includes(moverId),
+    [excludedIds, isSelectAll, selectedIds],
+  );
 
   return {
     selectedCount,

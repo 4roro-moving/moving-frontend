@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { memo } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
 import { Text } from "@/components/common/Text";
@@ -13,16 +14,42 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import type { Mover } from "@/types/mover";
 
+interface MoverCardSelection {
+  checked: boolean;
+  /** 카드가 mover.id를 넘겨 호출 — 부모는 안정적인 핸들러를 재사용 */
+  onCheckedChange: (moverId: string, checked: boolean) => void;
+}
+
 interface MoverCardProps {
   mover: Mover;
   variant?: "full" | "compact";
   className?: string;
   onFavoriteError?: (message: string) => void;
   /** 찜 목록 등에서 카드 선택용. 있으면 우상단 체크박스 표시 */
-  selection?: {
-    checked: boolean;
-    onCheckedChange: (checked: boolean) => void;
-  };
+  selection?: MoverCardSelection;
+}
+
+function areSelectionPropsEqual(
+  prev: MoverCardSelection | undefined,
+  next: MoverCardSelection | undefined,
+): boolean {
+  if (prev === next) {
+    return true;
+  }
+  if (!prev || !next) {
+    return false;
+  }
+  return prev.checked === next.checked && prev.onCheckedChange === next.onCheckedChange;
+}
+
+function areMoverCardPropsEqual(prev: MoverCardProps, next: MoverCardProps): boolean {
+  return (
+    prev.mover === next.mover &&
+    prev.variant === next.variant &&
+    prev.className === next.className &&
+    prev.onFavoriteError === next.onFavoriteError &&
+    areSelectionPropsEqual(prev.selection, next.selection)
+  );
 }
 
 interface FavoriteButtonProps {
@@ -73,7 +100,7 @@ function FavoriteButton({
   );
 }
 
-export default function MoverCard({
+function MoverCard({
   mover,
   variant = "full",
   className,
@@ -115,7 +142,7 @@ export default function MoverCard({
     >
       <Checkbox
         checked={selection.checked}
-        onCheckedChange={selection.onCheckedChange}
+        onCheckedChange={(checked) => selection.onCheckedChange(mover.id, checked)}
         aria-label={`${mover.name} 기사님 선택`}
       />
     </div>
@@ -306,3 +333,5 @@ export default function MoverCard({
     </article>
   );
 }
+
+export default memo(MoverCard, areMoverCardPropsEqual);

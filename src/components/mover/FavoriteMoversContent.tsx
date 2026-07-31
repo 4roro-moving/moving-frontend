@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import Button from "@/components/common/Button/Button";
 import EmptyState from "@/components/common/EmptyState/EmptyState";
 import { Text } from "@/components/common/Text";
@@ -30,9 +32,12 @@ export default function FavoriteMoversContent() {
   const { canFetch } = useCustomerAuthReady();
   const query = useFavoriteMoversInfinite({ enabled: canFetch });
 
-  const movers = query.data?.pages.flatMap((page) => page.data.map(mapMoverListItemToMover)) ?? [];
+  const movers = useMemo(
+    () => query.data?.pages.flatMap((page) => page.data.map(mapMoverListItemToMover)) ?? [],
+    [query.data],
+  );
   const totalCount = query.data?.pages[0]?.pagination.totalCount ?? 0;
-  const loadedIds = movers.map((mover) => mover.id);
+  const loadedIds = useMemo(() => movers.map((mover) => mover.id), [movers]);
 
   const selection = useFavoriteMoversSelection({ loadedIds, totalCount });
 
@@ -105,7 +110,7 @@ export default function FavoriteMoversContent() {
                   onFavoriteError={selection.setToastMessage}
                   selection={{
                     checked: selection.isMoverSelected(mover.id),
-                    onCheckedChange: (checked) => selection.handleToggleMover(mover.id, checked),
+                    onCheckedChange: selection.handleToggleMover,
                   }}
                 />
               </li>
