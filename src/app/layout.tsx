@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { NICKNAME_STORAGE_KEY, safeDecodeCookieValue } from "@/lib/auth/nickname";
+import { ROLE_STORAGE_KEY, parseAuthRole } from "@/lib/auth/role";
 import { REFRESH_TOKEN_COOKIE_NAME } from "@/lib/auth/token";
 
 import "./globals.css";
@@ -22,11 +23,18 @@ const RootLayout = async ({ children }: RootLayoutProps) => {
   const initialIsLogin = Boolean(cookieStore.get(REFRESH_TOKEN_COOKIE_NAME));
   const rawNickname = cookieStore.get(NICKNAME_STORAGE_KEY)?.value;
   const initialNickname = rawNickname ? safeDecodeCookieValue(rawNickname) : null;
+  const rawRole = cookieStore.get(ROLE_STORAGE_KEY)?.value;
+  const decodedRole = rawRole ? safeDecodeCookieValue(rawRole) : null;
+  const initialRole = parseAuthRole(decodedRole);
 
   return (
     <html lang="ko">
       <body className="flex min-h-screen flex-col">
-        <AppShell initialIsLogin={initialIsLogin} initialNickname={initialNickname}>
+        <AppShell
+          initialIsLogin={initialIsLogin}
+          initialNickname={initialNickname}
+          initialRole={initialRole}
+        >
           {children}
         </AppShell>
       </body>

@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -14,15 +13,23 @@ import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
 import { useSignUpMutation } from "@/hooks/auth/useSignUpMutation";
+import { useSignUpMoverMutation } from "@/hooks/auth/useSignUpMoverMutation";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { getPostAuthRedirectPath } from "@/lib/auth/redirect";
+import { getProfilePath, type AuthAudience } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { signUpSchema, type SignUpFormValues } from "@/lib/schemas/signUpSchema";
 import { cn } from "@/lib/utils/cn";
+import { useAuthStore } from "@/stores/useAuthStore";
 
-const SignUpForm = () => {
-  const router = useRouter();
-  const { mutateAsync: signUp, isPending } = useSignUpMutation();
+interface SignUpFormProps {
+  audience?: AuthAudience;
+}
+
+const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
+  const customerSignUp = useSignUpMutation();
+  const moverSignUp = useSignUpMoverMutation();
+  const { mutateAsync: signUp, isPending } = audience === "mover" ? moverSignUp : customerSignUp;
+  const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -41,10 +48,14 @@ const SignUpForm = () => {
     },
   });
 
+  const loginHref = audience === "mover" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
+
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
 
     try {
+      // establishSession(onSuccess) 전에 목적지 예약 — GuestOnly가 profile로 이동
+      setPostAuthRedirectPath(getProfilePath(audience));
       await signUp({
         email: values.email,
         password: values.password,
@@ -52,21 +63,14 @@ const SignUpForm = () => {
         phone: values.phone,
       });
     } catch (error) {
+      useAuthStore.getState().consumePostAuthRedirectPath();
       setSubmitError(getApiErrorMessage(error));
-      return;
     }
-
-    router.replace(
-      await getPostAuthRedirectPath({
-        returnPath: null,
-        fallbackPath: APP_ROUTES.PROFILE,
-      }),
-    );
   });
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
-      <AuthHeader />
+      <AuthHeader audience={audience} />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
         <form className="flex w-full flex-col gap-32 md:gap-56" onSubmit={onSubmit} noValidate>
@@ -159,7 +163,7 @@ const SignUpForm = () => {
             이미 무빙 회원이신가요?
           </Text>
           <Link
-            href={APP_ROUTES.LOGIN}
+            href={loginHref}
             className={cn(
               getTextVariantClass({ base: "link-xs", md: "link-xl" }),
               "text-text-brand",
