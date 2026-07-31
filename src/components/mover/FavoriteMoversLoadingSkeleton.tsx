@@ -2,8 +2,7 @@
 
 import FavoriteMoversToolbar from "@/components/mover/FavoriteMoversToolbar";
 import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
-
-const LIST_SKELETON_COUNT = 3;
+import { FAVORITE_MOVERS_PAGE_LIMIT } from "@/lib/api/favorites";
 
 export default function FavoriteMoversLoadingSkeleton() {
   return (
@@ -22,7 +21,7 @@ export default function FavoriteMoversLoadingSkeleton() {
       />
       <MoverCardSkeletonList
         variant="full"
-        count={LIST_SKELETON_COUNT}
+        count={FAVORITE_MOVERS_PAGE_LIMIT}
         showSelection
         className="gap-20 min-[744px]:gap-24 lg:gap-20"
         label="찜한 기사님을 불러오는 중"

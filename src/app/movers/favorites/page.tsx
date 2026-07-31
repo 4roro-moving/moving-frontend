@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageHeader } from "@/components/common/PageHeader";
 import FavoriteMoversPageClient from "@/components/mover/FavoriteMoversPageClient";
 
 export const metadata: Metadata = {
@@ -8,5 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function FavoriteMoversPage() {
-  return <FavoriteMoversPageClient />;
+  return (
+    <div className="bg-background-subtle flex w-full flex-col">
+      <PageHeader title="찜한 기사님" />
+      <FavoriteMoversPageClient />
+    </div>
+  );
 }
