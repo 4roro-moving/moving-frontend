@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useRef } from "react";
 
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
+import { getFocusableElements } from "@/lib/utils/focusable";
 
 interface ModalProps {
   open: boolean;
@@ -15,18 +16,6 @@ interface ModalProps {
   onClose: () => void;
   className?: string;
   overlayClassName?: string;
-}
-
-const FOCUSABLE_SELECTOR =
-  'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-function getFocusableElements(container: HTMLElement): HTMLElement[] {
-  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-    (element) =>
-      !element.hidden &&
-      element.getAttribute("aria-hidden") !== "true" &&
-      !("disabled" in element && (element as HTMLButtonElement).disabled),
-  );
 }
 
 function CloseIcon({ className }: { className?: string }) {

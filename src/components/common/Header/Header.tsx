@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import NotificationTrigger from "@/components/common/Header/NotificationTrigger";
+import NotificationTrigger from "@/components/common/Header/notification";
 import ProfileMenuTrigger, {
   type ProfileMenuItem,
 } from "@/components/common/Header/ProfileMenuTrigger";

@@ -69,10 +69,10 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
     },
   };
 
-export type NotificationMessagePart = {
+export interface NotificationMessagePart {
   text: string;
   highlight?: boolean;
-};
+}
 
 export const buildNotificationMessageParts = (
   type: NotificationType,
