@@ -30,6 +30,90 @@ const EMPTY_DESCRIPTION = (
 
 const LIST_SKELETON_COUNT = 3;
 
+const CONTENT_CLASSNAME =
+  "px-margin-mobile mx-auto flex w-full max-w-[var(--container-desktop)] flex-col pt-22 pb-80 min-[744px]:px-72 min-[744px]:pt-30 lg:px-0 lg:pt-32 lg:pb-[165px]";
+
+interface FavoriteMoversToolbarProps {
+  selectedCount: number;
+  totalCount: number;
+  isAllSelected: boolean;
+  disabled?: boolean;
+  isDeleting?: boolean;
+  onSelectAll: (checked: boolean) => void;
+  onBulkDelete: () => void;
+}
+
+function FavoriteMoversToolbar({
+  selectedCount,
+  totalCount,
+  isAllSelected,
+  disabled = false,
+  isDeleting = false,
+  onSelectAll,
+  onBulkDelete,
+}: FavoriteMoversToolbarProps) {
+  const hasSelection = selectedCount > 0;
+  const canDelete = hasSelection && !disabled && !isDeleting;
+
+  return (
+    <div className="flex h-36 w-full items-center justify-between">
+      <Checkbox
+        checked={isAllSelected}
+        disabled={disabled || totalCount === 0}
+        onCheckedChange={onSelectAll}
+        label={
+          <Text as="span" variant={{ base: "md-regular", md: "lg-regular" }}>
+            {`전체선택(${selectedCount}/${totalCount})`}
+          </Text>
+        }
+        labelClassName="text-text-tertiary"
+      />
+
+      <button
+        type="button"
+        disabled={!canDelete}
+        className={cn(
+          "rounded-8 focus-visible:ring-border-brand px-12 transition-colors focus-visible:ring-2 focus-visible:outline-none",
+          canDelete
+            ? "text-text-subtle hover:text-text-secondary"
+            : "text-text-subtle cursor-not-allowed opacity-50",
+        )}
+        onClick={onBulkDelete}
+      >
+        <Text as="span" variant={{ base: "md-regular", md: "lg-regular" }} className="text-inherit">
+          선택 항목 삭제
+        </Text>
+      </button>
+    </div>
+  );
+}
+
+function FavoriteMoversLoadingSkeleton() {
+  return (
+    <div
+      className="flex flex-col gap-10 min-[744px]:gap-18 lg:gap-28"
+      aria-busy="true"
+      aria-label="찜한 기사님을 불러오는 중"
+    >
+      <FavoriteMoversToolbar
+        selectedCount={0}
+        totalCount={0}
+        isAllSelected={false}
+        disabled
+        onSelectAll={() => undefined}
+        onBulkDelete={() => undefined}
+      />
+      <MoverCardSkeletonList
+        variant="full"
+        count={LIST_SKELETON_COUNT}
+        showSelection
+        className="gap-20 min-[744px]:gap-24 lg:gap-20"
+        label="찜한 기사님을 불러오는 중"
+      />
+    </div>
+  );
+}
+
 function FavoriteMoversContent() {
   const { canFetch } = useCustomerAuthReady();
   const [page, setPage] = useState(1);
@@ -94,111 +178,74 @@ function FavoriteMoversContent() {
   };
 
   return (
-    <div className="bg-background-subtle flex w-full flex-col">
-      <PageHeader title="찜한 기사님" />
+    <div className={CONTENT_CLASSNAME}>
+      {query.isPending ? <FavoriteMoversLoadingSkeleton /> : null}
 
-      <div className="px-margin-mobile mx-auto flex w-full max-w-[var(--container-desktop)] flex-col pt-22 pb-80 min-[744px]:px-72 min-[744px]:pt-30 lg:px-0 lg:pt-32 lg:pb-[165px]">
-        {query.isPending ? (
-          <div className="flex flex-col gap-10 min-[744px]:gap-18 lg:gap-28">
-            <div className="bg-background-subtle rounded-4 h-36 w-full animate-pulse" aria-hidden />
-            <MoverCardSkeletonList
-              variant="full"
-              count={LIST_SKELETON_COUNT}
-              label="찜한 기사님을 불러오는 중"
-            />
-          </div>
-        ) : null}
+      {query.isError ? (
+        <MoversErrorPanel
+          title="불러오지 못했어요"
+          description="찜한 기사님 목록을 가져오는 중 문제가 발생했습니다."
+          actionLabel="다시 시도"
+          isRetrying={query.isFetching}
+          onRetry={() => {
+            void query.refetch();
+          }}
+        />
+      ) : null}
 
-        {query.isError ? (
-          <MoversErrorPanel
-            title="불러오지 못했어요"
-            description="찜한 기사님 목록을 가져오는 중 문제가 발생했습니다."
-            actionLabel="다시 시도"
-            isRetrying={query.isFetching}
-            onRetry={() => {
-              void query.refetch();
+      {!query.isPending && !query.isError && movers.length === 0 ? (
+        <EmptyState
+          size="sm"
+          imageSrc="/images/empty/character.png"
+          description={EMPTY_DESCRIPTION}
+          buttonLabel="기사님 찾기"
+          href={APP_ROUTES.MOVERS.ROOT}
+        />
+      ) : null}
+
+      {!query.isPending && !query.isError && movers.length > 0 ? (
+        <div
+          className="flex w-full flex-col gap-10 min-[744px]:gap-18 lg:gap-28"
+          aria-busy={query.isFetching || isBulkDeleting}
+        >
+          <FavoriteMoversToolbar
+            selectedCount={selectedOnPageCount}
+            totalCount={pageIds.length}
+            isAllSelected={isAllSelected}
+            isDeleting={isBulkDeleting}
+            onSelectAll={handleSelectAll}
+            onBulkDelete={() => {
+              void handleBulkDelete();
             }}
           />
-        ) : null}
 
-        {!query.isPending && !query.isError && movers.length === 0 ? (
-          <EmptyState
-            size="sm"
-            imageSrc="/images/empty/character.png"
-            description={EMPTY_DESCRIPTION}
-            buttonLabel="기사님 찾기"
-            href={APP_ROUTES.MOVERS.ROOT}
-          />
-        ) : null}
-
-        {!query.isPending && !query.isError && movers.length > 0 ? (
-          <div
-            className="flex w-full flex-col gap-10 min-[744px]:gap-18 lg:gap-28"
-            aria-busy={query.isFetching || isBulkDeleting}
-          >
-            <div className="flex h-36 w-full items-center justify-between">
-              <Checkbox
-                checked={isAllSelected}
-                onCheckedChange={handleSelectAll}
-                label={
-                  <Text as="span" variant={{ base: "md-regular", md: "lg-regular" }}>
-                    {`전체선택(${selectedOnPageCount}/${pageIds.length})`}
-                  </Text>
-                }
-                labelClassName="text-text-tertiary"
-              />
-
-              <button
-                type="button"
-                disabled={!hasSelection || isBulkDeleting}
-                className={cn(
-                  "rounded-8 focus-visible:ring-border-brand px-12 transition-colors focus-visible:ring-2 focus-visible:outline-none",
-                  hasSelection && !isBulkDeleting
-                    ? "text-text-subtle hover:text-text-secondary"
-                    : "text-text-subtle cursor-not-allowed opacity-50",
-                )}
-                onClick={() => {
-                  void handleBulkDelete();
-                }}
-              >
-                <Text
-                  as="span"
-                  variant={{ base: "md-regular", md: "lg-regular" }}
-                  className="text-inherit"
-                >
-                  선택 항목 삭제
-                </Text>
-              </button>
-            </div>
-
-            <ul className="flex flex-col gap-20 min-[744px]:gap-24 lg:gap-20">
-              {movers.map((mover) => (
-                <li key={mover.id}>
-                  <MoverCard
-                    mover={mover}
-                    variant="full"
-                    onFavoriteError={setToastMessage}
-                    selection={{
-                      checked: selectedIds.includes(mover.id),
-                      onCheckedChange: (checked) => handleToggleMover(mover.id, checked),
-                    }}
-                  />
-                </li>
-              ))}
-            </ul>
-
-            {totalPages > 1 ? (
-              <div className="pt-16 md:pt-24">
-                <Pagination
-                  currentPage={page}
-                  pageCount={totalPages}
-                  onPageChange={handlePageChange}
+          <ul className="flex flex-col gap-20 min-[744px]:gap-24 lg:gap-20">
+            {movers.map((mover) => (
+              <li key={mover.id}>
+                <MoverCard
+                  mover={mover}
+                  variant="full"
+                  onFavoriteError={setToastMessage}
+                  selection={{
+                    checked: selectedIds.includes(mover.id),
+                    onCheckedChange: (checked) => handleToggleMover(mover.id, checked),
+                  }}
                 />
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
+              </li>
+            ))}
+          </ul>
+
+          {totalPages > 1 ? (
+            <div className="pt-16 md:pt-24">
+              <Pagination
+                currentPage={page}
+                pageCount={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </div>
@@ -207,8 +254,17 @@ function FavoriteMoversContent() {
 
 export default function FavoriteMoversPageClient() {
   return (
-    <CustomerAuthGate loadingMessage="찜한 기사님을 불러오는 중입니다.">
-      <FavoriteMoversContent />
-    </CustomerAuthGate>
+    <div className="bg-background-subtle flex w-full flex-col">
+      <PageHeader title="찜한 기사님" />
+      <CustomerAuthGate
+        loadingFallback={
+          <div className={CONTENT_CLASSNAME}>
+            <FavoriteMoversLoadingSkeleton />
+          </div>
+        }
+      >
+        <FavoriteMoversContent />
+      </CustomerAuthGate>
+    </div>
   );
 }
