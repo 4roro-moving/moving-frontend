@@ -126,7 +126,7 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
   };
 
   const itemClassName = cn(
-    "bg-background-surface flex items-center justify-center p-10",
+    "flex items-center justify-center p-10",
     isLg ? "size-48 rounded-8" : "size-34 rounded-6",
   );
 
@@ -140,7 +140,7 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
           type="button"
           className={cn(
             itemClassName,
-            "text-text-secondary hover:bg-background-hover disabled:text-text-weak transition disabled:cursor-not-allowed disabled:hover:bg-transparent",
+            "text-text-secondary enabled:hover:bg-background-hover disabled:text-text-weak transition disabled:cursor-not-allowed",
           )}
           onClick={() => goToPage(currentPage - 1)}
           disabled={isPrevDisabled}
@@ -170,8 +170,8 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
                   className={cn(
                     itemClassName,
                     item.page === currentPage
-                      ? "text-text-secondary"
-                      : "text-text-weak hover:bg-background-hover cursor-pointer",
+                      ? "text-text-secondary disabled:cursor-default"
+                      : "text-text-weak enabled:hover:bg-background-hover cursor-pointer",
                   )}
                   onClick={() => goToPage(item.page)}
                   disabled={item.page === currentPage}
@@ -201,7 +201,7 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
           type="button"
           className={cn(
             itemClassName,
-            "text-text-secondary hover:bg-background-hover disabled:text-text-weak transition disabled:cursor-not-allowed disabled:hover:bg-transparent",
+            "text-text-secondary enabled:hover:bg-background-hover disabled:text-text-weak transition disabled:cursor-not-allowed",
           )}
           onClick={() => goToPage(currentPage + 1)}
           disabled={isNextDisabled}
