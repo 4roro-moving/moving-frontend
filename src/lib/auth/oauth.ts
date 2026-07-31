@@ -1,6 +1,6 @@
 import type { AuthAudience } from "@/lib/auth/redirect";
-import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { ApiError } from "@/types/api";
 
 export type OAuthProvider = "google" | "kakao" | "naver";
 
@@ -61,13 +61,6 @@ export const loadOAuthClientState = (): string | null => {
   return sessionStorage.getItem(OAUTH_STATE_KEY);
 };
 
-/** code 교환 API 경로 (BFF) */
-export const OAUTH_TOKEN_API_PATH: Record<OAuthProvider, string> = {
-  google: API_ROUTES.AUTH.GOOGLE_LOGIN,
-  kakao: API_ROUTES.AUTH.KAKAO_LOGIN,
-  naver: API_ROUTES.AUTH.NAVER_LOGIN,
-};
-
 export const isOAuthProvider = (value: string): value is OAuthProvider => {
   return value === "google" || value === "kakao" || value === "naver";
 };
@@ -100,6 +93,12 @@ export const buildOAuthAuthorizeUrl = (
 ): string => {
   const config = OAUTH_AUTHORIZE_CONFIG[provider];
   const url = new URL(config.authorizeUrl);
+
+  const clientId = config.clientId;
+
+  if (!clientId) {
+    throw new ApiError("소셜 로그인 설정이 올바르지 않습니다.");
+  }
 
   url.searchParams.set("client_id", config.clientId);
   url.searchParams.set("redirect_uri", getOAuthRedirectUri(provider));

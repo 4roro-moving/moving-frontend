@@ -17,8 +17,6 @@ export const startOAuthLogin = async (
 ): Promise<void> => {
   const role = audienceToOAuthRole(audience);
 
-  console.log("returnPath", getLoginRedirectParam());
-
   saveOAuthPendingSession({
     provider,
     role,

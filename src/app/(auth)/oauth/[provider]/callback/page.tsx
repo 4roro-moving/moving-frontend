@@ -21,6 +21,7 @@ import {
   type AuthAudience,
 } from "@/lib/auth/redirect";
 import { useAuthStore } from "@/stores/useAuthStore";
+import Button from "@/components/common/Button/Button";
 
 const failOAuthCallback = (message: string, setError: (value: string) => void): void => {
   clearOAuthPendingSession();
@@ -52,9 +53,25 @@ const OAuthCallbackContent = () => {
     const run = async () => {
       const code = searchParams.get("code");
       const state = searchParams.get("state");
+      const providerError = searchParams.get("error");
       const pending = loadOAuthPendingSession();
       const pageAudience: AuthAudience = pending?.role === "MOVER" ? "mover" : "customer";
       const routeProvider = params.provider;
+
+      if (providerError) {
+        failOAuthCallback(
+          providerError === "access_denied"
+            ? "소셜 로그인이 취소되었습니다."
+            : "소셜 로그인에 실패했습니다.",
+          setError,
+        );
+        return;
+      }
+
+      if (!code || !pending) {
+        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
+        return;
+      }
 
       setLoginHref(buildLoginPath(undefined, pageAudience));
 
@@ -109,7 +126,7 @@ const OAuthCallbackContent = () => {
         setPostAuthRedirectPath(nextPath);
         establishSession(result.user);
         clearOAuthPendingSession();
-        // code가 히스토리에 남지 않도록 callback URL 정리 후 이동
+        // 인증 코드가 히스토리에 남지 않도록 callback URL 정리 후 이동
         window.history.replaceState(null, "", window.location.pathname);
         router.replace(nextPath);
       } catch (err) {
@@ -126,9 +143,9 @@ const OAuthCallbackContent = () => {
         <Text as="p" role="alert" variant="md-medium" className="text-text-error text-center">
           {error}
         </Text>
-        <Link href={loginHref} className="text-text-brand underline">
+        <Button variant="solid" size="md" onClick={() => router.push(loginHref)}>
           로그인으로 돌아가기
-        </Link>
+        </Button>
       </div>
     );
   }

@@ -3,11 +3,16 @@ import { GoogleIcon, KakaoLoginIcon, NaverLoginIcon } from "@/icons";
 import { startOAuthLogin } from "@/lib/auth/startOAuthLogin";
 import type { AuthAudience } from "@/lib/auth/redirect";
 import type { OAuthProvider } from "@/lib/auth/oauth";
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { cn } from "@/lib/utils/cn";
+import { useState } from "react";
+
 interface SocialLoginButtonsProps {
   className?: string;
   audience?: AuthAudience;
+  onError?: (message: string) => void;
 }
+
 const SOCIAL_PROVIDERS: {
   provider: OAuthProvider;
   label: string;
@@ -15,7 +20,6 @@ const SOCIAL_PROVIDERS: {
   icon: typeof GoogleIcon;
   iconClassName: string;
 }[] = [
-  // loginPath 제거 — authorize는 startOAuthLogin이 담당
   {
     provider: "google",
     label: "Google로 로그인",
@@ -38,7 +42,25 @@ const SOCIAL_PROVIDERS: {
     iconClassName: "size-20 md:size-24",
   },
 ];
-const SocialLoginButtons = ({ className, audience = "customer" }: SocialLoginButtonsProps) => {
+
+const SocialLoginButtons = ({
+  className,
+  audience = "customer",
+  onError,
+}: SocialLoginButtonsProps) => {
+  const [isPending, setIsPending] = useState(false);
+
+  const handleSocialLogin = async (provider: OAuthProvider) => {
+    if (isPending) return;
+    setIsPending(true);
+    try {
+      await startOAuthLogin(provider, audience);
+    } catch (err) {
+      onError?.(getApiErrorMessage(err));
+      setIsPending(false);
+    }
+  };
+
   return (
     <div className={cn("flex items-center gap-24 md:gap-32", className)}>
       {SOCIAL_PROVIDERS.map(
@@ -47,8 +69,9 @@ const SocialLoginButtons = ({ className, audience = "customer" }: SocialLoginBut
             key={provider}
             type="button"
             aria-label={label}
+            disabled={isPending}
             onClick={() => {
-              void startOAuthLogin(provider, audience);
+              void handleSocialLogin(provider);
             }}
             className={cn(
               "flex size-54 shrink-0 items-center justify-center rounded-full md:size-72",

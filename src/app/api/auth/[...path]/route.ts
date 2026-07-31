@@ -41,12 +41,9 @@ const STRIP_REFRESH_COOKIE_PATHS = new Set([
   "oauth/naver",
 ]);
 
-const isProduction = process.env.NODE_ENV === "production";
-
 /**
  * Set-Cookie 삭제 헤더를 붙입니다.
- * 주의: 같은 응답에서 `res.cookies.set`을 쓰면 Next가 Set-Cookie를 재작성해
- * headers.append로 넣은 refreshToken 삭제가 사라질 수 있습니다. 전부 append만 사용합니다.
+ * 주의: 같은 응답에서 `res.cookies.set`을 쓰면 Next가 Set-Cookie를 재작성해 headers.append로 넣은 refreshToken 삭제가 사라질 수 있습니다. 전부 append만 사용합니다.
  */
 const appendClearCookie = (
   res: NextResponse,
@@ -67,15 +64,7 @@ const appendClearCookie = (
 
 /** login 시 심은 쿠키와 동일한 속성으로 지워야 브라우저가 삭제합니다. */
 const clearClientAuthCookies = (res: NextResponse): void => {
-  const refreshSameSite = isProduction ? "None" : "Lax";
-  const refreshSecure = isProduction;
-
   for (const path of ["/", REFRESH_TOKEN_COOKIE_BACKEND_PATH]) {
-    appendClearCookie(res, REFRESH_TOKEN_COOKIE_NAME, path, {
-      httpOnly: true,
-      sameSite: refreshSameSite,
-      secure: refreshSecure,
-    });
     // 속성 불일치로 남은 쿠키 대비 (dev에서 Secure/SameSite 조합이 달랐던 경우)
     appendClearCookie(res, REFRESH_TOKEN_COOKIE_NAME, path, {
       httpOnly: true,
