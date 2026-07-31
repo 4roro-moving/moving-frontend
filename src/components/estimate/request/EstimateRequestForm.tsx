@@ -12,12 +12,14 @@ import {
   createEstimateRequest,
 } from "@/lib/api/estimateRequest";
 import { getApiError } from "@/lib/api/getApiError";
-import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
+import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { MOVE_TYPE_CARDS, type MoveTypeCardInfo } from "@/lib/constants/moveType";
+import { MOVE_TYPE_CARDS } from "@/lib/constants/moveType";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
+import { useAuthStore } from "@/stores/useAuthStore";
+import type { MoveType } from "@/types/move";
 
 import ActiveEstimateBlocked from "./ActiveEstimateBlocked";
 import AddressSelectModal, { type AddressItem } from "./AddressSelectModal";
@@ -30,7 +32,10 @@ const TOAST_FAILURE_MESSAGE = "견적 요청이 실패하였습니다.";
 const TOAST_EXISTING_REQUEST_MESSAGE =
   "견적 요청에 실패하였습니다. 기존 견적이 있는지 확인해주세요.";
 const TOAST_INVALID_ZIP_MESSAGE = "우편번호 정보가 올바르지 않습니다. 주소를 다시 선택해주세요.";
+const TOAST_FORBIDDEN_ROLE_MESSAGE = "고객 계정으로만 견적을 요청할 수 있어요.";
 const ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE = "고객님의 견적 정보를 불러오지 못했습니다.";
+const HOME_PATH = "/";
+const FORBIDDEN_REDIRECT_DELAY_MS = 1500;
 
 const MOBILE_STEP_TITLES = {
   1: "이사 유형을 선택해주세요",
@@ -38,7 +43,6 @@ const MOBILE_STEP_TITLES = {
   3: "이사 지역을 선택해주세요",
 } as const;
 
-type MoveTypeId = MoveTypeCardInfo["id"];
 type RegionKind = "출발지" | "도착지";
 type MobileStep = 1 | 2 | 3;
 
@@ -132,15 +136,21 @@ function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
 export default function EstimateRequestForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const userRole = useAuthStore((state) => state.user?.role ?? null);
+
   const [mobileStep, setMobileStep] = useState<MobileStep>(1);
-  const [selectedType, setSelectedType] = useState<MoveTypeId | null>(null);
+  const [selectedType, setSelectedType] = useState<MoveType | null>(null);
   const [moveDate, setMoveDate] = useState<Date>(() => new Date());
   const [fromAddress, setFromAddress] = useState<AddressItem | null>(null);
   const [toAddress, setToAddress] = useState<AddressItem | null>(null);
   const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const isLoggedIn = hasAuthSession();
+  const isAuthReady = hasHydrated && !isCheckingAuth;
+  const isCustomer = userRole === "CUSTOMER";
 
   const canSubmit = Boolean(selectedType && fromAddress && toAddress);
   const canGoNext =
@@ -152,17 +162,29 @@ export default function EstimateRequestForm() {
 
   // 2026.07.30 정슬기 - [수정] hasAuthSession + getLoginRedirectPath (dev 로그인 연동)
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!isAuthReady) return;
+
+    if (!isAuthenticated) {
       router.replace(getLoginRedirectPath());
     }
-  }, [isLoggedIn, router]);
+  }, [isAuthReady, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (!isAuthReady || !isAuthenticated || isCustomer) return;
+
+    const timeoutId = window.setTimeout(() => {
+      router.replace(HOME_PATH);
+    }, FORBIDDEN_REDIRECT_DELAY_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [isAuthReady, isAuthenticated, isCustomer, router]);
 
   const {
     data: activeRequest,
     isLoading: isActiveLoading,
     isError: isActiveError,
   } = useActiveEstimateRequest({
-    enabled: isLoggedIn,
+    enabled: isAuthReady && isCustomer,
   });
 
   // 2026.07.26 정슬기 - [수정] 생성 성공 시 내 견적 목록 캐시 무효화 (대기 목록이 stale하지 않도록)
@@ -210,8 +232,16 @@ export default function EstimateRequestForm() {
     if (!selectedType || !fromAddress || !toAddress) return;
     if (createMutation.isPending) return;
 
-    if (!isLoggedIn) {
+    if (!isAuthReady) return;
+
+    if (!isAuthenticated) {
       router.replace(getLoginRedirectPath());
+      return;
+    }
+
+    if (!isCustomer) {
+      setToastMessage(TOAST_FORBIDDEN_ROLE_MESSAGE);
+      router.replace(HOME_PATH);
       return;
     }
 
@@ -221,7 +251,7 @@ export default function EstimateRequestForm() {
     }
 
     const payload = buildCreateEstimateRequestPayload({
-      moveTypeId: selectedType,
+      moveType: selectedType,
       moveDate,
       from: fromAddress,
       to: toAddress,
@@ -239,10 +269,19 @@ export default function EstimateRequestForm() {
   }
 
   const isBusy = createMutation.isPending;
-  const isCheckingActive = !isLoggedIn || isActiveLoading;
+  const isAccessDenied = isAuthReady && isAuthenticated && !isCustomer;
+  const isCheckingActive =
+    !isAuthReady || !isAuthenticated || isAccessDenied || (isCustomer && isActiveLoading);
+
+  const accessDeniedToastMessage = isAccessDenied ? TOAST_FORBIDDEN_ROLE_MESSAGE : null;
+  const visibleToastMessage = toastMessage ?? accessDeniedToastMessage;
 
   const toastElement = (
-    <Toast open={Boolean(toastMessage)} message={toastMessage ?? ""} onClose={closeToast} />
+    <Toast
+      open={Boolean(visibleToastMessage)}
+      message={visibleToastMessage ?? ""}
+      onClose={closeToast}
+    />
   );
 
   if (isCheckingActive) {
