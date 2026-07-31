@@ -8,7 +8,7 @@ import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { ProfileDefaultIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { formatKoreanDateLong } from "@/lib/utils/estimateFormat";
+import { formatKoreanDateLong, getReviewMoverDisplayName } from "@/lib/utils/estimateFormat";
 import type { MyReviewItem } from "@/types/review";
 
 interface MyReviewCardProps {
@@ -18,9 +18,10 @@ interface MyReviewCardProps {
 // 2026.07.27 정슬기 - [추가] 내가 작성한 리뷰 카드
 // 2026.07.27 정슬기 - [수정] Mobile 주소 줄바꿈·타이포 / Desktop 작성일 우측 배치
 // 2026.07.27 정슬기 - [수정] 카드 클릭 시 기사님 상세 페이지로 이동
+// 2026.07.30 정슬기 - [수정] 기사님 표시명 공통 헬퍼 사용
 export default function MyReviewCard({ review }: MyReviewCardProps) {
   const { mover, estimateRequest, rating, content, createdAt } = review;
-  const displayName = mover.nickname?.trim() || mover.name;
+  const displayName = getReviewMoverDisplayName(mover);
   const titleId = `my-review-${review.id}-title`;
 
   return (
@@ -44,7 +45,7 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
             {mover.imageUrl ? (
               <Image
                 src={mover.imageUrl}
-                alt={`${displayName} 기사님 프로필`}
+                alt={`${displayName} 프로필`}
                 fill
                 sizes="50px"
                 className="object-cover"
@@ -62,7 +63,7 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
                 variant={{ base: "md-semibold", md: "lg-semibold" }}
                 className="text-text-primary min-w-0 break-words"
               >
-                {displayName} 기사님
+                {displayName}
               </Text>
               <Text
                 as="time"
