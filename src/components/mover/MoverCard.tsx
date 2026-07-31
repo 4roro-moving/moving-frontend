@@ -105,12 +105,11 @@ export default function MoverCard({
 
   const selectionControl = selection ? (
     <div
-      className="pointer-events-auto"
+      className="pointer-events-auto relative z-20"
       onClick={(event) => {
-        event.preventDefault();
         event.stopPropagation();
       }}
-      onKeyDown={(event) => {
+      onPointerDown={(event) => {
         event.stopPropagation();
       }}
     >

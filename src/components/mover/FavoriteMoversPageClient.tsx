@@ -63,7 +63,7 @@ function FavoriteMoversToolbar({
         onCheckedChange={onSelectAll}
         label={
           <Text as="span" variant={{ base: "md-regular", md: "lg-regular" }}>
-            {`전체선택(${selectedCount}/${totalCount})`}
+            {`전체 선택(${selectedCount}/${totalCount})`}
           </Text>
         }
         labelClassName="text-text-tertiary"
