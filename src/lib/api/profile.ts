@@ -1,5 +1,5 @@
 import type { AuthUser } from "@/lib/api/auth";
-import fetchInstance from "@/lib/api/fetchInstance";
+import fetchInstance, { type FetchRequestOptions } from "@/lib/api/fetchInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import type { RegionId } from "@/lib/constants/region";
 import { ApiError } from "@/types/api";
@@ -56,8 +56,8 @@ export type MoverProfileMe = MoverProfileMeResponse & {
  * customer 프로필 status 조회
  *
  */
-export const getCustomerProfileStatus = () =>
-  fetchInstance.get<CustomerProfileStatus>(API_ROUTES.PROFILES.CUSTOMER_STATUS);
+export const getCustomerProfileStatus = (options?: FetchRequestOptions) =>
+  fetchInstance.get<CustomerProfileStatus>(API_ROUTES.PROFILES.CUSTOMER_STATUS, options);
 
 export const mapCustomerProfileMeResponse = (
   profile: CustomerProfileMeResponse,
@@ -101,8 +101,8 @@ export const toAuthUserFromCustomerProfile = (profile: CustomerProfileMe): AuthU
  * mover 프로필 status 조회
  *
  */
-export const getMoverProfileStatus = () =>
-  fetchInstance.get<CustomerProfileStatus>(API_ROUTES.PROFILES.MOVER_STATUS);
+export const getMoverProfileStatus = (options?: FetchRequestOptions) =>
+  fetchInstance.get<CustomerProfileStatus>(API_ROUTES.PROFILES.MOVER_STATUS, options);
 
 export const mapMoverProfileMeResponse = (profile: MoverProfileMeResponse): MoverProfileMe => {
   if (!profile?.name) {

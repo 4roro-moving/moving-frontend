@@ -97,8 +97,12 @@ export const getPostAuthRedirectPath = async (params?: {
     params?.fallbackPath ?? getRoleHomePath(audience === "mover" ? "MOVER" : "CUSTOMER");
 
   try {
+    // 로그인 직후 폐기된 refresh 쿠키로 /auth/refresh가 돌지 않도록
+    const statusOptions = { skipRefresh: true } as const;
     const status =
-      audience === "mover" ? await getMoverProfileStatus() : await getCustomerProfileStatus();
+      audience === "mover"
+        ? await getMoverProfileStatus(statusOptions)
+        : await getCustomerProfileStatus(statusOptions);
 
     return resolvePostLoginPath({
       isProfileCompleted: status.isProfileCompleted,

@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
-import { loginWithOAuth } from "@/lib/api/auth";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
   clearOAuthPendingSession,
@@ -13,6 +12,7 @@ import {
   loadOAuthClientState,
   loadOAuthPendingSession,
 } from "@/lib/auth/oauth";
+import { exchangeOAuthCodeOnce } from "@/lib/auth/oauthExchange";
 import {
   buildLoginPath,
   getAuthAudienceFromRole,
@@ -21,6 +21,11 @@ import {
   type AuthAudience,
 } from "@/lib/auth/redirect";
 import { useAuthStore } from "@/stores/useAuthStore";
+
+const failOAuthCallback = (message: string, setError: (value: string) => void): void => {
+  clearOAuthPendingSession();
+  setError(message);
+};
 
 const getAudienceMismatchMessage = (pageAudience: AuthAudience): string => {
   switch (pageAudience) {
@@ -42,12 +47,8 @@ const OAuthCallbackContent = () => {
   const logout = useAuthStore((state) => state.logout);
   const [error, setError] = useState<string | null>(null);
   const [loginHref, setLoginHref] = useState(buildLoginPath());
-  const hasStartedRef = useRef(false);
 
   useEffect(() => {
-    if (hasStartedRef.current) return;
-    hasStartedRef.current = true;
-
     const run = async () => {
       const code = searchParams.get("code");
       const state = searchParams.get("state");
@@ -58,34 +59,31 @@ const OAuthCallbackContent = () => {
       setLoginHref(buildLoginPath(undefined, pageAudience));
 
       if (!isOAuthProvider(routeProvider)) {
-        setError("지원하지 않는 소셜 로그인입니다.");
-        clearOAuthPendingSession();
+        failOAuthCallback("지원하지 않는 소셜 로그인입니다.", setError);
         return;
       }
 
       if (!code || !pending) {
-        setError("소셜 로그인 정보가 올바르지 않습니다.");
-        clearOAuthPendingSession();
+        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
         return;
       }
 
       if (pending.provider !== routeProvider) {
-        setError("소셜 로그인 정보가 올바르지 않습니다.");
-        clearOAuthPendingSession();
+        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
         return;
       }
 
       if (pending.provider !== "naver") {
         const savedState = loadOAuthClientState();
         if (!state || !savedState || state !== savedState) {
-          setError("유효하지 않은 요청입니다.");
-          clearOAuthPendingSession();
+          failOAuthCallback("유효하지 않은 요청입니다.", setError);
           return;
         }
       }
 
       try {
-        const result = await loginWithOAuth(pending.provider, {
+        // Strict Mode remount 시 동일 code는 1회만 교환 (모듈 단위 single-flight)
+        const result = await exchangeOAuthCodeOnce(pending.provider, {
           code,
           role: pending.role,
           ...(pending.provider === "naver" && state ? { state } : {}),
@@ -98,8 +96,7 @@ const OAuthCallbackContent = () => {
           (pending.role === "MOVER" && resultAudience !== "mover")
         ) {
           await logout();
-          setError(getAudienceMismatchMessage(pageAudience));
-          clearOAuthPendingSession();
+          failOAuthCallback(getAudienceMismatchMessage(pageAudience), setError);
           return;
         }
 
@@ -112,10 +109,11 @@ const OAuthCallbackContent = () => {
         setPostAuthRedirectPath(nextPath);
         establishSession(result.user);
         clearOAuthPendingSession();
+        // code가 히스토리에 남지 않도록 callback URL 정리 후 이동
+        window.history.replaceState(null, "", window.location.pathname);
         router.replace(nextPath);
       } catch (err) {
-        setError(getApiErrorMessage(err));
-        clearOAuthPendingSession();
+        failOAuthCallback(getApiErrorMessage(err), setError);
       }
     };
 

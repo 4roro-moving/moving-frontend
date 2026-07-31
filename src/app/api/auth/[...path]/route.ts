@@ -31,38 +31,61 @@ const BODY_PATHS = new Set([
   "oauth/naver",
 ]);
 
+/** 새 세션 발급 경로 — 브라우저에 남은 폐기 refreshToken을 백엔드로 전달하지 않음 */
+const STRIP_REFRESH_COOKIE_PATHS = new Set([
+  "login",
+  "signup/customer",
+  "signup/mover",
+  "oauth/google",
+  "oauth/kakao",
+  "oauth/naver",
+]);
+
 const isProduction = process.env.NODE_ENV === "production";
+
+/**
+ * Set-Cookie 삭제 헤더를 붙입니다.
+ * 주의: 같은 응답에서 `res.cookies.set`을 쓰면 Next가 Set-Cookie를 재작성해
+ * headers.append로 넣은 refreshToken 삭제가 사라질 수 있습니다. 전부 append만 사용합니다.
+ */
+const appendClearCookie = (
+  res: NextResponse,
+  name: string,
+  path: string,
+  options?: { httpOnly?: boolean; sameSite?: "Lax" | "None"; secure?: boolean },
+): void => {
+  const sameSite = options?.sameSite ?? "Lax";
+  const secure = options?.secure ?? false;
+  const httpOnly = options?.httpOnly ?? false;
+
+  let value = `${name}=; Path=${path}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=${sameSite}`;
+  if (httpOnly) value += "; HttpOnly";
+  if (secure) value += "; Secure";
+
+  res.headers.append("Set-Cookie", value);
+};
 
 /** login 시 심은 쿠키와 동일한 속성으로 지워야 브라우저가 삭제합니다. */
 const clearClientAuthCookies = (res: NextResponse): void => {
-  const refreshCookieBase = {
-    httpOnly: true,
-    maxAge: 0,
-    expires: new Date(0),
-    sameSite: (isProduction ? "none" : "lax") as "none" | "lax",
-    secure: isProduction,
-  };
+  const refreshSameSite = isProduction ? "None" : "Lax";
+  const refreshSecure = isProduction;
 
-  res.cookies.set(REFRESH_TOKEN_COOKIE_NAME, "", {
-    ...refreshCookieBase,
-    path: "/",
-  });
-  res.cookies.set(REFRESH_TOKEN_COOKIE_NAME, "", {
-    ...refreshCookieBase,
-    path: REFRESH_TOKEN_COOKIE_BACKEND_PATH,
-  });
-  res.cookies.set(NICKNAME_STORAGE_KEY, "", {
-    path: "/",
-    maxAge: 0,
-    expires: new Date(0),
-    sameSite: "lax",
-  });
-  res.cookies.set(ROLE_STORAGE_KEY, "", {
-    path: "/",
-    maxAge: 0,
-    expires: new Date(0),
-    sameSite: "lax",
-  });
+  for (const path of ["/", REFRESH_TOKEN_COOKIE_BACKEND_PATH]) {
+    appendClearCookie(res, REFRESH_TOKEN_COOKIE_NAME, path, {
+      httpOnly: true,
+      sameSite: refreshSameSite,
+      secure: refreshSecure,
+    });
+    // 속성 불일치로 남은 쿠키 대비 (dev에서 Secure/SameSite 조합이 달랐던 경우)
+    appendClearCookie(res, REFRESH_TOKEN_COOKIE_NAME, path, {
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: false,
+    });
+  }
+
+  appendClearCookie(res, NICKNAME_STORAGE_KEY, "/", { sameSite: "Lax" });
+  appendClearCookie(res, ROLE_STORAGE_KEY, "/", { sameSite: "Lax" });
 };
 
 /**
@@ -84,7 +107,9 @@ export const POST = async (request: Request, context: { params: Promise<{ path: 
 
     const backendRes = await fetch(`${getBackendApiBaseUrl()}/auth/${authPath}`, {
       method: "POST",
-      headers: buildBackendHeaders(request),
+      headers: buildBackendHeaders(request, undefined, {
+        stripRefreshToken: STRIP_REFRESH_COOKIE_PATHS.has(authPath),
+      }),
       body,
       cache: "no-store",
     });
