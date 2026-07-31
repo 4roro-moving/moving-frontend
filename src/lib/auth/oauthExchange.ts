@@ -5,24 +5,46 @@ import type { OAuthProvider } from "@/lib/auth/oauth";
  * Strict Mode remount / effect 재실행에도 동일 code 교환은 1회만 수행합니다.
  * (code는 1회용 — 두 번 보내면 "만료된 인증 코드"가 됩니다.)
  */
-let inFlight: { key: string; promise: Promise<LoginResult> } | null = null;
+let pendingExchange: { key: string; promise: Promise<LoginResult> } | null = null;
+let completedExchange: { key: string; result: LoginResult } | null = null;
+
+const getExchangeKey = (provider: OAuthProvider, code: string): string => {
+  return `${provider}:${code}`;
+};
+
+export const getCompletedOAuthExchange = (
+  provider: OAuthProvider,
+  code: string,
+): LoginResult | null => {
+  const key = getExchangeKey(provider, code);
+  return completedExchange?.key === key ? completedExchange.result : null;
+};
 
 export const exchangeOAuthCodeOnce = (
   provider: OAuthProvider,
   input: OAuthLoginInput,
 ): Promise<LoginResult> => {
-  const key = `${provider}:${input.code}`;
+  const key = getExchangeKey(provider, input.code);
 
-  if (inFlight?.key === key) {
-    return inFlight.promise;
+  if (completedExchange?.key === key) {
+    return Promise.resolve(completedExchange.result);
   }
 
-  const promise = loginWithOAuth(provider, input).finally(() => {
-    if (inFlight?.key === key) {
-      inFlight = null;
-    }
-  });
+  if (pendingExchange?.key === key) {
+    return pendingExchange.promise;
+  }
 
-  inFlight = { key, promise };
+  const promise = loginWithOAuth(provider, input)
+    .then((result) => {
+      completedExchange = { key, result };
+      return result;
+    })
+    .finally(() => {
+      if (pendingExchange?.key === key) {
+        pendingExchange = null;
+      }
+    });
+
+  pendingExchange = { key, promise };
   return promise;
 };

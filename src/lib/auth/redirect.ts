@@ -139,6 +139,13 @@ export const isAuthPagePath = (pathname: string): boolean => {
   ].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 };
 
+/** OAuth Provider callback — checkAuth의 refresh/profile을 건너뜁니다. */
+export const isOAuthCallbackPath = (pathname: string): boolean => {
+  return (["google", "kakao", "naver"] as const).some(
+    (provider) => pathname === APP_ROUTES.OAUTH_CALLBACK(provider),
+  );
+};
+
 export const getAudienceFromPathname = (pathname: string): AuthAudience => {
   return pathname === APP_ROUTES.MOVER_LOGIN ||
     pathname.startsWith(`${APP_ROUTES.MOVER_LOGIN}/`) ||

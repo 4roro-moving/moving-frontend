@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 
+import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
@@ -12,7 +12,7 @@ import {
   loadOAuthClientState,
   loadOAuthPendingSession,
 } from "@/lib/auth/oauth";
-import { exchangeOAuthCodeOnce } from "@/lib/auth/oauthExchange";
+import { exchangeOAuthCodeOnce, getCompletedOAuthExchange } from "@/lib/auth/oauthExchange";
 import {
   buildLoginPath,
   getAuthAudienceFromRole,
@@ -21,7 +21,9 @@ import {
   type AuthAudience,
 } from "@/lib/auth/redirect";
 import { useAuthStore } from "@/stores/useAuthStore";
-import Button from "@/components/common/Button/Button";
+
+/** Strict remount에도 성공 후처리를 한 번만 수행 */
+const finishedExchangeKeys = new Set<string>();
 
 const failOAuthCallback = (message: string, setError: (value: string) => void): void => {
   clearOAuthPendingSession();
@@ -48,15 +50,21 @@ const OAuthCallbackContent = () => {
   const logout = useAuthStore((state) => state.logout);
   const [error, setError] = useState<string | null>(null);
   const [loginHref, setLoginHref] = useState(buildLoginPath());
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
     const run = async () => {
       const code = searchParams.get("code");
       const state = searchParams.get("state");
       const providerError = searchParams.get("error");
+      const routeProvider = params.provider;
       const pending = loadOAuthPendingSession();
       const pageAudience: AuthAudience = pending?.role === "MOVER" ? "mover" : "customer";
-      const routeProvider = params.provider;
+
+      setLoginHref(buildLoginPath(undefined, pageAudience));
 
       if (providerError) {
         failOAuthCallback(
@@ -68,19 +76,26 @@ const OAuthCallbackContent = () => {
         return;
       }
 
-      if (!code || !pending) {
-        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
-        return;
-      }
-
-      setLoginHref(buildLoginPath(undefined, pageAudience));
-
       if (!isOAuthProvider(routeProvider)) {
         failOAuthCallback("지원하지 않는 소셜 로그인입니다.", setError);
         return;
       }
 
-      if (!code || !pending) {
+      if (!code) {
+        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
+        return;
+      }
+
+      const exchangeKey = `${routeProvider}:${code}`;
+
+      // 성공 후 pending이 지워진 뒤 remount되어도 완료 캐시가 있으면 재처리/오탐 에러 방지
+      if (!pending) {
+        if (
+          getCompletedOAuthExchange(routeProvider, code) ||
+          finishedExchangeKeys.has(exchangeKey)
+        ) {
+          return;
+        }
         failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
         return;
       }
@@ -99,12 +114,16 @@ const OAuthCallbackContent = () => {
       }
 
       try {
-        // Strict Mode remount 시 동일 code는 1회만 교환 (모듈 단위 single-flight)
         const result = await exchangeOAuthCodeOnce(pending.provider, {
           code,
           role: pending.role,
           ...(pending.provider === "naver" && state ? { state } : {}),
         });
+
+        if (finishedExchangeKeys.has(exchangeKey)) {
+          return;
+        }
+        finishedExchangeKeys.add(exchangeKey);
 
         const resultAudience = getAuthAudienceFromRole(result.user.role);
 
@@ -126,7 +145,6 @@ const OAuthCallbackContent = () => {
         setPostAuthRedirectPath(nextPath);
         establishSession(result.user);
         clearOAuthPendingSession();
-        // 인증 코드가 히스토리에 남지 않도록 callback URL 정리 후 이동
         window.history.replaceState(null, "", window.location.pathname);
         router.replace(nextPath);
       } catch (err) {
