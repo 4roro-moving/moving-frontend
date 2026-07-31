@@ -62,6 +62,5 @@ export const API_ROUTES = {
     ROOT: "/notifications",
     UNREAD_COUNT: "/notifications/unread-count",
     READ: (notificationId: number) => `/notifications/${notificationId}/read`,
-    READ_ALL: "/notifications/read-all",
   },
 } as const;

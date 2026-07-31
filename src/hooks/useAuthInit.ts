@@ -29,6 +29,10 @@ export const useAuthInit = () => {
       const { pathname, search } = window.location;
       if (isAuthPagePath(pathname)) return;
 
+      // 404 화면은 버튼 클릭 전까지 유지 (로그인으로 강제 이동하지 않음)
+      // // 2026.07.31 정슬기 - [수정]
+      if (document.querySelector("[data-not-found-page]")) return;
+
       const audience = getAudienceFromPathname(pathname);
       window.location.assign(buildLoginPath(`${pathname}${search}`, audience));
     };

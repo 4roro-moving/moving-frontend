@@ -4,6 +4,8 @@
  * // 2026.07.25 정슬기 - [추가]
  */
 export const APP_ROUTES = {
+  /** 홈 */
+  HOME: "/",
   LOGIN: "/login",
   /** 기사님(mover) 전용 로그인 */
   MOVER_LOGIN: "/mover/login",
@@ -25,6 +27,8 @@ export const APP_ROUTES = {
   MOVERS: {
     ROOT: "/movers",
     DETAIL: (moverId: string) => `/movers/${moverId}`,
+    /** 찜한 기사님 전체 목록 */
+    FAVORITES: "/movers/favorites",
   },
   // 2026.07.27 정슬기 - [추가] 고객 리뷰 관리 페이지 경로
   REVIEWS: {
@@ -32,10 +36,6 @@ export const APP_ROUTES = {
     WRITABLE: "/reviews/writable",
     ME: "/reviews/me",
   },
-  /**
-   * NOTE: 찜한 기사님 전체 목록 페이지. 경로 확정 시 현재 상수값,  `src/app/favorites/movers/` 디렉터리 수정 필요
-   */
-  FAVORITE_MOVERS: "/favorites/movers",
   // 2026.07.30 정슬기 - [추가] 내 견적 관리 페이지 경로
   /** 내 견적 관리 */
   ESTIMATES: {

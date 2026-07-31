@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import MoverAuthGate from "@/components/auth/MoverAuthGate";
 import RejectedRequestsPage from "@/components/estimate/RejectedRequestsPage";
 
 export const metadata: Metadata = {
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function RejectedRequestsRoute() {
-  return <RejectedRequestsPage />;
+  return (
+    <MoverAuthGate loadingMessage="반려 요청을 불러오는 중입니다.">
+      <RejectedRequestsPage />
+    </MoverAuthGate>
+  );
 }
