@@ -7,6 +7,7 @@ export function getFocusableElements(container: HTMLElement): HTMLElement[] {
     (element) =>
       !element.hidden &&
       element.getAttribute("aria-hidden") !== "true" &&
-      !("disabled" in element && (element as HTMLButtonElement).disabled),
+      element.tabIndex >= 0 &&
+      !element.matches(":disabled"),
   );
 }

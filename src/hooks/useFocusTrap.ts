@@ -13,6 +13,7 @@ interface UseFocusTrapOptions {
 /**
  * 컨테이너 마운트 시 첫 포커스 가능 요소로 이동하고,
  * Tab을 컨테이너 안으로 가둡니다. Escape는 onEscape로 위임합니다.
+ * 트랩 해제(언마운트) 시 진입 전 포커스 요소로 복원합니다.
  */
 export function useFocusTrap({
   containerRef,
@@ -24,6 +25,9 @@ export function useFocusTrap({
 
     const container = containerRef.current;
     if (!container) return;
+
+    const previousActiveElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -60,7 +64,7 @@ export function useFocusTrap({
 
     document.addEventListener("keydown", handleKeyDown);
 
-    requestAnimationFrame(() => {
+    const frameId = requestAnimationFrame(() => {
       if (!containerRef.current) return;
 
       const focusable = getFocusableElements(containerRef.current);
@@ -72,7 +76,12 @@ export function useFocusTrap({
     });
 
     return () => {
+      cancelAnimationFrame(frameId);
       document.removeEventListener("keydown", handleKeyDown);
+
+      if (previousActiveElement?.isConnected) {
+        previousActiveElement.focus();
+      }
     };
   }, [containerRef, enabled, onEscape]);
 }
