@@ -9,16 +9,23 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 /**
  * 전역 404 안내 UI
  * // 2026.07.30 정슬기 - [추가] Empty/Error 톤에 맞춘 중앙 정렬 404
- * // 2026.07.31 정슬기 - [수정] 히스토리 없을 때 이전 페이지 → 홈 대체 이동
+ * // 2026.07.31 정슬기 - [수정] 동일 origin referrer일 때만 back, 그 외 홈 이동
  */
 export default function NotFoundView() {
   const router = useRouter();
 
   const handleBack = () => {
-    // 새 탭·직접 진입 등으로 뒤로 갈 히스토리가 없으면 홈으로 이동
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-      return;
+    try {
+      const referrer = document.referrer;
+      if (referrer) {
+        const referrerOrigin = new URL(referrer).origin;
+        if (referrerOrigin === window.location.origin) {
+          router.back();
+          return;
+        }
+      }
+    } catch {
+      // referrer URL 파싱 실패 시 홈으로 이동
     }
     router.push(APP_ROUTES.HOME);
   };

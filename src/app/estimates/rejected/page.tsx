@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import CustomerAuthGate from "@/components/auth/CustomerAuthGate";
+import MoverAuthGate from "@/components/auth/MoverAuthGate";
 import RejectedRequestsPage from "@/components/estimate/RejectedRequestsPage";
 
 export const metadata: Metadata = {
@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function RejectedRequestsRoute() {
   return (
-    <CustomerAuthGate loadingMessage="견적 관리를 불러오는 중입니다.">
+    <MoverAuthGate loadingMessage="반려 요청을 불러오는 중입니다.">
       <RejectedRequestsPage />
-    </CustomerAuthGate>
+    </MoverAuthGate>
   );
 }
