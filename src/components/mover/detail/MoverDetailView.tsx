@@ -22,6 +22,7 @@ import { useIsClient } from "@/hooks/useIsClient";
 import { useMoverDetail } from "@/hooks/useMoverDetail";
 import { hasAuthSession } from "@/lib/auth/session";
 import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
+import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
 import { ApiError } from "@/types/api";
 
 interface MoverDetailViewProps {
@@ -172,6 +173,12 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     requestButtonLabel,
   };
 
+  const kakaoShare = {
+    driver_name: detail.name,
+    like_count: String(detail.favoriteCount),
+    driver_profile: toKakaoShareImageUrl(detail.profileImageSrc),
+  };
+
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] lg:pb-0">
       <EstimateDetailHero imageUrl={detail.profileImageSrc} name={detail.name} />
@@ -187,6 +194,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
             <div className="lg:hidden">
               <EstimateDetailShare
                 title="나만 알기엔 아쉬운 기사님인가요?"
+                kakaoMoverShare={kakaoShare}
                 onToastMessage={setToastMessage}
               />
             </div>
@@ -205,6 +213,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
             <MoverDetailActions layout="sidebar" {...actionsProps} />
             <EstimateDetailShare
               title="나만 알기엔 아쉬운 기사님인가요?"
+              kakaoMoverShare={kakaoShare}
               onToastMessage={setToastMessage}
             />
           </aside>
