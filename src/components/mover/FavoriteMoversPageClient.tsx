@@ -121,6 +121,8 @@ function FavoriteMoversContent() {
   /** 화면에 안 보이는 찜까지 포함해 전체를 고른 상태 (카드는 더보기로만 표시) */
   const [isSelectAll, setIsSelectAll] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  /** 확인 모달 문구용 — 낙관적 업데이트로 totalCount가 0이 되어도 숫자가 바뀌지 않게 고정 */
+  const [deleteConfirmCount, setDeleteConfirmCount] = useState(0);
   const [isResolvingAllIds, setIsResolvingAllIds] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -193,6 +195,7 @@ function FavoriteMoversContent() {
     }
 
     if (isSelectAll || selectedCount === totalCount) {
+      setDeleteConfirmCount(totalCount);
       setIsDeleteConfirmOpen(true);
       return;
     }
@@ -328,7 +331,7 @@ function FavoriteMoversContent() {
 
       <FavoriteMoversDeleteConfirmModal
         open={isDeleteConfirmOpen}
-        count={totalCount}
+        count={deleteConfirmCount}
         isPending={isBulkDeleting}
         onClose={() => {
           if (!isBulkDeleting) {
