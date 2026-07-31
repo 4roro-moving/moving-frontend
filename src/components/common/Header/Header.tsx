@@ -145,6 +145,7 @@ const Header = ({
           <div className="flex items-center gap-32">
             <NotificationTrigger />
             <ProfileMenuTrigger
+              key={pathname}
               nickname={nickname}
               items={profileMenuItems}
               role={resolvedRole}

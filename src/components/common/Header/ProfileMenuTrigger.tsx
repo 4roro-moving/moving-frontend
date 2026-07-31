@@ -36,16 +36,9 @@ export default function ProfileMenuTrigger({
   const logout = useAuthStore((state) => state.logout);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [menuPathname, setMenuPathname] = useState(pathname);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  // 경로 변경(링크 이동·브라우저 뒤로/앞으로 가기) 시 메뉴 닫기
-  if (pathname !== menuPathname) {
-    setMenuPathname(pathname);
-    setIsOpen(false);
-  }
 
   const linkItems = items.filter((item) => item.type === "link");
   const logoutItem = items.find((item) => item.type === "action" && item.action === "logout");
