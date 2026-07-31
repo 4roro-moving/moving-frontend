@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import fetchInstance from "@/lib/api/fetchInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { MOVERS_ALL_VALUE, MOVERS_PAGE_LIMIT } from "@/lib/utils/moversSearchParams";
@@ -49,6 +51,9 @@ export async function getMovers(query: MoversListQuery): Promise<MoversListResul
 export async function getMoverDetail(moverId: string): Promise<MoverDetailItem> {
   return fetchInstance.get<MoverDetailItem>(API_ROUTES.MOVERS.DETAIL(moverId));
 }
+
+/** 동일 요청 내 generateMetadata·prefetch 중복 호출 방지 */
+export const getMoverDetailCached = cache((moverId: string) => getMoverDetail(moverId));
 
 /** GET /movers/:moverId/reviews — 기사님 리뷰 목록 */
 export async function getMoverReviews(

@@ -16,6 +16,8 @@ import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShar
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useEstimateDetail } from "@/hooks/useEstimateDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
+import { buildEstimateShareLine } from "@/lib/share/shareText";
 import { cn } from "@/lib/utils/cn";
 
 interface EstimateDetailViewProps {
@@ -53,6 +55,11 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
   }
 
   const displayName = data.mover.nickname || data.mover.name;
+  const kakaoEstimateShare = {
+    share_line: buildEstimateShareLine(displayName),
+    profile_image: toKakaoShareImageUrl(data.mover.imageUrl),
+    like_count: String(data.mover.favoriteCount),
+  };
 
   return (
     <>
@@ -82,7 +89,11 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
               isConfirming={confirmMutation.isPending}
               onConfirm={() => confirmMutation.mutate()}
             />
-            <EstimateDetailShare linkAccess="owner" onToastMessage={setToastMessage} />
+            <EstimateDetailShare
+              linkAccess="owner"
+              kakaoEstimateShare={kakaoEstimateShare}
+              onToastMessage={setToastMessage}
+            />
           </>
         }
       />
