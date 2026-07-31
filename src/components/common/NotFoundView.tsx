@@ -9,9 +9,19 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 /**
  * 전역 404 안내 UI
  * // 2026.07.30 정슬기 - [추가] Empty/Error 톤에 맞춘 중앙 정렬 404
+ * // 2026.07.31 정슬기 - [수정] 히스토리 없을 때 이전 페이지 → 홈 대체 이동
  */
 export default function NotFoundView() {
   const router = useRouter();
+
+  const handleBack = () => {
+    // 새 탭·직접 진입 등으로 뒤로 갈 히스토리가 없으면 홈으로 이동
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    router.push(APP_ROUTES.HOME);
+  };
 
   return (
     <div className="bg-background-default px-margin-mobile md:px-margin-tablet flex w-full flex-1 flex-col items-center justify-center py-64 lg:px-0">
@@ -61,9 +71,7 @@ export default function NotFoundView() {
             variant="outline"
             size="cta"
             className="sm:min-w-[160px]"
-            onClick={() => {
-              router.back();
-            }}
+            onClick={handleBack}
           >
             이전 페이지로 이동
           </Button>
