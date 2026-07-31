@@ -21,6 +21,8 @@ export function useFavoriteMoversSelection({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   /** 화면에 안 보이는 찜까지 포함해 전체를 고른 상태 */
   const [isSelectAll, setIsSelectAll] = useState(false);
+  /** 전체선택 상태에서 개별 해제한 id — “전체에서 이 사람만 제외” */
+  const [excludedIds, setExcludedIds] = useState<string[]>([]);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   /** 확인 모달 문구용 — 낙관적 업데이트로 totalCount가 0이 되어도 고정 */
   const [deleteConfirmCount, setDeleteConfirmCount] = useState(0);
@@ -30,19 +32,25 @@ export function useFavoriteMoversSelection({
   const bulkRemoveMutation = useBulkRemoveFavoriteMovers({ onError: setToastMessage });
 
   const selectedOnLoadedCount = loadedIds.filter((id) => selectedIds.includes(id)).length;
-  const selectedCount = isSelectAll ? totalCount : selectedOnLoadedCount;
-  const isAllSelected = isSelectAll || (totalCount > 0 && selectedCount === totalCount);
+  const selectedCount = isSelectAll
+    ? Math.max(0, totalCount - excludedIds.length)
+    : selectedOnLoadedCount;
+  const isAllSelected = isSelectAll
+    ? excludedIds.length === 0
+    : totalCount > 0 && selectedCount === totalCount;
   const hasSelection = selectedCount > 0;
   const isBulkDeleting = bulkRemoveMutation.isPending || isResolvingAllIds;
 
   const clearSelection = () => {
     setSelectedIds([]);
+    setExcludedIds([]);
     setIsSelectAll(false);
   };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       setIsSelectAll(true);
+      setExcludedIds([]);
       setSelectedIds(loadedIds);
       return;
     }
@@ -51,11 +59,12 @@ export function useFavoriteMoversSelection({
 
   const handleToggleMover = (moverId: string, checked: boolean) => {
     if (isSelectAll) {
-      if (checked) {
-        return;
-      }
-      setIsSelectAll(false);
-      setSelectedIds(loadedIds.filter((id) => id !== moverId));
+      setExcludedIds((prev) => {
+        if (checked) {
+          return prev.filter((id) => id !== moverId);
+        }
+        return prev.includes(moverId) ? prev : [...prev, moverId];
+      });
       return;
     }
 
@@ -76,6 +85,7 @@ export function useFavoriteMoversSelection({
 
     if (result.failedIds.length > 0) {
       setIsSelectAll(false);
+      setExcludedIds([]);
       setSelectedIds(result.failedIds);
       return;
     }
@@ -88,8 +98,9 @@ export function useFavoriteMoversSelection({
       return;
     }
 
+    // 전체선택(일부 제외 포함)이거나, 로드된 전체가 곧 전체 찜인 경우 → 확인 모달
     if (isSelectAll || selectedCount === totalCount) {
-      setDeleteConfirmCount(totalCount);
+      setDeleteConfirmCount(selectedCount);
       setIsDeleteConfirmOpen(true);
       return;
     }
@@ -108,8 +119,11 @@ export function useFavoriteMoversSelection({
       setIsResolvingAllIds(true);
       try {
         const allIds = await fetchAllFavoriteMoverIds();
+        const excludedSet = new Set(excludedIds);
+        const idsToRemove = isSelectAll ? allIds.filter((id) => !excludedSet.has(id)) : allIds;
+
         try {
-          await removeFavorites(allIds);
+          await removeFavorites(idsToRemove);
           setIsDeleteConfirmOpen(false);
         } catch {
           // 전부 실패 시 mutation onError에서 토스트 처리. 모달은 재시도 가능하도록 유지
@@ -128,7 +142,8 @@ export function useFavoriteMoversSelection({
     }
   };
 
-  const isMoverSelected = (moverId: string) => isSelectAll || selectedIds.includes(moverId);
+  const isMoverSelected = (moverId: string) =>
+    isSelectAll ? !excludedIds.includes(moverId) : selectedIds.includes(moverId);
 
   return {
     selectedCount,
