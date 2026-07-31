@@ -36,7 +36,7 @@ const resolveKnownRole = (storeRole: AuthRole | null | undefined): AuthRole | nu
     return null;
   }
 
-  return storeRole ?? loadRole() ?? (token ? getAccessTokenRole(token) : null);
+  return getAccessTokenRole(token);
 };
 
 /**
