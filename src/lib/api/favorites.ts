@@ -26,17 +26,23 @@ export interface FavoriteMoversListResult {
 }
 
 /** DELETE /favorites/movers — moverIds 또는 all(+excludedIds) */
-export interface BulkDeleteFavoriteMoversBody {
-  moverIds?: string[];
-  all?: boolean;
-  excludedIds?: string[];
-}
+export type BulkDeleteFavoriteMoversBody =
+  | {
+      moverIds: string[];
+      all?: false;
+      excludedIds?: never;
+    }
+  | {
+      all: true;
+      excludedIds?: string[];
+      moverIds?: never;
+    };
 
 export interface BulkDeleteFavoriteMoversResult {
   deletedCount: number;
 }
 
-/** 찜 목록 API 기본 page size */
+/** 찜 목록 API 기본 조회 개수 */
 export const FAVORITE_MOVERS_PAGE_LIMIT = 5;
 
 /** PC 기사님 찾기 사이드바에 표시하는 최대 인원 */
