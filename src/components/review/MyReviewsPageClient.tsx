@@ -18,7 +18,7 @@ import { MY_REVIEW_PAGE_LIMIT } from "@/lib/api/reviews";
  */
 export default function MyReviewsPageClient() {
   const [page, setPage] = useState(1);
-  const { data, isLoading, isError, error, refetch, isFetching } = useMyReviews({
+  const { data, isLoading, isError, error, refetch, isFetching, isPlaceholderData } = useMyReviews({
     page,
     limit: MY_REVIEW_PAGE_LIMIT,
   });
@@ -29,11 +29,14 @@ export default function MyReviewsPageClient() {
   const totalPages = Math.max(1, pagination?.totalPages ?? 1);
 
   // 범위 밖 page → 마지막 페이지로 상태 보정 (ME(last, limit) 키로 재조회)
-  // React: props/서버 응답 기반 상태 조정은 렌더 중 setState 허용
-  if (pagination && pagination.totalCount > 0 && page > totalPages) {
+  // keepPreviousData placeholder의 totalPages로 보정하면 페이지 이동 중 루프가 생길 수 있어
+  // 현재 쿼리 응답이 확정된 뒤에만 setPage 합니다.
+  // // 2026.07.31 정슬기 - [수정] isPlaceholderData 가드
+  if (!isPlaceholderData && pagination && pagination.totalCount > 0 && page > totalPages) {
     setPage(totalPages);
   }
 
+  // 렌더용 안전 clamp (쿼리 키와 별개)
   const currentPage = Math.min(Math.max(1, page), totalPages);
   const isEmpty = !isLoading && !isError && Boolean(pagination) && totalCount === 0;
   const hasList = !isLoading && !isError && reviews.length > 0;
