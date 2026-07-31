@@ -29,6 +29,9 @@ export const QUERY_KEYS = {
   // 2026.07.24 정슬기 - [추가] 받은 견적 목록·상세 React Query 키
   ESTIMATES: {
     ALL: ["estimates"],
+    SENT_LIST_ROOT: ["estimates", "sent", "list"] as const,
+    SENT_LIST: (status?: string) => ["estimates", "sent", "list", { status }] as const,
+    SENT_DETAIL: (estimateId: number) => ["estimates", "sent", "detail", estimateId] as const,
     RECEIVED: ["estimates", "received"] as const,
     // 받았던/대기 상세 모두 GET /estimates/:estimateId — 동일 DETAIL 키 공유
     // 2026.07.29 정슬기 - [수정] PENDING_DETAIL 제거, DETAIL로 통합

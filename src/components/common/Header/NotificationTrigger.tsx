@@ -48,10 +48,10 @@ export default function NotificationTrigger() {
         aria-label={unreadCount > 0 ? `알림, 읽지 않은 알림 ${unreadCount}개` : "알림"}
         aria-expanded={isOpen}
         aria-controls={isOpen ? notificationPanelId : undefined}
-        className="relative"
+        className="relative flex size-36 items-center justify-center"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <AlarmIcon className="text-icon-default size-24" aria-hidden="true" />
+        <AlarmIcon className="text-icon-subtle size-32 shrink-0" />
         {unreadCount > 0 ? (
           <Text
             as="span"

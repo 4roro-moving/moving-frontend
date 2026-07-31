@@ -18,6 +18,8 @@ export interface SignUpCustomerInput {
   phone: string;
 }
 
+export type SignUpMoverInput = SignUpCustomerInput;
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -66,6 +68,16 @@ export const login = async (input: LoginInput): Promise<LoginResult> => {
 export const signUpCustomer = async (input: SignUpCustomerInput): Promise<LoginResult> => {
   const data = await fetchInstance.post<LoginResult, SignUpCustomerInput>(
     API_ROUTES.AUTH.SIGN_UP_CUSTOMER,
+    input,
+    authBffOptions,
+  );
+  applyAccessTokenFromAuthResult(data, "회원가입에 실패했습니다.");
+  return data;
+};
+
+export const signUpMover = async (input: SignUpMoverInput): Promise<LoginResult> => {
+  const data = await fetchInstance.post<LoginResult, SignUpMoverInput>(
+    API_ROUTES.AUTH.SIGN_UP_MOVER,
     input,
     authBffOptions,
   );

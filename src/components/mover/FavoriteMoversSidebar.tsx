@@ -98,14 +98,9 @@ export function FavoriteMoversSidebar() {
         <Text as="h2" variant="xl-semibold" className="text-text-secondary">
           찜한 기사님
         </Text>
-        {/*
-          더보기 → 찜한 기사님 전체 목록.
-          NOTE: 목적지 경로 미확정. 확정 시 APP_ROUTES.FAVORITE_MOVERS(및 app 디렉터리) 수정 필요.
-          // 2026.07.27
-        */}
         {showMoreLink ? (
           <Link
-            href={APP_ROUTES.FAVORITE_MOVERS}
+            href={APP_ROUTES.MOVERS.FAVORITES}
             className="text-text-muted hover:text-text-secondary focus-visible:ring-border-brand rounded-8 flex shrink-0 items-center gap-2 focus-visible:ring-2 focus-visible:outline-none"
           >
             <Text as="span" variant="md-medium">

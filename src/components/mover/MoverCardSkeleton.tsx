@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils/cn";
 interface MoverCardSkeletonProps {
   variant?: "full" | "compact";
   className?: string;
+  /** 찜 목록처럼 우상단 체크박스 자리를 스켈레톤으로 표시 */
+  showSelection?: boolean;
 }
 
 const CARD_SHADOW =
@@ -38,7 +40,13 @@ function CompactMoverCardSkeleton({ className }: { className?: string }) {
   );
 }
 
-function FullMoverCardSkeleton({ className }: { className?: string }) {
+function FullMoverCardSkeleton({
+  className,
+  showSelection = false,
+}: {
+  className?: string;
+  showSelection?: boolean;
+}) {
   return (
     <div
       className={cn(
@@ -51,7 +59,10 @@ function FullMoverCardSkeleton({ className }: { className?: string }) {
     >
       {/* Mobile */}
       <div className="flex flex-col gap-8 min-[744px]:hidden">
-        <Skeleton className="h-28 w-72 rounded-full" />
+        <div className="flex min-h-36 items-center justify-between gap-8">
+          <Skeleton className="h-28 w-72 rounded-full" />
+          {showSelection ? <Skeleton className="rounded-4 size-36 shrink-0" /> : null}
+        </div>
         <div className="flex w-full flex-col gap-16">
           <div className="flex flex-col gap-8">
             <Skeleton className="h-24 w-3/4" />
@@ -74,7 +85,10 @@ function FullMoverCardSkeleton({ className }: { className?: string }) {
 
       {/* Tablet / Desktop */}
       <div className="hidden min-[744px]:contents">
-        <Skeleton className="h-32 w-120 rounded-full" />
+        <div className="flex min-h-36 items-center justify-between gap-8">
+          <Skeleton className="h-32 w-120 rounded-full" />
+          {showSelection ? <Skeleton className="rounded-4 size-36 shrink-0" /> : null}
+        </div>
         <div className="flex flex-row items-start gap-20">
           <Skeleton className="rounded-12 size-[134px] shrink-0" />
           <div className="flex min-w-0 flex-1 flex-col gap-20 self-stretch py-4">
@@ -97,12 +111,16 @@ function FullMoverCardSkeleton({ className }: { className?: string }) {
 }
 
 /** MoverCard full/compact 레이아웃에 맞춘 로딩 스켈레톤 */
-export function MoverCardSkeleton({ variant = "full", className }: MoverCardSkeletonProps) {
+export function MoverCardSkeleton({
+  variant = "full",
+  className,
+  showSelection = false,
+}: MoverCardSkeletonProps) {
   if (variant === "compact") {
     return <CompactMoverCardSkeleton className={className} />;
   }
 
-  return <FullMoverCardSkeleton className={className} />;
+  return <FullMoverCardSkeleton className={className} showSelection={showSelection} />;
 }
 
 interface MoverCardSkeletonListProps {
@@ -110,6 +128,7 @@ interface MoverCardSkeletonListProps {
   count: number;
   className?: string;
   itemClassName?: string;
+  showSelection?: boolean;
   /** 접근성용 로딩 안내 */
   label?: string;
 }
@@ -119,6 +138,7 @@ export function MoverCardSkeletonList({
   count,
   className,
   itemClassName,
+  showSelection = false,
   label = "기사님 목록을 불러오는 중",
 }: MoverCardSkeletonListProps) {
   return (
@@ -129,7 +149,11 @@ export function MoverCardSkeletonList({
     >
       {Array.from({ length: count }, (_, index) => (
         <li key={index}>
-          <MoverCardSkeleton variant={variant} className={itemClassName} />
+          <MoverCardSkeleton
+            variant={variant}
+            className={itemClassName}
+            showSelection={showSelection}
+          />
         </li>
       ))}
     </ul>
