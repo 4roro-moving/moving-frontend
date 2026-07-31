@@ -85,17 +85,10 @@ export function useFavoriteMoversSelection({
         return;
       }
 
-      const result = await bulkRemoveMutation.mutateAsync({
+      await bulkRemoveMutation.mutateAsync({
         mode: "ids",
         moverIds: idsToRemove,
       });
-
-      if (result.failedIds.length > 0) {
-        setIsSelectAll(false);
-        setExcludedIds([]);
-        setSelectedIds(result.failedIds);
-        return;
-      }
 
       clearSelection();
     },
@@ -104,17 +97,10 @@ export function useFavoriteMoversSelection({
 
   const removeFavoritesAll = useCallback(
     async (excluded: string[]) => {
-      const result = await bulkRemoveMutation.mutateAsync({
+      await bulkRemoveMutation.mutateAsync({
         mode: "all",
         excludedIds: excluded,
       });
-
-      if (result.failedIds.length > 0) {
-        setIsSelectAll(false);
-        setExcludedIds([]);
-        setSelectedIds(result.failedIds);
-        return;
-      }
 
       clearSelection();
     },

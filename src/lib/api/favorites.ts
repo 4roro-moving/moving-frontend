@@ -1,6 +1,6 @@
 import fetchInstance from "@/lib/api/fetchInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
-import type { MoverListItem, MoversListResult } from "@/types/mover";
+import type { MoverListItem } from "@/types/mover";
 
 interface FavoriteResult {
   moverId: string;
@@ -9,8 +9,20 @@ interface FavoriteResult {
 }
 
 export interface FavoriteMoversListQuery {
-  page?: number;
+  cursor?: string;
   limit?: number;
+}
+
+export interface FavoriteMoversPagination {
+  limit: number;
+  totalCount: number;
+  hasNext: boolean;
+  nextCursor: string | null;
+}
+
+export interface FavoriteMoversListResult {
+  data: MoverListItem[];
+  pagination: FavoriteMoversPagination;
 }
 
 /** DELETE /favorites/movers — moverIds 또는 all(+excludedIds) */
@@ -21,8 +33,7 @@ export interface BulkDeleteFavoriteMoversBody {
 }
 
 export interface BulkDeleteFavoriteMoversResult {
-  deletedIds: string[];
-  failedIds: string[];
+  deletedCount: number;
 }
 
 /** 찜 목록 API 기본 page size */
@@ -54,12 +65,12 @@ export async function removeFavoriteMoversBulk(
 /** GET /favorites/movers — 찜한 기사님 목록 (페이지네이션) */
 export async function getFavoriteMovers(
   query: FavoriteMoversListQuery = {},
-): Promise<MoversListResult> {
+): Promise<FavoriteMoversListResult> {
   const params = new URLSearchParams();
-  params.set("page", String(query.page ?? 1));
   params.set("limit", String(query.limit ?? FAVORITE_MOVERS_PAGE_LIMIT));
+  if (query.cursor) params.set("cursor", query.cursor);
 
-  return fetchInstance.getPaginated<MoverListItem[]>(
+  return fetchInstance.getPaginated<MoverListItem[], FavoriteMoversPagination>(
     `${API_ROUTES.FAVORITES.MOVERS}?${params.toString()}`,
   );
 }

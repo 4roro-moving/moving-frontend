@@ -28,18 +28,9 @@ function isUnauthorizedError(error: unknown): boolean {
   return false;
 }
 
-function buildPartialFailureMessage(totalCount: number, failedCount: number): string {
-  return `${totalCount}명 중 ${failedCount}명의 찜을 해제하지 못했습니다. 잠시 후 다시 시도해주세요.`;
-}
-
 /** ids: 선택 해제 / all: 전체 해제(제외 id 포함 가능) */
 export type BulkRemoveFavoriteVariables =
   { mode: "ids"; moverIds: string[] } | { mode: "all"; excludedIds: string[] };
-
-export interface BulkRemoveFavoriteResult {
-  succeededIds: string[];
-  failedIds: string[];
-}
 
 interface UseBulkRemoveFavoriteMoversOptions {
   onError?: (message: string) => void;
@@ -69,22 +60,13 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
   };
 
   const mutation = useMutation({
-    mutationFn: async (
-      variables: BulkRemoveFavoriteVariables,
-    ): Promise<BulkRemoveFavoriteResult> => {
-      const response =
-        variables.mode === "ids"
-          ? await removeFavoriteMoversBulk({ moverIds: variables.moverIds })
-          : await removeFavoriteMoversBulk({
-              all: true,
-              excludedIds: variables.excludedIds,
-            });
-
-      return {
-        succeededIds: response.deletedIds,
-        failedIds: response.failedIds,
-      };
-    },
+    mutationFn: (variables: BulkRemoveFavoriteVariables) =>
+      variables.mode === "ids"
+        ? removeFavoriteMoversBulk({ moverIds: variables.moverIds })
+        : removeFavoriteMoversBulk({
+            all: true,
+            excludedIds: variables.excludedIds,
+          }),
     onMutate: async (variables): Promise<BulkRemoveFavoriteContext> => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS });
 
@@ -111,29 +93,6 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
       }
 
       return { previousFavoriteMovers };
-    },
-    onSuccess: (result, variables, context) => {
-      if (result.failedIds.length === 0) {
-        return;
-      }
-
-      context?.previousFavoriteMovers.forEach(([queryKey, data]) => {
-        queryClient.setQueryData(queryKey, data);
-      });
-
-      const succeededSet = new Set(result.succeededIds);
-      queryClient.setQueriesData<FavoriteMoversCacheData>(
-        { queryKey: QUERY_KEYS.FAVORITES.MOVERS },
-        (list) =>
-          removeIdsFromFavoriteMoversCache(list, succeededSet, result.succeededIds.length) as
-            FavoriteMoversCacheData | undefined,
-      );
-
-      const requestedCount =
-        variables.mode === "ids"
-          ? variables.moverIds.length
-          : result.succeededIds.length + result.failedIds.length;
-      onErrorRef.current?.(buildPartialFailureMessage(requestedCount, result.failedIds.length));
     },
     onError: (error, _variables, context) => {
       context?.previousFavoriteMovers.forEach(([queryKey, data]) => {
@@ -162,7 +121,7 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
     }
 
     if (variables.mode === "ids" && variables.moverIds.length === 0) {
-      return Promise.resolve({ succeededIds: [], failedIds: [] });
+      return Promise.resolve({ deletedCount: 0 });
     }
 
     return mutation.mutateAsync(variables, mutateOptions);

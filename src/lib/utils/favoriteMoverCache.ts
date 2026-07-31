@@ -1,38 +1,39 @@
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 
+import type { FavoriteMoversListResult } from "@/lib/api/favorites";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
-import type { MoversListResult } from "@/types/mover";
 
-export type FavoriteMoversCacheData = MoversListResult | InfiniteData<MoversListResult>;
+export type FavoriteMoversCacheData =
+  FavoriteMoversListResult | InfiniteData<FavoriteMoversListResult>;
 
-function isFavoriteMoversInfiniteData(data: unknown): data is InfiniteData<MoversListResult> {
+function isFavoriteMoversInfiniteData(
+  data: unknown,
+): data is InfiniteData<FavoriteMoversListResult> {
   return (
     typeof data === "object" &&
     data !== null &&
     "pages" in data &&
-    Array.isArray((data as InfiniteData<MoversListResult>).pages)
+    Array.isArray((data as InfiniteData<FavoriteMoversListResult>).pages)
   );
 }
 
-function isFavoriteMoversListResult(data: unknown): data is MoversListResult {
+function isFavoriteMoversListResult(data: unknown): data is FavoriteMoversListResult {
   return (
     typeof data === "object" &&
     data !== null &&
     "data" in data &&
     "pagination" in data &&
-    Array.isArray((data as MoversListResult).data)
+    Array.isArray((data as FavoriteMoversListResult).data)
   );
 }
 
 function removeIdsFromFavoriteMoversPage(
-  page: MoversListResult,
+  page: FavoriteMoversListResult,
   idSet: Set<string>,
   removedTotalDelta: number,
-): MoversListResult {
+): FavoriteMoversListResult {
   const data = page.data.filter((mover) => !idSet.has(mover.id));
   const nextTotalCount = Math.max(0, page.pagination.totalCount - removedTotalDelta);
-  const limit = Math.max(1, page.pagination.limit);
-  const nextTotalPages = Math.max(1, Math.ceil(nextTotalCount / limit) || 1);
 
   return {
     ...page,
@@ -40,8 +41,6 @@ function removeIdsFromFavoriteMoversPage(
     pagination: {
       ...page.pagination,
       totalCount: nextTotalCount,
-      totalPages: nextTotalPages,
-      hasNext: page.pagination.page < nextTotalPages,
     },
   };
 }
@@ -90,8 +89,6 @@ export function keepOnlyIdsInFavoriteMoversCache(
   if (isFavoriteMoversInfiniteData(data)) {
     const pages = data.pages.map((page) => {
       const kept = page.data.filter((mover) => keepIds.has(mover.id));
-      const limit = Math.max(1, page.pagination.limit);
-      const nextTotalPages = Math.max(1, Math.ceil(nextTotalCount / limit) || 1);
 
       return {
         ...page,
@@ -99,8 +96,8 @@ export function keepOnlyIdsInFavoriteMoversCache(
         pagination: {
           ...page.pagination,
           totalCount: nextTotalCount,
-          totalPages: nextTotalPages,
-          hasNext: page.pagination.page < nextTotalPages,
+          hasNext: false,
+          nextCursor: null,
         },
       };
     });
@@ -110,8 +107,6 @@ export function keepOnlyIdsInFavoriteMoversCache(
 
   if (isFavoriteMoversListResult(data)) {
     const kept = data.data.filter((mover) => keepIds.has(mover.id));
-    const limit = Math.max(1, data.pagination.limit);
-    const nextTotalPages = Math.max(1, Math.ceil(nextTotalCount / limit) || 1);
 
     return {
       ...data,
@@ -119,8 +114,8 @@ export function keepOnlyIdsInFavoriteMoversCache(
       pagination: {
         ...data.pagination,
         totalCount: nextTotalCount,
-        totalPages: nextTotalPages,
-        hasNext: data.pagination.page < nextTotalPages,
+        hasNext: false,
+        nextCursor: null,
       },
     };
   }
