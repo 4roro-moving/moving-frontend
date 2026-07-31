@@ -11,6 +11,8 @@ export const APP_ROUTES = {
   SIGN_UP: "/signup",
   /** 기사님 이메일 회원가입 */
   MOVER_SIGN_UP: "/mover/signup",
+  /** OAuth 인가 code callback — `/oauth/{provider}/callback` */
+  OAUTH_CALLBACK: (provider: "google" | "kakao" | "naver") => `/oauth/${provider}/callback`,
   /** 고객 프로필 등록 */
   PROFILE: "/profile",
   /** 기사님 프로필 등록 */

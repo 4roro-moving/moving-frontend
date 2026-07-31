@@ -93,3 +93,36 @@ export const refreshSession = async (options?: EnsureAccessTokenOptions): Promis
 export const logout = async (sessionGeneration: number): Promise<void> => {
   await fetchInstance.post(API_ROUTES.AUTH.LOGOUT, undefined, authBffOptions);
 };
+
+export interface OAuthLoginInput {
+  code: string;
+  role: "CUSTOMER" | "MOVER";
+  state?: string;
+}
+
+export interface NaverOAuthStateResult {
+  state: string;
+}
+
+export const getNaverOAuthState = async (): Promise<NaverOAuthStateResult> => {
+  return fetchInstance.get<NaverOAuthStateResult>(
+    API_ROUTES.AUTH.NAVER_OAUTH_STATE,
+    authBffOptions,
+  );
+};
+
+export const loginWithOAuth = async (
+  provider: "google" | "kakao" | "naver",
+  input: OAuthLoginInput,
+): Promise<LoginResult> => {
+  const path =
+    provider === "google"
+      ? API_ROUTES.AUTH.GOOGLE_LOGIN
+      : provider === "kakao"
+        ? API_ROUTES.AUTH.KAKAO_LOGIN
+        : API_ROUTES.AUTH.NAVER_LOGIN;
+
+  const data = await fetchInstance.post<LoginResult, OAuthLoginInput>(path, input, authBffOptions);
+  applyAccessTokenFromAuthResult(data, "소셜 로그인에 실패했습니다.");
+  return data;
+};

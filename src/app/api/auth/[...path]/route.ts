@@ -9,8 +9,27 @@ import {
   getBackendApiBaseUrl,
 } from "@/lib/server/forwardBackendResponse";
 
-const ALLOWED_PATHS = new Set(["login", "refresh", "logout", "signup/customer", "signup/mover"]);
-const BODY_PATHS = new Set(["login", "signup/customer", "signup/mover"]);
+const ALLOWED_POST_PATHS = new Set([
+  "login",
+  "refresh",
+  "logout",
+  "signup/customer",
+  "signup/mover",
+  "oauth/google",
+  "oauth/kakao",
+  "oauth/naver",
+]);
+
+const ALLOWED_GET_PATHS = new Set(["oauth/naver/state"]);
+
+const BODY_PATHS = new Set([
+  "login",
+  "signup/customer",
+  "signup/mover",
+  "oauth/google",
+  "oauth/kakao",
+  "oauth/naver",
+]);
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -48,13 +67,12 @@ const clearClientAuthCookies = (res: NextResponse): void => {
 
 /**
  * Auth BFF — 브라우저 same-origin 요청을 백엔드로 프록시하고 Set-Cookie를 재부착합니다.
- * 예: POST /api/auth/login, /api/auth/signup/customer, /api/auth/signup/mover
  */
 export const POST = async (request: Request, context: { params: Promise<{ path: string[] }> }) => {
   const { path } = await context.params;
   const authPath = path.join("/");
 
-  if (!ALLOWED_PATHS.has(authPath)) {
+  if (!ALLOWED_POST_PATHS.has(authPath)) {
     return NextResponse.json(
       { success: false, error: { message: "지원하지 않는 auth 요청입니다." } },
       { status: 404 },
@@ -84,11 +102,37 @@ export const POST = async (request: Request, context: { params: Promise<{ path: 
       { status: 502 },
     );
 
-    // 백엔드 실패 시에도 클라이언트 쿠키는 정리
     if (authPath === "logout") {
       clearClientAuthCookies(res);
     }
 
     return res;
+  }
+};
+
+export const GET = async (request: Request, context: { params: Promise<{ path: string[] }> }) => {
+  const { path } = await context.params;
+  const authPath = path.join("/");
+
+  if (!ALLOWED_GET_PATHS.has(authPath)) {
+    return NextResponse.json(
+      { success: false, error: { message: "지원하지 않는 auth 요청입니다." } },
+      { status: 404 },
+    );
+  }
+
+  try {
+    const backendRes = await fetch(`${getBackendApiBaseUrl()}/auth/${authPath}`, {
+      method: "GET",
+      headers: buildBackendHeaders(request),
+      cache: "no-store",
+    });
+
+    return forwardBackendResponse(backendRes);
+  } catch {
+    return NextResponse.json(
+      { success: false, error: { message: "인증 요청에 실패했습니다." } },
+      { status: 502 },
+    );
   }
 };

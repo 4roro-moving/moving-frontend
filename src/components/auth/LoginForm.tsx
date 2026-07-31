@@ -166,7 +166,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
         >
           SNS 계정으로 간편 가입하기
         </Text>
-        <SocialLoginButtons />
+        <SocialLoginButtons audience={audience} />
       </div>
     </div>
   );

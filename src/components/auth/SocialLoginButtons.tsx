@@ -1,19 +1,21 @@
+"use client";
 import { GoogleIcon, KakaoLoginIcon, NaverLoginIcon } from "@/icons";
+import { startOAuthLogin } from "@/lib/auth/startOAuthLogin";
+import type { AuthAudience } from "@/lib/auth/redirect";
+import type { OAuthProvider } from "@/lib/auth/oauth";
 import { cn } from "@/lib/utils/cn";
-
-type SocialProvider = "google" | "kakao" | "naver";
-
 interface SocialLoginButtonsProps {
   className?: string;
+  audience?: AuthAudience;
 }
-
 const SOCIAL_PROVIDERS: {
-  provider: SocialProvider;
+  provider: OAuthProvider;
   label: string;
   className: string;
   icon: typeof GoogleIcon;
   iconClassName: string;
 }[] = [
+  // loginPath 제거 — authorize는 startOAuthLogin이 담당
   {
     provider: "google",
     label: "Google로 로그인",
@@ -36,12 +38,7 @@ const SOCIAL_PROVIDERS: {
     iconClassName: "size-20 md:size-24",
   },
 ];
-
-/**
- * SNS 간편 로그인 버튼 그룹.
- * 실제 OAuth 연동 전까지 UI만 제공합니다.
- */
-const SocialLoginButtons = ({ className }: SocialLoginButtonsProps) => {
+const SocialLoginButtons = ({ className, audience = "customer" }: SocialLoginButtonsProps) => {
   return (
     <div className={cn("flex items-center gap-24 md:gap-32", className)}>
       {SOCIAL_PROVIDERS.map(
@@ -49,12 +46,12 @@ const SocialLoginButtons = ({ className }: SocialLoginButtonsProps) => {
           <button
             key={provider}
             type="button"
-            aria-label={`${label} (준비 중)`}
-            title="준비 중"
-            disabled
+            aria-label={label}
+            onClick={() => {
+              void startOAuthLogin(provider, audience);
+            }}
             className={cn(
               "flex size-54 shrink-0 items-center justify-center rounded-full md:size-72",
-              "cursor-not-allowed opacity-90",
               buttonClassName,
             )}
           >
@@ -65,5 +62,4 @@ const SocialLoginButtons = ({ className }: SocialLoginButtonsProps) => {
     </div>
   );
 };
-
 export default SocialLoginButtons;
