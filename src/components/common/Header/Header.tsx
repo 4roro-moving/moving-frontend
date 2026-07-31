@@ -31,7 +31,7 @@ const MOVER_LOGGED_IN_LINKS = [
 
 const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   { type: "link", label: "프로필 수정", href: APP_ROUTES.PROFILE_EDIT },
-  { type: "link", label: "찜한 기사님", href: APP_ROUTES.FAVORITE_MOVERS },
+  { type: "link", label: "찜한 기사님", href: APP_ROUTES.MOVERS.FAVORITES },
   { type: "link", label: "이사 리뷰", href: APP_ROUTES.REVIEWS.WRITABLE },
   { type: "action", label: "로그아웃", action: "logout" },
 ];

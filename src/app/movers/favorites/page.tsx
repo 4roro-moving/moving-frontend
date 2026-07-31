@@ -9,11 +9,7 @@ export const metadata: Metadata = {
   description: "찜한 이사 기사님 목록을 확인하세요.",
 };
 
-/**
- * 찜한 기사님 전체 목록 페이지.
- *
- * NOTE: UI 본문·라우트 경로 모두 임시, 경로 확정 후 `APP_ROUTES.FAVORITE_MOVERS`와 현재 파일 변경해야 함
- */
+/** 찜한 기사님 전체 목록 페이지. */
 export default function FavoriteMoversPage() {
   return (
     <div className="bg-background-default flex w-full flex-col">
