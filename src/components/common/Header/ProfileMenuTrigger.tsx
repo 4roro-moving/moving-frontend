@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type FocusEvent } from "react";
 
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
@@ -35,20 +35,25 @@ export default function ProfileMenuTrigger({
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
 
-  // 경로별로 열린 메뉴를 추적해 pathname 변경 시 setState 없이 자동으로 닫힘
-  const [openMenuPath, setOpenMenuPath] = useState<string | null>(null);
-  const isOpen = openMenuPath === pathname;
+  const [isOpen, setIsOpen] = useState(false);
+  const [menuPathname, setMenuPathname] = useState(pathname);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // 경로 변경(링크 이동·브라우저 뒤로/앞으로 가기) 시 메뉴 닫기
+  if (pathname !== menuPathname) {
+    setMenuPathname(pathname);
+    setIsOpen(false);
+  }
 
   const linkItems = items.filter((item) => item.type === "link");
   const logoutItem = items.find((item) => item.type === "action" && item.action === "logout");
   const nicknameSuffix = role === "MOVER" ? "기사님" : "고객님";
 
-  const closeQuiet = useCallback(() => setOpenMenuPath(null), []);
+  const closeQuiet = useCallback(() => setIsOpen(false), []);
   const closeWithFocus = useCallback(() => {
-    setOpenMenuPath(null);
+    setIsOpen(false);
     triggerRef.current?.focus();
   }, []);
 
@@ -86,8 +91,22 @@ export default function ProfileMenuTrigger({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen, closeWithFocus]);
 
+  const handleContainerBlur = (event: FocusEvent<HTMLDivElement>) => {
+    const nextTarget = event.relatedTarget;
+    if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) {
+      return;
+    }
+
+    // relatedTarget이 null인 브라우저가 있어, 다음 프레임에 실제 포커스 위치로 판별
+    requestAnimationFrame(() => {
+      if (!containerRef.current?.contains(document.activeElement)) {
+        closeQuiet();
+      }
+    });
+  };
+
   const handleLogout = async () => {
-    setOpenMenuPath(null);
+    setIsOpen(false);
     const logoutPath = role === "MOVER" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
 
     try {
@@ -98,7 +117,11 @@ export default function ProfileMenuTrigger({
   };
 
   return (
-    <div ref={containerRef} className="relative flex items-center gap-16">
+    <div
+      ref={containerRef}
+      className="relative flex items-center gap-16"
+      onBlur={handleContainerBlur}
+    >
       <button
         ref={triggerRef}
         type="button"
@@ -108,7 +131,7 @@ export default function ProfileMenuTrigger({
         aria-expanded={isOpen}
         aria-controls={isOpen ? `${menuId}-menu` : undefined}
         className="focus-visible:ring-border-brand rounded-8 flex items-center gap-16 focus-visible:ring-2 focus-visible:outline-none"
-        onClick={() => setOpenMenuPath(isOpen ? null : pathname)}
+        onClick={() => setIsOpen((open) => !open)}
       >
         <Image src="/icons/profile-default.svg" alt="" width={36} height={36} />
         <Text as="span" variant="2lg-medium" className="text-text-primary">
