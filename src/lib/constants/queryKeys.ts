@@ -51,11 +51,15 @@ export const QUERY_KEYS = {
   },
 
   // 2026.07.25 정슬기 - [추가] 리뷰 쿼리 키
+  // 2026.07.30 정슬기 - [수정] 견적 관리와 동일하게 ROOT·페이지 팩토리 분리
   REVIEWS: {
     ALL: ["reviews"] as const,
-    ME: ["reviews", "me"] as const,
     REVIEWABLE: ["reviews", "reviewable"] as const,
-    BY_MOVER: (moverId: string) => ["reviews", "mover", moverId] as const,
+    ME_ROOT: ["reviews", "me"] as const,
+    ME: (page: number, limit: number) => ["reviews", "me", { page, limit }] as const,
+    BY_MOVER_ROOT: (moverId: string) => ["reviews", "mover", moverId] as const,
+    BY_MOVER: (moverId: string, page: number, limit: number) =>
+      ["reviews", "mover", moverId, { page, limit }] as const,
   },
 
   NOTIFICATIONS: {
