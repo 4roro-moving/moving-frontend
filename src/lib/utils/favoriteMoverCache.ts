@@ -81,6 +81,53 @@ export function removeIdsFromFavoriteMoversCache(
   return data;
 }
 
+/** 전체 해제 낙관적 업데이트 — keepIds만 남기고 totalCount 조정 */
+export function keepOnlyIdsInFavoriteMoversCache(
+  data: unknown,
+  keepIds: Set<string>,
+  nextTotalCount: number,
+): unknown {
+  if (isFavoriteMoversInfiniteData(data)) {
+    const pages = data.pages.map((page) => {
+      const kept = page.data.filter((mover) => keepIds.has(mover.id));
+      const limit = Math.max(1, page.pagination.limit);
+      const nextTotalPages = Math.max(1, Math.ceil(nextTotalCount / limit) || 1);
+
+      return {
+        ...page,
+        data: kept,
+        pagination: {
+          ...page.pagination,
+          totalCount: nextTotalCount,
+          totalPages: nextTotalPages,
+          hasNext: page.pagination.page < nextTotalPages,
+        },
+      };
+    });
+
+    return { ...data, pages };
+  }
+
+  if (isFavoriteMoversListResult(data)) {
+    const kept = data.data.filter((mover) => keepIds.has(mover.id));
+    const limit = Math.max(1, data.pagination.limit);
+    const nextTotalPages = Math.max(1, Math.ceil(nextTotalCount / limit) || 1);
+
+    return {
+      ...data,
+      data: kept,
+      pagination: {
+        ...data.pagination,
+        totalCount: nextTotalCount,
+        totalPages: nextTotalPages,
+        hasNext: data.pagination.page < nextTotalPages,
+      },
+    };
+  }
+
+  return data;
+}
+
 export function patchMoverFavorite<
   T extends { id: string; isFavorite: boolean; favoriteCount: number },
 >(mover: T, moverId: string, nextIsFavorite: boolean): T {

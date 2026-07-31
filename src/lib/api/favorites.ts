@@ -13,6 +13,18 @@ export interface FavoriteMoversListQuery {
   limit?: number;
 }
 
+/** DELETE /favorites/movers — moverIds 또는 all(+excludedIds) */
+export interface BulkDeleteFavoriteMoversBody {
+  moverIds?: string[];
+  all?: boolean;
+  excludedIds?: string[];
+}
+
+export interface BulkDeleteFavoriteMoversResult {
+  deletedIds: string[];
+  failedIds: string[];
+}
+
 /** 찜 목록 API 기본 page size */
 export const FAVORITE_MOVERS_PAGE_LIMIT = 5;
 
@@ -29,6 +41,16 @@ export async function removeFavoriteMover(moverId: string): Promise<FavoriteResu
   return fetchInstance.delete<FavoriteResult>(API_ROUTES.FAVORITES.MOVER(moverId));
 }
 
+/** DELETE /favorites/movers — 찜한 기사님 일괄 해제 */
+export async function removeFavoriteMoversBulk(
+  body: BulkDeleteFavoriteMoversBody,
+): Promise<BulkDeleteFavoriteMoversResult> {
+  return fetchInstance.delete<BulkDeleteFavoriteMoversResult, BulkDeleteFavoriteMoversBody>(
+    API_ROUTES.FAVORITES.MOVERS,
+    body,
+  );
+}
+
 /** GET /favorites/movers — 찜한 기사님 목록 (페이지네이션) */
 export async function getFavoriteMovers(
   query: FavoriteMoversListQuery = {},
@@ -40,30 +62,4 @@ export async function getFavoriteMovers(
   return fetchInstance.getPaginated<MoverListItem[]>(
     `${API_ROUTES.FAVORITES.MOVERS}?${params.toString()}`,
   );
-}
-
-/** 찜한 기사님 전체 id 수집 (페이지 순회). bulk API 부재 시 클라이언트에서 사용 */
-export async function fetchAllFavoriteMoverIds(): Promise<string[]> {
-  const limit = FAVORITE_MOVERS_PAGE_LIMIT;
-  const firstPage = await getFavoriteMovers({ page: 1, limit });
-  const ids = firstPage.data.map((mover) => mover.id);
-  const totalPages = Math.max(1, firstPage.pagination.totalPages);
-
-  if (totalPages <= 1) {
-    return ids;
-  }
-
-  const remainingPages = await Promise.all(
-    Array.from({ length: totalPages - 1 }, (_, index) =>
-      getFavoriteMovers({ page: index + 2, limit }),
-    ),
-  );
-
-  for (const pageResult of remainingPages) {
-    for (const mover of pageResult.data) {
-      ids.push(mover.id);
-    }
-  }
-
-  return ids;
 }
