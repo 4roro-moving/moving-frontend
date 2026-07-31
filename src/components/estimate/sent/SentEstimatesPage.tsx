@@ -13,12 +13,12 @@ export default function SentEstimatesPage() {
   const router = useRouter();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const query = useSentEstimates();
-  const { fetchNextPage, hasNextPage, isFetchingNextPage } = query;
+  const { fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError } = query;
   const estimates = query.data?.pages.flatMap((page) => page.data) ?? [];
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel || !hasNextPage || isFetchingNextPage) return;
+    if (!sentinel || !hasNextPage || isFetchingNextPage || isFetchNextPageError) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -29,7 +29,7 @@ export default function SentEstimatesPage() {
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError]);
 
   return (
     <>
@@ -80,6 +80,14 @@ export default function SentEstimatesPage() {
 
         {query.isFetchingNextPage ? (
           <EstimatesQueryStatus message="다음 견적을 불러오는 중이에요." />
+        ) : null}
+
+        {isFetchNextPageError ? (
+          <EstimatesQueryStatus
+            message="다음 견적을 불러오지 못했어요."
+            actionLabel="다시 시도"
+            onAction={() => void fetchNextPage()}
+          />
         ) : null}
       </main>
     </>
