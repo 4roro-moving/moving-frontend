@@ -29,6 +29,9 @@ export const QUERY_KEYS = {
   // 2026.07.24 정슬기 - [추가] 받은 견적 목록·상세 React Query 키
   ESTIMATES: {
     ALL: ["estimates"],
+    SENT_LIST_ROOT: ["estimates", "sent", "list"] as const,
+    SENT_LIST: (status?: string) => ["estimates", "sent", "list", { status }] as const,
+    SENT_DETAIL: (estimateId: number) => ["estimates", "sent", "detail", estimateId] as const,
     RECEIVED: ["estimates", "received"] as const,
     // 받았던/대기 상세 모두 GET /estimates/:estimateId — 동일 DETAIL 키 공유
     // 2026.07.29 정슬기 - [수정] PENDING_DETAIL 제거, DETAIL로 통합
@@ -51,11 +54,15 @@ export const QUERY_KEYS = {
   },
 
   // 2026.07.25 정슬기 - [추가] 리뷰 쿼리 키
+  // 2026.07.30 정슬기 - [수정] 견적 관리와 동일하게 ROOT·페이지 팩토리 분리
   REVIEWS: {
     ALL: ["reviews"] as const,
-    ME: ["reviews", "me"] as const,
     REVIEWABLE: ["reviews", "reviewable"] as const,
-    BY_MOVER: (moverId: string) => ["reviews", "mover", moverId] as const,
+    ME_ROOT: ["reviews", "me"] as const,
+    ME: (page: number, limit: number) => ["reviews", "me", { page, limit }] as const,
+    BY_MOVER_ROOT: (moverId: string) => ["reviews", "mover", moverId] as const,
+    BY_MOVER: (moverId: string, page: number, limit: number) =>
+      ["reviews", "mover", moverId, { page, limit }] as const,
   },
 
   NOTIFICATIONS: {

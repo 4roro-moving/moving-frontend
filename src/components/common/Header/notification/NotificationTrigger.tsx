@@ -38,10 +38,10 @@ export default function NotificationTrigger() {
         aria-expanded={isOpen}
         aria-haspopup="dialog"
         aria-controls={isOpen ? notificationPanelId : undefined}
-        className="relative"
+        className="relative flex size-36 items-center justify-center"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <AlarmIcon className="text-icon-default size-24" aria-hidden="true" />
+        <AlarmIcon className="text-icon-subtle size-32 shrink-0" />
         {unreadCount > 0 ? (
           <Text
             as="span"

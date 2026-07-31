@@ -10,6 +10,7 @@ import { Text } from "@/components/common/Text";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { useCreateReview } from "@/hooks/useCreateReview";
 import { ProfileDefaultIcon } from "@/icons";
+import { getReviewMoverDisplayName } from "@/lib/utils/estimateFormat";
 import type { ReviewableEstimateItem } from "@/types/review";
 
 const MIN_CONTENT_LENGTH = 10;
@@ -42,6 +43,7 @@ function ReviewWriteModalContent({
   const [submitError, setSubmitError] = useState<string | undefined>();
 
   const createMutation = useCreateReview({
+    moverId: item.mover.id,
     onSuccess: () => {
       onSuccess?.();
       onClose();
@@ -53,9 +55,7 @@ function ReviewWriteModalContent({
     },
   });
 
-  // GET /reviews/reviewable 응답 mover에는 name이 없고 nickname만 존재 (null 가능)
-  const nickname = item.mover.nickname?.trim();
-  const moverLabel = nickname ? `${nickname} 기사님` : "기사님";
+  const moverLabel = getReviewMoverDisplayName(item.mover);
   const trimmedContent = content.trim();
   const isPending = createMutation.isPending;
   const isSubmitDisabled = isPending || rating < 1 || trimmedContent.length < MIN_CONTENT_LENGTH;

@@ -37,11 +37,7 @@ export default function RejectedRequestsPage() {
       <main className="bg-background-subtle min-h-[calc(100vh-108px)] px-24 pt-24 pb-40 md:min-h-[calc(100vh-142px)] md:px-72 md:pt-32 lg:min-h-[calc(100vh-168px)] lg:px-0 lg:pt-[59px] lg:pb-[107px]">
         <h1 className="sr-only">반려 요청</h1>
 
-        {query.isPending ? (
-          <Text variant="lg-regular" className="text-text-muted py-80 text-center">
-            반려 요청을 불러오는 중이에요.
-          </Text>
-        ) : null}
+        {query.isPending ? <EstimatesQueryStatus message="반려 요청을 불러오는 중이에요." /> : null}
 
         {query.isError ? (
           <EstimatesQueryStatus
@@ -54,9 +50,7 @@ export default function RejectedRequestsPage() {
         ) : null}
 
         {items.length === 0 && !query.isPending && !query.isError ? (
-          <Text variant="lg-regular" className="text-text-muted py-80 text-center">
-            반려한 요청이 없어요.
-          </Text>
+          <EstimatesQueryStatus message="반려한 요청이 없어요." />
         ) : null}
 
         {items.length > 0 ? (
@@ -76,13 +70,15 @@ export default function RejectedRequestsPage() {
             ) : null}
 
             {isFetchNextPageError ? (
-              <EstimatesQueryStatus
-                message="다음 반려 요청을 불러오지 못했어요."
-                actionLabel="다시 시도"
-                onAction={() => {
-                  void fetchNextPage();
-                }}
-              />
+              <fieldset disabled={isFetchingNextPage}>
+                <EstimatesQueryStatus
+                  message="다음 반려 요청을 불러오지 못했어요."
+                  actionLabel={isFetchingNextPage ? "다시 시도 중..." : "다시 시도"}
+                  onAction={() => {
+                    void fetchNextPage();
+                  }}
+                />
+              </fieldset>
             ) : null}
           </div>
         ) : null}

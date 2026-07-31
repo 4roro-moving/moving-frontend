@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const LoginPage = () => {
   return (
     <AuthLayout>
-      <LoginForm />
+      <LoginForm audience="customer" />
     </AuthLayout>
   );
 };

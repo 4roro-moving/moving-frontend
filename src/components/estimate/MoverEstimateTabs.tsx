@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Text } from "@/components/common/Text";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 
 const TABS = [
-  { href: "/estimate/received-requests", label: "보낸 견적 조회" },
-  { href: "/estimates/rejected", label: "반려 요청" },
+  { href: APP_ROUTES.MOVER_ESTIMATES.SENT, label: "보낸 견적 조회" },
+  { href: APP_ROUTES.MOVER_ESTIMATES.REJECTED, label: "반려 요청" },
 ] as const;
 
 export default function MoverEstimateTabs() {
