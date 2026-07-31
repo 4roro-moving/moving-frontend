@@ -208,18 +208,18 @@ const Header = ({
         </div>
 
         {showAuthSkeleton ? (
-          <div className="flex items-center gap-20" aria-hidden>
-            <div className="bg-background-subtle size-24 animate-pulse rounded-full" />
-            <div className="flex items-center gap-20">
+          <div className="flex items-center gap-32" aria-hidden>
+            <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
+            <div className="flex items-center gap-16">
               <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
               <div className="bg-background-subtle rounded-4 h-20 w-64 animate-pulse" />
             </div>
           </div>
         ) : isLogin ? (
-          <div className="flex items-center gap-20">
+          <div className="flex items-center gap-32">
             <NotificationTrigger />
 
-            <div ref={profileMenuRef} className="relative flex items-center gap-12">
+            <div ref={profileMenuRef} className="relative flex items-center gap-16">
               <button
                 ref={triggerRef}
                 type="button"
@@ -228,7 +228,7 @@ const Header = ({
                 aria-haspopup="menu"
                 aria-expanded={isProfileMenuOpen}
                 aria-controls={isProfileMenuOpen ? `${menuId}-menu` : undefined}
-                className="focus-visible:ring-border-brand rounded-8 flex items-center gap-12 focus-visible:ring-2 focus-visible:outline-none"
+                className="focus-visible:ring-border-brand rounded-8 flex items-center gap-16 focus-visible:ring-2 focus-visible:outline-none"
                 onClick={() => {
                   if (isProfileMenuOpen) {
                     closeMenu();
