@@ -7,6 +7,7 @@ import type { OAuthProvider } from "@/lib/auth/oauth";
  */
 let pendingExchange: { key: string; promise: Promise<LoginResult> } | null = null;
 let completedExchange: { key: string; result: LoginResult } | null = null;
+const finishedExchangeKeys = new Set<string>();
 
 const getExchangeKey = (provider: OAuthProvider, code: string): string => {
   return `${provider}:${code}`;
@@ -18,6 +19,18 @@ export const getCompletedOAuthExchange = (
 ): LoginResult | null => {
   const key = getExchangeKey(provider, code);
   return completedExchange?.key === key ? completedExchange.result : null;
+};
+
+/** 성공 후처리(세션 확립·이동)를 1회만 수행. 이미 처리됨이면 false */
+export const markOAuthExchangeFinished = (provider: OAuthProvider, code: string): boolean => {
+  const key = getExchangeKey(provider, code);
+  if (finishedExchangeKeys.has(key)) return false;
+  finishedExchangeKeys.add(key);
+  return true;
+};
+
+export const isOAuthExchangeFinished = (provider: OAuthProvider, code: string): boolean => {
+  return finishedExchangeKeys.has(getExchangeKey(provider, code));
 };
 
 export const exchangeOAuthCodeOnce = (

@@ -23,12 +23,13 @@ export const startOAuthLogin = async (
     returnPath: getLoginRedirectParam(),
   });
 
-  let state = crypto.randomUUID();
+  let state: string = "";
 
   if (provider === "naver") {
     const data = await getNaverOAuthState();
     state = data.state;
   } else {
+    state = crypto.randomUUID();
     saveOAuthClientState(state);
   }
 

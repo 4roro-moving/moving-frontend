@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 
 import { NICKNAME_STORAGE_KEY } from "@/lib/auth/nickname";
 import { ROLE_STORAGE_KEY } from "@/lib/auth/role";
-import { REFRESH_TOKEN_COOKIE_BACKEND_PATH, REFRESH_TOKEN_COOKIE_NAME } from "@/lib/auth/token";
+import { REFRESH_TOKEN_COOKIE_BACKEND_PATH } from "@/lib/auth/token";
 import {
   buildBackendHeaders,
+  buildClearRefreshTokenCookie,
   forwardBackendResponse,
   getBackendApiBaseUrl,
 } from "@/lib/server/forwardBackendResponse";
@@ -65,12 +66,7 @@ const appendClearCookie = (
 /** login 시 심은 쿠키와 동일한 속성으로 지워야 브라우저가 삭제합니다. */
 const clearClientAuthCookies = (res: NextResponse): void => {
   for (const path of ["/", REFRESH_TOKEN_COOKIE_BACKEND_PATH]) {
-    // 속성 불일치로 남은 쿠키 대비 (dev에서 Secure/SameSite 조합이 달랐던 경우)
-    appendClearCookie(res, REFRESH_TOKEN_COOKIE_NAME, path, {
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: false,
-    });
+    res.headers.append("Set-Cookie", buildClearRefreshTokenCookie(path));
   }
 
   appendClearCookie(res, NICKNAME_STORAGE_KEY, "/", { sameSite: "Lax" });

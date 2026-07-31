@@ -5,6 +5,7 @@ import { setAccessToken } from "@/lib/auth/token";
 import { AUTH_BFF_BASE } from "@/lib/constants/authBff";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { ApiError } from "@/types/api";
+import { OAuthProvider } from "../auth/oauth";
 
 export interface LoginInput {
   email: string;
@@ -112,7 +113,7 @@ export const getNaverOAuthState = async (): Promise<NaverOAuthStateResult> => {
 };
 
 export const loginWithOAuth = async (
-  provider: "google" | "kakao" | "naver",
+  provider: OAuthProvider,
   input: OAuthLoginInput,
 ): Promise<LoginResult> => {
   const path =

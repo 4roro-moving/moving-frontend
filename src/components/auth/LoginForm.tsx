@@ -63,7 +63,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       // audience 불일치: establishSession 전에 롤백 (GuestOnly 홈 이동 방지)
       if (resultAudience !== audience) {
         await logout();
-        setSubmitError(getAudienceMismatchMessage(audience));
+        setSubmitError(getAudienceMismatchMessage(audience, resultAudience));
         return;
       }
 

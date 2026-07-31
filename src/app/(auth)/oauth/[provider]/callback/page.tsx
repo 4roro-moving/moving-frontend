@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
@@ -12,7 +12,12 @@ import {
   loadOAuthClientState,
   loadOAuthPendingSession,
 } from "@/lib/auth/oauth";
-import { exchangeOAuthCodeOnce, getCompletedOAuthExchange } from "@/lib/auth/oauthExchange";
+import {
+  exchangeOAuthCodeOnce,
+  getCompletedOAuthExchange,
+  isOAuthExchangeFinished,
+  markOAuthExchangeFinished,
+} from "@/lib/auth/oauthExchange";
 import {
   buildLoginPath,
   getAudienceMismatchMessage,
@@ -22,9 +27,6 @@ import {
   type AuthAudience,
 } from "@/lib/auth/redirect";
 import { useAuthStore } from "@/stores/useAuthStore";
-
-/** Strict remount에도 성공 후처리를 한 번만 수행 */
-const finishedExchangeKeys = new Set<string>();
 
 const failOAuthCallback = (message: string, setError: (value: string) => void): void => {
   clearOAuthPendingSession();
@@ -39,19 +41,17 @@ const OAuthCallbackContent = () => {
   const logout = useAuthStore((state) => state.logout);
   const [error, setError] = useState<string | null>(null);
   const [loginHref, setLoginHref] = useState(buildLoginPath());
-  const hasStartedRef = useRef(false);
 
   useEffect(() => {
-    if (hasStartedRef.current) return;
-    hasStartedRef.current = true;
-
     const run = async () => {
       const code = searchParams.get("code");
       const state = searchParams.get("state");
       const providerError = searchParams.get("error");
       const routeProvider = params.provider;
       const pending = loadOAuthPendingSession();
-      const pageAudience: AuthAudience = pending?.role === "MOVER" ? "mover" : "customer";
+      const pageAudience: AuthAudience = pending
+        ? getAuthAudienceFromRole(pending.role)
+        : "customer";
 
       setLoginHref(buildLoginPath(undefined, pageAudience));
 
@@ -75,13 +75,11 @@ const OAuthCallbackContent = () => {
         return;
       }
 
-      const exchangeKey = `${routeProvider}:${code}`;
-
       // 성공 후 pending이 지워진 뒤 remount되어도 완료 캐시가 있으면 재처리/오탐 에러 방지
       if (!pending) {
         if (
           getCompletedOAuthExchange(routeProvider, code) ||
-          finishedExchangeKeys.has(exchangeKey)
+          isOAuthExchangeFinished(routeProvider, code)
         ) {
           return;
         }
@@ -109,19 +107,17 @@ const OAuthCallbackContent = () => {
           ...(pending.provider === "naver" && state ? { state } : {}),
         });
 
-        if (finishedExchangeKeys.has(exchangeKey)) {
-          return;
-        }
-        finishedExchangeKeys.add(exchangeKey);
-
         const resultAudience = getAuthAudienceFromRole(result.user.role);
 
-        if (
-          (pending.role === "CUSTOMER" && resultAudience !== "customer") ||
-          (pending.role === "MOVER" && resultAudience !== "mover")
-        ) {
+        // LoginForm과 동일: audience 불일치 시 세션 롤백
+        if (resultAudience !== pageAudience) {
           await logout();
-          failOAuthCallback(getAudienceMismatchMessage(pageAudience), setError);
+          failOAuthCallback(getAudienceMismatchMessage(pageAudience, resultAudience), setError);
+          return;
+        }
+
+        // mismatch 통과 후에만 후처리 1회 확정
+        if (!markOAuthExchangeFinished(pending.provider, code)) {
           return;
         }
 
