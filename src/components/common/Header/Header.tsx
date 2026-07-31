@@ -30,9 +30,9 @@ const MOVER_LOGGED_IN_LINKS = [
 ];
 
 const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
-  { type: "link", label: "작성 가능한 리뷰", href: APP_ROUTES.REVIEWS.WRITABLE },
-  { type: "link", label: "내가 작성한 리뷰", href: APP_ROUTES.REVIEWS.ME },
-  { type: "link", label: "프로필", href: APP_ROUTES.PROFILE },
+  { type: "link", label: "프로필 수정", href: APP_ROUTES.PROFILE_EDIT },
+  { type: "link", label: "찜한 기사님", href: APP_ROUTES.FAVORITE_MOVERS },
+  { type: "link", label: "이사 리뷰", href: APP_ROUTES.REVIEWS.WRITABLE },
   { type: "action", label: "로그아웃", action: "logout" },
 ];
 
@@ -84,7 +84,7 @@ const Header = ({
       <div className="h-gnb-height-desktop px-gnb-padding-x-desktop flex items-center justify-between py-26">
         <div className="flex items-center gap-80">
           <Link href="/" className="shrink-0">
-            <Image src="/icons/logo_full.svg" alt="4roro-moving" width={100} height={37} priority />
+            <Image src="/icons/logo_full.svg" alt="4roro-moving" width={116} height={44} priority />
           </Link>
 
           <nav aria-label="주요 메뉴">
@@ -99,7 +99,9 @@ const Header = ({
                       aria-current={isActive ? "page" : undefined}
                       className={cn(
                         "transition-colors",
-                        isActive ? "text-text-primary" : "text-text-subtle hover:text-text-primary",
+                        isActive
+                          ? "text-nav-text-active"
+                          : "text-nav-text-default hover:text-nav-text-active",
                       )}
                     >
                       <Text variant="2lg-bold">{link.label}</Text>

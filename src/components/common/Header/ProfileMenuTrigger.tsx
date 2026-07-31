@@ -40,6 +40,9 @@ export default function ProfileMenuTrigger({
   const profileMenuRef = useClickOutside<HTMLDivElement>(() => setOpenMenuPath(null));
 
   const isProfileMenuOpen = openMenuPath === pathname;
+  const linkItems = items.filter((item) => item.type === "link");
+  const logoutItem = items.find((item) => item.type === "action" && item.action === "logout");
+  const nicknameSuffix = role === "MOVER" ? "기사님" : "고객님";
 
   const handleLogout = async () => {
     setOpenMenuPath(null);
@@ -144,7 +147,7 @@ export default function ProfileMenuTrigger({
         }}
       >
         <Image src="/icons/profile-default.svg" alt="" width={36} height={36} />
-        <Text as="span" variant="md-medium" className="text-text-primary">
+        <Text as="span" variant="2lg-medium" className="text-text-primary">
           {nickname}
         </Text>
       </button>
@@ -154,53 +157,60 @@ export default function ProfileMenuTrigger({
           id={`${menuId}-menu`}
           role="menu"
           aria-labelledby={`${menuId}-trigger`}
-          className="border-border-subtle bg-background-surface shadow-estimate-card rounded-12 absolute top-[calc(100%+8px)] right-0 z-50 flex min-w-[200px] flex-col overflow-hidden border py-8"
+          className="border-border-default bg-background-surface shadow-profile-menu rounded-16 absolute top-[calc(100%+18px)] right-0 z-50 flex w-[248px] flex-col items-start border px-4 pt-16 pb-6"
         >
-          {items.map((item, index) => {
-            if (item.type === "action") {
-              return (
-                <button
-                  key={item.action}
-                  ref={(node) => {
-                    itemRefs.current[index] = node;
-                  }}
-                  tabIndex={-1}
-                  type="button"
-                  role="menuitem"
-                  className="focus-visible:bg-background-hover text-text-muted hover:text-text-secondary border-border-subtle border-t px-16 py-12 text-center transition-colors focus-visible:outline-none"
-                  onClick={handleLogout}
-                >
-                  <Text as="span" variant="md-medium">
-                    {item.label}
-                  </Text>
-                </button>
-              );
-            }
+          <div className="flex w-full items-center py-14 pr-12 pl-24">
+            <Text as="p" variant="2lg-bold" className="text-text-secondary">
+              {nickname} {nicknameSuffix}
+            </Text>
+          </div>
 
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          <div className="flex w-full flex-col items-center gap-10">
+            <div className="flex w-full flex-col">
+              {linkItems.map((item, index) => {
+                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-            return (
-              <Link
-                key={item.href}
+                return (
+                  <Link
+                    key={item.href}
+                    ref={(node) => {
+                      itemRefs.current[index] = node;
+                    }}
+                    href={item.href}
+                    role="menuitem"
+                    tabIndex={-1}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "hover:bg-background-hover focus-visible:bg-background-hover flex w-full items-center py-14 pr-12 pl-24 transition-colors focus-visible:outline-none",
+                      isActive ? "text-text-brand" : "text-text-secondary",
+                    )}
+                    onClick={() => setOpenMenuPath(null)}
+                  >
+                    <Text as="span" variant="lg-medium">
+                      {item.label}
+                    </Text>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {logoutItem ? (
+              <button
                 ref={(node) => {
-                  itemRefs.current[index] = node;
+                  itemRefs.current[linkItems.length] = node;
                 }}
-                href={item.href}
-                role="menuitem"
                 tabIndex={-1}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "hover:bg-background-hover focus-visible:bg-background-hover px-16 py-12 transition-colors focus-visible:outline-none",
-                  isActive ? "text-text-brand" : "text-text-primary",
-                )}
-                onClick={() => setOpenMenuPath(null)}
+                type="button"
+                role="menuitem"
+                className="border-border-subtle hover:text-text-secondary focus-visible:bg-background-hover text-text-muted flex w-full items-center justify-center border-t px-12 pt-14 pb-8 transition-colors focus-visible:outline-none"
+                onClick={handleLogout}
               >
                 <Text as="span" variant="md-medium">
-                  {item.label}
+                  {logoutItem.label}
                 </Text>
-              </Link>
-            );
-          })}
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </div>
