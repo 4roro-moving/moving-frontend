@@ -1,15 +1,15 @@
 import type {
   MoverEstimateRequestQuery,
-  MoverEstimateRequestResponse,
+  MoverEstimateRequestResult,
   RejectEstimateRequest,
-  RejectEstimateResponse,
-  RejectedEstimateRequestListResponse,
+  RejectedEstimate,
+  RejectedEstimateRequestListResult,
   SendEstimateRequest,
-  SendEstimateResponse,
+  SentEstimate,
 } from "@/types/moverEstimateRequest";
 
-import { API_ROUTES } from "../constants/apiRoutes";
-import axiosInstance from "./axiosInstance";
+import fetchInstance from "@/lib/api/fetchInstance";
+import { API_ROUTES } from "@/lib/constants/apiRoutes";
 
 // 기사 견적 요청 목록 조회
 // GET /api/estimates/requests
@@ -34,45 +34,27 @@ export async function getMoverEstimateRequests(query: MoverEstimateRequestQuery)
   //이사 유형 필터
   query.moveType?.forEach((moveType) => params.append("moveType", moveType));
 
-  const response = await axiosInstance.get<MoverEstimateRequestResponse>(
+  return fetchInstance.get<MoverEstimateRequestResult>(
     `${API_ROUTES.ESTIMATES.REQUESTS}?${params.toString()}`,
   );
-
-  if (!response.data.success) {
-    throw new Error(response.data.error.code);
-  }
-
-  return response.data.data;
 }
 
 // 기사가 고객의 견적 요청에 견적 전송
 // POST /api/estimates/requests/:estimateRequestId
-export async function sendMoverEstimate(estimateRequestId: number, input: SendEstimateRequest) {
-  const response = await axiosInstance.post<SendEstimateResponse>(
+export function sendMoverEstimate(estimateRequestId: number, input: SendEstimateRequest) {
+  return fetchInstance.post<SentEstimate, SendEstimateRequest>(
     API_ROUTES.ESTIMATES.SEND(estimateRequestId),
     input,
   );
-
-  if (!response.data.success) {
-    throw new Error(response.data.error.message);
-  }
-
-  return response.data.data;
 }
 
 // 기사 견적 반려
 // POST /api/estimates/requests/:id/reject
-export async function rejectMoverEstimate(estimateRequestId: number, input: RejectEstimateRequest) {
-  const response = await axiosInstance.post<RejectEstimateResponse>(
+export function rejectMoverEstimate(estimateRequestId: number, input: RejectEstimateRequest) {
+  return fetchInstance.post<RejectedEstimate, RejectEstimateRequest>(
     API_ROUTES.ESTIMATES.REJECT(estimateRequestId),
     input,
   );
-
-  if (!response.data.success) {
-    throw new Error(response.data.error.message);
-  }
-
-  return response.data.data;
 }
 
 //기사님 반려 내역 조회
@@ -81,13 +63,7 @@ export async function getRejectedEstimateRequests(cursor?: string, limit = 10) {
   const params = new URLSearchParams({ limit: String(limit) });
   if (cursor) params.set("cursor", cursor);
 
-  const response = await axiosInstance.get<RejectedEstimateRequestListResponse>(
+  return fetchInstance.get<RejectedEstimateRequestListResult>(
     `${API_ROUTES.ESTIMATES.REJECTIONS}?${params.toString()}`,
   );
-
-  if (!response.data.success) {
-    throw new Error(response.data.error.message);
-  }
-
-  return response.data.data;
 }
