@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import Checkbox from "@/components/common/Checkbox/Checkbox";
 import { Text } from "@/components/common/Text";
 import { MoverMeta } from "@/components/mover/MoverMeta";
 import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
@@ -17,6 +18,11 @@ interface MoverCardProps {
   variant?: "full" | "compact";
   className?: string;
   onFavoriteError?: (message: string) => void;
+  /** 찜 목록 등에서 카드 선택용. 있으면 우상단 체크박스 표시 */
+  selection?: {
+    checked: boolean;
+    onCheckedChange: (checked: boolean) => void;
+  };
 }
 
 interface FavoriteButtonProps {
@@ -72,6 +78,7 @@ export default function MoverCard({
   variant = "full",
   className,
   onFavoriteError,
+  selection,
 }: MoverCardProps) {
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
 
@@ -95,6 +102,25 @@ export default function MoverCard({
 
   const detailHref = APP_ROUTES.MOVERS.DETAIL(mover.id);
   const detailLabel = `${mover.name} 기사님 상세 보기`;
+
+  const selectionControl = selection ? (
+    <div
+      className="pointer-events-auto"
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+      onKeyDown={(event) => {
+        event.stopPropagation();
+      }}
+    >
+      <Checkbox
+        checked={selection.checked}
+        onCheckedChange={selection.onCheckedChange}
+        aria-label={`${mover.name} 기사님 선택`}
+      />
+    </div>
+  ) : null;
 
   if (variant === "compact") {
     return (
@@ -166,7 +192,10 @@ export default function MoverCard({
         className="focus-visible:ring-border-brand rounded-16 min-[744px]:rounded-20 absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none"
       />
       <div className="pointer-events-none relative z-10 flex flex-col gap-8 min-[744px]:hidden">
-        <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
+        <div className="flex min-h-36 items-center justify-between gap-8">
+          <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
+          {selectionControl}
+        </div>
 
         <div className="flex w-full flex-col gap-16">
           <div className="flex flex-col">
@@ -221,8 +250,9 @@ export default function MoverCard({
       </div>
 
       <div className="pointer-events-none relative z-10 hidden min-[744px]:flex min-[744px]:flex-col min-[744px]:gap-20">
-        <div className="flex min-h-32 items-center">
+        <div className="flex min-h-36 items-center justify-between gap-8">
           <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="md" />
+          {selectionControl}
         </div>
 
         <div className="flex flex-row items-start gap-20">
