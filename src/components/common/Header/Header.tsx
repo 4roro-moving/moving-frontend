@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
-import NotificationTrigger from "@/components/common/Header/NotificationTrigger";
+import NotificationTrigger from "@/components/common/Header/notification";
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { getLoginRedirectPath } from "@/lib/auth/session";
