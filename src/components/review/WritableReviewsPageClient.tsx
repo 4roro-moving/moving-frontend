@@ -12,11 +12,15 @@ import WritableReviewCard from "@/components/review/WritableReviewCard";
 import { useReviewableEstimates } from "@/hooks/useReviewableEstimates";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { REVIEWABLE_PAGE_LIMIT } from "@/lib/api/reviews";
-import { buildMockPagination } from "@/lib/mocks/pagination";
+import { buildClientPagination } from "@/lib/utils/pagination";
 import type { ReviewableEstimateItem } from "@/types/review";
 
-// 2026.07.27 정슬기 - [추가] 작성 가능 리뷰 목록 Page Client
-// 2026.07.27 정슬기 - [수정] 페이지 보정을 파생값으로 처리 (render-phase setState 제거)
+/**
+ * 작성 가능 리뷰 목록
+ * // 2026.07.27 정슬기 - [추가]
+ * // 2026.07.30 정슬기 - [수정] FE 페이지네이션을 client util로 분리
+ * // 2026.07.31 정슬기 - [수정] 내 리뷰와 동일하게 page state를 totalPages로 보정
+ */
 export default function WritableReviewsPageClient() {
   const { data, isLoading, isError, error, refetch, isFetching } = useReviewableEstimates();
   const [page, setPage] = useState(1);
@@ -25,10 +29,18 @@ export default function WritableReviewsPageClient() {
 
   const totalCount = data?.length ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / REVIEWABLE_PAGE_LIMIT) || 1);
-  const currentPage = totalCount === 0 ? 1 : Math.min(Math.max(1, page), totalPages);
+
+  // 데이터 준비 후 범위 밖 page만 보정 (빈 목록이면 page 변경하지 않음 — 최소 1 유지)
+  // React: 응답 기반 상태 조정은 렌더 중 setState 허용 (내 리뷰와 동일)
+  if (data !== undefined && totalCount > 0 && page > totalPages) {
+    setPage(totalPages);
+  }
+
+  // page: 실제 페이지 상태 / currentPage: 렌더용 안전 clamp
+  const currentPage = Math.min(Math.max(1, page), totalPages);
 
   const pagination = useMemo(
-    () => buildMockPagination(totalCount, currentPage, REVIEWABLE_PAGE_LIMIT),
+    () => buildClientPagination(totalCount, currentPage, REVIEWABLE_PAGE_LIMIT),
     [totalCount, currentPage],
   );
 

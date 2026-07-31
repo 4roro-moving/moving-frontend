@@ -94,17 +94,24 @@ export interface MoverReviewListQuery {
   limit?: number;
 }
 
-export interface CreateReviewInput {
+/** `POST /reviews` 요청 body */
+export interface CreateReviewRequest {
   estimateId: number;
   rating: number;
   content: string;
 }
 
-/** `POST /reviews` 생성 응답 */
-export interface CreatedReview {
+/** @deprecated CreateReviewRequest 사용 */
+export type CreateReviewInput = CreateReviewRequest;
+
+/** `POST /reviews` 생성 응답 (data) */
+export interface ReviewResponse {
   id: number;
   estimateId: number;
   rating: number;
   content: string;
   createdAt: string;
 }
+
+/** @deprecated ReviewResponse 사용 */
+export type CreatedReview = ReviewResponse;
