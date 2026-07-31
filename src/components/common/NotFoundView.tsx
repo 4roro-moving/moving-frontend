@@ -54,12 +54,12 @@ export default function NotFoundView() {
           </div>
         </div>
 
-        <div className="flex w-full max-w-[320px] flex-col gap-12 sm:max-w-none sm:flex-row sm:justify-center sm:gap-16">
+        <div className="flex w-full flex-col gap-12 sm:w-auto sm:flex-row sm:justify-center sm:gap-16">
           <Button
             type="button"
             variant="solid"
             size="cta"
-            className="sm:min-w-[160px]"
+            className="w-full sm:w-auto sm:min-w-160"
             onClick={() => {
               router.push(APP_ROUTES.HOME);
             }}
@@ -70,7 +70,7 @@ export default function NotFoundView() {
             type="button"
             variant="outline"
             size="cta"
-            className="sm:min-w-[160px]"
+            className="w-full sm:w-auto sm:min-w-160"
             onClick={handleBack}
           >
             이전 페이지로 이동
