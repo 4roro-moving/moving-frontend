@@ -14,7 +14,7 @@ export interface FavoriteMoversListQuery {
 }
 
 /** 찜 목록 API 기본 page size */
-export const FAVORITE_MOVERS_PAGE_LIMIT = 10;
+export const FAVORITE_MOVERS_PAGE_LIMIT = 5;
 
 /** PC 기사님 찾기 사이드바에 표시하는 최대 인원 */
 export const FAVORITE_MOVERS_SIDEBAR_LIMIT = 3;
