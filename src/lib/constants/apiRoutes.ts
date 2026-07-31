@@ -32,6 +32,8 @@ export const API_ROUTES = {
   // 2026.07.28 정슬기 - [수정] 대기 중인 견적 목록 경로 추가 (BE GET /estimates/pending)
   ESTIMATES: {
     ROOT: "/estimates",
+    SENT: "/estimates/sent",
+    SENT_DETAIL: (estimateId: number) => `/estimates/sent/${estimateId}`,
     PENDING: "/estimates/pending",
     RECEIVED: "/estimates/received",
     DETAIL: (estimateId: number) => `/estimates/${estimateId}`,
