@@ -14,8 +14,23 @@ interface RoleGuardProps {
   children: ReactNode;
 }
 
+/**
+ * early direct role 이 있으면 바로 return
+ *
+ * token 이 없으면 null return
+ * token 이 있으면 token 에서 role 을 추출하여 return
+ */
 const resolveKnownRole = (storeRole: AuthRole | null | undefined): AuthRole | null => {
+  if (storeRole) {
+    return storeRole;
+  }
+
   const token = getAccessToken();
+
+  if (!token) {
+    return null;
+  }
+
   return storeRole ?? loadRole() ?? (token ? getAccessTokenRole(token) : null);
 };
 
