@@ -316,3 +316,97 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
 
   return { ...mutation, mutate, mutateAsync };
 }
+
+interface UseBulkRemoveFavoriteMoversOptions {
+  onError?: (message: string) => void;
+}
+
+interface BulkRemoveFavoriteContext {
+  previousFavoriteMovers: [readonly unknown[], MoversListResult | undefined][];
+}
+
+/** 찜한 기사님 여러 명 일괄 해제 — DELETE 병렬 + 캐시 무효화 1회 */
+export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMoversOptions) {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const loginRequiredModal = useLoginRequiredModal();
+  const onErrorRef = useRef(options?.onError);
+
+  useEffect(() => {
+    onErrorRef.current = options?.onError;
+  }, [options?.onError]);
+
+  const requireLogin = () => {
+    if (loginRequiredModal) {
+      loginRequiredModal.openLoginRequiredModal();
+      return;
+    }
+    router.push(getLoginRedirectPath());
+  };
+
+  const mutation = useMutation({
+    mutationFn: async (moverIds: string[]) => {
+      await Promise.all(moverIds.map((moverId) => removeFavoriteMover(moverId)));
+    },
+    onMutate: async (moverIds): Promise<BulkRemoveFavoriteContext> => {
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS });
+
+      const previousFavoriteMovers = queryClient.getQueriesData<MoversListResult>({
+        queryKey: QUERY_KEYS.FAVORITES.MOVERS,
+      });
+      const idSet = new Set(moverIds);
+
+      queryClient.setQueriesData<MoversListResult>(
+        { queryKey: QUERY_KEYS.FAVORITES.MOVERS },
+        (list) => {
+          if (!list) {
+            return list;
+          }
+
+          const data = list.data.filter((mover) => !idSet.has(mover.id));
+          const removedCount = list.data.length - data.length;
+          if (removedCount === 0) {
+            return list;
+          }
+
+          return {
+            ...list,
+            data,
+            pagination: {
+              ...list.pagination,
+              totalCount: Math.max(0, list.pagination.totalCount - removedCount),
+            },
+          };
+        },
+      );
+
+      return { previousFavoriteMovers };
+    },
+    onError: (error, _variables, context) => {
+      context?.previousFavoriteMovers.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+
+      if (isUnauthorizedError(error)) {
+        requireLogin();
+        return;
+      }
+
+      onErrorRef.current?.(getApiErrorMessage(error));
+    },
+    onSettled: async () => {
+      await invalidateFavoriteRelatedQueries(queryClient);
+    },
+  });
+
+  const mutateAsync: typeof mutation.mutateAsync = (variables, mutateOptions) => {
+    if (!hasAuthSession()) {
+      requireLogin();
+      return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
+    }
+
+    return mutation.mutateAsync(variables, mutateOptions);
+  };
+
+  return { ...mutation, mutateAsync };
+}
