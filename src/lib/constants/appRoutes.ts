@@ -48,5 +48,8 @@ export const APP_ROUTES = {
   /** 기사님 내 견적 관리 (임시 추가) */
   MOVER_ESTIMATES: {
     ROOT: "/estimate/received-requests",
+    SENT: "/estimate/sent",
+    SENT_DETAIL: (estimateId: number) => `/estimate/sent/${estimateId}`,
+    REJECTED: "/estimate/rejected",
   },
 } as const;
