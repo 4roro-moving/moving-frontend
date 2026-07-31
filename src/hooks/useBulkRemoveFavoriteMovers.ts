@@ -34,6 +34,8 @@ function buildPartialFailureMessage(totalCount: number, failedCount: number): st
 export interface BulkRemoveFavoriteResult {
   succeededIds: string[];
   failedIds: string[];
+  /** 일부 요청이 401인 경우 — onSuccess에서 로그인 유도 (토스트와 중복되지 않게) */
+  hadUnauthorizedError: boolean;
 }
 
 interface UseBulkRemoveFavoriteMoversOptions {
@@ -99,11 +101,11 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
           : new Error(getApiErrorMessage(firstFailure, ALL_FAILED_MESSAGE));
       }
 
-      if (unauthorizedError) {
-        requireLogin();
-      }
-
-      return { succeededIds, failedIds };
+      return {
+        succeededIds,
+        failedIds,
+        hadUnauthorizedError: Boolean(unauthorizedError),
+      };
     },
     onMutate: async (moverIds): Promise<BulkRemoveFavoriteContext> => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS });
@@ -139,6 +141,12 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
           removeIdsFromFavoriteMoversCache(list, succeededSet, result.succeededIds.length) as
             FavoriteMoversCacheData | undefined,
       );
+
+      // 인증 만료가 섞인 부분 실패는 로그인 유도만 (부분 실패 토스트와 중복 방지)
+      if (result.hadUnauthorizedError) {
+        requireLogin();
+        return;
+      }
 
       onErrorRef.current?.(buildPartialFailureMessage(moverIds.length, result.failedIds.length));
     },
