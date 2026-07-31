@@ -41,6 +41,26 @@ const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   { type: "action", label: "로그아웃", action: "logout" },
 ];
 
+/** GNB 메뉴 활성 여부. 찜한 기사님(`/movers/favorites`)은 프로필 메뉴 항목이라 기사님 찾기 활성에서 제외 */
+function isNavLinkActive(pathname: string, href: string): boolean {
+  if (pathname === href) {
+    return true;
+  }
+
+  if (!pathname.startsWith(`${href}/`)) {
+    return false;
+  }
+
+  if (href === APP_ROUTES.MOVERS.ROOT) {
+    const favoritesPath = APP_ROUTES.MOVERS.FAVORITES;
+    if (pathname === favoritesPath || pathname.startsWith(`${favoritesPath}/`)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export interface HeaderProps {
   /** Server에서 refresh 쿠키로 전달. hydrate 전 깜빡임 방지용 */
   isLogin?: boolean;
@@ -90,7 +110,7 @@ const Header = ({
           <nav aria-label="주요 메뉴">
             <ul className="flex items-center gap-40">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+                const isActive = isNavLinkActive(pathname, link.href);
 
                 return (
                   <li key={link.label}>
