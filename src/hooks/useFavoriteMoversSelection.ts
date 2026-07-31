@@ -72,7 +72,14 @@ export function useFavoriteMoversSelection({
       return;
     }
 
-    await bulkRemoveMutation.mutateAsync(idsToRemove);
+    const result = await bulkRemoveMutation.mutateAsync(idsToRemove);
+
+    if (result.failedIds.length > 0) {
+      setIsSelectAll(false);
+      setSelectedIds(result.failedIds);
+      return;
+    }
+
     clearSelection();
   };
 
@@ -90,8 +97,8 @@ export function useFavoriteMoversSelection({
     void (async () => {
       try {
         await removeFavorites([...selectedIds]);
-      } catch (error) {
-        setToastMessage(getApiErrorMessage(error, DELETE_ERROR_MESSAGE));
+      } catch {
+        // 전부 실패 시 useBulkRemoveFavoriteMovers onError에서 토스트 처리
       }
     })();
   };
@@ -101,8 +108,12 @@ export function useFavoriteMoversSelection({
       setIsResolvingAllIds(true);
       try {
         const allIds = await fetchAllFavoriteMoverIds();
-        await removeFavorites(allIds);
-        setIsDeleteConfirmOpen(false);
+        try {
+          await removeFavorites(allIds);
+          setIsDeleteConfirmOpen(false);
+        } catch {
+          // 전부 실패 시 mutation onError에서 토스트 처리. 모달은 재시도 가능하도록 유지
+        }
       } catch (error) {
         setToastMessage(getApiErrorMessage(error, DELETE_ERROR_MESSAGE));
       } finally {
