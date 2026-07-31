@@ -9,8 +9,12 @@ export const APP_ROUTES = {
   MOVER_LOGIN: "/mover/login",
   /** 고객 이메일 회원가입 */
   SIGN_UP: "/signup",
+  /** 기사님 이메일 회원가입 */
+  MOVER_SIGN_UP: "/mover/signup",
   /** 고객 프로필 등록 */
   PROFILE: "/profile",
+  /** 기사님 프로필 등록 */
+  MOVER_PROFILE: "/mover/profile",
   /** 견적 요청 */
   ESTIMATE_REQUEST: "/estimate-request",
   /** 프로필 수정 — 추후 페이지 연동 */
@@ -40,5 +44,9 @@ export const APP_ROUTES = {
     REQUEST_DETAIL: (estimateRequestId: number) => `/estimates/requests/${estimateRequestId}`,
     DETAIL: (estimateId: number) => `/estimates/${estimateId}`,
     PENDING_DETAIL: (estimateId: number) => `/estimates/pending/${estimateId}`,
+  },
+  /** 기사님 내 견적 관리 (임시 추가) */
+  MOVER_ESTIMATES: {
+    ROOT: "/estimate/received-requests",
   },
 } as const;

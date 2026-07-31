@@ -77,7 +77,7 @@ export default function RejectedRequestsPage() {
 
             {isFetchNextPageError ? (
               <fieldset disabled={isFetchingNextPage}>
-                <ReceivedEstimatesStatus
+                <EstimatesQueryStatus
                   message="다음 반려 요청을 불러오지 못했어요."
                   actionLabel={isFetchingNextPage ? "다시 시도 중..." : "다시 시도"}
                   onAction={() => {

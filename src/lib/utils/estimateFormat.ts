@@ -188,6 +188,25 @@ export function getDesignatedMoverDisplayName(mover: {
   return `${base} 기사님`;
 }
 
+/**
+ * 리뷰 카드·모달용 기사님 표시명
+ * reviewable은 nickname만, 내 리뷰는 nickname||name 을 사용합니다.
+ * // 2026.07.30 정슬기 - [추가]
+ */
+export function getReviewMoverDisplayName(mover: {
+  nickname?: string | null;
+  name?: string | null;
+}): string {
+  const base = (mover.nickname?.trim() || mover.name?.trim() || "").trim();
+  if (!base) {
+    return "기사님";
+  }
+  if (base.endsWith("기사님")) {
+    return base;
+  }
+  return `${base} 기사님`;
+}
+
 export function isPendingEstimate(status: EstimateStatus): boolean {
   return status === "SENT";
 }

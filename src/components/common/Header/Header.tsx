@@ -9,15 +9,22 @@ import NotificationTrigger from "@/components/common/Header/NotificationTrigger"
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { getLoginRedirectPath } from "@/lib/auth/session";
+import type { AuthRole } from "@/lib/auth/role";
+import { loadRole } from "@/lib/auth/role";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const LOGGED_OUT_LINKS = [{ label: "기사님 찾기", href: APP_ROUTES.MOVERS.ROOT }];
 
-const LOGGED_IN_LINKS = [
+const CUSTOMER_LOGGED_IN_LINKS = [
   { label: "견적 요청", href: APP_ROUTES.ESTIMATE_REQUEST },
   { label: "기사님 찾기", href: APP_ROUTES.MOVERS.ROOT },
+  { label: "내 견적 관리", href: APP_ROUTES.ESTIMATES.ROOT },
+];
+
+const MOVER_LOGGED_IN_LINKS = [
+  { label: "받은 요청", href: APP_ROUTES.MOVER_ESTIMATES.ROOT },
   { label: "내 견적 관리", href: APP_ROUTES.ESTIMATES.ROOT },
 ];
 
@@ -26,19 +33,31 @@ export interface HeaderProps {
   isLogin?: boolean;
   /** Server에서 nickname 쿠키로 전달. hydrate 전 이름 표시용 */
   initialNickname?: string | null;
+  /** Server에서 role 쿠키로 전달. hydrate 전 nav 분기용 */
+  initialRole?: AuthRole | null;
 }
 
 type ProfileMenuItem =
   | { type: "link"; label: string; href: string }
   | { type: "action"; label: string; action: "logout" };
 
-const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
+const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   { type: "link", label: "작성 가능한 리뷰", href: APP_ROUTES.REVIEWS.WRITABLE },
   { type: "link", label: "내가 작성한 리뷰", href: APP_ROUTES.REVIEWS.ME },
+  { type: "link", label: "프로필", href: APP_ROUTES.PROFILE },
   { type: "action", label: "로그아웃", action: "logout" },
 ];
 
-const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps) => {
+const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
+  { type: "link", label: "프로필", href: APP_ROUTES.MOVER_PROFILE },
+  { type: "action", label: "로그아웃", action: "logout" },
+];
+
+const Header = ({
+  isLogin: initialIsLogin,
+  initialNickname = null,
+  initialRole = null,
+}: HeaderProps) => {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -60,19 +79,28 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
   // hydrate 전·checkAuth 중: SSR refresh 쿠키 힌트 유지 (Access 메모리 공백 깜빡임 방지)
   // checkAuth 완료 후: 실제 세션(access) 기준
   const isLogin = !hasHydrated || isCheckingAuth ? Boolean(initialIsLogin) : isAuthenticated;
-  const navLinks = isLogin ? LOGGED_IN_LINKS : LOGGED_OUT_LINKS;
+  const resolvedRole: AuthRole | null =
+    user?.role ?? (!hasHydrated || isCheckingAuth ? initialRole : loadRole());
+  const navLinks = !isLogin
+    ? LOGGED_OUT_LINKS
+    : resolvedRole === "MOVER"
+      ? MOVER_LOGGED_IN_LINKS
+      : CUSTOMER_LOGGED_IN_LINKS;
+  const profileMenuItems =
+    resolvedRole === "MOVER" ? MOVER_PROFILE_MENU_ITEMS : CUSTOMER_PROFILE_MENU_ITEMS;
   // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
   const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
   const handleLogout = async () => {
     setOpenMenuPath(null);
+    const logoutPath = resolvedRole === "MOVER" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
 
     try {
       await logout();
-      router.replace(APP_ROUTES.LOGIN);
+      router.replace(logoutPath);
     } catch {
-      router.replace(APP_ROUTES.LOGIN);
+      router.replace(logoutPath);
     }
   };
 
@@ -222,7 +250,7 @@ const Header = ({ isLogin: initialIsLogin, initialNickname = null }: HeaderProps
                   aria-labelledby={`${menuId}-trigger`}
                   className="border-border-subtle bg-background-surface shadow-estimate-card rounded-12 absolute top-[calc(100%+8px)] right-0 z-50 flex min-w-[200px] flex-col overflow-hidden border py-8"
                 >
-                  {PROFILE_MENU_ITEMS.map((item, index) => {
+                  {profileMenuItems.map((item, index) => {
                     if (item.type === "action") {
                       return (
                         <button

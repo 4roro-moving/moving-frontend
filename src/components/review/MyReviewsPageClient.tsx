@@ -11,11 +11,14 @@ import { useMyReviews } from "@/hooks/useMyReviews";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { MY_REVIEW_PAGE_LIMIT } from "@/lib/api/reviews";
 
-// 2026.07.27 정슬기 - [추가] 내가 작성한 리뷰 목록 Page Client
-// 2026.07.27 정슬기 - [수정] 페이지 범위 보정은 service/mock에서 처리, UI는 파생값만 사용
+/**
+ * 내가 작성한 리뷰 목록 Page Client
+ * // 2026.07.27 정슬기 - [추가]
+ * // 2026.07.30 정슬기 - [수정] 범위 밖 page는 상태를 totalPages로 보정 후 해당 쿼리 키로 재조회
+ */
 export default function MyReviewsPageClient() {
   const [page, setPage] = useState(1);
-  const { data, isLoading, isError, error, refetch, isFetching } = useMyReviews({
+  const { data, isLoading, isError, error, refetch, isFetching, isPlaceholderData } = useMyReviews({
     page,
     limit: MY_REVIEW_PAGE_LIMIT,
   });
@@ -24,8 +27,17 @@ export default function MyReviewsPageClient() {
   const pagination = data?.pagination;
   const totalCount = pagination?.totalCount ?? 0;
   const totalPages = Math.max(1, pagination?.totalPages ?? 1);
-  // 응답 pagination.page를 우선해 표시 (service가 보정한 페이지)
-  const currentPage = pagination?.page ?? Math.min(Math.max(1, page), totalPages);
+
+  // 범위 밖 page → 마지막 페이지로 상태 보정 (ME(last, limit) 키로 재조회)
+  // keepPreviousData placeholder의 totalPages로 보정하면 페이지 이동 중 루프가 생길 수 있어
+  // 현재 쿼리 응답이 확정된 뒤에만 setPage 합니다.
+  // // 2026.07.31 정슬기 - [수정] isPlaceholderData 가드
+  if (!isPlaceholderData && pagination && pagination.totalCount > 0 && page > totalPages) {
+    setPage(totalPages);
+  }
+
+  // 렌더용 안전 clamp (쿼리 키와 별개)
+  const currentPage = Math.min(Math.max(1, page), totalPages);
   const isEmpty = !isLoading && !isError && Boolean(pagination) && totalCount === 0;
   const hasList = !isLoading && !isError && reviews.length > 0;
 
