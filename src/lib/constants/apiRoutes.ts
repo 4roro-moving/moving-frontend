@@ -46,5 +46,10 @@ export const API_ROUTES = {
     ME: "/reviews/me",
     REVIEWABLE: "/reviews/reviewable",
   },
-  NOTIFICATIONS: "/notifications",
+  NOTIFICATIONS: {
+    ROOT: "/notifications",
+    UNREAD_COUNT: "/notifications/unread-count",
+    READ: (notificationId: number) => `/notifications/${notificationId}/read`,
+    READ_ALL: "/notifications/read-all",
+  },
 } as const;

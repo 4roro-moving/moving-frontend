@@ -25,12 +25,6 @@ export interface CreateEstimateRequestPayload {
   to: EstimateAddressPayload;
 }
 
-const MOVE_TYPE_MAP = {
-  small: "SMALL",
-  home: "HOME",
-  office: "OFFICE",
-} as const satisfies Record<string, MoveType>;
-
 function extractSigungu(value: string): string | undefined {
   const parts = value.trim().split(/\s+/);
   return parts[1] || undefined;
@@ -50,13 +44,13 @@ export function toEstimateAddressPayload(item: AddressSearchItem): EstimateAddre
 }
 
 export function buildCreateEstimateRequestPayload(params: {
-  moveTypeId: keyof typeof MOVE_TYPE_MAP;
+  moveType: MoveType;
   moveDate: Date;
   from: AddressSearchItem;
   to: AddressSearchItem;
 }): CreateEstimateRequestPayload {
   return {
-    moveType: MOVE_TYPE_MAP[params.moveTypeId],
+    moveType: params.moveType,
     moveDate: formatDateToISODate(params.moveDate),
     from: toEstimateAddressPayload(params.from),
     to: toEstimateAddressPayload(params.to),
