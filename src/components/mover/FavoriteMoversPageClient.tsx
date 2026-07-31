@@ -3,18 +3,20 @@
 import { useState } from "react";
 
 import CustomerAuthGate from "@/components/auth/CustomerAuthGate";
+import Button from "@/components/common/Button/Button";
 import Checkbox from "@/components/common/Checkbox/Checkbox";
 import EmptyState from "@/components/common/EmptyState/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
-import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
+import FavoriteMoversDeleteConfirmModal from "@/components/mover/FavoriteMoversDeleteConfirmModal";
 import MoverCard from "@/components/mover/MoverCard";
 import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { useBulkRemoveFavoriteMovers } from "@/hooks/useFavoriteMover";
-import { useFavoriteMovers } from "@/hooks/useFavoriteMovers";
+import { useFavoriteMoversInfinite } from "@/hooks/useFavoriteMovers";
+import { fetchAllFavoriteMoverIds } from "@/lib/api/favorites";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
@@ -52,18 +54,17 @@ function FavoriteMoversToolbar({
   onSelectAll,
   onBulkDelete,
 }: FavoriteMoversToolbarProps) {
-  const hasSelection = selectedCount > 0;
-  const canDelete = hasSelection && !disabled && !isDeleting;
+  const canDelete = selectedCount > 0 && !disabled && !isDeleting;
 
   return (
-    <div className="flex h-36 w-full items-center justify-between">
+    <div className="flex h-36 w-full items-center justify-between gap-12">
       <Checkbox
         checked={isAllSelected}
         disabled={disabled || totalCount === 0}
         onCheckedChange={onSelectAll}
         label={
           <Text as="span" variant={{ base: "md-regular", md: "lg-regular" }}>
-            {`전체 선택(${selectedCount}/${totalCount})`}
+            {`전체선택(${selectedCount}/${totalCount})`}
           </Text>
         }
         labelClassName="text-text-tertiary"
@@ -73,7 +74,7 @@ function FavoriteMoversToolbar({
         type="button"
         disabled={!canDelete}
         className={cn(
-          "rounded-8 focus-visible:ring-border-brand px-12 transition-colors focus-visible:ring-2 focus-visible:outline-none",
+          "rounded-8 focus-visible:ring-border-brand px-8 transition-colors focus-visible:ring-2 focus-visible:outline-none min-[744px]:px-12",
           canDelete
             ? "text-text-subtle hover:text-text-secondary"
             : "text-text-subtle cursor-not-allowed opacity-50",
@@ -116,31 +117,59 @@ function FavoriteMoversLoadingSkeleton() {
 
 function FavoriteMoversContent() {
   const { canFetch } = useCustomerAuthReady();
-  const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  /** 화면에 안 보이는 찜까지 포함해 전체를 고른 상태 (카드는 더보기로만 표시) */
+  const [isSelectAll, setIsSelectAll] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isResolvingAllIds, setIsResolvingAllIds] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const query = useFavoriteMovers({ page, enabled: canFetch });
+  const query = useFavoriteMoversInfinite({ enabled: canFetch });
   const bulkRemoveMutation = useBulkRemoveFavoriteMovers({ onError: setToastMessage });
 
-  const movers = query.data?.data.map(mapMoverListItemToMover) ?? [];
-  const totalPages = Math.max(1, query.data?.pagination.totalPages ?? 1);
-  const pageIds = movers.map((mover) => mover.id);
-  const selectedOnPageCount = pageIds.filter((id) => selectedIds.includes(id)).length;
-  const isAllSelected = pageIds.length > 0 && selectedOnPageCount === pageIds.length;
-  const hasSelection = selectedIds.length > 0;
-  const isBulkDeleting = bulkRemoveMutation.isPending;
+  const movers = query.data?.pages.flatMap((page) => page.data.map(mapMoverListItemToMover)) ?? [];
+  const totalCount = query.data?.pages[0]?.pagination.totalCount ?? 0;
+  const loadedIds = movers.map((mover) => mover.id);
+  const selectedOnLoadedCount = loadedIds.filter((id) => selectedIds.includes(id)).length;
+  const selectedCount = isSelectAll ? totalCount : selectedOnLoadedCount;
+  const isAllSelected = isSelectAll || (totalCount > 0 && selectedCount === totalCount);
+  const hasSelection = selectedCount > 0;
+  const isBulkDeleting = bulkRemoveMutation.isPending || isResolvingAllIds;
+
+  const showEmpty =
+    !query.isError && !query.isPending && !query.isFetching && !isBulkDeleting && totalCount === 0;
+  const showListSkeleton =
+    !query.isError &&
+    !showEmpty &&
+    (query.isPending ||
+      (movers.length === 0 && (totalCount > 0 || isBulkDeleting || query.isFetching)));
+  const showList = !query.isError && !showEmpty && !showListSkeleton && movers.length > 0;
+
+  const clearSelection = () => {
+    setSelectedIds([]);
+    setIsSelectAll(false);
+  };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+      setIsSelectAll(true);
+      setSelectedIds(loadedIds);
       return;
     }
-
-    setSelectedIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+    clearSelection();
   };
 
   const handleToggleMover = (moverId: string, checked: boolean) => {
+    if (isSelectAll) {
+      if (checked) {
+        return;
+      }
+      // 전체선택 중 하나만 해제 → 현재 불러온 목록 기준으로 부분 선택
+      setIsSelectAll(false);
+      setSelectedIds(loadedIds.filter((id) => id !== moverId));
+      return;
+    }
+
     setSelectedIds((prev) => {
       if (checked) {
         return prev.includes(moverId) ? prev : [...prev, moverId];
@@ -149,37 +178,69 @@ function FavoriteMoversContent() {
     });
   };
 
-  const handlePageChange = (nextPage: number) => {
-    setPage(nextPage);
-    setSelectedIds([]);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const removeFavorites = async (idsToRemove: string[]) => {
+    if (idsToRemove.length === 0) {
+      return;
+    }
+
+    await bulkRemoveMutation.mutateAsync(idsToRemove);
+    clearSelection();
   };
 
-  const handleBulkDelete = async () => {
-    if (!hasSelection || isBulkDeleting) return;
-
-    const idsToRemove = [...selectedIds];
-    const removedAllOnPage = selectedOnPageCount === pageIds.length;
-
-    try {
-      await bulkRemoveMutation.mutateAsync(idsToRemove);
-      setSelectedIds([]);
-      if (removedAllOnPage && page > 1) {
-        setPage((prev) => prev - 1);
-      }
-    } catch (error) {
-      setToastMessage(
-        getApiErrorMessage(
-          error,
-          "선택한 기사님을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.",
-        ),
-      );
+  const handleBulkDelete = () => {
+    if (!hasSelection || isBulkDeleting) {
+      return;
     }
+
+    if (isSelectAll || selectedCount === totalCount) {
+      setIsDeleteConfirmOpen(true);
+      return;
+    }
+
+    void (async () => {
+      try {
+        await removeFavorites([...selectedIds]);
+      } catch (error) {
+        setToastMessage(
+          getApiErrorMessage(
+            error,
+            "선택한 기사님을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.",
+          ),
+        );
+      }
+    })();
+  };
+
+  const handleConfirmDeleteAll = () => {
+    void (async () => {
+      setIsResolvingAllIds(true);
+      try {
+        const allIds = await fetchAllFavoriteMoverIds();
+        await removeFavorites(allIds);
+        setIsDeleteConfirmOpen(false);
+      } catch (error) {
+        setToastMessage(
+          getApiErrorMessage(
+            error,
+            "선택한 기사님을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.",
+          ),
+        );
+      } finally {
+        setIsResolvingAllIds(false);
+      }
+    })();
+  };
+
+  const handleLoadMore = () => {
+    if (!query.hasNextPage || query.isFetchingNextPage) {
+      return;
+    }
+    void query.fetchNextPage();
   };
 
   return (
     <div className={CONTENT_CLASSNAME}>
-      {query.isPending ? <FavoriteMoversLoadingSkeleton /> : null}
+      {showListSkeleton ? <FavoriteMoversLoadingSkeleton /> : null}
 
       {query.isError ? (
         <MoversErrorPanel
@@ -193,7 +254,7 @@ function FavoriteMoversContent() {
         />
       ) : null}
 
-      {!query.isPending && !query.isError && movers.length === 0 ? (
+      {showEmpty ? (
         <EmptyState
           size="sm"
           imageSrc="/images/empty/character.png"
@@ -203,20 +264,18 @@ function FavoriteMoversContent() {
         />
       ) : null}
 
-      {!query.isPending && !query.isError && movers.length > 0 ? (
+      {showList ? (
         <div
           className="flex w-full flex-col gap-10 min-[744px]:gap-18 lg:gap-28"
           aria-busy={query.isFetching || isBulkDeleting}
         >
           <FavoriteMoversToolbar
-            selectedCount={selectedOnPageCount}
-            totalCount={pageIds.length}
+            selectedCount={selectedCount}
+            totalCount={totalCount}
             isAllSelected={isAllSelected}
             isDeleting={isBulkDeleting}
             onSelectAll={handleSelectAll}
-            onBulkDelete={() => {
-              void handleBulkDelete();
-            }}
+            onBulkDelete={handleBulkDelete}
           />
 
           <ul className="flex flex-col gap-20 min-[744px]:gap-24 lg:gap-20">
@@ -227,7 +286,7 @@ function FavoriteMoversContent() {
                   variant="full"
                   onFavoriteError={setToastMessage}
                   selection={{
-                    checked: selectedIds.includes(mover.id),
+                    checked: isSelectAll || selectedIds.includes(mover.id),
                     onCheckedChange: (checked) => handleToggleMover(mover.id, checked),
                   }}
                 />
@@ -235,17 +294,49 @@ function FavoriteMoversContent() {
             ))}
           </ul>
 
-          {totalPages > 1 ? (
-            <div className="pt-16 md:pt-24">
-              <Pagination
-                currentPage={page}
-                pageCount={totalPages}
-                onPageChange={handlePageChange}
-              />
+          {query.hasNextPage ? (
+            <div className="flex w-full justify-center pt-8 md:pt-16">
+              <Button
+                type="button"
+                variant="outline"
+                size="cta"
+                fullWidth
+                disabled={query.isFetchingNextPage}
+                onClick={handleLoadMore}
+                className="max-w-[327px]"
+              >
+                {query.isFetchingNextPage ? "불러오는 중..." : "더보기"}
+              </Button>
+            </div>
+          ) : null}
+
+          {query.isFetchNextPageError ? (
+            <div className="flex w-full justify-center">
+              <button
+                type="button"
+                className="text-text-brand focus-visible:ring-border-brand rounded-4 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                onClick={handleLoadMore}
+              >
+                <Text as="span" variant="md-semibold" className="text-text-brand">
+                  더 불러오지 못했어요. 다시 시도
+                </Text>
+              </button>
             </div>
           ) : null}
         </div>
       ) : null}
+
+      <FavoriteMoversDeleteConfirmModal
+        open={isDeleteConfirmOpen}
+        count={totalCount}
+        isPending={isBulkDeleting}
+        onClose={() => {
+          if (!isBulkDeleting) {
+            setIsDeleteConfirmOpen(false);
+          }
+        }}
+        onConfirm={handleConfirmDeleteAll}
+      />
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </div>

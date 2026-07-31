@@ -43,8 +43,86 @@ interface FavoriteMutationContext {
   previousDetails: [readonly unknown[], EstimateDetail | undefined][];
   previousPendingLists: [readonly unknown[], PendingEstimateSectionListResult | undefined][];
   previousMoverLists: [readonly unknown[], InfiniteData<MoversListResult> | undefined][];
-  previousFavoriteMovers: [readonly unknown[], MoversListResult | undefined][];
+  previousFavoriteMovers: [readonly unknown[], FavoriteMoversCacheData | undefined][];
   previousMoverDetail: MoverDetail | undefined;
+}
+
+type FavoriteMoversCacheData = MoversListResult | InfiniteData<MoversListResult>;
+
+function isFavoriteMoversInfiniteData(data: unknown): data is InfiniteData<MoversListResult> {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "pages" in data &&
+    Array.isArray((data as InfiniteData<MoversListResult>).pages)
+  );
+}
+
+function isFavoriteMoversListResult(data: unknown): data is MoversListResult {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "data" in data &&
+    "pagination" in data &&
+    Array.isArray((data as MoversListResult).data)
+  );
+}
+
+function removeIdsFromFavoriteMoversPage(
+  page: MoversListResult,
+  idSet: Set<string>,
+  removedTotalDelta: number,
+): MoversListResult {
+  const data = page.data.filter((mover) => !idSet.has(mover.id));
+  const nextTotalCount = Math.max(0, page.pagination.totalCount - removedTotalDelta);
+  const limit = Math.max(1, page.pagination.limit);
+  const nextTotalPages = Math.max(1, Math.ceil(nextTotalCount / limit) || 1);
+
+  return {
+    ...page,
+    data,
+    pagination: {
+      ...page.pagination,
+      totalCount: nextTotalCount,
+      totalPages: nextTotalPages,
+      hasNext: page.pagination.page < nextTotalPages,
+    },
+  };
+}
+
+/** 사이드바(유한) · 찜 목록 페이지(infinite) 캐시 공통 제거 패치 */
+function removeIdsFromFavoriteMoversCache(
+  data: unknown,
+  idSet: Set<string>,
+  removedTotalDelta: number,
+): unknown {
+  if (isFavoriteMoversInfiniteData(data)) {
+    let removedFromPages = 0;
+    const pages = data.pages.map((page) => {
+      const next = removeIdsFromFavoriteMoversPage(page, idSet, removedTotalDelta);
+      removedFromPages += page.data.length - next.data.length;
+      return next;
+    });
+
+    if (removedFromPages === 0 && removedTotalDelta === 0) {
+      return data;
+    }
+
+    return { ...data, pages };
+  }
+
+  if (isFavoriteMoversListResult(data)) {
+    const next = removeIdsFromFavoriteMoversPage(data, idSet, removedTotalDelta);
+    if (
+      next.data.length === data.data.length &&
+      next.pagination.totalCount === data.pagination.totalCount
+    ) {
+      return data;
+    }
+    return next;
+  }
+
+  return data;
 }
 
 function patchMoverFavorite<T extends { id: string; isFavorite: boolean; favoriteCount: number }>(
@@ -139,7 +217,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       const previousMoverLists = queryClient.getQueriesData<InfiniteData<MoversListResult>>({
         queryKey: QUERY_KEYS.MOVERS.LIST,
       });
-      const previousFavoriteMovers = queryClient.getQueriesData<MoversListResult>({
+      const previousFavoriteMovers = queryClient.getQueriesData<FavoriteMoversCacheData>({
         queryKey: QUERY_KEYS.FAVORITES.MOVERS,
       });
       const previousMoverDetail = queryClient.getQueryData<MoverDetail>(
@@ -216,29 +294,13 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         },
       );
 
-      // 찜한 기사님 사이드바: 해제 시 즉시 목록에서 제거 (등록은 onSettled invalidate로 동기화)
+      // 찜한 기사님 사이드바·목록: 해제 시 즉시 목록에서 제거 (등록은 onSettled invalidate로 동기화)
       if (!nextIsFavorite) {
-        queryClient.setQueriesData<MoversListResult>(
+        queryClient.setQueriesData<FavoriteMoversCacheData>(
           { queryKey: QUERY_KEYS.FAVORITES.MOVERS },
-          (list) => {
-            if (!list) {
-              return list;
-            }
-
-            const data = list.data.filter((mover) => mover.id !== moverId);
-            if (data.length === list.data.length) {
-              return list;
-            }
-
-            return {
-              ...list,
-              data,
-              pagination: {
-                ...list.pagination,
-                totalCount: Math.max(0, list.pagination.totalCount - 1),
-              },
-            };
-          },
+          (list) =>
+            removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1) as
+              FavoriteMoversCacheData | undefined,
         );
       }
 
@@ -322,7 +384,7 @@ interface UseBulkRemoveFavoriteMoversOptions {
 }
 
 interface BulkRemoveFavoriteContext {
-  previousFavoriteMovers: [readonly unknown[], MoversListResult | undefined][];
+  previousFavoriteMovers: [readonly unknown[], FavoriteMoversCacheData | undefined][];
 }
 
 /** 찜한 기사님 여러 명 일괄 해제 — DELETE 병렬 + 캐시 무효화 1회 */
@@ -351,33 +413,16 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
     onMutate: async (moverIds): Promise<BulkRemoveFavoriteContext> => {
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS });
 
-      const previousFavoriteMovers = queryClient.getQueriesData<MoversListResult>({
+      const previousFavoriteMovers = queryClient.getQueriesData<FavoriteMoversCacheData>({
         queryKey: QUERY_KEYS.FAVORITES.MOVERS,
       });
       const idSet = new Set(moverIds);
 
-      queryClient.setQueriesData<MoversListResult>(
+      queryClient.setQueriesData<FavoriteMoversCacheData>(
         { queryKey: QUERY_KEYS.FAVORITES.MOVERS },
-        (list) => {
-          if (!list) {
-            return list;
-          }
-
-          const data = list.data.filter((mover) => !idSet.has(mover.id));
-          const removedCount = list.data.length - data.length;
-          if (removedCount === 0) {
-            return list;
-          }
-
-          return {
-            ...list,
-            data,
-            pagination: {
-              ...list.pagination,
-              totalCount: Math.max(0, list.pagination.totalCount - removedCount),
-            },
-          };
-        },
+        (list) =>
+          removeIdsFromFavoriteMoversCache(list, idSet, moverIds.length) as
+            FavoriteMoversCacheData | undefined,
       );
 
       return { previousFavoriteMovers };
