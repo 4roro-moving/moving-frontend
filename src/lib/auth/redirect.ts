@@ -40,6 +40,18 @@ export const getAuthAudienceFromRole = (role: AuthRole | null | undefined): Auth
   }
 };
 
+/** 로그인/OAuth 입구 audience와 계정 role이 다를 때 안내 문구 */
+export const getAudienceMismatchMessage = (pageAudience: AuthAudience): string => {
+  switch (pageAudience) {
+    case "customer":
+      return "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요.";
+    case "mover":
+      return "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
+    case "admin":
+      return "관리자 계정입니다. 관리자 로그인을 이용해 주세요.";
+  }
+};
+
 /** 역할별 홈 — 잘못된 role 접근·auth 재진입 */
 export const getRoleHomePath = (role: AuthRole | null | undefined): string => {
   // 기본 customer

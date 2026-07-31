@@ -1,11 +1,13 @@
 "use client";
-import { GoogleIcon, KakaoLoginIcon, NaverLoginIcon } from "@/icons";
-import { startOAuthLogin } from "@/lib/auth/startOAuthLogin";
-import type { AuthAudience } from "@/lib/auth/redirect";
-import type { OAuthProvider } from "@/lib/auth/oauth";
-import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { cn } from "@/lib/utils/cn";
+
 import { useState } from "react";
+
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import type { OAuthProvider } from "@/lib/auth/oauth";
+import type { AuthAudience } from "@/lib/auth/redirect";
+import { startOAuthLogin } from "@/lib/auth/startOAuthLogin";
+import { GoogleIcon, KakaoLoginIcon, NaverLoginIcon } from "@/icons";
+import { cn } from "@/lib/utils/cn";
 
 interface SocialLoginButtonsProps {
   className?: string;
@@ -43,6 +45,10 @@ const SOCIAL_PROVIDERS: {
   },
 ];
 
+/**
+ * SNS 간편 로그인 버튼 그룹.
+ * Provider 인가 URL로 이동한 뒤 `/oauth/{provider}/callback`에서 code를 교환합니다.
+ */
 const SocialLoginButtons = ({
   className,
   audience = "customer",
@@ -52,7 +58,10 @@ const SocialLoginButtons = ({
 
   const handleSocialLogin = async (provider: OAuthProvider) => {
     if (isPending) return;
+
+    onError?.("");
     setIsPending(true);
+
     try {
       await startOAuthLogin(provider, audience);
     } catch (err) {
@@ -75,6 +84,7 @@ const SocialLoginButtons = ({
             }}
             className={cn(
               "flex size-54 shrink-0 items-center justify-center rounded-full md:size-72",
+              "disabled:cursor-not-allowed disabled:opacity-60",
               buttonClassName,
             )}
           >
@@ -85,4 +95,5 @@ const SocialLoginButtons = ({
     </div>
   );
 };
+
 export default SocialLoginButtons;

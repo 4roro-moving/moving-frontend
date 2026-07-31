@@ -15,6 +15,7 @@ import {
 import { exchangeOAuthCodeOnce, getCompletedOAuthExchange } from "@/lib/auth/oauthExchange";
 import {
   buildLoginPath,
+  getAudienceMismatchMessage,
   getAuthAudienceFromRole,
   getPostAuthRedirectPath,
   getRoleHomePath,
@@ -30,23 +31,11 @@ const failOAuthCallback = (message: string, setError: (value: string) => void): 
   setError(message);
 };
 
-const getAudienceMismatchMessage = (pageAudience: AuthAudience): string => {
-  switch (pageAudience) {
-    case "customer":
-      return "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요.";
-    case "mover":
-      return "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
-    case "admin":
-      return "관리자 계정입니다. 관리자 로그인을 이용해 주세요.";
-  }
-};
-
 const OAuthCallbackContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const params = useParams<{ provider: string }>();
   const establishSession = useAuthStore((state) => state.establishSession);
-  const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const logout = useAuthStore((state) => state.logout);
   const [error, setError] = useState<string | null>(null);
   const [loginHref, setLoginHref] = useState(buildLoginPath());
@@ -142,7 +131,7 @@ const OAuthCallbackContent = () => {
           fallbackPath: getRoleHomePath(result.user.role),
         });
 
-        setPostAuthRedirectPath(nextPath);
+        // GuestOnly 밖이므로 postAuthRedirectPath 대신 직접 이동
         establishSession(result.user);
         clearOAuthPendingSession();
         window.history.replaceState(null, "", window.location.pathname);
@@ -153,7 +142,7 @@ const OAuthCallbackContent = () => {
     };
 
     void run();
-  }, [searchParams, params.provider, establishSession, setPostAuthRedirectPath, logout, router]);
+  }, [searchParams, params.provider, establishSession, logout, router]);
 
   if (error) {
     return (
