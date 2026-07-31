@@ -35,7 +35,7 @@ export async function getMoverEstimateRequests(query: MoverEstimateRequestQuery)
   query.moveType?.forEach((moveType) => params.append("moveType", moveType));
 
   const response = await axiosInstance.get<MoverEstimateRequestResponse>(
-    `/api${API_ROUTES.ESTIMATES.ROOT}/requests?${params.toString()}`,
+    `${API_ROUTES.ESTIMATES.ROOT}/requests?${params.toString()}`,
   );
 
   if (!response.data.success) {
@@ -49,7 +49,7 @@ export async function getMoverEstimateRequests(query: MoverEstimateRequestQuery)
 // POST /api/estimates/requests/:estimateRequestId
 export async function sendMoverEstimate(estimateRequestId: number, input: SendEstimateRequest) {
   const response = await axiosInstance.post<SendEstimateResponse>(
-    `/api${API_ROUTES.ESTIMATES.ROOT}/requests/${estimateRequestId}`,
+    `${API_ROUTES.ESTIMATES.ROOT}/requests/${estimateRequestId}`,
     input,
   );
 
@@ -64,7 +64,7 @@ export async function sendMoverEstimate(estimateRequestId: number, input: SendEs
 // POST /api/estimates/requests/:id/reject
 export async function rejectMoverEstimate(estimateRequestId: number, input: RejectEstimateRequest) {
   const response = await axiosInstance.post<RejectEstimateResponse>(
-    `/api${API_ROUTES.ESTIMATES.ROOT}/requests/${estimateRequestId}/reject`,
+    `${API_ROUTES.ESTIMATES.ROOT}/requests/${estimateRequestId}/reject`,
     input,
   );
 
@@ -82,7 +82,7 @@ export async function getRejectedEstimateRequests(cursor?: string, limit = 10) {
   if (cursor) params.set("cursor", cursor);
 
   const response = await axiosInstance.get<RejectedEstimateRequestListResponse>(
-    `/api${API_ROUTES.ESTIMATES.ROOT}/rejections?${params.toString()}`,
+    `${API_ROUTES.ESTIMATES.ROOT}/rejections?${params.toString()}`,
   );
 
   if (!response.data.success) {
