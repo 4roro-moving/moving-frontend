@@ -8,6 +8,28 @@ export function formatKoreanDate(date: Date): string {
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 }
 
+/** ISO datetime → "N분 전" / "N시간 전" / "N일 전" */
+export function formatRelativeTime(date: string | Date): string {
+  const target = date instanceof Date ? date : new Date(date);
+
+  if (Number.isNaN(target.getTime())) {
+    return "";
+  }
+
+  const minutes = Math.max(1, Math.floor((Date.now() - target.getTime()) / 60_000));
+
+  if (minutes < 60) {
+    return `${minutes}분 전`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `${hours}시간 전`;
+  }
+
+  return `${Math.floor(hours / 24)}일 전`;
+}
+
 /** ISO 날짜 문자열 → KST 기준 "2025. 07. 01. (화)" */
 export function formatKoreanDateTime(date: string): string {
   // 2026.07.24 정슬기 - [수정] date-only는 parseDateOnly로 파싱해 타임존 밀림 방지
