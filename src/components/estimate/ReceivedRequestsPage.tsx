@@ -102,6 +102,12 @@ export default function ReceivedRequestsPage() {
 
   return (
     <>
+      <div className="border-border-subtle border-b">
+        <h1 className="text-text-primary mx-auto flex h-[54px] w-full max-w-[1200px] items-center px-24 text-lg font-semibold min-[744px]:px-[72px] lg:h-[96px] lg:px-0 lg:text-2xl">
+          받은 요청
+        </h1>
+      </div>
+
       <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-24 pb-80 min-[744px]:px-[72px] lg:gap-40 lg:px-0">
         <section className="flex flex-col gap-24">
           <form onSubmit={submitSearch} className="mx-10 w-[calc(100%_-_20px)] lg:mx-0 lg:w-full">

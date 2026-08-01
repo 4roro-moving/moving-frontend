@@ -1,5 +1,7 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
+import { useApiInfiniteQuery } from "@/hooks/queries/useApiInfiniteQuery";
+import { useApiMutation } from "@/hooks/queries/useApiMutation";
 import {
   getMoverEstimateRequests,
   getRejectedEstimateRequests,
@@ -14,7 +16,7 @@ import type {
 } from "@/types/moverEstimateRequest";
 
 export function useMoverEstimateRequests(query: MoverEstimateRequestQuery) {
-  return useInfiniteQuery({
+  return useApiInfiniteQuery({
     queryKey: [...QUERY_KEYS.ESTIMATES.ALL, query],
     queryFn: ({ pageParam }) => getMoverEstimateRequests({ ...query, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
@@ -24,7 +26,7 @@ export function useMoverEstimateRequests(query: MoverEstimateRequestQuery) {
 
 //견적 반려 조회
 export function useRejectedEstimateRequests() {
-  return useInfiniteQuery({
+  return useApiInfiniteQuery({
     queryKey: QUERY_KEYS.ESTIMATES.REJECTED,
     queryFn: ({ pageParam }) => getRejectedEstimateRequests(pageParam),
     initialPageParam: undefined as string | undefined,
@@ -41,7 +43,7 @@ type SendMoverEstimateVariables = {
 export function useSendMoverEstimate() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useApiMutation({
     mutationFn: ({ estimateRequestId, input }: SendMoverEstimateVariables) =>
       sendMoverEstimate(estimateRequestId, input),
 
@@ -61,7 +63,7 @@ type RejectMoverEstimateVariables = {
 export function useRejectMoverEstimate() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useApiMutation({
     mutationFn: ({ estimateRequestId, input }: RejectMoverEstimateVariables) =>
       rejectMoverEstimate(estimateRequestId, input),
     onSuccess: async () => {
