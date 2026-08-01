@@ -1,3 +1,15 @@
+import type { MoversListQuery } from "@/types/mover";
+
+export const MOVER_LIST_GUEST_SCOPE = "guest" as const;
+
+export const getMoverListAuthScope = (userId?: string | null) =>
+  userId ? (`user:${userId}` as const) : MOVER_LIST_GUEST_SCOPE;
+
+export const getMoverListQueryKey = (
+  authScope: ReturnType<typeof getMoverListAuthScope>,
+  query: Omit<MoversListQuery, "page">,
+) => [...QUERY_KEYS.MOVERS.LIST, authScope, query] as const;
+
 export const QUERY_KEYS = {
   AUTH: {
     ME: ["auth", "me"],

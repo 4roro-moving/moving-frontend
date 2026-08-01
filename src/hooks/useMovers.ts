@@ -1,7 +1,9 @@
 "use client";
 
 import { getMovers } from "@/lib/api/movers";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { getMoverListAuthScope, getMoverListQueryKey } from "@/lib/constants/queryKeys";
+import { getAccessTokenPayload } from "@/lib/auth/accessTokenPayload";
+import { getAccessToken } from "@/lib/auth/token";
 import { toMoversListQuery, type MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
 import { useApiInfiniteQuery } from "@/hooks/queries/useApiInfiniteQuery";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -13,11 +15,13 @@ export function useMovers(filters: MoversSearchParamsState) {
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const userId = useAuthStore((state) => state.user?.id);
   const isAuthReady = hasHydrated && !isCheckingAuth;
-  const authScope = isAuthenticated ? "authenticated" : "guest";
+  const tokenUserId = isAuthenticated ? getAccessTokenPayload(getAccessToken() ?? "").userId : null;
+  const authScope = getMoverListAuthScope(userId ?? tokenUserId);
 
   return useApiInfiniteQuery({
-    queryKey: [...QUERY_KEYS.MOVERS.LIST, authScope, listQuery],
+    queryKey: getMoverListQueryKey(authScope, listQuery),
     queryFn: ({ pageParam }) => getMovers({ ...listQuery, page: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
