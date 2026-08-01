@@ -13,7 +13,7 @@ export type FavoriteMoversCacheData =
   FavoriteMoversListResult | InfiniteData<FavoriteMoversListResult>;
 
 function isFavoriteMoversInfiniteData(
-  data: unknown,
+  data: FavoriteMoversCacheData | undefined,
 ): data is InfiniteData<FavoriteMoversListResult> {
   return (
     typeof data === "object" &&
@@ -23,7 +23,9 @@ function isFavoriteMoversInfiniteData(
   );
 }
 
-function isFavoriteMoversListResult(data: unknown): data is FavoriteMoversListResult {
+function isFavoriteMoversListResult(
+  data: FavoriteMoversCacheData | undefined,
+): data is FavoriteMoversListResult {
   return (
     typeof data === "object" &&
     data !== null &&
@@ -53,10 +55,10 @@ function removeIdsFromFavoriteMoversPage(
 
 /** 사이드바(유한) · 찜 목록 페이지(infinite) 캐시 공통 제거 패치 */
 export function removeIdsFromFavoriteMoversCache(
-  data: unknown,
+  data: FavoriteMoversCacheData | undefined,
   idSet: Set<string>,
   removedTotalDelta: number,
-): unknown {
+): FavoriteMoversCacheData | undefined {
   if (isFavoriteMoversInfiniteData(data)) {
     let removedFromPages = 0;
     const pages = data.pages.map((page) => {
@@ -88,10 +90,10 @@ export function removeIdsFromFavoriteMoversCache(
 
 /** 전체 해제 낙관적 업데이트 — keepIds만 남기고 totalCount 조정 */
 export function keepOnlyIdsInFavoriteMoversCache(
-  data: unknown,
+  data: FavoriteMoversCacheData | undefined,
   keepIds: Set<string>,
   nextTotalCount: number,
-): unknown {
+): FavoriteMoversCacheData | undefined {
   if (isFavoriteMoversInfiniteData(data)) {
     const firstPage = data.pages[0];
     if (!firstPage) {

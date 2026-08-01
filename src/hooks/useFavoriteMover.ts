@@ -187,9 +187,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       if (!nextIsFavorite) {
         queryClient.setQueriesData<FavoriteMoversCacheData>(
           { queryKey: favoriteMoversScopeQueryKey },
-          (list) =>
-            removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1) as
-              FavoriteMoversCacheData | undefined,
+          (list) => removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1),
         );
       }
 

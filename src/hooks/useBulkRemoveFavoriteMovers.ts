@@ -81,17 +81,13 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
         const idSet = new Set(variables.moverIds);
         queryClient.setQueriesData<FavoriteMoversCacheData>(
           { queryKey: favoriteMoversScopeQueryKey },
-          (list) =>
-            removeIdsFromFavoriteMoversCache(list, idSet, variables.moverIds.length) as
-              FavoriteMoversCacheData | undefined,
+          (list) => removeIdsFromFavoriteMoversCache(list, idSet, variables.moverIds.length),
         );
       } else {
         const keepIds = new Set(variables.excludedIds);
         queryClient.setQueriesData<FavoriteMoversCacheData>(
           { queryKey: favoriteMoversScopeQueryKey },
-          (list) =>
-            keepOnlyIdsInFavoriteMoversCache(list, keepIds, keepIds.size) as
-              FavoriteMoversCacheData | undefined,
+          (list) => keepOnlyIdsInFavoriteMoversCache(list, keepIds, keepIds.size),
         );
       }
 
