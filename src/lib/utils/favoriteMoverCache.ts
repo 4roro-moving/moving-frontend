@@ -1,7 +1,13 @@
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 
 import type { FavoriteMoversListResult } from "@/lib/api/favorites";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import {
+  getFavoriteMoversScopeQueryKey,
+  getMoverDetailScopeQueryKey,
+  getMoverListScopeQueryKey,
+  QUERY_KEYS,
+  type AuthQueryScope,
+} from "@/lib/constants/queryKeys";
 
 export type FavoriteMoversCacheData =
   FavoriteMoversListResult | InfiniteData<FavoriteMoversListResult>;
@@ -150,13 +156,16 @@ export function patchMoverFavorite<
   };
 }
 
-export async function invalidateFavoriteRelatedQueries(queryClient: QueryClient): Promise<void> {
+export async function invalidateFavoriteRelatedQueries(
+  queryClient: QueryClient,
+  authScope: AuthQueryScope,
+): Promise<void> {
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
-    queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.MOVERS.ALL, "detail"] }),
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS }),
+    queryClient.invalidateQueries({ queryKey: getMoverListScopeQueryKey(authScope) }),
+    queryClient.invalidateQueries({ queryKey: getMoverDetailScopeQueryKey(authScope) }),
+    queryClient.invalidateQueries({ queryKey: getFavoriteMoversScopeQueryKey(authScope) }),
   ]);
 }
