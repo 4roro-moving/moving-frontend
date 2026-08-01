@@ -13,10 +13,16 @@ export const getAuthQueryScope = (isAuthenticated: boolean, userId?: string | nu
 
 export type AuthQueryScope = ReturnType<typeof getAuthQueryScope>;
 
+export const getMoverListScopeQueryKey = (authScope: AuthQueryScope) =>
+  [...QUERY_KEYS.MOVERS.LIST, authScope] as const;
+
 export const getMoverListQueryKey = (
   authScope: AuthQueryScope,
   query: Omit<MoversListQuery, "page">,
-) => [...QUERY_KEYS.MOVERS.LIST, authScope, query] as const;
+) => [...getMoverListScopeQueryKey(authScope), query] as const;
+
+export const getFavoriteMoversScopeQueryKey = (authScope: AuthQueryScope) =>
+  [...QUERY_KEYS.FAVORITES.MOVERS, authScope] as const;
 
 export const QUERY_KEYS = {
   AUTH: {
@@ -71,9 +77,9 @@ export const QUERY_KEYS = {
     /** GET /favorites/movers — 찜한 기사님 목록 */
     MOVERS: ["favorites", "movers"] as const,
     MOVERS_LIST: (authScope: AuthQueryScope, limit: number) =>
-      ["favorites", "movers", authScope, { limit }] as const,
+      [...getFavoriteMoversScopeQueryKey(authScope), { limit }] as const,
     MOVERS_INFINITE: (authScope: AuthQueryScope, limit: number) =>
-      ["favorites", "movers", authScope, "infinite", { limit }] as const,
+      [...getFavoriteMoversScopeQueryKey(authScope), "infinite", { limit }] as const,
     MOVER: (moverId: string) => ["favorites", "mover", moverId] as const,
   },
 
