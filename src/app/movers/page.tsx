@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 
-import { MoversPageView } from "@/components/mover/MoversPageView";
+import { MoversPageView } from "@/components/mover/list/MoversPageView";
 import { AUTH_QUERY_GUEST_SCOPE } from "@/lib/constants/queryKeys";
 import { getMoversInfiniteQueryOptions } from "@/lib/queryOptions/movers";
 import { parseMoversSearchParams, toMoversListQuery } from "@/lib/utils/moversSearchParams";

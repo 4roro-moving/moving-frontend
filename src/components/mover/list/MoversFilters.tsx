@@ -3,7 +3,7 @@
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
-import { SORT_OPTIONS } from "@/components/mover/constants";
+import { SORT_OPTIONS } from "@/components/mover/list/constants";
 import { useMoversFilters } from "@/hooks/useMoversFilters";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS } from "@/lib/constants/region";
