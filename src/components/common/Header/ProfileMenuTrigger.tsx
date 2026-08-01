@@ -105,16 +105,14 @@ export default function ProfileMenuTrigger({
     const isPublicPage = isPublicMoverPath(pathname);
     const logoutPath = role === "MOVER" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
 
-    try {
-      await logout();
-    } finally {
-      if (isPublicPage) {
-        router.refresh();
-        return;
-      }
+    await logout();
 
-      router.replace(logoutPath);
+    if (isPublicPage) {
+      router.refresh();
+      return;
     }
+
+    router.replace(logoutPath);
   };
 
   return (
