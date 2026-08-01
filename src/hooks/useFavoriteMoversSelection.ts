@@ -3,6 +3,10 @@
 import { useCallback, useState } from "react";
 
 import { useBulkRemoveFavoriteMovers } from "@/hooks/useBulkRemoveFavoriteMovers";
+import { MAX_BULK_FAVORITE_MOVERS } from "@/lib/api/favorites";
+
+const MAX_SELECTION_MESSAGE = `한 번에 최대 ${MAX_BULK_FAVORITE_MOVERS}명까지 선택할 수 있습니다.`;
+const MAX_EXCLUSION_MESSAGE = `전체 선택에서 최대 ${MAX_BULK_FAVORITE_MOVERS}명까지 제외할 수 있습니다.`;
 
 interface UseFavoriteMoversSelectionOptions {
   loadedIds: string[];
@@ -60,12 +64,30 @@ export function useFavoriteMoversSelection({
   const handleToggleMover = useCallback(
     (moverId: string, checked: boolean) => {
       if (isSelectAll) {
+        if (
+          !checked &&
+          !excludedIds.includes(moverId) &&
+          excludedIds.length >= MAX_BULK_FAVORITE_MOVERS
+        ) {
+          setToastMessage(MAX_EXCLUSION_MESSAGE);
+          return;
+        }
+
         setExcludedIds((prev) => {
           if (checked) {
             return prev.filter((id) => id !== moverId);
           }
           return prev.includes(moverId) ? prev : [...prev, moverId];
         });
+        return;
+      }
+
+      if (
+        checked &&
+        !selectedIds.includes(moverId) &&
+        selectedIds.length >= MAX_BULK_FAVORITE_MOVERS
+      ) {
+        setToastMessage(MAX_SELECTION_MESSAGE);
         return;
       }
 
@@ -76,7 +98,7 @@ export function useFavoriteMoversSelection({
         return prev.filter((id) => id !== moverId);
       });
     },
-    [isSelectAll],
+    [excludedIds, isSelectAll, selectedIds],
   );
 
   const removeFavoritesByIds = useCallback(

@@ -48,6 +48,9 @@ export const FAVORITE_MOVERS_PAGE_LIMIT = 5;
 /** PC 기사님 찾기 사이드바에 표시하는 최대 인원 */
 export const FAVORITE_MOVERS_SIDEBAR_LIMIT = 3;
 
+/** 한 번에 찜 해제 가능한 기사님 수 */
+export const MAX_BULK_FAVORITE_MOVERS = 100;
+
 // 2026.07.24 정슬기 - [추가] 기사님 찜 추가/해제 API 연동
 // 2026.07.27 - [수정] axios → fetchInstance 전환 (Bearer·에러 타입 통일)
 export async function addFavoriteMover(moverId: string): Promise<FavoriteResult> {
