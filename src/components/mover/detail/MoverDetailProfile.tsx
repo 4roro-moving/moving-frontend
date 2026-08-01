@@ -118,7 +118,11 @@ export default function MoverDetailProfile({
   );
 }
 
-function FavoriteSummary({ detail }: { detail: MoverDetail }) {
+interface FavoriteSummaryProps {
+  detail: MoverDetail;
+}
+
+function FavoriteSummary({ detail }: FavoriteSummaryProps) {
   return (
     <>
       <Text
