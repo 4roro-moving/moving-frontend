@@ -11,6 +11,8 @@ interface CustomerAuthGateProps {
   children: ReactNode;
   /** 세션 확인 중 표시. 기본은 공통 로딩 메시지 */
   loadingMessage?: string;
+  /** 세션 확인 중 커스텀 UI. 있으면 loadingMessage 대신 사용 */
+  loadingFallback?: ReactNode;
 }
 
 /**
@@ -24,6 +26,7 @@ interface CustomerAuthGateProps {
 export default function CustomerAuthGate({
   children,
   loadingMessage = "로그인 상태를 확인하는 중입니다.",
+  loadingFallback,
 }: CustomerAuthGateProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -47,7 +50,7 @@ export default function CustomerAuthGate({
   }, [isPending, isAuthenticated, isMover, pathname, router]);
 
   if (isPending || !canFetch) {
-    return <EstimatesQueryStatus message={loadingMessage} />;
+    return loadingFallback ?? <EstimatesQueryStatus message={loadingMessage} />;
   }
 
   return children;

@@ -14,7 +14,7 @@ export interface FavoriteMoversListQuery {
 }
 
 /** 찜 목록 API 기본 page size */
-export const FAVORITE_MOVERS_PAGE_LIMIT = 10;
+export const FAVORITE_MOVERS_PAGE_LIMIT = 5;
 
 /** PC 기사님 찾기 사이드바에 표시하는 최대 인원 */
 export const FAVORITE_MOVERS_SIDEBAR_LIMIT = 3;
@@ -40,4 +40,30 @@ export async function getFavoriteMovers(
   return fetchInstance.getPaginated<MoverListItem[]>(
     `${API_ROUTES.FAVORITES.MOVERS}?${params.toString()}`,
   );
+}
+
+/** 찜한 기사님 전체 id 수집 (페이지 순회). bulk API 부재 시 클라이언트에서 사용 */
+export async function fetchAllFavoriteMoverIds(): Promise<string[]> {
+  const limit = FAVORITE_MOVERS_PAGE_LIMIT;
+  const firstPage = await getFavoriteMovers({ page: 1, limit });
+  const ids = firstPage.data.map((mover) => mover.id);
+  const totalPages = Math.max(1, firstPage.pagination.totalPages);
+
+  if (totalPages <= 1) {
+    return ids;
+  }
+
+  const remainingPages = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, index) =>
+      getFavoriteMovers({ page: index + 2, limit }),
+    ),
+  );
+
+  for (const pageResult of remainingPages) {
+    for (const mover of pageResult.data) {
+      ids.push(mover.id);
+    }
+  }
+
+  return ids;
 }

@@ -1,0 +1,113 @@
+import type { InfiniteData, QueryClient } from "@tanstack/react-query";
+
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import type { MoversListResult } from "@/types/mover";
+
+export type FavoriteMoversCacheData = MoversListResult | InfiniteData<MoversListResult>;
+
+function isFavoriteMoversInfiniteData(data: unknown): data is InfiniteData<MoversListResult> {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "pages" in data &&
+    Array.isArray((data as InfiniteData<MoversListResult>).pages)
+  );
+}
+
+function isFavoriteMoversListResult(data: unknown): data is MoversListResult {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "data" in data &&
+    "pagination" in data &&
+    Array.isArray((data as MoversListResult).data)
+  );
+}
+
+function removeIdsFromFavoriteMoversPage(
+  page: MoversListResult,
+  idSet: Set<string>,
+  removedTotalDelta: number,
+): MoversListResult {
+  const data = page.data.filter((mover) => !idSet.has(mover.id));
+  const nextTotalCount = Math.max(0, page.pagination.totalCount - removedTotalDelta);
+  const limit = Math.max(1, page.pagination.limit);
+  const nextTotalPages = Math.max(1, Math.ceil(nextTotalCount / limit) || 1);
+
+  return {
+    ...page,
+    data,
+    pagination: {
+      ...page.pagination,
+      totalCount: nextTotalCount,
+      totalPages: nextTotalPages,
+      hasNext: page.pagination.page < nextTotalPages,
+    },
+  };
+}
+
+/** 사이드바(유한) · 찜 목록 페이지(infinite) 캐시 공통 제거 패치 */
+export function removeIdsFromFavoriteMoversCache(
+  data: unknown,
+  idSet: Set<string>,
+  removedTotalDelta: number,
+): unknown {
+  if (isFavoriteMoversInfiniteData(data)) {
+    let removedFromPages = 0;
+    const pages = data.pages.map((page) => {
+      const next = removeIdsFromFavoriteMoversPage(page, idSet, removedTotalDelta);
+      removedFromPages += page.data.length - next.data.length;
+      return next;
+    });
+
+    if (removedFromPages === 0 && removedTotalDelta === 0) {
+      return data;
+    }
+
+    return { ...data, pages };
+  }
+
+  if (isFavoriteMoversListResult(data)) {
+    const next = removeIdsFromFavoriteMoversPage(data, idSet, removedTotalDelta);
+    if (
+      next.data.length === data.data.length &&
+      next.pagination.totalCount === data.pagination.totalCount
+    ) {
+      return data;
+    }
+    return next;
+  }
+
+  return data;
+}
+
+export function patchMoverFavorite<
+  T extends { id: string; isFavorite: boolean; favoriteCount: number },
+>(mover: T, moverId: string, nextIsFavorite: boolean): T {
+  if (mover.id !== moverId) {
+    return mover;
+  }
+
+  if (mover.isFavorite === nextIsFavorite) {
+    return mover;
+  }
+
+  const delta = nextIsFavorite ? 1 : -1;
+
+  return {
+    ...mover,
+    isFavorite: nextIsFavorite,
+    favoriteCount: Math.max(0, mover.favoriteCount + delta),
+  };
+}
+
+export async function invalidateFavoriteRelatedQueries(queryClient: QueryClient): Promise<void> {
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
+    queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.MOVERS.ALL, "detail"] }),
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS }),
+  ]);
+}
