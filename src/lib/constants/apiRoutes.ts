@@ -5,6 +5,10 @@ export const API_ROUTES = {
     LOGIN: "/auth/login",
     LOGOUT: "/auth/logout",
     REFRESH: "/auth/refresh",
+    GOOGLE_LOGIN: "/auth/oauth/google",
+    KAKAO_LOGIN: "/auth/oauth/kakao",
+    NAVER_LOGIN: "/auth/oauth/naver",
+    NAVER_OAUTH_STATE: "/auth/oauth/naver/state",
   },
   USERS: {
     ROOT: "/users",

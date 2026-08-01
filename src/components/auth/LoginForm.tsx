@@ -15,6 +15,7 @@ import { Text, getTextVariantClass } from "@/components/common/Text";
 import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
+  getAudienceMismatchMessage,
   getAuthAudienceFromRole,
   getLoginRedirectParam,
   getPostAuthRedirectPath,
@@ -29,17 +30,6 @@ import { useAuthStore } from "@/stores/useAuthStore";
 interface LoginFormProps {
   audience?: AuthAudience;
 }
-
-const getAudienceMismatchMessage = (pageAudience: AuthAudience): string => {
-  switch (pageAudience) {
-    case "customer":
-      return "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요.";
-    case "mover":
-      return "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
-    case "admin":
-      return "관리자 계정입니다. 관리자 로그인을 이용해 주세요.";
-  }
-};
 
 const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const { mutateAsync: login, isPending } = useLoginMutation();
@@ -73,7 +63,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       // audience 불일치: establishSession 전에 롤백 (GuestOnly 홈 이동 방지)
       if (resultAudience !== audience) {
         await logout();
-        setSubmitError(getAudienceMismatchMessage(audience));
+        setSubmitError(getAudienceMismatchMessage(audience, resultAudience));
         return;
       }
 
@@ -166,7 +156,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
         >
           SNS 계정으로 간편 가입하기
         </Text>
-        <SocialLoginButtons />
+        <SocialLoginButtons audience={audience} onError={setSubmitError} />
       </div>
     </div>
   );
