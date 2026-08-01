@@ -12,12 +12,9 @@ import EstimateDetailLayout, {
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import EstimateDetailNotice from "@/components/estimate/detail/EstimateDetailNotice";
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
-import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useEstimateDetail } from "@/hooks/useEstimateDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
-import { buildEstimateShareLine } from "@/lib/share/shareText";
 import { cn } from "@/lib/utils/cn";
 
 interface EstimateDetailViewProps {
@@ -55,11 +52,6 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
   }
 
   const displayName = data.mover.nickname || data.mover.name;
-  const kakaoEstimateShare = {
-    share_line: buildEstimateShareLine(displayName),
-    profile_image: toKakaoShareImageUrl(data.mover.imageUrl),
-    like_count: String(data.mover.favoriteCount),
-  };
 
   return (
     <>
@@ -81,20 +73,13 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
           </>
         }
         aside={
-          <>
-            <EstimateDetailActions
-              isConfirmed={data.isConfirmed}
-              canConfirm={data.canConfirm}
-              confirmDisabledReason={data.confirmDisabledReason}
-              isConfirming={confirmMutation.isPending}
-              onConfirm={() => confirmMutation.mutate()}
-            />
-            <EstimateDetailShare
-              linkAccess="owner"
-              kakaoEstimateShare={kakaoEstimateShare}
-              onToastMessage={setToastMessage}
-            />
-          </>
+          <EstimateDetailActions
+            isConfirmed={data.isConfirmed}
+            canConfirm={data.canConfirm}
+            confirmDisabledReason={data.confirmDisabledReason}
+            isConfirming={confirmMutation.isPending}
+            onConfirm={() => confirmMutation.mutate()}
+          />
         }
       />
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}

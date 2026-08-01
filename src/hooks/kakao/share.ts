@@ -1,14 +1,12 @@
 import { ensureKakaoSdk } from "@/hooks/kakao/sdk";
 import {
   buildKakaoShareImageUrl,
-  getEstimateShareTemplateId,
   getMoverShareTemplateId,
   hasKakaoJavascriptKey,
-  type KakaoEstimateShareTemplateArgs,
   type KakaoMoverShareTemplateArgs,
 } from "@/lib/kakao/shareTemplate";
 
-export type { KakaoEstimateShareTemplateArgs, KakaoMoverShareTemplateArgs };
+export type { KakaoMoverShareTemplateArgs };
 
 interface ShareKakaoHandlers {
   onMissingConfig?: () => void;
@@ -24,7 +22,7 @@ async function sendKakaoCustomShare({
   onError,
 }: {
   templateId: number | null;
-  templateArgs: KakaoMoverShareTemplateArgs | KakaoEstimateShareTemplateArgs;
+  templateArgs: KakaoMoverShareTemplateArgs;
   onMissingConfig?: () => void;
   onSuccess?: () => void;
   onError?: (message: string) => void;
@@ -56,22 +54,6 @@ export async function shareKakaoMoverCustom({
 }: ShareKakaoHandlers & { templateArgs: KakaoMoverShareTemplateArgs }): Promise<void> {
   return sendKakaoCustomShare({
     templateId: getMoverShareTemplateId(),
-    templateArgs,
-    onMissingConfig,
-    onSuccess,
-    onError,
-  });
-}
-
-/** 견적 상세 — NEXT_PUBLIC_KAKAO_ESTIMATE_SHARE_TEMPLATE_ID */
-export async function shareKakaoEstimateCustom({
-  templateArgs,
-  onMissingConfig,
-  onSuccess,
-  onError,
-}: ShareKakaoHandlers & { templateArgs: KakaoEstimateShareTemplateArgs }): Promise<void> {
-  return sendKakaoCustomShare({
-    templateId: getEstimateShareTemplateId(),
     templateArgs,
     onMissingConfig,
     onSuccess,

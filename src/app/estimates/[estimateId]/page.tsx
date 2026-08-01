@@ -3,22 +3,15 @@ import { notFound } from "next/navigation";
 
 import CustomerAuthGate from "@/components/auth/CustomerAuthGate";
 import EstimateDetailView from "@/components/estimate/detail/EstimateDetailView";
-import { FALLBACK_ESTIMATE_METADATA, generateReceivedEstimateMetadata } from "@/lib/share/metadata";
 import { parsePositiveIntId } from "@/lib/utils/parsePositiveIntId";
+
+export const metadata: Metadata = {
+  title: "견적 상세",
+  description: "이사 견적 상세 정보를 확인하세요.",
+};
 
 interface EstimateDetailPageProps {
   params: Promise<{ estimateId: string }>;
-}
-
-export async function generateMetadata({ params }: EstimateDetailPageProps): Promise<Metadata> {
-  const { estimateId } = await params;
-  const id = parsePositiveIntId(estimateId);
-
-  if (id === null) {
-    return FALLBACK_ESTIMATE_METADATA;
-  }
-
-  return generateReceivedEstimateMetadata(id, `/estimates/${id}`);
 }
 
 // 2026.07.24 정슬기 - [수정] 상세 라우트를 /estimates/[estimateId]로 정리하고 API 연동 뷰에 연결
