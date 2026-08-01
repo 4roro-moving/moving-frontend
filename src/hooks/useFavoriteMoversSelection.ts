@@ -3,10 +3,10 @@
 import { useCallback, useState } from "react";
 
 import { useBulkRemoveFavoriteMovers } from "@/hooks/useBulkRemoveFavoriteMovers";
-import { fetchAllFavoriteMoverIds } from "@/lib/api/favorites";
-import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { MAX_BULK_FAVORITE_MOVERS } from "@/lib/api/favorites";
 
-const DELETE_ERROR_MESSAGE = "선택한 기사님을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.";
+const MAX_SELECTION_MESSAGE = `한 번에 최대 ${MAX_BULK_FAVORITE_MOVERS}명까지 선택할 수 있습니다.`;
+const MAX_EXCLUSION_MESSAGE = `전체 선택에서 최대 ${MAX_BULK_FAVORITE_MOVERS}명까지 제외할 수 있습니다.`;
 
 interface UseFavoriteMoversSelectionOptions {
   loadedIds: string[];
@@ -26,10 +26,11 @@ export function useFavoriteMoversSelection({
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   /** 확인 모달 문구용 — 낙관적 업데이트로 totalCount가 0이 되어도 고정 */
   const [deleteConfirmCount, setDeleteConfirmCount] = useState(0);
-  const [isResolvingAllIds, setIsResolvingAllIds] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const bulkRemoveMutation = useBulkRemoveFavoriteMovers({ onError: setToastMessage });
+  const { mutateAsync: bulkRemove, isPending: isBulkDeleting } = useBulkRemoveFavoriteMovers({
+    onError: setToastMessage,
+  });
 
   const selectedOnLoadedCount = loadedIds.filter((id) => selectedIds.includes(id)).length;
   const selectedCount = isSelectAll
@@ -39,7 +40,6 @@ export function useFavoriteMoversSelection({
     ? excludedIds.length === 0
     : totalCount > 0 && selectedCount === totalCount;
   const hasSelection = selectedCount > 0;
-  const isBulkDeleting = bulkRemoveMutation.isPending || isResolvingAllIds;
 
   const clearSelection = useCallback(() => {
     setSelectedIds([]);
@@ -65,12 +65,30 @@ export function useFavoriteMoversSelection({
   const handleToggleMover = useCallback(
     (moverId: string, checked: boolean) => {
       if (isSelectAll) {
+        if (
+          !checked &&
+          !excludedIds.includes(moverId) &&
+          excludedIds.length >= MAX_BULK_FAVORITE_MOVERS
+        ) {
+          setToastMessage(MAX_EXCLUSION_MESSAGE);
+          return;
+        }
+
         setExcludedIds((prev) => {
           if (checked) {
             return prev.filter((id) => id !== moverId);
           }
           return prev.includes(moverId) ? prev : [...prev, moverId];
         });
+        return;
+      }
+
+      if (
+        checked &&
+        !selectedIds.includes(moverId) &&
+        selectedIds.length >= MAX_BULK_FAVORITE_MOVERS
+      ) {
+        setToastMessage(MAX_SELECTION_MESSAGE);
         return;
       }
 
@@ -81,27 +99,35 @@ export function useFavoriteMoversSelection({
         return prev.filter((id) => id !== moverId);
       });
     },
-    [isSelectAll],
+    [excludedIds, isSelectAll, selectedIds],
   );
 
-  const removeFavorites = useCallback(
+  const removeFavoritesByIds = useCallback(
     async (idsToRemove: string[]) => {
       if (idsToRemove.length === 0) {
         return;
       }
 
-      const result = await bulkRemoveMutation.mutateAsync(idsToRemove);
-
-      if (result.failedIds.length > 0) {
-        setIsSelectAll(false);
-        setExcludedIds([]);
-        setSelectedIds(result.failedIds);
-        return;
-      }
+      await bulkRemove({
+        mode: "ids",
+        moverIds: idsToRemove,
+      });
 
       clearSelection();
     },
-    [bulkRemoveMutation, clearSelection],
+    [bulkRemove, clearSelection],
+  );
+
+  const removeFavoritesAll = useCallback(
+    async (excluded: string[]) => {
+      await bulkRemove({
+        mode: "all",
+        excludedIds: excluded,
+      });
+
+      clearSelection();
+    },
+    [bulkRemove, clearSelection],
   );
 
   const handleBulkDelete = useCallback(() => {
@@ -109,7 +135,7 @@ export function useFavoriteMoversSelection({
       return;
     }
 
-    // 전체선택(일부 제외 포함)이거나, 로드된 전체가 곧 전체 찜인 경우 → 확인 모달
+    // 전체선택(일부 제외 포함)이거나 개별 선택 수가 현재 전체 수와 같으면 확인 모달
     if (isSelectAll || selectedCount === totalCount) {
       setDeleteConfirmCount(selectedCount);
       setIsDeleteConfirmOpen(true);
@@ -118,7 +144,7 @@ export function useFavoriteMoversSelection({
 
     void (async () => {
       try {
-        await removeFavorites([...selectedIds]);
+        await removeFavoritesByIds([...selectedIds]);
       } catch {
         // 전부 실패 시 useBulkRemoveFavoriteMovers onError에서 토스트 처리
       }
@@ -129,31 +155,24 @@ export function useFavoriteMoversSelection({
     isSelectAll,
     selectedCount,
     totalCount,
-    removeFavorites,
+    removeFavoritesByIds,
     selectedIds,
   ]);
 
   const handleConfirmDeleteAll = useCallback(() => {
     void (async () => {
-      setIsResolvingAllIds(true);
       try {
-        const allIds = await fetchAllFavoriteMoverIds();
-        const excludedSet = new Set(excludedIds);
-        const idsToRemove = isSelectAll ? allIds.filter((id) => !excludedSet.has(id)) : allIds;
-
-        try {
-          await removeFavorites(idsToRemove);
-          setIsDeleteConfirmOpen(false);
-        } catch {
-          // 전부 실패 시 mutation onError에서 토스트 처리. 모달은 재시도 가능하도록 유지
+        if (isSelectAll) {
+          await removeFavoritesAll(excludedIds);
+        } else {
+          await removeFavoritesByIds([...selectedIds]);
         }
-      } catch (error) {
-        setToastMessage(getApiErrorMessage(error, DELETE_ERROR_MESSAGE));
-      } finally {
-        setIsResolvingAllIds(false);
+        setIsDeleteConfirmOpen(false);
+      } catch {
+        // 전부 실패 시 mutation onError에서 토스트 처리. 모달은 재시도 가능하도록 유지
       }
     })();
-  }, [excludedIds, isSelectAll, removeFavorites]);
+  }, [excludedIds, isSelectAll, removeFavoritesAll, removeFavoritesByIds, selectedIds]);
 
   const handleCloseDeleteConfirm = useCallback(() => {
     if (!isBulkDeleting) {
