@@ -8,11 +8,11 @@ import Toast from "@/components/common/Toast/Toast";
 import { Text } from "@/components/common/Text";
 import MoverCard from "@/components/mover/MoverCard";
 import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
+import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { useFavoriteMovers } from "@/hooks/useFavoriteMovers";
-import { useIsClient } from "@/hooks/useIsClient";
 import { ChevronRightThinIcon } from "@/icons";
 import { FAVORITE_MOVERS_SIDEBAR_LIMIT } from "@/lib/api/favorites";
-import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
+import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import { cn } from "@/lib/utils/cn";
@@ -77,9 +77,7 @@ function FavoriteMoversSidebarStatus({
 }
 
 export function FavoriteMoversSidebar() {
-  // SSR/하이드레이션 전에는 토큰을 읽지 않아 서버·클라이언트 HTML을 동일하게 맞춤
-  const isClient = useIsClient();
-  const isLoggedIn = isClient && hasAuthSession();
+  const { isPending: isAuthPending, canFetch: isLoggedIn } = useCustomerAuthReady();
   const query = useFavoriteMovers({
     enabled: isLoggedIn,
     limit: FAVORITE_MOVERS_SIDEBAR_LIMIT,
@@ -88,7 +86,7 @@ export function FavoriteMoversSidebar() {
 
   const movers =
     query.data?.data.map(mapMoverListItemToMover).slice(0, FAVORITE_MOVERS_SIDEBAR_LIMIT) ?? [];
-  const showSkeleton = !isClient || (isLoggedIn && query.isPending);
+  const showSkeleton = isAuthPending || (isLoggedIn && query.isPending);
   // 찜한 기사님이 1명 이상일 때부터 더보기 표시, 비로그인·빈 목록에서는 숨김
   const showMoreLink = isLoggedIn && !query.isError && movers.length > 0;
 

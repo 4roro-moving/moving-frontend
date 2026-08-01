@@ -31,7 +31,8 @@ export default async function MoversPage({ searchParams }: MoversPageProps) {
   try {
     // infinite query는 await 필수 (미대기 dehydrate 시 클라이언트 hydrate 깨질 수 있음)
     await queryClient.prefetchInfiniteQuery({
-      queryKey: [...QUERY_KEYS.MOVERS.LIST, listQuery],
+      // 서버 prefetch에는 access token이 없으므로 guest 캐시로 분리합니다.
+      queryKey: [...QUERY_KEYS.MOVERS.LIST, "guest", listQuery],
       queryFn: ({ pageParam }) => getMovers({ ...listQuery, page: pageParam }),
       initialPageParam: 1,
       getNextPageParam: (lastPage) =>
