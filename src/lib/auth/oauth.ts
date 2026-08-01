@@ -54,21 +54,17 @@ export const saveOAuthClientState = (state: string): void => {
   sessionStorage.setItem(OAUTH_STATE_KEY, state);
 };
 
-export const loadOAuthClientState = (): string | null => {
-  return sessionStorage.getItem(OAUTH_STATE_KEY);
-};
-
 /** callback의 state와 시작 시 저장값을 비교. 불일치면 false */
-export const matchesOAuthClientState = (state: string | null): boolean => {
+export const consumeOAuthClientState = (state: string | null): boolean => {
   if (!state) return false;
 
-  const saved = loadOAuthClientState();
+  const saved = sessionStorage.getItem(OAUTH_STATE_KEY);
 
-  return Boolean(saved && state === saved);
-};
+  if (!saved || state !== saved) return false;
 
-export const clearOAuthClientState = (): void => {
   sessionStorage.removeItem(OAUTH_STATE_KEY);
+
+  return true;
 };
 
 export const isOAuthProvider = (value: string): value is OAuthProvider => {

@@ -9,13 +9,14 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
   clearOAuthPendingSession,
   isOAuthProvider,
-  matchesOAuthClientState,
+  consumeOAuthClientState,
   loadOAuthPendingSession,
 } from "@/lib/auth/oauth";
 import {
   exchangeOAuthCodeOnce,
   getCompletedOAuthExchange,
   isOAuthExchangeFinished,
+  isOAuthExchangePending,
   markOAuthExchangeFinished,
 } from "@/lib/auth/oauthExchange";
 import {
@@ -92,10 +93,18 @@ const OAuthCallbackContent = () => {
         return;
       }
 
-      // google/kakao/naver 공통: 시작 시 저장한 state와 비교
-      if (!matchesOAuthClientState(state)) {
-        failOAuthCallback("유효하지 않은 요청입니다.", setError);
-        return;
+      // 검증 직후 await 전에 동기 소비 — 동일 state 재사용 차단
+      if (!consumeOAuthClientState(state)) {
+        if (isOAuthExchangeFinished(routeProvider, code)) {
+          return;
+        }
+        if (
+          !getCompletedOAuthExchange(routeProvider, code) &&
+          !isOAuthExchangePending(routeProvider, code)
+        ) {
+          failOAuthCallback("유효하지 않은 요청입니다.", setError);
+          return;
+        }
       }
 
       try {

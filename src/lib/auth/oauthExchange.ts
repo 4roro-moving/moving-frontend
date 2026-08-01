@@ -29,8 +29,14 @@ export const markOAuthExchangeFinished = (provider: OAuthProvider, code: string)
   return true;
 };
 
+/** 성공 후처리(세션 확립·이동)를 1회만 수행. 이미 처리됨이면 false */
 export const isOAuthExchangeFinished = (provider: OAuthProvider, code: string): boolean => {
   return finishedExchangeKeys.has(getExchangeKey(provider, code));
+};
+
+/** 교환 요청 진행 중인지 확인 */
+export const isOAuthExchangePending = (provider: OAuthProvider, code: string): boolean => {
+  return pendingExchange?.key === getExchangeKey(provider, code);
 };
 
 export const exchangeOAuthCodeOnce = (
