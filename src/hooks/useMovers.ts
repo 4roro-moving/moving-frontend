@@ -15,7 +15,7 @@ export function useMovers(filters: MoversSearchParamsState) {
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isAuthReady = hasHydrated && !isCheckingAuth;
-  const authScope = useAuthQueryScope();
+  const { authScope, isAuthQueryReady } = useAuthQueryScope();
 
   return useApiInfiniteQuery({
     queryKey: getMoverListQueryKey(authScope, listQuery),
@@ -23,7 +23,7 @@ export function useMovers(filters: MoversSearchParamsState) {
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.pagination.hasNext ? lastPage.pagination.page + 1 : undefined,
-    enabled: isAuthReady,
+    enabled: isAuthReady && isAuthQueryReady,
     // 로그인 응답의 isFavorite는 세션 복구 직후 항상 서버에서 다시 확인합니다.
     staleTime: isAuthenticated ? 0 : MOVERS_LIST_STALE_TIME_MS,
   });

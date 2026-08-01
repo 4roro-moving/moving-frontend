@@ -1,9 +1,15 @@
 import type { MoversListQuery } from "@/types/mover";
 
 export const AUTH_QUERY_GUEST_SCOPE = "guest" as const;
+export const AUTH_QUERY_UNRESOLVED_SCOPE = "authenticated-unresolved" as const;
 
-export const getAuthQueryScope = (userId?: string | null) =>
-  userId ? (`user:${userId}` as const) : AUTH_QUERY_GUEST_SCOPE;
+export const getAuthQueryScope = (isAuthenticated: boolean, userId?: string | null) => {
+  if (!isAuthenticated) {
+    return AUTH_QUERY_GUEST_SCOPE;
+  }
+
+  return userId ? (`user:${userId}` as const) : AUTH_QUERY_UNRESOLVED_SCOPE;
+};
 
 export type AuthQueryScope = ReturnType<typeof getAuthQueryScope>;
 

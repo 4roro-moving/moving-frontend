@@ -10,7 +10,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 export function useAuthQueryCacheReset() {
   const queryClient = useQueryClient();
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
-  const sessionKey = useAuthQueryScope();
+  const { authScope: sessionKey } = useAuthQueryScope();
   const previousSessionKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
