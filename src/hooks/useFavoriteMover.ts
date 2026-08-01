@@ -11,6 +11,7 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
 import {
   getFavoriteMoversScopeQueryKey,
+  getMoverDetailQueryKey,
   getMoverListScopeQueryKey,
   QUERY_KEYS,
 } from "@/lib/constants/queryKeys";
@@ -90,12 +91,14 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       return removeFavoriteMover(moverId);
     },
     onMutate: async ({ moverId, nextIsFavorite }): Promise<FavoriteMutationContext> => {
+      const moverDetailQueryKey = getMoverDetailQueryKey(authScope, moverId);
+
       await Promise.all([
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
         queryClient.cancelQueries({ queryKey: moverListScopeQueryKey }),
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.MOVERS.DETAIL(moverId) }),
+        queryClient.cancelQueries({ queryKey: moverDetailQueryKey }),
         queryClient.cancelQueries({ queryKey: favoriteMoversScopeQueryKey }),
       ]);
 
@@ -114,9 +117,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       const previousFavoriteMovers = queryClient.getQueriesData<FavoriteMoversCacheData>({
         queryKey: favoriteMoversScopeQueryKey,
       });
-      const previousMoverDetail = queryClient.getQueryData<MoverDetail>(
-        QUERY_KEYS.MOVERS.DETAIL(moverId),
-      );
+      const previousMoverDetail = queryClient.getQueryData<MoverDetail>(moverDetailQueryKey);
 
       queryClient.setQueryData<ReceivedEstimatePanel[]>(QUERY_KEYS.ESTIMATES.RECEIVED, (panels) => {
         if (!panels) {
@@ -192,7 +193,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         );
       }
 
-      queryClient.setQueryData<MoverDetail>(QUERY_KEYS.MOVERS.DETAIL(moverId), (detail) => {
+      queryClient.setQueryData<MoverDetail>(moverDetailQueryKey, (detail) => {
         if (!detail) {
           return detail;
         }
@@ -225,7 +226,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
           queryClient.setQueryData(queryKey, data);
         });
         queryClient.setQueryData(
-          QUERY_KEYS.MOVERS.DETAIL(variables.moverId),
+          getMoverDetailQueryKey(authScope, variables.moverId),
           context.previousMoverDetail,
         );
       }

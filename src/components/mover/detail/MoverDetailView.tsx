@@ -23,6 +23,7 @@ import { useMoverDetail } from "@/hooks/useMoverDetail";
 import { hasAuthSession } from "@/lib/auth/session";
 import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
 import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { ApiError } from "@/types/api";
 
 interface MoverDetailViewProps {
@@ -40,6 +41,9 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
 
   const isClient = useIsClient();
   const isLoggedIn = isClient && hasAuthSession();
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const isAuthPending = !hasHydrated || isCheckingAuth;
   const loginRequiredModal = useLoginRequiredModal();
 
   const { data: detail, isLoading, error, isFetching, refetch } = useMoverDetail(moverId);
@@ -62,7 +66,8 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     onError: setToastMessage,
   });
 
-  if (isLoading) {
+  // SSR guest 상세가 로그인 사용자 정보보다 먼저 노출되지 않도록 세션 확인 완료까지 대기합니다.
+  if (isAuthPending || isLoading) {
     return <MoverDetailPageSkeleton />;
   }
 

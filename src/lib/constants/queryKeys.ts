@@ -1,5 +1,14 @@
 import type { MoversListQuery } from "@/types/mover";
 
+/**
+ * 사용자별 응답(`isFavorite`)이 React Query 캐시에서 섞이지 않도록 사용하는 인증 scope
+ *
+ * - guest: 비회원 및 서버 prefetch
+ * - authenticated-unresolved: 인증 상태지만 사용자 ID를 확인하지 못한 상태
+ * - user:{userId}: 사용자 식별이 완료된 로그인 상태
+ *
+ * authenticated-unresolved 상태에서는 사용자별 쿼리를 실행하지 않습니다.
+ */
 export const AUTH_QUERY_GUEST_SCOPE = "guest" as const;
 export const AUTH_QUERY_UNRESOLVED_SCOPE = "authenticated-unresolved" as const;
 
@@ -13,16 +22,32 @@ export const getAuthQueryScope = (isAuthenticated: boolean, userId?: string | nu
 
 export type AuthQueryScope = ReturnType<typeof getAuthQueryScope>;
 
+/**
+ * 현재 사용자의 모든 기사님 목록 쿼리를 대상으로 하는 prefix.
+ * 찜 mutation의 cancel·snapshot·낙관적 업데이트 범위를 제한할 때 사용합니다.
+ */
 export const getMoverListScopeQueryKey = (authScope: AuthQueryScope) =>
   [...QUERY_KEYS.MOVERS.LIST, authScope] as const;
 
+/** 필터 조건까지 포함한 기사님 목록의 실제 Query Key */
 export const getMoverListQueryKey = (
   authScope: AuthQueryScope,
   query: Omit<MoversListQuery, "page">,
 ) => [...getMoverListScopeQueryKey(authScope), query] as const;
 
+/**
+ * 현재 사용자의 유한·무한 찜 목록을 함께 대상으로 하는 prefix.
+ * 다른 사용자의 찜 캐시를 낙관적으로 수정하지 않도록 사용합니다.
+ */
 export const getFavoriteMoversScopeQueryKey = (authScope: AuthQueryScope) =>
   [...QUERY_KEYS.FAVORITES.MOVERS, authScope] as const;
+
+/**
+ * 기사 상세의 사용자별 Query Key.
+ * SSR prefetch에서는 guest scope를 사용합니다.
+ */
+export const getMoverDetailQueryKey = (authScope: AuthQueryScope, moverId: string) =>
+  [...QUERY_KEYS.MOVERS.DETAIL_ROOT, authScope, moverId] as const;
 
 export const QUERY_KEYS = {
   AUTH: {
@@ -37,7 +62,7 @@ export const QUERY_KEYS = {
   MOVERS: {
     ALL: ["movers"] as const,
     LIST: ["movers", "list"] as const,
-    DETAIL: (moverId: string) => ["movers", "detail", moverId] as const,
+    DETAIL_ROOT: ["movers", "detail"] as const,
   },
 
   ESTIMATE_REQUESTS: {
