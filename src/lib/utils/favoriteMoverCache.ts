@@ -87,22 +87,29 @@ export function keepOnlyIdsInFavoriteMoversCache(
   nextTotalCount: number,
 ): unknown {
   if (isFavoriteMoversInfiniteData(data)) {
-    const pages = data.pages.map((page) => {
-      const kept = page.data.filter((mover) => keepIds.has(mover.id));
+    const firstPage = data.pages[0];
+    if (!firstPage) {
+      return data;
+    }
 
-      return {
-        ...page,
-        data: kept,
-        pagination: {
-          ...page.pagination,
-          totalCount: nextTotalCount,
-          hasNext: false,
-          nextCursor: null,
+    const kept = data.pages.flatMap((page) => page.data.filter((mover) => keepIds.has(mover.id)));
+
+    return {
+      ...data,
+      pages: [
+        {
+          ...firstPage,
+          data: kept,
+          pagination: {
+            ...firstPage.pagination,
+            totalCount: nextTotalCount,
+            hasNext: false,
+            nextCursor: null,
+          },
         },
-      };
-    });
-
-    return { ...data, pages };
+      ],
+      pageParams: [data.pageParams[0]],
+    };
   }
 
   if (isFavoriteMoversListResult(data)) {
