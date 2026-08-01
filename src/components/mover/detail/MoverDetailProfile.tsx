@@ -60,6 +60,7 @@ export default function MoverDetailProfile({
           ) : (
             <div
               className="flex min-h-44 shrink-0 items-center gap-4 px-4 py-2"
+              role="group"
               aria-label={`현재 찜 ${detail.favoriteCount}개`}
             >
               <FavoriteSummary detail={detail} />
