@@ -9,7 +9,6 @@ import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { useMovers } from "@/hooks/useMovers";
-import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import type { MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -31,14 +30,13 @@ const MOVERS_LIST_SKELETON_COUNT = 3;
 const MOVERS_NEXT_PAGE_SKELETON_COUNT = 2;
 
 export function MoversList({ filters }: MoversListProps) {
-  const query = useMovers(filters);
+  const { movers, query } = useMovers(filters);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthPending = !hasHydrated || isCheckingAuth;
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const movers = query.data?.pages.flatMap((page) => page.data).map(mapMoverListItemToMover) ?? [];
   const sentinelRef = useMoversInfiniteScroll({
     enabled: !isAuthPending && !query.isPending && !query.isError && movers.length > 0,
     hasNextPage,
