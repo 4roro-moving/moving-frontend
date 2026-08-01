@@ -239,7 +239,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       onErrorRef.current?.(getApiErrorMessage(error));
     },
     onSettled: async () => {
-      await invalidateFavoriteRelatedQueries(queryClient);
+      await invalidateFavoriteRelatedQueries(queryClient, authScope);
     },
   });
 
