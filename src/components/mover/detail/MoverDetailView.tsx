@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { useMoverDesignation } from "@/hooks/useMoverDesignation";
 import { useMoverDetail } from "@/hooks/useMoverDetail";
-import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
 
 import Toast from "@/components/common/Toast/Toast";
 import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
@@ -80,10 +79,10 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     requestButtonLabel: designation.requestButtonLabel,
   };
 
-  const kakaoShare = {
-    driver_name: detail.name,
-    like_count: String(detail.favoriteCount),
-    driver_profile: toKakaoShareImageUrl(detail.profileImageSrc),
+  const shareProps = {
+    favoriteCount: detail.favoriteCount,
+    moverName: detail.name,
+    profileImageSrc: detail.profileImageSrc,
   };
 
   return (
@@ -103,7 +102,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
             <div className="border-border-subtle w-full border-t lg:hidden" aria-hidden="true" />
 
             <div className="lg:hidden">
-              <MoverDetailShare kakaoShare={kakaoShare} onToastMessage={setToastMessage} />
+              <MoverDetailShare {...shareProps} onToastMessage={setToastMessage} />
             </div>
 
             <div className="border-border-subtle w-full border-t" aria-hidden="true" />
@@ -120,7 +119,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
             {designation.showCustomerActions ? (
               <MoverDetailActions layout="sidebar" {...actionsProps} />
             ) : null}
-            <MoverDetailShare kakaoShare={kakaoShare} onToastMessage={setToastMessage} />
+            <MoverDetailShare {...shareProps} onToastMessage={setToastMessage} />
           </aside>
         </div>
       </div>
