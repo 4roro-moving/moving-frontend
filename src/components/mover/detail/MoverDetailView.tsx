@@ -25,15 +25,9 @@ import { hasAuthSession } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
 import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { ApiError } from "@/types/api";
 
 interface MoverDetailViewProps {
   moverId: string;
-}
-
-function isMoverNotFoundError(error: unknown): boolean {
-  return error instanceof ApiError && (error.status === 404 || error.code === "MOVER_NOT_FOUND");
 }
 
 export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
@@ -44,12 +38,9 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
 
   const isClient = useIsClient();
   const isLoggedIn = isClient && hasAuthSession();
-  const hasHydrated = useAuthStore((state) => state.hasHydrated);
-  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
-  const isAuthPending = !hasHydrated || isCheckingAuth;
   const loginRequiredModal = useLoginRequiredModal();
 
-  const { data: detail, isLoading, error, isFetching, refetch } = useMoverDetail(moverId);
+  const { detail, isInitialLoading, isNotFound, query } = useMoverDetail(moverId);
   const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
 
   const {
@@ -70,12 +61,12 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   });
 
   // SSR guest 상세가 로그인 사용자 정보보다 먼저 노출되지 않도록 세션 확인 완료까지 대기합니다.
-  if (isAuthPending || isLoading) {
+  if (isInitialLoading) {
     return <MoverDetailPageSkeleton />;
   }
 
   if (!detail) {
-    if (isMoverNotFoundError(error)) {
+    if (isNotFound) {
       return <MoverDetailNotFoundStatus />;
     }
 
@@ -85,9 +76,9 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
           title="불러오지 못했어요"
           description="기사님 정보를 가져오는 중 문제가 발생했습니다."
           actionLabel="다시 시도"
-          isRetrying={isFetching}
+          isRetrying={query.isFetching}
           onRetry={() => {
-            void refetch();
+            void query.refetch();
           }}
         />
       </div>
