@@ -76,17 +76,17 @@ function FavoriteMoversSidebarStatus({
 
 export function FavoriteMoversSidebar() {
   const {
-    auth,
     isInitialLoading,
+    isCustomerLoggedIn,
     movers: favoriteMovers,
     query,
+    shouldHideForMover,
   } = useFavoriteMovers({
     limit: FAVORITE_MOVERS_SIDEBAR_LIMIT,
   });
-  const { canFetch: isCustomerLoggedIn, isAuthenticated, isMover } = auth;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  if (!auth.isPending && isAuthenticated && isMover) {
+  if (shouldHideForMover) {
     return null;
   }
 
