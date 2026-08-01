@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
-import Toast from "@/components/common/Toast";
+import Toast from "@/components/common/Toast/Toast";
 import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
 import {
   buildCreateEstimateRequestPayload,
@@ -277,13 +277,9 @@ export default function EstimateRequestForm() {
   const accessDeniedToastMessage = isAccessDenied ? TOAST_FORBIDDEN_ROLE_MESSAGE : null;
   const visibleToastMessage = toastMessage ?? accessDeniedToastMessage;
 
-  const toastElement = (
-    <Toast
-      open={Boolean(visibleToastMessage)}
-      message={visibleToastMessage ?? ""}
-      onClose={closeToast}
-    />
-  );
+  const toastElement = visibleToastMessage ? (
+    <Toast onClose={closeToast}>{visibleToastMessage}</Toast>
+  ) : null;
 
   if (isCheckingActive) {
     return (

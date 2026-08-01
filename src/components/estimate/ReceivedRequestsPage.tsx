@@ -7,7 +7,7 @@ import Modal from "@/components/common/Modal";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
-import Toast from "@/components/common/Toast";
+import Toast from "@/components/common/Toast/Toast";
 import {
   useMoverEstimateRequests,
   useRejectMoverEstimate,
@@ -360,11 +360,7 @@ export default function ReceivedRequestsPage() {
         />
       )}
 
-      <Toast
-        open={Boolean(toastMessage)}
-        message={toastMessage ?? ""}
-        onClose={() => setToastMessage(null)}
-      />
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </>
   );
 }

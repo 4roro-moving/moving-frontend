@@ -14,10 +14,8 @@ export interface ToastProps {
 }
 
 /**
- * toast
- * - Desktop: 1200×66, top 103, rounded-16, px-32 py-20, 2lg-semibold
- * - Tablet: 640×54, top 70, inset 52, rounded-12, px-24 py-14, lg-semibold
- * - Mobile: 360×54, top 70, inset 8, rounded-12, px-24 py-14, lg-semibold
+ * 공통 Toast
+ * - 사용: `{message ? <Toast onClose={...}>{message}</Toast> : null}`
  */
 const Toast = ({ children, onClose }: ToastProps) => {
   const onCloseRef = useRef(onClose);
