@@ -69,6 +69,32 @@ function SentEstimateSummary({ estimate }: { estimate: SentEstimate }) {
   );
 }
 
+function SentEstimateComment({ comment }: { comment: string }) {
+  return (
+    <section
+      className="flex w-full flex-col gap-20 md:gap-28"
+      aria-labelledby="mover-comment-title"
+    >
+      <h2 id="mover-comment-title" className="text-text-primary">
+        <Text as="span" variant="lg-semibold" className="md:hidden">
+          기사님 코멘트
+        </Text>
+        <Text as="span" variant="xl-semibold" className="hidden md:inline">
+          기사님 코멘트
+        </Text>
+      </h2>
+
+      <Text
+        as="p"
+        variant="lg-medium"
+        className="text-text-muted wrap-break-word whitespace-pre-wrap"
+      >
+        {comment}
+      </Text>
+    </section>
+  );
+}
+
 export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetailPageProps) {
   const query = useSentEstimateDetail(estimateId);
 
@@ -103,21 +129,26 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
             <EstimateDetailPrice price={estimate.price} />
           </div>
 
-          <EstimateDetailInfoSection
-            rows={[
-              { label: "견적 요청일", value: formatKoreanDateTime(request.requestedAt) },
-              { label: "서비스", value: MOVE_TYPE_LABEL[request.moveType] },
-              { label: "이용일", value: formatKoreanDateTime(request.moveDate) },
-              {
-                label: "출발지",
-                value: formatAddress(request.fromAddress, request.fromDetailAddress),
-              },
-              {
-                label: "도착지",
-                value: formatAddress(request.toAddress, request.toDetailAddress),
-              },
-            ]}
-          />
+          <div className="flex w-full flex-col gap-20 md:gap-28">
+            <EstimateDetailInfoSection
+              rows={[
+                { label: "견적 요청일", value: formatKoreanDateTime(request.requestedAt) },
+                { label: "서비스", value: MOVE_TYPE_LABEL[request.moveType] },
+                { label: "이용일", value: formatKoreanDateTime(request.moveDate) },
+                {
+                  label: "출발지",
+                  value: formatAddress(request.fromAddress, request.fromDetailAddress),
+                },
+                {
+                  label: "도착지",
+                  value: formatAddress(request.toAddress, request.toDetailAddress),
+                },
+              ]}
+            />
+            <div className="border-border-subtle w-full border-t" aria-hidden="true" />
+          </div>
+
+          <SentEstimateComment comment={estimate.comment} />
         </>
       }
     />
