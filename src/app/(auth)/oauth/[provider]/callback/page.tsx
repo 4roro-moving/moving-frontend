@@ -3,8 +3,7 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
-import Button from "@/components/common/Button/Button";
-import { Text } from "@/components/common/Text";
+import OAuthLayout from "@/components/auth/OAuthLayout";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
   clearOAuthPendingSession,
@@ -147,39 +146,12 @@ const OAuthCallbackContent = () => {
     void run();
   }, [searchParams, params.provider, establishSession, logout, router]);
 
-  if (error) {
-    return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-16 px-24">
-        <Text as="p" role="alert" variant="md-medium" className="text-text-error text-center">
-          {error}
-        </Text>
-        <Button variant="solid" size="md" onClick={() => router.push(loginHref)}>
-          로그인으로 돌아가기
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex min-h-dvh items-center justify-center px-24">
-      <Text as="p" variant="md-medium" className="text-text-description">
-        로그인 처리 중…
-      </Text>
-    </div>
-  );
+  return <OAuthLayout error={error} loginHref={loginHref} />;
 };
 
 const OAuthCallbackPage = () => {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-dvh items-center justify-center px-24">
-          <Text as="p" variant="md-medium" className="text-text-description">
-            로그인 처리 중…
-          </Text>
-        </div>
-      }
-    >
+    <Suspense fallback={<OAuthLayout loginHref={buildLoginPath()} />}>
       <OAuthCallbackContent />
     </Suspense>
   );
