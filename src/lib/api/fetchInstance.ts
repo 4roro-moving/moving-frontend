@@ -151,10 +151,10 @@ const fetchInstance = {
   get: <TResponse>(endpoint: string, options?: FetchRequestOptions) =>
     request<TResponse>(endpoint, { ...options, method: "GET" }),
 
-  getPaginated: async <TResponse>(
+  getPaginated: async <TResponse, TPagination = Pagination>(
     endpoint: string,
     options?: FetchRequestOptions,
-  ): Promise<{ data: TResponse; pagination: Pagination }> => {
+  ): Promise<{ data: TResponse; pagination: TPagination }> => {
     const body = await requestBody<TResponse>(endpoint, { ...options, method: "GET" });
 
     if (body === null) {
@@ -165,7 +165,7 @@ const fetchInstance = {
       throw new ApiError("페이지네이션 응답이 올바르지 않습니다.");
     }
 
-    return { data: body.data, pagination: body.pagination };
+    return { data: body.data, pagination: body.pagination as TPagination };
   },
 
   post: <TResponse, TBody = unknown>(
@@ -192,6 +192,17 @@ const fetchInstance = {
 
   delete: <TResponse>(endpoint: string, options?: FetchRequestOptions) =>
     request<TResponse>(endpoint, { ...options, method: "DELETE" }),
+
+  deleteWithBody: <TResponse, TBody = unknown>(
+    endpoint: string,
+    body: TBody,
+    options?: FetchRequestOptions,
+  ) =>
+    request<TResponse>(endpoint, {
+      ...options,
+      method: "DELETE",
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    }),
 };
 
 export default fetchInstance;
