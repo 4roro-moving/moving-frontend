@@ -77,7 +77,7 @@ function FavoriteButton({
         <button
           type="button"
           className="focus-visible:ring-border-brand rounded-8 cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
-          aria-label={`${moverName} 기사님 찜하기`}
+          aria-label={`${moverName} 기사님 찜`}
           aria-pressed={isFavorite}
           onClick={(event) => {
             event.preventDefault();
