@@ -1,12 +1,14 @@
 import type { MoversListQuery } from "@/types/mover";
 
-export const MOVER_LIST_GUEST_SCOPE = "guest" as const;
+export const AUTH_QUERY_GUEST_SCOPE = "guest" as const;
 
-export const getMoverListAuthScope = (userId?: string | null) =>
-  userId ? (`user:${userId}` as const) : MOVER_LIST_GUEST_SCOPE;
+export const getAuthQueryScope = (userId?: string | null) =>
+  userId ? (`user:${userId}` as const) : AUTH_QUERY_GUEST_SCOPE;
+
+export type AuthQueryScope = ReturnType<typeof getAuthQueryScope>;
 
 export const getMoverListQueryKey = (
-  authScope: ReturnType<typeof getMoverListAuthScope>,
+  authScope: AuthQueryScope,
   query: Omit<MoversListQuery, "page">,
 ) => [...QUERY_KEYS.MOVERS.LIST, authScope, query] as const;
 
@@ -62,6 +64,10 @@ export const QUERY_KEYS = {
     ALL: ["favorites"] as const,
     /** GET /favorites/movers — 찜한 기사님 목록 */
     MOVERS: ["favorites", "movers"] as const,
+    MOVERS_LIST: (authScope: AuthQueryScope, limit: number) =>
+      ["favorites", "movers", authScope, { limit }] as const,
+    MOVERS_INFINITE: (authScope: AuthQueryScope, limit: number) =>
+      ["favorites", "movers", authScope, "infinite", { limit }] as const,
     MOVER: (moverId: string) => ["favorites", "mover", moverId] as const,
   },
 
