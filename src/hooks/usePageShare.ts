@@ -12,7 +12,7 @@ interface UsePageShareOptions {
 
 /**
  * 페이지 공유 (링크 복사 · Facebook)
- * 카카오 커스텀 템플릿은 EstimateDetailShare + hooks/kakao/share 에서 연동합니다.
+ * 카카오 커스텀 템플릿은 MoverDetailShare + hooks/kakao/share 에서 연동합니다.
  * // 2026.07.30 정슬기 - [추가]
  */
 export function usePageShare({ onToastMessage }: UsePageShareOptions = {}) {

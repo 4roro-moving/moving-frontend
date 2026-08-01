@@ -1,6 +1,7 @@
 import { getCustomerProfileStatus, getMoverProfileStatus } from "@/lib/api/profile";
 import type { AuthRole } from "@/lib/auth/role";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
 
 export type AuthAudience = "customer" | "mover" | "admin";
 
@@ -182,4 +183,21 @@ export const getAudienceFromPathname = (pathname: string): AuthAudience => {
     pathname.startsWith("/mover/")
     ? "mover"
     : "customer";
+};
+
+/** 현재 경로가 공개 페이지(기사님 찾기, 기사님 상세)인지 판별 */
+export const isPublicMoverPath = (pathname: string): boolean => {
+  if (pathname === APP_ROUTES.MOVERS.ROOT) {
+    return true;
+  }
+
+  const detailPrefix = `${APP_ROUTES.MOVERS.ROOT}/`;
+
+  if (!pathname.startsWith(detailPrefix)) {
+    return false;
+  }
+
+  const moverId = pathname.slice(detailPrefix.length);
+
+  return !moverId.includes("/") && isMoverDetailId(moverId);
 };

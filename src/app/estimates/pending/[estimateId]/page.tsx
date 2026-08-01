@@ -3,24 +3,15 @@ import { notFound } from "next/navigation";
 
 import CustomerAuthGate from "@/components/auth/CustomerAuthGate";
 import PendingEstimateDetailView from "@/components/estimate/pending/PendingEstimateDetailView";
-import { FALLBACK_ESTIMATE_METADATA, generateReceivedEstimateMetadata } from "@/lib/share/metadata";
 import { parsePositiveIntId } from "@/lib/utils/parsePositiveIntId";
+
+export const metadata: Metadata = {
+  title: "견적 상세",
+  description: "이사 견적 상세 정보를 확인하세요.",
+};
 
 interface PendingEstimateDetailPageProps {
   params: Promise<{ estimateId: string }>;
-}
-
-export async function generateMetadata({
-  params,
-}: PendingEstimateDetailPageProps): Promise<Metadata> {
-  const { estimateId } = await params;
-  const id = parsePositiveIntId(estimateId);
-
-  if (id === null) {
-    return FALLBACK_ESTIMATE_METADATA;
-  }
-
-  return generateReceivedEstimateMetadata(id, `/estimates/pending/${id}`);
 }
 
 // 2026.07.25 정슬기 - [추가] /estimates/pending/[estimateId] — 받은 견적 상세와 라우트 분리

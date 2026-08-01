@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import MoverDetailView from "@/components/mover/detail/MoverDetailView";
 import { getMoverDetailCached } from "@/lib/api/movers";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { AUTH_QUERY_GUEST_SCOPE, getMoverDetailQueryKey } from "@/lib/constants/queryKeys";
 import { buildMoverDetailMetadata } from "@/lib/share/metadata";
 import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
 import { mapMoverDetailItemToMoverDetail } from "@/lib/utils/mapMover";
@@ -61,7 +61,7 @@ export default async function MoverDetailPage({ params }: MoverDetailPageProps) 
 
   try {
     await queryClient.prefetchQuery({
-      queryKey: QUERY_KEYS.MOVERS.DETAIL(moverId),
+      queryKey: getMoverDetailQueryKey(AUTH_QUERY_GUEST_SCOPE, moverId),
       queryFn: async () => {
         const item = await getMoverDetailCached(moverId);
         return mapMoverDetailItemToMoverDetail(item);

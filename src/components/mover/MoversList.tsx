@@ -10,6 +10,7 @@ import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useMovers } from "@/hooks/useMovers";
 import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import type { MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 interface MoversListProps {
   filters: MoversSearchParamsState;
@@ -30,6 +31,9 @@ const MOVERS_NEXT_PAGE_SKELETON_COUNT = 2;
 
 export function MoversList({ filters }: MoversListProps) {
   const query = useMovers(filters);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const isAuthPending = !hasHydrated || isCheckingAuth;
   const sentinelRef = useRef<HTMLDivElement>(null);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -37,6 +41,10 @@ export function MoversList({ filters }: MoversListProps) {
   const movers = query.data?.pages.flatMap((page) => page.data).map(mapMoverListItemToMover) ?? [];
 
   useEffect(() => {
+    if (isAuthPending) {
+      return;
+    }
+
     const sentinel = sentinelRef.current;
     if (!sentinel) {
       return;
@@ -55,9 +63,9 @@ export function MoversList({ filters }: MoversListProps) {
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
+  }, [isAuthPending, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
 
-  if (query.isPending) {
+  if (isAuthPending || query.isPending) {
     return (
       <MoverCardSkeletonList
         variant="full"

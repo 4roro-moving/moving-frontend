@@ -7,14 +7,6 @@ export interface KakaoMoverShareTemplateArgs {
   driver_profile: string;
 }
 
-/** 견적 상세 카카오톡 메시지 공유 템플릿 인자 */
-export interface KakaoEstimateShareTemplateArgs {
-  share_line: string;
-  profile_image: string;
-  /** 기사가 보낸 견적일 경우에만 기사의 찜 수 포함 */
-  like_count: string;
-}
-
 export function parseKakaoTemplateId(raw: string | undefined): number | null {
   const trimmed = raw?.trim();
   if (!trimmed) {
@@ -35,10 +27,6 @@ export function getMoverShareTemplateId(): number | null {
     parseKakaoTemplateId(process.env.NEXT_PUBLIC_KAKAO_MOVER_SHARE_TEMPLATE_ID) ??
     parseKakaoTemplateId(process.env.NEXT_PUBLIC_KAKAO_SHARE_TEMPLATE_ID)
   );
-}
-
-export function getEstimateShareTemplateId(): number | null {
-  return parseKakaoTemplateId(process.env.NEXT_PUBLIC_KAKAO_ESTIMATE_SHARE_TEMPLATE_ID);
 }
 
 export function hasKakaoJavascriptKey(): boolean {

@@ -8,11 +8,11 @@ import Toast from "@/components/common/Toast/Toast";
 import { Text } from "@/components/common/Text";
 import MoverCard from "@/components/mover/MoverCard";
 import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
+import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { useFavoriteMovers } from "@/hooks/useFavoriteMovers";
-import { useIsClient } from "@/hooks/useIsClient";
 import { ChevronRightThinIcon } from "@/icons";
 import { FAVORITE_MOVERS_SIDEBAR_LIMIT } from "@/lib/api/favorites";
-import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
+import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import { cn } from "@/lib/utils/cn";
@@ -77,20 +77,27 @@ function FavoriteMoversSidebarStatus({
 }
 
 export function FavoriteMoversSidebar() {
-  // SSR/하이드레이션 전에는 토큰을 읽지 않아 서버·클라이언트 HTML을 동일하게 맞춤
-  const isClient = useIsClient();
-  const isLoggedIn = isClient && hasAuthSession();
+  const {
+    isPending: isAuthPending,
+    isAuthenticated,
+    isMover,
+    canFetch: isCustomerLoggedIn,
+  } = useCustomerAuthReady();
   const query = useFavoriteMovers({
-    enabled: isLoggedIn,
+    enabled: isCustomerLoggedIn,
     limit: FAVORITE_MOVERS_SIDEBAR_LIMIT,
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  if (!isAuthPending && isAuthenticated && isMover) {
+    return null;
+  }
+
   const movers =
     query.data?.data.map(mapMoverListItemToMover).slice(0, FAVORITE_MOVERS_SIDEBAR_LIMIT) ?? [];
-  const showSkeleton = !isClient || (isLoggedIn && query.isPending);
+  const showSkeleton = isAuthPending || (isCustomerLoggedIn && query.isPending);
   // 찜한 기사님이 1명 이상일 때부터 더보기 표시, 비로그인·빈 목록에서는 숨김
-  const showMoreLink = isLoggedIn && !query.isError && movers.length > 0;
+  const showMoreLink = isCustomerLoggedIn && !query.isError && movers.length > 0;
 
   return (
     <aside className="hidden w-full flex-col gap-16 lg:flex lg:w-[327px] lg:shrink-0 lg:self-stretch lg:pt-[192px]">
@@ -117,7 +124,7 @@ export function FavoriteMoversSidebar() {
           count={FAVORITE_MOVERS_SKELETON_COUNT}
           label="찜한 기사님을 불러오는 중"
         />
-      ) : !isLoggedIn ? (
+      ) : !isCustomerLoggedIn ? (
         <FavoriteMoversSidebarStatus
           title="아직 로그인하지 않았어요"
           description={

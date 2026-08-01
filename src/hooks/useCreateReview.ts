@@ -3,9 +3,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
+import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { createReview } from "@/lib/api/reviews";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { getMoverDetailQueryKey, QUERY_KEYS } from "@/lib/constants/queryKeys";
 import type { CreateReviewRequest } from "@/types/review";
 
 interface UseCreateReviewOptions {
@@ -22,6 +23,7 @@ interface UseCreateReviewOptions {
  */
 export function useCreateReview(options: UseCreateReviewOptions = {}) {
   const queryClient = useQueryClient();
+  const { authScope } = useAuthQueryScope();
 
   return useApiMutation({
     mutationFn: (input: CreateReviewRequest) => createReview(input),
@@ -37,7 +39,7 @@ export function useCreateReview(options: UseCreateReviewOptions = {}) {
             queryKey: QUERY_KEYS.REVIEWS.BY_MOVER_ROOT(options.moverId),
           }),
           queryClient.invalidateQueries({
-            queryKey: QUERY_KEYS.MOVERS.DETAIL(options.moverId),
+            queryKey: getMoverDetailQueryKey(authScope, options.moverId),
           }),
         );
       }

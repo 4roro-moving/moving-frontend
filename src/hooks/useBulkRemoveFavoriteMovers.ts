@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
+import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { removeFavoriteMoversBulk } from "@/lib/api/favorites";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { getFavoriteMoversScopeQueryKey } from "@/lib/constants/queryKeys";
 import {
   invalidateFavoriteRelatedQueries,
   keepOnlyIdsInFavoriteMoversCache,
@@ -45,6 +46,8 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
   const queryClient = useQueryClient();
   const router = useRouter();
   const loginRequiredModal = useLoginRequiredModal();
+  const { authScope } = useAuthQueryScope();
+  const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(authScope);
   const onErrorRef = useRef(options?.onError);
 
   useEffect(() => {
@@ -68,16 +71,16 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
             excludedIds: variables.excludedIds,
           }),
     onMutate: async (variables): Promise<BulkRemoveFavoriteContext> => {
-      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS });
+      await queryClient.cancelQueries({ queryKey: favoriteMoversScopeQueryKey });
 
       const previousFavoriteMovers = queryClient.getQueriesData<FavoriteMoversCacheData>({
-        queryKey: QUERY_KEYS.FAVORITES.MOVERS,
+        queryKey: favoriteMoversScopeQueryKey,
       });
 
       if (variables.mode === "ids") {
         const idSet = new Set(variables.moverIds);
         queryClient.setQueriesData<FavoriteMoversCacheData>(
-          { queryKey: QUERY_KEYS.FAVORITES.MOVERS },
+          { queryKey: favoriteMoversScopeQueryKey },
           (list) =>
             removeIdsFromFavoriteMoversCache(list, idSet, variables.moverIds.length) as
               FavoriteMoversCacheData | undefined,
@@ -85,7 +88,7 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
       } else {
         const keepIds = new Set(variables.excludedIds);
         queryClient.setQueriesData<FavoriteMoversCacheData>(
-          { queryKey: QUERY_KEYS.FAVORITES.MOVERS },
+          { queryKey: favoriteMoversScopeQueryKey },
           (list) =>
             keepOnlyIdsInFavoriteMoversCache(list, keepIds, keepIds.size) as
               FavoriteMoversCacheData | undefined,
