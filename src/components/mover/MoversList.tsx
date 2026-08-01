@@ -10,7 +10,6 @@ import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { useMovers } from "@/hooks/useMovers";
 import type { MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
-import { useAuthStore } from "@/stores/useAuthStore";
 
 interface MoversListProps {
   filters: MoversSearchParamsState;
@@ -25,27 +24,25 @@ const MOVERS_EMPTY_DESCRIPTION = (
 );
 
 /** 초기 로딩 스켈레톤 카드 수 */
-const MOVERS_LIST_SKELETON_COUNT = 3;
+const MOVERS_LIST_SKELETON_COUNT = 5;
+
 /** 다음 페이지 fetch 중 하단 스켈레톤 카드 수 */
 const MOVERS_NEXT_PAGE_SKELETON_COUNT = 2;
 
 export function MoversList({ filters }: MoversListProps) {
-  const { movers, query } = useMovers(filters);
-  const hasHydrated = useAuthStore((state) => state.hasHydrated);
-  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
-  const isAuthPending = !hasHydrated || isCheckingAuth;
+  const { movers, isInitialLoading, query } = useMovers(filters);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const sentinelRef = useMoversInfiniteScroll({
-    enabled: !isAuthPending && !query.isPending && !query.isError && movers.length > 0,
+    enabled: !isInitialLoading && !query.isError && movers.length > 0,
     hasNextPage,
     isFetchingNextPage,
     isFetchNextPageError,
     fetchNextPage,
   });
 
-  if (isAuthPending || query.isPending) {
+  if (isInitialLoading) {
     return (
       <MoverCardSkeletonList
         variant="full"

@@ -27,7 +27,7 @@ export function useMovers(filters: MoversSearchParamsState) {
     getNextPageParam: (lastPage) =>
       lastPage.pagination.hasNext ? lastPage.pagination.page + 1 : undefined,
     enabled: isAuthReady && isAuthQueryReady,
-    // 로그인 응답의 isFavorite는 세션 복구 직후 항상 서버에서 다시 확인합니다.
+    // 로그인 응답의 isFavorite는 세션 복구 직후 항상 서버에서 다시 확인
     staleTime: isAuthenticated ? 0 : MOVERS_LIST_STALE_TIME_MS,
   });
 
@@ -35,6 +35,7 @@ export function useMovers(filters: MoversSearchParamsState) {
     () => query.data?.pages.flatMap((page) => page.data).map(mapMoverListItemToMover) ?? [],
     [query.data],
   );
+  const isInitialLoading = !isAuthReady || !isAuthQueryReady || query.isPending;
 
-  return { movers, query };
+  return { movers, isInitialLoading, query };
 }
