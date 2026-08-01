@@ -134,7 +134,7 @@ export function useFavoriteMoversSelection({
       return;
     }
 
-    // 전체선택(일부 제외 포함)이거나, 로드된 전체가 곧 전체 찜인 경우 → 확인 모달
+    // 전체선택(일부 제외 포함)이거나 개별 선택 수가 현재 전체 수와 같으면 확인 모달
     if (isSelectAll || selectedCount === totalCount) {
       setDeleteConfirmCount(selectedCount);
       setIsDeleteConfirmOpen(true);
@@ -161,13 +161,17 @@ export function useFavoriteMoversSelection({
   const handleConfirmDeleteAll = useCallback(() => {
     void (async () => {
       try {
-        await removeFavoritesAll(isSelectAll ? excludedIds : []);
+        if (isSelectAll) {
+          await removeFavoritesAll(excludedIds);
+        } else {
+          await removeFavoritesByIds([...selectedIds]);
+        }
         setIsDeleteConfirmOpen(false);
       } catch {
         // 전부 실패 시 mutation onError에서 토스트 처리. 모달은 재시도 가능하도록 유지
       }
     })();
-  }, [excludedIds, isSelectAll, removeFavoritesAll]);
+  }, [excludedIds, isSelectAll, removeFavoritesAll, removeFavoritesByIds, selectedIds]);
 
   const handleCloseDeleteConfirm = useCallback(() => {
     if (!isBulkDeleting) {
