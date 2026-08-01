@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 
 import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
 import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
+import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { useDesignateMover } from "@/hooks/useDesignateMover";
-import { useIsClient } from "@/hooks/useIsClient";
-import { hasAuthSession } from "@/lib/auth/session";
+
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
 
@@ -21,9 +21,10 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
 
   const [isEstimateRequestModalOpen, setIsEstimateRequestModalOpen] = useState(false);
   const [isDesignateSuccessModalOpen, setIsDesignateSuccessModalOpen] = useState(false);
-  const isClient = useIsClient();
-  const isLoggedIn = isClient && hasAuthSession();
   const loginRequiredModal = useLoginRequiredModal();
+  const { isPending: isAuthPending, isAuthenticated, user } = useCustomerAuthReady();
+  const isCustomer = user?.role === "CUSTOMER";
+  const isCustomerLoggedIn = !isAuthPending && isAuthenticated && isCustomer;
 
   const {
     data: activeRequest,
@@ -32,7 +33,7 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
     isFetching: isActiveFetching,
     refetch: refetchActiveRequest,
   } = useActiveEstimateRequest({
-    enabled: isLoggedIn,
+    enabled: isCustomerLoggedIn,
   });
 
   const designateMutation = useDesignateMover({
@@ -43,15 +44,15 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
   });
 
   const ctaState =
-    isLoggedIn && !isActiveLoading && !isActiveError
+    isCustomerLoggedIn && !isActiveLoading && !isActiveError
       ? getDesignateCtaState(activeRequest ?? null, moverId)
       : null;
 
-  // 지정 불가 상태(완료·불가·만료·한도)는 버튼을 비활성화합니다.
+  // 지정 불가 상태(완료·불가·만료·한도)는 버튼 비활성화
   const isRequestDisabled =
     designateMutation.isPending ||
-    (isLoggedIn && isActiveLoading) ||
-    (isLoggedIn && isActiveError && isActiveFetching) ||
+    (isCustomerLoggedIn && isActiveLoading) ||
+    (isCustomerLoggedIn && isActiveError && isActiveFetching) ||
     (ctaState !== null && isDesignateCtaDisabled(ctaState.status));
 
   const requestButtonLabel =
@@ -61,8 +62,16 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
       : "지정 견적 요청하기");
 
   const requestEstimate = async () => {
-    if (!hasAuthSession()) {
+    if (isAuthPending) {
+      return;
+    }
+
+    if (!isAuthenticated) {
       loginRequiredModal?.openLoginRequiredModal("지정 견적 요청은 로그인 후 이용할 수 있어요.");
+      return;
+    }
+
+    if (!isCustomer) {
       return;
     }
 
@@ -121,5 +130,6 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
     isRequestDisabled,
     requestButtonLabel,
     requestEstimate,
+    showCustomerActions: !isAuthPending && (!isAuthenticated || isCustomer),
   };
 }

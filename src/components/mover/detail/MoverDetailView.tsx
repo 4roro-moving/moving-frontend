@@ -93,7 +93,11 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
       <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 lg:px-0 lg:pb-[150px]">
         <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-32 md:gap-40 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex w-full min-w-0 flex-col gap-40 md:gap-40 lg:w-[766px]">
-            <MoverDetailProfile detail={detail} onToggleFavorite={toggleFavorite} />
+            <MoverDetailProfile
+              detail={detail}
+              onToggleFavorite={toggleFavorite}
+              showFavoriteAction={designation.showCustomerActions}
+            />
             <MoverDetailServices detail={detail} />
 
             <div className="border-border-subtle w-full border-t lg:hidden" aria-hidden="true" />
@@ -113,13 +117,17 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
           </div>
 
           <aside className="hidden w-full min-w-0 flex-col items-start gap-40 lg:flex lg:w-[320px] lg:gap-70 lg:pt-40">
-            <MoverDetailActions layout="sidebar" {...actionsProps} />
+            {designation.showCustomerActions ? (
+              <MoverDetailActions layout="sidebar" {...actionsProps} />
+            ) : null}
             <MoverDetailShare kakaoShare={kakaoShare} onToastMessage={setToastMessage} />
           </aside>
         </div>
       </div>
 
-      <MoverDetailActions layout="sticky" {...actionsProps} />
+      {designation.showCustomerActions ? (
+        <MoverDetailActions layout="sticky" {...actionsProps} />
+      ) : null}
 
       <EstimateRequestRequiredModal
         open={designation.isEstimateRequestModalOpen}
