@@ -18,11 +18,16 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
   const [previousKeyword, setPreviousKeyword] = useState(filters.keyword);
   const [filterKey, setFilterKey] = useState(0);
   const searchDebounceTimerRef = useRef<number | null>(null);
+  const latestFiltersRef = useRef(filters);
 
   if (filters.keyword !== previousKeyword) {
     setPreviousKeyword(filters.keyword);
     setKeyword(filters.keyword);
   }
+
+  useEffect(() => {
+    latestFiltersRef.current = filters;
+  }, [filters]);
 
   const clearSearchDebounceTimer = useCallback(() => {
     if (searchDebounceTimerRef.current === null) {
@@ -35,6 +40,7 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
 
   const replaceUrl = useCallback(
     (nextFilters: MoversSearchParamsState) => {
+      latestFiltersRef.current = nextFilters;
       const queryString = buildMoversQueryString(nextFilters);
       // 필터 URL 동기화로 인한 불필요한 스크롤 이동 방지
       router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false });
@@ -43,33 +49,33 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
   );
 
   useEffect(() => {
-    if (keyword === filters.keyword) {
+    if (keyword === latestFiltersRef.current.keyword) {
       return;
     }
 
     clearSearchDebounceTimer();
     searchDebounceTimerRef.current = window.setTimeout(() => {
       searchDebounceTimerRef.current = null;
-      replaceUrl({ ...filters, keyword });
+      replaceUrl({ ...latestFiltersRef.current, keyword });
     }, SEARCH_DEBOUNCE_MS);
 
     return clearSearchDebounceTimer;
-  }, [keyword, filters, replaceUrl, clearSearchDebounceTimer]);
+  }, [keyword, replaceUrl, clearSearchDebounceTimer]);
 
   const replaceFilters = useCallback(
     (patch: Partial<MoversSearchParamsState>) => {
       clearSearchDebounceTimer();
-      replaceUrl({ ...filters, keyword, ...patch });
+      replaceUrl({ ...latestFiltersRef.current, keyword, ...patch });
     },
-    [clearSearchDebounceTimer, filters, keyword, replaceUrl],
+    [clearSearchDebounceTimer, keyword, replaceUrl],
   );
 
   const resetFilters = useCallback(() => {
     clearSearchDebounceTimer();
     setKeyword(MOVERS_SEARCH_DEFAULTS.keyword);
     setFilterKey((previousKey) => previousKey + 1);
-    router.replace(pathname, { scroll: false });
-  }, [clearSearchDebounceTimer, pathname, router]);
+    replaceUrl({ ...MOVERS_SEARCH_DEFAULTS });
+  }, [clearSearchDebounceTimer, replaceUrl]);
 
   return {
     filterKey,
