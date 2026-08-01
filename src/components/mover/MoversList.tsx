@@ -41,6 +41,10 @@ export function MoversList({ filters }: MoversListProps) {
   const movers = query.data?.pages.flatMap((page) => page.data).map(mapMoverListItemToMover) ?? [];
 
   useEffect(() => {
+    if (isAuthPending) {
+      return;
+    }
+
     const sentinel = sentinelRef.current;
     if (!sentinel) {
       return;
@@ -59,7 +63,7 @@ export function MoversList({ filters }: MoversListProps) {
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
+  }, [isAuthPending, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
 
   if (isAuthPending || query.isPending) {
     return (
