@@ -1,24 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import { SORT_OPTIONS } from "@/components/mover/constants";
+import { useMoversFilters } from "@/hooks/useMoversFilters";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS } from "@/lib/constants/region";
-import {
-  buildMoversQueryString,
-  MOVERS_ALL_VALUE,
-  MOVERS_SEARCH_DEFAULTS,
-  type MoversSearchParamsState,
-} from "@/lib/utils/moversSearchParams";
+import { MOVERS_ALL_VALUE, type MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
 import type { MoverSort } from "@/types/mover";
 
 const ALL_OPTION = { value: MOVERS_ALL_VALUE, label: "전체" } as const;
-const SEARCH_DEBOUNCE_MS = 300;
 
 const REGION_FILTER_OPTIONS = [
   ALL_OPTION,
@@ -35,60 +27,8 @@ interface MoversFiltersProps {
 }
 
 export function MoversFilters({ filters }: MoversFiltersProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [keyword, setKeyword] = useState(filters.keyword);
-  const [prevKeyword, setPrevKeyword] = useState(filters.keyword);
-  const [filterKey, setFilterKey] = useState(0);
-  const searchDebounceTimerRef = useRef<number | null>(null);
-
-  if (filters.keyword !== prevKeyword) {
-    setPrevKeyword(filters.keyword);
-    setKeyword(filters.keyword);
-  }
-
-  const clearSearchDebounceTimer = useCallback(() => {
-    if (searchDebounceTimerRef.current === null) {
-      return;
-    }
-    window.clearTimeout(searchDebounceTimerRef.current);
-    searchDebounceTimerRef.current = null;
-  }, []);
-
-  const replaceUrl = useCallback(
-    (next: MoversSearchParamsState) => {
-      const query = buildMoversQueryString(next);
-      router.replace(query ? `${pathname}?${query}` : pathname);
-    },
-    [pathname, router],
-  );
-
-  useEffect(() => {
-    if (keyword === filters.keyword) {
-      return;
-    }
-
-    clearSearchDebounceTimer();
-    searchDebounceTimerRef.current = window.setTimeout(() => {
-      searchDebounceTimerRef.current = null;
-      replaceUrl({ ...filters, keyword });
-    }, SEARCH_DEBOUNCE_MS);
-
-    return () => clearSearchDebounceTimer();
-  }, [keyword, filters, replaceUrl, clearSearchDebounceTimer]);
-
-  /** 지역·서비스·정렬은 즉시 반영. 대기 중인 검색 디바운스는 취소하고 현재 keyword와 합친다. */
-  function replaceFilters(patch: Partial<MoversSearchParamsState>) {
-    clearSearchDebounceTimer();
-    replaceUrl({ ...filters, keyword, ...patch });
-  }
-
-  function handleReset() {
-    clearSearchDebounceTimer();
-    setKeyword(MOVERS_SEARCH_DEFAULTS.keyword);
-    setFilterKey((prev) => prev + 1);
-    router.replace(pathname);
-  }
+  const { filterKey, keyword, replaceFilters, resetFilters, setKeyword } =
+    useMoversFilters(filters);
 
   return (
     <>
@@ -146,7 +86,7 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
           </div>
           <button
             type="button"
-            onClick={handleReset}
+            onClick={resetFilters}
             className="text-text-weak hover:text-text-muted shrink-0 transition-colors"
           >
             <Text as="span" variant={{ base: "md-medium", lg: "lg-medium" }}>
