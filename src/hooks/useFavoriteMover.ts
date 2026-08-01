@@ -5,10 +5,16 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
+import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { addFavoriteMover, removeFavoriteMover } from "@/lib/api/favorites";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import {
+  getFavoriteMoversScopeQueryKey,
+  getMoverDetailQueryKey,
+  getMoverListScopeQueryKey,
+  QUERY_KEYS,
+} from "@/lib/constants/queryKeys";
 import {
   invalidateFavoriteRelatedQueries,
   patchMoverFavorite,
@@ -60,6 +66,9 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const loginRequiredModal = useLoginRequiredModal();
+  const { authScope } = useAuthQueryScope();
+  const moverListScopeQueryKey = getMoverListScopeQueryKey(authScope);
+  const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(authScope);
   const onErrorRef = useRef(options?.onError);
 
   useEffect(() => {
@@ -82,13 +91,15 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       return removeFavoriteMover(moverId);
     },
     onMutate: async ({ moverId, nextIsFavorite }): Promise<FavoriteMutationContext> => {
+      const moverDetailQueryKey = getMoverDetailQueryKey(authScope, moverId);
+
       await Promise.all([
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
         queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.MOVERS.DETAIL(moverId) }),
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS }),
+        queryClient.cancelQueries({ queryKey: moverListScopeQueryKey }),
+        queryClient.cancelQueries({ queryKey: moverDetailQueryKey }),
+        queryClient.cancelQueries({ queryKey: favoriteMoversScopeQueryKey }),
       ]);
 
       const previousReceived = queryClient.getQueryData<ReceivedEstimatePanel[]>(
@@ -101,14 +112,12 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
       });
       const previousMoverLists = queryClient.getQueriesData<InfiniteData<MoversListResult>>({
-        queryKey: QUERY_KEYS.MOVERS.LIST,
+        queryKey: moverListScopeQueryKey,
       });
       const previousFavoriteMovers = queryClient.getQueriesData<FavoriteMoversCacheData>({
-        queryKey: QUERY_KEYS.FAVORITES.MOVERS,
+        queryKey: favoriteMoversScopeQueryKey,
       });
-      const previousMoverDetail = queryClient.getQueryData<MoverDetail>(
-        QUERY_KEYS.MOVERS.DETAIL(moverId),
-      );
+      const previousMoverDetail = queryClient.getQueryData<MoverDetail>(moverDetailQueryKey);
 
       queryClient.setQueryData<ReceivedEstimatePanel[]>(QUERY_KEYS.ESTIMATES.RECEIVED, (panels) => {
         if (!panels) {
@@ -159,7 +168,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       );
 
       queryClient.setQueriesData<InfiniteData<MoversListResult>>(
-        { queryKey: QUERY_KEYS.MOVERS.LIST },
+        { queryKey: moverListScopeQueryKey },
         (list) => {
           if (!list) {
             return list;
@@ -177,14 +186,14 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
 
       if (!nextIsFavorite) {
         queryClient.setQueriesData<FavoriteMoversCacheData>(
-          { queryKey: QUERY_KEYS.FAVORITES.MOVERS },
+          { queryKey: favoriteMoversScopeQueryKey },
           (list) =>
             removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1) as
               FavoriteMoversCacheData | undefined,
         );
       }
 
-      queryClient.setQueryData<MoverDetail>(QUERY_KEYS.MOVERS.DETAIL(moverId), (detail) => {
+      queryClient.setQueryData<MoverDetail>(moverDetailQueryKey, (detail) => {
         if (!detail) {
           return detail;
         }
@@ -217,7 +226,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
           queryClient.setQueryData(queryKey, data);
         });
         queryClient.setQueryData(
-          QUERY_KEYS.MOVERS.DETAIL(variables.moverId),
+          getMoverDetailQueryKey(authScope, variables.moverId),
           context.previousMoverDetail,
         );
       }
