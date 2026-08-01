@@ -1,14 +1,22 @@
+"use client";
+
+import { useState } from "react";
+
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import type { OAuthProvider } from "@/lib/auth/oauth";
+import type { AuthAudience } from "@/lib/auth/redirect";
+import { startOAuthLogin } from "@/lib/auth/startOAuthLogin";
 import { GoogleIcon, KakaoLoginIcon, NaverLoginIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 
-type SocialProvider = "google" | "kakao" | "naver";
-
 interface SocialLoginButtonsProps {
   className?: string;
+  audience?: AuthAudience;
+  onError?: (message: string) => void;
 }
 
 const SOCIAL_PROVIDERS: {
-  provider: SocialProvider;
+  provider: OAuthProvider;
   label: string;
   className: string;
   icon: typeof GoogleIcon;
@@ -39,9 +47,29 @@ const SOCIAL_PROVIDERS: {
 
 /**
  * SNS 간편 로그인 버튼 그룹.
- * 실제 OAuth 연동 전까지 UI만 제공합니다.
+ * Provider 인가 URL로 이동한 뒤 `/oauth/{provider}/callback`에서 code를 교환합니다.
  */
-const SocialLoginButtons = ({ className }: SocialLoginButtonsProps) => {
+const SocialLoginButtons = ({
+  className,
+  audience = "customer",
+  onError,
+}: SocialLoginButtonsProps) => {
+  const [isPending, setIsPending] = useState(false);
+
+  const handleSocialLogin = async (provider: OAuthProvider) => {
+    if (isPending) return;
+
+    onError?.("");
+    setIsPending(true);
+
+    try {
+      await startOAuthLogin(provider, audience);
+    } catch (err) {
+      onError?.(getApiErrorMessage(err));
+      setIsPending(false);
+    }
+  };
+
   return (
     <div className={cn("flex items-center gap-24 md:gap-32", className)}>
       {SOCIAL_PROVIDERS.map(
@@ -49,12 +77,14 @@ const SocialLoginButtons = ({ className }: SocialLoginButtonsProps) => {
           <button
             key={provider}
             type="button"
-            aria-label={`${label} (준비 중)`}
-            title="준비 중"
-            disabled
+            aria-label={label}
+            disabled={isPending}
+            onClick={() => {
+              void handleSocialLogin(provider);
+            }}
             className={cn(
               "flex size-54 shrink-0 items-center justify-center rounded-full md:size-72",
-              "cursor-not-allowed opacity-90",
+              "disabled:cursor-not-allowed disabled:opacity-60",
               buttonClassName,
             )}
           >

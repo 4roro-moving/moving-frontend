@@ -2,6 +2,28 @@ import { NextResponse } from "next/server";
 
 import { REFRESH_TOKEN_COOKIE_BACKEND_PATH, REFRESH_TOKEN_COOKIE_NAME } from "@/lib/auth/token";
 
+export type RefreshTokenCookieSecurity = {
+  sameSite: "Lax" | "None";
+  secure: boolean;
+};
+
+/** 발급·삭제에 동일하게 쓰는 refreshToken SameSite/Secure (백엔드·NODE_ENV와 맞춤) */
+export const getRefreshTokenCookieSecurity = (): RefreshTokenCookieSecurity => {
+  const isProduction = process.env.NODE_ENV === "production";
+  return {
+    sameSite: isProduction ? "None" : "Lax",
+    secure: isProduction,
+  };
+};
+
+/** refreshToken 삭제용 Set-Cookie 문자열 (Path별) */
+export const buildClearRefreshTokenCookie = (path: string): string => {
+  const { sameSite, secure } = getRefreshTokenCookieSecurity();
+  let value = `${REFRESH_TOKEN_COOKIE_NAME}=; Path=${path}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=${sameSite}`;
+  if (secure) value += "; Secure";
+  return value;
+};
+
 /**
  * 페이지(F5) 요청에도 쿠키가 실리도록 Path를 `/`로 맞춥니다.
  * 백엔드 Path=/api/auth 이면 document 요청에 쿠키가 안 실려 SSR이 비로그인으로 렌더됩니다.
@@ -19,8 +41,9 @@ const isRefreshTokenSetCookie = (setCookie: string): boolean => {
 };
 
 /** Path=/api/auth 에 남은 refreshToken을 제거해 Rotation 후 폐기 토큰 재전송을 막습니다. */
-const clearRefreshTokenBackendPathCookie = (): string =>
-  `${REFRESH_TOKEN_COOKIE_NAME}=; Path=${REFRESH_TOKEN_COOKIE_BACKEND_PATH}; Max-Age=0; HttpOnly`;
+const clearRefreshTokenBackendPathCookie = (): string => {
+  return buildClearRefreshTokenCookie(REFRESH_TOKEN_COOKIE_BACKEND_PATH);
+};
 
 /**
  * 백엔드 응답 JSON + Set-Cookie를 Next 응답으로 전달합니다.
@@ -65,8 +88,24 @@ export const getBackendApiBaseUrl = (): string => {
   return base.replace(/\/$/, "");
 };
 
+/** login/oauth 등 — 폐기된 refreshToken이 백엔드로 다시 실리지 않게 제거 */
+export const stripRefreshTokenCookie = (cookieHeader: string | null): string | undefined => {
+  if (!cookieHeader) return undefined;
+
+  const kept = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .filter((part) => part && !part.startsWith(`${REFRESH_TOKEN_COOKIE_NAME}=`));
+
+  return kept.length > 0 ? kept.join("; ") : undefined;
+};
+
 /** 브라우저 → Next 요청의 Origin/Cookie를 백엔드로 전달 (CSRF·refresh cookie) */
-export const buildBackendHeaders = (request: Request, init?: HeadersInit): Headers => {
+export const buildBackendHeaders = (
+  request: Request,
+  init?: HeadersInit,
+  options?: { stripRefreshToken?: boolean },
+): Headers => {
   const headers = new Headers(init);
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
@@ -77,7 +116,10 @@ export const buildBackendHeaders = (request: Request, init?: HeadersInit): Heade
     headers.set("Origin", origin);
   }
 
-  const cookie = request.headers.get("cookie");
+  const cookie = options?.stripRefreshToken
+    ? stripRefreshTokenCookie(request.headers.get("cookie"))
+    : (request.headers.get("cookie") ?? undefined);
+
   if (cookie) {
     headers.set("Cookie", cookie);
   }

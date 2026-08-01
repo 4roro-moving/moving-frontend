@@ -11,7 +11,7 @@ import {
   toAuthUserFromMoverProfile,
 } from "@/lib/api/profile";
 import { getAccessTokenPayload, getAccessTokenRole } from "@/lib/auth/accessTokenPayload";
-import { isAuthPagePath } from "@/lib/auth/redirect";
+import { isAuthPagePath, isOAuthCallbackPath } from "@/lib/auth/redirect";
 import { clearNickname, loadNickname, saveNickname } from "@/lib/auth/nickname";
 import { clearRole, loadRole, saveRole } from "@/lib/auth/role";
 import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
@@ -184,6 +184,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isCheckingAuth: true });
 
       try {
+        // OAuth callback: code 교환과 겹치지 않도록 refresh/profile 생략
+        // establishSession과 경합하지 않도록 markUnauthenticated는 호출하지 않음
+        const onOAuthCallback =
+          typeof window !== "undefined" && isOAuthCallbackPath(window.location.pathname);
+
+        if (onOAuthCallback) {
+          if (startSessionGeneration !== curSessionGeneration) {
+            return;
+          }
+          set({ isCheckingAuth: false, hasHydrated: true });
+          return;
+        }
+
         // Access 없음 → 선제 refresh 후 profile 1회 시도
         if (!getAccessToken()) {
           await refreshSession({ notifyOnFailure: false });
@@ -264,7 +277,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const logoutGeneration = curSessionGeneration;
 
     try {
-      await logoutApi(logoutGeneration);
+      await logoutApi();
     } finally {
       if (logoutGeneration === curSessionGeneration) {
         get().clearSession();
