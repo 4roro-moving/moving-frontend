@@ -28,7 +28,9 @@ export function useFavoriteMoversSelection({
   const [deleteConfirmCount, setDeleteConfirmCount] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const bulkRemoveMutation = useBulkRemoveFavoriteMovers({ onError: setToastMessage });
+  const { mutateAsync: bulkRemove, isPending: isBulkDeleting } = useBulkRemoveFavoriteMovers({
+    onError: setToastMessage,
+  });
 
   const selectedOnLoadedCount = loadedIds.filter((id) => selectedIds.includes(id)).length;
   const selectedCount = isSelectAll
@@ -38,7 +40,6 @@ export function useFavoriteMoversSelection({
     ? excludedIds.length === 0
     : totalCount > 0 && selectedCount === totalCount;
   const hasSelection = selectedCount > 0;
-  const isBulkDeleting = bulkRemoveMutation.isPending;
 
   const clearSelection = useCallback(() => {
     setSelectedIds([]);
@@ -107,26 +108,26 @@ export function useFavoriteMoversSelection({
         return;
       }
 
-      await bulkRemoveMutation.mutateAsync({
+      await bulkRemove({
         mode: "ids",
         moverIds: idsToRemove,
       });
 
       clearSelection();
     },
-    [bulkRemoveMutation, clearSelection],
+    [bulkRemove, clearSelection],
   );
 
   const removeFavoritesAll = useCallback(
     async (excluded: string[]) => {
-      await bulkRemoveMutation.mutateAsync({
+      await bulkRemove({
         mode: "all",
         excludedIds: excluded,
       });
 
       clearSelection();
     },
-    [bulkRemoveMutation, clearSelection],
+    [bulkRemove, clearSelection],
   );
 
   const handleBulkDelete = useCallback(() => {

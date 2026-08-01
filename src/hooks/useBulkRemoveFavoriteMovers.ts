@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
 import { removeFavoriteMoversBulk } from "@/lib/api/favorites";
@@ -51,13 +51,13 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
     onErrorRef.current = options?.onError;
   }, [options?.onError]);
 
-  const requireLogin = () => {
+  const requireLogin = useCallback(() => {
     if (loginRequiredModal) {
       loginRequiredModal.openLoginRequiredModal();
       return;
     }
     router.push(getLoginRedirectPath());
-  };
+  }, [loginRequiredModal, router]);
 
   const mutation = useMutation({
     mutationFn: (variables: BulkRemoveFavoriteVariables) =>
@@ -111,21 +111,25 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
     },
   });
 
-  const mutateAsync = (
-    variables: BulkRemoveFavoriteVariables,
-    mutateOptions?: Parameters<typeof mutation.mutateAsync>[1],
-  ) => {
-    if (!hasAuthSession()) {
-      requireLogin();
-      return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
-    }
+  const baseMutateAsync = mutation.mutateAsync;
+  const mutateAsync = useCallback(
+    (
+      variables: BulkRemoveFavoriteVariables,
+      mutateOptions?: Parameters<typeof baseMutateAsync>[1],
+    ) => {
+      if (!hasAuthSession()) {
+        requireLogin();
+        return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
+      }
 
-    if (variables.mode === "ids" && variables.moverIds.length === 0) {
-      return Promise.resolve({ deletedCount: 0 });
-    }
+      if (variables.mode === "ids" && variables.moverIds.length === 0) {
+        return Promise.resolve({ deletedCount: 0 });
+      }
 
-    return mutation.mutateAsync(variables, mutateOptions);
-  };
+      return baseMutateAsync(variables, mutateOptions);
+    },
+    [baseMutateAsync, requireLogin],
+  );
 
-  return { ...mutation, mutateAsync };
+  return useMemo(() => ({ ...mutation, mutateAsync }), [mutation, mutateAsync]);
 }
