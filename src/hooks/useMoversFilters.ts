@@ -36,7 +36,8 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
   const replaceUrl = useCallback(
     (nextFilters: MoversSearchParamsState) => {
       const queryString = buildMoversQueryString(nextFilters);
-      router.replace(queryString ? `${pathname}?${queryString}` : pathname);
+      // 필터 URL 동기화로 인한 불필요한 스크롤 이동 방지
+      router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false });
     },
     [pathname, router],
   );
@@ -67,7 +68,7 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
     clearSearchDebounceTimer();
     setKeyword(MOVERS_SEARCH_DEFAULTS.keyword);
     setFilterKey((previousKey) => previousKey + 1);
-    router.replace(pathname);
+    router.replace(pathname, { scroll: false });
   }, [clearSearchDebounceTimer, pathname, router]);
 
   return {
