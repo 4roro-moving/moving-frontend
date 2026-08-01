@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/common/PageHeader";
-import FavoriteMoversContent from "@/components/mover/FavoriteMoversContent";
+import FavoriteMoversContent from "@/components/mover/favorites/FavoriteMoversContent";
 
 export const metadata: Metadata = {
   title: "찜한 기사님",

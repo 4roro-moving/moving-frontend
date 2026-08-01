@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 
 import RoleGuard from "@/components/auth/RoleGuard";
 import { PageHeader } from "@/components/common/PageHeader";
-import FavoriteMoversLoadingSkeleton from "@/components/mover/FavoriteMoversLoadingSkeleton";
-import { FAVORITE_MOVERS_CONTENT_CLASSNAME } from "@/components/mover/FavoriteMoversContent";
+import FavoriteMoversLoadingSkeleton from "@/components/mover/favorites/FavoriteMoversLoadingSkeleton";
+import { FAVORITE_MOVERS_CONTENT_CLASSNAME } from "@/components/mover/favorites/FavoriteMoversContent";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
 interface CustomerProtectedLayoutProps {

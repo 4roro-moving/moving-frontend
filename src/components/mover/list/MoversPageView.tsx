@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/common/PageHeader";
-import { FavoriteMoversSidebar } from "@/components/mover/FavoriteMoversSidebar";
+
+import { FavoriteMoversSidebar } from "@/components/mover/favorites/FavoriteMoversSidebar";
 import { MoversFilters } from "@/components/mover/list/MoversFilters";
 import { MoversList } from "@/components/mover/list/MoversList";
 import type { MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
