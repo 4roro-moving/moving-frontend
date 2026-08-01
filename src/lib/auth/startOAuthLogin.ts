@@ -2,6 +2,7 @@ import { getNaverOAuthState } from "@/lib/api/auth";
 import {
   audienceToOAuthRole,
   buildOAuthAuthorizeUrl,
+  clearOAuthPendingSession,
   saveOAuthClientState,
   saveOAuthPendingSession,
   type OAuthProvider,
@@ -23,15 +24,21 @@ export const startOAuthLogin = async (
     returnPath: getLoginRedirectParam(),
   });
 
-  let state: string = "";
+  try {
+    let state: string = "";
 
-  if (provider === "naver") {
-    const data = await getNaverOAuthState();
-    state = data.state;
-  } else {
-    state = crypto.randomUUID();
+    if (provider === "naver") {
+      const data = await getNaverOAuthState();
+      state = data.state;
+    } else {
+      state = crypto.randomUUID();
+    }
+
     saveOAuthClientState(state);
-  }
 
-  window.location.assign(buildOAuthAuthorizeUrl(provider, { state }));
+    window.location.assign(buildOAuthAuthorizeUrl(provider, { state }));
+  } catch (err) {
+    clearOAuthPendingSession();
+    throw err;
+  }
 };

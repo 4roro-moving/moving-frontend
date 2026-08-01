@@ -9,7 +9,7 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
   clearOAuthPendingSession,
   isOAuthProvider,
-  loadOAuthClientState,
+  matchesOAuthClientState,
   loadOAuthPendingSession,
 } from "@/lib/auth/oauth";
 import {
@@ -92,12 +92,10 @@ const OAuthCallbackContent = () => {
         return;
       }
 
-      if (pending.provider !== "naver") {
-        const savedState = loadOAuthClientState();
-        if (!state || !savedState || state !== savedState) {
-          failOAuthCallback("유효하지 않은 요청입니다.", setError);
-          return;
-        }
+      // google/kakao/naver 공통: 시작 시 저장한 state와 비교
+      if (!matchesOAuthClientState(state)) {
+        failOAuthCallback("유효하지 않은 요청입니다.", setError);
+        return;
       }
 
       try {

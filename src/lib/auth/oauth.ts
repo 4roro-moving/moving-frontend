@@ -21,14 +21,11 @@ interface OAuthAuthorizeConfig {
 
 // 관리자는 포함 안됨
 export const audienceToOAuthRole = (audience: AuthAudience): "CUSTOMER" | "MOVER" => {
-  switch (audience) {
-    case "mover":
-      return "MOVER";
-    case "customer":
-      return "CUSTOMER";
-    default:
-      return "CUSTOMER";
+  if (audience === "admin") {
+    throw new ApiError("관리자는 소셜 로그인을 사용할 수 없습니다.");
   }
+
+  return audience === "mover" ? "MOVER" : "CUSTOMER";
 };
 
 /** oauth 대기 세션 저장 */
@@ -59,6 +56,19 @@ export const saveOAuthClientState = (state: string): void => {
 
 export const loadOAuthClientState = (): string | null => {
   return sessionStorage.getItem(OAUTH_STATE_KEY);
+};
+
+/** callback의 state와 시작 시 저장값을 비교. 불일치면 false */
+export const matchesOAuthClientState = (state: string | null): boolean => {
+  if (!state) return false;
+
+  const saved = loadOAuthClientState();
+
+  return Boolean(saved && state === saved);
+};
+
+export const clearOAuthClientState = (): void => {
+  sessionStorage.removeItem(OAUTH_STATE_KEY);
 };
 
 export const isOAuthProvider = (value: string): value is OAuthProvider => {
