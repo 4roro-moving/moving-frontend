@@ -8,7 +8,7 @@ import { EstimateDetailInfoSection } from "@/components/estimate/detail/Estimate
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
 import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import { useSentEstimateDetail } from "@/hooks/useSentEstimates";
-import FrameIcon from "@/icons/frame.svg";
+import { FrameIcon } from "@/icons";
 import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
 import { formatKoreanDateTime } from "@/lib/utils/date";
 import type { SentEstimate } from "@/types/sentEstimate";
