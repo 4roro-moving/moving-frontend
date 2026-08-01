@@ -6,7 +6,6 @@ import EstimateDetailLayout, {
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import { EstimateDetailInfoSection } from "@/components/estimate/detail/EstimateDetailInfoSection";
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
-import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
 import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import { useSentEstimateDetail } from "@/hooks/useSentEstimates";
 import FrameIcon from "@/icons/frame.svg";
@@ -97,7 +96,6 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
       contentClassName="pt-35 pb-64 md:pt-[46px] md:pb-80 lg:pt-[43px] lg:pb-37-5"
       rowClassName="gap-20 md:gap-32 lg:gap-0"
       mainClassName="gap-20 md:gap-30 lg:w-185"
-      asideClassName="border-border-subtle gap-12 border-t pt-20 md:gap-22 md:pt-32 lg:w-xs lg:border-t-0 lg:pt-0"
       main={
         <>
           <div className="flex w-full flex-col gap-20 md:gap-26">
@@ -122,7 +120,6 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
           />
         </>
       }
-      aside={<EstimateDetailShare linkAccess="owner" />}
     />
   );
 }
