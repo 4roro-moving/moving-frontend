@@ -65,7 +65,7 @@ export async function removeFavoriteMover(moverId: string): Promise<FavoriteResu
 export async function removeFavoriteMoversBulk(
   body: BulkDeleteFavoriteMoversBody,
 ): Promise<BulkDeleteFavoriteMoversResult> {
-  return fetchInstance.delete<BulkDeleteFavoriteMoversResult, BulkDeleteFavoriteMoversBody>(
+  return fetchInstance.deleteWithBody<BulkDeleteFavoriteMoversResult, BulkDeleteFavoriteMoversBody>(
     API_ROUTES.FAVORITES.MOVERS,
     body,
   );

@@ -190,15 +190,18 @@ const fetchInstance = {
       body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
     }),
 
-  delete: <TResponse, TBody = unknown>(
+  delete: <TResponse>(endpoint: string, options?: FetchRequestOptions) =>
+    request<TResponse>(endpoint, { ...options, method: "DELETE" }),
+
+  deleteWithBody: <TResponse, TBody = unknown>(
     endpoint: string,
-    body?: TBody,
+    body: TBody,
     options?: FetchRequestOptions,
   ) =>
     request<TResponse>(endpoint, {
       ...options,
       method: "DELETE",
-      body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
     }),
 };
 
