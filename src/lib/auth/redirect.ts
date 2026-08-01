@@ -1,6 +1,7 @@
 import { getCustomerProfileStatus, getMoverProfileStatus } from "@/lib/api/profile";
 import type { AuthRole } from "@/lib/auth/role";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
 
 export type AuthAudience = "customer" | "mover" | "admin";
 
@@ -190,9 +191,13 @@ export const isPublicMoverPath = (pathname: string): boolean => {
     return true;
   }
 
-  if (pathname === APP_ROUTES.MOVERS.FAVORITES) {
+  const detailPrefix = `${APP_ROUTES.MOVERS.ROOT}/`;
+
+  if (!pathname.startsWith(detailPrefix)) {
     return false;
   }
 
-  return pathname.startsWith(`${APP_ROUTES.MOVERS.ROOT}/`);
+  const moverId = pathname.slice(detailPrefix.length);
+
+  return !moverId.includes("/") && isMoverDetailId(moverId);
 };
