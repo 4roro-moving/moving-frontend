@@ -11,6 +11,7 @@ import type { AuthRole } from "@/lib/auth/role";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { isPublicMoverPath } from "@/lib/auth/redirect";
 
 export type ProfileMenuItem =
   | { type: "link"; label: string; href: string }
@@ -100,11 +101,18 @@ export default function ProfileMenuTrigger({
 
   const handleLogout = async () => {
     setIsOpen(false);
+
+    const isPublicPage = isPublicMoverPath(pathname);
     const logoutPath = role === "MOVER" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
 
     try {
       await logout();
     } finally {
+      if (isPublicPage) {
+        router.refresh();
+        return;
+      }
+
       router.replace(logoutPath);
     }
   };

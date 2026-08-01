@@ -183,3 +183,16 @@ export const getAudienceFromPathname = (pathname: string): AuthAudience => {
     ? "mover"
     : "customer";
 };
+
+/** 현재 경로가 공개 페이지(기사님 찾기, 기사님 상세)인지 판별 */
+export const isPublicMoverPath = (pathname: string): boolean => {
+  if (pathname === APP_ROUTES.MOVERS.ROOT) {
+    return true;
+  }
+
+  if (pathname === APP_ROUTES.MOVERS.FAVORITES) {
+    return false;
+  }
+
+  return pathname.startsWith(`${APP_ROUTES.MOVERS.ROOT}/`);
+};
