@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
 import Toast from "@/components/common/Toast/Toast";
 import MoverCard from "@/components/mover/MoverCard";
 import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
+import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { useMovers } from "@/hooks/useMovers";
 import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import type { MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
@@ -34,36 +35,17 @@ export function MoversList({ filters }: MoversListProps) {
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthPending = !hasHydrated || isCheckingAuth;
-  const sentinelRef = useRef<HTMLDivElement>(null);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const movers = query.data?.pages.flatMap((page) => page.data).map(mapMoverListItemToMover) ?? [];
-
-  useEffect(() => {
-    if (isAuthPending) {
-      return;
-    }
-
-    const sentinel = sentinelRef.current;
-    if (!sentinel) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        // 다음 페이지 실패 후에는 자동 재요청하지 않음 — 사용자가 "다시 시도"로 재개
-        if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage && !isFetchNextPageError) {
-          void fetchNextPage();
-        }
-      },
-      { rootMargin: "240px 0px" },
-    );
-
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [isAuthPending, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
+  const sentinelRef = useMoversInfiniteScroll({
+    enabled: !isAuthPending && !query.isPending && !query.isError && movers.length > 0,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    fetchNextPage,
+  });
 
   if (isAuthPending || query.isPending) {
     return (
