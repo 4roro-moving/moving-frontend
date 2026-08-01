@@ -7,7 +7,7 @@ import { useMoverDesignation } from "@/hooks/useMoverDesignation";
 import { useMoverDetail } from "@/hooks/useMoverDetail";
 
 import Toast from "@/components/common/Toast/Toast";
-import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
+import DetailHeroBanner from "@/components/common/DetailHeroBanner";
 import DesignateSuccessModal from "@/components/estimate/DesignateSuccessModal";
 import EstimateRequestRequiredModal from "@/components/estimate/EstimateRequestRequiredModal";
 
@@ -87,7 +87,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
 
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] lg:pb-0">
-      <EstimateDetailHero imageUrl={detail.profileImageSrc} name={detail.name} />
+      <DetailHeroBanner imageUrl={detail.profileImageSrc} name={detail.name} />
 
       <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 lg:px-0 lg:pb-[150px]">
         <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-32 md:gap-40 lg:flex-row lg:items-start lg:justify-between">
