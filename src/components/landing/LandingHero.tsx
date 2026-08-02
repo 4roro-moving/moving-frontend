@@ -8,6 +8,7 @@ import { Text } from "@/components/common/Text";
  * // 2026.07.31 정슬기 - [추가]
  * // 2026.08.01 정슬기 - [수정] Tablet/Mobile 반응형
  * // 2026.08.01 정슬기 - [수정] Hero 이미지를 배경+트럭 원본 형태로 복원
+ * // 2026.08.02 정슬기 - [수정] 오버레이 그라디언트를 토큰/Tailwind 유틸로 교체
  */
 export default function LandingHero() {
   return (
@@ -21,14 +22,7 @@ export default function LandingHero() {
           className="object-cover object-bottom opacity-80"
           sizes="100vw"
         />
-        <div
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(0, 0, 0, 0.24) 0%, rgba(0, 0, 0, 0.6) 100%), linear-gradient(90deg, rgba(70, 43, 20, 0.7) 0%, rgba(70, 43, 20, 0.7) 100%)",
-          }}
-        />
+        <div aria-hidden className="bg-landing-hero-overlay absolute inset-0" />
 
         <div className="relative z-10 flex flex-col items-center gap-20 px-32 text-center min-[375px]:px-56 min-[744px]:gap-28 min-[744px]:px-24">
           <Image

@@ -33,6 +33,7 @@ const MOVE_TYPES = [
  * // 2026.07.31 정슬기 - [추가]
  * // 2026.08.01 정슬기 - [수정] 개별 고해상도 아이콘으로 복원
  * // 2026.08.01 정슬기 - [수정] Mobile 카드가 화면 너비를 채우도록 조정
+ * // 2026.08.02 정슬기 - [수정] 카드 배경을 background-muted 토큰으로 교체
  */
 export default function LandingMoveTypes() {
   return (
@@ -56,7 +57,7 @@ export default function LandingMoveTypes() {
                 "flex min-w-0 flex-col items-center",
                 item.featured
                   ? "shadow-estimate-card flex-[1.2] gap-4 rounded-[24px] border-[2.5px] border-orange-300 bg-white px-10 py-14 min-[744px]:w-[245px] min-[744px]:flex-none min-[744px]:gap-8 min-[744px]:rounded-[39px] min-[744px]:border-4 min-[744px]:px-22 min-[744px]:py-23"
-                  : "flex-1 gap-4 rounded-[20px] bg-[#F7F7F7] px-10 pt-16 pb-18 min-[744px]:w-[200px] min-[744px]:flex-none min-[744px]:gap-8 min-[744px]:rounded-[31px] min-[744px]:px-26 min-[744px]:pt-26 min-[744px]:pb-30",
+                  : "bg-background-muted flex-1 gap-4 rounded-[20px] px-10 pt-16 pb-18 min-[744px]:w-[200px] min-[744px]:flex-none min-[744px]:gap-8 min-[744px]:rounded-[31px] min-[744px]:px-26 min-[744px]:pt-26 min-[744px]:pb-30",
               )}
             >
               <Image
