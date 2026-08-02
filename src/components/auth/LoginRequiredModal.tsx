@@ -2,16 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
-import Modal from "@/components/common/Modal/Modal";
+import AlertModal from "@/components/common/Modal/AlertModal";
 import { getLoginRedirectPath } from "@/lib/auth/session";
-import { cn } from "@/lib/utils/cn";
-
-const PANEL_CLASSNAME = cn(
-  "items-stretch text-left",
-  "rounded-24 md:rounded-32",
-  "w-full max-w-[292px] gap-30 px-16 py-24",
-  "md:max-w-[608px] md:gap-40 md:px-24 md:pt-32 md:pb-40",
-);
 
 interface LoginRequiredModalProps {
   open: boolean;
@@ -38,32 +30,13 @@ export function LoginRequiredModal({
     router.push(getLoginRedirectPath());
   };
 
-  if (!open) {
-    return null;
-  }
-
   return (
-    <Modal onClose={onClose} className={PANEL_CLASSNAME}>
-      <div className="flex w-full items-center justify-between gap-12">
-        <Modal.Title variant={{ base: "2lg-bold", md: "2xl-semibold" }}>
-          로그인이 필요해요
-        </Modal.Title>
-        <Modal.Close onClose={onClose} />
-      </div>
-      <div className="flex w-full flex-col items-stretch gap-30 md:gap-40">
-        <Modal.Desc variant="2lg-medium">{description}</Modal.Desc>
-        <Modal.Button fullWidth size="cta" className="md:hidden" onClick={handleLogin}>
-          로그인하기
-        </Modal.Button>
-        <Modal.Button
-          fullWidth
-          size="detail"
-          className="hidden md:inline-flex"
-          onClick={handleLogin}
-        >
-          로그인하기
-        </Modal.Button>
-      </div>
-    </Modal>
+    <AlertModal
+      open={open}
+      onClose={onClose}
+      title="로그인이 필요해요"
+      description={description}
+      primaryAction={{ label: "로그인하기", onClick: handleLogin }}
+    />
   );
 }
