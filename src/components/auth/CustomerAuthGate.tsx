@@ -19,9 +19,13 @@ interface CustomerAuthGateProps {
  * 고객 전용 영역 가드
  * - 세션 복구 중: 로딩
  * - 비로그인: 로그인 페이지로 이동 (?redirect=)
- * - 기사님: 받은 견적 요청 목록으로 이동
+ * - CUSTOMER 아님(기사님·ADMIN·역할 미확정): getRoleHomePath로 이동
  * // 2026.07.30 정슬기 - [추가]
  * // 2026.07.30 정슬기 - [수정] 리다이렉트를 router.replace로 통일 (하드 새로고침 불필요)
+ * // 2026.08.03 정슬기 - [수정] CUSTOMER 명시 판별로 canFetch·비고객 리다이렉트
+ *
+ * ADMIN 홈 경로는 getRoleHomePath의 임시 정책(기사님 찾기)을 그대로 사용합니다.
+ * 관리자 전용 홈이 정해지면 팀 정책에 맞춰 redirect 쪽만 조정하면 됩니다.
  */
 export default function CustomerAuthGate({
   children,
@@ -30,7 +34,7 @@ export default function CustomerAuthGate({
 }: CustomerAuthGateProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isPending, isAuthenticated, isMover, canFetch } = useCustomerAuthReady();
+  const { isPending, isAuthenticated, isCustomer, canFetch, user } = useCustomerAuthReady();
 
   useEffect(() => {
     if (isPending) return;
@@ -44,10 +48,10 @@ export default function CustomerAuthGate({
       return;
     }
 
-    if (isMover) {
-      router.replace(getRoleHomePath("MOVER"));
+    if (!isCustomer) {
+      router.replace(getRoleHomePath(user?.role));
     }
-  }, [isPending, isAuthenticated, isMover, pathname, router]);
+  }, [isPending, isAuthenticated, isCustomer, user?.role, pathname, router]);
 
   if (isPending || !canFetch) {
     return loadingFallback ?? <EstimatesQueryStatus message={loadingMessage} />;
