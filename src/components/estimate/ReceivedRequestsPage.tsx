@@ -268,14 +268,14 @@ export default function ReceivedRequestsPage() {
           presentation="responsive"
           size="md"
           overlayClassName="lg:hidden"
-          className="items-stretch gap-32 px-24 pt-24 pb-32 text-left"
+          className="items-stretch gap-32 px-24 py-32 text-left"
         >
-          <div className="flex w-full shrink-0 items-center justify-between">
-            <Modal.Title variant="2lg-bold">필터</Modal.Title>
-            <Modal.Close size="sm" onClose={() => setIsFilterOpen(false)} />
-          </div>
-
           <div className="flex w-full flex-col gap-28">
+            <div className="flex w-full shrink-0 items-center justify-between">
+              <Modal.Title variant="2lg-bold">필터</Modal.Title>
+              <Modal.Close size="sm" onClose={() => setIsFilterOpen(false)} />
+            </div>
+
             <section className="flex flex-col gap-8">
               <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
                 이사 유형
@@ -345,7 +345,7 @@ export default function ReceivedRequestsPage() {
             </section>
           </div>
 
-          <Modal.Button fullWidth size="detail" onClick={() => setIsFilterOpen(false)}>
+          <Modal.Button fullWidth size="cta" onClick={() => setIsFilterOpen(false)}>
             조회하기
           </Modal.Button>
         </Modal>
