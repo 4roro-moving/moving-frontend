@@ -41,8 +41,10 @@ export const LikeOutlineButton = forwardRef<HTMLButtonElement, LikeOutlineButton
     ref,
   ) {
     const resolvedSize = size ?? "sm";
-    const accessibleLabel = moverName ? `${moverName} 기사님 찜` : "기사님 찜";
+    const namePrefix = moverName ? `${moverName} ` : "";
     const label = isFavorite ? "기사님 찜 해제하기" : "기사님 찜하기";
+    const accessibleLabel =
+      resolvedSize === "sm" ? `${namePrefix}기사님 찜` : `${namePrefix}${label}`;
 
     return (
       <button
