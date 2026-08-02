@@ -1,0 +1,65 @@
+import Image from "next/image";
+
+import { Text } from "@/components/common/Text";
+
+/**
+ * 랜딩 Hero — Desktop / Tablet / Mobile
+ * 배경(hero-bg) + 트럭(hero-truck) 분리 + HTML 카피 (원래 형태)
+ * // 2026.07.31 정슬기 - [추가]
+ * // 2026.08.01 정슬기 - [수정] Tablet/Mobile 반응형
+ * // 2026.08.01 정슬기 - [수정] Hero 이미지를 배경+트럭 원본 형태로 복원
+ */
+export default function LandingHero() {
+  return (
+    <section className="relative w-full overflow-hidden">
+      <div className="relative flex h-[313px] w-full items-center justify-center min-[744px]:h-[405px]">
+        <Image
+          src="/images/landing/hero-bg.jpg"
+          alt=""
+          fill
+          priority
+          className="object-cover object-bottom opacity-80"
+          sizes="100vw"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(0, 0, 0, 0.24) 0%, rgba(0, 0, 0, 0.6) 100%), linear-gradient(90deg, rgba(70, 43, 20, 0.7) 0%, rgba(70, 43, 20, 0.7) 100%)",
+          }}
+        />
+
+        <div className="relative z-10 flex flex-col items-center gap-20 px-32 text-center min-[375px]:px-56 min-[744px]:gap-28 min-[744px]:px-24">
+          <Image
+            src="/images/landing/hero-truck.svg"
+            alt=""
+            width={160}
+            height={99}
+            className="h-[62px] w-[100px] object-contain min-[744px]:h-[99px] min-[744px]:w-160"
+            unoptimized
+          />
+
+          <div className="flex w-full max-w-[265px] flex-col items-center gap-8 min-[744px]:max-w-[431px] min-[744px]:gap-16">
+            <Text
+              as="h1"
+              variant={{ base: "xl-bold", md: "3xl-bold" }}
+              className="text-text-inverse min-[744px]:text-[length:var(--font-size-32)] min-[744px]:leading-[var(--line-height-46)]"
+            >
+              이사업체, 어떻게 고르세요?
+            </Text>
+            <Text
+              as="p"
+              variant={{ base: "lg-regular", md: "2lg-regular" }}
+              className="text-gray-300 min-[744px]:text-[length:var(--font-size-18)] min-[744px]:leading-[var(--line-height-26)] min-[744px]:text-gray-200"
+            >
+              무빙은 여러 견적을 한눈에 비교해
+              <br />
+              이사업체 선정 과정을 간편하게 바꿔드려요
+            </Text>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
