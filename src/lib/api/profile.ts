@@ -1,63 +1,36 @@
 import type { AuthUser } from "@/lib/api/auth";
 import fetchInstance, { type FetchRequestOptions } from "@/lib/api/fetchInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
-import type { RegionId } from "@/lib/constants/region";
 import { ApiError } from "@/types/api";
-import type { MoveType } from "@/types/move";
+import type {
+  CreateCustomerProfileInput,
+  CreateMoverProfileInput,
+  CustomerProfileMe,
+  CustomerProfileMeResponse,
+  MoverProfileMe,
+  MoverProfileMeResponse,
+  ProfileStatus,
+  UpdateCustomerProfileInput,
+  UpdateMoverProfileInput,
+} from "@/types/profile";
 
-export interface CustomerProfileStatus {
-  isProfileCompleted: boolean;
-}
+export type {
+  CreateCustomerProfileInput,
+  CreateMoverProfileInput,
+  CustomerProfileMe,
+  CustomerProfileMeResponse,
+  MoverProfileMe,
+  MoverProfileMeResponse,
+  ProfileStatus,
+  UpdateCustomerProfileInput,
+  UpdateMoverProfileInput,
+} from "@/types/profile";
 
-interface CustomerProfileRegion {
-  id: RegionId;
-  name: string;
-}
+/** @deprecated ProfileStatus 사용 */
+export type CustomerProfileStatus = ProfileStatus;
 
-/**
- * GET /profiles/customer/me 원본(data)
- * name/email/phone·regions·serviceTypes가 이미 펼쳐진 형태
- */
-export interface CustomerProfileMeResponse {
-  id: string | number;
-  userId: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  imageUrl: string | null;
-  regions: CustomerProfileRegion[];
-  serviceTypes: MoveType[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export type CustomerProfileMe = CustomerProfileMeResponse & {
-  id: string;
-};
-
-export interface MoverProfileMeResponse {
-  id: string | number;
-  userId: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  imageUrl: string | null;
-  regions: CustomerProfileRegion[];
-  serviceTypes: MoveType[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export type MoverProfileMe = MoverProfileMeResponse & {
-  id: string;
-};
-
-/**
- * customer 프로필 status 조회
- *
- */
 export const getCustomerProfileStatus = (options?: FetchRequestOptions) =>
-  fetchInstance.get<CustomerProfileStatus>(API_ROUTES.PROFILES.CUSTOMER_STATUS, options);
+  fetchInstance.get<ProfileStatus>(API_ROUTES.PROFILES.CUSTOMER_STATUS, options);
 
 export const mapCustomerProfileMeResponse = (
   profile: CustomerProfileMeResponse,
@@ -88,6 +61,18 @@ export const getCustomerProfileMe = async (): Promise<CustomerProfileMe> => {
   return mapCustomerProfileMeResponse(profile);
 };
 
+export const createCustomerProfile = (input: CreateCustomerProfileInput) =>
+  fetchInstance.post<CustomerProfileMeResponse, CreateCustomerProfileInput>(
+    API_ROUTES.PROFILES.CUSTOMER,
+    input,
+  );
+
+export const updateCustomerProfile = (input: UpdateCustomerProfileInput) =>
+  fetchInstance.patch<CustomerProfileMeResponse, UpdateCustomerProfileInput>(
+    API_ROUTES.PROFILES.CUSTOMER_ME,
+    input,
+  );
+
 /** Header·auth store용 — AuthUser.id = userId */
 export const toAuthUserFromCustomerProfile = (profile: CustomerProfileMe): AuthUser => ({
   id: profile.userId,
@@ -97,16 +82,12 @@ export const toAuthUserFromCustomerProfile = (profile: CustomerProfileMe): AuthU
   role: "CUSTOMER",
 });
 
-/**
- * mover 프로필 status 조회
- *
- */
 export const getMoverProfileStatus = (options?: FetchRequestOptions) =>
-  fetchInstance.get<CustomerProfileStatus>(API_ROUTES.PROFILES.MOVER_STATUS, options);
+  fetchInstance.get<ProfileStatus>(API_ROUTES.PROFILES.MOVER_STATUS, options);
 
 export const mapMoverProfileMeResponse = (profile: MoverProfileMeResponse): MoverProfileMe => {
-  if (!profile?.name) {
-    throw new ApiError("고객 프로필 응답 형식이 올바르지 않습니다.");
+  if (!profile?.nickname) {
+    throw new ApiError("기사 프로필 응답 형식이 올바르지 않습니다.");
   }
 
   return {
@@ -115,7 +96,14 @@ export const mapMoverProfileMeResponse = (profile: MoverProfileMeResponse): Move
     name: profile.name,
     email: profile.email,
     phone: profile.phone,
+    nickname: profile.nickname,
     imageUrl: profile.imageUrl,
+    career: profile.career,
+    shortIntro: profile.shortIntro,
+    description: profile.description,
+    confirmedCount: profile.confirmedCount,
+    averageRating: profile.averageRating,
+    reviewCount: profile.reviewCount,
     regions: profile.regions ?? [],
     serviceTypes: profile.serviceTypes ?? [],
     createdAt: profile.createdAt,
@@ -129,11 +117,23 @@ export const getMoverProfileMe = async (): Promise<MoverProfileMe> => {
   return mapMoverProfileMeResponse(profile);
 };
 
+export const createMoverProfile = (input: CreateMoverProfileInput) =>
+  fetchInstance.post<MoverProfileMeResponse, CreateMoverProfileInput>(
+    API_ROUTES.PROFILES.MOVER,
+    input,
+  );
+
+export const updateMoverProfile = (input: UpdateMoverProfileInput) =>
+  fetchInstance.patch<MoverProfileMeResponse, UpdateMoverProfileInput>(
+    API_ROUTES.PROFILES.MOVER_ME,
+    input,
+  );
+
 /** Header·auth store용 — AuthUser.id = userId */
 export const toAuthUserFromMoverProfile = (profile: MoverProfileMe): AuthUser => ({
   id: profile.userId,
   name: profile.name,
-  email: profile.email,
+  email: profile.email ?? "",
   phone: profile.phone,
   role: "MOVER",
 });

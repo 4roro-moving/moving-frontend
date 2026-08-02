@@ -1,21 +1,29 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import Button from "@/components/common/Button/Button";
+import { Text } from "@/components/common/Text";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
 import ProfileFieldHeader from "@/components/profile/ProfileFieldHeader";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
+import { useCreateCustomerProfile } from "@/hooks/profile/useCreateCustomerProfile";
+import { useUpdateCustomerProfile } from "@/hooks/profile/useUpdateCustomerProfile";
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { getRoleHomePath } from "@/lib/auth/redirect";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
+import { uploadProfileImageIfNeeded } from "@/lib/profile/uploadProfileImage";
 import {
   customerProfileSchema,
   type CustomerProfileFormValues,
 } from "@/lib/schemas/customerProfileSchema";
-import type { ProfileFormMode } from "@/types/profileFormMode";
 import type { MoveType } from "@/types/move";
+import type { ProfileFormMode } from "@/types/profile";
 
 interface CustomerProfileFormProps {
   mode?: ProfileFormMode;
@@ -41,7 +49,11 @@ const CustomerProfileForm = ({
   defaultValues,
   initialImageUrl = null,
 }: CustomerProfileFormProps) => {
+  const router = useRouter();
   const copy = COPY[mode];
+  const createCustomerProfile = useCreateCustomerProfile();
+  const updateCustomerProfile = useUpdateCustomerProfile();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     control,
@@ -58,9 +70,35 @@ const CustomerProfileForm = ({
     },
   });
 
-  const onSubmit = handleSubmit((values) => {
-    // Phase A: API 연동 전 — 제출 값 확인용
-    console.log("[CustomerProfileForm]", mode, values);
+  const isPending =
+    isSubmitting || createCustomerProfile.isPending || updateCustomerProfile.isPending;
+
+  const onSubmit = handleSubmit(async (formValues) => {
+    setSubmitError(null);
+
+    try {
+      if (formValues.regionId === null) {
+        setSubmitError("내가 사는 지역을 선택해 주세요");
+        return;
+      }
+
+      const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
+      const profileInput = {
+        ...(imageUrl ? { imageUrl } : {}),
+        regionIds: [formValues.regionId],
+        serviceTypes: formValues.serviceTypes,
+      };
+
+      if (mode === "create") {
+        await createCustomerProfile.mutateAsync(profileInput);
+        router.replace(getRoleHomePath("CUSTOMER"));
+        return;
+      }
+
+      await updateCustomerProfile.mutateAsync(profileInput);
+    } catch (error) {
+      setSubmitError(getApiErrorMessage(error, "프로필 저장에 실패했습니다."));
+    }
   });
 
   return (
@@ -136,13 +174,13 @@ const CustomerProfileForm = ({
         </section>
       </div>
 
-      <Button
-        type="submit"
-        variant="solid"
-        size="auth"
-        fullWidth
-        disabled={!isValid || isSubmitting}
-      >
+      {submitError ? (
+        <Text as="p" role="alert" variant="md-medium" className="text-text-error text-center">
+          {submitError}
+        </Text>
+      ) : null}
+
+      <Button type="submit" variant="solid" size="auth" fullWidth disabled={!isValid || isPending}>
         {copy.submitLabel}
       </Button>
     </form>

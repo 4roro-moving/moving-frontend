@@ -23,8 +23,12 @@ const regionIdSchema = z.union([
 
 export const moverProfileSchema = z.object({
   imageFile: z.custom<File | null>().nullable().optional(),
-  nickname: z.string().trim().min(1, "별명을 입력해 주세요"),
-  career: z.string().trim().min(1, "경력을 입력해 주세요"),
+  nickname: z.string().trim().min(2, "별명은 2자 이상 입력해 주세요"),
+  career: z
+    .string()
+    .trim()
+    .min(1, "경력을 입력해 주세요")
+    .regex(/^\d+$/, "경력은 숫자만 입력해 주세요"),
   shortIntro: z.string().trim().min(1, "한 줄 소개를 입력해 주세요"),
   description: z.string().trim().min(1, "상세 설명을 입력해 주세요"),
   serviceTypes: z.array(moveTypeSchema).min(1, "제공 서비스를 선택해 주세요"),

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import CustomerProfileForm from "@/components/profile/CustomerProfileForm";
+import CustomerProfileEditView from "@/components/profile/CustomerProfileEditView";
 
 export const metadata: Metadata = {
   title: "프로필 수정 | 무빙",
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const CustomerProfileEditPage = () => {
-  return <CustomerProfileForm mode="edit" />;
+  return <CustomerProfileEditView />;
 };
 
 export default CustomerProfileEditPage;

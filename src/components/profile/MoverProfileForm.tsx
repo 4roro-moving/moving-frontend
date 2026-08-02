@@ -1,20 +1,28 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import Button from "@/components/common/Button/Button";
 import Input from "@/components/common/Input/Input";
 import Textarea from "@/components/common/Input/Textarea";
+import { Text } from "@/components/common/Text";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
-import type { ProfileFormMode } from "@/types/profileFormMode";
 import ProfileFieldHeader from "@/components/profile/ProfileFieldHeader";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
+import { useCreateMoverProfile } from "@/hooks/profile/useCreateMoverProfile";
+import { useUpdateMoverProfile } from "@/hooks/profile/useUpdateMoverProfile";
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { getRoleHomePath } from "@/lib/auth/redirect";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
+import { uploadProfileImageIfNeeded } from "@/lib/profile/uploadProfileImage";
 import { moverProfileSchema, type MoverProfileFormValues } from "@/lib/schemas/moverProfileSchema";
 import type { MoveType } from "@/types/move";
+import type { ProfileFormMode } from "@/types/profile";
 
 interface MoverProfileFormProps {
   mode?: ProfileFormMode;
@@ -40,7 +48,11 @@ const MoverProfileForm = ({
   defaultValues,
   initialImageUrl = null,
 }: MoverProfileFormProps) => {
+  const router = useRouter();
   const copy = COPY[mode];
+  const createMoverProfile = useCreateMoverProfile();
+  const updateMoverProfile = useUpdateMoverProfile();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -62,9 +74,33 @@ const MoverProfileForm = ({
     },
   });
 
-  const onSubmit = handleSubmit((values) => {
-    // Phase A: API 연동 전 — 제출 값 확인용
-    console.log("[MoverProfileForm]", mode, values);
+  const isPending = isSubmitting || createMoverProfile.isPending || updateMoverProfile.isPending;
+
+  const onSubmit = handleSubmit(async (formValues) => {
+    setSubmitError(null);
+
+    try {
+      const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
+      const profileInput = {
+        nickname: formValues.nickname,
+        career: Number(formValues.career),
+        shortIntro: formValues.shortIntro,
+        description: formValues.description,
+        regionIds: formValues.regionIds,
+        serviceTypes: formValues.serviceTypes,
+        ...(imageUrl ? { imageUrl } : {}),
+      };
+
+      if (mode === "create") {
+        await createMoverProfile.mutateAsync(profileInput);
+        router.replace(getRoleHomePath("MOVER"));
+        return;
+      }
+
+      await updateMoverProfile.mutateAsync(profileInput);
+    } catch (error) {
+      setSubmitError(getApiErrorMessage(error, "프로필 저장에 실패했습니다."));
+    }
   });
 
   return (
@@ -109,6 +145,8 @@ const MoverProfileForm = ({
             <Input
               id="career"
               size="md"
+              inputMode="numeric"
+              numericOnly
               placeholder="기사님의 경력을 입력해 주세요"
               error={errors.career?.message}
               {...register("career")}
@@ -175,6 +213,12 @@ const MoverProfileForm = ({
         </div>
       </div>
 
+      {submitError ? (
+        <Text as="p" role="alert" variant="md-medium" className="text-text-error text-center">
+          {submitError}
+        </Text>
+      ) : null}
+
       <div className="flex w-full justify-end">
         <div className="w-full lg:w-[500px]">
           <Button
@@ -182,7 +226,7 @@ const MoverProfileForm = ({
             variant="solid"
             size="auth"
             fullWidth
-            disabled={!isValid || isSubmitting}
+            disabled={!isValid || isPending}
           >
             {copy.submitLabel}
           </Button>

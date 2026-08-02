@@ -16,8 +16,11 @@ export const API_ROUTES = {
   },
   PROFILES: {
     ROOT: "/profiles",
+    IMAGE_UPLOAD_URL: "/profiles/image/upload-url",
+    CUSTOMER: "/profiles/customer",
     CUSTOMER_STATUS: "/profiles/customer/status",
     CUSTOMER_ME: "/profiles/customer/me",
+    MOVER: "/profiles/mover",
     MOVER_STATUS: "/profiles/mover/status",
     MOVER_ME: "/profiles/mover/me",
   },

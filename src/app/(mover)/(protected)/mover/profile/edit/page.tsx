@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import MoverProfileForm from "@/components/profile/MoverProfileForm";
+import MoverProfileEditView from "@/components/profile/MoverProfileEditView";
 
 export const metadata: Metadata = {
   title: "기사 프로필 수정 | 무빙",
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const MoverProfileEditPage = () => {
-  return <MoverProfileForm mode="edit" />;
+  return <MoverProfileEditView />;
 };
 
 export default MoverProfileEditPage;
