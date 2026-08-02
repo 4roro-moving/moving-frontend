@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 
+import { Text } from "@/components/common/Text";
 import Input from "@/components/common/Input/Input";
 import Textarea from "@/components/common/Input/Textarea";
 import Modal from "@/components/common/Modal/Modal";
-import { Text } from "@/components/common/Text";
 import EstimateRequestSummaryContent from "@/components/estimate/EstimateRequestSummaryContent";
 import { cn } from "@/lib/utils/cn";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
@@ -16,9 +16,7 @@ const MAX_COMMENT_LENGTH = 1000;
 
 const PANEL_CLASSNAME = cn(
   "items-stretch text-left overflow-hidden",
-  "max-h-[calc(100dvh-104px)] w-full max-w-none rounded-b-none px-24 pt-32 pb-40 gap-40",
-  "min-[744px]:rounded-32 min-[744px]:w-[375px]",
-  "lg:w-full lg:max-w-[608px]",
+  "max-h-[calc(100dvh-104px)] gap-40 px-24 pt-32 pb-40",
 );
 
 export interface SendEstimateInput {
@@ -72,7 +70,8 @@ export default function SendEstimateModal({
   return (
     <Modal
       onClose={isPending ? undefined : onClose}
-      overlayClassName="items-end px-0 min-[744px]:items-center min-[744px]:px-24"
+      presentation="responsive"
+      size="lg"
       className={PANEL_CLASSNAME}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
@@ -92,7 +91,6 @@ export default function SendEstimateModal({
             moveDate={request.moveDate}
           />
         </section>
-
         <div className="flex flex-col gap-16">
           <Text as="label" htmlFor="estimate-price" variant="2lg-semibold">
             견적가를 입력해 주세요

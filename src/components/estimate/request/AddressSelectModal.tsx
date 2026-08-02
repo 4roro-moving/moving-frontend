@@ -145,7 +145,7 @@ export default function AddressSelectModal({
   }
 
   return (
-    <Modal onClose={onClose} className={PANEL_CLASSNAME}>
+    <Modal onClose={onClose} presentation="modal" size="lg" className={PANEL_CLASSNAME}>
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
         <Modal.Title>{kind}를 선택해주세요</Modal.Title>
         <Modal.Close onClose={onClose} />

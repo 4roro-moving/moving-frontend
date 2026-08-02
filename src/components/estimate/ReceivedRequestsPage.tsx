@@ -14,7 +14,6 @@ import {
   useSendMoverEstimate,
 } from "@/hooks/useMoverEstimateRequests";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
-import { cn } from "@/lib/utils/cn";
 import type { MoveType } from "@/types/move";
 import type { MoverEstimateRequest, RequestSort } from "@/types/moverEstimateRequest";
 
@@ -266,15 +265,14 @@ export default function ReceivedRequestsPage() {
       {isFilterOpen ? (
         <Modal
           onClose={() => setIsFilterOpen(false)}
-          overlayClassName="items-end px-0 min-[744px]:items-center min-[744px]:px-24 lg:hidden"
-          className={cn(
-            "max-w-none items-stretch gap-32 px-24 pt-24 pb-32 text-left",
-            "rounded-t-32 min-[744px]:rounded-32 min-[744px]:w-[375px]",
-          )}
+          presentation="responsive"
+          size="md"
+          overlayClassName="lg:hidden"
+          className="items-stretch gap-32 px-24 pt-24 pb-32 text-left"
         >
-          <div className="flex w-full shrink-0 items-center justify-between gap-16">
-            <Modal.Title>필터</Modal.Title>
-            <Modal.Close onClose={() => setIsFilterOpen(false)} />
+          <div className="flex w-full shrink-0 items-center justify-between">
+            <Modal.Title variant="2lg-bold">필터</Modal.Title>
+            <Modal.Close size="sm" onClose={() => setIsFilterOpen(false)} />
           </div>
 
           <div className="flex w-full flex-col gap-28">

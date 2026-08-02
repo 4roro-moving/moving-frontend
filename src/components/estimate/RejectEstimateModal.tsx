@@ -11,12 +11,7 @@ import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 const MIN_REASON_LENGTH = 10;
 const MAX_REASON_LENGTH = 1000;
 
-const PANEL_CLASSNAME = cn(
-  "items-stretch text-left overflow-hidden",
-  "w-full max-w-none rounded-b-none px-24 pt-32 pb-40 gap-40",
-  "min-[744px]:rounded-32 min-[744px]:w-[375px]",
-  "lg:w-full lg:max-w-[608px]",
-);
+const PANEL_CLASSNAME = cn("items-stretch text-left overflow-hidden", "gap-40 px-24 pt-32 pb-40");
 
 interface RejectEstimateModalProps {
   request: MoverEstimateRequest;
@@ -43,7 +38,8 @@ export default function RejectEstimateModal({
   return (
     <Modal
       onClose={isPending ? undefined : onClose}
-      overlayClassName="items-end px-0 min-[744px]:items-center min-[744px]:px-24"
+      presentation="responsive"
+      size="lg"
       className={PANEL_CLASSNAME}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">

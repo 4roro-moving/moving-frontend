@@ -95,8 +95,9 @@ function ReviewWriteModalContent({
   return (
     <Modal
       onClose={handleClose}
-      overlayClassName="items-end px-0 md:items-center md:px-margin-tablet lg:px-24"
-      className="rounded-t-24 md:rounded-24 max-h-[90dvh] w-full max-w-[35rem] gap-24 overflow-y-auto p-20 pb-32 md:gap-32 md:p-32 lg:gap-40 lg:p-40"
+      presentation="responsive"
+      size="lg"
+      className="max-h-[90dvh] gap-24 overflow-y-auto px-20 py-32 md:gap-32 md:p-32 lg:gap-40 lg:p-40"
       aria-label="리뷰 작성"
     >
       <div className="flex w-full items-start justify-between gap-12 md:gap-16">
@@ -139,13 +140,13 @@ function ReviewWriteModalContent({
           </div>
         </div>
 
-        <div className="flex w-full flex-col gap-10 md:gap-12">
+        <div className="flex w-full flex-col gap-12">
           <Text
             as="p"
-            variant={{ base: "md-semibold", md: "lg-semibold" }}
-            className="text-text-primary"
+            variant={{ base: "lg-semibold", lg: "2lg-semibold" }}
+            className="text-text-tertiary"
           >
-            별점을 선택해주세요
+            평점을 선택해 주세요
           </Text>
           <ReviewStarRating
             value={rating}
@@ -199,7 +200,7 @@ function ReviewWriteModalContent({
         </Text>
       ) : null}
 
-      <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
+      <div className="flex w-full flex-col-reverse gap-12 md:flex-row">
         <Button
           type="button"
           variant="outline"
