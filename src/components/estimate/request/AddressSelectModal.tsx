@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import Modal from "@/components/common/Modal";
+import Modal from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
@@ -21,6 +21,11 @@ interface AddressSelectModalProps {
 }
 
 const RESULT_AREA_HEIGHT_CLASS = "h-[280px] max-h-[280px]";
+
+const PANEL_CLASSNAME = cn(
+  "items-stretch text-left overflow-hidden",
+  "h-[640px] max-h-[90vh] w-full max-w-[608px] px-24 pt-32 pb-40 gap-40 rounded-32",
+);
 
 function AddressChip({ label }: { label: string }) {
   return (
@@ -135,20 +140,18 @@ export default function AddressSelectModal({
     setHasSearched(false);
   }
 
+  if (!open) {
+    return null;
+  }
+
   return (
-    <Modal
-      open={open}
-      title={`${kind}를 선택해주세요`}
-      confirmLabel="선택완료"
-      confirmDisabled={!selected}
-      onClose={onClose}
-      onConfirm={() => {
-        if (!selected) return;
-        onConfirm(selected);
-      }}
-      className="h-[640px] max-h-[90vh]"
-    >
-      <div className="flex h-full min-h-0 w-full flex-col gap-24">
+    <Modal onClose={onClose} className={PANEL_CLASSNAME}>
+      <div className="flex w-full shrink-0 items-center justify-between gap-16">
+        <Modal.Title variant="2xl-semibold">{kind}를 선택해주세요</Modal.Title>
+        <Modal.Close onClose={onClose} />
+      </div>
+
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-24 overflow-hidden">
         <div className="bg-background-muted rounded-16 flex h-64 shrink-0 items-center gap-16 overflow-hidden px-24">
           <input
             type="text"
@@ -221,6 +224,18 @@ export default function AddressSelectModal({
           )}
         </div>
       </div>
+
+      <Modal.Button
+        fullWidth
+        size="detail"
+        disabled={!selected}
+        onClick={() => {
+          if (!selected) return;
+          onConfirm(selected);
+        }}
+      >
+        선택완료
+      </Modal.Button>
     </Modal>
   );
 }

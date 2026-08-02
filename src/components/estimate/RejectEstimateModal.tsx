@@ -3,12 +3,20 @@
 import { useState } from "react";
 
 import Textarea from "@/components/common/Input/Textarea";
-import Modal from "@/components/common/Modal";
+import Modal from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
+import { cn } from "@/lib/utils/cn";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 const MIN_REASON_LENGTH = 10;
 const MAX_REASON_LENGTH = 1000;
+
+const PANEL_CLASSNAME = cn(
+  "items-stretch text-left overflow-hidden",
+  "w-full max-w-none rounded-b-none px-24 pt-32 pb-40 gap-40",
+  "min-[744px]:rounded-32 min-[744px]:w-[375px]",
+  "lg:w-full lg:max-w-[608px]",
+);
 
 interface RejectEstimateModalProps {
   request: MoverEstimateRequest;
@@ -34,16 +42,16 @@ export default function RejectEstimateModal({
 
   return (
     <Modal
-      open
-      title="제안 반려"
-      confirmLabel={isPending ? "반려하는 중..." : "반려하기"}
-      confirmDisabled={!isReasonValid || isPending}
-      onConfirm={() => isReasonValid && onSubmit(trimmedReason)}
-      onClose={onClose}
+      onClose={isPending ? undefined : onClose}
       overlayClassName="items-end px-0 min-[744px]:items-center min-[744px]:px-24"
-      className="min-[744px]:rounded-32 max-w-none rounded-b-none min-[744px]:w-[375px] lg:w-full lg:max-w-[608px]"
+      className={PANEL_CLASSNAME}
     >
-      <div className="flex flex-col gap-16">
+      <div className="flex w-full shrink-0 items-center justify-between gap-16">
+        <Modal.Title variant="2xl-semibold">제안 반려</Modal.Title>
+        <Modal.Close onClose={onClose} disabled={isPending} />
+      </div>
+
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-16 overflow-hidden">
         <Text as="p" variant="lg-regular" className="text-text-secondary">
           {request.customer.name} 고객님의 요청을 반려하는 이유를 입력해 주세요.
         </Text>
@@ -67,6 +75,15 @@ export default function RejectEstimateModal({
           </Text>
         </div>
       </div>
+
+      <Modal.Button
+        fullWidth
+        size="detail"
+        disabled={!isReasonValid || isPending}
+        onClick={() => isReasonValid && onSubmit(trimmedReason)}
+      >
+        {isPending ? "반려하는 중..." : "반려하기"}
+      </Modal.Button>
     </Modal>
   );
 }

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { FormEvent, useState } from "react";
 
-import Modal from "@/components/common/Modal";
+import Modal from "@/components/common/Modal/Modal";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
@@ -14,6 +14,7 @@ import {
   useSendMoverEstimate,
 } from "@/hooks/useMoverEstimateRequests";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
+import { cn } from "@/lib/utils/cn";
 import type { MoveType } from "@/types/move";
 import type { MoverEstimateRequest, RequestSort } from "@/types/moverEstimateRequest";
 
@@ -262,85 +263,95 @@ export default function ReceivedRequestsPage() {
         </section>
       </main>
 
-      <Modal
-        open={isFilterOpen}
-        title="필터"
-        confirmLabel="조회하기"
-        onConfirm={() => setIsFilterOpen(false)}
-        onClose={() => setIsFilterOpen(false)}
-        overlayClassName="items-end px-0 min-[744px]:items-center min-[744px]:px-24 lg:hidden"
-        className="rounded-t-32 min-[744px]:rounded-32 max-w-none gap-32 px-24 pt-24 pb-32 min-[744px]:w-[375px]"
-      >
-        <div className="flex flex-col gap-28">
-          <section className="flex flex-col gap-8">
-            <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
-              이사 유형
-            </Text>
-            <div className="flex flex-wrap gap-12">
-              {MOVE_TYPE_OPTIONS.map((moveType) => {
-                const isSelected = moveTypes.includes(moveType.value);
-                return (
-                  <button
-                    key={moveType.value}
-                    type="button"
-                    onClick={() => toggleMoveType(moveType.value)}
-                    className={`rounded-full border px-12 py-6 text-sm ${
-                      isSelected
-                        ? "border-border-brand bg-background-brand-muted text-text-brand font-medium"
-                        : "border-border-muted bg-background-subtle text-text-secondary font-medium"
-                    }`}
-                  >
-                    {moveType.label}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+      {isFilterOpen ? (
+        <Modal
+          onClose={() => setIsFilterOpen(false)}
+          overlayClassName="items-end px-0 min-[744px]:items-center min-[744px]:px-24 lg:hidden"
+          className={cn(
+            "max-w-none items-stretch gap-32 px-24 pt-24 pb-32 text-left",
+            "rounded-t-32 min-[744px]:rounded-32 min-[744px]:w-[375px]",
+          )}
+        >
+          <div className="flex w-full shrink-0 items-center justify-between gap-16">
+            <Modal.Title variant="2xl-semibold">필터</Modal.Title>
+            <Modal.Close onClose={() => setIsFilterOpen(false)} />
+          </div>
 
-          <section className="flex flex-col gap-8">
-            <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
-              지역 및 견적
-            </Text>
-            <div className="flex flex-col gap-12">
-              {[
-                {
-                  label: "지정 견적 요청",
-                  checked: includeDesignated,
-                  onChange: setIncludeDesignated,
-                },
-                {
-                  label: "서비스 가능 지역",
-                  checked: serviceAreaOnly,
-                  onChange: setServiceAreaOnly,
-                },
-              ].map((filter) => (
-                <label key={filter.label} className="text-text-secondary flex items-center">
-                  <input
-                    className="peer sr-only"
-                    type="checkbox"
-                    checked={filter.checked}
-                    onChange={(event) => filter.onChange(event.target.checked)}
-                  />
-                  <span className="peer-focus-visible:ring-border-brand flex h-36 w-36 items-center justify-center rounded-md peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
-                    <span
-                      className={`rounded-4 flex h-20 w-20 items-center justify-center ${
-                        filter.checked
-                          ? "bg-background-brand"
-                          : "border-border-default bg-background-surface border"
+          <div className="flex w-full flex-col gap-28">
+            <section className="flex flex-col gap-8">
+              <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
+                이사 유형
+              </Text>
+              <div className="flex flex-wrap gap-12">
+                {MOVE_TYPE_OPTIONS.map((moveType) => {
+                  const isSelected = moveTypes.includes(moveType.value);
+                  return (
+                    <button
+                      key={moveType.value}
+                      type="button"
+                      onClick={() => toggleMoveType(moveType.value)}
+                      className={`rounded-full border px-12 py-6 text-sm ${
+                        isSelected
+                          ? "border-border-brand bg-background-brand-muted text-text-brand font-medium"
+                          : "border-border-muted bg-background-subtle text-text-secondary font-medium"
                       }`}
                     >
-                      {filter.checked && (
-                        <Image src="/icons/checkbox-check.svg" alt="" width={10} height={6} />
-                      )}
+                      {moveType.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="flex flex-col gap-8">
+              <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
+                지역 및 견적
+              </Text>
+              <div className="flex flex-col gap-12">
+                {[
+                  {
+                    label: "지정 견적 요청",
+                    checked: includeDesignated,
+                    onChange: setIncludeDesignated,
+                  },
+                  {
+                    label: "서비스 가능 지역",
+                    checked: serviceAreaOnly,
+                    onChange: setServiceAreaOnly,
+                  },
+                ].map((filter) => (
+                  <label key={filter.label} className="text-text-secondary flex items-center">
+                    <input
+                      className="peer sr-only"
+                      type="checkbox"
+                      checked={filter.checked}
+                      onChange={(event) => filter.onChange(event.target.checked)}
+                    />
+                    <span className="peer-focus-visible:ring-border-brand flex h-36 w-36 items-center justify-center rounded-md peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
+                      <span
+                        className={`rounded-4 flex h-20 w-20 items-center justify-center ${
+                          filter.checked
+                            ? "bg-background-brand"
+                            : "border-border-default bg-background-surface border"
+                        }`}
+                      >
+                        {filter.checked && (
+                          <Image src="/icons/checkbox-check.svg" alt="" width={10} height={6} />
+                        )}
+                      </span>
                     </span>
-                  </span>
-                  {filter.label}
-                </label>
-              ))}
-            </div>
-          </section>
-        </div>
-      </Modal>
+                    {filter.label}
+                  </label>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          <Modal.Button fullWidth size="detail" onClick={() => setIsFilterOpen(false)}>
+            조회하기
+          </Modal.Button>
+        </Modal>
+      ) : null}
 
       {selectedRequest && (
         <SendEstimateModal

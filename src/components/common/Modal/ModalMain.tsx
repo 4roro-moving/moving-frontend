@@ -12,12 +12,9 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useIsClient } from "@/hooks/useIsClient";
 import { cn } from "@/lib/utils/cn";
-
-// 모달 내부에서 Tab 포커스 트랩 대상으로 볼 요소 목록
-const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 interface ModalContextValue {
   titleId: string;
@@ -68,48 +65,11 @@ const ModalMain = ({
     };
   }, []);
 
-  useEffect(() => {
-    panelRef.current?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose?.();
-        return;
-      }
-
-      if (event.key === "Tab") {
-        const panel = panelRef.current;
-        if (!panel) return;
-
-        const focusableElements = panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-
-        // 포커스 가능한 요소가 없으면 모달 밖으로 못 나가게
-        if (focusableElements.length === 0) {
-          event.preventDefault();
-          return;
-        }
-
-        const first = focusableElements[0];
-        const last = focusableElements[focusableElements.length - 1];
-        const active = document.activeElement;
-
-        if (event.shiftKey) {
-          if (active === first || active === panel || !panel.contains(active)) {
-            event.preventDefault();
-            last.focus();
-          }
-        } else {
-          if (active === last || !panel.contains(active)) {
-            event.preventDefault();
-            first.focus();
-          }
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  useFocusTrap({
+    containerRef: panelRef,
+    enabled: isMounted,
+    onEscape: onClose,
+  });
 
   if (!isMounted) return null;
 

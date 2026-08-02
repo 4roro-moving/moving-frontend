@@ -3,15 +3,23 @@
 import { useState } from "react";
 
 import Input from "@/components/common/Input/Input";
-import Modal from "@/components/common/Modal";
-import { Text } from "@/components/common/Text";
 import Textarea from "@/components/common/Input/Textarea";
+import Modal from "@/components/common/Modal/Modal";
+import { Text } from "@/components/common/Text";
 import EstimateRequestSummaryContent from "@/components/estimate/EstimateRequestSummaryContent";
+import { cn } from "@/lib/utils/cn";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 const MAX_PRICE = 100_000_000;
 const MIN_COMMENT_LENGTH = 10;
 const MAX_COMMENT_LENGTH = 1000;
+
+const PANEL_CLASSNAME = cn(
+  "items-stretch text-left overflow-hidden",
+  "max-h-[calc(100dvh-104px)] w-full max-w-none rounded-b-none px-24 pt-32 pb-40 gap-40",
+  "min-[744px]:rounded-32 min-[744px]:w-[375px]",
+  "lg:w-full lg:max-w-[608px]",
+);
 
 export interface SendEstimateInput {
   price: number;
@@ -34,24 +42,19 @@ export default function SendEstimateModal({
   const [price, setPrice] = useState("");
   const [comment, setComment] = useState("");
 
-  //가격 및 코멘트 변환
   const numericPrice = Number(price);
   const trimmedComment = comment.trim();
 
-  //가격 및 코멘트 검증
   const isPriceValid = numericPrice > 0 && numericPrice <= MAX_PRICE;
   const isCommentValid =
     trimmedComment.length >= MIN_COMMENT_LENGTH && trimmedComment.length <= MAX_COMMENT_LENGTH;
 
-  //제안할 수 있는지 확인
   const canSubmit = isPriceValid && isCommentValid && !isPending;
 
-  //가격 검증 오류 메시지
   const priceError =
     price.length > 0 && !isPriceValid
       ? "견적가는 1원 이상 1억 원 이하로 입력해 주세요."
       : undefined;
-  //코멘트 검증 오류 메시지
   const commentError =
     comment.length > 0 && !isCommentValid
       ? `코멘트는 ${MIN_COMMENT_LENGTH}자 이상 ${MAX_COMMENT_LENGTH}자 이하로 입력해 주세요.`
@@ -68,18 +71,17 @@ export default function SendEstimateModal({
 
   return (
     <Modal
-      open
-      title="견적 보내기"
-      confirmLabel={isPending ? "견적 보내는 중..." : "견적 보내기"}
-      confirmDisabled={!canSubmit}
-      onConfirm={handleSubmit}
-      onClose={onClose}
+      onClose={isPending ? undefined : onClose}
       overlayClassName="items-end px-0 min-[744px]:items-center min-[744px]:px-24"
-      className="min-[744px]:rounded-32 max-h-[calc(100dvh-104px)] max-w-none rounded-b-none min-[744px]:w-[375px] lg:w-full lg:max-w-[608px]"
+      className={PANEL_CLASSNAME}
     >
-      <div className="flex min-h-0 flex-col gap-32 overflow-y-auto">
+      <div className="flex w-full shrink-0 items-center justify-between gap-16">
+        <Modal.Title variant="2xl-semibold">견적 보내기</Modal.Title>
+        <Modal.Close onClose={onClose} disabled={isPending} />
+      </div>
+
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-32 overflow-y-auto">
         <section>
-          {/* 2026.07.29 정슬기 - [수정] 요청 요약 공통 컴포넌트 재사용 */}
           <EstimateRequestSummaryContent
             density="modal"
             moveType={request.moveType}
@@ -123,6 +125,10 @@ export default function SendEstimateModal({
           />
         </div>
       </div>
+
+      <Modal.Button fullWidth size="detail" disabled={!canSubmit} onClick={handleSubmit}>
+        {isPending ? "견적 보내는 중..." : "견적 보내기"}
+      </Modal.Button>
     </Modal>
   );
 }
