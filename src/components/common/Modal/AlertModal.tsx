@@ -18,26 +18,24 @@ export interface AlertModalProps {
   title: ReactNode;
   description?: ReactNode;
   onClose: () => void;
-  /** true면 Escape / overlay 클릭으로 닫히지 않음 */
   closeDisabled?: boolean;
-  /** md: 608px, sm: 480px (모바일 292px 공통) */
   size?: AlertModalSize;
-  /**
-   * 단일 주요 CTA (Mobile cta / Desktop detail).
-   * `actions`가 있으면 무시됩니다.
-   */
   primaryAction?: AlertPrimaryAction;
-  /** 커스텀 액션 영역. 있으면 primaryAction보다 우선합니다. */
   actions?: ReactNode;
 }
 
 function alertPanelClassName(size: AlertModalSize = "md"): string {
+  const compactPanel = cn(
+    "items-stretch text-left rounded-24",
+    "w-fit min-w-[293px] max-w-[calc(100vw-32px)] gap-30 px-16 py-24",
+  );
+
+  if (size === "sm") {
+    return compactPanel;
+  }
   return cn(
-    "items-stretch text-left",
-    "rounded-24 md:rounded-32",
-    "w-full max-w-[292px] gap-30 px-16 py-24",
-    "md:gap-40 md:px-24 md:pt-32 md:pb-40",
-    size === "sm" ? "md:max-w-[480px]" : "md:max-w-[608px]",
+    compactPanel,
+    "md:w-full md:min-w-0 md:max-w-[608px] md:rounded-32 md:gap-40 md:px-24 md:pt-32 md:pb-40",
   );
 }
 
