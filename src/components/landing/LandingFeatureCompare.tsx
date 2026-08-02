@@ -10,6 +10,7 @@ import { Text } from "@/components/common/Text";
  * // 2026.08.01 정슬기 - [수정] aspect-ratio + % 좌표로 이미지·텍스트 동기화
  * // 2026.08.01 정슬기 - [수정] img4 투명→회색 bake 제거·full-bleed·object-cover 정렬
  * // 2026.08.02 정슬기 - [수정] Desktop 랜딩 인스턴스 에셋 + cqw 텍스트 스케일(줄바꿈·위치 맞춤)
+ * // 2026.08.02 정슬기 - [수정] img4 Figma 원본 재적용(가공 번짐 제거, 캔버스만 밝게)
  */
 export default function LandingFeatureCompare() {
   return (
