@@ -6,11 +6,11 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import Button from "@/components/common/Button/Button";
+import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import Textarea from "@/components/common/Input/Textarea";
 import { Text } from "@/components/common/Text";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
-import ProfileFieldHeader from "@/components/profile/ProfileFieldHeader";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
 import { useCreateMoverProfile } from "@/hooks/profile/useCreateMoverProfile";
@@ -113,8 +113,7 @@ const MoverProfileForm = ({
 
       <div className="flex w-full flex-col gap-32 lg:flex-row lg:items-start lg:justify-between lg:gap-[120px]">
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">
-          <div className="flex flex-col gap-16 md:gap-20">
-            <ProfileFieldHeader label="프로필 이미지" />
+          <FormField label="프로필 이미지">
             <Controller
               name="imageFile"
               control={control}
@@ -127,10 +126,9 @@ const MoverProfileForm = ({
                 />
               )}
             />
-          </div>
+          </FormField>
 
-          <div className="flex flex-col gap-10">
-            <ProfileFieldHeader label="별명" htmlFor="nickname" required />
+          <FormField label="별명" labelFor="nickname" required>
             <Input
               id="nickname"
               size="md"
@@ -138,10 +136,9 @@ const MoverProfileForm = ({
               error={errors.nickname?.message}
               {...register("nickname")}
             />
-          </div>
+          </FormField>
 
-          <div className="flex flex-col gap-10">
-            <ProfileFieldHeader label="경력" htmlFor="career" required />
+          <FormField label="경력" labelFor="career" required>
             <Input
               id="career"
               size="md"
@@ -151,10 +148,9 @@ const MoverProfileForm = ({
               error={errors.career?.message}
               {...register("career")}
             />
-          </div>
+          </FormField>
 
-          <div className="flex flex-col gap-10">
-            <ProfileFieldHeader label="한 줄 소개" htmlFor="shortIntro" required />
+          <FormField label="한 줄 소개" labelFor="shortIntro" required>
             <Input
               id="shortIntro"
               size="md"
@@ -162,22 +158,20 @@ const MoverProfileForm = ({
               error={errors.shortIntro?.message}
               {...register("shortIntro")}
             />
-          </div>
+          </FormField>
         </div>
 
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">
-          <div className="flex flex-col gap-10">
-            <ProfileFieldHeader label="상세 설명" htmlFor="description" required />
+          <FormField label="상세 설명" labelFor="description" required>
             <Textarea
               id="description"
               placeholder="상세 내용을 입력해 주세요"
               error={errors.description?.message}
               {...register("description")}
             />
-          </div>
+          </FormField>
 
-          <div className="flex flex-col gap-16 md:gap-24">
-            <ProfileFieldHeader label="제공 서비스" required />
+          <FormField label="제공 서비스" required>
             <Controller
               name="serviceTypes"
               control={control}
@@ -191,10 +185,9 @@ const MoverProfileForm = ({
                 />
               )}
             />
-          </div>
+          </FormField>
 
-          <div className="flex flex-col gap-16 md:gap-24">
-            <ProfileFieldHeader label="서비스 가능 지역" required />
+          <FormField label="서비스 가능 지역" required>
             <Controller
               name="regionIds"
               control={control}
@@ -209,7 +202,7 @@ const MoverProfileForm = ({
                 />
               )}
             />
-          </div>
+          </FormField>
         </div>
       </div>
 

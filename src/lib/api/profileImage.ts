@@ -11,7 +11,6 @@ export const requestProfileImageUploadUrl = (body: ProfileImageUploadUrlRequest)
 
 /**
  * Presigned URL로 S3에 파일을 업로드합니다.
- * Authorization/JSON Content-Type을 붙이면 signature가 깨지므로 fetchInstance를 쓰지 않습니다.
  */
 export const uploadFileToPresignedUrl = async (uploadUrl: string, file: File): Promise<void> => {
   const response = await fetch(uploadUrl, {

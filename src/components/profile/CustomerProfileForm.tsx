@@ -6,9 +6,9 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import Button from "@/components/common/Button/Button";
+import FormField from "@/components/common/FormField/FormField";
 import { Text } from "@/components/common/Text";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
-import ProfileFieldHeader from "@/components/profile/ProfileFieldHeader";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
 import { useCreateCustomerProfile } from "@/hooks/profile/useCreateCustomerProfile";
@@ -111,8 +111,7 @@ const CustomerProfileForm = ({
 
       <div className="flex w-full flex-col gap-32">
         <section className="flex w-full flex-col gap-32">
-          <div className="flex flex-col gap-16 md:gap-20">
-            <ProfileFieldHeader label="프로필 이미지" htmlFor="customer-profile-image" />
+          <FormField label="프로필 이미지" labelFor="customer-profile-image">
             <Controller
               name="imageFile"
               control={control}
@@ -125,16 +124,15 @@ const CustomerProfileForm = ({
                 />
               )}
             />
-          </div>
+          </FormField>
           <div className="border-border-subtle w-full border-b" aria-hidden="true" />
         </section>
 
         <section className="flex w-full flex-col gap-32">
-          <div className="flex flex-col gap-16 md:gap-24">
-            <ProfileFieldHeader
-              label="이용 서비스"
-              hint="*이용 서비스는 중복 선택 가능하며, 언제든 수정 가능해요!"
-            />
+          <FormField
+            label="이용 서비스"
+            description="*이용 서비스는 중복 선택 가능하며, 언제든 수정 가능해요!"
+          >
             <Controller
               name="serviceTypes"
               control={control}
@@ -148,15 +146,11 @@ const CustomerProfileForm = ({
                 />
               )}
             />
-          </div>
+          </FormField>
           <div className="border-border-subtle w-full border-b" aria-hidden="true" />
         </section>
 
-        <section className="flex w-full flex-col gap-16 md:gap-24">
-          <ProfileFieldHeader
-            label="내가 사는 지역"
-            hint="*내가 사는 지역은 언제든 수정 가능해요!"
-          />
+        <FormField label="내가 사는 지역" description="*내가 사는 지역은 언제든 수정 가능해요!">
           <Controller
             name="regionId"
             control={control}
@@ -171,7 +165,7 @@ const CustomerProfileForm = ({
               />
             )}
           />
-        </section>
+        </FormField>
       </div>
 
       {submitError ? (
