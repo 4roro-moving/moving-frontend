@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 import Button from "@/components/common/Button/Button";
+import FormField from "@/components/common/FormField/FormField";
 import Textarea from "@/components/common/Input/Textarea";
 import Modal from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
@@ -166,16 +167,12 @@ function ReviewWriteModalContent({
           ) : null}
         </div>
 
-        <div className="flex w-full flex-col gap-10 md:gap-12">
-          <label htmlFor="review-content">
-            <Text
-              as="span"
-              variant={{ base: "md-semibold", md: "lg-semibold" }}
-              className="text-text-primary"
-            >
-              상세 후기를 작성해주세요
-            </Text>
-          </label>
+        <FormField
+          label="상세 후기를 작성해주세요"
+          labelFor="review-content"
+          variant="compact"
+          className="w-full gap-12"
+        >
           <Textarea
             id="review-content"
             value={content}
@@ -191,7 +188,7 @@ function ReviewWriteModalContent({
               }
             }}
           />
-        </div>
+        </FormField>
       </div>
 
       {submitError ? (

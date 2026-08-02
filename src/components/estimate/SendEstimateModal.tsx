@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Text } from "@/components/common/Text";
+import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import Textarea from "@/components/common/Input/Textarea";
 import Modal from "@/components/common/Modal/Modal";
@@ -91,10 +91,13 @@ export default function SendEstimateModal({
             moveDate={request.moveDate}
           />
         </section>
-        <div className="flex flex-col gap-16">
-          <Text as="label" htmlFor="estimate-price" variant="2lg-semibold">
-            견적가를 입력해 주세요
-          </Text>
+
+        <FormField
+          label="견적가를 입력해 주세요"
+          labelFor="estimate-price"
+          variant="compact"
+          className="gap-16"
+        >
           <Input
             id="estimate-price"
             inputMode="numeric"
@@ -106,12 +109,14 @@ export default function SendEstimateModal({
             onChange={(event) => setPrice(event.target.value)}
             className="h-54 text-lg"
           />
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-16">
-          <Text as="label" htmlFor="estimate-comment" variant="2lg-semibold">
-            코멘트를 입력해 주세요
-          </Text>
+        <FormField
+          label="코멘트를 입력해 주세요"
+          labelFor="estimate-comment"
+          variant="compact"
+          className="gap-16"
+        >
           <Textarea
             id="estimate-comment"
             value={comment}
@@ -121,7 +126,7 @@ export default function SendEstimateModal({
             onChange={(event) => setComment(event.target.value)}
             className="h-[160px] resize-none px-24 py-14 text-lg"
           />
-        </div>
+        </FormField>
       </div>
 
       <Modal.Button fullWidth size="detail" disabled={!canSubmit} onClick={handleSubmit}>

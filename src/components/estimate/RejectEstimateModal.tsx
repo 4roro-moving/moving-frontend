@@ -5,6 +5,7 @@ import { useState } from "react";
 import Textarea from "@/components/common/Input/Textarea";
 import Modal from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
+import FormField from "@/components/common/FormField/FormField";
 import { cn } from "@/lib/utils/cn";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
@@ -51,10 +52,7 @@ export default function RejectEstimateModal({
         <Text as="p" variant="lg-regular" className="text-text-secondary">
           {request.customer.name} 고객님의 요청을 반려하는 이유를 입력해 주세요.
         </Text>
-        <div className="flex flex-col gap-8">
-          <Text as="label" htmlFor="reject-reason" variant="2lg-semibold">
-            반려 사유
-          </Text>
+        <FormField label="반려 사유" labelFor="reject-reason" variant="compact" className="gap-8">
           <Textarea
             id="reject-reason"
             autoFocus
@@ -69,7 +67,7 @@ export default function RejectEstimateModal({
           <Text as="span" variant="xs-regular" className="text-text-muted self-end">
             {trimmedReason.length}/{MAX_REASON_LENGTH}
           </Text>
-        </div>
+        </FormField>
       </div>
 
       <Modal.Button
