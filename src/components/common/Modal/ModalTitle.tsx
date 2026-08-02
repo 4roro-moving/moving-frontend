@@ -13,7 +13,7 @@ interface ModalTitleProps {
   variant?: TextVariantProp;
 }
 
-const ModalTitle = ({ children, className, variant = "xl-bold" }: ModalTitleProps) => {
+const ModalTitle = ({ children, className, variant = "modalTitle" }: ModalTitleProps) => {
   const { titleId, setHasTitle } = useModalContext();
 
   useEffect(() => {

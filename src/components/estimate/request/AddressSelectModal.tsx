@@ -147,7 +147,7 @@ export default function AddressSelectModal({
   return (
     <Modal onClose={onClose} className={PANEL_CLASSNAME}>
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
-        <Modal.Title variant="2xl-semibold">{kind}를 선택해주세요</Modal.Title>
+        <Modal.Title>{kind}를 선택해주세요</Modal.Title>
         <Modal.Close onClose={onClose} />
       </div>
 

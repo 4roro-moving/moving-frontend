@@ -89,7 +89,7 @@ export default function AlertModal({
   return (
     <Modal onClose={closeDisabled ? undefined : onClose} className={alertPanelClassName(size)}>
       <div className="flex w-full items-center justify-between gap-12">
-        <Modal.Title variant={{ base: "2lg-bold", md: "2xl-semibold" }}>{title}</Modal.Title>
+        <Modal.Title>{title}</Modal.Title>
         <Modal.Close onClose={onClose} disabled={closeDisabled} />
       </div>
 

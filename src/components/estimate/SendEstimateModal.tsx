@@ -76,7 +76,7 @@ export default function SendEstimateModal({
       className={PANEL_CLASSNAME}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
-        <Modal.Title variant="2xl-semibold">견적 보내기</Modal.Title>
+        <Modal.Title>견적 보내기</Modal.Title>
         <Modal.Close onClose={onClose} disabled={isPending} />
       </div>
 
