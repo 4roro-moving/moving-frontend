@@ -37,7 +37,8 @@ const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
 ];
 
 const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
-  { type: "link", label: "프로필", href: APP_ROUTES.MOVER_PROFILE },
+  { type: "link", label: "프로필 수정", href: APP_ROUTES.MOVER_PROFILE_EDIT },
+  { type: "link", label: "기본정보 수정", href: APP_ROUTES.MOVER_BASIC_EDIT },
   { type: "action", label: "로그아웃", action: "logout" },
 ];
 

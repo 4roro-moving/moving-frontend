@@ -1,35 +1,35 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import Button from "@/components/common/Button/Button";
 import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import Textarea from "@/components/common/Input/Textarea";
 import { Text } from "@/components/common/Text";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
+import ProfileFormActions from "@/components/profile/ProfileFormActions";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
-import { useCreateMoverProfile } from "@/hooks/profile/useCreateMoverProfile";
+import { useUpdateMoverProfile } from "@/hooks/profile/useUpdateMoverProfile";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { getRoleHomePath } from "@/lib/auth/redirect";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
 import { uploadProfileImageIfNeeded } from "@/lib/profile/uploadProfileImage";
 import { moverProfileSchema, type MoverProfileFormValues } from "@/lib/schemas/moverProfileSchema";
 import type { MoveType } from "@/types/move";
 
-interface MoverProfileFormProps {
+interface MoverProfileEditFormProps {
   defaultValues?: Partial<MoverProfileFormValues>;
   initialImageUrl?: string | null;
 }
 
-const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfileFormProps) => {
-  const router = useRouter();
-  const createMoverProfile = useCreateMoverProfile();
+const MoverProfileEditForm = ({
+  defaultValues,
+  initialImageUrl = null,
+}: MoverProfileEditFormProps) => {
+  const updateMoverProfile = useUpdateMoverProfile();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -52,7 +52,7 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
     },
   });
 
-  const isPending = isSubmitting || createMoverProfile.isPending;
+  const isPending = isSubmitting || updateMoverProfile.isPending;
 
   const onSubmit = handleSubmit(async (formValues) => {
     setSubmitError(null);
@@ -60,7 +60,7 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
     try {
       const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
 
-      await createMoverProfile.mutateAsync({
+      await updateMoverProfile.mutateAsync({
         nickname: formValues.nickname,
         career: Number(formValues.career),
         shortIntro: formValues.shortIntro,
@@ -69,9 +69,8 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
         serviceTypes: formValues.serviceTypes,
         ...(imageUrl ? { imageUrl } : {}),
       });
-      router.replace(getRoleHomePath("MOVER"));
     } catch (error) {
-      setSubmitError(getApiErrorMessage(error, "프로필 저장에 실패했습니다."));
+      setSubmitError(getApiErrorMessage(error, "프로필 수정에 실패했습니다."));
     }
   });
 
@@ -81,10 +80,7 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
       onSubmit={onSubmit}
       noValidate
     >
-      <ProfilePageHeader
-        title="기사님 프로필 등록"
-        description="추가 정보를 입력하여 회원가입을 완료해주세요."
-      />
+      <ProfilePageHeader title="프로필 수정" />
 
       <div className="flex w-full flex-col gap-32 lg:flex-row lg:items-start lg:justify-between lg:gap-[120px]">
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">
@@ -103,9 +99,9 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
             />
           </FormField>
 
-          <FormField label="별명" labelFor="nickname" required>
+          <FormField label="별명" labelFor="mover-edit-nickname" required>
             <Input
-              id="nickname"
+              id="mover-edit-nickname"
               size="md"
               placeholder="사이트에 노출될 별명을 입력해 주세요"
               error={errors.nickname?.message}
@@ -113,9 +109,9 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
             />
           </FormField>
 
-          <FormField label="경력" labelFor="career" required>
+          <FormField label="경력" labelFor="mover-edit-career" required>
             <Input
-              id="career"
+              id="mover-edit-career"
               size="md"
               inputMode="numeric"
               numericOnly
@@ -125,9 +121,9 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
             />
           </FormField>
 
-          <FormField label="한 줄 소개" labelFor="shortIntro" required>
+          <FormField label="한 줄 소개" labelFor="mover-edit-shortIntro" required>
             <Input
-              id="shortIntro"
+              id="mover-edit-shortIntro"
               size="md"
               placeholder="한 줄 소개를 입력해 주세요"
               error={errors.shortIntro?.message}
@@ -137,9 +133,9 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
         </div>
 
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">
-          <FormField label="상세 설명" labelFor="description" required>
+          <FormField label="상세 설명" labelFor="mover-edit-description" required>
             <Textarea
-              id="description"
+              id="mover-edit-description"
               placeholder="상세 내용을 입력해 주세요"
               error={errors.description?.message}
               {...register("description")}
@@ -187,21 +183,9 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
         </Text>
       ) : null}
 
-      <div className="flex w-full justify-end">
-        <div className="w-full lg:w-[500px]">
-          <Button
-            type="submit"
-            variant="solid"
-            size="auth"
-            fullWidth
-            disabled={!isValid || isPending}
-          >
-            시작하기
-          </Button>
-        </div>
-      </div>
+      <ProfileFormActions isSubmitDisabled={!isValid || isPending} />
     </form>
   );
 };
 
-export default MoverProfileForm;
+export default MoverProfileEditForm;

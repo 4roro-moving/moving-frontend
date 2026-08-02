@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const CustomerProfilePage = () => {
-  return <CustomerProfileForm mode="create" />;
+  return <CustomerProfileForm />;
 };
 
 export default CustomerProfilePage;

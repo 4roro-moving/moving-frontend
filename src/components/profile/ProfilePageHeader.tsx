@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils/cn";
 
 interface ProfilePageHeaderProps {
   title: string;
-  description: string;
+  description?: string;
   className?: string;
 }
 
@@ -19,13 +19,15 @@ const ProfilePageHeader = ({ title, description, className }: ProfilePageHeaderP
         >
           {title}
         </Text>
-        <Text
-          as="p"
-          variant={{ base: "xs-regular", md: "xl-regular" }}
-          className="text-text-description"
-        >
-          {description}
-        </Text>
+        {description ? (
+          <Text
+            as="p"
+            variant={{ base: "xs-regular", md: "xl-regular" }}
+            className="text-text-description"
+          >
+            {description}
+          </Text>
+        ) : null}
       </div>
       <div className="border-border-subtle w-full border-b" aria-hidden="true" />
     </header>

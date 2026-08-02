@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const MoverProfilePage = () => {
-  return <MoverProfileForm mode="create" />;
+  return <MoverProfileForm />;
 };
 
 export default MoverProfilePage;

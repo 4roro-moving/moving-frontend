@@ -11,6 +11,7 @@ import type {
   MoverProfileMeResponse,
   ProfileStatus,
   UpdateCustomerProfileInput,
+  UpdateMoverBasicInfoInput,
   UpdateMoverProfileInput,
 } from "@/types/profile";
 
@@ -23,6 +24,7 @@ export type {
   MoverProfileMeResponse,
   ProfileStatus,
   UpdateCustomerProfileInput,
+  UpdateMoverBasicInfoInput,
   UpdateMoverProfileInput,
 } from "@/types/profile";
 
@@ -126,6 +128,12 @@ export const createMoverProfile = (input: CreateMoverProfileInput) =>
 export const updateMoverProfile = (input: UpdateMoverProfileInput) =>
   fetchInstance.patch<MoverProfileMeResponse, UpdateMoverProfileInput>(
     API_ROUTES.PROFILES.MOVER_ME,
+    input,
+  );
+
+export const updateMoverBasicInfo = (input: UpdateMoverBasicInfoInput) =>
+  fetchInstance.patch<MoverProfileMeResponse, UpdateMoverBasicInfoInput>(
+    API_ROUTES.PROFILES.MOVER_BASIC,
     input,
   );
 

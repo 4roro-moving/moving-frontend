@@ -12,7 +12,6 @@ import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
 import { useCreateCustomerProfile } from "@/hooks/profile/useCreateCustomerProfile";
-import { useUpdateCustomerProfile } from "@/hooks/profile/useUpdateCustomerProfile";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getRoleHomePath } from "@/lib/auth/redirect";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
@@ -23,36 +22,18 @@ import {
   type CustomerProfileFormValues,
 } from "@/lib/schemas/customerProfileSchema";
 import type { MoveType } from "@/types/move";
-import type { ProfileFormMode } from "@/types/profile";
 
 interface CustomerProfileFormProps {
-  mode?: ProfileFormMode;
   defaultValues?: Partial<CustomerProfileFormValues>;
   initialImageUrl?: string | null;
 }
 
-const COPY: Record<ProfileFormMode, { title: string; description: string; submitLabel: string }> = {
-  create: {
-    title: "프로필 등록",
-    description: "추가 정보를 입력하여 회원가입을 완료해주세요.",
-    submitLabel: "시작하기",
-  },
-  edit: {
-    title: "프로필 수정",
-    description: "프로필 정보를 수정할 수 있어요.",
-    submitLabel: "수정하기",
-  },
-};
-
 const CustomerProfileForm = ({
-  mode = "create",
   defaultValues,
   initialImageUrl = null,
 }: CustomerProfileFormProps) => {
   const router = useRouter();
-  const copy = COPY[mode];
   const createCustomerProfile = useCreateCustomerProfile();
-  const updateCustomerProfile = useUpdateCustomerProfile();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -70,8 +51,7 @@ const CustomerProfileForm = ({
     },
   });
 
-  const isPending =
-    isSubmitting || createCustomerProfile.isPending || updateCustomerProfile.isPending;
+  const isPending = isSubmitting || createCustomerProfile.isPending;
 
   const onSubmit = handleSubmit(async (formValues) => {
     setSubmitError(null);
@@ -83,19 +63,13 @@ const CustomerProfileForm = ({
       }
 
       const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
-      const profileInput = {
+
+      await createCustomerProfile.mutateAsync({
         ...(imageUrl ? { imageUrl } : {}),
         regionIds: [formValues.regionId],
         serviceTypes: formValues.serviceTypes,
-      };
-
-      if (mode === "create") {
-        await createCustomerProfile.mutateAsync(profileInput);
-        router.replace(getRoleHomePath("CUSTOMER"));
-        return;
-      }
-
-      await updateCustomerProfile.mutateAsync(profileInput);
+      });
+      router.replace(getRoleHomePath("CUSTOMER"));
     } catch (error) {
       setSubmitError(getApiErrorMessage(error, "프로필 저장에 실패했습니다."));
     }
@@ -107,7 +81,10 @@ const CustomerProfileForm = ({
       onSubmit={onSubmit}
       noValidate
     >
-      <ProfilePageHeader title={copy.title} description={copy.description} />
+      <ProfilePageHeader
+        title="프로필 등록"
+        description="추가 정보를 입력하여 회원가입을 완료해주세요."
+      />
 
       <div className="flex w-full flex-col gap-32">
         <section className="flex w-full flex-col gap-32">
@@ -175,7 +152,7 @@ const CustomerProfileForm = ({
       ) : null}
 
       <Button type="submit" variant="solid" size="auth" fullWidth disabled={!isValid || isPending}>
-        {copy.submitLabel}
+        시작하기
       </Button>
     </form>
   );

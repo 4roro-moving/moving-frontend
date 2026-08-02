@@ -1,9 +1,6 @@
 import type { RegionId } from "@/lib/constants/region";
 import type { MoveType } from "@/types/move";
 
-/** 프로필 등록·수정 화면 모드 */
-export type ProfileFormMode = "create" | "edit";
-
 export interface ProfileRegion {
   id: RegionId;
   name: string;
@@ -68,6 +65,11 @@ export interface CreateCustomerProfileInput {
 }
 
 export interface UpdateCustomerProfileInput {
+  name?: string;
+  phone?: string;
+  currentPassword?: string;
+  newPassword?: string;
+  newPasswordConfirm?: string;
   imageUrl?: string | null;
   regionIds?: number[];
   serviceTypes?: MoveType[];
@@ -91,6 +93,14 @@ export interface UpdateMoverProfileInput {
   description?: string;
   regionIds?: number[];
   serviceTypes?: MoveType[];
+}
+
+export interface UpdateMoverBasicInfoInput {
+  name?: string;
+  phone?: string;
+  currentPassword?: string;
+  newPassword?: string;
+  newPasswordConfirm?: string;
 }
 
 export const PROFILE_IMAGE_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;

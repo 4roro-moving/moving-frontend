@@ -23,6 +23,7 @@ export const API_ROUTES = {
     MOVER: "/profiles/mover",
     MOVER_STATUS: "/profiles/mover/status",
     MOVER_ME: "/profiles/mover/me",
+    MOVER_BASIC: "/profiles/mover/me/basic",
   },
   MOVERS: {
     ROOT: "/movers",

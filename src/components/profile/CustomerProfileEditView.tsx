@@ -1,10 +1,10 @@
 "use client";
 
-import CustomerProfileForm from "@/components/profile/CustomerProfileForm";
+import CustomerProfileEditForm from "@/components/profile/CustomerProfileEditForm";
 import { Text } from "@/components/common/Text";
 import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { useCustomerProfileMe } from "@/hooks/profile/useCustomerProfileMe";
-import { toCustomerProfileFormValues } from "@/lib/profile/toCustomerProfileFormValues";
+import { toCustomerProfileEditFormValues } from "@/lib/profile/toCustomerProfileEditFormValues";
 
 const CustomerProfileEditView = () => {
   const { canFetch, isPending: isAuthPending } = useCustomerAuthReady();
@@ -35,10 +35,10 @@ const CustomerProfileEditView = () => {
   }
 
   return (
-    <CustomerProfileForm
+    <CustomerProfileEditForm
       key={customerProfile.id}
-      mode="edit"
-      defaultValues={toCustomerProfileFormValues(customerProfile)}
+      email={customerProfile.email}
+      defaultValues={toCustomerProfileEditFormValues(customerProfile)}
       initialImageUrl={customerProfile.imageUrl}
     />
   );
