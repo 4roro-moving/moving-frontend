@@ -1,0 +1,195 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+
+import Button from "@/components/common/Button/Button";
+import Input from "@/components/common/Input/Input";
+import Textarea from "@/components/common/Input/Textarea";
+import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
+import type { ProfileFormMode } from "@/types/profileFormMode";
+import ProfileFieldHeader from "@/components/profile/ProfileFieldHeader";
+import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
+import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
+import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
+import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
+import { moverProfileSchema, type MoverProfileFormValues } from "@/lib/schemas/moverProfileSchema";
+import type { MoveType } from "@/types/move";
+
+interface MoverProfileFormProps {
+  mode?: ProfileFormMode;
+  defaultValues?: Partial<MoverProfileFormValues>;
+  initialImageUrl?: string | null;
+}
+
+const COPY: Record<ProfileFormMode, { title: string; description: string; submitLabel: string }> = {
+  create: {
+    title: "기사님 프로필 등록",
+    description: "추가 정보를 입력하여 회원가입을 완료해주세요.",
+    submitLabel: "시작하기",
+  },
+  edit: {
+    title: "기사님 프로필 수정",
+    description: "프로필 정보를 수정할 수 있어요.",
+    submitLabel: "수정하기",
+  },
+};
+
+const MoverProfileForm = ({
+  mode = "create",
+  defaultValues,
+  initialImageUrl = null,
+}: MoverProfileFormProps) => {
+  const copy = COPY[mode];
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm<MoverProfileFormValues>({
+    resolver: zodResolver(moverProfileSchema),
+    mode: "onChange",
+    defaultValues: {
+      imageFile: null,
+      nickname: "",
+      career: "",
+      shortIntro: "",
+      description: "",
+      serviceTypes: [],
+      regionIds: [],
+      ...defaultValues,
+    },
+  });
+
+  const onSubmit = handleSubmit((values) => {
+    // Phase A: API 연동 전 — 제출 값 확인용
+    console.log("[MoverProfileForm]", mode, values);
+  });
+
+  return (
+    <form
+      className="px-margin-mobile mx-auto flex w-full max-w-[1120px] flex-col gap-40 py-32 md:gap-48 md:px-72 md:py-40 lg:px-0 lg:pt-56 lg:pb-70"
+      onSubmit={onSubmit}
+      noValidate
+    >
+      <ProfilePageHeader title={copy.title} description={copy.description} />
+
+      <div className="flex w-full flex-col gap-32 lg:flex-row lg:items-start lg:justify-between lg:gap-[120px]">
+        <div className="flex w-full flex-col gap-32 lg:w-[500px]">
+          <div className="flex flex-col gap-16 md:gap-20">
+            <ProfileFieldHeader label="프로필 이미지" />
+            <Controller
+              name="imageFile"
+              control={control}
+              render={({ field }) => (
+                <ProfileImageUploader
+                  value={field.value ?? null}
+                  initialPreviewUrl={initialImageUrl}
+                  onChange={field.onChange}
+                  error={errors.imageFile?.message}
+                />
+              )}
+            />
+          </div>
+
+          <div className="flex flex-col gap-10">
+            <ProfileFieldHeader label="별명" htmlFor="nickname" required />
+            <Input
+              id="nickname"
+              size="md"
+              placeholder="사이트에 노출될 별명을 입력해 주세요"
+              error={errors.nickname?.message}
+              {...register("nickname")}
+            />
+          </div>
+
+          <div className="flex flex-col gap-10">
+            <ProfileFieldHeader label="경력" htmlFor="career" required />
+            <Input
+              id="career"
+              size="md"
+              placeholder="기사님의 경력을 입력해 주세요"
+              error={errors.career?.message}
+              {...register("career")}
+            />
+          </div>
+
+          <div className="flex flex-col gap-10">
+            <ProfileFieldHeader label="한 줄 소개" htmlFor="shortIntro" required />
+            <Input
+              id="shortIntro"
+              size="md"
+              placeholder="한 줄 소개를 입력해 주세요"
+              error={errors.shortIntro?.message}
+              {...register("shortIntro")}
+            />
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col gap-32 lg:w-[500px]">
+          <div className="flex flex-col gap-10">
+            <ProfileFieldHeader label="상세 설명" htmlFor="description" required />
+            <Textarea
+              id="description"
+              placeholder="상세 내용을 입력해 주세요"
+              error={errors.description?.message}
+              {...register("description")}
+            />
+          </div>
+
+          <div className="flex flex-col gap-16 md:gap-24">
+            <ProfileFieldHeader label="제공 서비스" required />
+            <Controller
+              name="serviceTypes"
+              control={control}
+              render={({ field }) => (
+                <ProfileChipGroup<MoveType>
+                  selectionMode="multiple"
+                  options={MOVE_TYPE_OPTIONS}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.serviceTypes?.message}
+                />
+              )}
+            />
+          </div>
+
+          <div className="flex flex-col gap-16 md:gap-24">
+            <ProfileFieldHeader label="서비스 가능 지역" required />
+            <Controller
+              name="regionIds"
+              control={control}
+              render={({ field }) => (
+                <ProfileChipGroup<RegionId>
+                  selectionMode="multiple"
+                  options={REGION_OPTIONS}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.regionIds?.message}
+                  className="max-w-[277px] gap-x-8 gap-y-12 md:max-w-none"
+                />
+              )}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex w-full justify-end">
+        <div className="w-full lg:w-[500px]">
+          <Button
+            type="submit"
+            variant="solid"
+            size="auth"
+            fullWidth
+            disabled={!isValid || isSubmitting}
+          >
+            {copy.submitLabel}
+          </Button>
+        </div>
+      </div>
+    </form>
+  );
+};
+
+export default MoverProfileForm;
