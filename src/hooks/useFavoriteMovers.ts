@@ -23,14 +23,15 @@ interface UseFavoriteMoversInfiniteOptions {
 function useFavoriteMoversQueryContext(requestEnabled = true) {
   const { authScope, isAuthQueryReady } = useAuthQueryScope();
   const auth = useCustomerAuthReady();
-  const isCustomerLoggedIn = auth.canFetch;
+  const isCustomerLoggedIn =
+    !auth.isPending && auth.isAuthenticated && auth.user?.role === "CUSTOMER";
 
   return {
     authScope,
     enabled: requestEnabled && isCustomerLoggedIn && isAuthQueryReady,
     isAuthPending: auth.isPending,
     isCustomerLoggedIn,
-    shouldHideForMover: !auth.isPending && auth.isAuthenticated && auth.isMover,
+    shouldHideForNonCustomer: !auth.isPending && auth.isAuthenticated && !isCustomerLoggedIn,
   };
 }
 
@@ -53,7 +54,7 @@ export function useFavoriteMovers(options: UseFavoriteMoversOptions = {}) {
     isInitialLoading: authContext.isAuthPending || (authContext.enabled && query.isPending),
     movers,
     query,
-    shouldHideForMover: authContext.shouldHideForMover,
+    shouldHideForNonCustomer: authContext.shouldHideForNonCustomer,
   };
 }
 
@@ -82,7 +83,7 @@ export function useFavoriteMoversInfinite(options: UseFavoriteMoversInfiniteOpti
     isInitialLoading: authContext.isAuthPending || (authContext.enabled && query.isPending),
     movers,
     query,
-    shouldHideForMover: authContext.shouldHideForMover,
+    shouldHideForNonCustomer: authContext.shouldHideForNonCustomer,
     totalCount: query.data?.pages[0]?.pagination.totalCount ?? 0,
   };
 }

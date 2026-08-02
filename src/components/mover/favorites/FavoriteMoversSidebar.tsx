@@ -80,13 +80,13 @@ export function FavoriteMoversSidebar() {
     isCustomerLoggedIn,
     movers: favoriteMovers,
     query,
-    shouldHideForMover,
+    shouldHideForNonCustomer,
   } = useFavoriteMovers({
     limit: FAVORITE_MOVERS_SIDEBAR_LIMIT,
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  if (shouldHideForMover) {
+  if (shouldHideForNonCustomer) {
     return null;
   }
 
