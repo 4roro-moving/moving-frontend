@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils/cn";
 interface ModalCloseProps {
   onClose: () => void;
   disabled?: boolean;
-  /** sm: 24px 고정 / md: 36px 고정 / responsive: 모바일 24px, 태블릿 이상 36px */
+  /** sm: 24px 고정 / md: 36px 고정 / responsive: 모바일·태블릿 24px, PC 36px */
   size?: "sm" | "md" | "responsive";
 }
 
@@ -18,7 +18,7 @@ const ModalClose = ({ onClose, disabled = false, size = "responsive" }: ModalClo
         "text-icon-default rounded-8 flex shrink-0 cursor-pointer items-center justify-center transition-colors",
         size === "sm" && "size-24",
         size === "md" && "size-36",
-        size === "responsive" && "size-24 md:size-36",
+        size === "responsive" && "size-24 lg:size-36",
         "hover:bg-background-hover hover:text-icon-default",
         "active:bg-background-hover",
         "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
@@ -31,7 +31,7 @@ const ModalClose = ({ onClose, disabled = false, size = "responsive" }: ModalClo
         className={cn(
           size === "sm" && "size-24",
           size === "md" && "size-36",
-          size === "responsive" && "size-24 md:size-36",
+          size === "responsive" && "size-24 lg:size-36",
         )}
       />
     </button>
