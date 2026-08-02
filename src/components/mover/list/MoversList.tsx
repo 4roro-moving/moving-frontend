@@ -120,8 +120,6 @@ export function MoversList({ filters }: MoversListProps) {
             }}
           />
         ) : null}
-
-        {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
       </div>
     );
   }
@@ -129,6 +127,7 @@ export function MoversList({ filters }: MoversListProps) {
   return (
     <div ref={listStartRef} className="scroll-mt-24">
       {content}
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </div>
   );
 }
