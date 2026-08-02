@@ -182,7 +182,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
         >
           SNS 계정으로 간편 가입하기
         </Text>
-        <SocialLoginButtons />
+        <SocialLoginButtons audience={audience} onError={setSubmitError} />
       </div>
     </div>
   );

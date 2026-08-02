@@ -1,23 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 
 import { Text } from "@/components/common/Text";
-import Toast from "@/components/common/Toast/Toast";
 import EstimateDetailLayout, {
   ESTIMATE_DETAIL_LAYOUT_CLASSES,
   EstimateDetailQueryState,
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import { EstimateDetailInfoSection } from "@/components/estimate/detail/EstimateDetailInfoSection";
-import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
 import EstimateRequestDesignatedMovers from "@/components/estimate/requests/EstimateRequestDesignatedMovers";
 import EstimateRequestDetailSummary from "@/components/estimate/requests/EstimateRequestDetailSummary";
 import { useEstimateRequestDetail } from "@/hooks/useEstimateRequestDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
-import { buildEstimateShareLine } from "@/lib/share/shareText";
 import {
   formatDetailDateLabel,
   formatMoveDateLabel,
@@ -61,7 +56,7 @@ function toStatusPresentation(request: MyEstimateRequestItem) {
  * 고객 보낸 견적 요청 상세
  *
  * Figma `견적 상세_확정 견적/Desktop`(8093:49323) 기준.
- * Header/Hero/InfoRow/Share는 견적 상세 공통 재사용.
+ * Header/Hero/InfoRow는 견적 상세 공통 재사용.
  * 기사님용 EstimateRequestSummaryContent(카드/모달)는 건드리지 않음.
  * // 2026.07.30 정슬기 - [수정] EstimateDetailLayout 적용
  * // 2026.07.30 정슬기 - [추가] 지정 요청 대상 기사님 정보 표시
@@ -70,7 +65,6 @@ export default function EstimateRequestDetailView({
   estimateRequestId,
 }: EstimateRequestDetailViewProps) {
   const { data, isLoading, isError, error, refetch } = useEstimateRequestDetail(estimateRequestId);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -113,44 +107,29 @@ export default function EstimateRequestDetailView({
 
   const isDesignated = data.designatedMovers.length > 0;
   const { statusLabel, showConfirmedIcon, statusClassName } = toStatusPresentation(data);
-  const kakaoEstimateShare = {
-    share_line: buildEstimateShareLine(null),
-    profile_image: toKakaoShareImageUrl(null),
-    like_count: "",
-  };
 
   return (
-    <>
-      <EstimateDetailLayout
-        title="견적 상세"
-        showProfile={false}
-        contentClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName}
-        rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
-        mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
-        asideClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName}
-        main={
-          <>
-            <EstimateRequestDetailSummary
-              moveType={data.moveType}
-              isDesignated={isDesignated}
-              title={getMoveTypeLabel(data.moveType)}
-              statusLabel={statusLabel}
-              statusClassName={statusClassName}
-              showConfirmedIcon={showConfirmedIcon}
-            />
-            <EstimateDetailInfoSection rows={toRequestInfoRows(data)} />
-            <EstimateRequestDesignatedMovers designatedMovers={data.designatedMovers} />
-          </>
-        }
-        aside={
-          <EstimateDetailShare
-            linkAccess="owner"
-            kakaoEstimateShare={kakaoEstimateShare}
-            onToastMessage={setToastMessage}
+    <EstimateDetailLayout
+      title="견적 상세"
+      showProfile={false}
+      contentClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName}
+      rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
+      mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
+      asideClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName}
+      main={
+        <>
+          <EstimateRequestDetailSummary
+            moveType={data.moveType}
+            isDesignated={isDesignated}
+            title={getMoveTypeLabel(data.moveType)}
+            statusLabel={statusLabel}
+            statusClassName={statusClassName}
+            showConfirmedIcon={showConfirmedIcon}
           />
-        }
-      />
-      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
-    </>
+          <EstimateDetailInfoSection rows={toRequestInfoRows(data)} />
+          <EstimateRequestDesignatedMovers designatedMovers={data.designatedMovers} />
+        </>
+      }
+    />
   );
 }

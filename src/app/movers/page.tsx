@@ -3,7 +3,7 @@ import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query
 
 import { MoversPageView } from "@/components/mover/MoversPageView";
 import { getMovers } from "@/lib/api/movers";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { AUTH_QUERY_GUEST_SCOPE, getMoverListQueryKey } from "@/lib/constants/queryKeys";
 import { parseMoversSearchParams, toMoversListQuery } from "@/lib/utils/moversSearchParams";
 
 export const metadata: Metadata = {
@@ -31,7 +31,8 @@ export default async function MoversPage({ searchParams }: MoversPageProps) {
   try {
     // infinite query는 await 필수 (미대기 dehydrate 시 클라이언트 hydrate 깨질 수 있음)
     await queryClient.prefetchInfiniteQuery({
-      queryKey: [...QUERY_KEYS.MOVERS.LIST, listQuery],
+      // 서버 prefetch에는 access token이 없으므로 guest 캐시로 분리합니다.
+      queryKey: getMoverListQueryKey(AUTH_QUERY_GUEST_SCOPE, listQuery),
       queryFn: ({ pageParam }) => getMovers({ ...listQuery, page: pageParam }),
       initialPageParam: 1,
       getNextPageParam: (lastPage) =>

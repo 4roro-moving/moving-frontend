@@ -5,6 +5,10 @@ export const API_ROUTES = {
     LOGIN: "/auth/login",
     LOGOUT: "/auth/logout",
     REFRESH: "/auth/refresh",
+    GOOGLE_LOGIN: "/auth/oauth/google",
+    KAKAO_LOGIN: "/auth/oauth/kakao",
+    NAVER_LOGIN: "/auth/oauth/naver",
+    NAVER_OAUTH_STATE: "/auth/oauth/naver/state",
   },
   USERS: {
     ROOT: "/users",
@@ -44,7 +48,6 @@ export const API_ROUTES = {
     CONFIRM: (estimateId: number) => `/estimates/${estimateId}/confirm`,
   },
   FAVORITES: {
-    /** GET 찜한 기사님 목록 */
     MOVERS: "/favorites/movers",
     MOVER: (moverId: string) => `/favorites/movers/${moverId}`,
   },
@@ -58,6 +61,5 @@ export const API_ROUTES = {
     ROOT: "/notifications",
     UNREAD_COUNT: "/notifications/unread-count",
     READ: (notificationId: number) => `/notifications/${notificationId}/read`,
-    READ_ALL: "/notifications/read-all",
   },
 } as const;

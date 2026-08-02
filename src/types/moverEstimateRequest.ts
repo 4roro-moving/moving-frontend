@@ -28,25 +28,14 @@ export type MoverEstimateRequestQuery = {
   limit: number;
 };
 
-export type MoverEstimateRequestResponse =
-  | {
-      success: true;
-      data: {
-        items: MoverEstimateRequest[];
-        pagination: {
-          nextCursor: string | null;
-          hasNextPage: boolean;
-          totalCount: number;
-        };
-      };
-    }
-  | {
-      success: false;
-      error: {
-        code: string;
-        message: string;
-      };
-    };
+export type MoverEstimateRequestResult = {
+  items: MoverEstimateRequest[];
+  pagination: {
+    nextCursor: string | null;
+    hasNextPage: boolean;
+    totalCount: number;
+  };
+};
 
 // 기사 견적 전송 요청 Body
 export type SendEstimateRequest = {
@@ -70,20 +59,6 @@ export type SentEstimate = {
   createdAt: string;
 };
 
-// 기사 견적 전송 API 응답
-export type SendEstimateResponse =
-  | {
-      success: true;
-      data: SentEstimate;
-    }
-  | {
-      success: false;
-      error: {
-        code: string;
-        message: string;
-      };
-    };
-
 export type RejectedEstimate = {
   id: number;
   estimateRequestId: number;
@@ -91,19 +66,6 @@ export type RejectedEstimate = {
   reason: string;
   createdAt: string;
 };
-
-export type RejectEstimateResponse =
-  | {
-      success: true;
-      data: RejectedEstimate;
-    }
-  | {
-      success: false;
-      error: {
-        code: string;
-        message: string;
-      };
-    };
 
 //기사 견적 반려 조회
 export type RejectedEstimateRequestItem = {
@@ -126,21 +88,10 @@ export type RejectedEstimateRequestItem = {
   };
 };
 
-export type RejectedEstimateRequestListResponse =
-  | {
-      success: true;
-      data: {
-        items: RejectedEstimateRequestItem[];
-        pagination: {
-          nextCursor: string | null;
-          hasNextPage: boolean;
-        };
-      };
-    }
-  | {
-      success: false;
-      error: {
-        code: string;
-        message: string;
-      };
-    };
+export type RejectedEstimateRequestListResult = {
+  items: RejectedEstimateRequestItem[];
+  pagination: {
+    nextCursor: string | null;
+    hasNextPage: boolean;
+  };
+};

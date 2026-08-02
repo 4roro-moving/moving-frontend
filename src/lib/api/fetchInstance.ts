@@ -15,6 +15,8 @@ export interface FetchRequestOptions extends RequestInit {
   baseURL?: string;
   /** true면 Authorization 미부착 (refresh 등) */
   skipAuth?: boolean;
+  /** true면 401이어도 /auth/refresh 재시도 안 함 */
+  skipRefresh?: boolean;
 }
 
 const NO_REFRESH_ENDPOINTS: readonly string[] = [
@@ -23,6 +25,10 @@ const NO_REFRESH_ENDPOINTS: readonly string[] = [
   API_ROUTES.AUTH.SIGN_UP_MOVER,
   API_ROUTES.AUTH.REFRESH,
   API_ROUTES.AUTH.LOGOUT,
+  API_ROUTES.AUTH.GOOGLE_LOGIN,
+  API_ROUTES.AUTH.KAKAO_LOGIN,
+  API_ROUTES.AUTH.NAVER_LOGIN,
+  API_ROUTES.AUTH.NAVER_OAUTH_STATE,
 ];
 
 const safeFetch = async (url: string, init: RequestInit): Promise<Response> => {
@@ -103,7 +109,13 @@ const requestBody = async <T>(
   options: FetchRequestOptions = {},
   retry = true,
 ): Promise<SuccessBody<T> | null> => {
-  const { baseURL = BASE_URL, skipAuth, headers: customHeaders, ...fetchOptions } = options;
+  const {
+    baseURL = BASE_URL,
+    skipAuth,
+    skipRefresh,
+    headers: customHeaders,
+    ...fetchOptions
+  } = options;
   const isFormData = fetchOptions.body instanceof FormData;
   const headers = await getRequestHeaders(customHeaders, isFormData, { skipAuth });
 
@@ -122,7 +134,8 @@ const requestBody = async <T>(
     SuccessBody<T> | ApiErrorResponse | Record<string, never>;
 
   if (!res.ok || body.success === false) {
-    const shouldRefresh = retry && res.status === 401 && !NO_REFRESH_ENDPOINTS.includes(endpoint);
+    const shouldRefresh =
+      retry && !skipRefresh && res.status === 401 && !NO_REFRESH_ENDPOINTS.includes(endpoint);
 
     if (shouldRefresh) {
       await ensureAccessTokenRefreshed();
@@ -151,10 +164,10 @@ const fetchInstance = {
   get: <TResponse>(endpoint: string, options?: FetchRequestOptions) =>
     request<TResponse>(endpoint, { ...options, method: "GET" }),
 
-  getPaginated: async <TResponse>(
+  getPaginated: async <TResponse, TPagination = Pagination>(
     endpoint: string,
     options?: FetchRequestOptions,
-  ): Promise<{ data: TResponse; pagination: Pagination }> => {
+  ): Promise<{ data: TResponse; pagination: TPagination }> => {
     const body = await requestBody<TResponse>(endpoint, { ...options, method: "GET" });
 
     if (body === null) {
@@ -165,7 +178,7 @@ const fetchInstance = {
       throw new ApiError("페이지네이션 응답이 올바르지 않습니다.");
     }
 
-    return { data: body.data, pagination: body.pagination };
+    return { data: body.data, pagination: body.pagination as TPagination };
   },
 
   post: <TResponse, TBody = unknown>(
@@ -192,6 +205,17 @@ const fetchInstance = {
 
   delete: <TResponse>(endpoint: string, options?: FetchRequestOptions) =>
     request<TResponse>(endpoint, { ...options, method: "DELETE" }),
+
+  deleteWithBody: <TResponse, TBody = unknown>(
+    endpoint: string,
+    body: TBody,
+    options?: FetchRequestOptions,
+  ) =>
+    request<TResponse>(endpoint, {
+      ...options,
+      method: "DELETE",
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    }),
 };
 
 export default fetchInstance;

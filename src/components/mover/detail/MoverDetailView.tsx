@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
 import Toast from "@/components/common/Toast/Toast";
 import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
-import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
 import DesignateSuccessModal from "@/components/estimate/DesignateSuccessModal";
 import EstimateRequestRequiredModal from "@/components/estimate/EstimateRequestRequiredModal";
 import MoverDetailActions from "@/components/mover/detail/MoverDetailActions";
@@ -14,6 +13,7 @@ import MoverDetailPageSkeleton from "@/components/mover/detail/MoverDetailPageSk
 import MoverDetailProfile from "@/components/mover/detail/MoverDetailProfile";
 import MoverDetailReviews from "@/components/mover/detail/MoverDetailReviews";
 import MoverDetailServices from "@/components/mover/detail/MoverDetailServices";
+import MoverDetailShare from "@/components/mover/detail/MoverDetailShare";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
 import { useDesignateMover } from "@/hooks/useDesignateMover";
@@ -23,6 +23,7 @@ import { useMoverDetail } from "@/hooks/useMoverDetail";
 import { hasAuthSession } from "@/lib/auth/session";
 import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
 import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { ApiError } from "@/types/api";
 
 interface MoverDetailViewProps {
@@ -40,6 +41,9 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
 
   const isClient = useIsClient();
   const isLoggedIn = isClient && hasAuthSession();
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const isAuthPending = !hasHydrated || isCheckingAuth;
   const loginRequiredModal = useLoginRequiredModal();
 
   const { data: detail, isLoading, error, isFetching, refetch } = useMoverDetail(moverId);
@@ -62,7 +66,8 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     onError: setToastMessage,
   });
 
-  if (isLoading) {
+  // SSR guest 상세가 로그인 사용자 정보보다 먼저 노출되지 않도록 세션 확인 완료까지 대기합니다.
+  if (isAuthPending || isLoading) {
     return <MoverDetailPageSkeleton />;
   }
 
@@ -192,11 +197,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
             <div className="border-border-subtle w-full border-t lg:hidden" aria-hidden="true" />
 
             <div className="lg:hidden">
-              <EstimateDetailShare
-                title="나만 알기엔 아쉬운 기사님인가요?"
-                kakaoMoverShare={kakaoShare}
-                onToastMessage={setToastMessage}
-              />
+              <MoverDetailShare kakaoShare={kakaoShare} onToastMessage={setToastMessage} />
             </div>
 
             <div className="border-border-subtle w-full border-t" aria-hidden="true" />
@@ -211,11 +212,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
 
           <aside className="hidden w-full min-w-0 flex-col items-start gap-40 lg:flex lg:w-[320px] lg:gap-70 lg:pt-40">
             <MoverDetailActions layout="sidebar" {...actionsProps} />
-            <EstimateDetailShare
-              title="나만 알기엔 아쉬운 기사님인가요?"
-              kakaoMoverShare={kakaoShare}
-              onToastMessage={setToastMessage}
-            />
+            <MoverDetailShare kakaoShare={kakaoShare} onToastMessage={setToastMessage} />
           </aside>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { getCustomerProfileStatus, getMoverProfileStatus } from "@/lib/api/profile";
 import type { AuthRole } from "@/lib/auth/role";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
 
 export type AuthAudience = "customer" | "mover" | "admin";
 
@@ -38,6 +39,34 @@ export const getAuthAudienceFromRole = (role: AuthRole | null | undefined): Auth
     default:
       return "customer";
   }
+};
+
+/** 로그인/OAuth 입구 audience와 계정 role이 다를 때 안내 문구 */
+export const getAudienceMismatchMessage = (
+  pageAudience: AuthAudience,
+  accountAudience: AuthAudience,
+): string => {
+  if (pageAudience === accountAudience) {
+    return "올바르지 않은 계정입니다. 다시 로그인해 주세요.";
+  }
+
+  // 관리자 계정이 고객/기사 로그인을 할 경우
+  if (accountAudience === "admin") {
+    return "관리자 계정입니다. 관리자 전용 로그인을 이용해 주세요.";
+  }
+
+  // 관리자 로그인 페이지에 고객/기사가 들어온 경우
+  if (pageAudience === "admin") {
+    return accountAudience === "mover"
+      ? "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요."
+      : "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
+  }
+
+  // 고객 로그인 페이지에 기사가 들어온 경우
+  if (pageAudience === "customer") {
+    return "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요.";
+  }
+  return "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
 };
 
 /** 역할별 홈 — 잘못된 role 접근·auth 재진입 */
@@ -97,8 +126,12 @@ export const getPostAuthRedirectPath = async (params?: {
     params?.fallbackPath ?? getRoleHomePath(audience === "mover" ? "MOVER" : "CUSTOMER");
 
   try {
+    // 로그인 직후 폐기된 refresh 쿠키로 /auth/refresh가 돌지 않도록
+    const statusOptions = { skipRefresh: true } as const;
     const status =
-      audience === "mover" ? await getMoverProfileStatus() : await getCustomerProfileStatus();
+      audience === "mover"
+        ? await getMoverProfileStatus(statusOptions)
+        : await getCustomerProfileStatus(statusOptions);
 
     return resolvePostLoginPath({
       isProfileCompleted: status.isProfileCompleted,
@@ -135,6 +168,13 @@ export const isAuthPagePath = (pathname: string): boolean => {
   ].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 };
 
+/** OAuth Provider callback — checkAuth의 refresh/profile을 건너뜁니다. */
+export const isOAuthCallbackPath = (pathname: string): boolean => {
+  return (["google", "kakao", "naver"] as const).some(
+    (provider) => pathname === APP_ROUTES.OAUTH_CALLBACK(provider),
+  );
+};
+
 export const getAudienceFromPathname = (pathname: string): AuthAudience => {
   return pathname === APP_ROUTES.MOVER_LOGIN ||
     pathname.startsWith(`${APP_ROUTES.MOVER_LOGIN}/`) ||
@@ -143,4 +183,21 @@ export const getAudienceFromPathname = (pathname: string): AuthAudience => {
     pathname.startsWith("/mover/")
     ? "mover"
     : "customer";
+};
+
+/** 현재 경로가 공개 페이지(기사님 찾기, 기사님 상세)인지 판별 */
+export const isPublicMoverPath = (pathname: string): boolean => {
+  if (pathname === APP_ROUTES.MOVERS.ROOT) {
+    return true;
+  }
+
+  const detailPrefix = `${APP_ROUTES.MOVERS.ROOT}/`;
+
+  if (!pathname.startsWith(detailPrefix)) {
+    return false;
+  }
+
+  const moverId = pathname.slice(detailPrefix.length);
+
+  return !moverId.includes("/") && isMoverDetailId(moverId);
 };

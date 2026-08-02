@@ -6,7 +6,6 @@ import EstimateDetailLayout, {
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import { EstimateDetailInfoSection } from "@/components/estimate/detail/EstimateDetailInfoSection";
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
-import EstimateDetailShare from "@/components/estimate/detail/EstimateDetailShare";
 import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import { useSentEstimateDetail } from "@/hooks/useSentEstimates";
 import FrameIcon from "@/icons/frame.svg";
@@ -70,6 +69,32 @@ function SentEstimateSummary({ estimate }: { estimate: SentEstimate }) {
   );
 }
 
+function SentEstimateComment({ comment }: { comment: string }) {
+  return (
+    <section
+      className="flex w-full flex-col gap-20 md:gap-28"
+      aria-labelledby="mover-comment-title"
+    >
+      <h2 id="mover-comment-title" className="text-text-primary">
+        <Text as="span" variant="lg-semibold" className="md:hidden">
+          기사님 코멘트
+        </Text>
+        <Text as="span" variant="xl-semibold" className="hidden md:inline">
+          기사님 코멘트
+        </Text>
+      </h2>
+
+      <Text
+        as="p"
+        variant="lg-medium"
+        className="text-text-muted wrap-break-word whitespace-pre-wrap"
+      >
+        {comment}
+      </Text>
+    </section>
+  );
+}
+
 export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetailPageProps) {
   const query = useSentEstimateDetail(estimateId);
 
@@ -97,7 +122,6 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
       contentClassName="pt-35 pb-64 md:pt-[46px] md:pb-80 lg:pt-[43px] lg:pb-37-5"
       rowClassName="gap-20 md:gap-32 lg:gap-0"
       mainClassName="gap-20 md:gap-30 lg:w-185"
-      asideClassName="border-border-subtle gap-12 border-t pt-20 md:gap-22 md:pt-32 lg:w-xs lg:border-t-0 lg:pt-0"
       main={
         <>
           <div className="flex w-full flex-col gap-20 md:gap-26">
@@ -105,24 +129,28 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
             <EstimateDetailPrice price={estimate.price} />
           </div>
 
-          <EstimateDetailInfoSection
-            rows={[
-              { label: "견적 요청일", value: formatKoreanDateTime(request.requestedAt) },
-              { label: "서비스", value: MOVE_TYPE_LABEL[request.moveType] },
-              { label: "이용일", value: formatKoreanDateTime(request.moveDate) },
-              {
-                label: "출발지",
-                value: formatAddress(request.fromAddress, request.fromDetailAddress),
-              },
-              {
-                label: "도착지",
-                value: formatAddress(request.toAddress, request.toDetailAddress),
-              },
-            ]}
-          />
+          <div className="flex w-full flex-col gap-20 md:gap-28">
+            <EstimateDetailInfoSection
+              rows={[
+                { label: "견적 요청일", value: formatKoreanDateTime(request.requestedAt) },
+                { label: "서비스", value: MOVE_TYPE_LABEL[request.moveType] },
+                { label: "이용일", value: formatKoreanDateTime(request.moveDate) },
+                {
+                  label: "출발지",
+                  value: formatAddress(request.fromAddress, request.fromDetailAddress),
+                },
+                {
+                  label: "도착지",
+                  value: formatAddress(request.toAddress, request.toDetailAddress),
+                },
+              ]}
+            />
+            <div className="border-border-subtle w-full border-t" aria-hidden="true" />
+          </div>
+
+          <SentEstimateComment comment={estimate.comment} />
         </>
       }
-      aside={<EstimateDetailShare linkAccess="owner" />}
     />
   );
 }
