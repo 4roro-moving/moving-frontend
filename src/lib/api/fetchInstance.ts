@@ -49,20 +49,18 @@ const setApiError = (status: number, body: unknown): ApiError => {
   const record = typeof body === "object" && body !== null ? (body as Record<string, unknown>) : {};
 
   const errorInfo = "error" in record ? (record.error as ApiErrorResponse["error"]) : undefined;
-  const debugInfo =
-    "path" in record
-      ? {
-          path: record.path as string | undefined,
-          method: record.method as string | undefined,
-          timestamp: record.timestamp as string | undefined,
-        }
-      : undefined;
+  const data = {
+    details: errorInfo?.data,
+    path: record.path as string | undefined,
+    method: record.method as string | undefined,
+    timestamp: record.timestamp as string | undefined,
+  };
 
   return new ApiError(
     errorInfo?.message ?? "알 수 없는 오류가 발생했습니다.",
     status,
     errorInfo?.code,
-    debugInfo,
+    data,
   );
 };
 

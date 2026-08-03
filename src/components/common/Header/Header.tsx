@@ -3,12 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import NotificationTrigger from "@/components/common/Header/notification";
+import HeaderSideNav from "@/components/common/Header/HeaderSideNav";
 import ProfileMenuTrigger, {
   type ProfileMenuItem,
 } from "@/components/common/Header/ProfileMenuTrigger";
 import { Text } from "@/components/common/Text";
+import { MenuIcon } from "@/icons";
 import { getLoginRedirectPath } from "@/lib/auth/session";
 import type { AuthRole } from "@/lib/auth/role";
 import { loadRole } from "@/lib/auth/role";
@@ -43,7 +46,7 @@ const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
 ];
 
 /** GNB 메뉴 활성 여부. 찜한 기사님(`/movers/favorites`)은 프로필 메뉴 항목이라 기사님 찾기 활성에서 제외 */
-function isNavLinkActive(pathname: string, href: string): boolean {
+const isNavLinkActive = (pathname: string, href: string): boolean => {
   if (pathname === href) {
     return true;
   }
@@ -60,7 +63,7 @@ function isNavLinkActive(pathname: string, href: string): boolean {
   }
 
   return true;
-}
+};
 
 export interface HeaderProps {
   /** Server에서 refresh 쿠키로 전달. hydrate 전 깜빡임 방지용 */
@@ -77,6 +80,15 @@ const Header = ({
   initialRole = null,
 }: HeaderProps) => {
   const pathname = usePathname();
+  const [isSideNavOpen, setIsSideNavOpen] = useState(false);
+  const [sideNavPathname, setSideNavPathname] = useState(pathname);
+
+  if (pathname !== sideNavPathname) {
+    setSideNavPathname(pathname);
+    if (isSideNavOpen) {
+      setIsSideNavOpen(false);
+    }
+  }
 
   const user = useAuthStore((state) => state.user);
   const displayName = useAuthStore((state) => state.displayName);
@@ -94,21 +106,34 @@ const Header = ({
     : resolvedRole === "MOVER"
       ? MOVER_LOGGED_IN_LINKS
       : CUSTOMER_LOGGED_IN_LINKS;
+  const sideNavLinks = !isLogin
+    ? [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
+    : navLinks;
   const profileMenuItems =
     resolvedRole === "MOVER" ? MOVER_PROFILE_MENU_ITEMS : CUSTOMER_PROFILE_MENU_ITEMS;
   // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
   const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
+  const openSideNav = () => setIsSideNavOpen(true);
+  const closeSideNav = () => setIsSideNavOpen(false);
+
   return (
     <header className="border-border-subtle bg-background-surface w-full border-b">
-      <div className="h-gnb-height-desktop px-gnb-padding-x-desktop flex items-center justify-between py-26">
+      <div className="h-gnb-height-mobile md:h-gnb-height-tablet lg:h-gnb-height-desktop px-margin-mobile md:px-margin-tablet lg:px-gnb-padding-x-desktop flex items-center justify-between py-10 lg:py-26">
         <div className="flex items-center gap-80">
           <Link href="/" className="shrink-0">
-            <Image src="/icons/logo_full.svg" alt="4roro-moving" width={116} height={44} priority />
+            <Image
+              src="/icons/logo_full.svg"
+              alt="4roro-moving"
+              width={116}
+              height={44}
+              priority
+              className="h-[34px] w-[88px] lg:h-44 lg:w-[116px]"
+            />
           </Link>
 
-          <nav aria-label="주요 메뉴">
+          <nav className="hidden lg:block" aria-label="주요 메뉴">
             <ul className="flex items-center gap-40">
               {navLinks.map((link) => {
                 const isActive = isNavLinkActive(pathname, link.href);
@@ -135,15 +160,16 @@ const Header = ({
         </div>
 
         {showAuthSkeleton ? (
-          <div className="flex items-center gap-32" aria-hidden>
-            <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
+          <div className="flex items-center gap-24 lg:gap-32" aria-hidden>
+            <div className="bg-background-subtle size-24 animate-pulse rounded-full lg:size-36" />
             <div className="flex items-center gap-16">
-              <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
-              <div className="bg-background-subtle rounded-4 h-20 w-64 animate-pulse" />
+              <div className="bg-background-subtle size-24 animate-pulse rounded-full lg:size-36" />
+              <div className="bg-background-subtle rounded-4 hidden h-20 w-64 animate-pulse lg:block" />
             </div>
+            <div className="bg-background-subtle rounded-4 size-24 animate-pulse lg:hidden" />
           </div>
         ) : isLogin ? (
-          <div className="flex items-center gap-32">
+          <div className="flex items-center gap-24 lg:gap-32">
             <NotificationTrigger />
             <ProfileMenuTrigger
               key={pathname}
@@ -151,16 +177,38 @@ const Header = ({
               items={profileMenuItems}
               role={resolvedRole}
             />
+            <button
+              type="button"
+              className="text-icon-default focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none lg:hidden"
+              aria-label="메뉴 열기"
+              aria-expanded={isSideNavOpen}
+              onClick={openSideNav}
+            >
+              <MenuIcon aria-hidden="true" className="size-24" />
+            </button>
           </div>
         ) : (
-          <Link
-            href={getLoginRedirectPath()}
-            className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 flex h-40 items-center px-20 transition-colors"
-          >
-            <Text variant="md-semibold">로그인</Text>
-          </Link>
+          <div className="flex items-center">
+            <Link
+              href={getLoginRedirectPath()}
+              className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 hidden h-40 items-center px-20 transition-colors lg:flex"
+            >
+              <Text variant="md-semibold">로그인</Text>
+            </Link>
+            <button
+              type="button"
+              className="text-icon-default focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none lg:hidden"
+              aria-label="메뉴 열기"
+              aria-expanded={isSideNavOpen}
+              onClick={openSideNav}
+            >
+              <MenuIcon aria-hidden="true" className="size-24" />
+            </button>
+          </div>
         )}
       </div>
+
+      <HeaderSideNav isOpen={isSideNavOpen} onClose={closeSideNav} links={sideNavLinks} />
     </header>
   );
 };

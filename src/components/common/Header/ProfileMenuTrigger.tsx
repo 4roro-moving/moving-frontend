@@ -132,8 +132,14 @@ export default function ProfileMenuTrigger({
         className="focus-visible:ring-border-brand rounded-8 flex items-center gap-16 focus-visible:ring-2 focus-visible:outline-none"
         onClick={() => setIsOpen((open) => !open)}
       >
-        <Image src="/icons/profile-default.svg" alt="" width={36} height={36} />
-        <Text as="span" variant="2lg-medium" className="text-text-primary">
+        <Image
+          src="/icons/profile-default.svg"
+          alt=""
+          width={36}
+          height={36}
+          className="size-24 lg:size-36"
+        />
+        <Text as="span" variant="2lg-medium" className="text-text-primary max-lg:hidden">
           {nickname}
         </Text>
       </button>

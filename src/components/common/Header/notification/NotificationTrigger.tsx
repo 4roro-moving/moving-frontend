@@ -41,7 +41,7 @@ export default function NotificationTrigger() {
         className="relative flex size-36 items-center justify-center"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <AlarmIcon className="text-icon-subtle size-32 shrink-0" />
+        <AlarmIcon className="text-icon-subtle size-24 shrink-0 lg:size-32" />
         {unreadCount > 0 ? (
           <Text
             as="span"
