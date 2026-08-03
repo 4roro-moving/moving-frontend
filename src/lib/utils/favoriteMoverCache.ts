@@ -1,13 +1,19 @@
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 
 import type { FavoriteMoversListResult } from "@/lib/api/favorites";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import {
+  getFavoriteMoversScopeQueryKey,
+  getMoverDetailScopeQueryKey,
+  getMoverListScopeQueryKey,
+  QUERY_KEYS,
+  type AuthQueryScope,
+} from "@/lib/constants/queryKeys";
 
 export type FavoriteMoversCacheData =
   FavoriteMoversListResult | InfiniteData<FavoriteMoversListResult>;
 
 function isFavoriteMoversInfiniteData(
-  data: unknown,
+  data: FavoriteMoversCacheData | undefined,
 ): data is InfiniteData<FavoriteMoversListResult> {
   return (
     typeof data === "object" &&
@@ -17,7 +23,9 @@ function isFavoriteMoversInfiniteData(
   );
 }
 
-function isFavoriteMoversListResult(data: unknown): data is FavoriteMoversListResult {
+function isFavoriteMoversListResult(
+  data: FavoriteMoversCacheData | undefined,
+): data is FavoriteMoversListResult {
   return (
     typeof data === "object" &&
     data !== null &&
@@ -47,10 +55,10 @@ function removeIdsFromFavoriteMoversPage(
 
 /** 사이드바(유한) · 찜 목록 페이지(infinite) 캐시 공통 제거 패치 */
 export function removeIdsFromFavoriteMoversCache(
-  data: unknown,
+  data: FavoriteMoversCacheData | undefined,
   idSet: Set<string>,
   removedTotalDelta: number,
-): unknown {
+): FavoriteMoversCacheData | undefined {
   if (isFavoriteMoversInfiniteData(data)) {
     let removedFromPages = 0;
     const pages = data.pages.map((page) => {
@@ -82,10 +90,10 @@ export function removeIdsFromFavoriteMoversCache(
 
 /** 전체 해제 낙관적 업데이트 — keepIds만 남기고 totalCount 조정 */
 export function keepOnlyIdsInFavoriteMoversCache(
-  data: unknown,
+  data: FavoriteMoversCacheData | undefined,
   keepIds: Set<string>,
   nextTotalCount: number,
-): unknown {
+): FavoriteMoversCacheData | undefined {
   if (isFavoriteMoversInfiniteData(data)) {
     const firstPage = data.pages[0];
     if (!firstPage) {
@@ -150,13 +158,16 @@ export function patchMoverFavorite<
   };
 }
 
-export async function invalidateFavoriteRelatedQueries(queryClient: QueryClient): Promise<void> {
+export async function invalidateFavoriteRelatedQueries(
+  queryClient: QueryClient,
+  authScope: AuthQueryScope,
+): Promise<void> {
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MOVERS.LIST }),
-    queryClient.invalidateQueries({ queryKey: [...QUERY_KEYS.MOVERS.ALL, "detail"] }),
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FAVORITES.MOVERS }),
+    queryClient.invalidateQueries({ queryKey: getMoverListScopeQueryKey(authScope) }),
+    queryClient.invalidateQueries({ queryKey: getMoverDetailScopeQueryKey(authScope) }),
+    queryClient.invalidateQueries({ queryKey: getFavoriteMoversScopeQueryKey(authScope) }),
   ]);
 }

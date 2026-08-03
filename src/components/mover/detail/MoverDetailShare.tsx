@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
-import { shareKakaoMoverCustom, type KakaoMoverShareTemplateArgs } from "@/hooks/kakao/share";
+import { shareKakaoMoverCustom, toKakaoShareImageUrl } from "@/hooks/kakao/share";
 import { usePageShare } from "@/hooks/usePageShare";
 import { ClipIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
@@ -31,19 +31,31 @@ function FacebookIcon({ className }: { className?: string }) {
 }
 
 interface MoverDetailShareProps {
+  favoriteCount: number;
+  moverName: string;
   onToastMessage?: (message: string) => void;
-  kakaoShare: KakaoMoverShareTemplateArgs;
+  profileImageSrc: string;
 }
 
 const SHARE_TITLE = "나만 알기엔 아쉬운 기사님인가요?";
 const FACEBOOK_SHARE_UI_ENABLED = false;
 
 /** 기사 상세 링크·카카오톡·Facebook 공유 버튼 그룹 */
-export default function MoverDetailShare({ onToastMessage, kakaoShare }: MoverDetailShareProps) {
+export default function MoverDetailShare({
+  favoriteCount,
+  moverName,
+  onToastMessage,
+  profileImageSrc,
+}: MoverDetailShareProps) {
   const { busyAction, isBusy, shareCopy, shareFacebook } = usePageShare({ onToastMessage });
   const [isKakaoSharing, setIsKakaoSharing] = useState(false);
   const kakaoSharingRef = useRef(false);
   const isShareBusy = isBusy || isKakaoSharing;
+  const kakaoShare = {
+    driver_name: moverName,
+    like_count: String(favoriteCount),
+    driver_profile: toKakaoShareImageUrl(profileImageSrc),
+  };
 
   const iconButtonClassName = cn(
     "rounded-8 md:rounded-16 flex size-40 min-h-44 min-w-44 shrink-0 items-center justify-center transition-colors md:size-64 md:min-h-64 md:min-w-64",

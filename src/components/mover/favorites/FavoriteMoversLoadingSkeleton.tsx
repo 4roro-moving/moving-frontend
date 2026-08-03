@@ -1,6 +1,6 @@
 "use client";
 
-import FavoriteMoversToolbar from "@/components/mover/FavoriteMoversToolbar";
+import FavoriteMoversToolbar from "@/components/mover/favorites/FavoriteMoversToolbar";
 import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
 import { FAVORITE_MOVERS_PAGE_LIMIT } from "@/lib/api/favorites";
 

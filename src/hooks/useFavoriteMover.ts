@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 
 import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
+import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { addFavoriteMover, removeFavoriteMover } from "@/lib/api/favorites";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
@@ -33,6 +34,7 @@ import type { MoverDetail } from "@/types/moverDetail";
 export { useBulkRemoveFavoriteMovers } from "@/hooks/useBulkRemoveFavoriteMovers";
 
 const LOGIN_REQUIRED_MESSAGE = "로그인이 필요한 서비스입니다.";
+const CUSTOMER_REQUIRED_MESSAGE = "고객만 이용할 수 있는 서비스입니다.";
 
 function isUnauthorizedError(error: unknown): boolean {
   if (error instanceof ApiError) {
@@ -66,6 +68,9 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const loginRequiredModal = useLoginRequiredModal();
+  const auth = useCustomerAuthReady();
+  const isCustomer = auth.user?.role === "CUSTOMER";
+  const canToggleFavorite = !auth.isPending && (!auth.isAuthenticated || isCustomer);
   const { authScope } = useAuthQueryScope();
   const moverListScopeQueryKey = getMoverListScopeQueryKey(authScope);
   const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(authScope);
@@ -187,9 +192,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       if (!nextIsFavorite) {
         queryClient.setQueriesData<FavoriteMoversCacheData>(
           { queryKey: favoriteMoversScopeQueryKey },
-          (list) =>
-            removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1) as
-              FavoriteMoversCacheData | undefined,
+          (list) => removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1),
         );
       }
 
@@ -239,13 +242,21 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       onErrorRef.current?.(getApiErrorMessage(error));
     },
     onSettled: async () => {
-      await invalidateFavoriteRelatedQueries(queryClient);
+      await invalidateFavoriteRelatedQueries(queryClient, authScope);
     },
   });
 
   const mutate: typeof mutation.mutate = (variables, mutateOptions) => {
-    if (!hasAuthSession()) {
+    if (auth.isPending) {
+      return;
+    }
+
+    if (!auth.isAuthenticated || !hasAuthSession()) {
       requireLogin();
+      return;
+    }
+
+    if (!isCustomer) {
       return;
     }
 
@@ -253,13 +264,21 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   };
 
   const mutateAsync: typeof mutation.mutateAsync = (variables, mutateOptions) => {
-    if (!hasAuthSession()) {
+    if (auth.isPending) {
+      return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
+    }
+
+    if (!auth.isAuthenticated || !hasAuthSession()) {
       requireLogin();
       return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
+    }
+
+    if (!isCustomer) {
+      return Promise.reject(new Error(CUSTOMER_REQUIRED_MESSAGE));
     }
 
     return mutation.mutateAsync(variables, mutateOptions);
   };
 
-  return { ...mutation, mutate, mutateAsync };
+  return { ...mutation, canToggleFavorite, mutate, mutateAsync };
 }

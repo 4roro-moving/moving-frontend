@@ -6,16 +6,14 @@ import Button from "@/components/common/Button/Button";
 import EmptyState from "@/components/common/EmptyState/EmptyState";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
-import FavoriteMoversDeleteConfirmModal from "@/components/mover/FavoriteMoversDeleteConfirmModal";
-import FavoriteMoversLoadingSkeleton from "@/components/mover/FavoriteMoversLoadingSkeleton";
-import FavoriteMoversToolbar from "@/components/mover/FavoriteMoversToolbar";
+import FavoriteMoversDeleteConfirmModal from "@/components/mover/favorites/FavoriteMoversDeleteConfirmModal";
+import FavoriteMoversLoadingSkeleton from "@/components/mover/favorites/FavoriteMoversLoadingSkeleton";
+import FavoriteMoversToolbar from "@/components/mover/favorites/FavoriteMoversToolbar";
 import MoverCard from "@/components/mover/MoverCard";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
-import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { useFavoriteMoversInfinite } from "@/hooks/useFavoriteMovers";
 import { useFavoriteMoversSelection } from "@/hooks/useFavoriteMoversSelection";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 
 const EMPTY_DESCRIPTION = (
   <>
@@ -29,28 +27,21 @@ export const FAVORITE_MOVERS_CONTENT_CLASSNAME =
   "px-margin-mobile mx-auto flex w-full max-w-[var(--container-desktop)] flex-col pt-22 pb-80 min-[744px]:px-72 min-[744px]:pt-30 lg:px-0 lg:pt-32 lg:pb-[165px]";
 
 export default function FavoriteMoversContent() {
-  const { canFetch } = useCustomerAuthReady();
-  const query = useFavoriteMoversInfinite({ enabled: canFetch });
-
-  const movers = useMemo(
-    () => query.data?.pages.flatMap((page) => page.data.map(mapMoverListItemToMover)) ?? [],
-    [query.data],
-  );
-  const totalCount = query.data?.pages[0]?.pagination.totalCount ?? 0;
+  const { isInitialLoading, movers, query, totalCount } = useFavoriteMoversInfinite();
   const loadedIds = useMemo(() => movers.map((mover) => mover.id), [movers]);
 
   const selection = useFavoriteMoversSelection({ loadedIds, totalCount });
 
   const showEmpty =
     !query.isError &&
-    !query.isPending &&
+    !isInitialLoading &&
     !query.isFetching &&
     !selection.isBulkDeleting &&
     totalCount === 0;
   const showListSkeleton =
     !query.isError &&
     !showEmpty &&
-    (query.isPending ||
+    (isInitialLoading ||
       (movers.length === 0 && (totalCount > 0 || selection.isBulkDeleting || query.isFetching)));
   const showList = !query.isError && !showEmpty && !showListSkeleton && movers.length > 0;
 

@@ -23,10 +23,7 @@ export function parseKakaoTemplateId(raw: string | undefined): number | null {
 
 /** NEXT_PUBLIC_* 는 정적 접근만 클라이언트 번들에 인라인됨 */
 export function getMoverShareTemplateId(): number | null {
-  return (
-    parseKakaoTemplateId(process.env.NEXT_PUBLIC_KAKAO_MOVER_SHARE_TEMPLATE_ID) ??
-    parseKakaoTemplateId(process.env.NEXT_PUBLIC_KAKAO_SHARE_TEMPLATE_ID)
-  );
+  return parseKakaoTemplateId(process.env.NEXT_PUBLIC_KAKAO_MOVER_SHARE_TEMPLATE_ID);
 }
 
 export function hasKakaoJavascriptKey(): boolean {

@@ -185,8 +185,18 @@ export const getAudienceFromPathname = (pathname: string): AuthAudience => {
     : "customer";
 };
 
-/** 현재 경로가 공개 페이지(기사님 찾기, 기사님 상세)인지 판별 */
-export const isPublicMoverPath = (pathname: string): boolean => {
+/**
+ * 로그인 없이 접근 가능한 공개 페이지인지 판별합니다.
+ * - 랜딩 `/`
+ * - 기사님 찾기 `/movers`
+ * - 기사님 상세 `/movers/:id` (유효한 id만)
+ * // 2026.08.02 정슬기 - [수정] HOME 포함·isPublicPath로 정리 (auth:expired 랜딩 강제 로그인 방지)
+ */
+export const isPublicPath = (pathname: string): boolean => {
+  if (pathname === APP_ROUTES.HOME) {
+    return true;
+  }
+
   if (pathname === APP_ROUTES.MOVERS.ROOT) {
     return true;
   }

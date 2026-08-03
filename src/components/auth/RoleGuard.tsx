@@ -10,13 +10,14 @@ import {
   getRoleHomePath,
   type AuthAudience,
 } from "@/lib/auth/redirect";
-import { loadRole, type AuthRole } from "@/lib/auth/role";
+import type { AuthRole } from "@/lib/auth/role";
 import { getAccessToken } from "@/lib/auth/token";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 interface RoleGuardProps {
   allowedRole: Extract<AuthRole, "CUSTOMER" | "MOVER" | "ADMIN">;
   children: ReactNode;
+  loadingFallback?: ReactNode;
 }
 
 /**
@@ -43,7 +44,7 @@ const resolveKnownRole = (storeRole: AuthRole | null | undefined): AuthRole | nu
  * 역할 전용 페이지 가드 — (protected) layout에서 사용
  * known role이 불일치하면 checkAuth 대기 없이 역할 홈으로 이동
  */
-const RoleGuard = ({ allowedRole, children }: RoleGuardProps) => {
+const RoleGuard = ({ allowedRole, children, loadingFallback = null }: RoleGuardProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
@@ -87,7 +88,7 @@ const RoleGuard = ({ allowedRole, children }: RoleGuardProps) => {
   ]);
 
   if (!hasHydrated) {
-    return null;
+    return loadingFallback;
   }
 
   if (isWrongRole) {
@@ -95,7 +96,7 @@ const RoleGuard = ({ allowedRole, children }: RoleGuardProps) => {
   }
 
   if (isCheckingAuth) {
-    return null;
+    return loadingFallback;
   }
 
   if (!isAuthenticated || storeRole !== allowedRole) {
