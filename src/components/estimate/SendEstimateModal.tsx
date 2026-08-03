@@ -6,6 +6,7 @@ import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import Textarea from "@/components/common/Input/Textarea";
 import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
+import { Text } from "@/components/common/Text";
 import EstimateRequestSummaryContent from "@/components/estimate/EstimateRequestSummaryContent";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
@@ -33,6 +34,7 @@ export default function SendEstimateModal({
 }: SendEstimateModalProps) {
   const [price, setPrice] = useState("");
   const [comment, setComment] = useState("");
+  const [isCommentTouched, setIsCommentTouched] = useState(false);
 
   const numericPrice = Number(price);
   const trimmedComment = comment.trim();
@@ -48,7 +50,7 @@ export default function SendEstimateModal({
       ? "견적가는 1원 이상 1억 원 이하로 입력해 주세요."
       : undefined;
   const commentError =
-    comment.length > 0 && !isCommentValid
+    isCommentTouched && !isCommentValid
       ? `코멘트는 ${MIN_COMMENT_LENGTH}자 이상 ${MAX_COMMENT_LENGTH}자 이하로 입력해 주세요.`
       : undefined;
 
@@ -111,15 +113,25 @@ export default function SendEstimateModal({
           variant="compact"
           className="gap-16"
         >
-          <Textarea
-            id="estimate-comment"
-            value={comment}
-            maxLength={MAX_COMMENT_LENGTH}
-            placeholder="최소 10자 이상 입력해 주세요"
-            error={commentError}
-            onChange={(event) => setComment(event.target.value)}
-            className="h-[160px] resize-none"
-          />
+          <div className="flex w-full flex-col gap-8">
+            <Textarea
+              id="estimate-comment"
+              value={comment}
+              maxLength={MAX_COMMENT_LENGTH}
+              placeholder="최소 10자 이상 입력해 주세요"
+              error={commentError}
+              onChange={(event) => setComment(event.target.value)}
+              onBlur={(event) => {
+                if ((event.relatedTarget as HTMLElement | null)?.ariaLabel !== "모달 닫기") {
+                  setIsCommentTouched(true);
+                }
+              }}
+              className="h-[160px] resize-none"
+            />
+            <Text as="span" variant="xs-regular" className="text-text-muted self-end">
+              {comment.length}/{MAX_COMMENT_LENGTH}
+            </Text>
+          </div>
         </FormField>
       </div>
 

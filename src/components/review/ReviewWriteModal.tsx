@@ -12,6 +12,7 @@ import { useCreateReview } from "@/hooks/useCreateReview";
 import type { ReviewableEstimateItem } from "@/types/review";
 
 const MIN_CONTENT_LENGTH = 10;
+const MAX_CONTENT_LENGTH = 1000;
 
 interface ReviewWriteModalProps {
   open: boolean;
@@ -40,8 +41,7 @@ function ReviewWriteModalContent({
 }: ReviewWriteModalContentProps) {
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
-  const [contentError, setContentError] = useState<string | undefined>();
-  const [ratingError, setRatingError] = useState<string | undefined>();
+  const [isContentTouched, setIsContentTouched] = useState(false);
   const [submitError, setSubmitError] = useState<string | undefined>();
 
   const createMutation = useCreateReview({
@@ -59,31 +59,16 @@ function ReviewWriteModalContent({
 
   const trimmedContent = content.trim();
   const isPending = createMutation.isPending;
-  const isSubmitDisabled = isPending || rating < 1 || trimmedContent.length < MIN_CONTENT_LENGTH;
-
-  const handleClose = () => {
-    if (isPending) return;
-    onClose();
-  };
+  const isContentValid =
+    trimmedContent.length >= MIN_CONTENT_LENGTH && trimmedContent.length <= MAX_CONTENT_LENGTH;
+  const contentValidationError =
+    isContentTouched && !isContentValid
+      ? `리뷰 내용은 ${MIN_CONTENT_LENGTH}자 이상 ${MAX_CONTENT_LENGTH}자 이하로 입력해 주세요.`
+      : undefined;
+  const isSubmitDisabled = isPending || rating < 1 || !isContentValid;
 
   const handleSubmit = () => {
-    let hasError = false;
-
-    if (rating < 1) {
-      setRatingError("별점을 선택해주세요.");
-      hasError = true;
-    } else {
-      setRatingError(undefined);
-    }
-
-    if (trimmedContent.length < MIN_CONTENT_LENGTH) {
-      setContentError(`리뷰 내용은 ${MIN_CONTENT_LENGTH}자 이상 입력해주세요.`);
-      hasError = true;
-    } else {
-      setContentError(undefined);
-    }
-
-    if (hasError) return;
+    if (isSubmitDisabled) return;
 
     setSubmitError(undefined);
     if (preview) return;
@@ -97,7 +82,7 @@ function ReviewWriteModalContent({
 
   return (
     <Modal
-      onClose={handleClose}
+      onClose={isPending ? undefined : onClose}
       presentation="responsive"
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
@@ -105,7 +90,7 @@ function ReviewWriteModalContent({
     >
       <div className="flex w-full items-start justify-between gap-12 md:gap-16">
         <Modal.Title>리뷰 작성</Modal.Title>
-        <Modal.Close onClose={handleClose} disabled={isPending} />
+        <Modal.Close onClose={onClose} disabled={isPending} />
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-28 overflow-y-auto lg:gap-32">
@@ -123,18 +108,12 @@ function ReviewWriteModalContent({
             value={rating}
             onChange={(next) => {
               setRating(next);
-              setRatingError(undefined);
               setSubmitError(undefined);
             }}
             size="lg"
             label="별점"
             disabled={isPending}
           />
-          {ratingError ? (
-            <Text as="p" variant="xs-regular" className="text-text-error" role="alert">
-              {ratingError}
-            </Text>
-          ) : null}
         </div>
 
         <FormField
@@ -143,21 +122,29 @@ function ReviewWriteModalContent({
           variant="compact"
           className="w-full gap-12"
         >
-          <Textarea
-            id="review-content"
-            value={content}
-            disabled={isPending}
-            placeholder={`최소 ${MIN_CONTENT_LENGTH}자 이상 입력해 주세요`}
-            error={contentError}
-            className="h-[160px]"
-            onChange={(event) => {
-              setContent(event.target.value);
-              setSubmitError(undefined);
-              if (event.target.value.trim().length >= MIN_CONTENT_LENGTH) {
-                setContentError(undefined);
-              }
-            }}
-          />
+          <div className="flex w-full flex-col gap-8">
+            <Textarea
+              id="review-content"
+              value={content}
+              maxLength={MAX_CONTENT_LENGTH}
+              disabled={isPending}
+              placeholder={`최소 ${MIN_CONTENT_LENGTH}자 이상 입력해 주세요`}
+              error={contentValidationError}
+              className="h-[160px]"
+              onChange={(event) => {
+                setContent(event.target.value);
+                setSubmitError(undefined);
+              }}
+              onBlur={(event) => {
+                if ((event.relatedTarget as HTMLElement | null)?.ariaLabel !== "모달 닫기") {
+                  setIsContentTouched(true);
+                }
+              }}
+            />
+            <Text as="span" variant="xs-regular" className="text-text-muted self-end">
+              {content.length}/{MAX_CONTENT_LENGTH}
+            </Text>
+          </div>
         </FormField>
       </div>
 

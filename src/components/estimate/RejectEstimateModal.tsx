@@ -26,11 +26,12 @@ export default function RejectEstimateModal({
   onSubmit,
 }: RejectEstimateModalProps) {
   const [reason, setReason] = useState("");
+  const [isReasonTouched, setIsReasonTouched] = useState(false);
   const trimmedReason = reason.trim();
   const isReasonValid =
     trimmedReason.length >= MIN_REASON_LENGTH && trimmedReason.length <= MAX_REASON_LENGTH;
   const reasonError =
-    reason.length > 0 && !isReasonValid
+    isReasonTouched && !isReasonValid
       ? `반려 사유는 ${MIN_REASON_LENGTH}자 이상 ${MAX_REASON_LENGTH}자 이하로 입력해 주세요.`
       : undefined;
 
@@ -65,20 +66,27 @@ export default function RejectEstimateModal({
           variant="compact"
           className="gap-16"
         >
-          <Textarea
-            id="reject-reason"
-            autoFocus
-            value={reason}
-            maxLength={MAX_REASON_LENGTH}
-            placeholder="최소 10자 이상 입력해 주세요"
-            error={reasonError}
-            disabled={isPending}
-            onChange={(event) => setReason(event.target.value)}
-            className="h-[160px] resize-none px-24 py-14 text-lg"
-          />
-          <Text as="span" variant="xs-regular" className="text-text-muted self-end">
-            {trimmedReason.length}/{MAX_REASON_LENGTH}
-          </Text>
+          <div className="flex w-full flex-col gap-8">
+            <Textarea
+              id="reject-reason"
+              autoFocus
+              value={reason}
+              maxLength={MAX_REASON_LENGTH}
+              placeholder="최소 10자 이상 입력해 주세요"
+              error={reasonError}
+              disabled={isPending}
+              onChange={(event) => setReason(event.target.value)}
+              onBlur={(event) => {
+                if ((event.relatedTarget as HTMLElement | null)?.ariaLabel !== "모달 닫기") {
+                  setIsReasonTouched(true);
+                }
+              }}
+              className="h-[160px] resize-none px-24 py-14 text-lg"
+            />
+            <Text as="span" variant="xs-regular" className="text-text-muted self-end">
+              {reason.length}/{MAX_REASON_LENGTH}
+            </Text>
+          </div>
         </FormField>
       </div>
 
