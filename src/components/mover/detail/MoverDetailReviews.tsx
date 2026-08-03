@@ -6,14 +6,12 @@ import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { MoverDetailReviewsSkeleton } from "@/components/mover/detail/MoverDetailPageSkeleton";
-import ReviewStarRating from "@/components/review/ReviewStarRating";
+import MoverRatingSummary from "@/components/mover/detail/MoverRatingSummary";
+import MoverReviewList from "@/components/mover/detail/MoverReviewList";
 import { useMoverReviews } from "@/hooks/useMoverReviews";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { MOVER_REVIEW_PAGE_LIMIT } from "@/lib/api/movers";
-import { cn } from "@/lib/utils/cn";
-import { formatDateOnlyLabel, formatRating } from "@/lib/utils/estimateFormat";
 import type { MoverDetail } from "@/types/moverDetail";
-import type { MoverReviewItem } from "@/types/review";
 
 interface MoverDetailReviewsProps {
   moverId: string;
@@ -53,13 +51,6 @@ export default function MoverDetailReviews({
   // 헤더 개수도 목록 totalCount와 맞춤 (없을 때만 상세 reviewCount fallback)
   // 2026.07.30 정슬기 - [수정]
   const displayedReviewCount = data?.pagination.totalCount ?? reviewCount;
-  const hasDistribution = ratingDistribution.some((item) => item.count > 0);
-
-  const maxCount = Math.max(...ratingDistribution.map((item) => item.count), 1);
-  // 동점이면 더 높은 점수(5→1 순) 하나만 강조
-  const topScore =
-    ratingDistribution.find((item) => item.count === maxCount && item.count > 0)?.score ?? null;
-
   return (
     <section className="flex w-full flex-col gap-24 md:gap-32" aria-labelledby="mover-reviews">
       <Text
@@ -82,60 +73,11 @@ export default function MoverDetailReviews({
         </div>
       ) : (
         <>
-          <div className="flex w-full flex-col gap-24 md:flex-row md:items-start md:justify-between">
-            <div className="flex items-center gap-16">
-              <Text as="p" variant="rating-score" className="text-text-primary">
-                {formatRating(rating)}
-              </Text>
-              <div className="flex flex-col gap-2">
-                <ReviewStarRating value={Math.round(rating)} size="sm" label="평균 별점" />
-                <Text as="p" variant="md-regular" className="text-text-muted">
-                  {displayedReviewCount}개의 리뷰
-                </Text>
-              </div>
-            </div>
-
-            {hasDistribution ? (
-              <ul
-                className="flex w-full max-w-[284px] flex-col gap-4 md:shrink-0"
-                aria-label="별점 분포"
-              >
-                {ratingDistribution.map((item) => {
-                  const isTop = item.score === topScore;
-
-                  return (
-                    <li key={item.score} className="flex items-center gap-16">
-                      <Text
-                        as="span"
-                        variant={isTop ? "md-bold" : "md-medium"}
-                        className="text-text-tertiary w-36 shrink-0"
-                      >
-                        {item.score}점
-                      </Text>
-                      <div
-                        className="bg-rating-track relative h-8 w-full max-w-[180px] overflow-hidden rounded-full"
-                        role="img"
-                        aria-label={`${item.score}점 ${item.count}개`}
-                      >
-                        <div
-                          className="bg-rating-fill absolute inset-y-0 left-0 rounded-full"
-                          // 동적 비율(리뷰 분포) — 토큰 고정 width로 표현 불가
-                          style={{ width: `${(item.count / maxCount) * 100}%` }}
-                        />
-                      </div>
-                      <Text
-                        as="span"
-                        variant={isTop ? "md-bold" : "md-medium"}
-                        className="text-rating-count w-36 shrink-0"
-                      >
-                        {item.count}
-                      </Text>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : null}
-          </div>
+          <MoverRatingSummary
+            rating={rating}
+            reviewCount={displayedReviewCount}
+            ratingDistribution={ratingDistribution}
+          />
 
           {!isError && isInitialLoading ? (
             <MoverDetailReviewsSkeleton count={MOVER_REVIEW_PAGE_LIMIT} />
@@ -151,21 +93,7 @@ export default function MoverDetailReviews({
             />
           ) : null}
 
-          {shouldShowReviews ? (
-            <ul className="flex w-full flex-col" aria-busy={isFetching}>
-              {reviews.map((review, index) => (
-                <li
-                  key={review.id}
-                  className={cn(
-                    "border-border-subtle py-20 md:py-24",
-                    index < reviews.length - 1 && "border-b",
-                  )}
-                >
-                  <MoverReviewListItem review={review} />
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          {shouldShowReviews ? <MoverReviewList reviews={reviews} isFetching={isFetching} /> : null}
 
           {shouldShowPagination ? (
             <Pagination
@@ -178,40 +106,5 @@ export default function MoverDetailReviews({
         </>
       )}
     </section>
-  );
-}
-
-function MoverReviewListItem({ review }: { review: MoverReviewItem }) {
-  return (
-    <article className="flex w-full flex-col gap-16 md:gap-24">
-      <div className="flex flex-col gap-8">
-        <div className="flex items-center gap-12">
-          <Text
-            as="p"
-            variant={{ base: "md-regular", md: "2lg-regular" }}
-            className="text-text-secondary"
-          >
-            {review.customer.displayName}
-          </Text>
-          <span className="bg-border-subtle h-12 w-px" aria-hidden="true" />
-          <Text
-            as="time"
-            dateTime={review.createdAt}
-            variant={{ base: "md-regular", md: "2lg-regular" }}
-            className="text-text-muted"
-          >
-            {formatDateOnlyLabel(review.createdAt)}
-          </Text>
-        </div>
-        <ReviewStarRating value={review.rating} size="sm" label="리뷰 별점" />
-      </div>
-      <Text
-        as="p"
-        variant={{ base: "md-regular", md: "2lg-regular" }}
-        className="text-text-primary whitespace-pre-line"
-      >
-        {review.content}
-      </Text>
-    </article>
   );
 }

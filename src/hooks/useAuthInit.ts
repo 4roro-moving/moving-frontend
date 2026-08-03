@@ -6,12 +6,13 @@ import {
   buildLoginPath,
   getAudienceFromPathname,
   isAuthPagePath,
-  isPublicMoverPath,
+  isPublicPath,
 } from "@/lib/auth/redirect";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 /**
  * 앱 시작 시 세션 확인 + access 만료(auth:expired) 시 로그인으로 유도
+ * // 2026.08.02 정슬기 - [수정] 공개 랜딩(/)에서도 auth:expired 시 로그인 강제 이동하지 않음
  */
 export const useAuthInit = () => {
   const hydrateFromStorage = useAuthStore((state) => state.hydrateFromStorage);
@@ -32,8 +33,8 @@ export const useAuthInit = () => {
       markUnauthenticated();
 
       const { pathname, search } = window.location;
-      // 로그인 또는 공개 페이지에서는 현재 화면 유지
-      if (isAuthPagePath(pathname) || isPublicMoverPath(pathname)) {
+      // 인증·공개 페이지(랜딩, 기사님 찾기/상세)에서는 현재 화면 유지
+      if (isAuthPagePath(pathname) || isPublicPath(pathname)) {
         return;
       }
       // 404 화면은 버튼 클릭 전까지 유지 (로그인으로 강제 이동하지 않음)

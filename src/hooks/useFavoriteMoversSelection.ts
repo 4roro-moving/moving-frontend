@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useBulkRemoveFavoriteMovers } from "@/hooks/useBulkRemoveFavoriteMovers";
 import { MAX_BULK_FAVORITE_MOVERS } from "@/lib/api/favorites";
@@ -32,7 +32,9 @@ export function useFavoriteMoversSelection({
     onError: setToastMessage,
   });
 
-  const selectedOnLoadedCount = loadedIds.filter((id) => selectedIds.includes(id)).length;
+  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const excludedIdSet = useMemo(() => new Set(excludedIds), [excludedIds]);
+  const selectedOnLoadedCount = loadedIds.filter((id) => selectedIdSet.has(id)).length;
   const selectedCount = isSelectAll
     ? Math.max(0, totalCount - excludedIds.length)
     : selectedOnLoadedCount;
@@ -67,7 +69,7 @@ export function useFavoriteMoversSelection({
       if (isSelectAll) {
         if (
           !checked &&
-          !excludedIds.includes(moverId) &&
+          !excludedIdSet.has(moverId) &&
           excludedIds.length >= MAX_BULK_FAVORITE_MOVERS
         ) {
           setToastMessage(MAX_EXCLUSION_MESSAGE);
@@ -85,7 +87,7 @@ export function useFavoriteMoversSelection({
 
       if (
         checked &&
-        !selectedIds.includes(moverId) &&
+        !selectedIdSet.has(moverId) &&
         selectedIds.length >= MAX_BULK_FAVORITE_MOVERS
       ) {
         setToastMessage(MAX_SELECTION_MESSAGE);
@@ -99,7 +101,7 @@ export function useFavoriteMoversSelection({
         return prev.filter((id) => id !== moverId);
       });
     },
-    [excludedIds, isSelectAll, selectedIds],
+    [excludedIdSet, excludedIds.length, isSelectAll, selectedIdSet, selectedIds.length],
   );
 
   const removeFavoritesByIds = useCallback(
@@ -181,9 +183,8 @@ export function useFavoriteMoversSelection({
   }, [isBulkDeleting]);
 
   const isMoverSelected = useCallback(
-    (moverId: string) =>
-      isSelectAll ? !excludedIds.includes(moverId) : selectedIds.includes(moverId),
-    [excludedIds, isSelectAll, selectedIds],
+    (moverId: string) => (isSelectAll ? !excludedIdSet.has(moverId) : selectedIdSet.has(moverId)),
+    [excludedIdSet, isSelectAll, selectedIdSet],
   );
 
   return {
