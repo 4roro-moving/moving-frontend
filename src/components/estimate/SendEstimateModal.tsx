@@ -16,7 +16,7 @@ const MAX_COMMENT_LENGTH = 1000;
 
 const PANEL_CLASSNAME = cn(
   "items-stretch text-left overflow-hidden",
-  "max-h-[calc(100dvh-104px)] gap-40 px-24 pt-32 pb-40",
+  "max-h-[calc(100dvh-104px)] gap-26 lg:gap-40 px-24 pt-32 pb-40",
 );
 
 export interface SendEstimateInput {
@@ -79,7 +79,7 @@ export default function SendEstimateModal({
         <Modal.Close onClose={onClose} disabled={isPending} />
       </div>
 
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-32 overflow-y-auto">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-20 overflow-y-auto lg:gap-32">
         <section>
           <EstimateRequestSummaryContent
             density="modal"
@@ -107,6 +107,7 @@ export default function SendEstimateModal({
             placeholder="견적가 입력"
             error={priceError}
             onChange={(event) => setPrice(event.target.value)}
+            className="h-54 md:h-54"
           />
         </FormField>
 
@@ -123,11 +124,12 @@ export default function SendEstimateModal({
             placeholder="최소 10자 이상 입력해주세요"
             error={commentError}
             onChange={(event) => setComment(event.target.value)}
+            className="h-[160px] resize-none"
           />
         </FormField>
       </div>
 
-      <Modal.Button fullWidth size="detail" disabled={!canSubmit} onClick={handleSubmit}>
+      <Modal.Button fullWidth size="cta" disabled={!canSubmit} onClick={handleSubmit}>
         {isPending ? "견적 보내는 중..." : "견적 보내기"}
       </Modal.Button>
     </Modal>

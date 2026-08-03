@@ -44,12 +44,18 @@ export default function EstimateRequestSummaryContent({
   density = "card",
 }: EstimateRequestSummaryContentProps) {
   const isModal = density === "modal";
-  const locationValueVariant = isModal ? "lg-medium" : "lg-semibold";
+  const locationValueVariant = isModal
+    ? ({ base: "md-medium", lg: "lg-medium" } as const)
+    : "lg-semibold";
   const locationValueClass = isModal ? "text-text-secondary" : "text-text-primary";
 
   return (
     <div
-      className={cn("flex flex-col", isModal ? "gap-20" : "gap-16 min-[744px]:gap-24", className)}
+      className={cn(
+        "flex flex-col",
+        isModal ? "gap-16 lg:gap-20" : "gap-16 min-[744px]:gap-24",
+        className,
+      )}
     >
       <div className="flex min-h-32 items-center justify-between gap-12">
         <div className="flex flex-wrap gap-8">
@@ -74,12 +80,12 @@ export default function EstimateRequestSummaryContent({
         className={cn(
           "flex flex-col",
           isModal
-            ? "gap-16 sm:flex-row sm:items-end sm:gap-48"
-            : "gap-12 sm:flex-row sm:justify-between sm:gap-20",
+            ? "gap-8 lg:flex-row lg:items-end lg:gap-48"
+            : "gap-12 lg:flex-row lg:justify-between lg:gap-20",
         )}
       >
         <div className="flex items-end gap-12">
-          <div>
+          <div className={cn(isModal && "flex items-center gap-8 lg:block")}>
             <Text as="dt" variant="md-regular" className="text-text-muted">
               출발지
             </Text>
@@ -91,8 +97,11 @@ export default function EstimateRequestSummaryContent({
               {fromLabel}
             </Text>
           </div>
-          <ArrowRightIcon size={16} className="mb-[9px] shrink-0" />
-          <div>
+          <ArrowRightIcon
+            size={16}
+            className={cn("shrink-0", isModal ? "mb-8 lg:mb-[9px]" : "mb-[9px]")}
+          />
+          <div className={cn(isModal && "flex items-center gap-8 lg:block")}>
             <Text as="dt" variant="md-regular" className="text-text-muted">
               도착지
             </Text>
@@ -105,7 +114,7 @@ export default function EstimateRequestSummaryContent({
             </Text>
           </div>
         </div>
-        <div>
+        <div className={cn(isModal && "flex items-center gap-8 lg:block")}>
           <Text as="dt" variant="md-regular" className="text-text-muted">
             이사일
           </Text>
@@ -119,7 +128,7 @@ export default function EstimateRequestSummaryContent({
         </div>
       </dl>
 
-      {isModal ? <div className="bg-border-subtle h-px" /> : null}
+      {isModal ? <div className="bg-border-subtle mt-4 h-px lg:mt-0" /> : null}
     </div>
   );
 }
