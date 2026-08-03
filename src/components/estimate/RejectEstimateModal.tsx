@@ -70,7 +70,7 @@ export default function RejectEstimateModal({
             autoFocus
             value={reason}
             maxLength={MAX_REASON_LENGTH}
-            placeholder="최소 10자 이상 입력해 주세요."
+            placeholder="최소 10자 이상 입력해 주세요"
             error={reasonError}
             disabled={isPending}
             onChange={(event) => setReason(event.target.value)}

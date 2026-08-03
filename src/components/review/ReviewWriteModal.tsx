@@ -1,17 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 
-import Button from "@/components/common/Button/Button";
 import FormField from "@/components/common/FormField/FormField";
 import Textarea from "@/components/common/Input/Textarea";
 import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
+import ReviewEstimateSummary from "@/components/review/ReviewEstimateSummary";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { useCreateReview } from "@/hooks/useCreateReview";
-import { ProfileDefaultIcon } from "@/icons";
-import { getReviewMoverDisplayName } from "@/lib/utils/estimateFormat";
 import type { ReviewableEstimateItem } from "@/types/review";
 
 const MIN_CONTENT_LENGTH = 10;
@@ -22,6 +19,8 @@ interface ReviewWriteModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   onError?: (message: string) => void;
+  /** 개발용 미리보기에서 실제 리뷰 생성 요청을 차단합니다. */
+  preview?: boolean;
 }
 
 interface ReviewWriteModalContentProps {
@@ -29,6 +28,7 @@ interface ReviewWriteModalContentProps {
   onClose: () => void;
   onSuccess?: () => void;
   onError?: (message: string) => void;
+  preview?: boolean;
 }
 
 function ReviewWriteModalContent({
@@ -36,6 +36,7 @@ function ReviewWriteModalContent({
   onClose,
   onSuccess,
   onError,
+  preview = false,
 }: ReviewWriteModalContentProps) {
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
@@ -56,7 +57,6 @@ function ReviewWriteModalContent({
     },
   });
 
-  const moverLabel = getReviewMoverDisplayName(item.mover);
   const trimmedContent = content.trim();
   const isPending = createMutation.isPending;
   const isSubmitDisabled = isPending || rating < 1 || trimmedContent.length < MIN_CONTENT_LENGTH;
@@ -86,6 +86,8 @@ function ReviewWriteModalContent({
     if (hasError) return;
 
     setSubmitError(undefined);
+    if (preview) return;
+
     createMutation.mutate({
       estimateId: item.estimateId,
       rating,
@@ -106,40 +108,8 @@ function ReviewWriteModalContent({
         <Modal.Close onClose={handleClose} disabled={isPending} />
       </div>
 
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-20 overflow-y-auto md:gap-28 lg:gap-32">
-        <div className="border-border-muted flex w-full items-center gap-10 border-b pb-16 md:gap-16 md:pb-20">
-          <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
-            {item.mover.imageUrl ? (
-              <Image
-                src={item.mover.imageUrl}
-                alt={`${moverLabel} 프로필`}
-                fill
-                sizes="50px"
-                className="object-cover"
-              />
-            ) : (
-              <ProfileDefaultIcon className="size-full" />
-            )}
-          </div>
-          <div className="flex min-w-0 flex-col gap-4">
-            <Text
-              as="p"
-              variant={{ base: "md-semibold", md: "lg-semibold" }}
-              className="text-text-primary break-words"
-            >
-              {moverLabel}
-            </Text>
-            <Text
-              as="p"
-              variant={{ base: "sm-medium", md: "md-medium" }}
-              className="text-text-muted break-words"
-            >
-              {item.estimateRequest.fromAddress}
-              <span aria-hidden="true"> → </span>
-              {item.estimateRequest.toAddress}
-            </Text>
-          </div>
-        </div>
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-28 overflow-y-auto lg:gap-32">
+        <ReviewEstimateSummary item={item} />
 
         <div className="flex w-full flex-col gap-12">
           <Text
@@ -177,9 +147,9 @@ function ReviewWriteModalContent({
             id="review-content"
             value={content}
             disabled={isPending}
-            placeholder={`최소 ${MIN_CONTENT_LENGTH}자 이상 작성해주세요.`}
+            placeholder={`최소 ${MIN_CONTENT_LENGTH}자 이상 입력해 주세요`}
             error={contentError}
-            className="h-[140px] md:h-[180px]"
+            className="h-[160px]"
             onChange={(event) => {
               setContent(event.target.value);
               setSubmitError(undefined);
@@ -197,30 +167,9 @@ function ReviewWriteModalContent({
         </Text>
       ) : null}
 
-      <div className="flex w-full flex-col-reverse gap-12 md:flex-row">
-        <Button
-          type="button"
-          variant="outline"
-          size="cta"
-          fullWidth
-          disabled={isPending}
-          onClick={handleClose}
-          className="md:flex-1"
-        >
-          취소
-        </Button>
-        <Button
-          type="button"
-          variant="solid"
-          size="cta"
-          fullWidth
-          disabled={isSubmitDisabled}
-          onClick={handleSubmit}
-          className="md:flex-1"
-        >
-          {isPending ? "등록 중..." : "등록하기"}
-        </Button>
-      </div>
+      <Modal.Button fullWidth size="cta" disabled={isSubmitDisabled} onClick={handleSubmit}>
+        {isPending ? "리뷰 등록 중..." : "리뷰 등록"}
+      </Modal.Button>
     </Modal>
   );
 }
@@ -233,6 +182,7 @@ export default function ReviewWriteModal({
   onClose,
   onSuccess,
   onError,
+  preview = false,
 }: ReviewWriteModalProps) {
   if (!open || !item) return null;
 
@@ -243,6 +193,7 @@ export default function ReviewWriteModal({
       onClose={onClose}
       onSuccess={onSuccess}
       onError={onError}
+      preview={preview}
     />
   );
 }

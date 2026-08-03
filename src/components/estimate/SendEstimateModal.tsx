@@ -115,7 +115,7 @@ export default function SendEstimateModal({
             id="estimate-comment"
             value={comment}
             maxLength={MAX_COMMENT_LENGTH}
-            placeholder="최소 10자 이상 입력해주세요"
+            placeholder="최소 10자 이상 입력해 주세요"
             error={commentError}
             onChange={(event) => setComment(event.target.value)}
             className="h-[160px] resize-none"
