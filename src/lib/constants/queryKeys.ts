@@ -49,6 +49,10 @@ export const getFavoriteMoversScopeQueryKey = (authScope: AuthQueryScope) =>
 export const getMoverDetailQueryKey = (authScope: AuthQueryScope, moverId: string) =>
   [...QUERY_KEYS.MOVERS.DETAIL_ROOT, authScope, moverId] as const;
 
+/** 현재 사용자의 모든 기사 상세 쿼리를 대상으로 하는 prefix. */
+export const getMoverDetailScopeQueryKey = (authScope: AuthQueryScope) =>
+  [...QUERY_KEYS.MOVERS.DETAIL_ROOT, authScope] as const;
+
 export const QUERY_KEYS = {
   AUTH: {
     ME: ["auth", "me"],

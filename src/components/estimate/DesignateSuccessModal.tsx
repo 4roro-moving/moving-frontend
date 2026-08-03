@@ -4,13 +4,14 @@ import { useRouter } from "next/navigation";
 
 import Modal from "@/components/common/Modal/Modal";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { cn } from "@/lib/utils/cn";
 
-const PANEL_CLASSNAME = [
+const PANEL_CLASSNAME = cn(
   "items-stretch text-left",
   "rounded-24 md:rounded-32",
   "w-full max-w-[292px] gap-30 px-16 py-24",
   "md:max-w-[608px] md:gap-40 md:px-24 md:pt-32 md:pb-40",
-].join(" ");
+);
 
 interface DesignateSuccessModalProps {
   open: boolean;
