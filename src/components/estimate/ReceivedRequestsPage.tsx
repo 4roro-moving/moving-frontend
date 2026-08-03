@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
 import Modal from "@/components/common/Modal/Modal";
+import { PageHeader } from "@/components/common/PageHeader";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
@@ -103,11 +104,7 @@ export default function ReceivedRequestsPage() {
 
   return (
     <>
-      <div className="border-border-subtle border-b">
-        <h1 className="text-text-primary mx-auto flex h-[54px] w-full max-w-[1200px] items-center px-24 text-lg font-semibold md:px-[72px] xl:h-[96px] xl:px-0 xl:text-2xl">
-          받은 요청
-        </h1>
-      </div>
+      <PageHeader title="받은 요청" />
 
       <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-24 pb-80 md:px-[72px] xl:gap-40 xl:px-0">
         <section className="flex flex-col gap-24">
