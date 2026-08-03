@@ -7,6 +7,7 @@ import { Text } from "@/components/common/Text";
  * Figma: 1:12143 / 1:12145 / 1:12147
  * Mobile/Tablet: img rect가 프레임보다 넓고 좌측으로 밀려 있음 → overflow clip으로 검정 여백 제거
  * // 2026.08.01 정슬기 - [수정] img3_sm/md Figma inset 크롭 반영 (양옆 검정 여백 제거)
+ * // 2026.08.03 정슬기 - [수정] 기본값과 동일한 priority={false} 제거
  */
 export default function LandingFeatureRequest() {
   return (
@@ -71,7 +72,6 @@ export default function LandingFeatureRequest() {
               fill
               className="object-cover object-top"
               sizes="100vw"
-              priority={false}
             />
           </div>
           <Text
