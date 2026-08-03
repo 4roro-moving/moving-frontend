@@ -19,7 +19,7 @@ export const useChatSocket = () => {
 
   useEffect(() => {
     if (!canConnect || !getAccessToken()) {
-      if (isConnected) {
+      if (socket) {
         disconnect();
       }
 
@@ -27,7 +27,7 @@ export const useChatSocket = () => {
     }
 
     connect();
-  }, [canConnect, connect, disconnect, isConnected]);
+  }, [canConnect, connect, disconnect, socket]);
 
   return {
     socket,
