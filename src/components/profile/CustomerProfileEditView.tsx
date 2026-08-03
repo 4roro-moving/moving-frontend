@@ -38,6 +38,7 @@ const CustomerProfileEditView = () => {
     <CustomerProfileEditForm
       key={customerProfile.id}
       email={customerProfile.email}
+      hasPassword={customerProfile.hasPassword}
       defaultValues={toCustomerProfileEditFormValues(customerProfile)}
       initialImageUrl={customerProfile.imageUrl}
     />

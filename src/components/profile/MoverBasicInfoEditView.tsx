@@ -34,6 +34,7 @@ const MoverBasicInfoEditView = () => {
     <MoverBasicInfoEditForm
       key={moverProfile.id}
       email={moverProfile.email ?? ""}
+      hasPassword={moverProfile.hasPassword}
       defaultValues={toMoverBasicInfoEditFormValues(moverProfile)}
     />
   );

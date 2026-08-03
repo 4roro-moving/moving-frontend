@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import MoverProfileForm from "@/components/profile/MoverProfileForm";
+import MoverProfileCreateView from "@/components/profile/MoverProfileCreateView";
 
 export const metadata: Metadata = {
   title: "기사 프로필 등록 | 무빙",
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const MoverProfilePage = () => {
-  return <MoverProfileForm />;
+  return <MoverProfileCreateView />;
 };
 
 export default MoverProfilePage;

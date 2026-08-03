@@ -27,12 +27,14 @@ import type { MoveType } from "@/types/move";
 
 interface CustomerProfileEditFormProps {
   email: string;
+  hasPassword: boolean;
   defaultValues?: Partial<CustomerProfileEditFormValues>;
   initialImageUrl?: string | null;
 }
 
 const CustomerProfileEditForm = ({
   email,
+  hasPassword,
   defaultValues,
   initialImageUrl = null,
 }: CustomerProfileEditFormProps) => {
@@ -77,7 +79,7 @@ const CustomerProfileEditForm = ({
       await updateCustomerProfile.mutateAsync({
         name: formValues.name,
         phone: formValues.phone,
-        ...toPasswordChangePayload(formValues),
+        ...(hasPassword ? toPasswordChangePayload(formValues) : {}),
         regionIds: [formValues.regionId],
         serviceTypes: formValues.serviceTypes,
         ...(imageUrl ? { imageUrl } : {}),
@@ -131,51 +133,53 @@ const CustomerProfileEditForm = ({
             />
           </FormField>
 
-          <FormField label="전화번호" labelFor="customer-edit-phone" required>
+          <FormField label="전화번호" labelFor="customer-edit-phone">
             <Input
               id="customer-edit-phone"
               size="md"
-              inputMode="numeric"
-              numericOnly
-              stripLeadingZeros={false}
-              placeholder="전화번호를 입력해 주세요"
+              readOnly
+              disabled
               error={errors.phone?.message}
               {...register("phone")}
             />
           </FormField>
 
-          <FormField label="현재 비밀번호" labelFor="customer-edit-current-password">
-            <PasswordInput
-              id="customer-edit-current-password"
-              size="md"
-              autoComplete="new-password"
-              placeholder="현재 비밀번호를 입력해 주세요"
-              error={errors.currentPassword?.message}
-              {...register("currentPassword")}
-            />
-          </FormField>
+          {hasPassword ? (
+            <>
+              <FormField label="현재 비밀번호" labelFor="customer-edit-current-password">
+                <PasswordInput
+                  id="customer-edit-current-password"
+                  size="md"
+                  autoComplete="new-password"
+                  placeholder="현재 비밀번호를 입력해 주세요"
+                  error={errors.currentPassword?.message}
+                  {...register("currentPassword")}
+                />
+              </FormField>
 
-          <FormField label="새 비밀번호" labelFor="customer-edit-new-password">
-            <PasswordInput
-              id="customer-edit-new-password"
-              size="md"
-              autoComplete="new-password"
-              placeholder="새 비밀번호를 입력해 주세요"
-              error={errors.newPassword?.message}
-              {...register("newPassword")}
-            />
-          </FormField>
+              <FormField label="새 비밀번호" labelFor="customer-edit-new-password">
+                <PasswordInput
+                  id="customer-edit-new-password"
+                  size="md"
+                  autoComplete="new-password"
+                  placeholder="새 비밀번호를 입력해 주세요"
+                  error={errors.newPassword?.message}
+                  {...register("newPassword")}
+                />
+              </FormField>
 
-          <FormField label="새 비밀번호 확인" labelFor="customer-edit-new-password-confirm">
-            <PasswordInput
-              id="customer-edit-new-password-confirm"
-              size="md"
-              autoComplete="new-password"
-              placeholder="새 비밀번호를 다시 입력해 주세요"
-              error={errors.newPasswordConfirm?.message}
-              {...register("newPasswordConfirm")}
-            />
-          </FormField>
+              <FormField label="새 비밀번호 확인" labelFor="customer-edit-new-password-confirm">
+                <PasswordInput
+                  id="customer-edit-new-password-confirm"
+                  size="md"
+                  autoComplete="new-password"
+                  placeholder="새 비밀번호를 다시 입력해 주세요"
+                  error={errors.newPasswordConfirm?.message}
+                  {...register("newPasswordConfirm")}
+                />
+              </FormField>
+            </>
+          ) : null}
         </div>
 
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">

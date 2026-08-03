@@ -8,6 +8,7 @@ export interface ProfileRegion {
 
 export interface ProfileStatus {
   isProfileCompleted: boolean;
+  hasPhone: boolean;
 }
 
 /**
@@ -19,6 +20,7 @@ export interface CustomerProfileMeResponse {
   name: string;
   email: string;
   phone: string | null;
+  hasPassword: boolean;
   imageUrl: string | null;
   regions: ProfileRegion[];
   serviceTypes: MoveType[];
@@ -39,6 +41,7 @@ export interface MoverProfileMeResponse {
   name: string;
   email?: string;
   phone: string | null;
+  hasPassword: boolean;
   nickname: string;
   imageUrl: string | null;
   career: number;
@@ -59,6 +62,7 @@ export type MoverProfileMe = Omit<MoverProfileMeResponse, "id" | "userId"> & {
 };
 
 export interface CreateCustomerProfileInput {
+  phone?: string;
   imageUrl?: string;
   regionIds: number[];
   serviceTypes: MoveType[];
@@ -76,6 +80,7 @@ export interface UpdateCustomerProfileInput {
 }
 
 export interface CreateMoverProfileInput {
+  phone?: string;
   nickname: string;
   imageUrl?: string;
   career: number;

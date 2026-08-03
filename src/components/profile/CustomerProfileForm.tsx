@@ -7,6 +7,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import Button from "@/components/common/Button/Button";
 import FormField from "@/components/common/FormField/FormField";
+import Input from "@/components/common/Input/Input";
 import { Text } from "@/components/common/Text";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
@@ -18,17 +19,21 @@ import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
 import { uploadProfileImageIfNeeded } from "@/lib/profile/uploadProfileImage";
 import {
-  customerProfileSchema,
+  createCustomerProfileSchema,
   type CustomerProfileFormValues,
 } from "@/lib/schemas/customerProfileSchema";
+import { ApiError } from "@/types/api";
 import type { MoveType } from "@/types/move";
 
 interface CustomerProfileFormProps {
+  /** status.hasPhone === false 일 때 전화번호 입력 필요 */
+  requiresPhone?: boolean;
   defaultValues?: Partial<CustomerProfileFormValues>;
   initialImageUrl?: string | null;
 }
 
 const CustomerProfileForm = ({
+  requiresPhone = false,
   defaultValues,
   initialImageUrl = null,
 }: CustomerProfileFormProps) => {
@@ -37,13 +42,16 @@ const CustomerProfileForm = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
+    register,
     control,
     handleSubmit,
+    setError,
     formState: { errors, isValid, isSubmitting },
   } = useForm<CustomerProfileFormValues>({
-    resolver: zodResolver(customerProfileSchema),
+    resolver: zodResolver(createCustomerProfileSchema({ requiresPhone })),
     mode: "onChange",
     defaultValues: {
+      phone: "",
       imageFile: null,
       serviceTypes: [],
       regionId: null,
@@ -65,12 +73,25 @@ const CustomerProfileForm = ({
       const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
 
       await createCustomerProfile.mutateAsync({
+        ...(requiresPhone && formValues.phone ? { phone: formValues.phone } : {}),
         ...(imageUrl ? { imageUrl } : {}),
         regionIds: [formValues.regionId],
         serviceTypes: formValues.serviceTypes,
       });
       router.replace(getRoleHomePath("CUSTOMER"));
     } catch (error) {
+      if (
+        error instanceof ApiError &&
+        (error.status === 409 || error.code === "CONFLICT") &&
+        error.message.includes("전화번호")
+      ) {
+        setError("phone", {
+          type: "server",
+          message: error.message,
+        });
+        return;
+      }
+
       setSubmitError(getApiErrorMessage(error, "프로필 저장에 실패했습니다."));
     }
   });
@@ -80,6 +101,7 @@ const CustomerProfileForm = ({
       className="px-margin-mobile mx-auto flex w-full max-w-[640px] flex-col gap-40 py-32 md:px-72 md:py-40 lg:px-0 lg:pt-56 lg:pb-70"
       onSubmit={onSubmit}
       noValidate
+      autoComplete="off"
     >
       <ProfilePageHeader
         title="프로필 등록"
@@ -87,6 +109,21 @@ const CustomerProfileForm = ({
       />
 
       <div className="flex w-full flex-col gap-32">
+        {requiresPhone ? (
+          <FormField label="전화번호" labelFor="customer-create-phone" required>
+            <Input
+              id="customer-create-phone"
+              size="md"
+              inputMode="numeric"
+              numericOnly
+              stripLeadingZeros={false}
+              placeholder="전화번호를 입력해 주세요"
+              error={errors.phone?.message}
+              {...register("phone")}
+            />
+          </FormField>
+        ) : null}
+
         <section className="flex w-full flex-col gap-32">
           <FormField label="프로필 이미지" labelFor="customer-profile-image">
             <Controller

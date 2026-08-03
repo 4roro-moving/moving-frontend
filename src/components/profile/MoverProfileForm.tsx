@@ -19,15 +19,25 @@ import { getRoleHomePath } from "@/lib/auth/redirect";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
 import { uploadProfileImageIfNeeded } from "@/lib/profile/uploadProfileImage";
-import { moverProfileSchema, type MoverProfileFormValues } from "@/lib/schemas/moverProfileSchema";
+import {
+  createMoverProfileSchema,
+  type MoverProfileFormValues,
+} from "@/lib/schemas/moverProfileSchema";
+import { ApiError } from "@/types/api";
 import type { MoveType } from "@/types/move";
 
 interface MoverProfileFormProps {
+  /** status.hasPhone === false 일 때 전화번호 입력 필요 */
+  requiresPhone?: boolean;
   defaultValues?: Partial<MoverProfileFormValues>;
   initialImageUrl?: string | null;
 }
 
-const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfileFormProps) => {
+const MoverProfileForm = ({
+  requiresPhone = false,
+  defaultValues,
+  initialImageUrl = null,
+}: MoverProfileFormProps) => {
   const router = useRouter();
   const createMoverProfile = useCreateMoverProfile();
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -36,11 +46,13 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
     register,
     control,
     handleSubmit,
+    setError,
     formState: { errors, isValid, isSubmitting },
   } = useForm<MoverProfileFormValues>({
-    resolver: zodResolver(moverProfileSchema),
+    resolver: zodResolver(createMoverProfileSchema({ requiresPhone })),
     mode: "onChange",
     defaultValues: {
+      phone: "",
       imageFile: null,
       nickname: "",
       career: "",
@@ -61,6 +73,7 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
       const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
 
       await createMoverProfile.mutateAsync({
+        ...(requiresPhone && formValues.phone ? { phone: formValues.phone } : {}),
         nickname: formValues.nickname,
         career: Number(formValues.career),
         shortIntro: formValues.shortIntro,
@@ -71,6 +84,18 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
       });
       router.replace(getRoleHomePath("MOVER"));
     } catch (error) {
+      if (
+        error instanceof ApiError &&
+        (error.status === 409 || error.code === "CONFLICT") &&
+        error.message.includes("전화번호")
+      ) {
+        setError("phone", {
+          type: "server",
+          message: error.message,
+        });
+        return;
+      }
+
       setSubmitError(getApiErrorMessage(error, "프로필 저장에 실패했습니다."));
     }
   });
@@ -80,6 +105,7 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
       className="px-margin-mobile mx-auto flex w-full max-w-[1120px] flex-col gap-40 py-32 md:gap-48 md:px-72 md:py-40 lg:px-0 lg:pt-56 lg:pb-70"
       onSubmit={onSubmit}
       noValidate
+      autoComplete="off"
     >
       <ProfilePageHeader
         title="기사님 프로필 등록"
@@ -88,6 +114,19 @@ const MoverProfileForm = ({ defaultValues, initialImageUrl = null }: MoverProfil
 
       <div className="flex w-full flex-col gap-32 lg:flex-row lg:items-start lg:justify-between lg:gap-[120px]">
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">
+          {requiresPhone ? (
+            <FormField label="전화번호" labelFor="mover-create-phone" required>
+              <Input
+                id="mover-create-phone"
+                size="md"
+                readOnly
+                disabled
+                error={errors.phone?.message}
+                {...register("phone")}
+              />
+            </FormField>
+          ) : null}
+
           <FormField label="프로필 이미지">
             <Controller
               name="imageFile"

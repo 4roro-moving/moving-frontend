@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import CustomerProfileForm from "@/components/profile/CustomerProfileForm";
+import CustomerProfileCreateView from "@/components/profile/CustomerProfileCreateView";
 
 export const metadata: Metadata = {
   title: "프로필 등록 | 무빙",
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const CustomerProfilePage = () => {
-  return <CustomerProfileForm />;
+  return <CustomerProfileCreateView />;
 };
 
 export default CustomerProfilePage;

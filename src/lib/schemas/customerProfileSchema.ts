@@ -21,15 +21,26 @@ const regionIdSchema = z.union([
   z.literal(17),
 ]);
 
-export const customerProfileSchema = z
-  .object({
-    imageFile: z.custom<File | null>().nullable().optional(),
-    serviceTypes: z.array(moveTypeSchema).min(1, "이용 서비스를 선택해 주세요"),
-    regionId: regionIdSchema.nullable(),
-  })
-  .refine((data) => data.regionId !== null, {
-    message: "내가 사는 지역을 선택해 주세요",
-    path: ["regionId"],
-  });
+const phoneSchema = z
+  .string()
+  .min(1, "전화번호를 입력해 주세요")
+  .regex(/^\d+$/, "숫자만 입력해 주세요")
+  .regex(/^010\d{8}$/, "올바른 전화번호를 입력해 주세요");
 
-export type CustomerProfileFormValues = z.infer<typeof customerProfileSchema>;
+export const createCustomerProfileSchema = (options: { requiresPhone: boolean }) =>
+  z
+    .object({
+      phone: options.requiresPhone ? phoneSchema : z.string().optional(),
+      imageFile: z.custom<File | null>().nullable().optional(),
+      serviceTypes: z.array(moveTypeSchema).min(1, "이용 서비스를 선택해 주세요"),
+      regionId: regionIdSchema.nullable(),
+    })
+    .refine((data) => data.regionId !== null, {
+      message: "내가 사는 지역을 선택해 주세요",
+      path: ["regionId"],
+    });
+
+export type CustomerProfileFormValues = z.infer<ReturnType<typeof createCustomerProfileSchema>>;
+
+/** @deprecated createCustomerProfileSchema 사용 */
+export const customerProfileSchema = createCustomerProfileSchema({ requiresPhone: false });

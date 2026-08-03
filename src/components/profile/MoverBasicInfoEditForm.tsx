@@ -21,10 +21,15 @@ import { ApiError } from "@/types/api";
 
 interface MoverBasicInfoEditFormProps {
   email: string;
+  hasPassword: boolean;
   defaultValues?: Partial<MoverBasicInfoEditFormValues>;
 }
 
-const MoverBasicInfoEditForm = ({ email, defaultValues }: MoverBasicInfoEditFormProps) => {
+const MoverBasicInfoEditForm = ({
+  email,
+  hasPassword,
+  defaultValues,
+}: MoverBasicInfoEditFormProps) => {
   const updateMoverBasicInfo = useUpdateMoverBasicInfo();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -55,7 +60,7 @@ const MoverBasicInfoEditForm = ({ email, defaultValues }: MoverBasicInfoEditForm
       await updateMoverBasicInfo.mutateAsync({
         name: formValues.name,
         phone: formValues.phone,
-        ...toPasswordChangePayload(formValues),
+        ...(hasPassword ? toPasswordChangePayload(formValues) : {}),
       });
     } catch (error) {
       if (
@@ -114,38 +119,42 @@ const MoverBasicInfoEditForm = ({ email, defaultValues }: MoverBasicInfoEditForm
         </div>
 
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">
-          <FormField label="현재 비밀번호" labelFor="mover-basic-current-password">
-            <PasswordInput
-              id="mover-basic-current-password"
-              size="md"
-              autoComplete="new-password"
-              placeholder="현재 비밀번호를 입력해 주세요"
-              error={errors.currentPassword?.message}
-              {...register("currentPassword")}
-            />
-          </FormField>
+          {hasPassword ? (
+            <>
+              <FormField label="현재 비밀번호" labelFor="mover-basic-current-password">
+                <PasswordInput
+                  id="mover-basic-current-password"
+                  size="md"
+                  autoComplete="new-password"
+                  placeholder="현재 비밀번호를 입력해 주세요"
+                  error={errors.currentPassword?.message}
+                  {...register("currentPassword")}
+                />
+              </FormField>
 
-          <FormField label="새 비밀번호" labelFor="mover-basic-new-password">
-            <PasswordInput
-              id="mover-basic-new-password"
-              size="md"
-              autoComplete="new-password"
-              placeholder="새 비밀번호를 입력해 주세요"
-              error={errors.newPassword?.message}
-              {...register("newPassword")}
-            />
-          </FormField>
+              <FormField label="새 비밀번호" labelFor="mover-basic-new-password">
+                <PasswordInput
+                  id="mover-basic-new-password"
+                  size="md"
+                  autoComplete="new-password"
+                  placeholder="새 비밀번호를 입력해 주세요"
+                  error={errors.newPassword?.message}
+                  {...register("newPassword")}
+                />
+              </FormField>
 
-          <FormField label="새 비밀번호 확인" labelFor="mover-basic-new-password-confirm">
-            <PasswordInput
-              id="mover-basic-new-password-confirm"
-              size="md"
-              autoComplete="new-password"
-              placeholder="새 비밀번호를 다시 입력해 주세요"
-              error={errors.newPasswordConfirm?.message}
-              {...register("newPasswordConfirm")}
-            />
-          </FormField>
+              <FormField label="새 비밀번호 확인" labelFor="mover-basic-new-password-confirm">
+                <PasswordInput
+                  id="mover-basic-new-password-confirm"
+                  size="md"
+                  autoComplete="new-password"
+                  placeholder="새 비밀번호를 다시 입력해 주세요"
+                  error={errors.newPasswordConfirm?.message}
+                  {...register("newPasswordConfirm")}
+                />
+              </FormField>
+            </>
+          ) : null}
         </div>
       </div>
 
