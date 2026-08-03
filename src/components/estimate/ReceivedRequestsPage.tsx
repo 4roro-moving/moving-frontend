@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { FormEvent, useState } from "react";
 
+import Checkbox from "@/components/common/Checkbox/Checkbox";
 import Modal from "@/components/common/Modal/Modal";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
@@ -155,42 +156,16 @@ export default function ReceivedRequestsPage() {
               </Text>
             )}
             <div className="hidden flex-wrap items-center gap-12 text-base lg:flex">
-              <label className="flex items-center gap-4">
-                <input
-                  className="peer sr-only"
-                  type="checkbox"
-                  checked={includeDesignated}
-                  onChange={(event) => setIncludeDesignated(event.target.checked)}
-                />
-                <span className="peer-focus-visible:ring-border-brand flex h-36 w-36 items-center justify-center rounded-md peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
-                  <span
-                    className={`flex h-20 w-20 items-center justify-center rounded ${includeDesignated ? "bg-background-brand" : "border-border-muted bg-background-surface border"}`}
-                  >
-                    {includeDesignated && (
-                      <Image src="/icons/checkbox-check.svg" alt="" width={10} height={6} />
-                    )}
-                  </span>
-                </span>
-                지정 견적 요청
-              </label>
-              <label className="flex items-center gap-4">
-                <input
-                  className="peer sr-only"
-                  type="checkbox"
-                  checked={serviceAreaOnly}
-                  onChange={(event) => setServiceAreaOnly(event.target.checked)}
-                />
-                <span className="peer-focus-visible:ring-border-brand flex h-36 w-36 items-center justify-center rounded-md peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
-                  <span
-                    className={`flex h-20 w-20 items-center justify-center rounded ${serviceAreaOnly ? "bg-background-brand" : "border-border-muted bg-background-surface border"}`}
-                  >
-                    {serviceAreaOnly && (
-                      <Image src="/icons/checkbox-check.svg" alt="" width={10} height={6} />
-                    )}
-                  </span>
-                </span>
-                서비스 가능 지역
-              </label>
+              <Checkbox
+                checked={includeDesignated}
+                onCheckedChange={setIncludeDesignated}
+                label="지정 견적 요청"
+              />
+              <Checkbox
+                checked={serviceAreaOnly}
+                onCheckedChange={setServiceAreaOnly}
+                label="서비스 가능 지역"
+              />
             </div>
             <div className="flex items-center gap-4">
               <Select
@@ -322,28 +297,13 @@ export default function ReceivedRequestsPage() {
                     onChange: setServiceAreaOnly,
                   },
                 ].map((filter) => (
-                  <label key={filter.label} className="text-text-secondary flex items-center">
-                    <input
-                      className="peer sr-only"
-                      type="checkbox"
-                      checked={filter.checked}
-                      onChange={(event) => filter.onChange(event.target.checked)}
-                    />
-                    <span className="peer-focus-visible:ring-border-brand flex h-36 w-36 items-center justify-center rounded-md peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
-                      <span
-                        className={`rounded-4 flex h-20 w-20 items-center justify-center ${
-                          filter.checked
-                            ? "bg-background-brand"
-                            : "border-border-default bg-background-surface border"
-                        }`}
-                      >
-                        {filter.checked && (
-                          <Image src="/icons/checkbox-check.svg" alt="" width={10} height={6} />
-                        )}
-                      </span>
-                    </span>
-                    {filter.label}
-                  </label>
+                  <Checkbox
+                    key={filter.label}
+                    checked={filter.checked}
+                    onCheckedChange={filter.onChange}
+                    label={filter.label}
+                    labelClassName="text-text-secondary"
+                  />
                 ))}
               </div>
             </section>
