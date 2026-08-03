@@ -16,6 +16,14 @@ interface UseMoverDesignationOptions {
   onError: (message: string) => void;
 }
 
+/**
+ * 기사님 상세의 지정 견적 CTA 상태와 동작을 관리합니다.
+ *
+ * - 비회원: 로그인 안내 모달
+ * - 활성 요청 없음: 일반 견적 요청 안내 모달
+ * - CONFIRMED 요청: 진행 중인 견적 상세로 이동
+ * - PENDING·OPEN 요청: 지정 가능 여부 확인 후 지정 API 호출
+ */
 export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOptions) {
   const router = useRouter();
 
@@ -48,7 +56,7 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
       ? getDesignateCtaState(activeRequest ?? null, moverId)
       : null;
 
-  // 지정 불가 상태(완료·불가·만료·한도)는 버튼 비활성화
+  // 이미 기사를 지정했거나 만료·한도 초과 등 상태에서는 CTA 버튼 비활성화
   const isRequestDisabled =
     designateMutation.isPending ||
     (isCustomerLoggedIn && isActiveLoading) ||
@@ -81,7 +89,7 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
 
     let request = activeRequest ?? null;
 
-    // 조회 실패 상태면 재클릭 시 refetch 후 최신 결과로 CTA를 판단합니다.
+    // 조회 실패 상태면 재클릭 시 refetch 후 최신 결과로 CTA 판단
     if (isActiveError) {
       const result = await refetchActiveRequest();
       if (result.error) {
@@ -98,6 +106,7 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
       return;
     }
 
+    // 확정 견적이 있으면 추가 지정을 막고 현재 진행 중인 견적 상세로 안내
     if (nextCtaState.status === "confirmed" && nextCtaState.estimateRequestId !== null) {
       router.push(APP_ROUTES.ESTIMATES.REQUEST_DETAIL(nextCtaState.estimateRequestId));
       return;

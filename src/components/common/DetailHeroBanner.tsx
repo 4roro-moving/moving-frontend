@@ -11,7 +11,7 @@ interface DetailHeroBannerProps {
 }
 
 /**
- * 견적 상세 히어로 배너
+ * 기사·견적 상세 히어로 배너
  * // 2026.07.29 정슬기 - [수정] showProfile=false 배너 전용 모드 (Figma 8093:49327)
  */
 export default function DetailHeroBanner({
