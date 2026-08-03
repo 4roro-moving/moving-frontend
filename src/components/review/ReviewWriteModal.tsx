@@ -6,7 +6,7 @@ import { useState } from "react";
 import Button from "@/components/common/Button/Button";
 import FormField from "@/components/common/FormField/FormField";
 import Textarea from "@/components/common/Input/Textarea";
-import Modal from "@/components/common/Modal/Modal";
+import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { useCreateReview } from "@/hooks/useCreateReview";
@@ -98,7 +98,7 @@ function ReviewWriteModalContent({
       onClose={handleClose}
       presentation="responsive"
       size="lg"
-      className="max-h-[90dvh] gap-24 overflow-y-auto px-20 py-32 md:gap-32 md:p-32 lg:gap-40 lg:p-40"
+      className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
       aria-label="리뷰 작성"
     >
       <div className="flex w-full items-start justify-between gap-12 md:gap-16">
@@ -106,7 +106,7 @@ function ReviewWriteModalContent({
         <Modal.Close onClose={handleClose} disabled={isPending} />
       </div>
 
-      <div className="flex w-full flex-col gap-20 md:gap-28 lg:gap-32">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-20 overflow-y-auto md:gap-28 lg:gap-32">
         <div className="border-border-muted flex w-full items-center gap-10 border-b pb-16 md:gap-16 md:pb-20">
           <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
             {item.mover.imageUrl ? (

@@ -3,16 +3,14 @@
 import { useState } from "react";
 
 import Textarea from "@/components/common/Input/Textarea";
-import Modal from "@/components/common/Modal/Modal";
+import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
 import FormField from "@/components/common/FormField/FormField";
-import { cn } from "@/lib/utils/cn";
+import EstimateRequestSummaryContent from "@/components/estimate/EstimateRequestSummaryContent";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 const MIN_REASON_LENGTH = 10;
 const MAX_REASON_LENGTH = 1000;
-
-const PANEL_CLASSNAME = cn("items-stretch text-left overflow-hidden", "gap-40 px-24 pt-32 pb-40");
 
 interface RejectEstimateModalProps {
   request: MoverEstimateRequest;
@@ -41,18 +39,32 @@ export default function RejectEstimateModal({
       onClose={isPending ? undefined : onClose}
       presentation="responsive"
       size="lg"
-      className={PANEL_CLASSNAME}
+      className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
         <Modal.Title>제안 반려</Modal.Title>
         <Modal.Close onClose={onClose} disabled={isPending} />
       </div>
 
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-16 overflow-hidden">
-        <Text as="p" variant="lg-regular" className="text-text-secondary">
-          {request.customer.name} 고객님의 요청을 반려하는 이유를 입력해 주세요.
-        </Text>
-        <FormField label="반려 사유" labelFor="reject-reason" variant="compact" className="gap-8">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-16 overflow-y-auto">
+        <section>
+          <EstimateRequestSummaryContent
+            density="modal"
+            moveType={request.moveType}
+            isDesignated={request.isDesignated}
+            title={`${request.customer.name} 고객님`}
+            fromLabel={request.fromRegion}
+            toLabel={request.toRegion}
+            moveDate={request.moveDate}
+          />
+        </section>
+
+        <FormField
+          label="반려 사유를 입력해 주세요"
+          labelFor="reject-reason"
+          variant="compact"
+          className="gap-16"
+        >
           <Textarea
             id="reject-reason"
             autoFocus
@@ -72,7 +84,7 @@ export default function RejectEstimateModal({
 
       <Modal.Button
         fullWidth
-        size="detail"
+        size="cta"
         disabled={!isReasonValid || isPending}
         onClick={() => isReasonValid && onSubmit(trimmedReason)}
       >

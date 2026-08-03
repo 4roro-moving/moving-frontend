@@ -5,19 +5,13 @@ import { useState } from "react";
 import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import Textarea from "@/components/common/Input/Textarea";
-import Modal from "@/components/common/Modal/Modal";
+import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
 import EstimateRequestSummaryContent from "@/components/estimate/EstimateRequestSummaryContent";
-import { cn } from "@/lib/utils/cn";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 const MAX_PRICE = 100_000_000;
 const MIN_COMMENT_LENGTH = 10;
 const MAX_COMMENT_LENGTH = 1000;
-
-const PANEL_CLASSNAME = cn(
-  "items-stretch text-left overflow-hidden",
-  "max-h-[calc(100dvh-104px)] gap-26 lg:gap-40 px-24 pt-32 pb-40",
-);
 
 export interface SendEstimateInput {
   price: number;
@@ -72,7 +66,7 @@ export default function SendEstimateModal({
       onClose={isPending ? undefined : onClose}
       presentation="responsive"
       size="lg"
-      className={PANEL_CLASSNAME}
+      className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
         <Modal.Title>견적 보내기</Modal.Title>
