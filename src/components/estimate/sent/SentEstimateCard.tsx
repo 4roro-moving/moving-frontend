@@ -30,13 +30,6 @@ function RouteArrow() {
   );
 }
 
-function formatMoveDate(date: string): string {
-  return formatKoreanDateTime(date).replace(
-    /^(\d{4})\.\s*(\d{2})\.\s*(\d{2})\.\s*/,
-    "$1년 $2월 $3일 ",
-  );
-}
-
 export default function SentEstimateCard({ estimate, onViewDetail }: SentEstimateCardProps) {
   const isConfirmed = estimate.status !== "SENT";
   const isCompleted = estimate.status === "COMPLETED";
@@ -101,7 +94,7 @@ export default function SentEstimateCard({ estimate, onViewDetail }: SentEstimat
               이사일
             </Text>
             <Text as="dd" variant="lg-semibold" className="text-text-secondary whitespace-nowrap">
-              {formatMoveDate(estimate.moveDate)}
+              {formatKoreanDateTime(estimate.moveDate)}
             </Text>
           </div>
         </dl>

@@ -107,7 +107,6 @@ export default function SendEstimateModal({
             placeholder="견적가 입력"
             error={priceError}
             onChange={(event) => setPrice(event.target.value)}
-            className="h-54 text-lg"
           />
         </FormField>
 
@@ -124,7 +123,6 @@ export default function SendEstimateModal({
             placeholder="최소 10자 이상 입력해주세요"
             error={commentError}
             onChange={(event) => setComment(event.target.value)}
-            className="h-[160px] resize-none px-24 py-14 text-lg"
           />
         </FormField>
       </div>
