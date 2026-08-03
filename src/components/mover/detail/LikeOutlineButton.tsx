@@ -41,15 +41,17 @@ export const LikeOutlineButton = forwardRef<HTMLButtonElement, LikeOutlineButton
     ref,
   ) {
     const resolvedSize = size ?? "sm";
-    const namePrefix = moverName ? `${moverName} 기사님 ` : "";
+    const namePrefix = moverName ? `${moverName} ` : "";
     const label = isFavorite ? "기사님 찜 해제하기" : "기사님 찜하기";
+    const accessibleLabel =
+      resolvedSize === "sm" ? `${namePrefix}기사님 찜` : `${namePrefix}${label}`;
 
     return (
       <button
         ref={ref}
         type={type}
         aria-pressed={isFavorite}
-        aria-label={isFavorite ? `${namePrefix}찜 해제하기` : `${namePrefix}찜하기`}
+        aria-label={accessibleLabel}
         className={cn(likeOutlineButtonVariants({ size: resolvedSize }), className)}
         {...props}
       >

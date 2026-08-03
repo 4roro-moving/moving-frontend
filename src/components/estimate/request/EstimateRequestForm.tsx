@@ -305,22 +305,34 @@ export default function EstimateRequestForm() {
   }
 
   if (activeRequest) {
+    const isConfirmedRequest = activeRequest.status === "CONFIRMED";
+
     return (
       <>
         {toastElement}
         <ActiveEstimateBlocked
           imageSrc="/images/empty/moving-car.png"
           description={
-            <>
-              현재 진행 중인 이사 견적이 있어요!
-              <br />
-              진행 중인 이사 완료 후 새로운 견적을 받아보세요.
-            </>
+            isConfirmedRequest ? (
+              <>
+                확정한 견적으로 이사를 준비 중이에요!
+                <br />
+                이사 완료 후 새로운 견적을 요청할 수 있어요.
+              </>
+            ) : (
+              <>
+                현재 진행 중인 이사 견적이 있어요!
+                <br />
+                진행 중인 이사 완료 후 새로운 견적을 받아보세요.
+              </>
+            )
           }
-          // 요청 직후엔 견적 미도착이 일반적 → '받은 견적'보다 대기 탭으로 안내
-          // 2026.07.30 정슬기 - [수정] 버튼 문구·경로를 대기 중인 견적 흐름에 맞춤
-          buttonLabel="대기 중인 견적 보기"
-          href={APP_ROUTES.ESTIMATES.PENDING}
+          buttonLabel={isConfirmedRequest ? "진행 중인 견적 보기" : "대기 중인 견적 보기"}
+          href={
+            isConfirmedRequest
+              ? APP_ROUTES.ESTIMATES.REQUEST_DETAIL(activeRequest.id)
+              : APP_ROUTES.ESTIMATES.PENDING
+          }
         />
       </>
     );

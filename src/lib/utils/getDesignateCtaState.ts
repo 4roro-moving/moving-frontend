@@ -8,6 +8,7 @@ const DESIGNATABLE_STATUSES: readonly EstimateRequestStatus[] = ["PENDING", "OPE
 
 export type DesignateCtaStatus =
   | "needEstimateRequest"
+  | "confirmed"
   | "alreadyDesignated"
   | "notEditable"
   | "expired"
@@ -23,6 +24,7 @@ export const DESIGNATE_CTA_DISABLED_STATUSES: readonly DesignateCtaStatus[] = [
 ];
 
 const DESIGNATE_CTA_BUTTON_LABEL = {
+  confirmed: "진행 중인 견적 보기",
   alreadyDesignated: "지정 견적 요청 완료",
   notEditable: "지정 견적 요청 불가",
   expired: "만료된 견적 요청",
@@ -50,7 +52,8 @@ export interface DesignateCtaState {
  * 판정 순서: 요청 없음 → 상태/만료(현재 지정 가능 여부) → 이미 지정 → 한도 → 가능
  *
  * - needEstimateRequest: 활성 견적 요청 없음 → 호출부에서 안내 모달 표시
- * - notEditable:        상태(CONFIRMED 등)로 수정 불가 → 버튼 비활성
+ * - confirmed:          확정 견적 요청 존재 → 진행 중인 견적 상세로 이동
+ * - notEditable:        지정할 수 없는 상태 → 버튼 비활성
  * - expired:            만료 → 버튼 비활성
  * - alreadyDesignated:  해당 기사가 이미 지정됨 → 버튼 비활성
  * - limitExceeded:      지정 기사 3명 도달 → 버튼 비활성
@@ -75,7 +78,17 @@ export function getDesignateCtaState(
 
   const estimateRequestId = activeRequest.id;
 
-  // 방어: active에 CONFIRMED 등이 남은 경우(캐시·레이스). 확정 후 정상 응답은 보통 null
+  if (activeRequest.status === "CONFIRMED") {
+    return {
+      status: "confirmed",
+      canSubmit: false,
+      estimateRequestId,
+      message: null,
+      buttonLabel: DESIGNATE_CTA_BUTTON_LABEL.confirmed,
+    };
+  }
+
+  // 방어: active에 지정할 수 없는 상태가 남은 경우
   if (!DESIGNATABLE_STATUSES.includes(activeRequest.status)) {
     return {
       status: "notEditable",
