@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
@@ -21,6 +22,7 @@ import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { useIsClient } from "@/hooks/useIsClient";
 import { useMoverDetail } from "@/hooks/useMoverDetail";
 import { hasAuthSession } from "@/lib/auth/session";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
 import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -35,6 +37,7 @@ function isMoverNotFoundError(error: unknown): boolean {
 }
 
 export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
+  const router = useRouter();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isEstimateRequestModalOpen, setIsEstimateRequestModalOpen] = useState(false);
   const [isDesignateSuccessModalOpen, setIsDesignateSuccessModalOpen] = useState(false);
@@ -146,6 +149,11 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
 
     if (nextCtaState.status === "needEstimateRequest") {
       setIsEstimateRequestModalOpen(true);
+      return;
+    }
+
+    if (nextCtaState.status === "confirmed" && nextCtaState.estimateRequestId !== null) {
+      router.push(APP_ROUTES.ESTIMATES.REQUEST_DETAIL(nextCtaState.estimateRequestId));
       return;
     }
 
