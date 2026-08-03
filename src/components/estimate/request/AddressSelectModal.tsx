@@ -24,7 +24,7 @@ const RESULT_AREA_HEIGHT_CLASS = "h-[280px] max-h-[280px]";
 const PANEL_CLASSNAME = cn(
   "items-stretch text-left overflow-hidden",
   "h-auto min-h-[446px] max-h-[90vh] w-full max-w-[292px] gap-0 rounded-24 px-16 py-24",
-  "min-[744px]:h-[620px] min-[744px]:max-w-[608px] min-[744px]:rounded-32 min-[744px]:px-24 min-[744px]:pt-32 min-[744px]:pb-40",
+  "md:h-[620px] md:max-w-[608px] md:rounded-32 md:px-24 md:pt-32 md:pb-40",
 );
 
 function AddressChip({ label }: { label: string }) {
@@ -146,19 +146,19 @@ export default function AddressSelectModal({
 
   return (
     <Modal onClose={onClose} presentation="modal" size="lg" className={PANEL_CLASSNAME}>
-      <div className="mb-30 flex w-full shrink-0 items-center justify-between gap-16 min-[744px]:mb-40">
+      <div className="mb-30 flex w-full shrink-0 items-center justify-between gap-16 md:mb-40">
         <Modal.Title variant={{ base: "2lg-bold", md: "2xl-semibold" }}>
           {kind}를 선택해주세요
         </Modal.Title>
         <Modal.Close
           size="sm"
           onClose={onClose}
-          className="min-[744px]:size-36"
-          iconClassName="min-[744px]:size-36"
+          className="md:size-36"
+          iconClassName="md:size-36"
         />
       </div>
 
-      <div className="mb-24 flex min-h-0 w-full flex-col gap-24 overflow-hidden min-[744px]:mb-40 min-[744px]:flex-1">
+      <div className="mb-24 flex min-h-0 w-full flex-col gap-24 overflow-hidden md:mb-40 md:flex-1">
         <form
           className="w-full shrink-0"
           onSubmit={(event) => {
@@ -202,7 +202,7 @@ export default function AddressSelectModal({
               ))}
             </div>
           ) : (
-            <div className="flex h-full items-center justify-center px-0 lg:px-24">
+            <div className="flex h-full items-center justify-center px-0 xl:px-24">
               <Text
                 as="p"
                 variant={{ base: "md-regular", md: "lg-regular" }}
@@ -220,7 +220,7 @@ export default function AddressSelectModal({
       <Modal.Button
         fullWidth
         size="cta"
-        className="mt-auto min-[744px]:h-64"
+        className="mt-auto md:h-64"
         disabled={!selected}
         onClick={() => {
           if (!selected) return;

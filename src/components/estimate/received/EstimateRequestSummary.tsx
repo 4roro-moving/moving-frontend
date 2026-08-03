@@ -22,7 +22,7 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
 
   return (
     <section
-      className="flex w-full flex-col gap-16 md:gap-24 lg:w-[260px] lg:shrink-0 lg:gap-40"
+      className="flex w-full flex-col gap-16 md:gap-24 xl:w-[260px] xl:shrink-0 xl:gap-40"
       aria-label="견적 정보"
     >
       <div className="flex w-full items-center justify-center md:justify-between">

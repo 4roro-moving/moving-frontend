@@ -22,7 +22,7 @@ export default function ReceivedEstimatesPageClient() {
     <div
       className={cn(
         "bg-background-default md:bg-background-subtle flex w-full flex-col items-center",
-        !isEmpty && "py-38 md:py-32 lg:py-64",
+        !isEmpty && "py-38 md:py-32 xl:py-64",
       )}
     >
       {isLoading ? <EstimatesQueryStatus message="받은 견적을 불러오는 중입니다." /> : null}

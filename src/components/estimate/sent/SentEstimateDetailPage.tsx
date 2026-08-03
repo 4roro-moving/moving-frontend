@@ -141,9 +141,18 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
           <div className="flex w-full flex-col gap-20 md:gap-28">
             <EstimateDetailInfoSection
               rows={[
-                { label: "견적 요청일", value: formatKoreanDateTime(request.requestedAt) },
-                { label: "서비스", value: MOVE_TYPE_LABEL[request.moveType] },
-                { label: "이용일", value: formatKoreanDateTime(request.moveDate) },
+                {
+                  label: "견적 요청일",
+                  value: formatKoreanDateTime(request.requestedAt),
+                },
+                {
+                  label: "서비스",
+                  value: MOVE_TYPE_LABEL[request.moveType],
+                },
+                {
+                  label: "이용일",
+                  value: formatKoreanDateTime(request.moveDate),
+                },
                 {
                   label: "출발지",
                   value: formatAddress(request.fromAddress, request.fromDetailAddress),

@@ -24,7 +24,7 @@ const EMPTY_DESCRIPTION = (
 );
 
 export const FAVORITE_MOVERS_CONTENT_CLASSNAME =
-  "px-margin-mobile mx-auto flex w-full max-w-[var(--container-desktop)] flex-col pt-22 pb-80 min-[744px]:px-72 min-[744px]:pt-30 lg:px-0 lg:pt-32 lg:pb-[165px]";
+  "px-margin-mobile mx-auto flex w-full max-w-[var(--container-desktop)] flex-col pt-22 pb-80 md:px-72 md:pt-30 xl:px-0 xl:pt-32 xl:pb-[165px]";
 
 export default function FavoriteMoversContent() {
   const { isInitialLoading, movers, query, totalCount } = useFavoriteMoversInfinite();
@@ -80,7 +80,7 @@ export default function FavoriteMoversContent() {
 
       {showList ? (
         <div
-          className="flex w-full flex-col gap-10 min-[744px]:gap-18 lg:gap-28"
+          className="flex w-full flex-col gap-10 md:gap-18 xl:gap-28"
           aria-busy={query.isFetching || selection.isBulkDeleting}
         >
           <FavoriteMoversToolbar
@@ -92,7 +92,7 @@ export default function FavoriteMoversContent() {
             onBulkDelete={selection.handleBulkDelete}
           />
 
-          <ul className="flex flex-col gap-20 min-[744px]:gap-24 lg:gap-20">
+          <ul className="flex flex-col gap-20 md:gap-24 xl:gap-20">
             {movers.map((mover) => (
               <li key={mover.id}>
                 <MoverCard

@@ -10,8 +10,8 @@ interface ReviewEstimateSummaryProps {
   item: ReviewableEstimateItem;
 }
 
-const LABEL_VARIANT = { base: "xs-regular", lg: "md-regular" } as const;
-const VALUE_VARIANT = { base: "sm-medium", lg: "lg-regular" } as const;
+const LABEL_VARIANT = { base: "xs-regular", xl: "md-regular" } as const;
+const VALUE_VARIANT = { base: "sm-medium", xl: "lg-regular" } as const;
 
 function summarizeAddress(address: string): string {
   const [region = "", district = ""] = address.trim().split(/\s+/);
@@ -51,18 +51,18 @@ export default function ReviewEstimateSummary({ item }: ReviewEstimateSummaryPro
   const moverLabel = getReviewMoverDisplayName(mover);
 
   return (
-    <section className="flex w-full flex-col gap-14 lg:gap-16">
-      <div className="flex flex-wrap items-center gap-8 lg:gap-12">
-        <MoveTypeChip moveType={estimateRequest.moveType} size="sm" className="lg:hidden" />
+    <section className="flex w-full flex-col gap-14 xl:gap-16">
+      <div className="flex flex-wrap items-center gap-8 xl:gap-12">
+        <MoveTypeChip moveType={estimateRequest.moveType} size="sm" className="xl:hidden" />
         <MoveTypeChip
           moveType={estimateRequest.moveType}
           size="md"
-          className="hidden lg:inline-flex"
+          className="hidden xl:inline-flex"
         />
         {estimateRequest.isDesignated ? (
           <>
-            <DesignatedChip size="sm" className="lg:hidden" />
-            <DesignatedChip size="md" className="hidden lg:inline-flex" />
+            <DesignatedChip size="sm" className="xl:hidden" />
+            <DesignatedChip size="md" className="hidden xl:inline-flex" />
           </>
         ) : null}
       </div>
@@ -70,10 +70,10 @@ export default function ReviewEstimateSummary({ item }: ReviewEstimateSummaryPro
       <div className="flex flex-col gap-12">
         <div className="flex w-full items-center justify-between gap-16">
           <div className="flex min-w-0 flex-col items-start justify-center gap-4">
-            <DriverBadgeIcon className="h-[18.2px] w-16 shrink-0 lg:h-23 lg:w-20" />
+            <DriverBadgeIcon className="h-[18.2px] w-16 shrink-0 xl:h-23 xl:w-20" />
             <Text
               as="p"
-              variant={{ base: "lg-semibold", lg: "2lg-semibold" }}
+              variant={{ base: "lg-semibold", xl: "2lg-semibold" }}
               className="text-text-secondary truncate"
             >
               {moverLabel}
@@ -97,16 +97,16 @@ export default function ReviewEstimateSummary({ item }: ReviewEstimateSummaryPro
 
         <div className="bg-border-subtle h-px w-full" />
 
-        <dl className="flex w-full items-end justify-between gap-12 lg:justify-start lg:gap-40">
+        <dl className="flex w-full items-end justify-between gap-12 xl:justify-start xl:gap-40">
           <div className="flex min-w-0 items-end gap-12">
             <RouteField
               label="출발지"
               value={summarizeAddress(estimateRequest.fromAddress)}
               fullValue={estimateRequest.fromAddress}
             />
-            <span className="flex h-22 shrink-0 items-center lg:h-26" aria-hidden="true">
-              <ArrowRightIcon size={12} className="lg:hidden" />
-              <ArrowRightIcon size={16} className="hidden lg:block" />
+            <span className="flex h-22 shrink-0 items-center xl:h-26" aria-hidden="true">
+              <ArrowRightIcon size={12} className="xl:hidden" />
+              <ArrowRightIcon size={16} className="hidden xl:block" />
             </span>
             <RouteField
               label="도착지"

@@ -104,14 +104,14 @@ export default function ReceivedRequestsPage() {
   return (
     <>
       <div className="border-border-subtle border-b">
-        <h1 className="text-text-primary mx-auto flex h-[54px] w-full max-w-[1200px] items-center px-24 text-lg font-semibold min-[744px]:px-[72px] lg:h-[96px] lg:px-0 lg:text-2xl">
+        <h1 className="text-text-primary mx-auto flex h-[54px] w-full max-w-[1200px] items-center px-24 text-lg font-semibold md:px-[72px] xl:h-[96px] xl:px-0 xl:text-2xl">
           받은 요청
         </h1>
       </div>
 
-      <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-24 pb-80 min-[744px]:px-[72px] lg:gap-40 lg:px-0">
+      <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-24 pb-80 md:px-[72px] xl:gap-40 xl:px-0">
         <section className="flex flex-col gap-24">
-          <form onSubmit={submitSearch} className="mx-10 w-[calc(100%_-_20px)] lg:mx-0 lg:w-full">
+          <form onSubmit={submitSearch} className="mx-10 w-[calc(100%_-_20px)] xl:mx-0 xl:w-full">
             <Search
               size="responsive"
               value={searchText}
@@ -126,7 +126,7 @@ export default function ReceivedRequestsPage() {
             />
           </form>
 
-          <div className="hidden flex-wrap gap-12 lg:flex">
+          <div className="hidden flex-wrap gap-12 xl:flex">
             {MOVE_TYPE_OPTIONS.map((moveType) => {
               const isSelected = moveTypes.includes(moveType.value);
               return (
@@ -134,7 +134,7 @@ export default function ReceivedRequestsPage() {
                   key={moveType.value}
                   type="button"
                   onClick={() => toggleMoveType(moveType.value)}
-                  className={`rounded-full border px-20 py-2.5 text-base lg:text-lg ${isSelected ? "border-border-brand bg-background-brand-muted text-text-brand font-medium" : "border-border-muted bg-background-subtle text-text-secondary font-normal"}`}
+                  className={`rounded-full border px-20 py-2.5 text-base xl:text-lg ${isSelected ? "border-border-brand bg-background-brand-muted text-text-brand font-medium" : "border-border-muted bg-background-subtle text-text-secondary font-normal"}`}
                 >
                   {moveType.label}
                 </button>
@@ -143,19 +143,19 @@ export default function ReceivedRequestsPage() {
           </div>
         </section>
 
-        <section className="flex flex-col gap-12 lg:gap-24">
+        <section className="flex flex-col gap-12 xl:gap-24">
           {!query.isPending && (
-            <Text as="p" variant="2lg-semibold" className="text-text-secondary hidden lg:block">
+            <Text as="p" variant="2lg-semibold" className="text-text-secondary hidden xl:block">
               전체 {totalCount}건
             </Text>
           )}
-          <div className="flex min-h-40 flex-wrap items-center justify-between gap-12 px-10 lg:px-0">
+          <div className="flex min-h-40 flex-wrap items-center justify-between gap-12 px-10 xl:px-0">
             {!query.isPending && (
-              <Text as="p" variant="md-semibold" className="text-text-secondary lg:hidden">
+              <Text as="p" variant="md-semibold" className="text-text-secondary xl:hidden">
                 전체 {totalCount}건
               </Text>
             )}
-            <div className="hidden flex-wrap items-center gap-12 text-base lg:flex">
+            <div className="hidden flex-wrap items-center gap-12 text-base xl:flex">
               <Checkbox
                 checked={includeDesignated}
                 onCheckedChange={setIncludeDesignated}
@@ -183,7 +183,7 @@ export default function ReceivedRequestsPage() {
                 type="button"
                 aria-label="필터 열기"
                 onClick={() => setIsFilterOpen(true)}
-                className="border-filter-button-border flex h-32 w-32 items-center justify-center rounded-lg border lg:hidden"
+                className="border-filter-button-border flex h-32 w-32 items-center justify-center rounded-lg border xl:hidden"
               >
                 <Image src="/icons/filter.svg" alt="" width={24} height={24} />
               </button>
@@ -216,7 +216,7 @@ export default function ReceivedRequestsPage() {
           )}
           {items.length > 0 && (
             <>
-              <div className="grid w-full grid-cols-1 gap-24 min-[744px]:max-w-[588px] lg:max-w-none lg:grid-cols-2">
+              <div className="grid w-full grid-cols-1 gap-24 md:max-w-[588px] xl:max-w-none xl:grid-cols-2">
                 {items.map((request) => (
                   <ReceivedRequestCard
                     key={request.id}
@@ -246,7 +246,7 @@ export default function ReceivedRequestsPage() {
           onClose={() => setIsFilterOpen(false)}
           presentation="responsive"
           size="md"
-          overlayClassName="lg:hidden"
+          overlayClassName="xl:hidden"
           className="items-stretch gap-32 px-24 py-32 text-left"
         >
           <div className="flex w-full flex-col gap-28">

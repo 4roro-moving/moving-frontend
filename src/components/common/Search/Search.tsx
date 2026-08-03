@@ -17,8 +17,7 @@ const searchVariants = cva(
       size: {
         sm: "h-[52px] w-[260px] gap-6 px-16 py-14",
         md: "h-64 w-[560px] gap-8 px-24 py-14",
-        responsive:
-          "h-[52px] gap-6 px-16 py-14 min-[744px]:h-64 min-[744px]:gap-8 min-[744px]:px-24",
+        responsive: "h-[52px] gap-6 px-16 py-14 md:h-64 md:gap-8 md:px-24",
       },
     },
     defaultVariants: { size: "md" },
@@ -41,21 +40,13 @@ const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
   const hasValue = value !== undefined && String(value).length > 0;
   const isSmall = resolvedSize === "sm";
   const isResponsive = resolvedSize === "responsive";
-  const iconSizeClass = isSmall
-    ? "size-24"
-    : isResponsive
-      ? "size-24 min-[744px]:size-36"
-      : "size-36";
-  const clearIconSizeClass = isSmall
-    ? "size-20"
-    : isResponsive
-      ? "size-20 min-[744px]:size-28"
-      : "size-28";
-  const actionGapClass = isSmall ? "gap-12" : isResponsive ? "gap-12 min-[744px]:gap-16" : "gap-16";
+  const iconSizeClass = isSmall ? "size-24" : isResponsive ? "size-24 md:size-36" : "size-36";
+  const clearIconSizeClass = isSmall ? "size-20" : isResponsive ? "size-20 md:size-28" : "size-28";
+  const actionGapClass = isSmall ? "gap-12" : isResponsive ? "gap-12 md:gap-16" : "gap-16";
   const textVariantClass = isResponsive
     ? cn(
         getTextVariantClass("md-regular"),
-        "min-[744px]:text-[length:var(--font-size-18)] min-[744px]:leading-[var(--line-height-26)]",
+        "md:text-[length:var(--font-size-18)] md:leading-[var(--line-height-26)]",
       )
     : getTextVariantClass(isSmall ? "md-regular" : "2lg-regular");
 

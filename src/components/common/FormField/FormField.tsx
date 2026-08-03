@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils/cn";
 type FormFieldVariant = "default" | "compact" | "auth";
 
 const FORM_FIELD_LABEL_VARIANTS = {
-  default: { base: "lg-semibold", lg: "xl-semibold" },
-  compact: { base: "lg-semibold", lg: "2lg-semibold" },
-  auth: { base: "md-regular", lg: "xl-regular" },
+  default: { base: "lg-semibold", xl: "xl-semibold" },
+  compact: { base: "lg-semibold", xl: "2lg-semibold" },
+  auth: { base: "md-regular", xl: "xl-regular" },
 } as const satisfies Record<FormFieldVariant, TextVariantProp>;
 
 interface FormFieldProps {

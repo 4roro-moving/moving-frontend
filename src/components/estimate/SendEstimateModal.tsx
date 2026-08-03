@@ -75,7 +75,7 @@ export default function SendEstimateModal({
         <Modal.Close onClose={onClose} disabled={isPending} />
       </div>
 
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-20 overflow-y-auto lg:gap-32">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-20 overflow-y-auto xl:gap-32">
         <section>
           <EstimateRequestSummaryContent
             density="modal"

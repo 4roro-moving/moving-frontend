@@ -34,7 +34,7 @@ export default function RejectedRequestsPage() {
   return (
     <>
       <MoverEstimateTabs />
-      <main className="bg-background-subtle min-h-[calc(100vh-108px)] px-24 pt-24 pb-40 md:min-h-[calc(100vh-142px)] md:px-72 md:pt-32 lg:min-h-[calc(100vh-168px)] lg:px-0 lg:pt-[59px] lg:pb-[107px]">
+      <main className="bg-background-subtle min-h-[calc(100vh-108px)] px-24 pt-24 pb-40 md:min-h-[calc(100vh-142px)] md:px-72 md:pt-32 xl:min-h-[calc(100vh-168px)] xl:px-0 xl:pt-[59px] xl:pb-[107px]">
         <h1 className="sr-only">반려 요청</h1>
 
         {query.isPending ? <EstimatesQueryStatus message="반려 요청을 불러오는 중이에요." /> : null}
@@ -55,7 +55,7 @@ export default function RejectedRequestsPage() {
 
         {items.length > 0 ? (
           <div className="mx-auto w-full max-w-[1200px]">
-            <div className="grid grid-cols-1 gap-20 md:mx-auto md:max-w-[600px] md:gap-32 lg:max-w-none lg:grid-cols-2 lg:gap-24">
+            <div className="grid grid-cols-1 gap-20 md:mx-auto md:max-w-[600px] md:gap-32 xl:max-w-none xl:grid-cols-2 xl:gap-24">
               {items.map((item) => (
                 <RejectedRequestCard key={item.id} item={item} />
               ))}

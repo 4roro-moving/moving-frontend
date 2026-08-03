@@ -47,14 +47,14 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
       <div className="flex w-full flex-nowrap items-center justify-between gap-8">
         <div className="flex min-w-0 flex-nowrap items-center gap-24">
           <div className="flex flex-nowrap items-center gap-12">
-            <div className="w-fit shrink-0 lg:w-[160px]">
+            <div className="w-fit shrink-0 xl:w-[160px]">
               <Select
                 key={`serviceArea-${filters.serviceArea}-${filterKey}`}
                 label="지역"
                 desc="지역"
                 size="lg"
                 columns={2}
-                className="w-fit lg:w-full"
+                className="w-fit xl:w-full"
                 defaultValue={filters.serviceArea}
                 placeholderValue={ALL_OPTION.value}
                 onChange={(value) => replaceFilters({ serviceArea: value })}
@@ -66,13 +66,13 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
                 ))}
               </Select>
             </div>
-            <div className="w-fit shrink-0 lg:w-[160px]">
+            <div className="w-fit shrink-0 xl:w-[160px]">
               <Select
                 key={`moveType-${filters.moveType}-${filterKey}`}
                 label="서비스"
                 desc="서비스"
                 size="lg"
-                className="w-fit lg:w-full"
+                className="w-fit xl:w-full"
                 defaultValue={filters.moveType}
                 placeholderValue={ALL_OPTION.value}
                 onChange={(value) => replaceFilters({ moveType: value })}
@@ -90,7 +90,7 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
             onClick={resetFilters}
             className="text-text-weak hover:text-text-muted shrink-0 transition-colors"
           >
-            <Text as="span" variant={{ base: "md-medium", lg: "lg-medium" }}>
+            <Text as="span" variant={{ base: "md-medium", xl: "lg-medium" }}>
               초기화
             </Text>
           </button>

@@ -91,8 +91,7 @@ const ModalMain = ({
         className={cn(
           "bg-overlay-scrim fixed inset-0 z-[9999] flex items-center justify-center",
           presentation === "bottom-sheet" && "items-end px-0",
-          presentation === "responsive" &&
-            "items-end px-0 min-[744px]:items-center min-[744px]:px-24",
+          presentation === "responsive" && "items-end px-0 md:items-center md:px-24",
           overlayClassName,
         )}
         onClick={handleOverlayClick}
@@ -109,15 +108,15 @@ const ModalMain = ({
             "rounded-24 bg-background-surface relative flex flex-col items-center gap-40 p-40 shadow-lg focus:outline-none",
             presentation === "bottom-sheet" && "rounded-t-32 w-full max-w-none rounded-b-none",
             presentation === "responsive" &&
-              "rounded-t-32 min-[744px]:rounded-32 w-full max-w-none rounded-b-none",
+              "rounded-t-32 md:rounded-32 w-full max-w-none rounded-b-none",
             size === "sm" && "w-full max-w-[293px]",
             size === "md" &&
               (presentation === "responsive"
-                ? "min-[744px]:w-[375px] min-[744px]:max-w-[375px]"
+                ? "md:w-[375px] md:max-w-[375px]"
                 : "w-full max-w-[375px]"),
             size === "lg" &&
               (presentation === "responsive"
-                ? "min-[744px]:w-[375px] min-[744px]:max-w-[375px] lg:w-full lg:max-w-[608px]"
+                ? "md:w-[375px] md:max-w-[375px] xl:w-full xl:max-w-[608px]"
                 : "w-full max-w-[608px]"),
             className,
           )}

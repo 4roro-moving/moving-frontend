@@ -26,7 +26,7 @@ export default function MoverDetailActions({
 }: MoverDetailActionsProps) {
   if (layout === "sticky") {
     return (
-      <div className="border-border-subtle bg-background-default px-margin-mobile md:px-margin-tablet fixed inset-x-0 bottom-0 z-20 border-t py-28 lg:hidden">
+      <div className="border-border-subtle bg-background-default px-margin-mobile md:px-margin-tablet fixed inset-x-0 bottom-0 z-20 border-t py-28 xl:hidden">
         <div className="mx-auto flex w-full max-w-[600px] items-center gap-8">
           <LikeOutlineButton
             size="sm"
@@ -52,7 +52,7 @@ export default function MoverDetailActions({
   }
 
   return (
-    <section className="hidden w-full flex-col gap-16 lg:flex" aria-label="견적 요청">
+    <section className="hidden w-full flex-col gap-16 xl:flex" aria-label="견적 요청">
       <Text as="p" variant="2lg-semibold" className="text-text-secondary">
         {moverName} 기사님에게
         <br /> 지정 견적을 요청해보세요!

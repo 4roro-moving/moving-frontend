@@ -33,7 +33,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
   return (
     <article
       aria-labelledby={titleId}
-      className="bg-background-surface border-border-subtle shadow-estimate-card rounded-16 md:rounded-20 flex w-full flex-col gap-20 border-[0.5px] px-16 py-20 md:gap-28 md:px-24 md:py-28 lg:flex-row lg:items-center lg:justify-between lg:gap-40 lg:px-32 lg:py-32"
+      className="bg-background-surface border-border-subtle shadow-estimate-card rounded-16 md:rounded-20 flex w-full flex-col gap-20 border-[0.5px] px-16 py-20 md:gap-28 md:px-24 md:py-28 xl:flex-row xl:items-center xl:justify-between xl:gap-40 xl:px-32 xl:py-32"
     >
       <div className="flex min-w-0 flex-1 flex-col gap-16 md:gap-20">
         <div className="flex flex-wrap items-center gap-8">
@@ -150,8 +150,8 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
         </dl>
       </div>
 
-      <div className="border-border-muted flex w-full flex-col gap-16 border-t pt-16 md:gap-20 lg:w-[240px] lg:shrink-0 lg:items-end lg:border-t-0 lg:pt-0">
-        <div className="flex w-full items-end justify-between gap-12 lg:flex-col lg:items-end">
+      <div className="border-border-muted flex w-full flex-col gap-16 border-t pt-16 md:gap-20 xl:w-[240px] xl:shrink-0 xl:items-end xl:border-t-0 xl:pt-0">
+        <div className="flex w-full items-end justify-between gap-12 xl:flex-col xl:items-end">
           <Text
             as="span"
             variant={{ base: "sm-medium", md: "md-medium" }}

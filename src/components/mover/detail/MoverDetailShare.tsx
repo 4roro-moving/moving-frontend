@@ -88,7 +88,7 @@ export default function MoverDetailShare({
     >
       <Text
         as="h2"
-        variant={{ base: "lg-semibold", lg: "xl-semibold" }}
+        variant={{ base: "lg-semibold", xl: "xl-semibold" }}
         className="text-text-secondary"
       >
         {SHARE_TITLE}

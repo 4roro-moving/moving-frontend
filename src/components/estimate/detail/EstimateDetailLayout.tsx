@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils/cn";
 export const ESTIMATE_DETAIL_LAYOUT_CLASSES = {
   contentClassName: "pt-24 pb-64 md:pt-28 md:pb-80 xl:pb-37-5",
   // 본문+aside 블록을 컨테이너 안에서 가운데로 모아 좌측 치우침을 줄인다
-  rowClassName: "gap-32 md:gap-40 xl:justify-center xl:gap-40",
+  rowClassName: "gap-32 md:gap-40 xl:justify-center",
   // Desktop 본문 840 + aside 320 + gap 40 = 1200 (container)
   // overflow-clip 제거 — focus ring이 aside 경계에서 잘리지 않도록 폭만으로 제한
   // 2026.08.04 정슬기 - [수정]

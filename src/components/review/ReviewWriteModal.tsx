@@ -93,13 +93,13 @@ function ReviewWriteModalContent({
         <Modal.Close onClose={onClose} disabled={isPending} />
       </div>
 
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-28 overflow-y-auto lg:gap-32">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-28 overflow-y-auto xl:gap-32">
         <ReviewEstimateSummary item={item} />
 
         <div className="flex w-full flex-col gap-12">
           <Text
             as="p"
-            variant={{ base: "lg-semibold", lg: "2lg-semibold" }}
+            variant={{ base: "lg-semibold", xl: "2lg-semibold" }}
             className="text-text-tertiary"
           >
             평점을 선택해 주세요

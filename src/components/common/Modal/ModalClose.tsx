@@ -26,7 +26,7 @@ const ModalClose = ({
         "text-icon-default rounded-8 flex shrink-0 cursor-pointer items-center justify-center transition-colors",
         size === "sm" && "size-24",
         size === "md" && "size-36",
-        size === "responsive" && "size-24 lg:size-36",
+        size === "responsive" && "size-24 xl:size-36",
         "hover:bg-background-hover hover:text-icon-default",
         "active:bg-background-hover",
         "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
@@ -40,7 +40,7 @@ const ModalClose = ({
         className={cn(
           size === "sm" && "size-24",
           size === "md" && "size-36",
-          size === "responsive" && "size-24 lg:size-36",
+          size === "responsive" && "size-24 xl:size-36",
           iconClassName,
         )}
       />

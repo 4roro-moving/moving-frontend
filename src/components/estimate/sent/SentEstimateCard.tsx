@@ -35,20 +35,20 @@ export default function SentEstimateCard({ estimate, onViewDetail }: SentEstimat
   const isCompleted = estimate.status === "COMPLETED";
 
   return (
-    <article className="border-border-subtle bg-background-default shadow-estimate-card rounded-20 relative flex min-h-[333px] w-full flex-col gap-24 overflow-hidden border-[0.5px] px-20 py-24 min-[744px]:min-h-[322px] min-[744px]:gap-32 min-[744px]:px-40 min-[744px]:py-32 lg:min-h-[324px]">
-      <div className="flex flex-1 flex-col gap-16 min-[744px]:gap-24">
+    <article className="border-border-subtle bg-background-default shadow-estimate-card rounded-20 relative flex min-h-[333px] w-full flex-col gap-24 overflow-hidden border-[0.5px] px-20 py-24 md:min-h-[322px] md:gap-32 md:px-40 md:py-32 xl:min-h-[324px]">
+      <div className="flex flex-1 flex-col gap-16 md:gap-24">
         <div className="flex min-h-26 items-center justify-between">
           <div className="flex items-center gap-8">
-            <MoveTypeChip moveType={estimate.moveType} size="sm" className="min-[744px]:hidden" />
+            <MoveTypeChip moveType={estimate.moveType} size="sm" className="md:hidden" />
             <MoveTypeChip
               moveType={estimate.moveType}
               size="md"
-              className="hidden min-[744px]:inline-flex"
+              className="hidden md:inline-flex"
             />
             {estimate.isDesignated ? (
               <>
-                <DesignatedChip size="sm" className="min-[744px]:hidden" />
-                <DesignatedChip size="md" className="hidden min-[744px]:inline-flex" />
+                <DesignatedChip size="sm" className="md:hidden" />
+                <DesignatedChip size="md" className="hidden md:inline-flex" />
               </>
             ) : null}
           </div>
@@ -68,7 +68,7 @@ export default function SentEstimateCard({ estimate, onViewDetail }: SentEstimat
           <div className="bg-border-subtle h-px" />
         </div>
 
-        <dl className="flex flex-col gap-12 min-[744px]:flex-row min-[744px]:items-start min-[744px]:justify-between min-[744px]:gap-20">
+        <dl className="flex flex-col gap-12 md:flex-row md:items-start md:justify-between md:gap-20">
           <div className="flex items-end gap-12">
             <div>
               <Text as="dt" variant="md-regular" className="text-text-muted">
@@ -100,16 +100,16 @@ export default function SentEstimateCard({ estimate, onViewDetail }: SentEstimat
         </dl>
       </div>
 
-      <div className="border-border-default flex h-47 items-end justify-between border-t min-[744px]:h-52">
+      <div className="border-border-default flex h-47 items-end justify-between border-t md:h-52">
         <Text
           variant={{ base: "md-medium", md: "lg-medium" }}
-          className="text-text-muted min-[744px]:text-[length:var(--font-size-16)] min-[744px]:leading-[var(--line-height-26)]"
+          className="text-text-muted md:text-[length:var(--font-size-16)] md:leading-[var(--line-height-26)]"
         >
           견적 금액
         </Text>
         <Text
           variant={{ base: "2lg-bold", md: "2xl-bold" }}
-          className="text-text-secondary min-[744px]:text-[length:var(--font-size-24)] min-[744px]:leading-[var(--line-height-32)]"
+          className="text-text-secondary md:text-[length:var(--font-size-24)] md:leading-[var(--line-height-32)]"
         >
           {estimate.price.toLocaleString("ko-KR")}원
         </Text>

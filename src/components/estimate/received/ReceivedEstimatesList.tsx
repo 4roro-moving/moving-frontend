@@ -21,7 +21,7 @@ export default function ReceivedEstimatesList({
   // 2026.07.24 정슬기 - [수정] Figma margin/mobile·tablet 적용, Desktop 컨테이너는 lg부터
   return (
     // 2026.07.24 정슬기 - [수정] container-desktop-narrow max-width 토큰 유틸 사용
-    <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow flex w-full flex-col gap-24 md:gap-40 lg:px-0">
+    <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow flex w-full flex-col gap-24 md:gap-40 xl:px-0">
       {panels.map((panel) => (
         <EstimateDetailPanel
           key={panel.estimateRequest.id}

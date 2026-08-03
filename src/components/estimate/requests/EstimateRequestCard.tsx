@@ -40,7 +40,7 @@ export default function EstimateRequestCard({ request }: EstimateRequestCardProp
         "flex w-full flex-col border-0 px-0 py-0 shadow-none",
         "md:border-[0.5px] md:px-28 md:py-32",
         "md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)]",
-        "lg:px-40 lg:pt-48 lg:pb-40",
+        "xl:px-40 xl:pt-48 xl:pb-40",
         "focus-visible:ring-border-brand rounded-0 md:rounded-20 focus-visible:ring-2 focus-visible:outline-none",
         "hover:bg-background-subtle/40 md:hover:bg-background-surface transition-colors",
       )}
