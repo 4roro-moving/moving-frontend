@@ -22,6 +22,9 @@ interface EstimateDetailLayoutProps {
   heroName?: string;
   /** 히어로에 프로필 이미지 표시 여부 (요청 상세는 false) */
   showProfile?: boolean;
+  /** Header 우측 액션 (optional — 다른 상세 화면 무영향) */
+  // 2026.08.03 정슬기 - [추가]
+  headerActions?: ReactNode;
   main: ReactNode;
   aside?: ReactNode;
   /** main+aside 바깥 여백·폭. Figma 화면별로 다를 수 있음 */
@@ -45,6 +48,7 @@ export default function EstimateDetailLayout({
   heroImageUrl = null,
   heroName = "",
   showProfile = true,
+  headerActions,
   main,
   aside,
   contentClassName,
@@ -55,7 +59,7 @@ export default function EstimateDetailLayout({
 }: EstimateDetailLayoutProps) {
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
-      <EstimateDetailHeader title={title} />
+      <EstimateDetailHeader title={title} actions={headerActions} />
       <DetailHeroBanner imageUrl={heroImageUrl} name={heroName} showProfile={showProfile} />
 
       <div

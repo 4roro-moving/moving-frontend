@@ -21,6 +21,7 @@ export { default as LikeIcon } from "./like";
 export { default as MenuIcon } from "./menu.svg";
 export { default as ProfileDefaultIcon } from "./profile-default.svg";
 export { default as StarIcon } from "./star.svg";
+export { default as TrashIcon } from "./trash.svg";
 export { default as VisibilityIcon } from "./visibility.svg";
 export { default as VisibilityOffIcon } from "./visibility_off.svg";
 export { default as WriteIcon } from "./write.svg";

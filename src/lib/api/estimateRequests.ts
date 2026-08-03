@@ -58,3 +58,16 @@ export async function fetchEstimateRequestDetail(
     API_ROUTES.ESTIMATE_REQUESTS.DETAIL(estimateRequestId),
   );
 }
+
+/**
+ * 보낸 견적 요청 soft cancel
+ * BE: DELETE /api/estimate-requests/:estimateRequestId
+ * // 2026.08.03 정슬기 - [추가]
+ */
+export async function cancelEstimateRequest(
+  estimateRequestId: number,
+): Promise<MyEstimateRequestItem> {
+  return fetchInstance.delete<MyEstimateRequestItem>(
+    API_ROUTES.ESTIMATE_REQUESTS.DELETE(estimateRequestId),
+  );
+}
