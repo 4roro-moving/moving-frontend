@@ -2,25 +2,36 @@
 
 import { useEffect } from "react";
 
+import { getAccessToken } from "@/lib/auth/token";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { useSocketStore } from "@/stores/useSocketStore";
 
 export const useChatSocket = () => {
   const connect = useSocketStore((state) => state.connect);
+  const disconnect = useSocketStore((state) => state.disconnect);
   const socket = useSocketStore((state) => state.socket);
   const isConnected = useSocketStore((state) => state.isConnected);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  const canConnect = hasHydrated && !isCheckingAuth && isAuthenticated;
 
   useEffect(() => {
-    const connectedSocket = connect();
+    if (!canConnect || !getAccessToken()) {
+      if (isConnected) {
+        disconnect();
+      }
 
-    return () => {
-      connectedSocket.off("chat:message");
-      connectedSocket.off("chat:room:joined");
-      connectedSocket.off("socket:error");
-    };
-  }, [connect]);
+      return;
+    }
+
+    connect();
+  }, [canConnect, connect, disconnect, isConnected]);
 
   return {
     socket,
     isConnected,
+    canConnect,
   };
 };

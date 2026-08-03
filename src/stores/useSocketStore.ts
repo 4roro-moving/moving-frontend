@@ -12,35 +12,45 @@ interface SocketState {
   disconnect: () => void;
 }
 
-export const useSocketStore = create<SocketState>((set, get) => ({
-  socket: null,
-  isConnected: false,
+export const useSocketStore = create<SocketState>((set, get) => {
+  const handleConnect = () => {
+    set({ isConnected: true });
+  };
 
-  connect: () => {
-    const socket = get().socket ?? getSocket();
-
-    socket.off("connect");
-    socket.off("disconnect");
-
-    socket.on("connect", () => {
-      set({ isConnected: true });
-    });
-
-    socket.on("disconnect", () => {
-      set({ isConnected: false });
-    });
-
-    if (!socket.connected) {
-      socket.connect();
-    }
-
-    set({ socket });
-
-    return socket;
-  },
-
-  disconnect: () => {
-    disconnectSocket();
+  const handleDisconnect = () => {
     set({ isConnected: false });
-  },
-}));
+  };
+
+  return {
+    socket: null,
+    isConnected: false,
+
+    connect: () => {
+      const currentSocket = get().socket;
+      const socket = currentSocket ?? getSocket();
+
+      if (!currentSocket) {
+        socket.on("connect", handleConnect);
+        socket.on("disconnect", handleDisconnect);
+      }
+
+      if (!socket.connected) {
+        socket.connect();
+      }
+
+      set({ socket });
+
+      return socket;
+    },
+
+    disconnect: () => {
+      const socket = get().socket;
+
+      socket?.off("connect", handleConnect);
+      socket?.off("disconnect", handleDisconnect);
+
+      disconnectSocket();
+      set({ socket: null, isConnected: false });
+    },
+  };
+});
