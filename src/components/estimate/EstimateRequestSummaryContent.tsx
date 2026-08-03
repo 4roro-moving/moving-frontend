@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
 import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { ArrowRightIcon } from "@/icons";
 import { formatKoreanDateTime } from "@/lib/utils/date";
 import { cn } from "@/lib/utils/cn";
 import type { MoveType } from "@/types/move";
@@ -90,13 +91,7 @@ export default function EstimateRequestSummaryContent({
               {fromLabel}
             </Text>
           </div>
-          <span
-            className={cn("mb-[9px] flex items-center", isModal ? "w-16" : "w-[18px]")}
-            aria-hidden="true"
-          >
-            <span className="bg-text-secondary h-px flex-1" />
-            <span className="border-text-secondary -ml-1 h-1.5 w-1.5 rotate-45 border-t border-r" />
-          </span>
+          <ArrowRightIcon size={16} className="mb-[9px] shrink-0" />
           <div>
             <Text as="dt" variant="md-regular" className="text-text-muted">
               도착지

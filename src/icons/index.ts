@@ -1,4 +1,7 @@
 export { default as AlarmIcon } from "./alarm.svg";
+// 2026.08.03 유서현 - [추가] ArrowRightIcon 및 ArrowRightIconSize type 추가
+export { default as ArrowRightIcon } from "./arrow-right";
+export type { ArrowRightIconSize } from "./arrow-right";
 export { default as BoxIcon } from "./box.svg";
 export { default as CalendarIcon } from "./calendar.svg";
 export { default as ChevronDownIcon } from "./chevron-down.svg";
