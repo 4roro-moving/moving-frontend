@@ -42,8 +42,9 @@ export function useCancelEstimateRequest(
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST_ROOT }),
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE }),
-        // SENT 견적이 CANCELED 되므로 대기 중 견적 목록도 갱신
+        // SENT 견적이 CANCELED 되므로 대기·받았던 견적 목록도 갱신
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
       ]);
 
       onSuccessRef.current?.(request);

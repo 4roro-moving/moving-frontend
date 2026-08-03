@@ -27,18 +27,13 @@ import {
   getEstimateRequestStatusLabel,
   getEstimateRequestStatusTextClassName,
   getMoveTypeLabel,
+  isCancelableEstimateRequestStatus,
 } from "@/lib/utils/estimateFormat";
 import { ApiError } from "@/types/api";
-import type { EstimateRequestStatus, MyEstimateRequestItem } from "@/types/estimate";
+import type { MyEstimateRequestItem } from "@/types/estimate";
 
 interface EstimateRequestDetailViewProps {
   estimateRequestId: number;
-}
-
-/** 고객이 soft cancel 가능한 요청 상태 */
-// 2026.08.03 정슬기 - [추가]
-function isCancelableEstimateRequestStatus(status: EstimateRequestStatus): boolean {
-  return status === "PENDING" || status === "OPEN";
 }
 
 /**
@@ -158,18 +153,25 @@ export default function EstimateRequestDetailView({
     <button
       ref={cancelButtonRef}
       type="button"
-      aria-label="견적 요청 취소"
+      aria-label="견적 요청 취소하기"
       aria-busy={isCancelPending}
       disabled={isCancelPending}
       onClick={() => setIsCancelModalOpen(true)}
       className={cn(
-        "text-icon-default rounded-8 flex size-44 shrink-0 items-center justify-center",
+        "border-border-default text-text-primary rounded-12 flex min-h-44 shrink-0 items-center gap-8 border px-12 py-10 md:px-16",
         "hover:bg-background-hover",
         "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
         "disabled:cursor-not-allowed disabled:opacity-40",
       )}
     >
-      <TrashIcon className="size-24" />
+      <TrashIcon className="size-20 shrink-0 md:size-24" aria-hidden="true" />
+      <Text
+        as="span"
+        variant={{ base: "md-semibold", md: "lg-semibold" }}
+        className="whitespace-nowrap"
+      >
+        견적 요청 취소하기
+      </Text>
     </button>
   ) : null;
 

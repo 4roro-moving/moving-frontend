@@ -43,9 +43,7 @@ export default function EstimateRequestCancelConfirmModal({
 
       <div className="flex w-full flex-col items-stretch gap-30 md:gap-40">
         <Modal.Desc variant="2lg-medium">
-          취소한 견적 요청은 더 이상 진행할 수 없습니다.
-          <br />
-          이미 받은 견적도 함께 취소됩니다.
+          견적 요청을 취소하면 받은 견적도 함께 취소되며 더 이상 진행할 수 없습니다.
         </Modal.Desc>
 
         <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
