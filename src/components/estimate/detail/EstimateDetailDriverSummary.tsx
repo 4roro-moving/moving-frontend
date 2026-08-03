@@ -1,7 +1,8 @@
 "use client";
 
 import { Text } from "@/components/common/Text";
-import { MoveTypeChip, DesignatedChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { ConfirmedCheckIcon, LikeIcon, StarIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";

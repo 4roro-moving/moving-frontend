@@ -4,6 +4,7 @@ import Image from "next/image";
 import { FormEvent, useState } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
+import SelectableChip from "@/components/common/Chip/SelectableChip";
 import Modal from "@/components/common/Modal/Modal";
 import { PageHeader } from "@/components/common/PageHeader";
 import Search from "@/components/common/Search/Search";
@@ -127,14 +128,14 @@ export default function ReceivedRequestsPage() {
             {MOVE_TYPE_OPTIONS.map((moveType) => {
               const isSelected = moveTypes.includes(moveType.value);
               return (
-                <button
+                <SelectableChip
                   key={moveType.value}
-                  type="button"
+                  size="md"
+                  selected={isSelected}
                   onClick={() => toggleMoveType(moveType.value)}
-                  className={`rounded-full border px-20 py-2.5 text-base xl:text-lg ${isSelected ? "border-border-brand bg-background-brand-muted text-text-brand font-medium" : "border-border-muted bg-background-subtle text-text-secondary font-normal"}`}
                 >
                   {moveType.label}
-                </button>
+                </SelectableChip>
               );
             })}
           </div>
@@ -260,18 +261,14 @@ export default function ReceivedRequestsPage() {
                 {MOVE_TYPE_OPTIONS.map((moveType) => {
                   const isSelected = moveTypes.includes(moveType.value);
                   return (
-                    <button
+                    <SelectableChip
                       key={moveType.value}
-                      type="button"
+                      size="sm"
+                      selected={isSelected}
                       onClick={() => toggleMoveType(moveType.value)}
-                      className={`rounded-full border px-12 py-6 text-sm ${
-                        isSelected
-                          ? "border-border-brand bg-background-brand-muted text-text-brand font-medium"
-                          : "border-border-muted bg-background-subtle text-text-secondary font-medium"
-                      }`}
                     >
                       {moveType.label}
-                    </button>
+                    </SelectableChip>
                   );
                 })}
               </div>

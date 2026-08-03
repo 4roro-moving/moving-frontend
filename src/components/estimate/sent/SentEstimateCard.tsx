@@ -1,5 +1,6 @@
 import { Text } from "@/components/common/Text";
-import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import DesignatedChip from "@/components/estimate/DesignatedChip";
 import FrameIcon from "@/icons/frame.svg";
 import { formatKoreanDateTime } from "@/lib/utils/date";
 import type { MoveType } from "@/types/move";

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils/cn";
 import type { MoveType } from "@/types/move";
-import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 
 interface MoverServiceTypeChipsProps {
   serviceTypes: MoveType[];

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
-import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { ProfileDefaultIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";

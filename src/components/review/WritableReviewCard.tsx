@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
-import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import { ProfileDefaultIcon, StarIcon } from "@/icons";
 import {
   formatMoveDateLabelSafe,
