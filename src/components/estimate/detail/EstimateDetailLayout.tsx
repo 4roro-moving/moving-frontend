@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import EstimateDetailHeader from "@/components/estimate/detail/EstimateDetailHeader";
-import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
+import DetailHeroBanner from "@/components/common/DetailHeroBanner";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { cn } from "@/lib/utils/cn";
 
@@ -56,7 +56,7 @@ export default function EstimateDetailLayout({
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
       <EstimateDetailHeader title={title} />
-      <EstimateDetailHero imageUrl={heroImageUrl} name={heroName} showProfile={showProfile} />
+      <DetailHeroBanner imageUrl={heroImageUrl} name={heroName} showProfile={showProfile} />
 
       <div
         className={cn(

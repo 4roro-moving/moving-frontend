@@ -8,13 +8,11 @@ import Toast from "@/components/common/Toast/Toast";
 import { Text } from "@/components/common/Text";
 import MoverCard from "@/components/mover/MoverCard";
 import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
-import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { useFavoriteMovers } from "@/hooks/useFavoriteMovers";
 import { ChevronRightThinIcon } from "@/icons";
 import { FAVORITE_MOVERS_SIDEBAR_LIMIT } from "@/lib/api/favorites";
 import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import { cn } from "@/lib/utils/cn";
 
 /** 사이드바 로딩 스켈레톤 카드 수 (표시 한도와 동일) */
@@ -78,24 +76,21 @@ function FavoriteMoversSidebarStatus({
 
 export function FavoriteMoversSidebar() {
   const {
-    isPending: isAuthPending,
-    isAuthenticated,
-    isMover,
-    canFetch: isCustomerLoggedIn,
-  } = useCustomerAuthReady();
-  const query = useFavoriteMovers({
-    enabled: isCustomerLoggedIn,
+    isInitialLoading,
+    isCustomerLoggedIn,
+    movers: favoriteMovers,
+    query,
+    shouldHideForNonCustomer,
+  } = useFavoriteMovers({
     limit: FAVORITE_MOVERS_SIDEBAR_LIMIT,
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  if (!isAuthPending && isAuthenticated && isMover) {
+  if (shouldHideForNonCustomer) {
     return null;
   }
 
-  const movers =
-    query.data?.data.map(mapMoverListItemToMover).slice(0, FAVORITE_MOVERS_SIDEBAR_LIMIT) ?? [];
-  const showSkeleton = isAuthPending || (isCustomerLoggedIn && query.isPending);
+  const movers = favoriteMovers.slice(0, FAVORITE_MOVERS_SIDEBAR_LIMIT);
   // 찜한 기사님이 1명 이상일 때부터 더보기 표시, 비로그인·빈 목록에서는 숨김
   const showMoreLink = isCustomerLoggedIn && !query.isError && movers.length > 0;
 
@@ -118,7 +113,7 @@ export function FavoriteMoversSidebar() {
         ) : null}
       </div>
 
-      {showSkeleton ? (
+      {isInitialLoading ? (
         <MoverCardSkeletonList
           variant="compact"
           count={FAVORITE_MOVERS_SKELETON_COUNT}

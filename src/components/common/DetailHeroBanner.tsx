@@ -3,7 +3,7 @@ import Image from "next/image";
 import { HeroDecorationLeftIcon, HeroDecorationRightIcon, ProfileDefaultIcon } from "@/icons";
 import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 
-interface EstimateDetailHeroProps {
+interface DetailHeroBannerProps {
   /** false면 주황 배너만 (프로필 없음). 보낸 견적 요청 상세 등 */
   showProfile?: boolean;
   imageUrl?: string | null;
@@ -11,14 +11,14 @@ interface EstimateDetailHeroProps {
 }
 
 /**
- * 견적 상세 히어로 배너
+ * 기사·견적 상세 히어로 배너
  * // 2026.07.29 정슬기 - [수정] showProfile=false 배너 전용 모드 (Figma 8093:49327)
  */
-export default function EstimateDetailHero({
+export default function DetailHeroBanner({
   showProfile = true,
   imageUrl = null,
   name = "",
-}: EstimateDetailHeroProps) {
+}: DetailHeroBannerProps) {
   if (!showProfile) {
     return (
       <div className="bg-background-brand relative h-30.5 w-full shrink-0 overflow-hidden md:h-42.5 lg:h-56.25">

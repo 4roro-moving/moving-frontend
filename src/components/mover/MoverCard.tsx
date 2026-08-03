@@ -53,6 +53,7 @@ function areMoverCardPropsEqual(prev: MoverCardProps, next: MoverCardProps): boo
 }
 
 interface FavoriteButtonProps {
+  canToggle: boolean;
   moverName: string;
   isFavorite: boolean;
   favoriteCount?: number;
@@ -62,6 +63,7 @@ interface FavoriteButtonProps {
 }
 
 function FavoriteButton({
+  canToggle,
   moverName,
   isFavorite,
   favoriteCount,
@@ -71,25 +73,37 @@ function FavoriteButton({
 }: FavoriteButtonProps) {
   return (
     <div className="pointer-events-auto flex shrink-0 items-center justify-center gap-2">
-      <button
-        type="button"
-        className="focus-visible:ring-border-brand rounded-8 cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
-        aria-label={`${moverName} 기사님 찜하기`}
-        aria-pressed={isFavorite}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onToggle(!isFavorite);
-        }}
-      >
-        <LikeIcon
-          isFavorite={isFavorite}
-          className={cn(
-            iconClassName,
-            isFavorite ? "text-like-active-fill" : "text-like-default-stroke",
-          )}
-        />
-      </button>
+      {canToggle ? (
+        <button
+          type="button"
+          className="focus-visible:ring-border-brand rounded-8 cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
+          aria-label={`${moverName} 기사님 찜`}
+          aria-pressed={isFavorite}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onToggle(!isFavorite);
+          }}
+        >
+          <LikeIcon
+            isFavorite={isFavorite}
+            className={cn(
+              iconClassName,
+              isFavorite ? "text-like-active-fill" : "text-like-default-stroke",
+            )}
+          />
+        </button>
+      ) : (
+        <span aria-label={`${moverName} 기사님 찜 상태`}>
+          <LikeIcon
+            isFavorite={isFavorite}
+            className={cn(
+              iconClassName,
+              isFavorite ? "text-like-active-fill" : "text-like-default-stroke",
+            )}
+          />
+        </span>
+      )}
       {showCount && favoriteCount !== undefined ? (
         <Text as="span" variant="md-regular" className="text-text-muted">
           <span aria-hidden="true">{favoriteCount}</span>
@@ -121,6 +135,7 @@ function MoverCard({
   };
 
   const favoriteButtonProps = {
+    canToggle: favoriteMutation.canToggleFavorite,
     moverName: mover.name,
     isFavorite: mover.isFavorite,
     favoriteCount: mover.favoriteCount,
