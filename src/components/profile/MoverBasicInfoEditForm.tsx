@@ -37,6 +37,7 @@ const MoverBasicInfoEditForm = ({
     register,
     handleSubmit,
     setError,
+    setFocus,
     formState: { errors, isValid, isSubmitting },
   } = useForm<MoverBasicInfoEditFormValues>({
     resolver: zodResolver(moverBasicInfoEditSchema),
@@ -72,6 +73,20 @@ const MoverBasicInfoEditForm = ({
           type: "server",
           message: error.message,
         });
+        setFocus("phone");
+        return;
+      }
+
+      if (
+        error instanceof ApiError &&
+        (error.status === 401 || error.code === "UNAUTHORIZED") &&
+        error.message.includes("현재 비밀번호")
+      ) {
+        setError("currentPassword", {
+          type: "server",
+          message: error.message,
+        });
+        setFocus("currentPassword");
         return;
       }
 
