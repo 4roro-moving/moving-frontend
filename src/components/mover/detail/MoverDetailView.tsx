@@ -1,13 +1,16 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
+import { useFavoriteMover } from "@/hooks/useFavoriteMover";
+import { useMoverDesignation } from "@/hooks/useMoverDesignation";
+import { useMoverDetail } from "@/hooks/useMoverDetail";
+
 import Toast from "@/components/common/Toast/Toast";
-import EstimateDetailHero from "@/components/estimate/detail/EstimateDetailHero";
+import DetailHeroBanner from "@/components/common/DetailHeroBanner";
 import DesignateSuccessModal from "@/components/estimate/DesignateSuccessModal";
 import EstimateRequestRequiredModal from "@/components/estimate/EstimateRequestRequiredModal";
+
 import MoverDetailActions from "@/components/mover/detail/MoverDetailActions";
 import MoverDetailNotFoundStatus from "@/components/mover/detail/MoverDetailNotFoundStatus";
 import MoverDetailPageSkeleton from "@/components/mover/detail/MoverDetailPageSkeleton";
@@ -16,66 +19,28 @@ import MoverDetailReviews from "@/components/mover/detail/MoverDetailReviews";
 import MoverDetailServices from "@/components/mover/detail/MoverDetailServices";
 import MoverDetailShare from "@/components/mover/detail/MoverDetailShare";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
-import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
-import { useDesignateMover } from "@/hooks/useDesignateMover";
-import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { useIsClient } from "@/hooks/useIsClient";
-import { useMoverDetail } from "@/hooks/useMoverDetail";
-import { hasAuthSession } from "@/lib/auth/session";
-import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
-import { toKakaoShareImageUrl } from "@/hooks/kakao/share";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { ApiError } from "@/types/api";
 
 interface MoverDetailViewProps {
   moverId: string;
 }
 
-function isMoverNotFoundError(error: unknown): boolean {
-  return error instanceof ApiError && (error.status === 404 || error.code === "MOVER_NOT_FOUND");
-}
-
 export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
-  const router = useRouter();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [isEstimateRequestModalOpen, setIsEstimateRequestModalOpen] = useState(false);
-  const [isDesignateSuccessModalOpen, setIsDesignateSuccessModalOpen] = useState(false);
 
-  const isClient = useIsClient();
-  const isLoggedIn = isClient && hasAuthSession();
-  const hasHydrated = useAuthStore((state) => state.hasHydrated);
-  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
-  const isAuthPending = !hasHydrated || isCheckingAuth;
-  const loginRequiredModal = useLoginRequiredModal();
-
-  const { data: detail, isLoading, error, isFetching, refetch } = useMoverDetail(moverId);
+  const { detail, isInitialLoading, isNotFound, query } = useMoverDetail(moverId);
   const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
-
-  const {
-    data: activeRequest,
-    isLoading: isActiveLoading,
-    isError: isActiveError,
-    isFetching: isActiveFetching,
-    refetch: refetchActiveRequest,
-  } = useActiveEstimateRequest({
-    enabled: isLoggedIn,
-  });
-
-  const designateMutation = useDesignateMover({
-    onSuccess: () => {
-      setIsDesignateSuccessModalOpen(true);
-    },
+  const designation = useMoverDesignation({
+    moverId,
     onError: setToastMessage,
   });
 
   // SSR guest 상세가 로그인 사용자 정보보다 먼저 노출되지 않도록 세션 확인 완료까지 대기합니다.
-  if (isAuthPending || isLoading) {
+  if (isInitialLoading) {
     return <MoverDetailPageSkeleton />;
   }
 
   if (!detail) {
-    if (isMoverNotFoundError(error)) {
+    if (isNotFound) {
       return <MoverDetailNotFoundStatus />;
     }
 
@@ -85,32 +50,14 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
           title="불러오지 못했어요"
           description="기사님 정보를 가져오는 중 문제가 발생했습니다."
           actionLabel="다시 시도"
-          isRetrying={isFetching}
+          isRetrying={query.isFetching}
           onRetry={() => {
-            void refetch();
+            void query.refetch();
           }}
         />
       </div>
     );
   }
-
-  const ctaState =
-    isLoggedIn && !isActiveLoading && !isActiveError
-      ? getDesignateCtaState(activeRequest ?? null, detail.id)
-      : null;
-
-  // 지정 불가 상태(완료·불가·만료·한도)는 버튼 비활성. 안내 모달만 클릭으로 처리
-  const isRequestDisabled =
-    designateMutation.isPending ||
-    (isLoggedIn && isActiveLoading) ||
-    (isLoggedIn && isActiveError && isActiveFetching) ||
-    (ctaState !== null && isDesignateCtaDisabled(ctaState.status));
-
-  const requestButtonLabel =
-    ctaState?.buttonLabel ??
-    (designateMutation.isPending || (isActiveError && isActiveFetching)
-      ? "요청 중..."
-      : "지정 견적 요청하기");
 
   const toggleFavorite = () => {
     if (favoriteMutation.isPending) {
@@ -123,89 +70,39 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     });
   };
 
-  const handleRequestEstimate = async () => {
-    if (!hasAuthSession()) {
-      loginRequiredModal?.openLoginRequiredModal("지정 견적 요청은 로그인 후 이용할 수 있어요.");
-      return;
-    }
-
-    if (isActiveLoading || designateMutation.isPending || (isActiveError && isActiveFetching)) {
-      return;
-    }
-
-    let request = activeRequest ?? null;
-
-    // 조회 실패 상태면 재클릭 시 refetch 후 최신 결과로 CTA 판단
-    if (isActiveError) {
-      const result = await refetchActiveRequest();
-      if (result.error) {
-        setToastMessage("견적 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
-        return;
-      }
-      request = result.data ?? null;
-    }
-
-    const nextCtaState = getDesignateCtaState(request, detail.id);
-
-    if (nextCtaState.status === "needEstimateRequest") {
-      setIsEstimateRequestModalOpen(true);
-      return;
-    }
-
-    if (nextCtaState.status === "confirmed" && nextCtaState.estimateRequestId !== null) {
-      router.push(APP_ROUTES.ESTIMATES.REQUEST_DETAIL(nextCtaState.estimateRequestId));
-      return;
-    }
-
-    // 비활성 CTA — 클릭해도 Toast 없이 무시 (버튼 disabled가 1차 방어)
-    if (isDesignateCtaDisabled(nextCtaState.status)) {
-      return;
-    }
-
-    if (nextCtaState.message) {
-      setToastMessage(nextCtaState.message);
-      return;
-    }
-
-    if (!nextCtaState.canSubmit || nextCtaState.estimateRequestId === null) {
-      return;
-    }
-
-    designateMutation.mutate({
-      estimateRequestId: nextCtaState.estimateRequestId,
-      moverId: detail.id,
-    });
-  };
-
   const actionsProps = {
     moverName: detail.name,
     isFavorite: detail.isFavorite,
     onToggleFavorite: toggleFavorite,
-    onRequestEstimate: handleRequestEstimate,
-    requestDisabled: isRequestDisabled,
-    requestButtonLabel,
+    onRequestEstimate: designation.requestEstimate,
+    requestDisabled: designation.isRequestDisabled,
+    requestButtonLabel: designation.requestButtonLabel,
   };
 
-  const kakaoShare = {
-    driver_name: detail.name,
-    like_count: String(detail.favoriteCount),
-    driver_profile: toKakaoShareImageUrl(detail.profileImageSrc),
+  const shareProps = {
+    favoriteCount: detail.favoriteCount,
+    moverName: detail.name,
+    profileImageSrc: detail.profileImageSrc,
   };
 
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] lg:pb-0">
-      <EstimateDetailHero imageUrl={detail.profileImageSrc} name={detail.name} />
+      <DetailHeroBanner imageUrl={detail.profileImageSrc} name={detail.name} />
 
       <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 lg:px-0 lg:pb-[150px]">
         <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-32 md:gap-40 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex w-full min-w-0 flex-col gap-40 md:gap-40 lg:w-[766px]">
-            <MoverDetailProfile detail={detail} onToggleFavorite={toggleFavorite} />
+            <MoverDetailProfile
+              detail={detail}
+              onToggleFavorite={toggleFavorite}
+              showFavoriteAction={designation.showCustomerActions}
+            />
             <MoverDetailServices detail={detail} />
 
             <div className="border-border-subtle w-full border-t lg:hidden" aria-hidden="true" />
 
             <div className="lg:hidden">
-              <MoverDetailShare kakaoShare={kakaoShare} onToastMessage={setToastMessage} />
+              <MoverDetailShare {...shareProps} onToastMessage={setToastMessage} />
             </div>
 
             <div className="border-border-subtle w-full border-t" aria-hidden="true" />
@@ -219,22 +116,26 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
           </div>
 
           <aside className="hidden w-full min-w-0 flex-col items-start gap-40 lg:flex lg:w-[320px] lg:gap-70 lg:pt-40">
-            <MoverDetailActions layout="sidebar" {...actionsProps} />
-            <MoverDetailShare kakaoShare={kakaoShare} onToastMessage={setToastMessage} />
+            {designation.showCustomerActions ? (
+              <MoverDetailActions layout="sidebar" {...actionsProps} />
+            ) : null}
+            <MoverDetailShare {...shareProps} onToastMessage={setToastMessage} />
           </aside>
         </div>
       </div>
 
-      <MoverDetailActions layout="sticky" {...actionsProps} />
+      {designation.showCustomerActions ? (
+        <MoverDetailActions layout="sticky" {...actionsProps} />
+      ) : null}
 
       <EstimateRequestRequiredModal
-        open={isEstimateRequestModalOpen}
-        onClose={() => setIsEstimateRequestModalOpen(false)}
+        open={designation.isEstimateRequestModalOpen}
+        onClose={designation.closeEstimateRequestModal}
       />
 
       <DesignateSuccessModal
-        open={isDesignateSuccessModalOpen}
-        onClose={() => setIsDesignateSuccessModalOpen(false)}
+        open={designation.isDesignateSuccessModalOpen}
+        onClose={designation.closeDesignateSuccessModal}
       />
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}

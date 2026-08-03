@@ -12,9 +12,14 @@ import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips"
 interface MoverDetailProfileProps {
   detail: MoverDetail;
   onToggleFavorite: () => void;
+  showFavoriteAction?: boolean;
 }
 
-export default function MoverDetailProfile({ detail, onToggleFavorite }: MoverDetailProfileProps) {
+export default function MoverDetailProfile({
+  detail,
+  onToggleFavorite,
+  showFavoriteAction = true,
+}: MoverDetailProfileProps) {
   return (
     <section className="flex w-full flex-col gap-36 md:gap-32" aria-label="기사님 소개">
       <div className="flex w-full flex-col gap-16 md:gap-20">
@@ -42,29 +47,25 @@ export default function MoverDetailProfile({ detail, onToggleFavorite }: MoverDe
             </Text>
           </div>
 
-          <button
-            type="button"
-            className="focus-visible:ring-border-brand rounded-8 flex min-h-44 shrink-0 items-center gap-4 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none"
-            aria-label={`${detail.name} 기사님 찜, 현재 찜 ${detail.favoriteCount}개`}
-            aria-pressed={detail.isFavorite}
-            onClick={onToggleFavorite}
-          >
-            <Text
-              as="span"
-              variant={{ base: "md-semibold", md: "2lg-medium" }}
-              className="text-text-muted"
-              aria-hidden="true"
+          {showFavoriteAction ? (
+            <button
+              type="button"
+              className="focus-visible:ring-border-brand rounded-8 flex min-h-44 shrink-0 items-center gap-4 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none"
+              aria-label={`${detail.name} 기사님 찜, 현재 찜 ${detail.favoriteCount}개`}
+              aria-pressed={detail.isFavorite}
+              onClick={onToggleFavorite}
             >
-              {detail.favoriteCount}
-            </Text>
-            <LikeIcon
-              isFavorite={detail.isFavorite}
-              className={cn(
-                "size-24",
-                detail.isFavorite ? "text-like-active-fill" : "text-like-default-stroke",
-              )}
-            />
-          </button>
+              <FavoriteSummary detail={detail} />
+            </button>
+          ) : (
+            <div
+              className="flex min-h-44 shrink-0 items-center gap-4 px-4 py-2"
+              role="group"
+              aria-label={`현재 찜 ${detail.favoriteCount}개`}
+            >
+              <FavoriteSummary detail={detail} />
+            </div>
+          )}
         </div>
 
         <Text
@@ -115,6 +116,32 @@ export default function MoverDetailProfile({ detail, onToggleFavorite }: MoverDe
         <StatItem label="총 경력" value={`${detail.careerYears}년`} />
       </div>
     </section>
+  );
+}
+
+interface FavoriteSummaryProps {
+  detail: MoverDetail;
+}
+
+function FavoriteSummary({ detail }: FavoriteSummaryProps) {
+  return (
+    <>
+      <Text
+        as="span"
+        variant={{ base: "md-semibold", md: "2lg-medium" }}
+        className="text-text-muted"
+        aria-hidden="true"
+      >
+        {detail.favoriteCount}
+      </Text>
+      <LikeIcon
+        isFavorite={detail.isFavorite}
+        className={cn(
+          "size-24",
+          detail.isFavorite ? "text-like-active-fill" : "text-like-default-stroke",
+        )}
+      />
+    </>
   );
 }
 
