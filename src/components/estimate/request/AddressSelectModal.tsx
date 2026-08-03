@@ -24,7 +24,8 @@ const RESULT_AREA_HEIGHT_CLASS = "h-[280px] max-h-[280px]";
 
 const PANEL_CLASSNAME = cn(
   "items-stretch text-left overflow-hidden",
-  "h-[640px] max-h-[90vh] w-full max-w-[608px] px-24 pt-32 pb-40 gap-40 rounded-32",
+  "h-auto min-h-[446px] max-h-[90vh] w-full max-w-[292px] gap-0 rounded-24 px-16 py-24",
+  "min-[744px]:h-[620px] min-[744px]:max-w-[608px] min-[744px]:rounded-32 min-[744px]:px-24 min-[744px]:pt-32 min-[744px]:pb-40",
 );
 
 function AddressChip({ label }: { label: string }) {
@@ -146,12 +147,19 @@ export default function AddressSelectModal({
 
   return (
     <Modal onClose={onClose} presentation="modal" size="lg" className={PANEL_CLASSNAME}>
-      <div className="flex w-full shrink-0 items-center justify-between gap-16">
-        <Modal.Title>{kind}를 선택해주세요</Modal.Title>
-        <Modal.Close onClose={onClose} />
+      <div className="mb-30 flex w-full shrink-0 items-center justify-between gap-16 min-[744px]:mb-40">
+        <Modal.Title variant={{ base: "2lg-bold", md: "2xl-semibold" }}>
+          {kind}를 선택해주세요
+        </Modal.Title>
+        <Modal.Close
+          size="sm"
+          onClose={onClose}
+          className="min-[744px]:size-36"
+          iconClassName="min-[744px]:size-36"
+        />
       </div>
 
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-24 overflow-hidden">
+      <div className="mb-24 flex min-h-0 w-full flex-col gap-24 overflow-hidden min-[744px]:mb-40 min-[744px]:flex-1">
         <div className="bg-background-muted rounded-16 flex h-64 shrink-0 items-center gap-16 overflow-hidden px-24">
           <input
             type="text"
@@ -189,7 +197,7 @@ export default function AddressSelectModal({
           </div>
         </div>
 
-        <div className={cn("min-h-0 w-full flex-1 overflow-y-auto", RESULT_AREA_HEIGHT_CLASS)}>
+        <div className={cn("min-h-0 w-full shrink-0 overflow-y-auto", RESULT_AREA_HEIGHT_CLASS)}>
           {isSearching ? (
             <div className="flex h-full items-center justify-center">
               <Text as="p" variant="md-regular" className="text-text-placeholder">
@@ -214,8 +222,12 @@ export default function AddressSelectModal({
               ))}
             </div>
           ) : (
-            <div className="flex h-full items-center justify-center px-24">
-              <Text as="p" variant="md-regular" className="text-text-placeholder text-center">
+            <div className="flex h-full items-center justify-center px-0 lg:px-24">
+              <Text
+                as="p"
+                variant={{ base: "md-regular", md: "lg-regular" }}
+                className="text-text-placeholder text-center"
+              >
                 {hasSearched
                   ? "검색 결과가 없습니다. 다른 주소로 검색해보세요."
                   : "주소를 검색하면 결과가 여기에 표시됩니다"}
@@ -227,14 +239,15 @@ export default function AddressSelectModal({
 
       <Modal.Button
         fullWidth
-        size="detail"
+        size="cta"
+        className="mt-auto min-[744px]:h-64"
         disabled={!selected}
         onClick={() => {
           if (!selected) return;
           onConfirm(selected);
         }}
       >
-        선택완료
+        선택 완료
       </Modal.Button>
     </Modal>
   );
