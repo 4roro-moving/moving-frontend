@@ -1,6 +1,7 @@
 "use client";
 
 import CustomerProfileForm from "@/components/profile/CustomerProfileForm";
+import ProfileFormSkeleton from "@/components/profile/ProfileFormSkeleton";
 import { Text } from "@/components/common/Text";
 import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { useCustomerProfileStatus } from "@/hooks/profile/useCustomerProfileStatus";
@@ -11,11 +12,11 @@ const CustomerProfileCreateView = () => {
 
   if (isAuthPending || isStatusPending) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center px-24">
-        <Text as="p" variant="md-medium" className="text-text-description">
-          프로필 정보를 불러오는 중입니다.
-        </Text>
-      </div>
+      <ProfileFormSkeleton
+        title="프로필 등록"
+        description="추가 정보를 입력하여 회원가입을 완료해주세요."
+        layout="single"
+      />
     );
   }
 

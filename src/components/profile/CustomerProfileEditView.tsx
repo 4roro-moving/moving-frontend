@@ -1,6 +1,7 @@
 "use client";
 
 import CustomerProfileEditForm from "@/components/profile/CustomerProfileEditForm";
+import ProfileFormSkeleton from "@/components/profile/ProfileFormSkeleton";
 import { Text } from "@/components/common/Text";
 import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { useCustomerProfileMe } from "@/hooks/profile/useCustomerProfileMe";
@@ -15,13 +16,7 @@ const CustomerProfileEditView = () => {
   } = useCustomerProfileMe(canFetch);
 
   if (isAuthPending || isProfilePending) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center px-24">
-        <Text as="p" variant="md-medium" className="text-text-description">
-          프로필을 불러오는 중입니다.
-        </Text>
-      </div>
-    );
+    return <ProfileFormSkeleton title="프로필 수정" layout="twoColumn" />;
   }
 
   if (isError || !customerProfile) {

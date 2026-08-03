@@ -1,6 +1,7 @@
 "use client";
 
 import MoverBasicInfoEditForm from "@/components/profile/MoverBasicInfoEditForm";
+import ProfileFormSkeleton from "@/components/profile/ProfileFormSkeleton";
 import { Text } from "@/components/common/Text";
 import { useMoverAuthReady } from "@/hooks/useMoverAuthReady";
 import { useMoverProfileMe } from "@/hooks/profile/useMoverProfileMe";
@@ -11,13 +12,7 @@ const MoverBasicInfoEditView = () => {
   const { data: moverProfile, isPending: isProfilePending, isError } = useMoverProfileMe(canFetch);
 
   if (isAuthPending || isProfilePending) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center px-24">
-        <Text as="p" variant="md-medium" className="text-text-description">
-          기본정보를 불러오는 중입니다.
-        </Text>
-      </div>
-    );
+    return <ProfileFormSkeleton title="기본정보 수정" layout="twoColumn" />;
   }
 
   if (isError || !moverProfile) {
