@@ -13,7 +13,7 @@ export { default as ChevronLeftThinIcon } from "./chevron-left-thin.svg";
 export { default as ChevronRightIcon } from "./chevron-right.svg";
 export { default as ChevronRightThinIcon } from "./chevron-right-thin.svg";
 export { default as ChevronUpIcon } from "./chevron-up.svg";
-export { default as ClearIcon } from "./clear-circle.svg";
+export { default as ClearIcon } from "./color/clear-circle.svg";
 export { default as ClipIcon } from "./clip.svg";
 export { default as CloseIcon } from "./close.svg";
 export { default as ConfirmedCheckIcon } from "./confirmed-estimate.svg";
@@ -25,7 +25,7 @@ export { default as InfoIcon } from "./info.svg";
 // 2026.07.24 정슬기 - [수정] 찜 상태(fill) prop을 받도록 LikeIcon을 TSX 컴포넌트로 연결
 export { default as LikeIcon } from "./like";
 export { default as MenuIcon } from "./menu.svg";
-export { default as ProfileDefaultIcon } from "./profile-default.svg";
+export { default as ProfileDefaultIcon } from "./color/profile-default.svg";
 export { default as StarIcon } from "./star.svg";
 export { default as TrashIcon } from "./trash.svg";
 export { default as VisibilityIcon } from "./visibility.svg";

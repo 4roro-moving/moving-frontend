@@ -7,12 +7,8 @@ export const svgrOptions = {
     focusable: "false",
     "aria-hidden": "true",
   },
-  // 2026.07.26 정슬기 - [수정] preset-default 유지 + 전역 currentColor 변환 제거
-  // ProfileDefault 등 고정색 SVG 보존. 단색 아이콘은 #ABABAB만 currentColor로 치환
-  replaceAttrValues: {
-    "#ABABAB": "currentColor",
-    "#ababab": "currentColor",
-  },
+  // 단색 아이콘은 SVG 원본의 fill/stroke를 currentColor로 작성합니다.
+  // ProfileDefault 등 고정색 SVG가 섞여 있어 빌드 시 색상을 일괄 변환하지 않습니다.
   svgoConfig: {
     plugins: [
       {

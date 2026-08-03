@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
         ],
         as: "*.js",
       },
-      // 단색: currentColor 변환. icons/color는 위 규칙만 타도록 제외
+      // 단색: SVG 원본의 currentColor를 사용. icons/color는 위 규칙만 타도록 제외
       "*.svg": {
         condition: {
           not: {

@@ -50,7 +50,7 @@ function SentEstimateSummary({ estimate }: { estimate: SentEstimate }) {
 
           {isConfirmed ? (
             <span className="text-text-brand flex shrink-0 items-center gap-4">
-              <FrameIcon className="size-20 shrink-0" aria-hidden="true" />
+              <FrameIcon className="text-icon-brand size-20 shrink-0" />
               <Text variant="lg-bold">확정견적</Text>
             </span>
           ) : null}
