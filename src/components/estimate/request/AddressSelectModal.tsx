@@ -3,11 +3,10 @@
 import { useCallback, useState } from "react";
 
 import Modal from "@/components/common/Modal/Modal";
+import Search from "@/components/common/Search/Search";
 import { Text } from "@/components/common/Text";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
-
-import { ClearCircleIcon, SearchIcon } from "../icons";
 
 export type AddressItem = AddressSearchItem;
 
@@ -160,42 +159,23 @@ export default function AddressSelectModal({
       </div>
 
       <div className="mb-24 flex min-h-0 w-full flex-col gap-24 overflow-hidden min-[744px]:mb-40 min-[744px]:flex-1">
-        <div className="bg-background-muted rounded-16 flex h-64 shrink-0 items-center gap-16 overflow-hidden px-24">
-          <input
-            type="text"
+        <form
+          className="w-full shrink-0"
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleSearch();
+          }}
+        >
+          <Search
+            size="responsive"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                handleSearch();
-              }
-            }}
+            onClear={handleClear}
             placeholder="주소를 검색해주세요"
-            className="text-text-secondary placeholder:text-text-placeholder font-regular min-w-0 flex-1 bg-transparent text-[length:var(--font-size-18)] leading-[var(--line-height-26)] outline-none"
             aria-label={`${kind} 주소 검색`}
+            className="w-full"
           />
-          <div className="flex shrink-0 items-center gap-16">
-            {query.length > 0 && (
-              <button
-                type="button"
-                onClick={handleClear}
-                aria-label="검색어 지우기"
-                className="flex size-36 items-center justify-center"
-              >
-                <ClearCircleIcon className="text-icon-subtle" />
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handleSearch}
-              aria-label="주소 검색"
-              className="flex size-36 items-center justify-center"
-            >
-              <SearchIcon className="text-icon-default" />
-            </button>
-          </div>
-        </div>
+        </form>
 
         <div className={cn("min-h-0 w-full shrink-0 overflow-y-auto", RESULT_AREA_HEIGHT_CLASS)}>
           {isSearching ? (

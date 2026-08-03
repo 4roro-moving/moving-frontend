@@ -112,10 +112,14 @@ export default function ReceivedRequestsPage() {
         <section className="flex flex-col gap-24">
           <form onSubmit={submitSearch} className="mx-10 w-[calc(100%_-_20px)] lg:mx-0 lg:w-full">
             <Search
-              size="md"
+              size="responsive"
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
-              className="h-[52px] w-full border-0 px-16 lg:h-64 lg:px-24"
+              onClear={() => {
+                setSearchText("");
+                setKeyword("");
+              }}
+              className="w-full"
               placeholder="어떤 고객님을 찾고 계세요?"
               aria-label="고객명 검색"
             />

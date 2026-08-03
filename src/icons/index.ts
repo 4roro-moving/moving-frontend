@@ -31,6 +31,7 @@ export { default as TrashIcon } from "./trash.svg";
 export { default as VisibilityIcon } from "./visibility.svg";
 export { default as VisibilityOffIcon } from "./visibility_off.svg";
 export { default as WriteIcon } from "./write.svg";
+export { default as SearchIcon } from "./search.svg";
 export { default as HomeIcon } from "./color/home.svg";
 export { default as CompanyIcon } from "./color/company.svg";
 export { default as DriverBadgeIcon } from "./color/driver-badge.svg";

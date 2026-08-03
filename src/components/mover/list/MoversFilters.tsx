@@ -34,12 +34,13 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
     <>
       <div className="w-full py-10">
         <Search
-          size="md"
+          size="responsive"
           value={keyword}
           onChange={(event) => setKeyword(event.target.value)}
+          onClear={() => setKeyword("")}
           placeholder="텍스트를 입력해 주세요."
           aria-label="기사님 검색"
-          className="h-[52px] w-full gap-8 px-16 min-[744px]:h-64 min-[744px]:px-24"
+          className="w-full"
         />
       </div>
 
