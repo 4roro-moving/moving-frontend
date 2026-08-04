@@ -76,10 +76,8 @@ export default function RejectEstimateModal({
               error={reasonError}
               disabled={isPending}
               onChange={(event) => setReason(event.target.value)}
-              onBlur={(event) => {
-                if ((event.relatedTarget as HTMLElement | null)?.ariaLabel !== "모달 닫기") {
-                  setIsReasonTouched(true);
-                }
+              onBlur={() => {
+                setIsReasonTouched(true);
               }}
               className="h-[160px] resize-none px-24 py-14 text-lg"
             />

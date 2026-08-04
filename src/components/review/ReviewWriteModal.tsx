@@ -135,10 +135,8 @@ function ReviewWriteModalContent({
                 setContent(event.target.value);
                 setSubmitError(undefined);
               }}
-              onBlur={(event) => {
-                if ((event.relatedTarget as HTMLElement | null)?.ariaLabel !== "모달 닫기") {
-                  setIsContentTouched(true);
-                }
+              onBlur={() => {
+                setIsContentTouched(true);
               }}
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">

@@ -121,10 +121,8 @@ export default function SendEstimateModal({
               placeholder="최소 10자 이상 입력해 주세요"
               error={commentError}
               onChange={(event) => setComment(event.target.value)}
-              onBlur={(event) => {
-                if ((event.relatedTarget as HTMLElement | null)?.ariaLabel !== "모달 닫기") {
-                  setIsCommentTouched(true);
-                }
+              onBlur={() => {
+                setIsCommentTouched(true);
               }}
               className="h-[160px] resize-none"
             />
