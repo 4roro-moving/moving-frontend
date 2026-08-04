@@ -56,4 +56,7 @@ export const APP_ROUTES = {
     SENT_DETAIL: (estimateId: number) => `/estimate/sent/${estimateId}`,
     REJECTED: "/estimate/rejected",
   },
+  ADMIN: {
+    CONTENTS: "/admin/contents",
+  },
 } as const;

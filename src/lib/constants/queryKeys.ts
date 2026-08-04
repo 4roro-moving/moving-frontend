@@ -137,4 +137,14 @@ export const QUERY_KEYS = {
     UNREAD_COUNT: (authScope: AuthQueryScope) =>
       ["notifications", "unread-count", authScope] as const,
   },
+
+  ADMIN: {
+    REVIEWS_ROOT: ["admin", "reviews"] as const,
+    REVIEWS_LIST: (
+      page: number,
+      limit: number,
+      keyword: string,
+      sort: "LATEST" | "OLDEST" | "RATING_HIGH" | "RATING_LOW",
+    ) => ["admin", "reviews", { page, limit, keyword, sort }] as const,
+  },
 } as const;

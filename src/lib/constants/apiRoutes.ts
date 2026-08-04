@@ -64,4 +64,11 @@ export const API_ROUTES = {
     UNREAD_COUNT: "/notifications/unread-count",
     READ: (notificationId: number) => `/notifications/${notificationId}/read`,
   },
+  ADMIN: {
+    REVIEWS: {
+      ROOT: "/admin/reviews",
+      HIDE: (reviewId: number) => `/admin/reviews/${reviewId}/hide`,
+      UNHIDE: (reviewId: number) => `/admin/reviews/${reviewId}/unhide`,
+    },
+  },
 } as const;
