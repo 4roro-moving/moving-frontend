@@ -11,11 +11,13 @@ import ProfileMenuTrigger, {
 } from "@/components/common/Header/ProfileMenuTrigger";
 import { Text } from "@/components/common/Text";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { CloseIcon, MenuIcon } from "@/icons";
 import type { AuthRole } from "@/lib/auth/role";
 import { loadRole } from "@/lib/auth/role";
 import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { MEDIA_QUERY } from "@/lib/constants/breakpoints";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -177,6 +179,23 @@ const Header = ({
       document.body.style.overflow = previousOverflow;
     };
   }, [isMobileMenuOpen]);
+
+  // xl 브레이크포인트 진입 시 모바일 메뉴를 닫아 focus trap·scroll lock 해제
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(MEDIA_QUERY.xl);
+
+    const handleBreakpointChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    mediaQuery.addEventListener("change", handleBreakpointChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleBreakpointChange);
+    };
+  }, []);
 
   return (
     <header className="border-border-subtle bg-background-surface relative z-40 w-full max-w-full border-b">

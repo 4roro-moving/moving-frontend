@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
+import { MEDIA_QUERY } from "@/lib/constants/breakpoints";
 
 import PaginationEllipsis from "./PaginationEllipsis";
 
@@ -24,22 +26,6 @@ export interface PaginationProps {
 /** Figma pagination size=lg: 연속 숫자 5개 / size=sm: 3개 */
 const RANGE_SIZE_LG = 5;
 const RANGE_SIZE_SM = 3;
-
-const LG_MEDIA_QUERY = "(min-width: 64rem)";
-
-function subscribeLg(onStoreChange: () => void) {
-  const mediaQuery = window.matchMedia(LG_MEDIA_QUERY);
-  mediaQuery.addEventListener("change", onStoreChange);
-  return () => mediaQuery.removeEventListener("change", onStoreChange);
-}
-
-function getLgSnapshot() {
-  return window.matchMedia(LG_MEDIA_QUERY).matches;
-}
-
-function getLgServerSnapshot() {
-  return false;
-}
 
 /**
  * 현재 페이지 주변 `rangeSize`개의 연속 숫자를 보여 주고,
@@ -108,7 +94,7 @@ const getPageItems = (currentPage: number, pageCount: number, rangeSize: number)
 };
 
 const Pagination = ({ currentPage, pageCount, onPageChange, className }: PaginationProps) => {
-  const isLg = useSyncExternalStore(subscribeLg, getLgSnapshot, getLgServerSnapshot);
+  const isLg = useMediaQuery(MEDIA_QUERY.xl);
   const [openEllipsisIndex, setOpenEllipsisIndex] = useState<number | null>(null);
   const containerRef = useClickOutside<HTMLDivElement>(() => setOpenEllipsisIndex(null));
 
