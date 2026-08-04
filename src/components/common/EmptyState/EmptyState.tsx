@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { MouseEventHandler, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
@@ -16,7 +16,7 @@ export interface EmptyStateProps {
   buttonLabel?: string;
   /** CTA 클릭 시 이동 경로 */
   href?: string;
-  onButtonClick?: MouseEventHandler<HTMLAnchorElement>;
+  onButtonClick?: () => void;
   imageAlt?: string;
   className?: string;
   /**

@@ -17,7 +17,7 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { MOVE_TYPE_CARDS } from "@/lib/constants/moveType";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
-import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
+import { markInternalDetailNavigation } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
 import type { MoveType } from "@/types/move";
@@ -337,7 +337,7 @@ export default function EstimateRequestForm() {
           }
           onButtonClick={
             isConfirmedRequest
-              ? (event) => markInternalDetailNavigationOnClick(event, activeRequestDetailHref)
+              ? () => markInternalDetailNavigation(activeRequestDetailHref)
               : undefined
           }
         />

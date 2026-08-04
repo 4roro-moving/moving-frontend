@@ -1,126 +1,70 @@
 "use client";
 
-const INTERNAL_DETAIL_ENTRY_PENDING_STORAGE_KEY = "moving:internal-detail-entry-pending";
-const INTERNAL_DETAIL_ENTRY_HISTORY_STATE_KEY = "__movingInternalDetailEntryPath";
+const INTERNAL_DETAIL_ENTRY_STORAGE_KEY = "moving:internal-detail-entries";
 
-interface NavigationClickEventLike {
-  altKey?: boolean;
-  button?: number;
-  ctrlKey?: boolean;
-  defaultPrevented?: boolean;
-  metaKey?: boolean;
-  shiftKey?: boolean;
-}
+type InternalDetailEntryMap = Record<string, true>;
 
-function readPendingInternalDetailNavigation(): string | null {
+function readInternalDetailEntries(): InternalDetailEntryMap {
   try {
-    return sessionStorage.getItem(INTERNAL_DETAIL_ENTRY_PENDING_STORAGE_KEY);
+    const raw = sessionStorage.getItem(INTERNAL_DETAIL_ENTRY_STORAGE_KEY);
+
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw) as unknown;
+
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return {};
+    }
+
+    return Object.entries(parsed).reduce<InternalDetailEntryMap>((entries, [pathname, value]) => {
+      if (value === true) {
+        entries[pathname] = true;
+      }
+
+      return entries;
+    }, {});
   } catch {
-    return null;
+    return {};
   }
 }
 
-function clearPendingInternalDetailNavigation(pathname?: string) {
+function writeInternalDetailEntries(entries: InternalDetailEntryMap) {
   try {
-    const pendingPathname = sessionStorage.getItem(INTERNAL_DETAIL_ENTRY_PENDING_STORAGE_KEY);
+    const nextEntries = Object.keys(entries);
 
-    if (!pendingPathname) {
+    if (nextEntries.length === 0) {
+      sessionStorage.removeItem(INTERNAL_DETAIL_ENTRY_STORAGE_KEY);
       return;
     }
 
-    if (pathname && pendingPathname !== pathname) {
-      return;
-    }
-
-    sessionStorage.removeItem(INTERNAL_DETAIL_ENTRY_PENDING_STORAGE_KEY);
+    sessionStorage.setItem(INTERNAL_DETAIL_ENTRY_STORAGE_KEY, JSON.stringify(entries));
   } catch {
     // ignore
   }
-}
-
-function replaceInternalDetailHistoryState(pathname: string | null) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  const currentState =
-    window.history.state && typeof window.history.state === "object"
-      ? (window.history.state as Record<string, unknown>)
-      : {};
-
-  const nextState = { ...currentState };
-
-  if (pathname) {
-    nextState[INTERNAL_DETAIL_ENTRY_HISTORY_STATE_KEY] = pathname;
-  } else {
-    delete nextState[INTERNAL_DETAIL_ENTRY_HISTORY_STATE_KEY];
-  }
-
-  window.history.replaceState(nextState, "", window.location.href);
-}
-
-function readInternalDetailHistoryState(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const state = window.history.state;
-
-  if (!state || typeof state !== "object") {
-    return null;
-  }
-
-  const pathname = (state as Record<string, unknown>)[INTERNAL_DETAIL_ENTRY_HISTORY_STATE_KEY];
-
-  return typeof pathname === "string" ? pathname : null;
 }
 
 export function markInternalDetailNavigation(pathname: string) {
-  try {
-    sessionStorage.setItem(INTERNAL_DETAIL_ENTRY_PENDING_STORAGE_KEY, pathname);
-  } catch {
-    // ignore
-  }
+  const entries = readInternalDetailEntries();
+
+  entries[pathname] = true;
+  writeInternalDetailEntries(entries);
 }
 
-export function markInternalDetailNavigationOnClick(
-  event: NavigationClickEventLike,
-  pathname: string,
-) {
-  if (
-    event.defaultPrevented ||
-    event.metaKey ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.altKey ||
-    (typeof event.button === "number" && event.button !== 0)
-  ) {
-    return;
-  }
+export function hasInternalDetailNavigation(pathname: string): boolean {
+  const entries = readInternalDetailEntries();
 
-  markInternalDetailNavigation(pathname);
-}
-
-export function activateInternalDetailNavigation(pathname: string): boolean {
-  const pendingPathname = readPendingInternalDetailNavigation();
-
-  if (pendingPathname === pathname) {
-    clearPendingInternalDetailNavigation(pathname);
-    replaceInternalDetailHistoryState(pathname);
-    return true;
-  }
-
-  if (pendingPathname) {
-    clearPendingInternalDetailNavigation();
-  }
-
-  return readInternalDetailHistoryState() === pathname;
+  return entries[pathname] === true;
 }
 
 export function clearInternalDetailNavigation(pathname: string) {
-  clearPendingInternalDetailNavigation(pathname);
+  const entries = readInternalDetailEntries();
 
-  if (readInternalDetailHistoryState() === pathname) {
-    replaceInternalDetailHistoryState(null);
+  if (!(pathname in entries)) {
+    return;
   }
+
+  delete entries[pathname];
+  writeInternalDetailEntries(entries);
 }
