@@ -9,6 +9,8 @@ import { MoveTypeChip, DesignatedChip } from "@/components/estimate/received/Mov
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { markInternalDetailNavigation } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import {
   formatPrice,
@@ -43,6 +45,7 @@ export default function PendingEstimateCard({
   const displayName = mover.nickname || mover.name;
   const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
   const moverTitleId = `offer-${offer.id}-mover`;
+  const detailHref = APP_ROUTES.ESTIMATES.PENDING_DETAIL(offer.id);
   // 찜: PENDING_LIST / RECEIVED / DETAIL 캐시는 useFavoriteMover가 갱신
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
   // BE mapListEstimate에는 canConfirm 없음 — SENT만 확정 후보 (pending 목록은 SENT-only)
@@ -226,7 +229,8 @@ export default function PendingEstimateCard({
       {/* 상세: /estimates/pending/[estimateId] */}
       <div className="flex w-full flex-col-reverse gap-11 md:flex-row">
         <Link
-          href={`/estimates/pending/${offer.id}`}
+          href={detailHref}
+          onClick={() => markInternalDetailNavigation(detailHref)}
           className={cn(
             buttonVariants({ variant: "outline", size: "cta", fullWidth: true }),
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none md:flex-1",
