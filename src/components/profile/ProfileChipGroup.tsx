@@ -12,6 +12,7 @@ interface ProfileChipGroupBaseProps<T extends string | number> {
   className?: string;
   chipClassName?: string;
   error?: string;
+  "aria-labelledby"?: string;
 }
 
 interface ProfileChipGroupSingleProps<
@@ -62,11 +63,15 @@ const handleSelect = <T extends string | number>(
 
 /** 프로필 서비스·지역 Chip 선택 그룹 */
 const ProfileChipGroup = <T extends string | number>(props: ProfileChipGroupProps<T>) => {
-  const { options, className, chipClassName, error } = props;
+  const { options, className, chipClassName, error, "aria-labelledby": ariaLabelledby } = props;
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className={cn("flex flex-wrap gap-8 md:gap-12", className)} role="group">
+      <div
+        className={cn("flex flex-wrap gap-8 md:gap-12", className)}
+        role="group"
+        aria-labelledby={ariaLabelledby}
+      >
         {options.map((option) => (
           <ProfileSelectableChip
             key={String(option.value)}

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import NotificationTrigger from "@/components/common/Header/notification";
 import HeaderSideNav from "@/components/common/Header/HeaderSideNav";
@@ -124,8 +124,8 @@ const Header = ({
   const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
-  const openSideNav = () => setIsSideNavOpen(true);
-  const closeSideNav = () => setIsSideNavOpen(false);
+  const openSideNav = useCallback(() => setIsSideNavOpen(true), []);
+  const closeSideNav = useCallback(() => setIsSideNavOpen(false), []);
 
   return (
     <header className="border-border-subtle bg-background-surface w-full border-b">

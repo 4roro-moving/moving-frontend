@@ -196,12 +196,13 @@ const MoverProfileForm = ({
             />
           </FormField>
 
-          <FormField label="제공 서비스" required>
+          <FormField label="제공 서비스" labelId="mover-create-service-types-label" required>
             <Controller
               name="serviceTypes"
               control={control}
               render={({ field }) => (
                 <ProfileChipGroup<MoveType>
+                  aria-labelledby="mover-create-service-types-label"
                   selectionMode="multiple"
                   options={MOVE_TYPE_OPTIONS}
                   value={field.value}
@@ -212,12 +213,13 @@ const MoverProfileForm = ({
             />
           </FormField>
 
-          <FormField label="서비스 가능 지역" required>
+          <FormField label="서비스 가능 지역" labelId="mover-create-region-label" required>
             <Controller
               name="regionIds"
               control={control}
               render={({ field }) => (
                 <ProfileChipGroup<RegionId>
+                  aria-labelledby="mover-create-region-label"
                   selectionMode="multiple"
                   options={REGION_OPTIONS}
                   value={field.value}

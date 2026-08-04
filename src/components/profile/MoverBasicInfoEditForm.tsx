@@ -127,14 +127,7 @@ const MoverBasicInfoEditForm = ({
           </FormField>
 
           <FormField label="전화번호" labelFor="mover-basic-phone" required>
-            <Input
-              id="mover-basic-phone"
-              size="md"
-              readOnly
-              disabled
-              error={errors.phone?.message}
-              {...register("phone")}
-            />
+            <Input id="mover-basic-phone" size="md" readOnly disabled {...register("phone")} />
           </FormField>
         </div>
 
@@ -145,7 +138,7 @@ const MoverBasicInfoEditForm = ({
                 <PasswordInput
                   id="mover-basic-current-password"
                   size="md"
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   placeholder="현재 비밀번호를 입력해 주세요"
                   error={errors.currentPassword?.message}
                   {...register("currentPassword")}

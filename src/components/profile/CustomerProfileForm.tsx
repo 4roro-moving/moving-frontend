@@ -145,6 +145,7 @@ const CustomerProfileForm = ({
         <section className="flex w-full flex-col gap-32">
           <FormField
             label="이용 서비스"
+            labelId="customer-create-service-types-label"
             description="*이용 서비스는 중복 선택 가능하며, 언제든 수정 가능해요!"
           >
             <Controller
@@ -152,6 +153,7 @@ const CustomerProfileForm = ({
               control={control}
               render={({ field }) => (
                 <ProfileChipGroup<MoveType>
+                  aria-labelledby="customer-create-service-types-label"
                   selectionMode="multiple"
                   options={MOVE_TYPE_OPTIONS}
                   value={field.value}
@@ -164,12 +166,17 @@ const CustomerProfileForm = ({
           <div className="border-border-subtle w-full border-b" aria-hidden="true" />
         </section>
 
-        <FormField label="내가 사는 지역" description="*내가 사는 지역은 언제든 수정 가능해요!">
+        <FormField
+          label="내가 사는 지역"
+          labelId="customer-create-region-label"
+          description="*내가 사는 지역은 언제든 수정 가능해요!"
+        >
           <Controller
             name="regionId"
             control={control}
             render={({ field }) => (
               <ProfileChipGroup<RegionId>
+                aria-labelledby="customer-create-region-label"
                 selectionMode="single"
                 options={REGION_OPTIONS}
                 value={field.value ?? null}

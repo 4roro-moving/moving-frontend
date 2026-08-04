@@ -1,14 +1,24 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 import MoverProfileForm from "@/components/profile/MoverProfileForm";
 import ProfileFormSkeleton from "@/components/profile/ProfileFormSkeleton";
 import { Text } from "@/components/common/Text";
 import { useMoverAuthReady } from "@/hooks/useMoverAuthReady";
 import { useMoverProfileStatus } from "@/hooks/profile/useMoverProfileStatus";
+import { getRoleHomePath } from "@/lib/auth/redirect";
 
 const MoverProfileCreateView = () => {
+  const router = useRouter();
   const { canFetch, isPending: isAuthPending, user } = useMoverAuthReady();
   const { data: status, isPending: isStatusPending, isError } = useMoverProfileStatus(canFetch);
+
+  useEffect(() => {
+    if (!status?.isProfileCompleted) return;
+    router.replace(getRoleHomePath(user?.role));
+  }, [status?.isProfileCompleted, user?.role, router]);
 
   if (isAuthPending || isStatusPending) {
     return (
@@ -27,6 +37,16 @@ const MoverProfileCreateView = () => {
           프로필 정보를 불러오지 못했습니다.
         </Text>
       </div>
+    );
+  }
+
+  if (status.isProfileCompleted) {
+    return (
+      <ProfileFormSkeleton
+        title="기사님 프로필 등록"
+        description="추가 정보를 입력하여 회원가입을 완료해주세요."
+        layout="twoColumn"
+      />
     );
   }
 

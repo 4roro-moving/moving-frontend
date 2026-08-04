@@ -1,16 +1,28 @@
 import { type ReactNode } from "react";
 
-import { Text } from "@/components/common/Text";
+import { Text, type TextVariantProp } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
+
+type FormFieldVariant = "default" | "compact" | "auth";
+
+const FORM_FIELD_LABEL_VARIANTS = {
+  default: { base: "lg-semibold", lg: "xl-semibold" },
+  compact: { base: "lg-semibold", lg: "2lg-semibold" },
+  auth: { base: "md-regular", lg: "xl-regular" },
+} as const satisfies Record<FormFieldVariant, TextVariantProp>;
 
 interface FormFieldProps {
   label: string;
-  /** 연결할 input id. Chip 그룹처럼 단일 input이 없으면 생략 */
+  /** 단일 input/textarea와 연결. Chip group이면 생략하고 labelId 사용 */
   labelFor?: string;
+  /** Chip group 등 — 시각 라벨을 aria-labelledby로 연결할 때 */
+  labelId?: string;
   children: ReactNode;
   className?: string;
-  /** 기본: fieldLabel. auth: 로그인·회원가입 label */
-  variant?: "default" | "auth";
+  /** default: 프로필 등 / compact: 모달 폼 / auth: 로그인·회원가입 */
+  variant?: FormFieldVariant;
+  /** FORM_FIELD_LABEL_VARIANTS에 해당하지 않는 라벨 타이포에 사용 */
+  labelVariant?: TextVariantProp;
   required?: boolean;
   /** 라벨 아래 부가 안내 문구 */
   description?: string;
@@ -19,25 +31,33 @@ interface FormFieldProps {
 const FormField = ({
   label,
   labelFor,
+  labelId,
   children,
   className,
   variant = "default",
+  labelVariant,
   required = false,
   description,
 }: FormFieldProps) => {
   const isAuth = variant === "auth";
+  const resolvedLabelVariant = labelVariant ?? FORM_FIELD_LABEL_VARIANTS[variant];
   const labelClassName = isAuth ? "text-text-secondary" : "text-text-tertiary";
-  const labelVariant = isAuth
-    ? ({ base: "md-regular", md: "xl-regular" } as const)
-    : ("fieldLabel" as const);
 
   const labelContent = (
     <>
       {label}
       {required ? (
-        <Text as="span" variant={labelVariant} className="text-text-brand" aria-hidden="true">
-          *
-        </Text>
+        <>
+          <Text
+            as="span"
+            variant={resolvedLabelVariant}
+            className="text-text-brand"
+            aria-hidden="true"
+          >
+            *
+          </Text>
+          <span className="sr-only">필수</span>
+        </>
       ) : null}
     </>
   );
@@ -49,7 +69,7 @@ const FormField = ({
           <Text
             as="label"
             htmlFor={labelFor}
-            variant={labelVariant}
+            variant={resolvedLabelVariant}
             className={cn(labelClassName, "flex items-center gap-4")}
           >
             {labelContent}
@@ -57,7 +77,8 @@ const FormField = ({
         ) : (
           <Text
             as="p"
-            variant={labelVariant}
+            id={labelId}
+            variant={resolvedLabelVariant}
             className={cn(labelClassName, "flex items-center gap-4")}
           >
             {labelContent}

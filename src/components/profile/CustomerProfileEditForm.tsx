@@ -54,8 +54,9 @@ const CustomerProfileEditForm = ({
     handleSubmit,
     setError,
     setFocus,
-    setValue,
-    formState: { errors, isValid, isSubmitting },
+    getValues,
+    reset,
+    formState: { errors, isValid, isSubmitting, dirtyFields },
   } = useForm<CustomerProfileEditFormValues>({
     resolver: zodResolver(customerProfileEditSchema),
     mode: "onChange",
@@ -72,12 +73,6 @@ const CustomerProfileEditForm = ({
     },
   });
 
-  const clearPasswordFields = () => {
-    setValue("currentPassword", "", { shouldValidate: true });
-    setValue("newPassword", "", { shouldValidate: true });
-    setValue("newPasswordConfirm", "", { shouldValidate: true });
-  };
-
   const isPending =
     isSubmitting || updateCustomerBasicInfo.isPending || updateCustomerProfile.isPending;
 
@@ -93,12 +88,7 @@ const CustomerProfileEditForm = ({
       const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
       const { basic, profile } = buildCustomerProfileEditPayloads({
         formValues,
-        initial: {
-          name: defaultValues?.name ?? "",
-          phone: defaultValues?.phone ?? "",
-          regionId: defaultValues?.regionId ?? null,
-          serviceTypes: defaultValues?.serviceTypes ?? [],
-        },
+        dirtyFields,
         hasPassword,
         uploadedImageUrl: imageUrl,
       });
@@ -113,7 +103,15 @@ const CustomerProfileEditForm = ({
       if (basic) {
         await updateCustomerBasicInfo.mutateAsync(basic);
         didBasicSucceed = true;
-        clearPasswordFields();
+
+        // 현재 값을 새 default로 승격 → 성공한 필드는 dirty에서 제외
+        const current = getValues();
+        reset({
+          ...current,
+          currentPassword: "",
+          newPassword: "",
+          newPasswordConfirm: "",
+        });
       }
 
       if (profile) {
@@ -129,6 +127,13 @@ const CustomerProfileEditForm = ({
         }
       }
 
+      const current = getValues();
+      reset({
+        ...current,
+        currentPassword: "",
+        newPassword: "",
+        newPasswordConfirm: "",
+      });
       setToastMessage("프로필이 수정되었습니다.");
     } catch (error) {
       if (
@@ -194,14 +199,7 @@ const CustomerProfileEditForm = ({
           </FormField>
 
           <FormField label="전화번호" labelFor="customer-edit-phone">
-            <Input
-              id="customer-edit-phone"
-              size="md"
-              readOnly
-              disabled
-              error={errors.phone?.message}
-              {...register("phone")}
-            />
+            <Input id="customer-edit-phone" size="md" readOnly disabled {...register("phone")} />
           </FormField>
 
           {hasPassword ? (
@@ -210,7 +208,7 @@ const CustomerProfileEditForm = ({
                 <PasswordInput
                   id="customer-edit-current-password"
                   size="md"
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   placeholder="현재 비밀번호를 입력해 주세요"
                   error={errors.currentPassword?.message}
                   {...register("currentPassword")}
@@ -260,6 +258,7 @@ const CustomerProfileEditForm = ({
 
           <FormField
             label="이용 서비스"
+            labelId="customer-edit-service-types-label"
             description="*견적 요청 시 이용 서비스를 선택할 수 있어요."
           >
             <Controller
@@ -267,6 +266,7 @@ const CustomerProfileEditForm = ({
               control={control}
               render={({ field }) => (
                 <ProfileChipGroup<MoveType>
+                  aria-labelledby="customer-edit-service-types-label"
                   selectionMode="multiple"
                   options={MOVE_TYPE_OPTIONS}
                   value={field.value}
@@ -277,12 +277,17 @@ const CustomerProfileEditForm = ({
             />
           </FormField>
 
-          <FormField label="내가 사는 지역" description="*견적 요청 시 지역을 설정할 수 있어요.">
+          <FormField
+            label="내가 사는 지역"
+            labelId="customer-edit-region-label"
+            description="*견적 요청 시 지역을 설정할 수 있어요."
+          >
             <Controller
               name="regionId"
               control={control}
               render={({ field }) => (
                 <ProfileChipGroup<RegionId>
+                  aria-labelledby="customer-edit-region-label"
                   selectionMode="single"
                   options={REGION_OPTIONS}
                   value={field.value ?? null}
