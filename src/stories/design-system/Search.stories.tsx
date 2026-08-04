@@ -3,6 +3,7 @@ import { useState } from "react";
 import { fn } from "storybook/test";
 
 import Search from "@/components/common/Search/Search";
+import { cn } from "@/lib/utils/cn";
 
 const SEARCH_SOURCE = `<form onSubmit={handleSearch}>
   <Search
@@ -39,6 +40,7 @@ const meta = {
     },
   },
   args: {
+    value: "",
     placeholder: "검색어를 입력해 주세요",
     size: "responsive",
     onChange: fn(),
@@ -51,19 +53,35 @@ const meta = {
       description: "검색창의 높이, 너비, 아이콘과 텍스트 크기",
       table: { defaultValue: { summary: "md" } },
     },
-    value: { control: false, description: "호출부에서 관리하는 검색어" },
-    onChange: { control: false, description: "검색어 변경 핸들러" },
-    onClear: { control: false, description: "검색어 지우기 버튼 클릭 핸들러" },
-    placeholder: { control: "text", description: "검색어가 없을 때 표시할 안내 문구" },
-    className: { control: "text", description: "검색창 너비나 배치를 확장하는 클래스" },
+    value: {
+      control: false,
+      description: "호출부에서 관리하는 검색어",
+    },
+    onChange: {
+      control: false,
+      description: "검색어 변경 핸들러",
+    },
+    onClear: {
+      control: false,
+      description: "검색어 지우기 버튼 클릭 핸들러",
+    },
+    placeholder: {
+      control: "text",
+      description: "검색어가 없을 때 표시할 안내 문구",
+    },
+    className: {
+      control: "text",
+      description: "검색창 너비나 배치를 확장하는 클래스",
+    },
   },
 } satisfies Meta<typeof Search>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 function ControlledSearch(args: React.ComponentProps<typeof Search>) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(args.value);
 
   return (
     <form
@@ -82,7 +100,10 @@ function ControlledSearch(args: React.ComponentProps<typeof Search>) {
           setValue("");
           args.onClear?.();
         }}
-        className={args.size === "responsive" ? "w-[min(560px,calc(100vw-48px))]" : undefined}
+        className={cn(
+          args.className,
+          args.size === "responsive" && "w-[min(560px,calc(100vw_-_48px))]",
+        )}
       />
     </form>
   );
@@ -91,8 +112,13 @@ function ControlledSearch(args: React.ComponentProps<typeof Search>) {
 export const Playground: Story = {
   parameters: {
     docs: {
-      description: { story: "검색창에 포커스하거나 검색어를 입력해 상태 변화를 확인합니다." },
-      source: { code: SEARCH_SOURCE, language: "tsx" },
+      description: {
+        story: "검색창에 포커스하거나 검색어를 입력해 상태 변화를 확인합니다.",
+      },
+      source: {
+        code: SEARCH_SOURCE,
+        language: "tsx",
+      },
     },
   },
   render: (args) => <ControlledSearch {...args} />,
@@ -100,7 +126,11 @@ export const Playground: Story = {
 
 export const Sizes: Story = {
   parameters: {
-    docs: { description: { story: "고정 크기인 sm과 md를 한 화면에서 비교합니다." } },
+    docs: {
+      description: {
+        story: "고정 크기인 sm과 md를 한 화면에서 비교합니다.",
+      },
+    },
   },
   render: (args) => (
     <div className="flex flex-col gap-16">
@@ -111,11 +141,15 @@ export const Sizes: Story = {
 };
 
 export const WithValue: Story = {
-  args: { defaultValue: undefined },
   parameters: {
     docs: {
-      description: { story: "검색어 입력 후 지우기 버튼이 표시되는 상태입니다." },
-      source: { code: WITH_VALUE_SOURCE, language: "tsx" },
+      description: {
+        story: "검색어 입력 후 지우기 버튼이 표시되는 상태입니다.",
+      },
+      source: {
+        code: WITH_VALUE_SOURCE,
+        language: "tsx",
+      },
     },
   },
   render: (args) => {
@@ -127,10 +161,18 @@ export const WithValue: Story = {
           <Search
             {...args}
             value={value}
-            autoFocus
-            onChange={(event) => setValue(event.target.value)}
-            onClear={() => setValue("")}
-            className="w-[min(560px,calc(100vw-48px))]"
+            onChange={(event) => {
+              setValue(event.target.value);
+              args.onChange?.(event);
+            }}
+            onClear={() => {
+              setValue("");
+              args.onClear?.();
+            }}
+            className={cn(
+              args.className,
+              args.size === "responsive" && "w-[min(560px,calc(100vw_-_48px))]",
+            )}
           />
         </form>
       );
