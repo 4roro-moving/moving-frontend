@@ -4,8 +4,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
 import {
+  activateInternalDetailNavigation,
   clearInternalDetailNavigation,
-  hasInternalDetailNavigation,
 } from "@/lib/utils/detailNavigation";
 
 /**
@@ -15,7 +15,7 @@ import {
 export function useDetailBackNavigation(fallbackHref: string) {
   const pathname = usePathname();
   const router = useRouter();
-  const isInternalEntryRef = useRef(pathname ? hasInternalDetailNavigation(pathname) : false);
+  const isInternalEntryRef = useRef(false);
 
   useEffect(() => {
     if (!pathname) {
@@ -23,11 +23,7 @@ export function useDetailBackNavigation(fallbackHref: string) {
       return;
     }
 
-    isInternalEntryRef.current = hasInternalDetailNavigation(pathname);
-
-    return () => {
-      clearInternalDetailNavigation(pathname);
-    };
+    isInternalEntryRef.current = activateInternalDetailNavigation(pathname);
   }, [pathname]);
 
   return useCallback(() => {

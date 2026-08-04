@@ -10,7 +10,7 @@ import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { markInternalDetailNavigation } from "@/lib/utils/detailNavigation";
+import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import {
   formatPrice,
@@ -230,7 +230,7 @@ export default function PendingEstimateCard({
       <div className="flex w-full flex-col-reverse gap-11 md:flex-row">
         <Link
           href={detailHref}
-          onClick={() => markInternalDetailNavigation(detailHref)}
+          onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
           className={cn(
             buttonVariants({ variant: "outline", size: "cta", fullWidth: true }),
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none md:flex-1",
