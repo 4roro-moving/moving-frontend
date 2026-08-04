@@ -32,7 +32,11 @@ export const createMoverProfileSchema = (options: { requiresPhone: boolean }) =>
       .string()
       .trim()
       .min(1, "경력을 입력해 주세요")
-      .regex(/^\d+$/, "경력은 숫자만 입력해 주세요"),
+      .regex(/^\d+$/, "경력은 숫자만 입력해 주세요")
+      .refine((value) => {
+        const career = Number(value);
+        return Number.isInteger(career) && career >= 0 && career <= 100;
+      }, "경력은 0 이상 100 이하의 정수여야 합니다"),
     shortIntro: z.string().trim().min(1, "한 줄 소개를 입력해 주세요"),
     description: z.string().trim().min(1, "상세 설명을 입력해 주세요"),
     serviceTypes: z.array(moveTypeSchema).min(1, "제공 서비스를 선택해 주세요"),
