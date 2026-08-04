@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { useMoverDesignation } from "@/hooks/useMoverDesignation";
 import { useMoverDetail } from "@/hooks/useMoverDetail";
+import { cn } from "@/lib/utils/cn";
 
 import Toast from "@/components/common/Toast/Toast";
 import EstimateDetailHeader from "@/components/estimate/detail/EstimateDetailHeader";
@@ -100,7 +101,12 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   };
 
   return (
-    <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] lg:pb-0">
+    <div
+      className={cn(
+        "bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden xl:pb-0",
+        designation.showCustomerActions ? "pb-[110px]" : "pb-0",
+      )}
+    >
       <EstimateDetailHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
 
       <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 xl:px-0 xl:pb-[150px]">
@@ -137,21 +143,17 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
           </aside>
         </div>
       </div>
-
       {designation.showCustomerActions ? (
         <MoverDetailActions layout="sticky" {...actionsProps} />
       ) : null}
-
       <EstimateRequestRequiredModal
         open={designation.isEstimateRequestModalOpen}
         onClose={designation.closeEstimateRequestModal}
       />
-
       <DesignateSuccessModal
         open={designation.isDesignateSuccessModalOpen}
         onClose={designation.closeDesignateSuccessModal}
       />
-
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </div>
   );
