@@ -5,10 +5,10 @@ import { useState } from "react";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { useMoverDesignation } from "@/hooks/useMoverDesignation";
 import { useMoverDetail } from "@/hooks/useMoverDetail";
-import { cn } from "@/lib/utils/cn";
 
 import Toast from "@/components/common/Toast/Toast";
-import EstimateDetailHeader from "@/components/estimate/detail/EstimateDetailHeader";
+import DetailHeroBanner from "@/components/common/DetailHeroBanner";
+import { PageHeader } from "@/components/common/PageHeader";
 import DesignateSuccessModal from "@/components/estimate/DesignateSuccessModal";
 import EstimateRequestRequiredModal from "@/components/estimate/EstimateRequestRequiredModal";
 
@@ -40,7 +40,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   if (isInitialLoading) {
     return (
       <div className="bg-background-default flex w-full max-w-full flex-col overflow-x-hidden">
-        <EstimateDetailHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+        <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
         <MoverDetailPageSkeleton />
       </div>
     );
@@ -50,7 +50,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     if (isNotFound) {
       return (
         <div className="bg-background-default flex w-full max-w-full flex-col overflow-x-hidden">
-          <EstimateDetailHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+          <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
           <MoverDetailNotFoundStatus />
         </div>
       );
@@ -58,7 +58,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
 
     return (
       <div className="bg-background-default flex w-full flex-1 flex-col overflow-x-hidden">
-        <EstimateDetailHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+        <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
         <div className="flex w-full flex-1 flex-col items-center justify-center">
           <MoversErrorPanel
             title="불러오지 못했어요"
@@ -101,13 +101,9 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   };
 
   return (
-    <div
-      className={cn(
-        "bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden xl:pb-0",
-        designation.showCustomerActions ? "pb-[110px]" : "pb-0",
-      )}
-    >
-      <EstimateDetailHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+    <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] xl:pb-0">
+      <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+      <DetailHeroBanner imageUrl={detail.profileImageSrc} name={detail.name} />
 
       <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 xl:px-0 xl:pb-[150px]">
         <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-32 md:gap-40 xl:flex-row xl:items-start xl:justify-between">
@@ -143,17 +139,21 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
           </aside>
         </div>
       </div>
+
       {designation.showCustomerActions ? (
         <MoverDetailActions layout="sticky" {...actionsProps} />
       ) : null}
+
       <EstimateRequestRequiredModal
         open={designation.isEstimateRequestModalOpen}
         onClose={designation.closeEstimateRequestModal}
       />
+
       <DesignateSuccessModal
         open={designation.isDesignateSuccessModalOpen}
         onClose={designation.closeDesignateSuccessModal}
       />
+
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </div>
   );
