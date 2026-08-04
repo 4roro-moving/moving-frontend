@@ -103,12 +103,13 @@ const MoverProfileEditForm = ({
 
       <div className="flex w-full flex-col gap-32 lg:flex-row lg:items-start lg:justify-between lg:gap-[120px]">
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">
-          <FormField label="프로필 이미지">
+          <FormField label="프로필 이미지" labelFor="mover-edit-profile-image">
             <Controller
               name="imageFile"
               control={control}
               render={({ field }) => (
                 <ProfileImageUploader
+                  id="mover-edit-profile-image"
                   value={field.value ?? null}
                   initialPreviewUrl={initialImageUrl}
                   onChange={field.onChange}

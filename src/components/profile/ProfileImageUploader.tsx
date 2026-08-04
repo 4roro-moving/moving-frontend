@@ -8,6 +8,8 @@ import { IS_PROFILE_IMAGE_UPLOAD_ENABLED } from "@/lib/profile/uploadProfileImag
 import { cn } from "@/lib/utils/cn";
 
 interface ProfileImageUploaderProps {
+  /** FormField labelFor 와 맞출 input id. 없으면 내부 useId */
+  id?: string;
   value?: File | null;
   /** 수정 모드 등 기존 이미지 URL */
   initialPreviewUrl?: string | null;
@@ -20,15 +22,20 @@ const PROFILE_IMAGE_UPLOAD_DISABLED_MESSAGE = "이미지 업로드 기능은 아
 
 /** 프로필 이미지 업로드 트리거 (Figma profile/image-uploader) */
 const ProfileImageUploader = ({
+  id,
   value,
   initialPreviewUrl = null,
   onChange,
   error,
   className,
 }: ProfileImageUploaderProps) => {
-  const inputId = useId();
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+  const errorId = `${inputId}-error`;
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // react-hooks/set-state-in-effect 때문에 effect + setState 패턴 대신
+  // useMemo 생성 + effect cleanup revoke 로 관리한다.
   const objectUrl = useMemo(() => {
     if (!value) return null;
     return URL.createObjectURL(value);
@@ -60,11 +67,13 @@ const ProfileImageUploader = ({
         className="sr-only"
         disabled={!isUploadEnabled}
         aria-invalid={Boolean(error)}
+        aria-describedby={error ? errorId : undefined}
         onChange={handleChange}
       />
       <button
         type="button"
         aria-label={isUploadEnabled ? "프로필 이미지 선택" : PROFILE_IMAGE_UPLOAD_DISABLED_MESSAGE}
+        aria-describedby={error ? errorId : undefined}
         disabled={!isUploadEnabled}
         onClick={() => {
           if (!isUploadEnabled) return;
@@ -91,7 +100,7 @@ const ProfileImageUploader = ({
         </Text>
       ) : null}
       {error ? (
-        <Text as="p" role="alert" variant="xs-regular" className="text-text-error">
+        <Text as="p" id={errorId} role="alert" variant="xs-regular" className="text-text-error">
           {error}
         </Text>
       ) : null}

@@ -247,6 +247,7 @@ const CustomerProfileEditForm = ({
               control={control}
               render={({ field }) => (
                 <ProfileImageUploader
+                  id="customer-edit-profile-image"
                   value={field.value ?? null}
                   initialPreviewUrl={initialImageUrl}
                   onChange={field.onChange}
