@@ -31,6 +31,10 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
       prefix: "",
       suffix: " 님이 견적 요청을 반려했어요",
     },
+    ESTIMATE_REQUEST_CANCELED: {
+      prefix: "",
+      suffix: " 님이 견적 요청을 취소했어요",
+    },
     MOVE_DAY_REMINDER: {
       prefix: "내일은 ",
       suffix: "이에요.",
@@ -67,6 +71,18 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
       prefix: "",
       suffix: "",
     },
+    INQUIRY_ANSWERED: {
+      prefix: "",
+      suffix: " 문의에 답변이 등록되었어요",
+    },
+    CONTENT_HIDDEN: {
+      prefix: "게시글이 숨김 처리되었어요. 사유: ",
+      suffix: "",
+    },
+    CONTENT_RESTORED: {
+      prefix: "",
+      suffix: "",
+    },
   };
 
 export interface NotificationMessagePart {
@@ -78,7 +94,14 @@ export const buildNotificationMessageParts = (
   type: NotificationType,
   content: string,
 ): NotificationMessagePart[] => {
-  const { prefix, suffix } = NOTIFICATION_MESSAGE_TEMPLATES[type];
+  const template = NOTIFICATION_MESSAGE_TEMPLATES[type];
+
+  // 백엔드에만 있는 신규 타입이 와도 패널이 깨지지 않도록 폴백
+  if (!template) {
+    return content ? [{ text: content, highlight: true }] : [{ text: "새로운 알림이 있어요" }];
+  }
+
+  const { prefix, suffix } = template;
   const parts: NotificationMessagePart[] = [];
 
   if (prefix) {

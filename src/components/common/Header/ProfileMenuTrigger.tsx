@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -8,10 +9,11 @@ import { useCallback, useEffect, useId, useRef, useState, type FocusEvent } from
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import type { AuthRole } from "@/lib/auth/role";
+import { isPublicPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { isPublicPath } from "@/lib/auth/redirect";
 
 export type ProfileMenuItem =
   | { type: "link"; label: string; href: string }
@@ -34,6 +36,7 @@ export default function ProfileMenuTrigger({
 }: ProfileMenuTriggerProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const logout = useAuthStore((state) => state.logout);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -106,6 +109,7 @@ export default function ProfileMenuTrigger({
     const logoutPath = role === "MOVER" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
 
     await logout();
+    queryClient.removeQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.ALL });
 
     if (isPublicPage) {
       router.refresh();
