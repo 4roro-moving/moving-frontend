@@ -68,12 +68,17 @@ export interface CreateCustomerProfileInput {
   serviceTypes: MoveType[];
 }
 
-export interface UpdateCustomerProfileInput {
+/** PATCH /profiles/customer/me/basic */
+export interface UpdateCustomerBasicInfoInput {
   name?: string;
   phone?: string;
   currentPassword?: string;
   newPassword?: string;
   newPasswordConfirm?: string;
+}
+
+/** PATCH /profiles/customer/me */
+export interface UpdateCustomerProfileInput {
   imageUrl?: string | null;
   regionIds?: number[];
   serviceTypes?: MoveType[];

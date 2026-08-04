@@ -10,6 +10,7 @@ import type {
   MoverProfileMe,
   MoverProfileMeResponse,
   ProfileStatus,
+  UpdateCustomerBasicInfoInput,
   UpdateCustomerProfileInput,
   UpdateMoverBasicInfoInput,
   UpdateMoverProfileInput,
@@ -23,6 +24,7 @@ export type {
   MoverProfileMe,
   MoverProfileMeResponse,
   ProfileStatus,
+  UpdateCustomerBasicInfoInput,
   UpdateCustomerProfileInput,
   UpdateMoverBasicInfoInput,
   UpdateMoverProfileInput,
@@ -67,6 +69,12 @@ export const getCustomerProfileMe = async (): Promise<CustomerProfileMe> => {
 export const createCustomerProfile = (input: CreateCustomerProfileInput) =>
   fetchInstance.post<CustomerProfileMeResponse, CreateCustomerProfileInput>(
     API_ROUTES.PROFILES.CUSTOMER,
+    input,
+  );
+
+export const updateCustomerBasicInfo = (input: UpdateCustomerBasicInfoInput) =>
+  fetchInstance.patch<CustomerProfileMeResponse, UpdateCustomerBasicInfoInput>(
+    API_ROUTES.PROFILES.CUSTOMER_BASIC,
     input,
   );
 

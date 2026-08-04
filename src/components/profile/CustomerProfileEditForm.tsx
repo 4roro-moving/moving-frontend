@@ -12,18 +12,22 @@ import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
 import ProfileFormActions from "@/components/profile/ProfileFormActions";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
+import { useUpdateCustomerBasicInfo } from "@/hooks/profile/useUpdateCustomerBasicInfo";
 import { useUpdateCustomerProfile } from "@/hooks/profile/useUpdateCustomerProfile";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
+import { buildCustomerProfileEditPayloads } from "@/lib/profile/buildCustomerProfileEditPayloads";
 import { uploadProfileImageIfNeeded } from "@/lib/profile/uploadProfileImage";
 import {
   customerProfileEditSchema,
   type CustomerProfileEditFormValues,
 } from "@/lib/schemas/customerProfileEditSchema";
-import { toPasswordChangePayload } from "@/lib/schemas/passwordChangeFields";
 import { ApiError } from "@/types/api";
 import type { MoveType } from "@/types/move";
+
+const PROFILE_PARTIAL_SAVE_ERROR =
+  "기본정보는 저장되었지만 프로필 정보 저장에 실패했습니다. 다시 시도해 주세요.";
 
 interface CustomerProfileEditFormProps {
   email: string;
@@ -38,6 +42,7 @@ const CustomerProfileEditForm = ({
   defaultValues,
   initialImageUrl = null,
 }: CustomerProfileEditFormProps) => {
+  const updateCustomerBasicInfo = useUpdateCustomerBasicInfo();
   const updateCustomerProfile = useUpdateCustomerProfile();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -64,7 +69,8 @@ const CustomerProfileEditForm = ({
     },
   });
 
-  const isPending = isSubmitting || updateCustomerProfile.isPending;
+  const isPending =
+    isSubmitting || updateCustomerBasicInfo.isPending || updateCustomerProfile.isPending;
 
   const onSubmit = handleSubmit(async (formValues) => {
     setSubmitError(null);
@@ -76,15 +82,42 @@ const CustomerProfileEditForm = ({
       }
 
       const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
-
-      await updateCustomerProfile.mutateAsync({
-        name: formValues.name,
-        phone: formValues.phone,
-        ...(hasPassword ? toPasswordChangePayload(formValues) : {}),
-        regionIds: [formValues.regionId],
-        serviceTypes: formValues.serviceTypes,
-        ...(imageUrl ? { imageUrl } : {}),
+      const { basic, profile } = buildCustomerProfileEditPayloads({
+        formValues,
+        initial: {
+          name: defaultValues?.name ?? "",
+          phone: defaultValues?.phone ?? "",
+          regionId: defaultValues?.regionId ?? null,
+          serviceTypes: defaultValues?.serviceTypes ?? [],
+        },
+        hasPassword,
+        uploadedImageUrl: imageUrl,
       });
+
+      if (!basic && !profile) {
+        setSubmitError("변경된 정보가 없습니다.");
+        return;
+      }
+
+      let didBasicSucceed = false;
+
+      if (basic) {
+        await updateCustomerBasicInfo.mutateAsync(basic);
+        didBasicSucceed = true;
+      }
+
+      if (profile) {
+        try {
+          await updateCustomerProfile.mutateAsync(profile);
+        } catch (profileError) {
+          if (didBasicSucceed) {
+            setSubmitError(PROFILE_PARTIAL_SAVE_ERROR);
+            return;
+          }
+
+          throw profileError;
+        }
+      }
     } catch (error) {
       if (
         error instanceof ApiError &&
