@@ -33,9 +33,20 @@ const COMPACT_SOURCE = `const [open, setOpen] = useState(false);
   }}
 />`;
 
-const CUSTOM_ACTIONS_SOURCE = `<AlertModal
+const CUSTOM_ACTIONS_SOURCE = `const [open, setOpen] = useState(false);
+
+const close = () => {
+  setOpen(false);
+};
+
+const handleConfirm = () => {
+  onConfirm();
+  close();
+};
+
+<AlertModal
   open={open}
-  onClose={onClose}
+  onClose={close}
   closeDisabled={isPending}
   size="sm"
   title="찜 해제 확인"
@@ -47,7 +58,7 @@ const CUSTOM_ACTIONS_SOURCE = `<AlertModal
         size="cta"
         fullWidth
         disabled={isPending}
-        onClick={onClose}
+        onClick={close}
       >
         취소
       </Modal.Button>
@@ -55,13 +66,15 @@ const CUSTOM_ACTIONS_SOURCE = `<AlertModal
         size="cta"
         fullWidth
         disabled={isPending}
-        onClick={onConfirm}
+        onClick={handleConfirm}
       >
         확인
       </Modal.Button>
     </div>
   }
 />`;
+
+const customConfirmAction = fn();
 
 const meta = {
   title: "Overlay/AlertModal",
@@ -81,7 +94,10 @@ const meta = {
     title: "알림",
     description: "작업이 정상적으로 완료되었습니다.",
     onClose: fn(),
-    primaryAction: { label: "확인", onClick: fn() },
+    primaryAction: {
+      label: "확인",
+      onClick: fn(),
+    },
   },
   argTypes: {
     open: {
@@ -107,13 +123,19 @@ const meta = {
     closeDisabled: {
       control: "boolean",
       description: "처리 중일 때 닫기 동작과 닫기 버튼을 비활성화",
-      table: { type: { summary: "boolean" }, defaultValue: { summary: "false" } },
+      table: {
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
     },
     size: {
       control: "inline-radio",
       options: ["sm", "md"],
       description: "sm은 컴팩트 너비, md는 태블릿부터 608px 너비를 사용하는 반응형 크기",
-      table: { type: { summary: "sm | md" }, defaultValue: { summary: "md" } },
+      table: {
+        type: { summary: "sm | md" },
+        defaultValue: { summary: "md" },
+      },
     },
     primaryAction: {
       control: false,
@@ -129,6 +151,7 @@ const meta = {
 } satisfies Meta<typeof AlertModal>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 function AlertWithTrigger(args: React.ComponentProps<typeof AlertModal>) {
@@ -144,6 +167,7 @@ function AlertWithTrigger(args: React.ComponentProps<typeof AlertModal>) {
       <Button size="cta" onClick={() => setOpen(true)}>
         Alert 열기
       </Button>
+
       <AlertModal
         {...args}
         open={open}
@@ -161,22 +185,76 @@ function AlertWithTrigger(args: React.ComponentProps<typeof AlertModal>) {
   );
 }
 
+function AlertWithCustomActions(args: React.ComponentProps<typeof AlertModal>) {
+  const [open, setOpen] = useState(false);
+
+  const close = () => {
+    setOpen(false);
+    args.onClose();
+  };
+
+  const handleConfirm = () => {
+    customConfirmAction();
+    close();
+  };
+
+  return (
+    <>
+      <Button size="cta" onClick={() => setOpen(true)}>
+        Alert 열기
+      </Button>
+
+      <AlertModal
+        {...args}
+        open={open}
+        onClose={close}
+        primaryAction={undefined}
+        actions={
+          <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
+            <Modal.Button variant="outline" size="cta" fullWidth onClick={close}>
+              취소
+            </Modal.Button>
+
+            <Modal.Button size="cta" fullWidth onClick={handleConfirm}>
+              확인
+            </Modal.Button>
+          </div>
+        }
+      />
+    </>
+  );
+}
+
 export const Default: Story = {
   parameters: {
     docs: {
-      description: { story: "제목, 설명, 하나의 기본 액션으로 구성한 일반적인 Alert입니다." },
-      source: { code: DEFAULT_SOURCE, language: "tsx" },
+      description: {
+        story: "제목, 설명, 하나의 기본 액션으로 구성한 일반적인 Alert입니다.",
+      },
+      source: {
+        code: DEFAULT_SOURCE,
+        language: "tsx",
+      },
     },
   },
   render: (args) => <AlertWithTrigger {...args} />,
 };
 
 export const Compact: Story = {
-  args: { size: "sm", title: "정말 삭제할까요?", description: "삭제한 내용은 복구할 수 없습니다." },
+  args: {
+    size: "sm",
+    title: "정말 삭제할까요?",
+    description: "삭제한 내용은 복구할 수 없습니다.",
+  },
   parameters: {
     docs: {
-      description: { story: "화면 크기와 관계없이 작은 너비를 유지하는 컴팩트 Alert입니다." },
-      source: { code: COMPACT_SOURCE, language: "tsx" },
+      description: {
+        story: "화면 크기와 관계없이 작은 너비를 유지하는 컴팩트 Alert입니다.",
+      },
+      source: {
+        code: COMPACT_SOURCE,
+        language: "tsx",
+      },
     },
   },
   render: (args) => <AlertWithTrigger {...args} />,
@@ -188,24 +266,19 @@ export const CustomActions: Story = {
     title: "찜 해제 확인",
     description: "찜한 기사님의 찜을 해제할까요?",
     primaryAction: undefined,
-    actions: (
-      <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
-        <Modal.Button variant="outline" size="cta" fullWidth>
-          취소
-        </Modal.Button>
-        <Modal.Button size="cta" fullWidth>
-          확인
-        </Modal.Button>
-      </div>
-    ),
+    actions: undefined,
   },
   parameters: {
     docs: {
       description: {
-        story: "`actions`를 사용해 취소와 확인 버튼을 직접 구성한 예시입니다.",
+        story:
+          "`actions`를 사용해 취소와 확인 버튼을 직접 구성하고, 각 버튼에 닫기 및 확인 동작을 연결한 예시입니다.",
       },
-      source: { code: CUSTOM_ACTIONS_SOURCE, language: "tsx" },
+      source: {
+        code: CUSTOM_ACTIONS_SOURCE,
+        language: "tsx",
+      },
     },
   },
-  render: (args) => <AlertWithTrigger {...args} />,
+  render: (args) => <AlertWithCustomActions {...args} />,
 };
