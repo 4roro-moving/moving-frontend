@@ -60,9 +60,12 @@ function toStatusPresentation(request: MyEstimateRequestItem) {
 }
 
 /**
- * 보낸 견적 요청 상세 — 취소 액션 (aside)
- * Header가 아닌 상세 액션 영역에 배치
+ * 보낸 견적 요청 상세 — 취소 액션
+ * aside(320px 고정폭) 대신 main 콘텐츠 하단에 배치.
+ * 이 페이지는 aside에 프로필 카드 등 다른 콘텐츠가 없어 버튼 하나만
+ * aside에 넣으면 Desktop에서 폭이 안 맞아 붕 떠 보이는 문제가 있었음.
  * // 2026.08.04 정슬기 - [추가]
+ * // 2026.08.04 정슬기 - [수정] aside → main 하단으로 이동 (Desktop 레이아웃 오류 수정)
  */
 function EstimateRequestCancelAction({
   cancelButtonRef,
@@ -83,7 +86,7 @@ function EstimateRequestCancelAction({
       onClick={onCancel}
       className={cn(
         // Tablet/Mobile 풀폭 액션 — detail CTA(h-64)와 동일 높이
-        // 2026.08.04 정슬기 - [수정]
+        // Desktop main 컬럼(840px) 안에서도 동일하게 풀폭으로 자연스럽게 이어짐
         "border-border-default text-text-primary rounded-16 flex h-64 w-full items-center justify-center gap-8 border px-16",
         "hover:bg-background-hover",
         "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
@@ -108,6 +111,7 @@ function EstimateRequestCancelAction({
  * // 2026.07.30 정슬기 - [추가] 지정 요청 대상 기사님 정보 표시
  * // 2026.08.03 정슬기 - [추가] PENDING|OPEN 취소 액션
  * // 2026.08.04 정슬기 - [수정] Header → 상세 액션 영역으로 취소 버튼 이동
+ * // 2026.08.04 정슬기 - [수정] aside(320px 고정폭) → main 하단으로 이동
  */
 export default function EstimateRequestDetailView({
   estimateRequestId,
@@ -172,7 +176,6 @@ export default function EstimateRequestDetailView({
         contentClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName}
         rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
         mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
-        asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "xl:pt-40")}
         main={
           <>
             <EstimateRequestDetailSummary
@@ -185,16 +188,14 @@ export default function EstimateRequestDetailView({
             />
             <EstimateDetailInfoSection rows={toRequestInfoRows(data)} />
             <EstimateRequestDesignatedMovers designatedMovers={data.designatedMovers} />
+            {canCancel ? (
+              <EstimateRequestCancelAction
+                cancelButtonRef={cancelFlow.cancelButtonRef}
+                isCancelPending={cancelFlow.isCancelPending}
+                onCancel={cancelFlow.openCancelModal}
+              />
+            ) : null}
           </>
-        }
-        aside={
-          canCancel ? (
-            <EstimateRequestCancelAction
-              cancelButtonRef={cancelFlow.cancelButtonRef}
-              isCancelPending={cancelFlow.isCancelPending}
-              onCancel={cancelFlow.openCancelModal}
-            />
-          ) : undefined
         }
       />
 
