@@ -149,6 +149,7 @@ export default function EstimateRequestForm() {
   const [toAddress, setToAddress] = useState<AddressItem | null>(null);
   const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isAccessDeniedToastVisible, setIsAccessDeniedToastVisible] = useState(true);
 
   const isAuthReady = hasHydrated && !isCheckingAuth;
   const isCustomer = userRole === "CUSTOMER";
@@ -159,6 +160,10 @@ export default function EstimateRequestForm() {
 
   const closeToast = useCallback(() => {
     setToastMessage(null);
+  }, []);
+
+  const closeAccessDeniedToast = useCallback(() => {
+    setIsAccessDeniedToastVisible(false);
   }, []);
 
   // 2026.07.30 정슬기 - [수정] hasAuthSession + getLoginRedirectPath (dev 로그인 연동)
@@ -274,11 +279,15 @@ export default function EstimateRequestForm() {
   const isCheckingActive =
     !isAuthReady || !isAuthenticated || isAccessDenied || (isCustomer && isActiveLoading);
 
-  const accessDeniedToastMessage = isAccessDenied ? TOAST_FORBIDDEN_ROLE_MESSAGE : null;
+  const accessDeniedToastMessage =
+    isAccessDenied && isAccessDeniedToastVisible ? TOAST_FORBIDDEN_ROLE_MESSAGE : null;
+
   const visibleToastMessage = toastMessage ?? accessDeniedToastMessage;
 
   const toastElement = visibleToastMessage ? (
-    <Toast onClose={closeToast}>{visibleToastMessage}</Toast>
+    <Toast onClose={toastMessage ? closeToast : closeAccessDeniedToast}>
+      {visibleToastMessage}
+    </Toast>
   ) : null;
 
   if (isCheckingActive) {
