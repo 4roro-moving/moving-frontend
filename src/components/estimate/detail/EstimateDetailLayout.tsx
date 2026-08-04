@@ -16,8 +16,10 @@ export const ESTIMATE_DETAIL_LAYOUT_CLASSES = {
   // 본문+aside 블록을 컨테이너 안에서 가운데로 모아 좌측 치우침을 줄인다
   rowClassName: "gap-32 md:gap-40 xl:justify-center xl:gap-40",
   // Desktop 본문 840 + aside 320 + gap 40 = 1200 (container)
+  // overflow-clip 제거 — focus ring이 aside 경계에서 잘리지 않도록 폭만으로 제한
+  // 2026.08.04 정슬기 - [수정]
   mainClassName: "gap-24 md:gap-30 xl:w-210 xl:shrink-0",
-  asideClassName: "gap-28 md:gap-40 xl:w-80 xl:shrink-0 xl:overflow-clip",
+  asideClassName: "gap-28 md:gap-40 xl:w-80 xl:shrink-0",
 } as const;
 
 interface EstimateDetailLayoutProps {
