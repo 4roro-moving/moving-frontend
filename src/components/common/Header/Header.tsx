@@ -100,20 +100,24 @@ const Header = ({
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
   return (
-    <header className="border-border-subtle bg-background-surface w-full border-b">
-      <div className="h-gnb-height-desktop px-gnb-padding-x-desktop flex items-center justify-between py-26">
-        <div className="flex items-center gap-80">
+    <header className="border-border-subtle bg-background-surface w-full max-w-full overflow-x-hidden border-b">
+      {/* Desktop 고정 GNB padding은 xl+ — Tablet에서 160px×2 padding + nav가 가로 스크롤을 만들던 문제 방지 */}
+      {/* 2026.08.04 정슬기 - [수정] */}
+      <div className="h-gnb-height-mobile md:h-gnb-height-tablet xl:h-gnb-height-desktop px-margin-mobile md:px-margin-tablet xl:px-gnb-padding-x-desktop flex w-full max-w-full items-center justify-between gap-12 py-16 xl:py-26">
+        <div className="flex min-w-0 flex-1 items-center gap-24 overflow-hidden xl:gap-80">
           <Link href="/" className="shrink-0">
             <Image src="/icons/logo_full.svg" alt="4roro-moving" width={116} height={44} priority />
           </Link>
 
-          <nav aria-label="주요 메뉴">
-            <ul className="flex items-center gap-40">
+          {/* Mobile은 햄버거 전까지 링크 숨김 — 좁은 폭에서 GNB 가로 스크롤 방지 */}
+          {/* 2026.08.04 정슬기 - [수정] */}
+          <nav aria-label="주요 메뉴" className="hidden min-w-0 md:block">
+            <ul className="flex items-center gap-16 md:gap-24 xl:gap-40">
               {navLinks.map((link) => {
                 const isActive = isNavLinkActive(pathname, link.href);
 
                 return (
-                  <li key={link.label}>
+                  <li key={link.label} className="shrink-0">
                     <Link
                       href={link.href}
                       aria-current={isActive ? "page" : undefined}
@@ -134,7 +138,7 @@ const Header = ({
         </div>
 
         {showAuthSkeleton ? (
-          <div className="flex items-center gap-32" aria-hidden>
+          <div className="flex shrink-0 items-center gap-16 xl:gap-32" aria-hidden>
             <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
             <div className="flex items-center gap-16">
               <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
@@ -142,7 +146,7 @@ const Header = ({
             </div>
           </div>
         ) : isLogin ? (
-          <div className="flex items-center gap-32">
+          <div className="flex shrink-0 items-center gap-16 xl:gap-32">
             <NotificationTrigger />
             <ProfileMenuTrigger
               key={pathname}
@@ -154,7 +158,7 @@ const Header = ({
         ) : (
           <Link
             href={getLoginRedirectPath()}
-            className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 flex h-40 items-center px-20 transition-colors"
+            className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 flex h-40 shrink-0 items-center px-20 transition-colors"
           >
             <Text variant="md-semibold">로그인</Text>
           </Link>

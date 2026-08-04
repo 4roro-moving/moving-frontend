@@ -71,6 +71,12 @@ export function getMoveTypeLabel(moveType: MoveType): string {
 }
 
 /** // 2026.07.29 정슬기 - [추가] 보낸 견적 요청 상태 라벨 */
+/** 고객 soft cancel 가능 요청 상태 (PENDING|OPEN) */
+// 2026.08.03 정슬기 - [추가]
+export function isCancelableEstimateRequestStatus(status: EstimateRequestStatus): boolean {
+  return status === "PENDING" || status === "OPEN";
+}
+
 export function getEstimateRequestStatusLabel(status: EstimateRequestStatus): string {
   return ESTIMATE_REQUEST_STATUS_LABEL[status];
 }
