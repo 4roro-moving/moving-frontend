@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import type { RefObject } from "react";
 
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
@@ -14,8 +13,7 @@ import { EstimateDetailInfoSection } from "@/components/estimate/detail/Estimate
 import EstimateRequestCancelConfirmModal from "@/components/estimate/requests/EstimateRequestCancelConfirmModal";
 import EstimateRequestDesignatedMovers from "@/components/estimate/requests/EstimateRequestDesignatedMovers";
 import EstimateRequestDetailSummary from "@/components/estimate/requests/EstimateRequestDetailSummary";
-import { ESTIMATE_REQUEST_CANCELED_TOAST_KEY } from "@/components/estimate/requests/estimateRequestCancelToast";
-import { useCancelEstimateRequest } from "@/hooks/useCancelEstimateRequest";
+import { useEstimateRequestCancelFlow } from "@/hooks/useEstimateRequestCancelFlow";
 import { useEstimateRequestDetail } from "@/hooks/useEstimateRequestDetail";
 import { TrashIcon } from "@/icons";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
@@ -62,6 +60,43 @@ function toStatusPresentation(request: MyEstimateRequestItem) {
 }
 
 /**
+ * 보낸 견적 요청 상세 — 취소 액션 (aside)
+ * Header가 아닌 상세 액션 영역에 배치
+ * // 2026.08.04 정슬기 - [추가]
+ */
+function EstimateRequestCancelAction({
+  cancelButtonRef,
+  isCancelPending,
+  onCancel,
+}: {
+  cancelButtonRef: RefObject<HTMLButtonElement | null>;
+  isCancelPending: boolean;
+  onCancel: () => void;
+}) {
+  return (
+    <button
+      ref={cancelButtonRef}
+      type="button"
+      aria-label="견적 요청 취소하기"
+      aria-busy={isCancelPending}
+      disabled={isCancelPending}
+      onClick={onCancel}
+      className={cn(
+        "border-border-default text-text-primary rounded-16 flex min-h-57 w-full items-center justify-center gap-8 border px-16 py-16",
+        "hover:bg-background-hover",
+        "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+        "disabled:cursor-not-allowed disabled:opacity-40",
+      )}
+    >
+      <TrashIcon className="size-24 shrink-0" aria-hidden="true" />
+      <Text as="span" variant="lg-semibold" className="whitespace-nowrap">
+        견적 요청 취소하기
+      </Text>
+    </button>
+  );
+}
+
+/**
  * 고객 보낸 견적 요청 상세
  *
  * Figma `견적 상세_확정 견적/Desktop`(8093:49323) 기준.
@@ -69,41 +104,14 @@ function toStatusPresentation(request: MyEstimateRequestItem) {
  * 기사님용 EstimateRequestSummaryContent(카드/모달)는 건드리지 않음.
  * // 2026.07.30 정슬기 - [수정] EstimateDetailLayout 적용
  * // 2026.07.30 정슬기 - [추가] 지정 요청 대상 기사님 정보 표시
- * // 2026.08.03 정슬기 - [추가] PENDING|OPEN 취소(쓰레기통) 액션
+ * // 2026.08.03 정슬기 - [추가] PENDING|OPEN 취소 액션
+ * // 2026.08.04 정슬기 - [수정] Header → 상세 액션 영역으로 취소 버튼 이동
  */
 export default function EstimateRequestDetailView({
   estimateRequestId,
 }: EstimateRequestDetailViewProps) {
-  const router = useRouter();
-  const cancelButtonRef = useRef<HTMLButtonElement>(null);
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
   const { data, isLoading, isError, error, refetch } = useEstimateRequestDetail(estimateRequestId);
-
-  const closeCancelModal = useCallback(() => {
-    setIsCancelModalOpen(false);
-    // 닫힌 뒤 쓰레기통 버튼으로 focus 복귀
-    queueMicrotask(() => {
-      cancelButtonRef.current?.focus();
-    });
-  }, []);
-
-  const cancelMutation = useCancelEstimateRequest(estimateRequestId, {
-    onSuccess: () => {
-      setIsCancelModalOpen(false);
-      // 목록 이동 후에도 Toast를 보이도록 one-shot 플래그 전달
-      try {
-        sessionStorage.setItem(ESTIMATE_REQUEST_CANCELED_TOAST_KEY, "1");
-      } catch {
-        // sessionStorage 불가 환경에서는 Toast 없이 이동
-      }
-      router.push(APP_ROUTES.ESTIMATES.REQUESTS);
-    },
-    onError: (message) => {
-      setToastMessage(message);
-    },
-  });
+  const cancelFlow = useEstimateRequestCancelFlow(estimateRequestId);
 
   if (isLoading) {
     return (
@@ -147,44 +155,16 @@ export default function EstimateRequestDetailView({
   const isDesignated = data.designatedMovers.length > 0;
   const { statusLabel, showConfirmedIcon, statusClassName } = toStatusPresentation(data);
   const canCancel = isCancelableEstimateRequestStatus(data.status);
-  const isCancelPending = cancelMutation.isPending;
-
-  const headerActions = canCancel ? (
-    <button
-      ref={cancelButtonRef}
-      type="button"
-      aria-label="견적 요청 취소하기"
-      aria-busy={isCancelPending}
-      disabled={isCancelPending}
-      onClick={() => setIsCancelModalOpen(true)}
-      className={cn(
-        "border-border-default text-text-primary rounded-12 flex min-h-44 shrink-0 items-center gap-8 border px-12 py-10 md:px-16",
-        "hover:bg-background-hover",
-        "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
-        "disabled:cursor-not-allowed disabled:opacity-40",
-      )}
-    >
-      <TrashIcon className="size-20 shrink-0 md:size-24" aria-hidden="true" />
-      <Text
-        as="span"
-        variant={{ base: "md-semibold", md: "lg-semibold" }}
-        className="whitespace-nowrap"
-      >
-        견적 요청 취소하기
-      </Text>
-    </button>
-  ) : null;
 
   return (
     <>
       <EstimateDetailLayout
         title="견적 상세"
         showProfile={false}
-        headerActions={headerActions}
         contentClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName}
         rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
         mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
-        asideClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName}
+        asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "lg:pt-40")}
         main={
           <>
             <EstimateRequestDetailSummary
@@ -199,21 +179,27 @@ export default function EstimateRequestDetailView({
             <EstimateRequestDesignatedMovers designatedMovers={data.designatedMovers} />
           </>
         }
+        aside={
+          canCancel ? (
+            <EstimateRequestCancelAction
+              cancelButtonRef={cancelFlow.cancelButtonRef}
+              isCancelPending={cancelFlow.isCancelPending}
+              onCancel={cancelFlow.openCancelModal}
+            />
+          ) : undefined
+        }
       />
 
       <EstimateRequestCancelConfirmModal
-        open={isCancelModalOpen}
-        isPending={isCancelPending}
-        onClose={closeCancelModal}
-        onConfirm={() => {
-          if (isCancelPending) {
-            return;
-          }
-          cancelMutation.mutate();
-        }}
+        open={cancelFlow.isCancelModalOpen}
+        isPending={cancelFlow.isCancelPending}
+        onClose={cancelFlow.closeCancelModal}
+        onConfirm={cancelFlow.confirmCancel}
       />
 
-      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
+      {cancelFlow.toastMessage ? (
+        <Toast onClose={cancelFlow.clearToast}>{cancelFlow.toastMessage}</Toast>
+      ) : null}
     </>
   );
 }

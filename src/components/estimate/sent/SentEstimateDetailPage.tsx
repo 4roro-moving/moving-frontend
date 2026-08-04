@@ -121,7 +121,7 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
       showProfile={false}
       contentClassName="pt-35 pb-64 md:pt-[46px] md:pb-80 lg:pt-[43px] lg:pb-37-5"
       rowClassName="gap-20 md:gap-32 lg:gap-0"
-      mainClassName="gap-20 md:gap-30 lg:w-220"
+      mainClassName="gap-20 md:gap-30 lg:w-210"
       main={
         <>
           <div className="flex w-full flex-col gap-20 md:gap-26">

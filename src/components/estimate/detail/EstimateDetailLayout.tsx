@@ -6,7 +6,7 @@ import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { cn } from "@/lib/utils/cn";
 
 /**
- * 받은 견적·견적요청 상세 공통 레이아웃 프리셋 (tokens: pb-37-5 / w-220 / w-xs)
+ * 받은 견적·견적요청 상세 공통 레이아웃 프리셋 (tokens: pb-37-5 / w-210 / w-xs)
  * // 2026.07.30 정슬기 - [추가] 호출부 임의 px·클래스 중복 제거
  */
 export const ESTIMATE_DETAIL_LAYOUT_CLASSES = {
@@ -14,9 +14,9 @@ export const ESTIMATE_DETAIL_LAYOUT_CLASSES = {
   // 본문+aside 블록을 컨테이너 안에서 가운데로 모아 좌측 치우침을 줄인다
   // 2026.08.03 정슬기 - [수정] justify-between → justify-center
   rowClassName: "gap-32 md:gap-40 lg:justify-center lg:gap-40",
-  // Desktop 본문만 840→880 — 모바일/태블릿은 w-full 유지
-  // 2026.08.03 정슬기 - [수정] lg:w-210 → lg:w-220
-  mainClassName: "gap-24 md:gap-30 lg:w-220 lg:shrink-0",
+  // Desktop 본문 740→840 — 컨테이너(1200) + aside(320) + gap(40)에 맞춤
+  // 2026.08.04 정슬기 - [수정] lg:w-185 → lg:w-210 (overflow 방지)
+  mainClassName: "gap-24 md:gap-30 lg:w-210 lg:shrink-0",
   asideClassName: "gap-28 md:gap-40 lg:w-xs lg:shrink-0 lg:overflow-clip",
 } as const;
 

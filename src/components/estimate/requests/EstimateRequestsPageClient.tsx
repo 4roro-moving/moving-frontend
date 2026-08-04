@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Toast from "@/components/common/Toast/Toast";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
@@ -13,10 +13,6 @@ import { cn } from "@/lib/utils/cn";
 import type { EstimateRequestListStatusFilter } from "@/types/estimate";
 
 function readCanceledToastMessage(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
   try {
     if (sessionStorage.getItem(ESTIMATE_REQUEST_CANCELED_TOAST_KEY) === "1") {
       sessionStorage.removeItem(ESTIMATE_REQUEST_CANCELED_TOAST_KEY);
@@ -36,12 +32,22 @@ function readCanceledToastMessage(): string | null {
  * // 2026.07.29 정슬기 - [수정] status 필터 연결 (전체 / OPEN / COMPLETED)
  * // 2026.07.30 정슬기 - [수정] EstimatesQueryStatus·필터 전환 placeholder 처리
  * // 2026.08.03 정슬기 - [추가] 취소 성공 Toast (상세 → 목록 이동 후)
+ * // 2026.08.04 정슬기 - [수정] sessionStorage Toast를 useEffect에서 소비 (hydration 안전)
  */
 export default function EstimateRequestsPageClient() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<EstimateRequestListStatusFilter>("all");
-  // 클라이언트 마운트(목록 이동) 시에만 sessionStorage를 읽어 hydration mismatch를 피한다
-  const [toastMessage, setToastMessage] = useState<string | null>(readCanceledToastMessage);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    // 마운트 후 비동기로 소비 — 렌더 중 sessionStorage 부작용·hydration mismatch 방지
+    const timerId = window.setTimeout(() => {
+      setToastMessage(readCanceledToastMessage());
+    }, 0);
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, []);
 
   const listStatus = statusFilter === "all" ? undefined : statusFilter;
 

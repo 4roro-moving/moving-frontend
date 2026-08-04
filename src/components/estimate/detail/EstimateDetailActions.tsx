@@ -1,3 +1,5 @@
+import type { Ref } from "react";
+
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import { TrashIcon } from "@/icons";
@@ -19,13 +21,17 @@ interface EstimateDetailActionsProps {
   canCancelRequest?: boolean;
   isCanceling?: boolean;
   onCancelRequest?: () => void;
+  /** 모달 닫힘 후 포커스 복귀용 */
+  // 2026.08.04 정슬기 - [추가]
+  cancelButtonRef?: Ref<HTMLButtonElement>;
 }
 
 /**
  * 견적 상세 확정 CTA (받았던·대기 상세 공통)
  * // 2026.07.24 정슬기 - [추가]
  * // 2026.07.30 정슬기 - [수정] PendingEstimateDetailActions 통합 (optional price·buttonSize)
- * // 2026.08.03 정슬기 - [수정] 확정 Primary + 우측 Trash 아이콘 버튼
+ * // 2026.08.03 정슬기 - [수정] 확정 Primary + Trash 아이콘 버튼
+ * // 2026.08.04 정슬기 - [수정] 미확정 전제 · cancel ref 포커스 복귀
  */
 export default function EstimateDetailActions({
   isConfirmed,
@@ -38,6 +44,7 @@ export default function EstimateDetailActions({
   canCancelRequest = false,
   isCanceling = false,
   onCancelRequest,
+  cancelButtonRef,
 }: EstimateDetailActionsProps) {
   const showPrice = typeof price === "number";
   const showCancel = canCancelRequest && typeof onCancelRequest === "function";
@@ -57,8 +64,8 @@ export default function EstimateDetailActions({
 
   if (isConfirmed) {
     // 확정 안내 문구는 DriverSummary의 "확정견적" 배지로 통일 — 중복 텍스트 제거
-    // 2026.08.03 정슬기 - [수정] "견적이 확정되었습니다" 제거 (대기 상세는 견적가만 유지)
-    // Desktop에서만 aside 견적가 노출
+    // 호출부는 미확정일 때만 Actions를 넘김. 방어적으로 견적가만 Desktop 노출.
+    // 2026.08.04 정슬기 - [수정] CodeRabbit: 확정+취소 조합은 호출부에서 제거
     if (!showPrice) {
       return null;
     }
@@ -77,10 +84,10 @@ export default function EstimateDetailActions({
 
       <div className="flex w-full flex-col gap-12">
         {/* [Trash] [견적 확정하기] — Trash size-57 통일, 세로 가운데 정렬 */}
-        {/* 2026.08.03 정슬기 - [수정] 버튼 순서 교체 · Trash 크기 통일 */}
         <div className="flex w-full flex-row items-center gap-8 md:gap-12">
           {showCancel ? (
             <button
+              ref={cancelButtonRef}
               type="button"
               aria-label="견적 요청 취소"
               aria-busy={isCanceling}
