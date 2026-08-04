@@ -26,8 +26,9 @@ const searchVariants = cva(
 
 export interface SearchProps
   extends
-    Omit<ComponentPropsWithoutRef<"input">, "size" | "type">,
+    Omit<ComponentPropsWithoutRef<"input">, "size" | "type" | "defaultValue" | "value">,
     VariantProps<typeof searchVariants> {
+  value: string;
   onClear?: () => void;
 }
 
@@ -37,7 +38,8 @@ const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
 ) {
   const [isFocused, setIsFocused] = useState(false);
   const resolvedSize = size ?? "md";
-  const hasValue = value !== undefined && String(value).length > 0;
+  const hasValue = value.length > 0;
+
   const isSmall = resolvedSize === "sm";
   const isResponsive = resolvedSize === "responsive";
   const iconSizeClass = isSmall ? "size-24" : isResponsive ? "size-24 md:size-36" : "size-36";
