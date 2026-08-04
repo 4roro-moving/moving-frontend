@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { fn } from "storybook/test";
 
 import SelectableChip from "@/components/common/Chip/SelectableChip";
@@ -30,8 +30,11 @@ const meta = {
       options: ["sm", "md", "responsive"],
       description: "Chip의 패딩과 텍스트 크기 규격",
     },
-    selected: { control: "boolean", description: "선택 상태와 색상" },
-    onClick: { control: false, description: "선택 상태를 변경하는 핸들러" },
+    selected: { control: "boolean", description: "선택 여부에 따른 스타일 적용" },
+    onClick: {
+      control: false,
+      description: "Chip 클릭 시 호출되는 핸들러. 전달하면 선택 가능한 Chip으로 동작",
+    },
     disabled: { control: "boolean", description: "선택 불가 상태" },
     children: { control: "text", description: "Chip에 표시할 텍스트 또는 콘텐츠" },
     className: { control: "text", description: "레이아웃이나 스타일을 확장하는 클래스" },
