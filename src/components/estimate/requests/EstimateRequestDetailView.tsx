@@ -82,7 +82,9 @@ function EstimateRequestCancelAction({
       disabled={isCancelPending}
       onClick={onCancel}
       className={cn(
-        "border-border-default text-text-primary rounded-16 flex min-h-57 w-full items-center justify-center gap-8 border px-16 py-16",
+        // Tablet/Mobile 풀폭 액션 — detail CTA(h-64)와 동일 높이
+        // 2026.08.04 정슬기 - [수정]
+        "border-border-default text-text-primary rounded-16 flex h-64 w-full items-center justify-center gap-8 border px-16",
         "hover:bg-background-hover",
         "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
         "disabled:cursor-not-allowed disabled:opacity-40",
@@ -164,7 +166,7 @@ export default function EstimateRequestDetailView({
         contentClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName}
         rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
         mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
-        asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "lg:pt-40")}
+        asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "xl:pt-40")}
         main={
           <>
             <EstimateRequestDetailSummary

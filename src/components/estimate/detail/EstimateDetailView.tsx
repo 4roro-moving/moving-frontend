@@ -60,7 +60,7 @@ function EstimateDetailContent({ estimateId, data }: EstimateDetailContentProps)
         contentClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName}
         rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
         mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
-        asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "lg:pt-40")}
+        asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "xl:pt-40")}
         main={
           <>
             <div className="flex w-full flex-col gap-20 md:gap-26">
@@ -89,6 +89,7 @@ function EstimateDetailContent({ estimateId, data }: EstimateDetailContentProps)
               isCanceling={cancelFlow.isCancelPending}
               onCancelRequest={cancelFlow.openCancelModal}
               cancelButtonRef={cancelFlow.cancelButtonRef}
+              buttonSize="detail"
             />
           ) : undefined
         }

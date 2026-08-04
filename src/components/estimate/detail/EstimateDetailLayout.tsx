@@ -6,18 +6,18 @@ import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { cn } from "@/lib/utils/cn";
 
 /**
- * 받은 견적·견적요청 상세 공통 레이아웃 프리셋 (tokens: pb-37-5 / w-210 / w-xs)
+ * 받은 견적·견적요청 상세 공통 레이아웃 프리셋 (tokens: pb-37-5 / w-210 / w-80)
+ * Desktop 좌우 분할은 xl(1280+) — lg(1024)에서 고정폭 1200이 Tablet 가로 스크롤을 만들던 문제 방지
  * // 2026.07.30 정슬기 - [추가] 호출부 임의 px·클래스 중복 제거
+ * // 2026.08.04 정슬기 - [수정] lg → xl (Tablet 가로 스크롤)
  */
 export const ESTIMATE_DETAIL_LAYOUT_CLASSES = {
-  contentClassName: "pt-24 pb-64 md:pt-28 md:pb-80 lg:pb-37-5",
+  contentClassName: "pt-24 pb-64 md:pt-28 md:pb-80 xl:pb-37-5",
   // 본문+aside 블록을 컨테이너 안에서 가운데로 모아 좌측 치우침을 줄인다
-  // 2026.08.03 정슬기 - [수정] justify-between → justify-center
-  rowClassName: "gap-32 md:gap-40 lg:justify-center lg:gap-40",
-  // Desktop 본문 740→840 — 컨테이너(1200) + aside(320) + gap(40)에 맞춤
-  // 2026.08.04 정슬기 - [수정] lg:w-185 → lg:w-210 (overflow 방지)
-  mainClassName: "gap-24 md:gap-30 lg:w-210 lg:shrink-0",
-  asideClassName: "gap-28 md:gap-40 lg:w-xs lg:shrink-0 lg:overflow-clip",
+  rowClassName: "gap-32 md:gap-40 xl:justify-center xl:gap-40",
+  // Desktop 본문 840 + aside 320 + gap 40 = 1200 (container)
+  mainClassName: "gap-24 md:gap-30 xl:w-210 xl:shrink-0",
+  asideClassName: "gap-28 md:gap-40 xl:w-80 xl:shrink-0 xl:overflow-clip",
 } as const;
 
 interface EstimateDetailLayoutProps {
@@ -68,15 +68,15 @@ export default function EstimateDetailLayout({
 
       <div
         className={cn(
-          "px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center lg:px-0",
+          "px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center xl:px-0",
           contentClassName,
         )}
       >
         <div
           className={cn(
-            // 기본은 컨테이너 안 가운데 정렬 — 호출부에서 justify-* 로 덮어쓸 수 있음
-            // 2026.08.03 정슬기 - [수정]
-            "max-w-container-desktop flex w-full flex-col items-stretch lg:flex-row lg:items-start lg:justify-center",
+            // Desktop(xl+)만 좌우 분할 — Tablet(lg 포함)은 세로 스택으로 가로 스크롤 방지
+            // 2026.08.04 정슬기 - [수정]
+            "max-w-container-desktop flex w-full flex-col items-stretch xl:flex-row xl:items-start xl:justify-center",
             rowClassName,
           )}
         >
@@ -113,7 +113,7 @@ export function EstimateDetailQueryState({
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col overflow-x-hidden">
       <EstimateDetailHeader title={title} />
-      <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center lg:px-0">
+      <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center xl:px-0">
         <div className="max-w-container-desktop w-full">
           <EstimatesQueryStatus message={message} actionLabel={actionLabel} onAction={onAction} />
           {secondaryAction}
