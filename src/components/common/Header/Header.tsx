@@ -128,9 +128,12 @@ const Header = ({
   const closeSideNav = useCallback(() => setIsSideNavOpen(false), []);
 
   return (
-    <header className="border-border-subtle bg-background-surface w-full border-b">
-      <div className="h-gnb-height-mobile md:h-gnb-height-tablet lg:h-gnb-height-desktop px-margin-mobile md:px-margin-tablet lg:px-gnb-padding-x-desktop flex items-center justify-between py-10 lg:py-26">
-        <div className="flex items-center gap-80">
+    <header className="border-border-subtle bg-background-surface relative z-40 w-full max-w-full border-b">
+      {/* Desktop 고정 GNB padding은 lg+ — Tablet에서 160px×2 padding + nav가 가로 스크롤을 만들던 문제 방지 */}
+      {/* 2026.08.04 정슬기 - [수정] */}
+      {/* overflow-x-hidden 을 header 전체에 두면 알림/프로필 드롭다운이 잘리므로, 좌측 nav 영역에만 적용 */}
+      <div className="h-gnb-height-mobile md:h-gnb-height-tablet lg:h-gnb-height-desktop px-margin-mobile md:px-margin-tablet lg:px-gnb-padding-x-desktop flex w-full max-w-full items-center justify-between gap-12 py-10 lg:py-26">
+        <div className="flex min-w-0 flex-1 items-center gap-24 overflow-x-hidden lg:gap-80">
           <Link href="/" className="shrink-0">
             <Image
               src="/icons/logo_full.svg"
@@ -142,13 +145,15 @@ const Header = ({
             />
           </Link>
 
-          <nav className="hidden lg:block" aria-label="주요 메뉴">
+          {/* Mobile은 햄버거 전까지 링크 숨김 — 좁은 폭에서 GNB 가로 스크롤 방지 */}
+          {/* 2026.08.04 정슬기 - [수정] */}
+          <nav aria-label="주요 메뉴" className="hidden min-w-0 lg:block">
             <ul className="flex items-center gap-40">
               {navLinks.map((link) => {
                 const isActive = isNavLinkActive(pathname, link.href);
 
                 return (
-                  <li key={link.label}>
+                  <li key={link.label} className="shrink-0">
                     <Link
                       href={link.href}
                       aria-current={isActive ? "page" : undefined}
@@ -169,7 +174,7 @@ const Header = ({
         </div>
 
         {showAuthSkeleton ? (
-          <div className="flex items-center gap-24 lg:gap-32" aria-hidden>
+          <div className="flex shrink-0 items-center gap-24 lg:gap-32" aria-hidden>
             <div className="bg-background-subtle size-24 animate-pulse rounded-full lg:size-36" />
             <div className="flex items-center gap-16">
               <div className="bg-background-subtle size-24 animate-pulse rounded-full lg:size-36" />
@@ -178,7 +183,7 @@ const Header = ({
             <div className="bg-background-subtle rounded-4 size-24 animate-pulse lg:hidden" />
           </div>
         ) : isLogin ? (
-          <div className="flex items-center gap-24 lg:gap-32">
+          <div className="relative z-50 flex shrink-0 items-center gap-24 lg:gap-32">
             <NotificationTrigger />
             <ProfileMenuTrigger
               key={pathname}
@@ -198,7 +203,7 @@ const Header = ({
             </button>
           </div>
         ) : (
-          <div className="flex items-center">
+          <div className="flex shrink-0 items-center">
             <Link
               href={getLoginRedirectPath()}
               className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 hidden h-40 items-center px-20 transition-colors lg:flex"

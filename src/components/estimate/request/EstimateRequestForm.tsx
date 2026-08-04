@@ -17,6 +17,7 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { MOVE_TYPE_CARDS } from "@/lib/constants/moveType";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
+import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
 import type { MoveType } from "@/types/move";
@@ -306,6 +307,7 @@ export default function EstimateRequestForm() {
 
   if (activeRequest) {
     const isConfirmedRequest = activeRequest.status === "CONFIRMED";
+    const activeRequestDetailHref = APP_ROUTES.ESTIMATES.REQUEST_DETAIL(activeRequest.id);
 
     return (
       <>
@@ -328,10 +330,11 @@ export default function EstimateRequestForm() {
             )
           }
           buttonLabel={isConfirmedRequest ? "진행 중인 견적 보기" : "대기 중인 견적 보기"}
-          href={
+          href={isConfirmedRequest ? activeRequestDetailHref : APP_ROUTES.ESTIMATES.PENDING}
+          onButtonClick={
             isConfirmedRequest
-              ? APP_ROUTES.ESTIMATES.REQUEST_DETAIL(activeRequest.id)
-              : APP_ROUTES.ESTIMATES.PENDING
+              ? (event) => markInternalDetailNavigationOnClick(event, activeRequestDetailHref)
+              : undefined
           }
         />
       </>

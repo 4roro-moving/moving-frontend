@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Text } from "@/components/common/Text";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import { formatPrice, formatRating } from "@/lib/utils/estimateFormat";
 import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
@@ -49,6 +51,7 @@ export default function EstimateOfferCard({
   const { mover, status, isDesignated, price } = offer;
   const displayName = mover.nickname || mover.name;
   const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
+  const detailHref = APP_ROUTES.ESTIMATES.DETAIL(offer.id);
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
 
   return (
@@ -91,7 +94,8 @@ export default function EstimateOfferCard({
           {/* 2026.07.24 정슬기 - [수정] 상세 이동과 찜 동작이 충돌하지 않도록 Link와 버튼 영역 분리 */}
           <div className="border-border-muted rounded-12 flex w-full items-end justify-between gap-12 border border-solid py-12 pr-20 pl-12 shadow-none">
             <Link
-              href={`/estimates/${offer.id}`}
+              href={detailHref}
+              onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
               className="focus-visible:ring-border-brand rounded-8 flex min-w-0 flex-1 items-end gap-12 focus-visible:ring-2 focus-visible:outline-none"
               aria-label={`${displayName} 기사님 견적 상세 보기`}
             >

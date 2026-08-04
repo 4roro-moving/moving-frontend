@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
+import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { readNotification } from "@/lib/api/notifications";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import type {
@@ -35,17 +36,20 @@ function markNotificationAsRead(notification: NotificationItem, readAt: string):
 /** PATCH /notifications/:notificationId/read — isRead가 false일 때만 호출 */
 export function useReadNotification() {
   const queryClient = useQueryClient();
+  const { authScope } = useAuthQueryScope();
+  const listScopeQueryKey = QUERY_KEYS.NOTIFICATIONS.LIST_SCOPE(authScope);
+  const unreadCountQueryKey = QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT(authScope);
 
   return useApiMutation<ReadNotificationResponse, number, ReadNotificationContext>({
     mutationFn: (notificationId) => readNotification(notificationId),
     onMutate: async (notificationId) => {
       await Promise.all([
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.LIST_ROOT }),
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT }),
+        queryClient.cancelQueries({ queryKey: listScopeQueryKey }),
+        queryClient.cancelQueries({ queryKey: unreadCountQueryKey }),
       ]);
 
       const previousLists = queryClient.getQueriesData<NotificationListResponse>({
-        queryKey: QUERY_KEYS.NOTIFICATIONS.LIST_ROOT,
+        queryKey: listScopeQueryKey,
       });
       const previousByQuery = previousLists.map(([queryKey, current]) => ({
         queryKey,
@@ -66,7 +70,7 @@ export function useReadNotification() {
       const readAt = new Date().toISOString();
 
       queryClient.setQueriesData<NotificationListResponse>(
-        { queryKey: QUERY_KEYS.NOTIFICATIONS.LIST_ROOT },
+        { queryKey: listScopeQueryKey },
         (current) => {
           if (!current) {
             return current;
@@ -83,18 +87,15 @@ export function useReadNotification() {
         },
       );
 
-      queryClient.setQueryData<UnreadNotificationCountResponse>(
-        QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT,
-        (current) => {
-          if (!current) {
-            return current;
-          }
+      queryClient.setQueryData<UnreadNotificationCountResponse>(unreadCountQueryKey, (current) => {
+        if (!current) {
+          return current;
+        }
 
-          return {
-            unreadCount: Math.max(0, current.unreadCount - 1),
-          };
-        },
-      );
+        return {
+          unreadCount: Math.max(0, current.unreadCount - 1),
+        };
+      });
 
       return { previousByQuery, unreadDecremented: true };
     },
@@ -122,7 +123,7 @@ export function useReadNotification() {
 
       if (context.unreadDecremented) {
         queryClient.setQueryData<UnreadNotificationCountResponse>(
-          QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT,
+          unreadCountQueryKey,
           (current) => {
             if (!current) {
               return current;
@@ -139,7 +140,7 @@ export function useReadNotification() {
       const updated = data.notification;
 
       queryClient.setQueriesData<NotificationListResponse>(
-        { queryKey: QUERY_KEYS.NOTIFICATIONS.LIST_ROOT },
+        { queryKey: listScopeQueryKey },
         (current) => {
           if (!current) {
             return current;
@@ -156,8 +157,8 @@ export function useReadNotification() {
     },
     onSettled: async () => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.LIST_ROOT }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT }),
+        queryClient.invalidateQueries({ queryKey: listScopeQueryKey }),
+        queryClient.invalidateQueries({ queryKey: unreadCountQueryKey }),
       ]);
     },
   });

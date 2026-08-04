@@ -52,6 +52,8 @@ export default function EstimateDetailDriverSummary({
           )}
         </div>
 
+        {/* md+: 소개 왼쪽 + 상태(확정견적/견적대기) 오른쪽 — 본문 컬럼 안에서 자연스럽게 정렬 */}
+        {/* 2026.08.03 정슬기 - [수정] 확정 안내 문구 제거 후 배지만 유지, 과도한 중앙 강제 정렬 제거 */}
         <div className="flex w-full items-center justify-between gap-12">
           <Text
             as="p"
@@ -67,7 +69,6 @@ export default function EstimateDetailDriverSummary({
           >
             {intro}
           </Text>
-
           <div className="hidden shrink-0 md:block">
             {isConfirmed ? (
               <ConfirmedStatus />

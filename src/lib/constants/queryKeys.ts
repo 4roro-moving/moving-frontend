@@ -93,6 +93,9 @@ export const QUERY_KEYS = {
     ALL: ["estimates"],
     SENT_LIST_ROOT: ["estimates", "sent", "list"] as const,
     SENT_LIST: (status?: string) => ["estimates", "sent", "list", { status }] as const,
+    // DETAIL_ROOT(["estimates","detail"])와 접두사가 다름 — 취소 시 별도 invalidate 필요
+    // 2026.08.04 정슬기 - [추가]
+    SENT_DETAIL_ROOT: ["estimates", "sent", "detail"] as const,
     SENT_DETAIL: (estimateId: number) => ["estimates", "sent", "detail", estimateId] as const,
     RECEIVED: ["estimates", "received"] as const,
     // 받았던/대기 상세 모두 GET /estimates/:estimateId — 동일 DETAIL 키 공유
@@ -134,7 +137,11 @@ export const QUERY_KEYS = {
   NOTIFICATIONS: {
     ALL: ["notifications"] as const,
     LIST_ROOT: ["notifications", "list"] as const,
-    LIST: (page: number, limit: number) => ["notifications", "list", { page, limit }] as const,
-    UNREAD_COUNT: ["notifications", "unread-count"] as const,
+    LIST_SCOPE: (authScope: AuthQueryScope) => ["notifications", "list", authScope] as const,
+    LIST: (authScope: AuthQueryScope, page: number, limit: number) =>
+      ["notifications", "list", authScope, { page, limit }] as const,
+    UNREAD_COUNT_ROOT: ["notifications", "unread-count"] as const,
+    UNREAD_COUNT: (authScope: AuthQueryScope) =>
+      ["notifications", "unread-count", authScope] as const,
   },
 } as const;

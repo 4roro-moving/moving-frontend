@@ -34,6 +34,8 @@ export const API_ROUTES = {
   ESTIMATE_REQUESTS: {
     ROOT: "/estimate-requests",
     DETAIL: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
+    // 2026.08.03 정슬기 - [추가] 견적 요청 soft cancel (DELETE)
+    DELETE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
     ACTIVE: "/estimate-requests/active",
     DESIGNATE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}/designate`,
   },
