@@ -7,7 +7,7 @@ import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { useCustomerProfileStatus } from "@/hooks/profile/useCustomerProfileStatus";
 
 const CustomerProfileCreateView = () => {
-  const { canFetch, isPending: isAuthPending } = useCustomerAuthReady();
+  const { canFetch, isPending: isAuthPending, user } = useCustomerAuthReady();
   const { data: status, isPending: isStatusPending, isError } = useCustomerProfileStatus(canFetch);
 
   if (isAuthPending || isStatusPending) {
@@ -30,7 +30,10 @@ const CustomerProfileCreateView = () => {
     );
   }
 
-  return <CustomerProfileForm key={String(status.hasPhone)} requiresPhone={!status.hasPhone} />;
+  // 일반 가입/로그인 사용자는 세션에 phone이 있음. status만 보면 캐시·타이밍에 따라 잘못 노출될 수 있음
+  const hasPhone = status.hasPhone === true || Boolean(user?.phone?.trim());
+
+  return <CustomerProfileForm key={String(hasPhone)} requiresPhone={!hasPhone} />;
 };
 
 export default CustomerProfileCreateView;

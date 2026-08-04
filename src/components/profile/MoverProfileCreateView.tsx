@@ -7,7 +7,7 @@ import { useMoverAuthReady } from "@/hooks/useMoverAuthReady";
 import { useMoverProfileStatus } from "@/hooks/profile/useMoverProfileStatus";
 
 const MoverProfileCreateView = () => {
-  const { canFetch, isPending: isAuthPending } = useMoverAuthReady();
+  const { canFetch, isPending: isAuthPending, user } = useMoverAuthReady();
   const { data: status, isPending: isStatusPending, isError } = useMoverProfileStatus(canFetch);
 
   if (isAuthPending || isStatusPending) {
@@ -30,7 +30,10 @@ const MoverProfileCreateView = () => {
     );
   }
 
-  return <MoverProfileForm key={String(status.hasPhone)} requiresPhone={!status.hasPhone} />;
+  // 일반 가입/로그인 사용자는 세션에 phone이 있음. status만 보면 캐시·타이밍에 따라 잘못 노출될 수 있음
+  const hasPhone = status.hasPhone === true || Boolean(user?.phone?.trim());
+
+  return <MoverProfileForm key={String(hasPhone)} requiresPhone={!hasPhone} />;
 };
 
 export default MoverProfileCreateView;
