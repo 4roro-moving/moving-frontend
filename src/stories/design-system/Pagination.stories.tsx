@@ -23,7 +23,11 @@ const meta = {
   },
   args: { currentPage: 1, pageCount: 9, onPageChange: fn() },
   argTypes: {
-    currentPage: { control: "number", description: "현재 선택된 페이지. 1부터 시작합니다." },
+    currentPage: {
+      control: false,
+      description:
+        "스토리의 초기 페이지입니다. 이후 페이지 이동 상태는 스토리 내부에서 관리합니다.",
+    },
     pageCount: { control: "number", description: "표시할 전체 페이지 수" },
     onPageChange: { control: false, description: "페이지 이동 시 선택된 페이지를 전달하는 핸들러" },
     className: { control: "text", description: "Pagination 영역의 레이아웃을 확장하는 클래스" },
