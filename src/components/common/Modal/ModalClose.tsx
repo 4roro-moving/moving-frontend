@@ -22,8 +22,8 @@ const ModalClose = ({
     <button
       type="button"
       className={cn(
-        disabled && "cursor-not-allowed opacity-40",
-        "text-icon-default rounded-8 flex shrink-0 cursor-pointer items-center justify-center transition-colors",
+        "text-icon-default rounded-8 flex shrink-0 items-center justify-center transition-colors",
+        disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer",
         size === "sm" && "size-24",
         size === "md" && "size-36",
         size === "responsive" && "size-24 xl:size-36",
