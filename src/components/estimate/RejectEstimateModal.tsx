@@ -27,6 +27,13 @@ export default function RejectEstimateModal({
 }: RejectEstimateModalProps) {
   const [reason, setReason] = useState("");
   const [isReasonTouched, setIsReasonTouched] = useState(false);
+
+  const handleClose = () => {
+    setReason("");
+    setIsReasonTouched(false);
+    onClose();
+  };
+
   const trimmedReason = reason.trim();
   const isReasonValid =
     trimmedReason.length >= MIN_REASON_LENGTH && trimmedReason.length <= MAX_REASON_LENGTH;
@@ -37,14 +44,14 @@ export default function RejectEstimateModal({
 
   return (
     <Modal
-      onClose={isPending ? undefined : onClose}
+      onClose={isPending ? undefined : handleClose}
       presentation="responsive"
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
         <Modal.Title>제안 반려</Modal.Title>
-        <Modal.Close onClose={onClose} disabled={isPending} />
+        <Modal.Close onClose={handleClose} disabled={isPending} />
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-16 overflow-y-auto">
@@ -69,7 +76,6 @@ export default function RejectEstimateModal({
           <div className="flex w-full flex-col gap-8">
             <Textarea
               id="reject-reason"
-              autoFocus
               value={reason}
               maxLength={MAX_REASON_LENGTH}
               placeholder="최소 10자 이상 입력해 주세요"

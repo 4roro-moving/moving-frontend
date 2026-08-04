@@ -44,11 +44,19 @@ function ReviewWriteModalContent({
   const [isContentTouched, setIsContentTouched] = useState(false);
   const [submitError, setSubmitError] = useState<string | undefined>();
 
+  const handleClose = () => {
+    setRating(0);
+    setContent("");
+    setIsContentTouched(false);
+    setSubmitError(undefined);
+    onClose();
+  };
+
   const createMutation = useCreateReview({
     moverId: item.mover.id,
     onSuccess: () => {
       onSuccess?.();
-      onClose();
+      handleClose();
     },
     onError: (message) => {
       // Modal과 Toast가 동일 z-index라 실패 시 Toast가 가려질 수 있어 모달 내 인라인 표시
@@ -82,7 +90,7 @@ function ReviewWriteModalContent({
 
   return (
     <Modal
-      onClose={isPending ? undefined : onClose}
+      onClose={isPending ? undefined : handleClose}
       presentation="responsive"
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
@@ -90,7 +98,7 @@ function ReviewWriteModalContent({
     >
       <div className="flex w-full items-start justify-between gap-12 md:gap-16">
         <Modal.Title>리뷰 작성</Modal.Title>
-        <Modal.Close onClose={onClose} disabled={isPending} />
+        <Modal.Close onClose={handleClose} disabled={isPending} />{" "}
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-28 overflow-y-auto xl:gap-32">

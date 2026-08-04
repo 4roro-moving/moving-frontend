@@ -36,6 +36,13 @@ export default function SendEstimateModal({
   const [comment, setComment] = useState("");
   const [isCommentTouched, setIsCommentTouched] = useState(false);
 
+  const handleClose = () => {
+    setPrice("");
+    setComment("");
+    setIsCommentTouched(false);
+    onClose();
+  };
+
   const numericPrice = Number(price);
   const trimmedComment = comment.trim();
 
@@ -65,14 +72,14 @@ export default function SendEstimateModal({
 
   return (
     <Modal
-      onClose={isPending ? undefined : onClose}
+      onClose={isPending ? undefined : handleClose}
       presentation="responsive"
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
         <Modal.Title>견적 보내기</Modal.Title>
-        <Modal.Close onClose={onClose} disabled={isPending} />
+        <Modal.Close onClose={handleClose} disabled={isPending} />
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-20 overflow-y-auto xl:gap-32">
