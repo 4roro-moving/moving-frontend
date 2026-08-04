@@ -5,9 +5,6 @@ import AddressSelectModal, {
   type AddressItem,
 } from "@/components/estimate/request/AddressSelectModal";
 
-/**
- * NOTE: 실제 AddressSearchItem 타입 필드에 맞게 값을 조정해주세요.
- */
 const mockAddressResults: AddressItem[] = [
   {
     id: "addr-1",
@@ -23,13 +20,27 @@ const mockAddressResults: AddressItem[] = [
   },
 ] as unknown as AddressItem[];
 
-/** window.fetch를 스텁으로 교체합니다. 각 play 시작부에서 호출해 이전 스토리의 mock이 남지 않게 합니다. */
-function mockFetchOnce(options: { ok: boolean; results?: AddressItem[]; message?: string }) {
-  const { ok, results = [], message } = options;
+interface MockFetchOptions {
+  ok: boolean;
+  results?: AddressItem[];
+  message?: string;
+}
+
+/**
+ * window.fetch를 테스트용 스텁으로 교체하고,
+ * 호출부에서 원래 fetch를 복원할 수 있는 함수를 반환합니다.
+ */
+function mockFetchOnce({ ok, results = [], message }: MockFetchOptions): () => void {
+  const originalFetch = window.fetch;
+
   window.fetch = fn(async () => ({
     ok,
     json: async () => (ok ? { results } : { message }),
   })) as unknown as typeof fetch;
+
+  return () => {
+    window.fetch = originalFetch;
+  };
 }
 
 const meta = {
@@ -53,12 +64,15 @@ const meta = {
 } satisfies Meta<typeof AddressSelectModal>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   parameters: {
     docs: {
-      description: { story: "검색 전 초기 상태입니다. 안내 문구가 표시됩니다." },
+      description: {
+        story: "검색 전 초기 상태입니다. 안내 문구가 표시됩니다.",
+      },
     },
   },
   play: async () => {
@@ -66,7 +80,10 @@ export const Default: Story = {
 
     expect(canvas.getByText("주소를 검색하면 결과가 여기에 표시됩니다")).toBeInTheDocument();
 
-    const confirmButton = canvas.getByRole("button", { name: "선택 완료" });
+    const confirmButton = canvas.getByRole("button", {
+      name: "선택 완료",
+    });
+
     expect(confirmButton).toBeDisabled();
   },
 };
@@ -81,93 +98,145 @@ export const SearchWithResults: Story = {
     },
   },
   play: async ({ args }) => {
-    mockFetchOnce({ ok: true, results: mockAddressResults });
-    const canvas = within(document.body);
-
-    const searchInput = canvas.getByPlaceholderText("주소를 검색해주세요");
-    await userEvent.type(searchInput, "테헤란로{Enter}");
-
-    await waitFor(() => {
-      expect(canvas.getByText("서울 강남구 테헤란로 123")).toBeInTheDocument();
+    const restoreFetch = mockFetchOnce({
+      ok: true,
+      results: mockAddressResults,
     });
 
-    const confirmButton = canvas.getByRole("button", { name: "선택 완료" });
-    expect(confirmButton).toBeDisabled();
+    try {
+      const canvas = within(document.body);
 
-    await userEvent.click(canvas.getByText("서울 강남구 테헤란로 123"));
-    await waitFor(() => {
-      expect(confirmButton).toBeEnabled();
-    });
+      const searchInput = canvas.getByPlaceholderText("주소를 검색해주세요");
 
-    await userEvent.click(confirmButton);
-    expect(args.onConfirm).toHaveBeenCalledWith(
-      expect.objectContaining({ roadAddress: "서울 강남구 테헤란로 123" }),
-    );
+      await userEvent.type(searchInput, "테헤란로{Enter}");
+
+      await waitFor(() => {
+        expect(canvas.getByText("서울 강남구 테헤란로 123")).toBeInTheDocument();
+      });
+
+      const confirmButton = canvas.getByRole("button", {
+        name: "선택 완료",
+      });
+
+      expect(confirmButton).toBeDisabled();
+
+      await userEvent.click(canvas.getByText("서울 강남구 테헤란로 123"));
+
+      await waitFor(() => {
+        expect(confirmButton).toBeEnabled();
+      });
+
+      await userEvent.click(confirmButton);
+
+      expect(args.onConfirm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          roadAddress: "서울 강남구 테헤란로 123",
+        }),
+      );
+    } finally {
+      restoreFetch();
+    }
   },
 };
 
 export const SearchWithNoResults: Story = {
   parameters: {
     docs: {
-      description: { story: "검색 결과가 없을 때 안내 문구가 표시됩니다." },
+      description: {
+        story: "검색 결과가 없을 때 안내 문구가 표시됩니다.",
+      },
     },
   },
   play: async () => {
-    mockFetchOnce({ ok: true, results: [] });
-    const canvas = within(document.body);
-
-    const searchInput = canvas.getByPlaceholderText("주소를 검색해주세요");
-    await userEvent.type(searchInput, "존재하지않는주소{Enter}");
-
-    await waitFor(() => {
-      expect(
-        canvas.getByText("검색 결과가 없습니다. 다른 주소로 검색해보세요."),
-      ).toBeInTheDocument();
+    const restoreFetch = mockFetchOnce({
+      ok: true,
+      results: [],
     });
+
+    try {
+      const canvas = within(document.body);
+
+      const searchInput = canvas.getByPlaceholderText("주소를 검색해주세요");
+
+      await userEvent.type(searchInput, "존재하지않는주소{Enter}");
+
+      await waitFor(() => {
+        expect(
+          canvas.getByText("검색 결과가 없습니다. 다른 주소로 검색해보세요."),
+        ).toBeInTheDocument();
+      });
+    } finally {
+      restoreFetch();
+    }
   },
 };
 
 export const SearchError: Story = {
   parameters: {
     docs: {
-      description: { story: "검색 요청이 실패하면 오류 메시지가 표시됩니다." },
+      description: {
+        story: "검색 요청이 실패하면 오류 메시지가 표시됩니다.",
+      },
     },
   },
   play: async () => {
-    mockFetchOnce({ ok: false, message: "주소 검색에 실패했습니다." });
-    const canvas = within(document.body);
-
-    const searchInput = canvas.getByPlaceholderText("주소를 검색해주세요");
-    await userEvent.type(searchInput, "테헤란로{Enter}");
-
-    await waitFor(() => {
-      expect(canvas.getByText("주소 검색에 실패했습니다.")).toBeInTheDocument();
+    const restoreFetch = mockFetchOnce({
+      ok: false,
+      message: "주소 검색에 실패했습니다.",
     });
+
+    try {
+      const canvas = within(document.body);
+
+      const searchInput = canvas.getByPlaceholderText("주소를 검색해주세요");
+
+      await userEvent.type(searchInput, "테헤란로{Enter}");
+
+      await waitFor(() => {
+        expect(canvas.getByText("주소 검색에 실패했습니다.")).toBeInTheDocument();
+      });
+    } finally {
+      restoreFetch();
+    }
   },
 };
 
 export const ClearResetsSearch: Story = {
   parameters: {
     docs: {
-      description: { story: "지우기 버튼을 누르면 검색어와 결과, 선택 상태가 초기화됩니다." },
+      description: {
+        story: "지우기 버튼을 누르면 검색어와 결과, 선택 상태가 초기화됩니다.",
+      },
     },
   },
   play: async () => {
-    mockFetchOnce({ ok: true, results: mockAddressResults });
-    const canvas = within(document.body);
-
-    const searchInput = canvas.getByPlaceholderText("주소를 검색해주세요");
-    await userEvent.type(searchInput, "테헤란로{Enter}");
-
-    await waitFor(() => {
-      expect(canvas.getByText("서울 강남구 테헤란로 123")).toBeInTheDocument();
+    const restoreFetch = mockFetchOnce({
+      ok: true,
+      results: mockAddressResults,
     });
 
-    const clearButton = canvas.getByRole("button", { name: /지우기|clear/i });
-    await userEvent.click(clearButton);
+    try {
+      const canvas = within(document.body);
 
-    await waitFor(() => {
-      expect(canvas.getByText("주소를 검색하면 결과가 여기에 표시됩니다")).toBeInTheDocument();
-    });
+      const searchInput = canvas.getByPlaceholderText("주소를 검색해주세요");
+
+      await userEvent.type(searchInput, "테헤란로{Enter}");
+
+      await waitFor(() => {
+        expect(canvas.getByText("서울 강남구 테헤란로 123")).toBeInTheDocument();
+      });
+
+      const clearButton = canvas.getByRole("button", {
+        name: /지우기|clear/i,
+      });
+
+      await userEvent.click(clearButton);
+
+      await waitFor(() => {
+        expect(canvas.getByText("주소를 검색하면 결과가 여기에 표시됩니다")).toBeInTheDocument();
+      });
+    } finally {
+      restoreFetch();
+    }
   },
 };
