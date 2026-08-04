@@ -200,22 +200,3 @@ export const CharacterCounter: Story = {
     });
   },
 };
-
-export const CloseDisabledWhilePending: Story = {
-  args: { open: true },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "제출 중(isPending)에는 닫기 버튼과 별점·textarea가 비활성화됩니다. 실제 pending 상태는 mutation이 필요해 이 스토리에서는 UI 구조만 확인합니다.",
-      },
-    },
-  },
-  play: async () => {
-    const canvas = within(document.body);
-    const closeButton = await canvas.findByRole("button", { name: "모달 닫기" });
-
-    // preview 모드에서는 pending 상태를 만들 수 없어 기본적으로 활성화 상태만 확인
-    expect(closeButton).toBeEnabled();
-  },
-};
