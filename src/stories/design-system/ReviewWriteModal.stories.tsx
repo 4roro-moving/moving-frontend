@@ -103,11 +103,18 @@ export const RatingOnlySelected: Story = {
   play: async () => {
     const canvas = within(document.body);
 
-    // 별점 5개 중 4번째 별 클릭 (ReviewStarRating의 접근성 라벨은 실제 구현에 맞게 조정 필요)
-    const stars = await canvas.findAllByRole("radio");
-    await userEvent.click(stars[3]);
+    const fourthStar = await canvas.findByRole("button", {
+      name: "별점 4점",
+    });
 
-    const submitButton = canvas.getByRole("button", { name: "리뷰 등록" });
+    await userEvent.click(fourthStar);
+
+    expect(fourthStar).toHaveAttribute("aria-pressed", "true");
+
+    const submitButton = canvas.getByRole("button", {
+      name: "리뷰 등록",
+    });
+
     expect(submitButton).toBeDisabled();
   },
 };
@@ -149,19 +156,28 @@ export const ValidInputEnablesSubmit: Story = {
   play: async () => {
     const canvas = within(document.body);
 
-    const stars = await canvas.findAllByRole("radio");
-    await userEvent.click(stars[4]); // 5점 선택
+    const fifthStar = await canvas.findByRole("button", {
+      name: "별점 5점",
+    });
+
+    await userEvent.click(fifthStar);
+
+    expect(fifthStar).toHaveAttribute("aria-pressed", "true");
 
     const textarea = canvas.getByPlaceholderText("최소 10자 이상 입력해 주세요");
+
     await userEvent.type(textarea, "정말 친절하고 꼼꼼하게 도와주셨어요.");
 
-    const submitButton = canvas.getByRole("button", { name: "리뷰 등록" });
+    const submitButton = canvas.getByRole("button", {
+      name: "리뷰 등록",
+    });
+
     await waitFor(() => {
       expect(submitButton).toBeEnabled();
     });
 
-    // preview=true이므로 클릭해도 실제 요청은 발생하지 않고 에러도 뜨지 않아야 함
     await userEvent.click(submitButton);
+
     expect(canvas.queryByRole("alert")).not.toBeInTheDocument();
   },
 };
