@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef } from "react";
 
 import {
   clearInternalDetailNavigation,
-  hasInternalDetailNavigation,
+  consumeInternalDetailNavigation,
 } from "@/lib/utils/detailNavigation";
 
 /**
@@ -15,7 +15,7 @@ import {
 export function useDetailBackNavigation(fallbackHref: string) {
   const pathname = usePathname();
   const router = useRouter();
-  const isInternalEntryRef = useRef(pathname ? hasInternalDetailNavigation(pathname) : false);
+  const isInternalEntryRef = useRef(false);
 
   useEffect(() => {
     if (!pathname) {
@@ -23,22 +23,17 @@ export function useDetailBackNavigation(fallbackHref: string) {
       return;
     }
 
-    isInternalEntryRef.current = hasInternalDetailNavigation(pathname);
-
-    return () => {
-      clearInternalDetailNavigation(pathname);
-    };
+    isInternalEntryRef.current = consumeInternalDetailNavigation(pathname);
   }, [pathname]);
 
   return useCallback(() => {
-    if (pathname && isInternalEntryRef.current) {
-      clearInternalDetailNavigation(pathname);
-      router.back();
-      return;
-    }
-
     if (pathname) {
       clearInternalDetailNavigation(pathname);
+    }
+
+    if (pathname && isInternalEntryRef.current) {
+      router.back();
+      return;
     }
 
     router.replace(fallbackHref);

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { MouseEventHandler, ReactNode } from "react";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
 
@@ -9,7 +9,7 @@ interface ActiveEstimateBlockedProps {
   description?: ReactNode;
   buttonLabel?: string;
   href?: string;
-  onButtonClick?: () => void;
+  onButtonClick?: MouseEventHandler<HTMLAnchorElement>;
 }
 
 const DEFAULT_DESCRIPTION = (

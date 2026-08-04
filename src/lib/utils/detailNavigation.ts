@@ -1,70 +1,83 @@
 "use client";
 
-const INTERNAL_DETAIL_ENTRY_STORAGE_KEY = "moving:internal-detail-entries";
+const INTERNAL_DETAIL_ENTRY_STORAGE_KEY = "moving:internal-detail-entry";
 
-type InternalDetailEntryMap = Record<string, true>;
+interface NavigationClickEventLike {
+  altKey?: boolean;
+  button?: number;
+  ctrlKey?: boolean;
+  defaultPrevented?: boolean;
+  metaKey?: boolean;
+  shiftKey?: boolean;
+}
 
-function readInternalDetailEntries(): InternalDetailEntryMap {
+function readInternalDetailNavigation(): string | null {
   try {
-    const raw = sessionStorage.getItem(INTERNAL_DETAIL_ENTRY_STORAGE_KEY);
-
-    if (!raw) {
-      return {};
-    }
-
-    const parsed = JSON.parse(raw) as unknown;
-
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      return {};
-    }
-
-    return Object.entries(parsed).reduce<InternalDetailEntryMap>((entries, [pathname, value]) => {
-      if (value === true) {
-        entries[pathname] = true;
-      }
-
-      return entries;
-    }, {});
+    return sessionStorage.getItem(INTERNAL_DETAIL_ENTRY_STORAGE_KEY);
   } catch {
-    return {};
+    return null;
   }
 }
 
-function writeInternalDetailEntries(entries: InternalDetailEntryMap) {
+function clearStoredInternalDetailNavigation(pathname?: string) {
   try {
-    const nextEntries = Object.keys(entries);
+    const currentPathname = sessionStorage.getItem(INTERNAL_DETAIL_ENTRY_STORAGE_KEY);
 
-    if (nextEntries.length === 0) {
-      sessionStorage.removeItem(INTERNAL_DETAIL_ENTRY_STORAGE_KEY);
+    if (!currentPathname) {
       return;
     }
 
-    sessionStorage.setItem(INTERNAL_DETAIL_ENTRY_STORAGE_KEY, JSON.stringify(entries));
+    if (pathname && currentPathname !== pathname) {
+      return;
+    }
+
+    sessionStorage.removeItem(INTERNAL_DETAIL_ENTRY_STORAGE_KEY);
   } catch {
     // ignore
   }
 }
 
 export function markInternalDetailNavigation(pathname: string) {
-  const entries = readInternalDetailEntries();
-
-  entries[pathname] = true;
-  writeInternalDetailEntries(entries);
+  try {
+    sessionStorage.setItem(INTERNAL_DETAIL_ENTRY_STORAGE_KEY, pathname);
+  } catch {
+    // ignore
+  }
 }
 
-export function hasInternalDetailNavigation(pathname: string): boolean {
-  const entries = readInternalDetailEntries();
-
-  return entries[pathname] === true;
-}
-
-export function clearInternalDetailNavigation(pathname: string) {
-  const entries = readInternalDetailEntries();
-
-  if (!(pathname in entries)) {
+export function markInternalDetailNavigationOnClick(
+  event: NavigationClickEventLike,
+  pathname: string,
+) {
+  if (
+    event.defaultPrevented ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey ||
+    (typeof event.button === "number" && event.button !== 0)
+  ) {
     return;
   }
 
-  delete entries[pathname];
-  writeInternalDetailEntries(entries);
+  markInternalDetailNavigation(pathname);
+}
+
+export function consumeInternalDetailNavigation(pathname: string): boolean {
+  const pendingPathname = readInternalDetailNavigation();
+
+  if (pendingPathname === pathname) {
+    clearStoredInternalDetailNavigation(pathname);
+    return true;
+  }
+
+  if (pendingPathname) {
+    clearStoredInternalDetailNavigation();
+  }
+
+  return false;
+}
+
+export function clearInternalDetailNavigation(pathname: string) {
+  clearStoredInternalDetailNavigation(pathname);
 }

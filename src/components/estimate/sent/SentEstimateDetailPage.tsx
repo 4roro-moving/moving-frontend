@@ -9,6 +9,7 @@ import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPric
 import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import { useSentEstimateDetail } from "@/hooks/useSentEstimates";
 import FrameIcon from "@/icons/frame.svg";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
 import { formatKoreanDateTime } from "@/lib/utils/date";
 import type { SentEstimate } from "@/types/sentEstimate";
@@ -119,6 +120,7 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
   return (
     <EstimateDetailLayout
       showProfile={false}
+      backFallbackHref={APP_ROUTES.MOVER_ESTIMATES.SENT}
       contentClassName="pt-35 pb-64 md:pt-[46px] md:pb-80 lg:pt-[43px] lg:pb-37-5"
       rowClassName="gap-20 md:gap-32 lg:gap-0"
       mainClassName="gap-20 md:gap-30 lg:w-210"

@@ -7,7 +7,7 @@ import { Text } from "@/components/common/Text";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { markInternalDetailNavigation } from "@/lib/utils/detailNavigation";
+import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import { formatPrice, formatRating } from "@/lib/utils/estimateFormat";
 import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
@@ -95,7 +95,7 @@ export default function EstimateOfferCard({
           <div className="border-border-muted rounded-12 flex w-full items-end justify-between gap-12 border border-solid py-12 pr-20 pl-12 shadow-none">
             <Link
               href={detailHref}
-              onClick={() => markInternalDetailNavigation(detailHref)}
+              onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
               className="focus-visible:ring-border-brand rounded-8 flex min-w-0 flex-1 items-end gap-12 focus-visible:ring-2 focus-visible:outline-none"
               aria-label={`${displayName} 기사님 견적 상세 보기`}
             >
