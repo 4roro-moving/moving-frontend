@@ -27,8 +27,6 @@ interface EstimateDetailLayoutProps {
   heroName?: string;
   /** 히어로에 프로필 이미지 표시 여부 (요청 상세는 false) */
   showProfile?: boolean;
-  /** Header 우측 액션 (보낸 요청 취소 등) */
-  headerActions?: ReactNode;
   /** 상세 Header 뒤로가기 fallback 목록 경로 */
   backFallbackHref?: string;
   main: ReactNode;
@@ -54,7 +52,6 @@ export default function EstimateDetailLayout({
   heroImageUrl = null,
   heroName = "",
   showProfile = true,
-  headerActions,
   backFallbackHref,
   main,
   aside,
@@ -68,7 +65,7 @@ export default function EstimateDetailLayout({
 
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
-      <PageHeader title={headerTitle} backFallbackHref={backFallbackHref} actions={headerActions} />
+      <PageHeader title={headerTitle} backFallbackHref={backFallbackHref} />
 
       <DetailHeroBanner imageUrl={heroImageUrl} name={heroName} showProfile={showProfile} />
 
