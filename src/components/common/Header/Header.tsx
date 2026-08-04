@@ -100,11 +100,12 @@ const Header = ({
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
   return (
-    <header className="border-border-subtle bg-background-surface w-full max-w-full overflow-x-hidden border-b">
+    <header className="border-border-subtle bg-background-surface relative z-40 w-full max-w-full border-b">
       {/* Desktop 고정 GNB padding은 xl+ — Tablet에서 160px×2 padding + nav가 가로 스크롤을 만들던 문제 방지 */}
       {/* 2026.08.04 정슬기 - [수정] */}
+      {/* overflow-x-hidden 을 header 전체에 두면 알림/프로필 드롭다운이 잘리므로, 좌측 nav 영역에만 적용 */}
       <div className="h-gnb-height-mobile md:h-gnb-height-tablet xl:h-gnb-height-desktop px-margin-mobile md:px-margin-tablet xl:px-gnb-padding-x-desktop flex w-full max-w-full items-center justify-between gap-12 py-16 xl:py-26">
-        <div className="flex min-w-0 flex-1 items-center gap-24 overflow-hidden xl:gap-80">
+        <div className="flex min-w-0 flex-1 items-center gap-24 overflow-x-hidden xl:gap-80">
           <Link href="/" className="shrink-0">
             <Image src="/icons/logo_full.svg" alt="4roro-moving" width={116} height={44} priority />
           </Link>
@@ -146,7 +147,7 @@ const Header = ({
             </div>
           </div>
         ) : isLogin ? (
-          <div className="flex shrink-0 items-center gap-16 xl:gap-32">
+          <div className="relative z-50 flex shrink-0 items-center gap-16 xl:gap-32">
             <NotificationTrigger />
             <ProfileMenuTrigger
               key={pathname}
