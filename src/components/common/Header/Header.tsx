@@ -11,7 +11,6 @@ import ProfileMenuTrigger, {
 } from "@/components/common/Header/ProfileMenuTrigger";
 import { Text } from "@/components/common/Text";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { CloseIcon, MenuIcon } from "@/icons";
 import type { AuthRole } from "@/lib/auth/role";
 import { loadRole } from "@/lib/auth/role";

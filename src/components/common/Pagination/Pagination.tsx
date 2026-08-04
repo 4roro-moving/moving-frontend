@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/icons";
-import { cn } from "@/lib/utils/cn";
 import { MEDIA_QUERY } from "@/lib/constants/breakpoints";
+import { cn } from "@/lib/utils/cn";
 
 import PaginationEllipsis from "./PaginationEllipsis";
 
@@ -28,8 +27,38 @@ const RANGE_SIZE_LG = 5;
 const RANGE_SIZE_SM = 3;
 
 /**
+ * xl 미디어 쿼리 변경을 구독합니다.
+ *
+ * 모듈 스코프에 선언되어 함수 참조가 렌더링마다 변경되지 않으므로
+ * useSyncExternalStore가 불필요하게 구독을 해제하고 다시 등록하지 않습니다.
+ */
+function subscribeToXl(callback: () => void) {
+  const mediaQueryList = window.matchMedia(MEDIA_QUERY.xl);
+
+  mediaQueryList.addEventListener("change", callback);
+
+  return () => {
+    mediaQueryList.removeEventListener("change", callback);
+  };
+}
+
+/** 현재 뷰포트가 xl 브레이크포인트 이상인지 반환합니다. */
+function getXlSnapshot() {
+  return window.matchMedia(MEDIA_QUERY.xl).matches;
+}
+
+/**
+ * 서버에는 window가 없으므로 false를 반환합니다.
+ * 서버 렌더링과 hydration 시 동일한 초기 스냅샷을 사용합니다.
+ */
+function getServerSnapshot() {
+  return false;
+}
+
+/**
  * 현재 페이지 주변 `rangeSize`개의 연속 숫자를 보여 주고,
  * 양끝과 떨어지면 `...`으로 접습니다.
+ *
  * - Desktop(Figma lg): 1 2 3 4 5 … 9
  * - Mobile/Tablet(Figma sm): 1 2 3 … 9
  */
@@ -56,15 +85,18 @@ const getPageItems = (currentPage: number, pageCount: number, rangeSize: number)
     end = pageCount;
   } else {
     const radius = Math.floor((rangeSize - 1) / 2);
+
     start = currentPage - radius;
     end = currentPage + (rangeSize - 1 - radius);
   }
 
-  // 경계와 창 사이 간격이 1이면 별도 페이지 대신 창을 경계까지 확장해 rangeSize 유지
+  // 경계와 창 사이 간격이 1이면 별도 페이지를 추가하지 않고
+  // 페이지 범위를 경계까지 확장해 rangeSize를 유지합니다.
   if (start === 2) {
     start = 1;
     end = rangeSize;
   }
+
   if (end === pageCount - 1) {
     end = pageCount;
     start = pageCount - rangeSize + 1;
@@ -74,8 +106,13 @@ const getPageItems = (currentPage: number, pageCount: number, rangeSize: number)
 
   if (start > 1) {
     items.push({ type: "page", page: 1 });
+
     if (start > 2) {
-      items.push({ type: "ellipsis", start: 1, end: start });
+      items.push({
+        type: "ellipsis",
+        start: 1,
+        end: start,
+      });
     }
   }
 
@@ -85,8 +122,13 @@ const getPageItems = (currentPage: number, pageCount: number, rangeSize: number)
 
   if (end < pageCount) {
     if (end < pageCount - 1) {
-      items.push({ type: "ellipsis", start: end, end: pageCount });
+      items.push({
+        type: "ellipsis",
+        start: end,
+        end: pageCount,
+      });
     }
+
     items.push({ type: "page", page: pageCount });
   }
 
@@ -94,9 +136,13 @@ const getPageItems = (currentPage: number, pageCount: number, rangeSize: number)
 };
 
 const Pagination = ({ currentPage, pageCount, onPageChange, className }: PaginationProps) => {
-  const isLg = useMediaQuery(MEDIA_QUERY.xl);
+  const isLg = useSyncExternalStore(subscribeToXl, getXlSnapshot, getServerSnapshot);
+
   const [openEllipsisIndex, setOpenEllipsisIndex] = useState<number | null>(null);
-  const containerRef = useClickOutside<HTMLDivElement>(() => setOpenEllipsisIndex(null));
+
+  const containerRef = useClickOutside<HTMLDivElement>(() => {
+    setOpenEllipsisIndex(null);
+  });
 
   if (pageCount <= 0) {
     return null;
@@ -108,7 +154,9 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
   const pageItems = getPageItems(currentPage, pageCount, rangeSize);
 
   const goToPage = (page: number) => {
-    onPageChange(Math.min(Math.max(page, 1), pageCount));
+    const nextPage = Math.min(Math.max(page, 1), pageCount);
+
+    onPageChange(nextPage);
   };
 
   const itemClassName = cn(
