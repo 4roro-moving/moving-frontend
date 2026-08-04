@@ -91,13 +91,28 @@ const SEMANTIC_SOURCE = `<div className="flex flex-col gap-24">
   <Text as="h1" variant="pageTitle" className="text-text-primary">
     페이지 제목
   </Text>
-  <Text as="label" variant="fieldLabel" className="text-text-tertiary">
-    폼 필드 라벨
-  </Text>
+
+  <div className="flex flex-col gap-8">
+    <Text
+      as="label"
+      htmlFor="semantic-field"
+      variant="fieldLabel"
+      className="text-text-tertiary"
+    >
+      폼 필드 라벨
+    </Text>
+    <input
+      id="semantic-field"
+      type="text"
+      className="rounded-8 border border-border-default px-12 py-8"
+    />
+  </div>
+
   <Text as="h2" variant="modalTitle" className="text-text-primary">
     모달 제목
   </Text>
-</div>`;
+</div>
+`;
 
 const meta = {
   title: "Foundations/Typography",
@@ -214,30 +229,30 @@ export const SemanticVariants: Story = {
   },
   render: () => (
     <div className="flex flex-col gap-24">
-      <div className="flex flex-col gap-4">
-        <Text variant="xs-medium" className="text-text-muted">
-          pageTitle · base 2lg-semibold / xl 2xl-semibold
-        </Text>
-        <Text as="h1" variant="pageTitle" className="text-text-primary">
-          페이지 제목
-        </Text>
-      </div>
-      <div className="flex flex-col gap-4">
-        <Text variant="xs-medium" className="text-text-muted">
-          fieldLabel · base lg-semibold / xl xl-semibold
-        </Text>
-        <Text as="label" variant="fieldLabel" className="text-text-tertiary">
+      <Text as="h1" variant="pageTitle" className="text-text-primary">
+        페이지 제목
+      </Text>
+
+      <div className="flex flex-col gap-8">
+        <Text
+          as="label"
+          htmlFor="semantic-field"
+          variant="fieldLabel"
+          className="text-text-tertiary"
+        >
           폼 필드 라벨
         </Text>
+
+        <input
+          id="semantic-field"
+          type="text"
+          className="rounded-8 border-border-default border px-12 py-8"
+        />
       </div>
-      <div className="flex flex-col gap-4">
-        <Text variant="xs-medium" className="text-text-muted">
-          modalTitle · base 2lg-bold / xl 2xl-semibold
-        </Text>
-        <Text as="h2" variant="modalTitle" className="text-text-primary">
-          모달 제목
-        </Text>
-      </div>
+
+      <Text as="h2" variant="modalTitle" className="text-text-primary">
+        모달 제목
+      </Text>
     </div>
   ),
 };

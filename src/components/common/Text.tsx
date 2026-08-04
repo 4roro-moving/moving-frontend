@@ -226,7 +226,7 @@ export interface ResponsiveTextVariant {
 export const SEMANTIC_TEXT_VARIANTS = {
   pageTitle: { base: "2lg-semibold", xl: "2xl-semibold" },
   fieldLabel: { base: "lg-semibold", xl: "xl-semibold" },
-  modalTitle: { base: "2lg-bold", xl: "2xl-semibold" },
+  modalTitle: { base: "2lg-semibold", xl: "2xl-semibold" },
 } as const satisfies Record<string, ResponsiveTextVariant>;
 
 export type SemanticTextVariant = keyof typeof SEMANTIC_TEXT_VARIANTS;
