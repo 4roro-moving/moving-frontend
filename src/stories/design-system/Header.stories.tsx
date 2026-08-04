@@ -8,7 +8,9 @@ import { useAuthStore } from "@/stores/useAuthStore";
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false, staleTime: Infinity } },
 });
-queryClient.setQueryData(QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT, { unreadCount: 0 });
+// UNREAD_COUNT는 authScope("guest" | "authenticated-unresolved" | `user:${string}`)에 따라
+// 캐시 키가 달라지는 factory 함수라 호출해서 실제 키 배열을 넘겨야 합니다.
+queryClient.setQueryData(QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT("guest"), { unreadCount: 0 });
 
 const meta = {
   title: "Layout/Header",
