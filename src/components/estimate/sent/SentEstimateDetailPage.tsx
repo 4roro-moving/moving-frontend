@@ -100,7 +100,13 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
   const query = useSentEstimateDetail(estimateId);
 
   if (query.isPending) {
-    return <EstimateDetailQueryState title="견적 상세" message="견적을 불러오는 중이에요." />;
+    return (
+      <EstimateDetailQueryState
+        title="견적 상세"
+        message="견적을 불러오는 중이에요."
+        backFallbackHref={APP_ROUTES.MOVER_ESTIMATES.SENT}
+      />
+    );
   }
 
   if (query.isError || !query.data) {
@@ -108,6 +114,7 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
       <EstimateDetailQueryState
         title="견적 상세"
         message="견적을 불러오지 못했어요."
+        backFallbackHref={APP_ROUTES.MOVER_ESTIMATES.SENT}
         actionLabel="다시 시도"
         onAction={() => void query.refetch()}
       />
