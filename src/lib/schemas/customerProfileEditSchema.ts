@@ -23,14 +23,14 @@ const regionIdSchema = z.union([
   z.literal(17),
 ]);
 
+/**
+ * phone은 UI에서 disabled — 형식 검증으로 제출을 막지 않음
+ * (변경·전송은 buildCustomerProfileEditPayloads에서 처리)
+ */
 export const customerProfileEditSchema = z
   .object({
     name: z.string().trim().min(1, "성함을 입력해 주세요"),
-    phone: z
-      .string()
-      .min(1, "전화번호를 입력해 주세요")
-      .regex(/^\d+$/, "숫자만 입력해 주세요")
-      .regex(/^010\d{8}$/, "올바른 전화번호를 입력해 주세요"),
+    phone: z.string(),
     imageFile: z.custom<File | null>().nullable().optional(),
     serviceTypes: z.array(moveTypeSchema).min(1, "이용 서비스를 선택해 주세요"),
     regionId: regionIdSchema.nullable(),

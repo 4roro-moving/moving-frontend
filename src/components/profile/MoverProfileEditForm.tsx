@@ -8,6 +8,7 @@ import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import Textarea from "@/components/common/Input/Textarea";
 import { Text } from "@/components/common/Text";
+import Toast from "@/components/common/Toast/Toast";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
 import ProfileFormActions from "@/components/profile/ProfileFormActions";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
@@ -18,6 +19,7 @@ import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
 import { uploadProfileImageIfNeeded } from "@/lib/profile/uploadProfileImage";
 import { moverProfileSchema, type MoverProfileFormValues } from "@/lib/schemas/moverProfileSchema";
+import { ApiError } from "@/types/api";
 import type { MoveType } from "@/types/move";
 
 interface MoverProfileEditFormProps {
@@ -31,11 +33,14 @@ const MoverProfileEditForm = ({
 }: MoverProfileEditFormProps) => {
   const updateMoverProfile = useUpdateMoverProfile();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const {
     register,
     control,
     handleSubmit,
+    setError,
+    setFocus,
     formState: { errors, isValid, isSubmitting },
   } = useForm<MoverProfileFormValues>({
     resolver: zodResolver(moverProfileSchema),
@@ -69,7 +74,21 @@ const MoverProfileEditForm = ({
         serviceTypes: formValues.serviceTypes,
         ...(imageUrl ? { imageUrl } : {}),
       });
+      setToastMessage("프로필이 수정되었습니다.");
     } catch (error) {
+      if (
+        error instanceof ApiError &&
+        (error.status === 409 || error.code === "CONFLICT") &&
+        (error.message.includes("닉네임") || error.message.includes("별명"))
+      ) {
+        setError("nickname", {
+          type: "server",
+          message: error.message,
+        });
+        setFocus("nickname");
+        return;
+      }
+
       setSubmitError(getApiErrorMessage(error, "프로필 수정에 실패했습니다."));
     }
   });
@@ -184,6 +203,8 @@ const MoverProfileEditForm = ({
       ) : null}
 
       <ProfileFormActions isSubmitDisabled={!isValid || isPending} />
+
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </form>
   );
 };

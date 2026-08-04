@@ -8,6 +8,7 @@ import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text } from "@/components/common/Text";
+import Toast from "@/components/common/Toast/Toast";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
 import ProfileFormActions from "@/components/profile/ProfileFormActions";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
@@ -45,6 +46,7 @@ const CustomerProfileEditForm = ({
   const updateCustomerBasicInfo = useUpdateCustomerBasicInfo();
   const updateCustomerProfile = useUpdateCustomerProfile();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -52,6 +54,7 @@ const CustomerProfileEditForm = ({
     handleSubmit,
     setError,
     setFocus,
+    setValue,
     formState: { errors, isValid, isSubmitting },
   } = useForm<CustomerProfileEditFormValues>({
     resolver: zodResolver(customerProfileEditSchema),
@@ -68,6 +71,12 @@ const CustomerProfileEditForm = ({
       ...defaultValues,
     },
   });
+
+  const clearPasswordFields = () => {
+    setValue("currentPassword", "", { shouldValidate: true });
+    setValue("newPassword", "", { shouldValidate: true });
+    setValue("newPasswordConfirm", "", { shouldValidate: true });
+  };
 
   const isPending =
     isSubmitting || updateCustomerBasicInfo.isPending || updateCustomerProfile.isPending;
@@ -104,6 +113,7 @@ const CustomerProfileEditForm = ({
       if (basic) {
         await updateCustomerBasicInfo.mutateAsync(basic);
         didBasicSucceed = true;
+        clearPasswordFields();
       }
 
       if (profile) {
@@ -118,6 +128,8 @@ const CustomerProfileEditForm = ({
           throw profileError;
         }
       }
+
+      setToastMessage("프로필이 수정되었습니다.");
     } catch (error) {
       if (
         error instanceof ApiError &&
@@ -291,6 +303,8 @@ const CustomerProfileEditForm = ({
       ) : null}
 
       <ProfileFormActions isSubmitDisabled={!isValid || isPending} />
+
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </form>
   );
 };

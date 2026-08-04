@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import NotificationTrigger from "@/components/common/Header/notification";
 import HeaderSideNav from "@/components/common/Header/HeaderSideNav";
@@ -82,6 +82,8 @@ const Header = ({
   const pathname = usePathname();
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
   const [sideNavPathname, setSideNavPathname] = useState(pathname);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const wasSideNavOpenRef = useRef(false);
 
   if (pathname !== sideNavPathname) {
     setSideNavPathname(pathname);
@@ -89,6 +91,13 @@ const Header = ({
       setIsSideNavOpen(false);
     }
   }
+
+  useEffect(() => {
+    if (wasSideNavOpenRef.current && !isSideNavOpen) {
+      menuButtonRef.current?.focus();
+    }
+    wasSideNavOpenRef.current = isSideNavOpen;
+  }, [isSideNavOpen]);
 
   const user = useAuthStore((state) => state.user);
   const displayName = useAuthStore((state) => state.displayName);
@@ -178,6 +187,7 @@ const Header = ({
               role={resolvedRole}
             />
             <button
+              ref={menuButtonRef}
               type="button"
               className="text-icon-default focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none lg:hidden"
               aria-label="메뉴 열기"
@@ -196,6 +206,7 @@ const Header = ({
               <Text variant="md-semibold">로그인</Text>
             </Link>
             <button
+              ref={menuButtonRef}
               type="button"
               className="text-icon-default focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none lg:hidden"
               aria-label="메뉴 열기"

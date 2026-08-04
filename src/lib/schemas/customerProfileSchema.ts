@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { phoneSchema } from "@/lib/schemas/phoneSchema";
+
 const moveTypeSchema = z.enum(["SMALL", "HOME", "OFFICE"]);
 const regionIdSchema = z.union([
   z.literal(1),
@@ -20,12 +22,6 @@ const regionIdSchema = z.union([
   z.literal(16),
   z.literal(17),
 ]);
-
-const phoneSchema = z
-  .string()
-  .min(1, "전화번호를 입력해 주세요")
-  .regex(/^\d+$/, "숫자만 입력해 주세요")
-  .regex(/^010\d{8}$/, "올바른 전화번호를 입력해 주세요");
 
 export const createCustomerProfileSchema = (options: { requiresPhone: boolean }) =>
   z

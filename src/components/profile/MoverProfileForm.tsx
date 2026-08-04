@@ -47,6 +47,7 @@ const MoverProfileForm = ({
     control,
     handleSubmit,
     setError,
+    setFocus,
     formState: { errors, isValid, isSubmitting },
   } = useForm<MoverProfileFormValues>({
     resolver: zodResolver(createMoverProfileSchema({ requiresPhone })),
@@ -84,16 +85,24 @@ const MoverProfileForm = ({
       });
       router.replace(getRoleHomePath("MOVER"));
     } catch (error) {
-      if (
-        error instanceof ApiError &&
-        (error.status === 409 || error.code === "CONFLICT") &&
-        error.message.includes("전화번호")
-      ) {
-        setError("phone", {
-          type: "server",
-          message: error.message,
-        });
-        return;
+      if (error instanceof ApiError && (error.status === 409 || error.code === "CONFLICT")) {
+        if (error.message.includes("전화번호")) {
+          setError("phone", {
+            type: "server",
+            message: error.message,
+          });
+          setFocus("phone");
+          return;
+        }
+
+        if (error.message.includes("닉네임") || error.message.includes("별명")) {
+          setError("nickname", {
+            type: "server",
+            message: error.message,
+          });
+          setFocus("nickname");
+          return;
+        }
       }
 
       setSubmitError(getApiErrorMessage(error, "프로필 저장에 실패했습니다."));
@@ -119,8 +128,10 @@ const MoverProfileForm = ({
               <Input
                 id="mover-create-phone"
                 size="md"
-                readOnly
-                disabled
+                inputMode="numeric"
+                numericOnly
+                stripLeadingZeros={false}
+                placeholder="전화번호를 입력해 주세요"
                 error={errors.phone?.message}
                 {...register("phone")}
               />

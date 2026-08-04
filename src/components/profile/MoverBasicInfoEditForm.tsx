@@ -8,6 +8,7 @@ import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text } from "@/components/common/Text";
+import Toast from "@/components/common/Toast/Toast";
 import ProfileFormActions from "@/components/profile/ProfileFormActions";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
 import { useUpdateMoverBasicInfo } from "@/hooks/profile/useUpdateMoverBasicInfo";
@@ -32,12 +33,14 @@ const MoverBasicInfoEditForm = ({
 }: MoverBasicInfoEditFormProps) => {
   const updateMoverBasicInfo = useUpdateMoverBasicInfo();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     setError,
     setFocus,
+    setValue,
     formState: { errors, isValid, isSubmitting },
   } = useForm<MoverBasicInfoEditFormValues>({
     resolver: zodResolver(moverBasicInfoEditSchema),
@@ -63,6 +66,10 @@ const MoverBasicInfoEditForm = ({
         phone: formValues.phone,
         ...(hasPassword ? toPasswordChangePayload(formValues) : {}),
       });
+      setValue("currentPassword", "", { shouldValidate: true });
+      setValue("newPassword", "", { shouldValidate: true });
+      setValue("newPasswordConfirm", "", { shouldValidate: true });
+      setToastMessage("기본정보가 수정되었습니다.");
     } catch (error) {
       if (
         error instanceof ApiError &&
@@ -123,10 +130,8 @@ const MoverBasicInfoEditForm = ({
             <Input
               id="mover-basic-phone"
               size="md"
-              inputMode="numeric"
-              numericOnly
-              stripLeadingZeros={false}
-              placeholder="전화번호를 입력해 주세요"
+              readOnly
+              disabled
               error={errors.phone?.message}
               {...register("phone")}
             />
@@ -180,6 +185,8 @@ const MoverBasicInfoEditForm = ({
       ) : null}
 
       <ProfileFormActions isSubmitDisabled={!isValid || isPending} />
+
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </form>
   );
 };

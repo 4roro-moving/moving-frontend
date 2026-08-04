@@ -21,6 +21,11 @@ interface HeaderSideNavProps {
   links: HeaderSideNavLink[];
 }
 
+const DESKTOP_MEDIA_QUERY = "(min-width: 1024px)";
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 const isNavLinkActive = (pathname: string, href: string): boolean => {
   if (pathname === href) {
     return true;
@@ -44,7 +49,29 @@ const isNavLinkActive = (pathname: string, href: string): boolean => {
 const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
   const pathname = usePathname();
   const titleId = useId();
+  const panelRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
+    const handleDesktopChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        onClose();
+      }
+    };
+
+    if (mediaQuery.matches) {
+      onClose();
+      return;
+    }
+
+    mediaQuery.addEventListener("change", handleDesktopChange);
+    return () => mediaQuery.removeEventListener("change", handleDesktopChange);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -65,6 +92,34 @@ const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
       if (event.key === "Escape") {
         event.preventDefault();
         onClose();
+        return;
+      }
+
+      if (event.key !== "Tab" || !panelRef.current) {
+        return;
+      }
+
+      const focusable = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+      ).filter((element) => !element.hasAttribute("disabled") && element.tabIndex !== -1);
+
+      if (focusable.length === 0) {
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last?.focus();
+        return;
+      }
+
+      if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first?.focus();
       }
     };
 
@@ -91,6 +146,7 @@ const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
       />
 
       <nav
+        ref={panelRef}
         className="bg-background-surface absolute inset-y-0 right-0 flex w-[220px] flex-col"
         aria-labelledby={titleId}
         aria-modal="true"
