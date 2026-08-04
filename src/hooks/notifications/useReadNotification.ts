@@ -37,18 +37,19 @@ function markNotificationAsRead(notification: NotificationItem, readAt: string):
 export function useReadNotification() {
   const queryClient = useQueryClient();
   const { authScope } = useAuthQueryScope();
+  const listScopeQueryKey = QUERY_KEYS.NOTIFICATIONS.LIST_SCOPE(authScope);
   const unreadCountQueryKey = QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT(authScope);
 
   return useApiMutation<ReadNotificationResponse, number, ReadNotificationContext>({
     mutationFn: (notificationId) => readNotification(notificationId),
     onMutate: async (notificationId) => {
       await Promise.all([
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.LIST_ROOT }),
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT_ROOT }),
+        queryClient.cancelQueries({ queryKey: listScopeQueryKey }),
+        queryClient.cancelQueries({ queryKey: unreadCountQueryKey }),
       ]);
 
       const previousLists = queryClient.getQueriesData<NotificationListResponse>({
-        queryKey: QUERY_KEYS.NOTIFICATIONS.LIST_ROOT,
+        queryKey: listScopeQueryKey,
       });
       const previousByQuery = previousLists.map(([queryKey, current]) => ({
         queryKey,
@@ -69,7 +70,7 @@ export function useReadNotification() {
       const readAt = new Date().toISOString();
 
       queryClient.setQueriesData<NotificationListResponse>(
-        { queryKey: QUERY_KEYS.NOTIFICATIONS.LIST_ROOT },
+        { queryKey: listScopeQueryKey },
         (current) => {
           if (!current) {
             return current;
@@ -139,7 +140,7 @@ export function useReadNotification() {
       const updated = data.notification;
 
       queryClient.setQueriesData<NotificationListResponse>(
-        { queryKey: QUERY_KEYS.NOTIFICATIONS.LIST_ROOT },
+        { queryKey: listScopeQueryKey },
         (current) => {
           if (!current) {
             return current;
@@ -156,8 +157,8 @@ export function useReadNotification() {
     },
     onSettled: async () => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.LIST_ROOT }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT_ROOT }),
+        queryClient.invalidateQueries({ queryKey: listScopeQueryKey }),
+        queryClient.invalidateQueries({ queryKey: unreadCountQueryKey }),
       ]);
     },
   });

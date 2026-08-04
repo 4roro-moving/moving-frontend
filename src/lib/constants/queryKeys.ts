@@ -127,6 +127,7 @@ export const QUERY_KEYS = {
   NOTIFICATIONS: {
     ALL: ["notifications"] as const,
     LIST_ROOT: ["notifications", "list"] as const,
+    LIST_SCOPE: (authScope: AuthQueryScope) => ["notifications", "list", authScope] as const,
     LIST: (authScope: AuthQueryScope, page: number, limit: number) =>
       ["notifications", "list", authScope, { page, limit }] as const,
     UNREAD_COUNT_ROOT: ["notifications", "unread-count"] as const,
