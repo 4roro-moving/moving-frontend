@@ -235,8 +235,8 @@ const Header = ({
           </Link>
 
           {/* Mobile은 햄버거 전까지 링크 숨김 — 좁은 폭에서 GNB 가로 스크롤 방지 */}
-          <nav aria-label="주요 메뉴" className="hidden min-w-0 md:block">
-            <ul className="flex items-center gap-16 md:gap-24 xl:gap-40">
+          <nav aria-label="주요 메뉴" className="hidden min-w-0 xl:block">
+            <ul className="flex items-center xl:gap-40">
               {navLinks.map((link) => {
                 const isActive = isNavLinkActive(pathname, link.href);
 
