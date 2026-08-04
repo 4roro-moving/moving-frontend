@@ -49,7 +49,7 @@ const isNavLinkActive = (pathname: string, href: string): boolean => {
 const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
   const pathname = usePathname();
   const titleId = useId();
-  const panelRef = useRef<HTMLElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -145,12 +145,13 @@ const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
         onClick={onClose}
       />
 
-      <nav
+      <div
         ref={panelRef}
         className="bg-background-surface absolute inset-y-0 right-0 flex w-[220px] flex-col"
-        aria-labelledby={titleId}
-        aria-modal="true"
         role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
       >
         <div className="border-border-subtle h-gnb-height-mobile flex items-center justify-end border-b px-16 py-10">
           <h2 id={titleId} className="sr-only">
@@ -167,32 +168,34 @@ const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
           </button>
         </div>
 
-        <ul className="flex flex-col">
-          {links.map((link) => {
-            const isActive = isNavLinkActive(pathname, link.href);
+        <nav aria-label="모바일 주요 메뉴">
+          <ul className="flex flex-col">
+            {links.map((link) => {
+              const isActive = isNavLinkActive(pathname, link.href);
 
-            return (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  aria-current={isActive ? "page" : undefined}
-                  className={cn(
-                    "flex items-center px-20 py-24 transition-colors",
-                    isActive
-                      ? "text-nav-text-active"
-                      : "text-text-primary hover:text-nav-text-active",
-                  )}
-                  onClick={onClose}
-                >
-                  <Text as="span" variant="lg-medium">
-                    {link.label}
-                  </Text>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "flex items-center px-20 py-24 transition-colors",
+                      isActive
+                        ? "text-nav-text-active"
+                        : "text-text-primary hover:text-nav-text-active",
+                    )}
+                    onClick={onClose}
+                  >
+                    <Text as="span" variant="lg-medium">
+                      {link.label}
+                    </Text>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </div>
     </div>,
     document.body,
   );
