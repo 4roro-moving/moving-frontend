@@ -18,7 +18,7 @@ export function EstimateDetailInfoRow({ label, value }: EstimateDetailInfoRowPro
   return (
     // 2026.07.24 정슬기 - [수정] Mobile에서도 라벨·값 가로 배치, 긴 주소 줄바꿈
     // 2026.07.25 정슬기 - [수정] Desktop 라벨 90 + gap 23 (값 x=113), 좌측 정렬 (Figma 8091:48009)
-    <div className="flex w-full items-start justify-between gap-12 sm:items-center sm:justify-start sm:gap-24 xl:gap-23">
+    <div className="flex w-full items-start justify-between md:items-center md:justify-start md:gap-12 xl:gap-23">
       <Text as="dt" variant="lg-regular" className="text-text-weak w-90 shrink-0">
         {label}
       </Text>
