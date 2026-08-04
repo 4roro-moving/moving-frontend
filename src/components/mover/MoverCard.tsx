@@ -11,6 +11,7 @@ import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips"
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { DriverBadgeIcon, LikeIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import type { Mover } from "@/types/mover";
 
@@ -174,6 +175,7 @@ function MoverCard({
       >
         <Link
           href={detailHref}
+          onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
           aria-label={detailLabel}
           className="focus-visible:ring-border-brand rounded-16 absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none"
         />
@@ -229,6 +231,7 @@ function MoverCard({
     >
       <Link
         href={detailHref}
+        onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
         aria-label={detailLabel}
         className="focus-visible:ring-border-brand rounded-16 min-[744px]:rounded-20 absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none"
       />

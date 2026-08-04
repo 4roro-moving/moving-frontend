@@ -86,6 +86,9 @@ export const QUERY_KEYS = {
     ALL: ["estimates"],
     SENT_LIST_ROOT: ["estimates", "sent", "list"] as const,
     SENT_LIST: (status?: string) => ["estimates", "sent", "list", { status }] as const,
+    // DETAIL_ROOT(["estimates","detail"])와 접두사가 다름 — 취소 시 별도 invalidate 필요
+    // 2026.08.04 정슬기 - [추가]
+    SENT_DETAIL_ROOT: ["estimates", "sent", "detail"] as const,
     SENT_DETAIL: (estimateId: number) => ["estimates", "sent", "detail", estimateId] as const,
     RECEIVED: ["estimates", "received"] as const,
     // 받았던/대기 상세 모두 GET /estimates/:estimateId — 동일 DETAIL 키 공유

@@ -16,8 +16,10 @@ export const ESTIMATE_DETAIL_LAYOUT_CLASSES = {
   // 본문+aside 블록을 컨테이너 안에서 가운데로 모아 좌측 치우침을 줄인다
   rowClassName: "gap-32 md:gap-40 xl:justify-center xl:gap-40",
   // Desktop 본문 840 + aside 320 + gap 40 = 1200 (container)
+  // overflow-clip 제거 — focus ring이 aside 경계에서 잘리지 않도록 폭만으로 제한
+  // 2026.08.04 정슬기 - [수정]
   mainClassName: "gap-24 md:gap-30 xl:w-210 xl:shrink-0",
-  asideClassName: "gap-28 md:gap-40 xl:w-80 xl:shrink-0 xl:overflow-clip",
+  asideClassName: "gap-28 md:gap-40 xl:w-80 xl:shrink-0",
 } as const;
 
 interface EstimateDetailLayoutProps {
@@ -29,6 +31,9 @@ interface EstimateDetailLayoutProps {
   /** Header 우측 액션 (optional — 다른 상세 화면 무영향) */
   // 2026.08.03 정슬기 - [추가]
   headerActions?: ReactNode;
+  /** 상세 Header 뒤로가기 fallback 목록 경로 */
+  // 2026.08.03 정슬기 - [추가]
+  backFallbackHref?: string;
   main: ReactNode;
   aside?: ReactNode;
   /** main+aside 바깥 여백·폭. Figma 화면별로 다를 수 있음 */
@@ -53,6 +58,7 @@ export default function EstimateDetailLayout({
   heroName = "",
   showProfile = true,
   headerActions,
+  backFallbackHref,
   main,
   aside,
   contentClassName,
@@ -63,7 +69,11 @@ export default function EstimateDetailLayout({
 }: EstimateDetailLayoutProps) {
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
-      <EstimateDetailHeader title={title} actions={headerActions} />
+      <EstimateDetailHeader
+        title={title}
+        backFallbackHref={backFallbackHref}
+        actions={headerActions}
+      />
       <DetailHeroBanner imageUrl={heroImageUrl} name={heroName} showProfile={showProfile} />
 
       <div
@@ -100,6 +110,9 @@ interface EstimateDetailQueryStateProps {
   onAction?: () => void;
   /** 에러 시 목록 링크 등 추가 액션 */
   secondaryAction?: ReactNode;
+  /** 로딩·에러 Header 뒤로가기 fallback */
+  // 2026.08.03 정슬기 - [추가]
+  backFallbackHref?: string;
 }
 
 /** 상세 로딩·에러 — Header만 두고 상태 메시지 표시 */
@@ -109,10 +122,11 @@ export function EstimateDetailQueryState({
   actionLabel,
   onAction,
   secondaryAction,
+  backFallbackHref,
 }: EstimateDetailQueryStateProps) {
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col overflow-x-hidden">
-      <EstimateDetailHeader title={title} />
+      <EstimateDetailHeader title={title} backFallbackHref={backFallbackHref} />
       <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center xl:px-0">
         <div className="max-w-container-desktop w-full">
           <EstimatesQueryStatus message={message} actionLabel={actionLabel} onAction={onAction} />

@@ -9,6 +9,7 @@ import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { useDesignateMover } from "@/hooks/useDesignateMover";
 
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { markInternalDetailNavigation } from "@/lib/utils/detailNavigation";
 import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
 
 interface UseMoverDesignationOptions {
@@ -108,7 +109,10 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
 
     // 확정 견적이 있으면 추가 지정을 막고 현재 진행 중인 견적 상세로 안내
     if (nextCtaState.status === "confirmed" && nextCtaState.estimateRequestId !== null) {
-      router.push(APP_ROUTES.ESTIMATES.REQUEST_DETAIL(nextCtaState.estimateRequestId));
+      const detailHref = APP_ROUTES.ESTIMATES.REQUEST_DETAIL(nextCtaState.estimateRequestId);
+
+      markInternalDetailNavigation(detailHref);
+      router.push(detailHref);
       return;
     }
 
