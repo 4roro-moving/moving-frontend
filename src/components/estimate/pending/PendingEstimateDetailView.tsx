@@ -17,6 +17,7 @@ import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useEstimateDetail } from "@/hooks/useEstimateDetail";
 import { useEstimateRequestCancelFlow } from "@/hooks/useEstimateRequestCancelFlow";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { isCancelableEstimateRequestStatus } from "@/lib/utils/estimateFormat";
 import type { EstimateDetail } from "@/types/estimate";
@@ -59,6 +60,7 @@ function PendingEstimateDetailContent({ estimateId, data }: PendingEstimateDetai
         rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
         mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
         asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "xl:gap-80 xl:pt-40")}
+        backFallbackHref={APP_ROUTES.ESTIMATES.PENDING}
         main={
           <>
             <div className="flex w-full flex-col gap-26">
@@ -116,13 +118,18 @@ function PendingEstimateDetailContent({ estimateId, data }: PendingEstimateDetai
  * 대기 견적 상세 Desktop (Figma 8091:47263)
  * // 2026.07.25 정슬기 - [추가]
  * // 2026.07.30 정슬기 - [수정] useEstimateDetail·Layout·Actions 통합
- * // 2026.08.03 정슬기 - [수정] 레이아웃·코멘트·요청 취소 액션
+ * // 2026.08.03 정슬기 - [수정] 레이아웃·코멘트·요청 취소 액션 · Header 뒤로가기
  */
 export default function PendingEstimateDetailView({ estimateId }: PendingEstimateDetailViewProps) {
   const { data, isLoading, isError, error, refetch } = useEstimateDetail(estimateId);
 
   if (isLoading) {
-    return <EstimateDetailQueryState message="견적 상세를 불러오는 중입니다." />;
+    return (
+      <EstimateDetailQueryState
+        message="견적 상세를 불러오는 중입니다."
+        backFallbackHref={APP_ROUTES.ESTIMATES.PENDING}
+      />
+    );
   }
 
   if (isError || !data) {
@@ -133,6 +140,7 @@ export default function PendingEstimateDetailView({ estimateId }: PendingEstimat
         onAction={() => {
           void refetch();
         }}
+        backFallbackHref={APP_ROUTES.ESTIMATES.PENDING}
       />
     );
   }

@@ -117,7 +117,11 @@ export default function EstimateRequestDetailView({
 
   if (isLoading) {
     return (
-      <EstimateDetailQueryState title="견적 상세" message="견적 요청 상세를 불러오는 중입니다." />
+      <EstimateDetailQueryState
+        title="견적 상세"
+        message="견적 요청 상세를 불러오는 중입니다."
+        backFallbackHref={APP_ROUTES.ESTIMATES.REQUESTS}
+      />
     );
   }
 
@@ -138,6 +142,7 @@ export default function EstimateRequestDetailView({
         onAction={() => {
           void refetch();
         }}
+        backFallbackHref={APP_ROUTES.ESTIMATES.REQUESTS}
         secondaryAction={
           <div className="flex w-full justify-center pb-40">
             <Link
@@ -163,6 +168,7 @@ export default function EstimateRequestDetailView({
       <EstimateDetailLayout
         title="견적 상세"
         showProfile={false}
+        backFallbackHref={APP_ROUTES.ESTIMATES.REQUESTS}
         contentClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName}
         rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
         mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}

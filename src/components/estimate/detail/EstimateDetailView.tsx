@@ -18,6 +18,7 @@ import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useEstimateDetail } from "@/hooks/useEstimateDetail";
 import { useEstimateRequestCancelFlow } from "@/hooks/useEstimateRequestCancelFlow";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { isCancelableEstimateRequestStatus } from "@/lib/utils/estimateFormat";
 import type { EstimateDetail } from "@/types/estimate";
@@ -61,6 +62,7 @@ function EstimateDetailContent({ estimateId, data }: EstimateDetailContentProps)
         rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
         mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
         asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "xl:pt-40")}
+        backFallbackHref={APP_ROUTES.ESTIMATES.RECEIVED}
         main={
           <>
             <div className="flex w-full flex-col gap-20 md:gap-26">
@@ -120,13 +122,18 @@ function EstimateDetailContent({ estimateId, data }: EstimateDetailContentProps)
  * 받았던 견적 상세
  * // 2026.07.24 정슬기 - [추가]
  * // 2026.07.30 정슬기 - [수정] EstimateDetailLayout·공통 Actions 사용
- * // 2026.08.03 정슬기 - [수정] 레이아웃·코멘트·요청 취소 액션
+ * // 2026.08.03 정슬기 - [수정] 레이아웃·코멘트·요청 취소 액션 · Header 뒤로가기
  */
 export default function EstimateDetailView({ estimateId }: EstimateDetailViewProps) {
   const { data, isLoading, isError, error, refetch } = useEstimateDetail(estimateId);
 
   if (isLoading) {
-    return <EstimateDetailQueryState message="견적 상세를 불러오는 중입니다." />;
+    return (
+      <EstimateDetailQueryState
+        message="견적 상세를 불러오는 중입니다."
+        backFallbackHref={APP_ROUTES.ESTIMATES.RECEIVED}
+      />
+    );
   }
 
   if (isError || !data) {
@@ -137,6 +144,7 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
         onAction={() => {
           void refetch();
         }}
+        backFallbackHref={APP_ROUTES.ESTIMATES.RECEIVED}
       />
     );
   }
