@@ -125,7 +125,7 @@ function MoverCard({
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
 
   const toggleFavorite = (nextIsFavorite: boolean) => {
-    if (favoriteMutation.isPending || mover.isFavorite === nextIsFavorite) {
+    if (mover.isFavorite === nextIsFavorite) {
       return;
     }
 

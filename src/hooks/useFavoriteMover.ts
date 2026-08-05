@@ -54,6 +54,10 @@ interface FavoriteMoverVariables {
   nextIsFavorite: boolean;
 }
 
+interface FavoriteMoverRequest extends FavoriteMoverVariables {
+  requestId: number;
+}
+
 interface FavoriteMutationContext {
   previousReceived: ReceivedEstimatePanel[] | undefined;
   previousDetails: [readonly unknown[], EstimateDetail | undefined][];
@@ -61,6 +65,31 @@ interface FavoriteMutationContext {
   previousMoverLists: [readonly unknown[], InfiniteData<MoversListResult> | undefined][];
   previousFavoriteMovers: [readonly unknown[], FavoriteMoversCacheData | undefined][];
   previousMoverDetail: MoverDetail | undefined;
+}
+
+const favoriteRequestQueues = new Map<string, Promise<void>>();
+const latestFavoriteRequestIds = new Map<string, number>();
+let favoriteRequestId = 0;
+
+/** 같은 기사님의 연속 찜 요청은 클릭 순서대로 서버에 전달 */
+function enqueueFavoriteRequest({ moverId, nextIsFavorite }: FavoriteMoverRequest) {
+  const previousRequest = favoriteRequestQueues.get(moverId) ?? Promise.resolve();
+  const request = previousRequest
+    .catch(() => undefined)
+    .then(() => (nextIsFavorite ? addFavoriteMover(moverId) : removeFavoriteMover(moverId)));
+  const queueTail = request.then(
+    () => undefined,
+    () => undefined,
+  );
+
+  favoriteRequestQueues.set(moverId, queueTail);
+  void queueTail.finally(() => {
+    if (favoriteRequestQueues.get(moverId) === queueTail) {
+      favoriteRequestQueues.delete(moverId);
+    }
+  });
+
+  return request;
 }
 
 /** 기사님 단건 찜 추가/해제 + 관련 목록·상세 낙관적 업데이트 */
@@ -89,12 +118,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   };
 
   const mutation = useMutation({
-    mutationFn: async ({ moverId, nextIsFavorite }: FavoriteMoverVariables) => {
-      if (nextIsFavorite) {
-        return addFavoriteMover(moverId);
-      }
-      return removeFavoriteMover(moverId);
-    },
+    mutationFn: enqueueFavoriteRequest,
     onMutate: async ({ moverId, nextIsFavorite }): Promise<FavoriteMutationContext> => {
       const moverDetailQueryKey = getMoverDetailQueryKey(authScope, moverId);
 
@@ -214,7 +238,10 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       };
     },
     onError: (error, variables, context) => {
-      if (context) {
+      const isLatestRequest =
+        latestFavoriteRequestIds.get(variables.moverId) === variables.requestId;
+
+      if (context && isLatestRequest) {
         queryClient.setQueryData(QUERY_KEYS.ESTIMATES.RECEIVED, context.previousReceived);
         context.previousDetails.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
@@ -239,14 +266,24 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         return;
       }
 
-      onErrorRef.current?.(getApiErrorMessage(error));
+      if (isLatestRequest) {
+        onErrorRef.current?.(getApiErrorMessage(error));
+      }
     },
-    onSettled: () => {
+    onSettled: (_data, _error, variables) => {
+      if (latestFavoriteRequestIds.get(variables.moverId) !== variables.requestId) {
+        return;
+      }
+
+      latestFavoriteRequestIds.delete(variables.moverId);
       void invalidateFavoriteRelatedQueries(queryClient, authScope);
     },
   });
 
-  const mutate: typeof mutation.mutate = (variables, mutateOptions) => {
+  const mutate = (
+    variables: FavoriteMoverVariables,
+    mutateOptions?: Parameters<typeof mutation.mutate>[1],
+  ) => {
     if (auth.isPending) {
       return;
     }
@@ -260,10 +297,15 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       return;
     }
 
-    mutation.mutate(variables, mutateOptions);
+    const requestId = ++favoriteRequestId;
+    latestFavoriteRequestIds.set(variables.moverId, requestId);
+    mutation.mutate({ ...variables, requestId }, mutateOptions);
   };
 
-  const mutateAsync: typeof mutation.mutateAsync = (variables, mutateOptions) => {
+  const mutateAsync = (
+    variables: FavoriteMoverVariables,
+    mutateOptions?: Parameters<typeof mutation.mutateAsync>[1],
+  ) => {
     if (auth.isPending) {
       return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
     }
@@ -277,7 +319,9 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       return Promise.reject(new Error(CUSTOMER_REQUIRED_MESSAGE));
     }
 
-    return mutation.mutateAsync(variables, mutateOptions);
+    const requestId = ++favoriteRequestId;
+    latestFavoriteRequestIds.set(variables.moverId, requestId);
+    return mutation.mutateAsync({ ...variables, requestId }, mutateOptions);
   };
 
   return { ...mutation, canToggleFavorite, mutate, mutateAsync };

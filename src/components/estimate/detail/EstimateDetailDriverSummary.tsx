@@ -91,10 +91,9 @@ export default function EstimateDetailDriverSummary({
           </Text>
           <button
             type="button"
-            className="focus-visible:ring-border-brand rounded-8 flex min-h-44 min-w-44 shrink-0 items-center justify-center gap-4 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+            className="focus-visible:ring-border-brand rounded-8 flex min-h-44 min-w-44 shrink-0 items-center justify-center gap-4 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none"
             aria-label={`${displayName} 기사님 찜, 현재 찜 ${mover.favoriteCount}개`}
             aria-pressed={mover.isFavorite}
-            disabled={favoriteMutation.isPending}
             onClick={() =>
               favoriteMutation.mutate({
                 moverId: mover.id,
