@@ -147,7 +147,9 @@ const Header = ({
     ? LOGGED_OUT_LINKS
     : resolvedRole === "MOVER"
       ? MOVER_LOGGED_IN_LINKS
-      : CUSTOMER_LOGGED_IN_LINKS;
+      : resolvedRole === "CUSTOMER"
+        ? CUSTOMER_LOGGED_IN_LINKS
+        : []; // role 미확정·ADMIN 등 — 고객 링크 기본값 사용 안 함
 
   const sideNavLinks = !isLogin
     ? [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
@@ -165,7 +167,11 @@ const Header = ({
   const shouldHideNavLinks = isLogin && (isIncomplete || isCompletionUnresolved);
 
   const completedProfileMenuItems =
-    resolvedRole === "MOVER" ? MOVER_PROFILE_MENU_ITEMS : CUSTOMER_PROFILE_MENU_ITEMS;
+    resolvedRole === "MOVER"
+      ? MOVER_PROFILE_MENU_ITEMS
+      : resolvedRole === "CUSTOMER"
+        ? CUSTOMER_PROFILE_MENU_ITEMS
+        : [PROFILE_LOGOUT_MENU_ITEM];
 
   const profileMenuItems: ProfileMenuItem[] = !isLogin
     ? completedProfileMenuItems

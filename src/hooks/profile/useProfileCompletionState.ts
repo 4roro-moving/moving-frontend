@@ -40,7 +40,9 @@ export const useProfileCompletionState = (
 
   const isAuthPending = !hasHydrated || isCheckingAuth;
   const isStatusPending = shouldCheck && statusQuery.isPending;
-  const isCompletionUnresolved = isAuthPending || isStatusPending;
+  // 토큰만 있고 role 없음(힌트 실패 등) → 완료로 오인하지 않음
+  const hasNoRole = isAuthenticated && role == null;
+  const isCompletionUnresolved = isAuthPending || isStatusPending || hasNoRole;
 
   return {
     shouldCheck,
