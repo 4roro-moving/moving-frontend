@@ -17,7 +17,7 @@ interface FavoriteButtonProps {
   className?: string;
   iconClassName?: string;
   countClassName?: string;
-  onToggle?: (nextIsFavorite: boolean) => void;
+  onToggle: (nextIsFavorite: boolean) => void;
 }
 
 /** 기사님 찜 하트·개수 표시와 토글 접근성을 통일하는 공통 버튼 */
@@ -61,7 +61,7 @@ export function FavoriteButton({
     </>
   );
 
-  if (!interactive || !onToggle) {
+  if (!interactive) {
     return (
       <div
         className={cn("flex shrink-0 items-center", className)}
