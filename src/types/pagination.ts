@@ -10,9 +10,16 @@ export interface Pagination {
   hasNext: boolean;
 }
 
+export interface CursorPagination {
+  limit: number;
+  totalCount: number;
+  hasNext: boolean;
+  nextCursor: string | null;
+}
+
 /** GET 목록 API의 success + data + pagination 응답 */
-export interface PaginatedApiSuccessResponse<T> {
+export interface PaginatedApiSuccessResponse<T, TPagination = Pagination> {
   success: true;
   data: T;
-  pagination: Pagination;
+  pagination: TPagination;
 }

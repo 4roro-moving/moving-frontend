@@ -6,11 +6,20 @@ export interface ApiSuccessResponse<T> {
   data: T;
 }
 
+export interface ApiErrorData {
+  /** BE `error.data` (zod issues 배열 등) */
+  details?: unknown;
+  path?: string;
+  method?: string;
+  timestamp?: string;
+}
+
 export interface ApiErrorResponse {
   success: false;
   error: {
     code: ErrorCode;
     message: string;
+    data?: unknown;
   };
   path?: string;
   method?: string;
@@ -20,9 +29,9 @@ export interface ApiErrorResponse {
 export class ApiError extends Error {
   status?: number;
   code?: ErrorCode;
-  data?: unknown; // path/method/timestamp 등 디버깅용 정보
+  data?: ApiErrorData;
 
-  constructor(message: string, status?: number, code?: ErrorCode, data?: unknown) {
+  constructor(message: string, status?: number, code?: ErrorCode, data?: ApiErrorData) {
     super(message);
     this.name = "ApiError";
     this.status = status;

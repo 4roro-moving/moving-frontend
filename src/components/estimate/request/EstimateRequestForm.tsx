@@ -335,11 +335,7 @@ export default function EstimateRequestForm() {
             )
           }
           buttonLabel={isConfirmedRequest ? "진행 중인 견적 보기" : "대기 중인 견적 보기"}
-          href={
-            isConfirmedRequest
-              ? activeRequestDetailHref
-              : APP_ROUTES.ESTIMATES.PENDING
-          }
+          href={isConfirmedRequest ? activeRequestDetailHref : APP_ROUTES.ESTIMATES.PENDING}
           onButtonClick={
             isConfirmedRequest
               ? (event) => markInternalDetailNavigationOnClick(event, activeRequestDetailHref)

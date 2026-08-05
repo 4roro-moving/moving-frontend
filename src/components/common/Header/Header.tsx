@@ -3,20 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import NotificationTrigger from "@/components/common/Header/notification";
+import HeaderSideNav from "@/components/common/Header/HeaderSideNav";
+import { isNavLinkActive } from "@/components/common/Header/isNavLinkActive";
 import ProfileMenuTrigger, {
   type ProfileMenuItem,
 } from "@/components/common/Header/ProfileMenuTrigger";
 import { Text } from "@/components/common/Text";
-import { useFocusTrap } from "@/hooks/useFocusTrap";
-import { CloseIcon, MenuIcon } from "@/icons";
+import { MenuIcon } from "@/icons";
 import type { AuthRole } from "@/lib/auth/role";
 import { loadRole } from "@/lib/auth/role";
 import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { MEDIA_QUERY } from "@/lib/constants/breakpoints";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -79,8 +79,13 @@ const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
 const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   {
     type: "link",
-    label: "프로필",
-    href: APP_ROUTES.MOVER_PROFILE,
+    label: "프로필 수정",
+    href: APP_ROUTES.MOVER_PROFILE_EDIT,
+  },
+  {
+    type: "link",
+    label: "기본정보 수정",
+    href: APP_ROUTES.MOVER_BASIC_EDIT,
   },
   {
     type: "action",
@@ -88,31 +93,6 @@ const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     action: "logout",
   },
 ];
-
-/**
- * GNB 메뉴 활성 여부.
- * 찜한 기사님(`/movers/favorites`)은 프로필 메뉴 항목이므로
- * 기사님 찾기 활성 상태에서 제외합니다.
- */
-function isNavLinkActive(pathname: string, href: string): boolean {
-  if (pathname === href) {
-    return true;
-  }
-
-  if (!pathname.startsWith(`${href}/`)) {
-    return false;
-  }
-
-  if (href === APP_ROUTES.MOVERS.ROOT) {
-    const favoritesPath = APP_ROUTES.MOVERS.FAVORITES;
-
-    if (pathname === favoritesPath || pathname.startsWith(`${favoritesPath}/`)) {
-      return false;
-    }
-  }
-
-  return true;
-}
 
 export interface HeaderProps {
   /** Server에서 refresh 쿠키로 전달. hydrate 전 깜빡임 방지용 */
@@ -130,8 +110,24 @@ const Header = ({
 }: HeaderProps) => {
   const pathname = usePathname();
   const mobileMenuId = useId();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const mobileMenuRef = useRef<HTMLElement>(null);
+  const [isSideNavOpen, setIsSideNavOpen] = useState(false);
+  const [sideNavPathname, setSideNavPathname] = useState(pathname);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const wasSideNavOpenRef = useRef(false);
+
+  if (pathname !== sideNavPathname) {
+    setSideNavPathname(pathname);
+    if (isSideNavOpen) {
+      setIsSideNavOpen(false);
+    }
+  }
+
+  useEffect(() => {
+    if (wasSideNavOpenRef.current && !isSideNavOpen) {
+      menuButtonRef.current?.focus();
+    }
+    wasSideNavOpenRef.current = isSideNavOpen;
+  }, [isSideNavOpen]);
 
   const user = useAuthStore((state) => state.user);
   const displayName = useAuthStore((state) => state.displayName);
@@ -152,6 +148,10 @@ const Header = ({
       ? MOVER_LOGGED_IN_LINKS
       : CUSTOMER_LOGGED_IN_LINKS;
 
+  const sideNavLinks = !isLogin
+    ? [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
+    : navLinks;
+
   const profileMenuItems =
     resolvedRole === "MOVER" ? MOVER_PROFILE_MENU_ITEMS : CUSTOMER_PROFILE_MENU_ITEMS;
 
@@ -160,45 +160,13 @@ const Header = ({
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
-  useFocusTrap({
-    containerRef: mobileMenuRef,
-    enabled: isMobileMenuOpen,
-    onEscape: () => setIsMobileMenuOpen(false),
-  });
-
-  useEffect(() => {
-    if (!isMobileMenuOpen) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isMobileMenuOpen]);
-
-  // xl 브레이크포인트 진입 시 모바일 메뉴를 닫아 focus trap·scroll lock 해제
-  useEffect(() => {
-    const mediaQuery = window.matchMedia(MEDIA_QUERY.xl);
-
-    const handleBreakpointChange = (event: MediaQueryListEvent) => {
-      if (event.matches) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    mediaQuery.addEventListener("change", handleBreakpointChange);
-
-    return () => {
-      mediaQuery.removeEventListener("change", handleBreakpointChange);
-    };
-  }, []);
+  const openSideNav = useCallback(() => setIsSideNavOpen(true), []);
+  const closeSideNav = useCallback(() => setIsSideNavOpen(false), []);
 
   return (
     <header className="border-border-subtle bg-background-surface relative z-40 w-full max-w-full border-b">
       {/* Desktop 고정 GNB padding은 xl+ — Tablet에서 과도한 padding으로 가로 스크롤이 생기는 문제 방지 */}
+      {/* 2026.08.04 정슬기 - [수정] */}
       {/* overflow-x-hidden을 header 전체에 두면 알림·프로필 드롭다운이 잘리므로 좌측 nav 영역에만 적용 */}
       <div className="h-gnb-height-mobile md:h-gnb-height-tablet xl:h-gnb-height-desktop px-margin-mobile md:px-margin-tablet xl:px-gnb-padding-x-desktop flex w-full max-w-full items-center justify-between gap-12 py-16 xl:py-26">
         <div className="flex min-w-0 flex-1 items-center gap-24 overflow-x-hidden xl:gap-80">
@@ -235,6 +203,7 @@ const Header = ({
           </Link>
 
           {/* Mobile은 햄버거 전까지 링크 숨김 — 좁은 폭에서 GNB 가로 스크롤 방지 */}
+          {/* 2026.08.04 정슬기 - [수정] */}
           <nav aria-label="주요 메뉴" className="hidden min-w-0 xl:block">
             <ul className="flex items-center xl:gap-40">
               {navLinks.map((link) => {
@@ -264,121 +233,62 @@ const Header = ({
         {showAuthSkeleton ? (
           <div className="flex shrink-0 items-center gap-16 xl:gap-32" aria-hidden>
             <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
-
             <div className="flex items-center gap-16">
               <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
               <div className="bg-background-subtle rounded-4 h-20 w-64 animate-pulse" />
             </div>
-
             <div className="bg-background-subtle rounded-4 size-24 animate-pulse xl:hidden" />
           </div>
         ) : isLogin ? (
           <div className="relative z-50 flex shrink-0 items-center gap-16 xl:gap-32">
             <NotificationTrigger />
-
             <ProfileMenuTrigger
               key={pathname}
               nickname={nickname}
               items={profileMenuItems}
               role={resolvedRole}
             />
-
             <button
+              ref={menuButtonRef}
               type="button"
               aria-label="주요 메뉴"
-              aria-expanded={isMobileMenuOpen}
+              aria-expanded={isSideNavOpen}
               aria-controls={mobileMenuId}
               className="focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none xl:hidden"
-              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              onClick={openSideNav}
             >
-              <MenuIcon className="size-24" />
+              <MenuIcon aria-hidden="true" className="size-24" />
             </button>
           </div>
         ) : (
-          <Link
-            href={getLoginRedirectPath()}
-            className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 flex h-40 shrink-0 items-center px-20 transition-colors"
-          >
-            <Text variant="md-semibold">로그인</Text>
-          </Link>
+          <div className="flex shrink-0 items-center gap-16">
+            <Link
+              href={getLoginRedirectPath()}
+              className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 hidden h-40 items-center px-20 transition-colors xl:flex"
+            >
+              <Text variant="md-semibold">로그인</Text>
+            </Link>
+            <button
+              ref={menuButtonRef}
+              type="button"
+              aria-label="주요 메뉴"
+              aria-expanded={isSideNavOpen}
+              aria-controls={mobileMenuId}
+              className="focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none xl:hidden"
+              onClick={openSideNav}
+            >
+              <MenuIcon aria-hidden="true" className="size-24" />
+            </button>
+          </div>
         )}
       </div>
 
-      <button
-        type="button"
-        aria-label="메뉴 닫기"
-        aria-hidden={!isMobileMenuOpen}
-        tabIndex={isMobileMenuOpen ? 0 : -1}
-        className={cn(
-          "bg-overlay-scrim fixed inset-0 z-[9999] transition-opacity duration-200 xl:hidden",
-          isMobileMenuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-        )}
-        onClick={() => setIsMobileMenuOpen(false)}
-      />
-
-      <aside
-        ref={mobileMenuRef}
+      <HeaderSideNav
         id={mobileMenuId}
-        role="dialog"
-        aria-modal="true"
-        aria-label="주요 메뉴"
-        aria-hidden={!isMobileMenuOpen}
-        inert={!isMobileMenuOpen}
-        tabIndex={-1}
-        className={cn(
-          "bg-background-surface fixed inset-y-0 right-0 z-[10000] flex w-[220px] flex-col transition-transform duration-200 ease-out focus:outline-none xl:hidden",
-          isMobileMenuOpen ? "translate-x-0" : "translate-x-full",
-        )}
-      >
-        <div className="border-border-subtle flex h-54 shrink-0 items-center justify-end border-b px-16 py-10">
-          <button
-            type="button"
-            aria-label="메뉴 닫기"
-            className="text-icon-default focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            <CloseIcon className="size-24" />
-          </button>
-        </div>
-
-        <nav aria-label="모바일 주요 메뉴">
-          <ul className="flex flex-col items-start">
-            {navLinks.map((link) => {
-              const isActive = isNavLinkActive(pathname, link.href);
-
-              return (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    aria-current={isActive ? "page" : undefined}
-                    className={cn(
-                      "flex w-[220px] items-center overflow-hidden px-20 py-24 transition-colors",
-                      isActive
-                        ? "text-text-primary"
-                        : "text-text-primary hover:bg-background-hover",
-                    )}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Text variant="lg-medium">{link.label}</Text>
-                  </Link>
-                </li>
-              );
-            })}
-
-            {!isLogin ? (
-              <li>
-                <Link
-                  href={getLoginRedirectPath()}
-                  className="text-text-primary hover:bg-background-hover flex w-[220px] items-center overflow-hidden px-20 py-24 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Text variant="lg-medium">로그인</Text>
-                </Link>
-              </li>
-            ) : null}
-          </ul>
-        </nav>
-      </aside>
+        isOpen={isSideNavOpen}
+        onClose={closeSideNav}
+        links={sideNavLinks}
+      />
     </header>
   );
 };

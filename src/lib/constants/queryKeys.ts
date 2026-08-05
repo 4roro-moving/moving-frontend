@@ -63,6 +63,13 @@ export const QUERY_KEYS = {
     DETAIL: (userId: string) => ["users", userId],
   },
 
+  PROFILES: {
+    CUSTOMER_ME: ["profiles", "customer", "me"] as const,
+    CUSTOMER_STATUS: ["profiles", "customer", "status"] as const,
+    MOVER_ME: ["profiles", "mover", "me"] as const,
+    MOVER_STATUS: ["profiles", "mover", "status"] as const,
+  },
+
   MOVERS: {
     ALL: ["movers"] as const,
     LIST: ["movers", "list"] as const,
@@ -113,6 +120,16 @@ export const QUERY_KEYS = {
     MOVERS_INFINITE: (authScope: AuthQueryScope, limit: number) =>
       [...getFavoriteMoversScopeQueryKey(authScope), "infinite", { limit }] as const,
     MOVER: (moverId: string) => ["favorites", "mover", moverId] as const,
+  },
+
+  CHATS: {
+    ALL: ["chats"] as const,
+    ROOM: (authScope: AuthQueryScope, roomId: number) =>
+      ["chats", authScope, "room", roomId] as const,
+    MESSAGES_ROOT: (authScope: AuthQueryScope, roomId: number) =>
+      ["chats", authScope, "room", roomId, "messages"] as const,
+    MESSAGES: (authScope: AuthQueryScope, roomId: number, limit: number) =>
+      ["chats", authScope, "room", roomId, "messages", { limit }] as const,
   },
 
   // 2026.07.25 정슬기 - [추가] 리뷰 쿼리 키
