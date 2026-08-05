@@ -1,18 +1,19 @@
-import { ensureFacebookSdk } from "@/lib/facebook/sbk";
+import { ensureFacebookSdk, hasFacebookAppId } from "@/lib/facebook/sdk";
 
 interface ShareFacebookHandlers {
   onError?: (message: string) => void;
-  onSuccess?: () => void;
 }
 
+/**
+ * Facebook Share Dialog (FB.ui).
+ * Share Dialog는 성공/취소 구분이 불안정하므로 성공 콜백은 다루지 않습니다.
+ */
 export async function shareFacebook({
   href,
   onError,
-  onSuccess,
 }: ShareFacebookHandlers & { href: string }): Promise<void> {
   try {
-    const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID?.trim();
-    if (!appId) {
+    if (!hasFacebookAppId()) {
       onError?.("페이스북 앱 설정이 필요합니다.");
       return;
     }
@@ -25,11 +26,9 @@ export async function shareFacebook({
         href,
         display: "popup",
       },
-      (response: FacebookShareResponse) => {
-        if (response && !response.error_code) {
-          onSuccess?.();
-        } else if (response?.error_message) {
-          onError?.(response.error_message);
+      (response) => {
+        if (response?.error_code && response.error_message) {
+          onError?.(decodeURIComponent(response.error_message.replace(/\+/g, " ")));
         }
       },
     );
@@ -39,11 +38,4 @@ export async function shareFacebook({
   }
 }
 
-export function hasFacebookAppId(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_FACEBOOK_APP_ID?.trim());
-}
-
-export function getFacebookAppId(): string | null {
-  const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID?.trim();
-  return appId || null;
-}
+export { getFacebookAppId, hasFacebookAppId } from "@/lib/facebook/sdk";

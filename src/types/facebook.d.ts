@@ -21,14 +21,15 @@ declare global {
 
   interface FacebookSDK {
     init: (config: FacebookSDKConfig) => void;
-    ui: (params: FacebookShareParams, callback?: (response: FacebookShareResponse) => void) => void;
-    AppEvents: {
-      logPageView: () => void;
-    };
+    ui: (
+      params: FacebookShareParams,
+      callback?: (response?: FacebookShareResponse) => void,
+    ) => void;
   }
 
   interface Window {
     FB?: FacebookSDK;
+    fbAsyncInit?: () => void;
   }
 }
 
