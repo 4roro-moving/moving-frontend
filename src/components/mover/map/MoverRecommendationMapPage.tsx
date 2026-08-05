@@ -6,12 +6,19 @@ import { useMemo, useState } from "react";
 
 import Button from "@/components/common/Button/Button";
 import Input from "@/components/common/Input/Input";
+import NavigationTabs from "@/components/common/NavigationTabs/NavigationTabs";
+import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import { DriverBadgeIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 
 type MatchType = "BOTH" | "DEPARTURE" | "DESTINATION";
+
+const MOVER_NAVIGATION_ITEMS = [
+  { href: APP_ROUTES.MOVERS.ROOT, label: "기사님 찾기", match: "exact" },
+  { href: APP_ROUTES.MOVERS.MAP, label: "기사님 추천", match: "exact" },
+] as const;
 
 interface MockMover {
   id: string;
@@ -249,24 +256,7 @@ export function MoverRecommendationMapPage() {
 
   return (
     <main className="bg-background-surface flex min-h-[calc(100dvh-88px)] flex-col">
-      <nav
-        aria-label="기사님 찾기 방식"
-        className="border-border-subtle flex h-64 shrink-0 items-end border-b px-24 lg:px-40"
-      >
-        <Link
-          href={APP_ROUTES.MOVERS.ROOT}
-          className="text-text-muted flex h-52 items-center border-b-2 border-transparent px-16 text-[16px] font-semibold"
-        >
-          기사님 찾기
-        </Link>
-        <Link
-          href={APP_ROUTES.MOVERS.MAP}
-          aria-current="page"
-          className="text-text-brand border-border-brand flex h-52 items-center border-b-2 px-16 text-[16px] font-semibold"
-        >
-          기사님 추천
-        </Link>
-      </nav>
+      <NavigationTabs ariaLabel="기사님 찾기 방식" items={MOVER_NAVIGATION_ITEMS} />
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <aside className="border-border-subtle z-10 flex w-full shrink-0 flex-col border-b bg-white lg:w-[430px] lg:border-r lg:border-b-0">
@@ -301,17 +291,19 @@ export function MoverRecommendationMapPage() {
                   </span>
                 }
               />
-              <select
-                value={moveType}
-                onChange={(event) => setMoveType(event.target.value)}
-                aria-label="이사 유형"
-                className="border-border-default text-text-secondary rounded-16 h-54 w-full border bg-white px-16 text-[16px] outline-none focus:border-[var(--color-border-brand)]"
+              <Select
+                desc="이사 유형 전체"
+                label="이사 유형"
+                defaultValue={moveType}
+                placeholderValue="ALL"
+                onChange={setMoveType}
+                className="w-full [&>button]:w-full"
               >
-                <option value="ALL">이사 유형 전체</option>
-                <option value="소형이사">소형이사</option>
-                <option value="가정이사">가정이사</option>
-                <option value="사무실이사">사무실이사</option>
-              </select>
+                <Select.Option value="ALL">이사 유형 전체</Select.Option>
+                <Select.Option value="소형이사">소형이사</Select.Option>
+                <Select.Option value="가정이사">가정이사</Select.Option>
+                <Select.Option value="사무실이사">사무실이사</Select.Option>
+              </Select>
               <Button
                 size="cta"
                 fullWidth
