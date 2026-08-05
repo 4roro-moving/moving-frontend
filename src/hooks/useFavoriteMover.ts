@@ -241,8 +241,8 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
 
       onErrorRef.current?.(getApiErrorMessage(error));
     },
-    onSettled: async () => {
-      await invalidateFavoriteRelatedQueries(queryClient, authScope);
+    onSettled: () => {
+      void invalidateFavoriteRelatedQueries(queryClient, authScope);
     },
   });
 
