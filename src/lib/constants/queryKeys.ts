@@ -63,6 +63,13 @@ export const QUERY_KEYS = {
     DETAIL: (userId: string) => ["users", userId],
   },
 
+  PROFILES: {
+    CUSTOMER_ME: ["profiles", "customer", "me"] as const,
+    CUSTOMER_STATUS: ["profiles", "customer", "status"] as const,
+    MOVER_ME: ["profiles", "mover", "me"] as const,
+    MOVER_STATUS: ["profiles", "mover", "status"] as const,
+  },
+
   MOVERS: {
     ALL: ["movers"] as const,
     LIST: ["movers", "list"] as const,
