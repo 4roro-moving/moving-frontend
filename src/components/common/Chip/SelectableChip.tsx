@@ -15,7 +15,8 @@ const selectableChipVariants = cva(
       },
       selected: {
         true: "border-border-brand bg-background-brand-muted text-text-brand",
-        false: "border-border-muted bg-background-subtle text-text-secondary",
+        false:
+          "border-border-muted bg-background-subtle text-text-secondary hover:border-border-brand",
       },
     },
     defaultVariants: {

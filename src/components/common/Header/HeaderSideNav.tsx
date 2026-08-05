@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type TransitionEvent } from "react";
 import { createPortal } from "react-dom";
 
 import { isNavLinkActive } from "@/components/common/Header/isNavLinkActive";
@@ -24,14 +24,20 @@ interface HeaderSideNavProps {
   links: HeaderSideNavLink[];
 }
 
-/** tablet·mobile GNB 사이드 네비게이션 (오른쪽 슬라이드) — 열릴 때만 mount */
+/** tablet·mobile GNB 사이드 네비게이션 — exit 애니메이션 후 unmount */
 const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
   const pathname = usePathname();
   const panelRef = useRef<HTMLElement>(null);
+  const [shouldRender, setShouldRender] = useState(false);
+
+  // props 변화에 맞춘 state 조정 (render-time). effect setState 린트 회피
+  if (isOpen && !shouldRender) {
+    setShouldRender(true);
+  }
 
   useFocusTrap({
     containerRef: panelRef,
-    enabled: isOpen,
+    enabled: isOpen && shouldRender,
     onEscape: onClose,
   });
 
@@ -61,7 +67,7 @@ const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
   }, [isOpen, onClose]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!shouldRender) {
       return;
     }
 
@@ -71,9 +77,17 @@ const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [isOpen]);
+  }, [shouldRender]);
 
-  if (typeof document === "undefined" || !isOpen) {
+  const handlePanelTransitionEnd = (event: TransitionEvent<HTMLElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.propertyName !== "transform") return;
+    if (isOpen) return;
+
+    setShouldRender(false);
+  };
+
+  if (typeof document === "undefined" || !shouldRender) {
     return null;
   }
 
@@ -82,7 +96,12 @@ const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
       <button
         type="button"
         aria-label="메뉴 닫기"
-        className="bg-overlay-scrim fixed inset-0 z-[9999] xl:hidden"
+        tabIndex={isOpen ? 0 : -1}
+        className={cn(
+          "bg-overlay-scrim fixed inset-0 z-[9999] transition-opacity duration-200 xl:hidden",
+          "starting:opacity-0",
+          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+        )}
         onClick={onClose}
       />
 
@@ -92,8 +111,14 @@ const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
         role="dialog"
         aria-modal="true"
         aria-label="주요 메뉴"
+        aria-hidden={!isOpen}
         tabIndex={-1}
-        className="bg-background-surface fixed inset-y-0 right-0 z-[10000] flex w-[220px] flex-col focus:outline-none xl:hidden"
+        onTransitionEnd={handlePanelTransitionEnd}
+        className={cn(
+          "bg-background-surface fixed inset-y-0 right-0 z-[10000] flex w-[220px] flex-col transition-transform duration-200 ease-out focus:outline-none xl:hidden",
+          "starting:translate-x-full",
+          isOpen ? "translate-x-0" : "translate-x-full",
+        )}
       >
         <div className="border-border-subtle flex h-54 shrink-0 items-center justify-end border-b px-16 py-10">
           <button
