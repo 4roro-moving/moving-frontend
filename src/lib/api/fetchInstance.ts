@@ -102,13 +102,14 @@ const buildTimeoutSignal = (signal?: AbortSignal): AbortSignal => {
   return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
 };
 
-type SuccessBody<T> = ApiSuccessResponse<T> | PaginatedApiSuccessResponse<T>;
+type SuccessBody<T, TPagination = Pagination> =
+  ApiSuccessResponse<T> | PaginatedApiSuccessResponse<T, TPagination>;
 
-const requestBody = async <T>(
+const requestBody = async <T, TPagination = Pagination>(
   endpoint: string,
   options: FetchRequestOptions = {},
   retry = true,
-): Promise<SuccessBody<T> | null> => {
+): Promise<SuccessBody<T, TPagination> | null> => {
   const {
     baseURL = BASE_URL,
     skipAuth,
@@ -131,7 +132,7 @@ const requestBody = async <T>(
   }
 
   const body = (await res.json().catch(() => ({}))) as
-    SuccessBody<T> | ApiErrorResponse | Record<string, never>;
+    SuccessBody<T, TPagination> | ApiErrorResponse | Record<string, never>;
 
   if (!res.ok || body.success === false) {
     const shouldRefresh =
@@ -139,13 +140,13 @@ const requestBody = async <T>(
 
     if (shouldRefresh) {
       await ensureAccessTokenRefreshed();
-      return requestBody<T>(endpoint, options, false);
+      return requestBody<T, TPagination>(endpoint, options, false);
     }
 
     throw setApiError(res.status, body);
   }
 
-  return body as SuccessBody<T>;
+  return body as SuccessBody<T, TPagination>;
 };
 
 const request = async <T>(
@@ -168,7 +169,10 @@ const fetchInstance = {
     endpoint: string,
     options?: FetchRequestOptions,
   ): Promise<{ data: TResponse; pagination: TPagination }> => {
-    const body = await requestBody<TResponse>(endpoint, { ...options, method: "GET" });
+    const body = await requestBody<TResponse, TPagination>(endpoint, {
+      ...options,
+      method: "GET",
+    });
 
     if (body === null) {
       throw new ApiError("페이지네이션 응답이 비어 있습니다.", 204);
