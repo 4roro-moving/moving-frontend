@@ -6,6 +6,7 @@ import { Text } from "@/components/common/Text";
 import { shareKakaoMoverCustom, toKakaoShareImageUrl } from "@/hooks/kakao/share";
 import { usePageShare } from "@/hooks/usePageShare";
 import { ClipIcon } from "@/icons";
+import { hasFacebookAppId } from "@/lib/facebook/sdk";
 import { cn } from "@/lib/utils/cn";
 
 function KakaoIcon({ className }: { className?: string }) {
@@ -38,7 +39,7 @@ interface MoverDetailShareProps {
 }
 
 const SHARE_TITLE = "나만 알기엔 아쉬운 기사님인가요?";
-const FACEBOOK_SHARE_UI_ENABLED = true;
+const FACEBOOK_SHARE_UI_ENABLED = hasFacebookAppId();
 
 export default function MoverDetailShare({
   favoriteCount,
@@ -125,9 +126,10 @@ export default function MoverDetailShare({
 
         <button
           type="button"
-          aria-label="페이스북 공유"
+          aria-label={FACEBOOK_SHARE_UI_ENABLED ? "페이스북 공유" : "페이스북 공유 (준비 중)"}
           aria-busy={busyAction === "facebook"}
           disabled={!FACEBOOK_SHARE_UI_ENABLED || isShareBusy}
+          title={FACEBOOK_SHARE_UI_ENABLED ? undefined : "준비 중"}
           onClick={shareFacebook}
           className={cn(
             iconButtonClassName,
