@@ -75,7 +75,7 @@ export const getRoleHomePath = (role: AuthRole | null | undefined): string => {
   // admin home page 임시 설정. 추후 변경 필요
   switch (role) {
     case "ADMIN":
-      return APP_ROUTES.ADMIN.CONTENTS;
+      return APP_ROUTES.MOVERS.ROOT;
     case "MOVER":
       return APP_ROUTES.MOVER_ESTIMATES.ROOT;
     case "CUSTOMER":

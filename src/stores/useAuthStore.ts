@@ -83,22 +83,11 @@ const resolveAuthUser = async (): Promise<AuthUser> => {
     throw new ApiError("인증 정보가 없습니다.", 401);
   }
 
-  const payload = getAccessTokenPayload(accessToken);
-  const role = payload.role ?? loadRole();
+  const role = getAccessTokenRole(accessToken) ?? loadRole();
 
   if (role === "MOVER") {
     const profile = await getMoverProfileMe();
     return toAuthUserFromMoverProfile(profile);
-  }
-
-  if (role === "ADMIN") {
-    return {
-      id: payload.userId ?? "",
-      email: "",
-      name: loadNickname() ?? "관리자",
-      phone: null,
-      role: "ADMIN",
-    };
   }
 
   const profile = await getCustomerProfileMe();

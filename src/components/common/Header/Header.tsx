@@ -29,8 +29,6 @@ const MOVER_LOGGED_IN_LINKS = [
   { label: "내 견적 관리", href: APP_ROUTES.MOVER_ESTIMATES.SENT },
 ];
 
-const ADMIN_LOGGED_IN_LINKS = [{ label: "콘텐츠 관리", href: APP_ROUTES.ADMIN.CONTENTS }];
-
 const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   { type: "link", label: "프로필 수정", href: APP_ROUTES.PROFILE_EDIT },
   { type: "link", label: "찜한 기사님", href: APP_ROUTES.MOVERS.FAVORITES },
@@ -40,11 +38,6 @@ const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
 
 const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   { type: "link", label: "프로필", href: APP_ROUTES.MOVER_PROFILE },
-  { type: "action", label: "로그아웃", action: "logout" },
-];
-
-const ADMIN_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
-  { type: "link", label: "콘텐츠 관리", href: APP_ROUTES.ADMIN.CONTENTS },
   { type: "action", label: "로그아웃", action: "logout" },
 ];
 
@@ -99,15 +92,9 @@ const Header = ({
     ? LOGGED_OUT_LINKS
     : resolvedRole === "MOVER"
       ? MOVER_LOGGED_IN_LINKS
-      : resolvedRole === "ADMIN"
-        ? ADMIN_LOGGED_IN_LINKS
-        : CUSTOMER_LOGGED_IN_LINKS;
+      : CUSTOMER_LOGGED_IN_LINKS;
   const profileMenuItems =
-    resolvedRole === "MOVER"
-      ? MOVER_PROFILE_MENU_ITEMS
-      : resolvedRole === "ADMIN"
-        ? ADMIN_PROFILE_MENU_ITEMS
-        : CUSTOMER_PROFILE_MENU_ITEMS;
+    resolvedRole === "MOVER" ? MOVER_PROFILE_MENU_ITEMS : CUSTOMER_PROFILE_MENU_ITEMS;
   // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
   const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
