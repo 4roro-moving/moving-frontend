@@ -11,6 +11,8 @@ export type { KakaoMoverShareTemplateArgs };
 const KAKAO_SDK_SCRIPT_ID = "kakao-js-sdk";
 const KAKAO_SDK_SRC = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.5/kakao.min.js";
 const KAKAO_SDK_LOAD_ERROR = "Kakao SDK 로드에 실패했습니다.";
+const KAKAO_SDK_TIMEOUT_ERROR = "Kakao SDK 로드 시간이 초과되었습니다.";
+const KAKAO_SDK_LOAD_TIMEOUT_MS = 10_000;
 
 function loadKakaoSdkScript(): Promise<void> {
   if (typeof window === "undefined") {
@@ -28,10 +30,24 @@ function loadKakaoSdkScript(): Promise<void> {
         resolve();
         return;
       }
-      existing.addEventListener("load", () => resolve(), { once: true });
+
+      const timeoutId = window.setTimeout(() => {
+        existing.remove();
+        reject(new Error(KAKAO_SDK_TIMEOUT_ERROR));
+      }, KAKAO_SDK_LOAD_TIMEOUT_MS);
+
+      existing.addEventListener(
+        "load",
+        () => {
+          window.clearTimeout(timeoutId);
+          resolve();
+        },
+        { once: true },
+      );
       existing.addEventListener(
         "error",
         () => {
+          window.clearTimeout(timeoutId);
           existing.remove();
           reject(new Error(KAKAO_SDK_LOAD_ERROR));
         },
@@ -45,8 +61,18 @@ function loadKakaoSdkScript(): Promise<void> {
     script.id = KAKAO_SDK_SCRIPT_ID;
     script.src = KAKAO_SDK_SRC;
     script.async = true;
-    script.onload = () => resolve();
+
+    const timeoutId = window.setTimeout(() => {
+      script.remove();
+      reject(new Error(KAKAO_SDK_TIMEOUT_ERROR));
+    }, KAKAO_SDK_LOAD_TIMEOUT_MS);
+
+    script.onload = () => {
+      window.clearTimeout(timeoutId);
+      resolve();
+    };
     script.onerror = () => {
+      window.clearTimeout(timeoutId);
       script.remove();
       reject(new Error(KAKAO_SDK_LOAD_ERROR));
     };
