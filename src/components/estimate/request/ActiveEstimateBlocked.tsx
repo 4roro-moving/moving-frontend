@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { MouseEventHandler, ReactNode } from "react";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
 
@@ -9,6 +9,7 @@ interface ActiveEstimateBlockedProps {
   description?: ReactNode;
   buttonLabel?: string;
   href?: string;
+  onButtonClick?: MouseEventHandler<HTMLAnchorElement>;
 }
 
 const DEFAULT_DESCRIPTION = (
@@ -24,6 +25,7 @@ export default function ActiveEstimateBlocked({
   description = DEFAULT_DESCRIPTION,
   buttonLabel,
   href,
+  onButtonClick,
 }: ActiveEstimateBlockedProps) {
   return (
     <EmptyState
@@ -31,6 +33,7 @@ export default function ActiveEstimateBlocked({
       description={description}
       buttonLabel={buttonLabel}
       href={href}
+      onButtonClick={onButtonClick}
     />
   );
 }

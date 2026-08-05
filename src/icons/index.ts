@@ -3,6 +3,9 @@ export { default as BoxIcon } from "./box.svg";
 export { default as CalendarIcon } from "./calendar.svg";
 export { default as ChevronDownIcon } from "./chevron-down.svg";
 export { default as ChevronLeftIcon } from "./chevron-left.svg";
+/** 상세 뒤로가기 등 — ChevronLeft와 동일 SVG (ArrowLeft 의미) */
+// 2026.08.03 정슬기 - [추가]
+export { default as ArrowLeftIcon } from "./chevron-left.svg";
 export { default as ChevronLeftThinIcon } from "./chevron-left-thin.svg";
 export { default as ChevronRightIcon } from "./chevron-right.svg";
 export { default as ChevronRightThinIcon } from "./chevron-right-thin.svg";
@@ -21,6 +24,7 @@ export { default as LikeIcon } from "./like";
 export { default as MenuIcon } from "./menu.svg";
 export { default as ProfileDefaultIcon } from "./profile-default.svg";
 export { default as StarIcon } from "./star.svg";
+export { default as TrashIcon } from "./trash.svg";
 export { default as VisibilityIcon } from "./visibility.svg";
 export { default as VisibilityOffIcon } from "./visibility_off.svg";
 export { default as WriteIcon } from "./write.svg";

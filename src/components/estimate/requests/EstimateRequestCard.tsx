@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Text } from "@/components/common/Text";
 import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import {
   formatMoveDateLabelSafe,
@@ -32,6 +33,7 @@ export default function EstimateRequestCard({ request }: EstimateRequestCardProp
   return (
     <Link
       href={href}
+      onClick={(event) => markInternalDetailNavigationOnClick(event, href)}
       aria-labelledby={titleId}
       className={cn(
         "bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle",

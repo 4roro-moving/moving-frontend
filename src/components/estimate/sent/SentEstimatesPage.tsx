@@ -8,6 +8,7 @@ import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import SentEstimateCard from "@/components/estimate/sent/SentEstimateCard";
 import { useSentEstimates } from "@/hooks/useSentEstimates";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { markInternalDetailNavigation } from "@/lib/utils/detailNavigation";
 
 export default function SentEstimatesPage() {
   const router = useRouter();
@@ -67,9 +68,12 @@ export default function SentEstimatesPage() {
                     price: estimate.price,
                     status: estimate.status,
                   }}
-                  onViewDetail={(estimateId) =>
-                    router.push(APP_ROUTES.MOVER_ESTIMATES.SENT_DETAIL(estimateId))
-                  }
+                  onViewDetail={(estimateId) => {
+                    const detailHref = APP_ROUTES.MOVER_ESTIMATES.SENT_DETAIL(estimateId);
+
+                    markInternalDetailNavigation(detailHref);
+                    router.push(detailHref);
+                  }}
                 />
               </div>
             ))}
