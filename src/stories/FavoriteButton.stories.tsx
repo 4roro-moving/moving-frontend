@@ -107,7 +107,7 @@ export const Playground: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const button = canvas.getByRole("button", { name: "김무빙 기사님 찜" });
+    const button = canvas.getByRole("button", { name: /^김무빙 기사님 찜/ });
 
     expect(button).toHaveAttribute("aria-pressed", "false");
     expect(canvas.getByText("12")).toBeInTheDocument();
