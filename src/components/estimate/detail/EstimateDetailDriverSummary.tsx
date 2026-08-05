@@ -3,9 +3,9 @@
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
+import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { ConfirmedCheckIcon, LikeIcon, StarIcon } from "@/icons";
-import { cn } from "@/lib/utils/cn";
+import { ConfirmedCheckIcon, StarIcon } from "@/icons";
 import { formatRating } from "@/lib/utils/estimateFormat";
 import type { EstimateDetail } from "@/types/estimate";
 
@@ -89,26 +89,18 @@ export default function EstimateDetailDriverSummary({
           <Text as="p" variant="2lg-semibold" className="text-text-primary min-w-0 wrap-break-word">
             {displayName} 기사님
           </Text>
-          <button
-            type="button"
-            className="focus-visible:ring-border-brand rounded-8 flex min-h-44 min-w-44 shrink-0 items-center justify-center gap-4 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none"
-            aria-label={`${displayName} 기사님 찜, 현재 찜 ${mover.favoriteCount}개`}
-            aria-pressed={mover.isFavorite}
-            onClick={() =>
-              favoriteMutation.mutate({
-                moverId: mover.id,
-                nextIsFavorite: !mover.isFavorite,
-              })
-            }
-          >
-            <Text as="span" variant="2lg-medium" className="text-text-muted" aria-hidden="true">
-              {mover.favoriteCount}
-            </Text>
-            <LikeIcon
-              isFavorite={mover.isFavorite}
-              className={cn("size-24", mover.isFavorite ? "text-text-brand" : "text-icon-default")}
-            />
-          </button>
+          <FavoriteButton
+            moverName={displayName}
+            isFavorite={mover.isFavorite}
+            favoriteCount={mover.favoriteCount}
+            showCount
+            countPosition="before"
+            countVariant="2lg-medium"
+            className="min-h-44 min-w-44 justify-center gap-4 px-4 py-2"
+            onToggle={(nextIsFavorite) => {
+              favoriteMutation.mutate({ moverId: mover.id, nextIsFavorite });
+            }}
+          />
         </div>
 
         <div className="flex flex-wrap items-center gap-x-8 gap-y-4">

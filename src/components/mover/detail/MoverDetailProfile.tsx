@@ -2,12 +2,13 @@
 
 import type { ReactNode } from "react";
 
-import { DriverBadgeIcon, LikeIcon, StarIcon } from "@/icons";
+import { Text } from "@/components/common/Text";
+import { FavoriteButton } from "@/components/mover/FavoriteButton";
+import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips";
+import { DriverBadgeIcon, StarIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import { formatRating } from "@/lib/utils/estimateFormat";
 import type { MoverDetail } from "@/types/moverDetail";
-import { Text } from "@/components/common/Text";
-import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips";
 
 interface MoverDetailProfileProps {
   detail: MoverDetail;
@@ -47,25 +48,17 @@ export default function MoverDetailProfile({
             </Text>
           </div>
 
-          {showFavoriteAction ? (
-            <button
-              type="button"
-              className="focus-visible:ring-border-brand rounded-8 flex min-h-44 shrink-0 items-center gap-4 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none"
-              aria-label={`${detail.name} 기사님 찜, 현재 찜 ${detail.favoriteCount}개`}
-              aria-pressed={detail.isFavorite}
-              onClick={onToggleFavorite}
-            >
-              <FavoriteSummary detail={detail} />
-            </button>
-          ) : (
-            <div
-              className="flex min-h-44 shrink-0 items-center gap-4 px-4 py-2"
-              role="group"
-              aria-label={`현재 찜 ${detail.favoriteCount}개`}
-            >
-              <FavoriteSummary detail={detail} />
-            </div>
-          )}
+          <FavoriteButton
+            moverName={detail.name}
+            isFavorite={detail.isFavorite}
+            favoriteCount={detail.favoriteCount}
+            showCount
+            interactive={showFavoriteAction}
+            countPosition="before"
+            countVariant={{ base: "md-semibold", md: "2lg-medium" }}
+            className="min-h-44 gap-4 px-4 py-2"
+            onToggle={onToggleFavorite}
+          />
         </div>
 
         <Text
@@ -116,32 +109,6 @@ export default function MoverDetailProfile({
         <StatItem label="총 경력" value={`${detail.careerYears}년`} />
       </div>
     </section>
-  );
-}
-
-interface FavoriteSummaryProps {
-  detail: MoverDetail;
-}
-
-function FavoriteSummary({ detail }: FavoriteSummaryProps) {
-  return (
-    <>
-      <Text
-        as="span"
-        variant={{ base: "md-semibold", md: "2lg-medium" }}
-        className="text-text-muted"
-        aria-hidden="true"
-      >
-        {detail.favoriteCount}
-      </Text>
-      <LikeIcon
-        isFavorite={detail.isFavorite}
-        className={cn(
-          "size-24",
-          detail.isFavorite ? "text-like-active-fill" : "text-like-default-stroke",
-        )}
-      />
-    </>
   );
 }
 

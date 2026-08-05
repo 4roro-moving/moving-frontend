@@ -5,11 +5,12 @@ import { memo } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
 import { Text } from "@/components/common/Text";
+import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { MoverMeta } from "@/components/mover/MoverMeta";
 import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
 import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { DriverBadgeIcon, LikeIcon } from "@/icons";
+import { DriverBadgeIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
@@ -53,68 +54,6 @@ function areMoverCardPropsEqual(prev: MoverCardProps, next: MoverCardProps): boo
   );
 }
 
-interface FavoriteButtonProps {
-  canToggle: boolean;
-  moverName: string;
-  isFavorite: boolean;
-  favoriteCount?: number;
-  showCount?: boolean;
-  iconClassName: string;
-  onToggle: (nextIsFavorite: boolean) => void;
-}
-
-function FavoriteButton({
-  canToggle,
-  moverName,
-  isFavorite,
-  favoriteCount,
-  showCount,
-  iconClassName,
-  onToggle,
-}: FavoriteButtonProps) {
-  return (
-    <div className="pointer-events-auto flex shrink-0 items-center justify-center gap-2">
-      {canToggle ? (
-        <button
-          type="button"
-          className="focus-visible:ring-border-brand rounded-8 cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
-          aria-label={`${moverName} 기사님 찜`}
-          aria-pressed={isFavorite}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onToggle(!isFavorite);
-          }}
-        >
-          <LikeIcon
-            isFavorite={isFavorite}
-            className={cn(
-              iconClassName,
-              isFavorite ? "text-like-active-fill" : "text-like-default-stroke",
-            )}
-          />
-        </button>
-      ) : (
-        <span aria-label={`${moverName} 기사님 찜 상태`}>
-          <LikeIcon
-            isFavorite={isFavorite}
-            className={cn(
-              iconClassName,
-              isFavorite ? "text-like-active-fill" : "text-like-default-stroke",
-            )}
-          />
-        </span>
-      )}
-      {showCount && favoriteCount !== undefined ? (
-        <Text as="span" variant="md-regular" className="text-text-muted">
-          <span aria-hidden="true">{favoriteCount}</span>
-          <span className="sr-only">현재 찜 {favoriteCount}개</span>
-        </Text>
-      ) : null}
-    </div>
-  );
-}
-
 function MoverCard({
   mover,
   variant = "full",
@@ -136,7 +75,7 @@ function MoverCard({
   };
 
   const favoriteButtonProps = {
-    canToggle: favoriteMutation.canToggleFavorite,
+    interactive: favoriteMutation.canToggleFavorite,
     moverName: mover.name,
     isFavorite: mover.isFavorite,
     favoriteCount: mover.favoriteCount,
@@ -203,7 +142,11 @@ function MoverCard({
                       {mover.name} 기사님
                     </Text>
                   </div>
-                  <FavoriteButton {...favoriteButtonProps} iconClassName="size-20" />
+                  <FavoriteButton
+                    {...favoriteButtonProps}
+                    className="pointer-events-auto justify-center gap-2"
+                    iconClassName="size-20"
+                  />
                 </div>
                 <MoverMeta
                   rating={mover.rating}
@@ -278,7 +221,12 @@ function MoverCard({
                     기사님
                   </Text>
                 </div>
-                <FavoriteButton {...favoriteButtonProps} showCount iconClassName="size-24" />
+                <FavoriteButton
+                  {...favoriteButtonProps}
+                  showCount
+                  className="pointer-events-auto justify-center gap-2"
+                  iconClassName="size-24"
+                />
               </div>
 
               <MoverMeta
@@ -343,7 +291,12 @@ function MoverCard({
                 />
               </div>
 
-              <FavoriteButton {...favoriteButtonProps} showCount iconClassName="size-24" />
+              <FavoriteButton
+                {...favoriteButtonProps}
+                showCount
+                className="pointer-events-auto justify-center gap-2"
+                iconClassName="size-24"
+              />
             </div>
           </div>
         </div>
