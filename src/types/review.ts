@@ -16,6 +16,7 @@ export interface ReviewableEstimateItem {
     fromAddress: string;
     toAddress: string;
     status: string;
+    isDesignated?: boolean;
   };
   mover: {
     id: string;

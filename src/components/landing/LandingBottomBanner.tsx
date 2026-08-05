@@ -10,31 +10,31 @@ import { Text } from "@/components/common/Text";
  */
 export default function LandingBottomBanner() {
   return (
-    <section className="bg-landing-bottom-banner flex w-full shrink-0 flex-col items-center pt-[39px] pb-[39px] min-[744px]:pt-[65px] min-[744px]:pb-[65px] xl:pt-[87px] xl:pb-[87px]">
-      <div className="flex w-[363px] max-w-full flex-col items-center gap-12 min-[744px]:gap-32">
+    <section className="bg-landing-bottom-banner flex w-full shrink-0 flex-col items-center pt-[39px] pb-[39px] md:pt-[65px] md:pb-[65px] xl:pt-[87px] xl:pb-[87px]">
+      <div className="flex w-[363px] max-w-full flex-col items-center gap-12 md:gap-32">
         {/* Figma app icon lg: 100×103 white rounded tile + Union 58×60 */}
-        <div className="flex size-[56px] shrink-0 items-center justify-center overflow-hidden rounded-[11px] bg-white min-[744px]:size-[100px] min-[744px]:rounded-[19px]">
+        <div className="flex size-[56px] shrink-0 items-center justify-center overflow-hidden rounded-[11px] bg-white md:size-[100px] md:rounded-[19px]">
           <Image
             src="/images/landing/brand-mark.svg"
             alt="무빙"
             width={58}
             height={60}
             unoptimized
-            className="h-[34px] w-[33px] object-contain min-[744px]:h-[60px] min-[744px]:w-[58px]"
+            className="h-[34px] w-[33px] object-contain md:h-[60px] md:w-[58px]"
           />
         </div>
 
         <Text
           as="p"
           variant={{ base: "lg-bold", md: "2xl-bold" }}
-          className="text-text-inverse w-full text-center min-[744px]:text-[28px] min-[744px]:leading-[46px]"
+          className="text-text-inverse w-full text-center md:text-[28px] md:leading-[46px]"
         >
-          <span className="min-[744px]:hidden">
+          <span className="md:hidden">
             복잡한 이사 준비,
             <br />
             무빙 하나면 끝!
           </span>
-          <span className="hidden min-[744px]:inline">복잡한 이사 준비, 무빙 하나면 끝!</span>
+          <span className="hidden md:inline">복잡한 이사 준비, 무빙 하나면 끝!</span>
         </Text>
       </div>
     </section>

@@ -34,7 +34,7 @@ export default function LandingFeatureCompare() {
       </section>
 
       {/* Tablet — 744×1008, full bleed */}
-      <section className="bg-background-default relative hidden w-full shrink-0 overflow-hidden min-[744px]:block xl:hidden">
+      <section className="bg-background-default relative hidden w-full shrink-0 overflow-hidden md:block xl:hidden">
         <div className="@container relative aspect-[744/1008] w-full">
           <Image
             src="/images/landing/img4-md.png"
@@ -52,7 +52,7 @@ export default function LandingFeatureCompare() {
       </section>
 
       {/* Mobile — 375×1076, full bleed */}
-      <section className="bg-background-default relative w-full shrink-0 overflow-hidden min-[744px]:hidden">
+      <section className="bg-background-default relative w-full shrink-0 overflow-hidden md:hidden">
         <div className="@container relative aspect-[375/1076] w-full">
           <Image
             src="/images/landing/img4-sm.png"
@@ -64,7 +64,7 @@ export default function LandingFeatureCompare() {
           <Text
             as="h2"
             variant="xl-bold"
-            className="text-text-secondary absolute top-[5.2%] left-[8.5%] z-10 w-[53%] max-w-[200px] text-left"
+            className="text-text-secondary absolute top-[5.2%] left-[8.5%] z-10 w-[200px] max-w-[calc(100%-64px)] text-left"
           >
             여러 업체의 견적을
             <br />

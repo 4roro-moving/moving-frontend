@@ -22,7 +22,7 @@ const AuthLayout = ({ children, showMascot = true, className }: AuthLayoutProps)
         "md:bg-background-brand",
         "pt-auth-top-gap-mobile pb-auth-bottom-gap-mobile px-margin-mobile",
         "md:pt-auth-top-gap-tablet md:pb-auth-bottom-gap-tablet md:px-0",
-        "lg:pt-auth-top-gap-desktop lg:pb-auth-bottom-gap-desktop",
+        "xl:pt-auth-top-gap-desktop xl:pb-auth-bottom-gap-desktop",
         className,
       )}
     >
@@ -31,8 +31,8 @@ const AuthLayout = ({ children, showMascot = true, className }: AuthLayoutProps)
           "relative z-10 flex w-full flex-col items-center",
           "md:bg-background-surface md:max-w-auth-container-tablet md:rounded-auth-container",
           "md:px-auth-container-padding-x-tablet md:py-auth-container-padding-y-tablet",
-          "lg:max-w-auth-container-desktop",
-          "lg:px-auth-container-padding-x-desktop lg:py-auth-container-padding-y-desktop",
+          "xl:max-w-auth-container-desktop",
+          "xl:px-auth-container-padding-x-desktop xl:py-auth-container-padding-y-desktop",
         )}
       >
         {children}
@@ -44,7 +44,7 @@ const AuthLayout = ({ children, showMascot = true, className }: AuthLayoutProps)
           className={cn(
             "pointer-events-none absolute right-0 bottom-0 z-0 hidden overflow-hidden md:block",
             "h-auth-mascot-height-tablet w-auth-mascot-width-tablet",
-            "lg:h-auth-mascot-height-desktop lg:w-auth-mascot-width-desktop",
+            "xl:h-auth-mascot-height-desktop xl:w-auth-mascot-width-desktop",
           )}
         >
           <Image

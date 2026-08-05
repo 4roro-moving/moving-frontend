@@ -12,12 +12,9 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useIsClient } from "@/hooks/useIsClient";
 import { cn } from "@/lib/utils/cn";
-
-// 모달 내부에서 Tab 포커스 트랩 대상으로 볼 요소 목록
-const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 interface ModalContextValue {
   titleId: string;
@@ -31,6 +28,10 @@ const ModalContext = createContext<ModalContextValue | null>(null);
 export interface ModalMainProps {
   children: ReactNode;
   onClose?: () => void;
+  /** modal: 중앙 / bottom-sheet: 하단 / responsive: 모바일 하단, 태블릿 이상 중앙 */
+  presentation?: "modal" | "bottom-sheet" | "responsive";
+  /** sm: 293px / md: 375px / lg: 모바일 full → 태블릿 375px → 데스크톱 608px */
+  size?: "sm" | "md" | "lg";
   className?: string;
   overlayClassName?: string;
   /** Modal.Title 없이 접근성 라벨이 필요할 때 사용 */
@@ -40,6 +41,8 @@ export interface ModalMainProps {
 const ModalMain = ({
   children,
   onClose,
+  presentation = "modal",
+  size,
   className,
   overlayClassName,
   "aria-label": ariaLabel,
@@ -68,48 +71,11 @@ const ModalMain = ({
     };
   }, []);
 
-  useEffect(() => {
-    panelRef.current?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose?.();
-        return;
-      }
-
-      if (event.key === "Tab") {
-        const panel = panelRef.current;
-        if (!panel) return;
-
-        const focusableElements = panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-
-        // 포커스 가능한 요소가 없으면 모달 밖으로 못 나가게
-        if (focusableElements.length === 0) {
-          event.preventDefault();
-          return;
-        }
-
-        const first = focusableElements[0];
-        const last = focusableElements[focusableElements.length - 1];
-        const active = document.activeElement;
-
-        if (event.shiftKey) {
-          if (active === first || active === panel || !panel.contains(active)) {
-            event.preventDefault();
-            last.focus();
-          }
-        } else {
-          if (active === last || !panel.contains(active)) {
-            event.preventDefault();
-            first.focus();
-          }
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  useFocusTrap({
+    containerRef: panelRef,
+    enabled: isMounted,
+    onEscape: onClose,
+  });
 
   if (!isMounted) return null;
 
@@ -124,6 +90,8 @@ const ModalMain = ({
       <div
         className={cn(
           "bg-overlay-scrim fixed inset-0 z-[9999] flex items-center justify-center",
+          presentation === "bottom-sheet" && "items-end px-0",
+          presentation === "responsive" && "items-end px-0 md:items-center md:px-24",
           overlayClassName,
         )}
         onClick={handleOverlayClick}
@@ -138,6 +106,18 @@ const ModalMain = ({
           tabIndex={-1}
           className={cn(
             "rounded-24 bg-background-surface relative flex flex-col items-center gap-40 p-40 shadow-lg focus:outline-none",
+            presentation === "bottom-sheet" && "rounded-t-32 w-full max-w-none rounded-b-none",
+            presentation === "responsive" &&
+              "rounded-t-32 md:rounded-32 w-full max-w-none rounded-b-none",
+            size === "sm" && "w-full max-w-[293px]",
+            size === "md" &&
+              (presentation === "responsive"
+                ? "md:w-[375px] md:max-w-[375px]"
+                : "w-full max-w-[375px]"),
+            size === "lg" &&
+              (presentation === "responsive"
+                ? "md:w-[375px] md:max-w-[375px] xl:w-full xl:max-w-[608px]"
+                : "w-full max-w-[608px]"),
             className,
           )}
         >

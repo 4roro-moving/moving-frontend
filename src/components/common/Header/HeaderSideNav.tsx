@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
+import { isNavLinkActive } from "@/components/common/Header/isNavLinkActive";
 import { Text } from "@/components/common/Text";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { CloseIcon } from "@/icons";
-import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { MEDIA_QUERY } from "@/lib/constants/breakpoints";
 import { cn } from "@/lib/utils/cn";
 
 export interface HeaderSideNavLink {
@@ -16,49 +18,31 @@ export interface HeaderSideNavLink {
 }
 
 interface HeaderSideNavProps {
+  id: string;
   isOpen: boolean;
   onClose: () => void;
   links: HeaderSideNavLink[];
 }
 
-const DESKTOP_MEDIA_QUERY = "(min-width: 1024px)";
-
-const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-const isNavLinkActive = (pathname: string, href: string): boolean => {
-  if (pathname === href) {
-    return true;
-  }
-
-  if (!pathname.startsWith(`${href}/`)) {
-    return false;
-  }
-
-  if (href === APP_ROUTES.MOVERS.ROOT) {
-    const favoritesPath = APP_ROUTES.MOVERS.FAVORITES;
-    if (pathname === favoritesPath || pathname.startsWith(`${favoritesPath}/`)) {
-      return false;
-    }
-  }
-
-  return true;
-};
-
 /** tablet·mobile GNB 사이드 네비게이션 (오른쪽 슬라이드) */
-const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
+const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
   const pathname = usePathname();
-  const titleId = useId();
-  const panelRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
+
+  useFocusTrap({
+    containerRef: panelRef,
+    enabled: isOpen,
+    onEscape: onClose,
+  });
 
   useEffect(() => {
     if (!isOpen) {
       return;
     }
 
-    const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
-    const handleDesktopChange = (event: MediaQueryListEvent) => {
+    const mediaQuery = window.matchMedia(MEDIA_QUERY.xl);
+
+    const handleBreakpointChange = (event: MediaQueryListEvent) => {
       if (event.matches) {
         onClose();
       }
@@ -69,8 +53,11 @@ const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
       return;
     }
 
-    mediaQuery.addEventListener("change", handleDesktopChange);
-    return () => mediaQuery.removeEventListener("change", handleDesktopChange);
+    mediaQuery.addEventListener("change", handleBreakpointChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleBreakpointChange);
+    };
   }, [isOpen, onClose]);
 
   useEffect(() => {
@@ -79,86 +66,47 @@ const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
     }
 
     const previousOverflow = document.body.style.overflow;
-    const previousPaddingRight = document.body.style.paddingRight;
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = "hidden";
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    }
-
-    closeButtonRef.current?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-        return;
-      }
-
-      if (event.key !== "Tab" || !panelRef.current) {
-        return;
-      }
-
-      const focusable = Array.from(
-        panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-      ).filter((element) => !element.hasAttribute("disabled") && element.tabIndex !== -1);
-
-      if (focusable.length === 0) {
-        return;
-      }
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
-
-      if (event.shiftKey && active === first) {
-        event.preventDefault();
-        last?.focus();
-        return;
-      }
-
-      if (!event.shiftKey && active === last) {
-        event.preventDefault();
-        first?.focus();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      document.body.style.paddingRight = previousPaddingRight;
-      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
-  if (typeof document === "undefined" || !isOpen) {
+  if (typeof document === "undefined") {
     return null;
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] lg:hidden" role="presentation">
+    <>
       <button
         type="button"
-        className="bg-overlay-scrim absolute inset-0"
         aria-label="메뉴 닫기"
+        aria-hidden={!isOpen}
+        tabIndex={isOpen ? 0 : -1}
+        className={cn(
+          "bg-overlay-scrim fixed inset-0 z-[9999] transition-opacity duration-200 xl:hidden",
+          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+        )}
         onClick={onClose}
       />
 
-      <div
+      <aside
         ref={panelRef}
-        className="bg-background-surface absolute inset-y-0 right-0 flex w-[220px] flex-col"
+        id={id}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={titleId}
+        aria-label="주요 메뉴"
+        aria-hidden={!isOpen}
+        inert={!isOpen}
         tabIndex={-1}
+        className={cn(
+          "bg-background-surface fixed inset-y-0 right-0 z-[10000] flex w-[220px] flex-col transition-transform duration-200 ease-out focus:outline-none xl:hidden",
+          isOpen ? "translate-x-0" : "translate-x-full",
+        )}
       >
-        <div className="border-border-subtle h-gnb-height-mobile flex items-center justify-end border-b px-16 py-10">
-          <h2 id={titleId} className="sr-only">
-            메뉴
-          </h2>
+        <div className="border-border-subtle flex h-54 shrink-0 items-center justify-end border-b px-16 py-10">
           <button
-            ref={closeButtonRef}
             type="button"
             aria-label="메뉴 닫기"
             className="text-icon-default focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none"
@@ -169,7 +117,7 @@ const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
         </div>
 
         <nav aria-label="모바일 주요 메뉴">
-          <ul className="flex flex-col">
+          <ul className="flex flex-col items-start">
             {links.map((link) => {
               const isActive = isNavLinkActive(pathname, link.href);
 
@@ -179,10 +127,10 @@ const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
                     href={link.href}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "flex items-center px-20 py-24 transition-colors",
+                      "flex w-[220px] items-center overflow-hidden px-20 py-24 transition-colors",
                       isActive
-                        ? "text-nav-text-active"
-                        : "text-text-primary hover:text-nav-text-active",
+                        ? "text-text-primary"
+                        : "text-text-primary hover:bg-background-hover",
                     )}
                     onClick={onClose}
                   >
@@ -195,8 +143,8 @@ const HeaderSideNav = ({ isOpen, onClose, links }: HeaderSideNavProps) => {
             })}
           </ul>
         </nav>
-      </div>
-    </div>,
+      </aside>
+    </>,
     document.body,
   );
 };

@@ -45,7 +45,7 @@ export default function NotificationTrigger() {
         className="relative flex size-36 items-center justify-center"
         onClick={() => setOpenScope((prev) => (prev === authScope ? null : authScope))}
       >
-        <AlarmIcon className="text-icon-subtle size-24 shrink-0 lg:size-32" />
+        <AlarmIcon className="text-icon-subtle size-24 shrink-0 xl:size-32" />
         {unreadCount > 0 ? (
           <Text
             as="span"

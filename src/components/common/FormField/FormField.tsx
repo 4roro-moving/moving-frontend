@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils/cn";
 type FormFieldVariant = "default" | "compact" | "auth";
 
 const FORM_FIELD_LABEL_VARIANTS = {
-  default: { base: "lg-semibold", lg: "xl-semibold" },
-  compact: { base: "lg-semibold", lg: "2lg-semibold" },
-  auth: { base: "md-regular", lg: "xl-regular" },
+  default: { base: "lg-semibold", xl: "xl-semibold" },
+  compact: { base: "lg-semibold", xl: "2lg-semibold" },
+  auth: { base: "md-regular", xl: "xl-regular" },
 } as const satisfies Record<FormFieldVariant, TextVariantProp>;
 
 interface FormFieldProps {
@@ -19,7 +19,7 @@ interface FormFieldProps {
   labelId?: string;
   children: ReactNode;
   className?: string;
-  /** default: 프로필 등 / compact: 모달 폼 / auth: 로그인·회원가입 */
+  /** default: 프로필 등록·수정 폼 등 / compact: 모달 폼 / auth: 로그인·회원가입 */
   variant?: FormFieldVariant;
   /** FORM_FIELD_LABEL_VARIANTS에 해당하지 않는 라벨 타이포에 사용 */
   labelVariant?: TextVariantProp;

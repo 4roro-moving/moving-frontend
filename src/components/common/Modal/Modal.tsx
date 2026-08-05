@@ -6,6 +6,8 @@ import ModalDescription from "./ModalDescription";
 import { ModalMain, type ModalMainProps } from "./ModalMain";
 import ModalTitle from "./ModalTitle";
 
+export { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "./modalStyles";
+
 interface ModalComponent extends FC<ModalMainProps> {
   Close: typeof ModalClose;
   Title: typeof ModalTitle;

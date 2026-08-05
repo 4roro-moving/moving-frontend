@@ -95,7 +95,7 @@ export function FavoriteMoversSidebar() {
   const showMoreLink = isCustomerLoggedIn && !query.isError && movers.length > 0;
 
   return (
-    <aside className="hidden w-full flex-col gap-16 lg:flex lg:w-[327px] lg:shrink-0 lg:self-stretch lg:pt-[192px]">
+    <aside className="hidden w-full flex-col gap-16 xl:flex xl:w-[327px] xl:shrink-0 xl:self-stretch xl:pt-[192px]">
       <div className="flex w-full items-center justify-between gap-12">
         <Text as="h2" variant="xl-semibold" className="text-text-secondary">
           찜한 기사님

@@ -122,7 +122,7 @@ export default function ProfileMenuTrigger({
   return (
     <div
       ref={containerRef}
-      className="relative flex items-center gap-16"
+      className="relative flex items-center xl:gap-16"
       onBlur={handleContainerBlur}
     >
       <button
@@ -133,7 +133,7 @@ export default function ProfileMenuTrigger({
         aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-controls={isOpen ? `${menuId}-menu` : undefined}
-        className="focus-visible:ring-border-brand rounded-8 flex items-center gap-16 focus-visible:ring-2 focus-visible:outline-none"
+        className="focus-visible:ring-border-brand rounded-8 flex items-center focus-visible:ring-2 focus-visible:outline-none xl:gap-16"
         onClick={() => setIsOpen((open) => !open)}
       >
         <Image
@@ -141,9 +141,9 @@ export default function ProfileMenuTrigger({
           alt=""
           width={36}
           height={36}
-          className="size-24 lg:size-36"
+          className="rounded-4 size-24 xl:size-36 xl:rounded-none"
         />
-        <Text as="span" variant="2lg-medium" className="text-text-primary max-lg:hidden">
+        <Text as="span" variant="2lg-medium" className="text-text-primary hidden xl:block">
           {nickname}
         </Text>
       </button>

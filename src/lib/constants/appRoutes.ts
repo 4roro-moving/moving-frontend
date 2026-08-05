@@ -30,6 +30,8 @@ export const APP_ROUTES = {
   // 2026.07.27 정슬기 - [추가] 기사님 찾기·상세 페이지 경로
   MOVERS: {
     ROOT: "/movers",
+    // 2026.08.03 윤소정 - [추가] 지도기반 기사님 추천
+    MAP: "/movers/map",
     DETAIL: (moverId: string) => `/movers/${moverId}`,
     /** 찜한 기사님 전체 목록 */
     FAVORITES: "/movers/favorites",

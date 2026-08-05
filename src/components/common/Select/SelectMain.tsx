@@ -30,7 +30,7 @@ const SelectContext = createContext<SelectContextValue | null>(null);
 
 /**
  * Figma dropdown size=sm → 모바일/태블릿(기본)
- * Figma dropdown size=md → 데스크톱(lg:)
+ * Figma dropdown size=md → 데스크톱(xl:)
  */
 const selectVariants = cva("relative", {
   variants: {
@@ -44,7 +44,7 @@ const selectVariants = cva("relative", {
 
 const selectTriggerVariants = cva(
   [
-    "flex w-fit items-center justify-between whitespace-nowrap transition-colors lg:w-full",
+    "flex w-fit items-center justify-between whitespace-nowrap transition-colors xl:w-full",
     "text-text-secondary",
     "disabled:cursor-not-allowed disabled:text-text-disabled",
   ],
@@ -55,12 +55,12 @@ const selectTriggerVariants = cva(
           "rounded-8 gap-6 border py-6 pr-10 pl-14",
           "border-border-default bg-background-surface",
           "disabled:bg-background-disabled",
-          "lg:rounded-12 lg:h-[50px] lg:gap-0 lg:py-16 lg:pr-12 lg:pl-20",
+          "xl:rounded-12 xl:h-[50px] xl:gap-0 xl:py-16 xl:pr-12 xl:pl-20",
         ],
         /** 정렬: 테두리·그림자 없이 텍스트 + 아이콘 */
         sort: [
           "gap-2 rounded-8 border-0 bg-transparent py-6 pr-0 pl-8 shadow-none",
-          "lg:gap-10 lg:py-8 lg:pr-0 lg:pl-10",
+          "xl:gap-10 xl:py-8 xl:pr-0 xl:pl-10",
         ],
       },
     },
@@ -71,11 +71,11 @@ const selectTriggerVariants = cva(
 function getTriggerTextVariant(variant: SelectVariant, isOpen: boolean): TextVariantProp {
   if (variant === "sort") {
     return isOpen
-      ? { base: "xs-medium", lg: "md-medium" }
-      : { base: "xs-semibold", lg: "md-semibold" };
+      ? { base: "xs-medium", xl: "md-medium" }
+      : { base: "xs-semibold", xl: "md-semibold" };
   }
 
-  return { base: "md-medium", lg: "lg-medium" };
+  return { base: "md-medium", xl: "lg-medium" };
 }
 
 export interface SelectMainProps extends VariantProps<typeof selectVariants> {
@@ -168,12 +168,12 @@ const SelectMain = ({
   const defaultShadowClass =
     variant === "default"
       ? isOpen
-        ? "shadow-select-open lg:shadow-select-lg-open"
-        : "shadow-select lg:shadow-select-lg"
+        ? "shadow-select-open xl:shadow-select-lg-open"
+        : "shadow-select xl:shadow-select-lg"
       : undefined;
 
   const chevronClassName = cn(
-    variant === "sort" ? "size-20 text-icon-muted" : "size-20 lg:size-36",
+    variant === "sort" ? "size-20 text-icon-muted" : "size-20 xl:size-36",
     variant === "default" && (isOpen ? "text-icon-brand" : "text-icon-default"),
   );
 
@@ -220,14 +220,14 @@ const SelectMain = ({
               className={cn(
                 "bg-background-surface absolute z-50 my-4",
                 variant === "sort" &&
-                  "rounded-8 border-border-subtle flex w-[91px] min-w-[91px] flex-col items-start border lg:w-[114px] lg:min-w-[114px]",
+                  "rounded-8 border-border-subtle flex w-[91px] min-w-[91px] flex-col items-start border xl:w-[114px] xl:min-w-[114px]",
                 variant === "default" &&
                   !isMultiColumn &&
-                  "rounded-8 border-border-default shadow-select lg:rounded-12 flex w-full min-w-[106px] flex-col items-start border lg:min-w-[160px]",
+                  "rounded-8 border-border-default shadow-select xl:rounded-12 flex w-full min-w-[106px] flex-col items-start border xl:min-w-[160px]",
                 variant === "default" &&
                   isMultiColumn &&
                   // sm: 75×36 × 2열 / md: 164×64 × 2열, 보이는 행 5개
-                  "rounded-8 border-border-default shadow-select lg:rounded-16 grid max-h-[180px] w-[150px] grid-cols-2 overflow-y-auto border lg:max-h-[320px] lg:w-[328px]",
+                  "rounded-8 border-border-default shadow-select xl:rounded-16 grid max-h-[180px] w-[150px] grid-cols-2 overflow-y-auto border xl:max-h-[320px] xl:w-[328px]",
               )}
             >
               {children}

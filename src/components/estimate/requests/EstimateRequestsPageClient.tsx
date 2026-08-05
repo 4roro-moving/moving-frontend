@@ -81,7 +81,7 @@ export default function EstimateRequestsPageClient() {
     <div
       className={cn(
         "bg-background-default md:bg-background-subtle flex w-full flex-col items-center",
-        !isEmpty && "py-38 md:py-32 lg:py-64",
+        !isEmpty && "py-38 md:py-32 xl:py-64",
       )}
     >
       {isLoading ? <EstimatesQueryStatus message="보낸 견적 요청을 불러오는 중입니다." /> : null}
