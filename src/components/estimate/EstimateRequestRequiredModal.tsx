@@ -2,16 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
-import Modal from "@/components/common/Modal/Modal";
+import AlertModal from "@/components/common/Modal/AlertModal";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { cn } from "@/lib/utils/cn";
-
-const PANEL_CLASSNAME = cn(
-  "items-stretch text-left",
-  "rounded-24 md:rounded-32",
-  "w-full max-w-[292px] gap-30 px-16 py-24",
-  "md:max-w-[608px] md:gap-40 md:px-24 md:pt-32 md:pb-40",
-);
 
 interface EstimateRequestRequiredModalProps {
   open: boolean;
@@ -32,37 +24,13 @@ export default function EstimateRequestRequiredModal({
     router.push(APP_ROUTES.ESTIMATE_REQUEST);
   };
 
-  if (!open) {
-    return null;
-  }
-
   return (
-    <Modal onClose={onClose} className={PANEL_CLASSNAME}>
-      <div className="flex w-full items-center justify-between gap-12">
-        <Modal.Title variant={{ base: "2lg-bold", md: "2xl-semibold" }}>
-          지정 견적 요청하기
-        </Modal.Title>
-        <Modal.Close onClose={onClose} />
-      </div>
-      <div className="flex w-full flex-col items-stretch gap-30 md:gap-40">
-        <Modal.Desc variant="2lg-medium">일반 견적 요청을 먼저 진행해 주세요.</Modal.Desc>
-        <Modal.Button
-          fullWidth
-          size="cta"
-          className="md:hidden"
-          onClick={handleGoToEstimateRequest}
-        >
-          일반 견적 요청 하기
-        </Modal.Button>
-        <Modal.Button
-          fullWidth
-          size="detail"
-          className="hidden md:inline-flex"
-          onClick={handleGoToEstimateRequest}
-        >
-          일반 견적 요청 하기
-        </Modal.Button>
-      </div>
-    </Modal>
+    <AlertModal
+      open={open}
+      onClose={onClose}
+      title="지정 견적 요청하기"
+      description="일반 견적 요청을 먼저 진행해 주세요."
+      primaryAction={{ label: "일반 견적 요청 하기", onClick: handleGoToEstimateRequest }}
+    />
   );
 }

@@ -50,9 +50,9 @@ export default function PendingEstimatesList({
                 <PendingEstimatesEmpty />
               </div>
             ) : (
-              <div className="bg-background-subtle px-margin-mobile md:px-margin-tablet flex w-full justify-center pt-35 pb-64 md:pt-42 md:pb-80 lg:px-0 lg:pt-78 lg:pb-80">
-                {/* Desktop lg: 2열·1140·gap24 / Tablet md: 1열·600·gap32 / Mobile: 1열·327·gap20 */}
-                <div className="max-w-container-pending-mobile md:max-w-container-pending-tablet lg:max-w-container-pending-desktop grid w-full grid-cols-1 gap-20 md:gap-32 lg:grid-cols-2 lg:gap-24">
+              <div className="bg-background-subtle px-margin-mobile md:px-margin-tablet flex w-full justify-center pt-35 pb-64 md:pt-42 md:pb-80 xl:px-0 xl:pt-78 xl:pb-80">
+                {/* Desktop xl: 2열·1140·gap24 / Tablet md: 1열·600·gap32 / Mobile: 1열·327·gap20 */}
+                <div className="max-w-container-pending-mobile md:max-w-container-pending-tablet xl:max-w-container-pending-desktop grid w-full grid-cols-1 gap-20 md:gap-32 xl:grid-cols-2 xl:gap-24">
                   {section.estimates.map((offer) => (
                     <PendingEstimateCard
                       key={offer.id}

@@ -67,7 +67,7 @@ export default function MyReviewsPageClient() {
 
       {hasList && pagination ? (
         <div className="flex w-full flex-col gap-16 md:gap-24" aria-busy={isFetching}>
-          <ul className="flex w-full flex-col gap-16 md:gap-20 lg:gap-24">
+          <ul className="flex w-full flex-col gap-16 md:gap-20 xl:gap-24">
             {reviews.map((review) => (
               <li key={review.id}>
                 <MyReviewCard review={review} />

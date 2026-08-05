@@ -35,7 +35,7 @@ export default function SentEstimatesPage() {
   return (
     <>
       <MoverEstimateTabs />
-      <main className="bg-background-subtle min-h-[calc(100vh-108px)] px-24 pt-24 pb-[77px] min-[744px]:min-h-[calc(100vh-142px)] min-[744px]:px-72 min-[744px]:pt-32 min-[744px]:pb-40 min-[1344px]:min-h-[calc(100vh-168px)] min-[1344px]:px-0 min-[1344px]:pt-[59px] min-[1344px]:pb-[107px]">
+      <main className="bg-background-subtle min-h-[calc(100vh-108px)] px-24 pt-24 pb-[77px] md:min-h-[calc(100vh-142px)] md:px-72 md:pt-32 md:pb-40 xl:min-h-[calc(100vh-168px)] xl:px-0 xl:pt-[59px] xl:pb-[107px]">
         <h1 className="sr-only">보낸 견적 조회</h1>
 
         {query.isPending ? <EstimatesQueryStatus message="보낸 견적을 불러오는 중이에요." /> : null}
@@ -53,9 +53,9 @@ export default function SentEstimatesPage() {
         ) : null}
 
         {estimates.length > 0 ? (
-          <div className="mx-auto grid w-full min-w-0 grid-cols-1 gap-20 min-[744px]:max-w-[600px] min-[744px]:gap-32 min-[1344px]:max-w-[1200px] min-[1344px]:grid-cols-2 min-[1344px]:gap-24">
+          <div className="mx-auto grid w-full min-w-0 grid-cols-1 gap-20 md:max-w-[600px] md:gap-32 xl:max-w-[1200px] xl:grid-cols-2 xl:gap-24">
             {estimates.map((estimate) => (
-              <div key={estimate.id} className="w-full min-w-0 min-[744px]:w-[588px]">
+              <div key={estimate.id} className="w-full min-w-0 md:w-[588px]">
                 <SentEstimateCard
                   estimate={{
                     id: estimate.id,

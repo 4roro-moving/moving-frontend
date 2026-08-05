@@ -224,7 +224,7 @@ function MoverCard({
       className={cn(
         "border-border-subtle bg-background-surface relative flex w-full flex-col border-[0.5px]",
         "rounded-16 gap-8 p-20",
-        "min-[744px]:rounded-20 min-[744px]:gap-20 min-[744px]:px-28 min-[744px]:py-24",
+        "md:rounded-20 md:gap-20 md:px-28 md:py-24",
         "shadow-[-2px_-2px_10px_0px_rgba(220,220,220,0.2),2px_2px_10px_0px_rgba(220,220,220,0.2)]",
         className,
       )}
@@ -233,9 +233,9 @@ function MoverCard({
         href={detailHref}
         onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
         aria-label={detailLabel}
-        className="focus-visible:ring-border-brand rounded-16 min-[744px]:rounded-20 absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none"
+        className="focus-visible:ring-border-brand rounded-16 md:rounded-20 absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none"
       />
-      <div className="pointer-events-none relative z-10 flex flex-col gap-8 min-[744px]:hidden">
+      <div className="pointer-events-none relative z-10 flex flex-col gap-8 md:hidden">
         <div className="flex min-h-36 items-center justify-between gap-8">
           <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
           {selectionControl}
@@ -293,7 +293,7 @@ function MoverCard({
         </div>
       </div>
 
-      <div className="pointer-events-none relative z-10 hidden min-[744px]:flex min-[744px]:flex-col min-[744px]:gap-20">
+      <div className="pointer-events-none relative z-10 hidden md:flex md:flex-col md:gap-20">
         <div className="flex min-h-36 items-center justify-between gap-8">
           <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="md" />
           {selectionControl}

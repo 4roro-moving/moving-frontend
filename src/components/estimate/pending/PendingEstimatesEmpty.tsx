@@ -6,7 +6,7 @@ import { Text } from "@/components/common/Text";
 export default function PendingEstimatesEmpty() {
   return (
     <div
-      className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center justify-center gap-24 py-64 md:gap-32 md:py-80 lg:px-0"
+      className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center justify-center gap-24 py-64 md:gap-32 md:py-80 xl:px-0"
       role="status"
     >
       <div className="relative size-200 opacity-30 md:size-280">

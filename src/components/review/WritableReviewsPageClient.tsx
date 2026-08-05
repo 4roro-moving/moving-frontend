@@ -78,7 +78,7 @@ export default function WritableReviewsPageClient() {
 
       {!isLoading && !isError && data && data.length > 0 ? (
         <div className="flex w-full flex-col gap-16 md:gap-24" aria-busy={isFetching}>
-          <ul className="flex w-full flex-col gap-16 md:gap-20 lg:gap-24">
+          <ul className="flex w-full flex-col gap-16 md:gap-20 xl:gap-24">
             {pageItems.map((item) => (
               <li key={item.estimateId}>
                 <WritableReviewCard item={item} onWriteClick={setSelectedItem} />

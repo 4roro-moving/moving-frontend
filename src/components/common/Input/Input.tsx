@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils/cn";
  * - md: Tablet·Desktop (Mobile에서는 sm 타이포, md:부터 2lg/Regular 18 + h64)
  */
 const inputVariants = cva(
-  "flex w-full items-center gap-8 rounded-16 border border-border-default bg-background-surface p-14 transition-colors has-[input:disabled]:bg-background-disabled",
+  "flex w-full items-center gap-8 rounded-16 border border-border-default bg-background-surface px-16 py-14 transition-colors has-[input:disabled]:bg-background-disabled",
   {
     variants: {
       size: {

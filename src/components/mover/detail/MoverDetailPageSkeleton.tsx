@@ -48,20 +48,20 @@ export function MoverDetailReviewsSkeleton({
 export default function MoverDetailPageSkeleton() {
   return (
     <div
-      className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] lg:pb-0"
+      className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] xl:pb-0"
       aria-busy="true"
       aria-label="기사님 정보를 불러오는 중"
     >
-      <div className="relative h-160 w-full shrink-0 md:h-200 lg:h-64.75">
-        <div className="bg-background-brand absolute top-0 left-1/2 h-30.5 w-full max-w-480 -translate-x-1/2 md:h-42.5 lg:h-56.25" />
-        <div className="bg-background-avatar rounded-16 md:rounded-12 left-margin-mobile md:left-margin-tablet lg:rounded-20 absolute bottom-0 size-21.5 overflow-hidden md:size-25 lg:top-30.5 lg:bottom-auto lg:left-[max(1rem,calc(50%_-_601px))] lg:h-34.25 lg:w-32.25">
+      <div className="relative h-160 w-full shrink-0 md:h-200 xl:h-64.75">
+        <div className="bg-background-brand absolute top-0 left-1/2 h-30.5 w-full max-w-480 -translate-x-1/2 md:h-42.5 xl:h-56.25" />
+        <div className="bg-background-avatar rounded-16 md:rounded-12 left-margin-mobile md:left-margin-tablet xl:rounded-20 absolute bottom-0 size-21.5 overflow-hidden md:size-25 xl:top-30.5 xl:bottom-auto xl:left-[max(1rem,calc(50%_-_601px))] xl:h-34.25 xl:w-32.25">
           <Skeleton className="size-full rounded-none" />
         </div>
       </div>
 
-      <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 lg:px-0 lg:pb-[150px]">
-        <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-32 md:gap-40 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex w-full min-w-0 flex-col gap-40 md:gap-40 lg:w-[766px]">
+      <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 xl:px-0 xl:pb-[150px]">
+        <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-32 md:gap-40 xl:flex-row xl:items-start xl:justify-between">
+          <div className="flex w-full min-w-0 flex-col gap-40 md:gap-40 xl:w-[766px]">
             <div className="flex w-full flex-col gap-16 md:gap-24">
               <div className="flex flex-wrap gap-8">
                 <Skeleton className="h-28 w-72 rounded-full" />
@@ -110,7 +110,7 @@ export default function MoverDetailPageSkeleton() {
             </div>
           </div>
 
-          <aside className="hidden w-full min-w-0 flex-col items-start gap-40 lg:flex lg:w-[320px] lg:gap-70 lg:pt-40">
+          <aside className="hidden w-full min-w-0 flex-col items-start gap-40 xl:flex xl:w-[320px] xl:gap-70 xl:pt-40">
             <div className="flex w-full flex-col gap-16">
               <Skeleton className="h-24 w-full" />
               <Skeleton className="h-24 w-4/5" />

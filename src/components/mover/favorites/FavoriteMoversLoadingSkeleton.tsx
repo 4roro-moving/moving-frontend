@@ -7,7 +7,7 @@ import { FAVORITE_MOVERS_PAGE_LIMIT } from "@/lib/api/favorites";
 export default function FavoriteMoversLoadingSkeleton() {
   return (
     <div
-      className="flex flex-col gap-10 min-[744px]:gap-18 lg:gap-28"
+      className="flex flex-col gap-10 md:gap-18 xl:gap-28"
       aria-busy="true"
       aria-label="찜한 기사님을 불러오는 중"
     >
@@ -23,7 +23,7 @@ export default function FavoriteMoversLoadingSkeleton() {
         variant="full"
         count={FAVORITE_MOVERS_PAGE_LIMIT}
         showSelection
-        className="gap-20 min-[744px]:gap-24 lg:gap-20"
+        className="gap-20 md:gap-24 xl:gap-20"
         label="찜한 기사님을 불러오는 중"
       />
     </div>

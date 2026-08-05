@@ -6,7 +6,8 @@ import EstimateDetailLayout, {
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import { EstimateDetailInfoSection } from "@/components/estimate/detail/EstimateDetailInfoSection";
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
-import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { useSentEstimateDetail } from "@/hooks/useSentEstimates";
 import FrameIcon from "@/icons/frame.svg";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
@@ -50,7 +51,7 @@ function SentEstimateSummary({ estimate }: { estimate: SentEstimate }) {
 
           {isConfirmed ? (
             <span className="text-text-brand flex shrink-0 items-center gap-4">
-              <FrameIcon className="size-20 shrink-0" aria-hidden="true" />
+              <FrameIcon className="text-icon-brand size-20 shrink-0" />
               <Text variant="lg-bold">확정견적</Text>
             </span>
           ) : null}
@@ -141,9 +142,18 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
           <div className="flex w-full flex-col gap-20 md:gap-28">
             <EstimateDetailInfoSection
               rows={[
-                { label: "견적 요청일", value: formatKoreanDateTime(request.requestedAt) },
-                { label: "서비스", value: MOVE_TYPE_LABEL[request.moveType] },
-                { label: "이용일", value: formatKoreanDateTime(request.moveDate) },
+                {
+                  label: "견적 요청일",
+                  value: formatKoreanDateTime(request.requestedAt),
+                },
+                {
+                  label: "서비스",
+                  value: MOVE_TYPE_LABEL[request.moveType],
+                },
+                {
+                  label: "이용일",
+                  value: formatKoreanDateTime(request.moveDate),
+                },
                 {
                   label: "출발지",
                   value: formatAddress(request.fromAddress, request.fromDetailAddress),
