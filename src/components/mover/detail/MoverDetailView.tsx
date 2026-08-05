@@ -75,10 +75,6 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   }
 
   const toggleFavorite = () => {
-    if (favoriteMutation.isPending) {
-      return;
-    }
-
     favoriteMutation.mutate({
       moverId: detail.id,
       nextIsFavorite: !detail.isFavorite,
