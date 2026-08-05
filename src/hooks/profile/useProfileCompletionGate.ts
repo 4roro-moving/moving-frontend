@@ -1,11 +1,7 @@
 "use client";
 
-import { useCustomerProfileStatus } from "@/hooks/profile/useCustomerProfileStatus";
-import { useMoverProfileStatus } from "@/hooks/profile/useMoverProfileStatus";
-import { getProfilePath, type AuthAudience } from "@/lib/auth/redirect";
+import { useProfileCompletionState } from "@/hooks/profile/useProfileCompletionState";
 import type { AuthRole } from "@/lib/auth/role";
-import { isProfileMissingError } from "@/lib/profile/isProfileMissingError";
-import { useAuthStore } from "@/stores/useAuthStore";
 
 interface ProfileCompletionGate {
   /** 프로필 미완료 시 GNB/SideNav 링크 숨김 (경로 무관) */
@@ -20,23 +16,10 @@ interface ProfileCompletionGate {
  * - 그 외 status 실패·로딩 → fail-open
  */
 export const useProfileCompletionGate = (role: AuthRole | null): ProfileCompletionGate => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-
-  const isCustomer = isAuthenticated && role === "CUSTOMER";
-  const isMover = isAuthenticated && role === "MOVER";
-
-  const customerStatus = useCustomerProfileStatus(isCustomer);
-  const moverStatus = useMoverProfileStatus(isMover);
-  const statusQuery = isMover ? moverStatus : customerStatus;
-
-  const isIncomplete =
-    statusQuery.data?.isProfileCompleted === false ||
-    (statusQuery.isError && isProfileMissingError(statusQuery.error));
-
-  const audience: AuthAudience = role === "MOVER" ? "mover" : "customer";
+  const { isIncomplete, profileCreatePath } = useProfileCompletionState(role);
 
   return {
     shouldHideNavLinks: isIncomplete,
-    profileCreatePath: getProfilePath(audience),
+    profileCreatePath,
   };
 };

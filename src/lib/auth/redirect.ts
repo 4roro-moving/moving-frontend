@@ -89,6 +89,11 @@ export const getProfilePath = (audience: AuthAudience): string => {
   return audience === "mover" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.PROFILE;
 };
 
+/** 역할별 프로필 생성(등록) 경로인지 */
+export const isProfileCreatePath = (pathname: string, audience: AuthAudience): boolean => {
+  return pathname === getProfilePath(audience);
+};
+
 export const resolvePostLoginPath = (params: {
   isProfileCompleted: boolean;
   returnPath?: string | null;
