@@ -79,7 +79,8 @@ interface FavoriteMutationContext {
   previousMoverDetail: MoverDetail | undefined;
 }
 
-const favoriteRequestQueues = new Map<string, Promise<void>>();
+const favoriteRequestQueues = new Map<string, Promise<unknown>>();
+const favoriteOptimisticQueues = new Map<string, Promise<unknown>>();
 const latestFavoriteRequestIds = new Map<string, number>();
 let favoriteRequestId = 0;
 
@@ -89,9 +90,34 @@ function getFavoriteQueueKey(authScope: string, moverId: string) {
 }
 
 /**
+ * 주어진 key에 대해 task들을 등록된 순서대로 순차 실행합니다.
+ * task 자체는 동기 시점(호출 즉시)에 큐에 등록되므로, 실제 완료 순서가 뒤바뀌어도 시작 순서는 항상 호출 순서를 따릅니다.
+ */
+function runSerialized<T>(
+  queues: Map<string, Promise<unknown>>,
+  key: string,
+  task: () => Promise<T>,
+): Promise<T> {
+  const previous = queues.get(key) ?? Promise.resolve();
+  const run = previous.catch(() => undefined).then(task);
+  const tail = run.then(
+    () => undefined,
+    () => undefined,
+  );
+
+  queues.set(key, tail);
+  void tail.finally(() => {
+    if (queues.get(key) === tail) {
+      queues.delete(key);
+    }
+  });
+
+  return run;
+}
+
+/**
  * 같은 기사님의 연속 찜 요청은 클릭 순서대로 서버에 전달합니다.
- * 큐 대기 중 로그아웃/계정 전환이 일어나면, 실행 직전 세션이 달라졌는지 확인해
- * 다른 계정의 토큰으로 이전 계정의 요청이 실행되지 않도록 폐기합니다.
+ * 큐 대기 중 로그아웃/계정 전환이 일어나면, 실행 직전 세션이 달라졌는지 확인해 다른 계정의 토큰으로 이전 계정의 요청이 실행되지 않도록 폐기합니다.
  */
 function enqueueFavoriteRequest({
   moverId,
@@ -100,29 +126,14 @@ function enqueueFavoriteRequest({
   getCurrentAuthScope,
 }: FavoriteMoverRequest) {
   const queueKey = getFavoriteQueueKey(authScope, moverId);
-  const previousRequest = favoriteRequestQueues.get(queueKey) ?? Promise.resolve();
-  const request = previousRequest
-    .catch(() => undefined)
-    .then(() => {
-      if (getCurrentAuthScope() !== authScope) {
-        throw new StaleFavoriteRequestError();
-      }
 
-      return nextIsFavorite ? addFavoriteMover(moverId) : removeFavoriteMover(moverId);
-    });
-  const queueTail = request.then(
-    () => undefined,
-    () => undefined,
-  );
-
-  favoriteRequestQueues.set(queueKey, queueTail);
-  void queueTail.finally(() => {
-    if (favoriteRequestQueues.get(queueKey) === queueTail) {
-      favoriteRequestQueues.delete(queueKey);
+  return runSerialized(favoriteRequestQueues, queueKey, async () => {
+    if (getCurrentAuthScope() !== authScope) {
+      throw new StaleFavoriteRequestError();
     }
-  });
 
-  return request;
+    return nextIsFavorite ? addFavoriteMover(moverId) : removeFavoriteMover(moverId);
+  });
 }
 
 /** 기사님 단건 찜 추가/해제 + 관련 목록·상세 낙관적 업데이트 */
@@ -137,8 +148,8 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   const moverListScopeQueryKey = getMoverListScopeQueryKey(authScope);
   const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(authScope);
   const onErrorRef = useRef(options?.onError);
-  // 큐에 대기 중인 요청이 실행되는 시점에 "현재" 세션을 조회하기 위한 ref.
-  // authScope를 클로저로 그대로 캡처하면 대기 중 값이 바뀌어도 갱신되지 않음.
+  // 큐에 대기 중인 요청이 실행되는 시점에 현재 세션을 조회하기 위한 ref
+  // authScope를 클로저로 그대로 캡처하면 대기 중 값이 바뀌어도 갱신되지 않음
   const authScopeRef = useRef(authScope);
 
   useEffect(() => {
@@ -159,123 +170,133 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
 
   const mutation = useMutation({
     mutationFn: enqueueFavoriteRequest,
-    onMutate: async ({ moverId, nextIsFavorite }): Promise<FavoriteMutationContext> => {
-      const moverDetailQueryKey = getMoverDetailQueryKey(authScope, moverId);
+    onMutate: async (variables): Promise<FavoriteMutationContext> => {
+      const { moverId, nextIsFavorite, authScope: requestAuthScope } = variables;
+      const queueKey = getFavoriteQueueKey(requestAuthScope, moverId);
 
-      await Promise.all([
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
-        queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
-        queryClient.cancelQueries({ queryKey: moverListScopeQueryKey }),
-        queryClient.cancelQueries({ queryKey: moverDetailQueryKey }),
-        queryClient.cancelQueries({ queryKey: favoriteMoversScopeQueryKey }),
-      ]);
+      // cancelQueries~setQueryData(낙관적 업데이트) 구간을 클릭 순서대로 강제
+      // 큐에 등록하는 시점은 항상 동기적으로 클릭 순서를 따르므로, 실제 cancelQueries 완료 순서가 뒤바뀌어도 마지막 클릭 상태가 최종적으로 반영됨
+      return runSerialized(favoriteOptimisticQueues, queueKey, async () => {
+        const moverDetailQueryKey = getMoverDetailQueryKey(authScope, moverId);
 
-      const previousReceived = queryClient.getQueryData<ReceivedEstimatePanel[]>(
-        QUERY_KEYS.ESTIMATES.RECEIVED,
-      );
-      const previousDetails = queryClient.getQueriesData<EstimateDetail>({
-        queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT,
-      });
-      const previousPendingLists = queryClient.getQueriesData<PendingEstimateSectionListResult>({
-        queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
-      });
-      const previousMoverLists = queryClient.getQueriesData<InfiniteData<MoversListResult>>({
-        queryKey: moverListScopeQueryKey,
-      });
-      const previousFavoriteMovers = queryClient.getQueriesData<FavoriteMoversCacheData>({
-        queryKey: favoriteMoversScopeQueryKey,
-      });
-      const previousMoverDetail = queryClient.getQueryData<MoverDetail>(moverDetailQueryKey);
+        await Promise.all([
+          queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
+          queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
+          queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
+          queryClient.cancelQueries({ queryKey: moverListScopeQueryKey }),
+          queryClient.cancelQueries({ queryKey: moverDetailQueryKey }),
+          queryClient.cancelQueries({ queryKey: favoriteMoversScopeQueryKey }),
+        ]);
 
-      queryClient.setQueryData<ReceivedEstimatePanel[]>(QUERY_KEYS.ESTIMATES.RECEIVED, (panels) => {
-        if (!panels) {
-          return panels;
-        }
+        const previousReceived = queryClient.getQueryData<ReceivedEstimatePanel[]>(
+          QUERY_KEYS.ESTIMATES.RECEIVED,
+        );
+        const previousDetails = queryClient.getQueriesData<EstimateDetail>({
+          queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT,
+        });
+        const previousPendingLists = queryClient.getQueriesData<PendingEstimateSectionListResult>({
+          queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
+        });
+        const previousMoverLists = queryClient.getQueriesData<InfiniteData<MoversListResult>>({
+          queryKey: moverListScopeQueryKey,
+        });
+        const previousFavoriteMovers = queryClient.getQueriesData<FavoriteMoversCacheData>({
+          queryKey: favoriteMoversScopeQueryKey,
+        });
+        const previousMoverDetail = queryClient.getQueryData<MoverDetail>(moverDetailQueryKey);
 
-        return panels.map((panel) => ({
-          ...panel,
-          estimates: panel.estimates.map((estimate) => ({
-            ...estimate,
-            mover: patchMoverFavorite(estimate.mover, moverId, nextIsFavorite),
-          })),
-        }));
-      });
+        queryClient.setQueryData<ReceivedEstimatePanel[]>(
+          QUERY_KEYS.ESTIMATES.RECEIVED,
+          (panels) => {
+            if (!panels) {
+              return panels;
+            }
 
-      queryClient.setQueriesData<EstimateDetail>(
-        { queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT },
-        (detail) => {
-          if (!detail?.mover) {
-            return detail;
-          }
-
-          return {
-            ...detail,
-            mover: patchMoverFavorite(detail.mover, moverId, nextIsFavorite),
-          };
-        },
-      );
-
-      queryClient.setQueriesData<PendingEstimateSectionListResult>(
-        { queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT },
-        (list) => {
-          if (!list || !Array.isArray(list.sections)) {
-            return list;
-          }
-
-          return {
-            ...list,
-            sections: list.sections.map((section) => ({
-              ...section,
-              estimates: section.estimates.map((estimate) => ({
+            return panels.map((panel) => ({
+              ...panel,
+              estimates: panel.estimates.map((estimate) => ({
                 ...estimate,
                 mover: patchMoverFavorite(estimate.mover, moverId, nextIsFavorite),
               })),
-            })),
-          };
-        },
-      );
-
-      queryClient.setQueriesData<InfiniteData<MoversListResult>>(
-        { queryKey: moverListScopeQueryKey },
-        (list) => {
-          if (!list) {
-            return list;
-          }
-
-          return {
-            ...list,
-            pages: list.pages.map((page) => ({
-              ...page,
-              data: page.data.map((mover) => patchMoverFavorite(mover, moverId, nextIsFavorite)),
-            })),
-          };
-        },
-      );
-
-      if (!nextIsFavorite) {
-        queryClient.setQueriesData<FavoriteMoversCacheData>(
-          { queryKey: favoriteMoversScopeQueryKey },
-          (list) => removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1),
+            }));
+          },
         );
-      }
 
-      queryClient.setQueryData<MoverDetail>(moverDetailQueryKey, (detail) => {
-        if (!detail) {
-          return detail;
+        queryClient.setQueriesData<EstimateDetail>(
+          { queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT },
+          (detail) => {
+            if (!detail?.mover) {
+              return detail;
+            }
+
+            return {
+              ...detail,
+              mover: patchMoverFavorite(detail.mover, moverId, nextIsFavorite),
+            };
+          },
+        );
+
+        queryClient.setQueriesData<PendingEstimateSectionListResult>(
+          { queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT },
+          (list) => {
+            if (!list || !Array.isArray(list.sections)) {
+              return list;
+            }
+
+            return {
+              ...list,
+              sections: list.sections.map((section) => ({
+                ...section,
+                estimates: section.estimates.map((estimate) => ({
+                  ...estimate,
+                  mover: patchMoverFavorite(estimate.mover, moverId, nextIsFavorite),
+                })),
+              })),
+            };
+          },
+        );
+
+        queryClient.setQueriesData<InfiniteData<MoversListResult>>(
+          { queryKey: moverListScopeQueryKey },
+          (list) => {
+            if (!list) {
+              return list;
+            }
+
+            return {
+              ...list,
+              pages: list.pages.map((page) => ({
+                ...page,
+                data: page.data.map((mover) => patchMoverFavorite(mover, moverId, nextIsFavorite)),
+              })),
+            };
+          },
+        );
+
+        if (!nextIsFavorite) {
+          queryClient.setQueriesData<FavoriteMoversCacheData>(
+            { queryKey: favoriteMoversScopeQueryKey },
+            (list) => removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1),
+          );
         }
 
-        return patchMoverFavorite(detail, moverId, nextIsFavorite);
-      });
+        queryClient.setQueryData<MoverDetail>(moverDetailQueryKey, (detail) => {
+          if (!detail) {
+            return detail;
+          }
 
-      return {
-        previousReceived,
-        previousDetails,
-        previousPendingLists,
-        previousMoverLists,
-        previousFavoriteMovers,
-        previousMoverDetail,
-      };
+          return patchMoverFavorite(detail, moverId, nextIsFavorite);
+        });
+
+        return {
+          previousReceived,
+          previousDetails,
+          previousPendingLists,
+          previousMoverLists,
+          previousFavoriteMovers,
+          previousMoverDetail,
+        };
+      });
     },
     onError: (error, variables, context) => {
       const isLatestRequest =
@@ -307,7 +328,9 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       }
 
       if (isUnauthorizedError(error)) {
-        requireLogin();
+        if (isLatestRequest) {
+          requireLogin();
+        }
         return;
       }
 
