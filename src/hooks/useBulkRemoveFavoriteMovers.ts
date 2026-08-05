@@ -109,8 +109,8 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
 
       onErrorRef.current?.(getApiErrorMessage(error, ALL_FAILED_MESSAGE));
     },
-    onSettled: async () => {
-      await invalidateFavoriteRelatedQueries(queryClient, authScope);
+    onSettled: () => {
+      void invalidateFavoriteRelatedQueries(queryClient, authScope);
     },
   });
 

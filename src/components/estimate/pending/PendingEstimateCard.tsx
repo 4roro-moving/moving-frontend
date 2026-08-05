@@ -7,9 +7,10 @@ import Button, { buttonVariants } from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
+import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
+import { ConfirmedCheckIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
@@ -141,35 +142,16 @@ export default function PendingEstimateCard({
                       {displayName} 기사님
                     </Text>
                   </div>
-                  <button
-                    type="button"
-                    className="focus-visible:ring-border-brand rounded-8 flex shrink-0 items-center gap-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-                    aria-label={`${displayName} 기사님 찜, 현재 찜 ${mover.favoriteCount}개`}
-                    aria-pressed={mover.isFavorite}
-                    disabled={favoriteMutation.isPending}
-                    onClick={() => {
-                      favoriteMutation.mutate({
-                        moverId: mover.id,
-                        nextIsFavorite: !mover.isFavorite,
-                      });
+                  <FavoriteButton
+                    moverName={displayName}
+                    isFavorite={mover.isFavorite}
+                    favoriteCount={mover.favoriteCount}
+                    showCount
+                    className="gap-2"
+                    onToggle={(nextIsFavorite) => {
+                      favoriteMutation.mutate({ moverId: mover.id, nextIsFavorite });
                     }}
-                  >
-                    <LikeIcon
-                      isFavorite={mover.isFavorite}
-                      className={cn(
-                        "size-24",
-                        mover.isFavorite ? "text-text-brand" : "text-icon-default",
-                      )}
-                    />
-                    <Text
-                      as="span"
-                      variant="md-regular"
-                      className="text-text-muted"
-                      aria-hidden="true"
-                    >
-                      {mover.favoriteCount}
-                    </Text>
-                  </button>
+                  />
                 </div>
 
                 <div className="flex w-full flex-wrap items-center gap-x-8 gap-y-4">

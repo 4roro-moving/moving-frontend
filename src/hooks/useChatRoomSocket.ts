@@ -105,33 +105,37 @@ export function useChatRoomSocket({
 
         socket
           .timeout(SOCKET_ACK_TIMEOUT_MS)
-          .emit("chat:message:send", payload, (error: Error | null, response?: SendMessageAck) => {
-            if (error) {
-              resolve({
-                ok: false,
-                error: {
-                  code: "SOCKET_TIMEOUT",
-                  message: "채팅 서버 응답 시간이 초과되었습니다.",
-                },
-                clientMessageId: payload.clientMessageId,
-              });
-              return;
-            }
+          .emit(
+            "chat:message:send",
+            payload,
+            (error: Error | null, response?: SendChatMessageAck) => {
+              if (error) {
+                resolve({
+                  ok: false,
+                  error: {
+                    code: "SOCKET_TIMEOUT",
+                    message: "채팅 서버 응답 시간이 초과되었습니다.",
+                  },
+                  clientMessageId: payload.clientMessageId,
+                });
+                return;
+              }
 
-            if (!response) {
-              resolve({
-                ok: false,
-                error: {
-                  code: "SOCKET_EMPTY_ACK",
-                  message: "채팅 서버 응답이 올바르지 않습니다.",
-                },
-                clientMessageId: payload.clientMessageId,
-              });
-              return;
-            }
+              if (!response) {
+                resolve({
+                  ok: false,
+                  error: {
+                    code: "SOCKET_EMPTY_ACK",
+                    message: "채팅 서버 응답이 올바르지 않습니다.",
+                  },
+                  clientMessageId: payload.clientMessageId,
+                });
+                return;
+              }
 
-            resolve(response);
-          });
+              resolve(response);
+            },
+          );
       }),
     [isConnected, socket],
   );
