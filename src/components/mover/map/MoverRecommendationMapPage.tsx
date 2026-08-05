@@ -93,7 +93,7 @@ function RecommendationCard({
           : "border-border-subtle shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.2),2px_2px_10px_0_rgba(220,220,220,0.2)]",
       )}
     >
-      <button type="button" onClick={onSelect} className="w-full text-left">
+      <button type="button" aria-pressed={selected} onClick={onSelect} className="w-full text-left">
         <div className="mb-12 flex items-center justify-between gap-8">
           <span className="bg-background-brand-muted text-text-brand rounded-4 px-8 py-2 text-[13px] font-semibold">
             {mover.service}
@@ -195,6 +195,7 @@ function MockMap({
           <button
             key={mover.id}
             type="button"
+            aria-pressed={selected}
             onClick={() => onSelectMover(mover.id)}
             style={mover.marker}
             className="absolute -translate-x-1/2 -translate-y-1/2"
