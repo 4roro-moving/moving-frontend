@@ -11,6 +11,11 @@ interface FavoriteButtonProps {
   isFavorite: boolean;
   favoriteCount?: number;
   showCount?: boolean;
+  /**
+   * 클릭 가능 여부. 기본값 true.
+   * 로그인 가드 등으로 이미 접근이 제한된 화면이면 생략
+   * 같은 화면에서 상황에 따라 토글 가능 여부가 갈리면(비로그인 노출 등) 명시적으로 조건을 계산해 전달해야 함
+   */
   interactive?: boolean;
   countPosition?: "before" | "after";
   countVariant?: TextVariant | ResponsiveTextVariant;
