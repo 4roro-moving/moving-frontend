@@ -12,6 +12,8 @@ import type {
   SendChatMessagePayload,
 } from "@/types/chat";
 
+const SOCKET_ACK_TIMEOUT_MS = 5000;
+
 interface UseChatRoomSocketOptions {
   roomId: number;
   lastMessageId?: number | null;
@@ -29,10 +31,19 @@ export function useChatRoomSocket({
 }: UseChatRoomSocketOptions) {
   const { socket, isConnected, canConnect } = useChatSocket();
   const lastMessageIdRef = useRef<number | null>(lastMessageId ?? null);
+  const onJoinedRef = useRef(onJoined);
+  const onJoinErrorRef = useRef(onJoinError);
+  const onMessageRef = useRef(onMessage);
 
   useEffect(() => {
     lastMessageIdRef.current = lastMessageId ?? null;
   }, [lastMessageId]);
+
+  useEffect(() => {
+    onJoinedRef.current = onJoined;
+    onJoinErrorRef.current = onJoinError;
+    onMessageRef.current = onMessage;
+  }, [onJoined, onJoinError, onMessage]);
 
   useEffect(() => {
     if (!socket || !canConnect) {
@@ -40,12 +51,14 @@ export function useChatRoomSocket({
     }
 
     const handleJoined = (response: ChatRoomJoinedPayload) => {
-      onJoined?.(response);
+      if (response.room.id === roomId) {
+        onJoinedRef.current?.(response);
+      }
     };
 
     const handleMessage = (message: ChatMessage) => {
       if (message.roomId === roomId) {
-        onMessage?.(message);
+        onMessageRef.current?.(message);
       }
     };
 
@@ -56,7 +69,7 @@ export function useChatRoomSocket({
       socket.off("chat:room:joined", handleJoined);
       socket.off("chat:message:new", handleMessage);
     };
-  }, [canConnect, onJoined, onMessage, roomId, socket]);
+  }, [canConnect, roomId, socket]);
 
   useEffect(() => {
     if (!socket || !isConnected || !canConnect) {
@@ -70,10 +83,10 @@ export function useChatRoomSocket({
 
     socket.emit("chat:room:join", payload, (response: JoinChatRoomAck) => {
       if (!response.ok) {
-        onJoinError?.(response.error);
+        onJoinErrorRef.current?.(response.error);
       }
     });
-  }, [canConnect, isConnected, onJoinError, roomId, socket]);
+  }, [canConnect, isConnected, roomId, socket]);
 
   const sendMessage = useCallback(
     (payload: SendChatMessagePayload) =>
@@ -90,7 +103,35 @@ export function useChatRoomSocket({
           return;
         }
 
-        socket.emit("chat:message:send", payload, resolve);
+        socket
+          .timeout(SOCKET_ACK_TIMEOUT_MS)
+          .emit("chat:message:send", payload, (error: Error | null, response?: SendMessageAck) => {
+            if (error) {
+              resolve({
+                ok: false,
+                error: {
+                  code: "SOCKET_TIMEOUT",
+                  message: "채팅 서버 응답 시간이 초과되었습니다.",
+                },
+                clientMessageId: payload.clientMessageId,
+              });
+              return;
+            }
+
+            if (!response) {
+              resolve({
+                ok: false,
+                error: {
+                  code: "SOCKET_EMPTY_ACK",
+                  message: "채팅 서버 응답이 올바르지 않습니다.",
+                },
+                clientMessageId: payload.clientMessageId,
+              });
+              return;
+            }
+
+            resolve(response);
+          });
       }),
     [isConnected, socket],
   );

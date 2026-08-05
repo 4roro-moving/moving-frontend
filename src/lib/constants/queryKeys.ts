@@ -114,10 +114,12 @@ export const QUERY_KEYS = {
 
   CHATS: {
     ALL: ["chats"] as const,
-    ROOM: (roomId: number) => ["chats", "room", roomId] as const,
-    MESSAGES_ROOT: (roomId: number) => ["chats", "room", roomId, "messages"] as const,
-    MESSAGES: (roomId: number, limit: number) =>
-      ["chats", "room", roomId, "messages", { limit }] as const,
+    ROOM: (authScope: AuthQueryScope, roomId: number) =>
+      ["chats", authScope, "room", roomId] as const,
+    MESSAGES_ROOT: (authScope: AuthQueryScope, roomId: number) =>
+      ["chats", authScope, "room", roomId, "messages"] as const,
+    MESSAGES: (authScope: AuthQueryScope, roomId: number, limit: number) =>
+      ["chats", authScope, "room", roomId, "messages", { limit }] as const,
   },
 
   // 2026.07.25 정슬기 - [추가] 리뷰 쿼리 키

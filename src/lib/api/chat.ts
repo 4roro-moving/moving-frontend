@@ -19,7 +19,7 @@ function buildMessageListQuery({
 
   searchParams.set("limit", String(limit));
 
-  if (cursor) {
+  if (cursor !== null && cursor !== undefined) {
     searchParams.set("cursor", String(cursor));
   }
 
