@@ -9,7 +9,7 @@ import {
   buildMoverDetailFallbackMetadata,
   buildMoverDetailMetadata,
   buildMoverNotFoundMetadata,
-} from "@/lib/share/metadata";
+} from "@/lib/share/og";
 import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
 import { mapMoverDetailItemToMoverDetail } from "@/lib/utils/mapMover";
 import { ApiError } from "@/types/api";

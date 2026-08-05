@@ -3,8 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 
 import { shareFacebook } from "@/hooks/facebook/share";
-import { copyShareLink } from "@/lib/share/copyLink";
-import { getCurrentPageShareUrl } from "@/lib/share/shareUrl";
+import { copyShareLink, getCurrentPageShareUrl } from "@/lib/share/client";
 
 interface UsePageShareOptions {
   onToastMessage?: (message: string) => void;

@@ -6,7 +6,7 @@ import { Text } from "@/components/common/Text";
 import { shareKakaoMoverCustom, toKakaoShareImageUrl } from "@/hooks/kakao/share";
 import { usePageShare } from "@/hooks/usePageShare";
 import { ClipIcon } from "@/icons";
-import { hasFacebookAppId } from "@/lib/facebook/config";
+import { hasFacebookAppId } from "@/hooks/facebook/share";
 import { cn } from "@/lib/utils/cn";
 
 function KakaoIcon({ className }: { className?: string }) {
