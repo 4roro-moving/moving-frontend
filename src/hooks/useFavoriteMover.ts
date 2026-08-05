@@ -36,6 +36,14 @@ export { useBulkRemoveFavoriteMovers } from "@/hooks/useBulkRemoveFavoriteMovers
 const LOGIN_REQUIRED_MESSAGE = "로그인이 필요한 서비스입니다.";
 const CUSTOMER_REQUIRED_MESSAGE = "고객만 이용할 수 있는 서비스입니다.";
 
+/** 세션(authScope)이 바뀐 뒤 뒤늦게 실행되려는 요청을 조용히 폐기하기 위한 sentinel 에러 */
+class StaleFavoriteRequestError extends Error {
+  constructor() {
+    super("찜 요청이 실행되기 전에 세션이 변경되어 폐기되었습니다.");
+    this.name = "StaleFavoriteRequestError";
+  }
+}
+
 function isUnauthorizedError(error: unknown): boolean {
   if (error instanceof ApiError) {
     return error.status === 401 || error.code === "UNAUTHORIZED";
@@ -56,6 +64,10 @@ interface FavoriteMoverVariables {
 
 interface FavoriteMoverRequest extends FavoriteMoverVariables {
   requestId: number;
+  /** 요청을 큐에 넣은 시점의 세션 스코프. 실행 직전 현재 스코프와 비교해 계정 전환을 감지 */
+  authScope: string;
+  /** 실행 직전 현재 세션 스코프를 조회. ref 기반이라 큐 대기 중 값이 바뀌어도 최신값을 봄 */
+  getCurrentAuthScope: () => string;
 }
 
 interface FavoriteMutationContext {
@@ -71,21 +83,42 @@ const favoriteRequestQueues = new Map<string, Promise<void>>();
 const latestFavoriteRequestIds = new Map<string, number>();
 let favoriteRequestId = 0;
 
-/** 같은 기사님의 연속 찜 요청은 클릭 순서대로 서버에 전달 */
-function enqueueFavoriteRequest({ moverId, nextIsFavorite }: FavoriteMoverRequest) {
-  const previousRequest = favoriteRequestQueues.get(moverId) ?? Promise.resolve();
+/** moverId만으로는 계정 전환 시 큐가 세션을 넘나들며 공유되므로 authScope까지 키에 포함 */
+function getFavoriteQueueKey(authScope: string, moverId: string) {
+  return `${authScope}:${moverId}`;
+}
+
+/**
+ * 같은 기사님의 연속 찜 요청은 클릭 순서대로 서버에 전달합니다.
+ * 큐 대기 중 로그아웃/계정 전환이 일어나면, 실행 직전 세션이 달라졌는지 확인해
+ * 다른 계정의 토큰으로 이전 계정의 요청이 실행되지 않도록 폐기합니다.
+ */
+function enqueueFavoriteRequest({
+  moverId,
+  nextIsFavorite,
+  authScope,
+  getCurrentAuthScope,
+}: FavoriteMoverRequest) {
+  const queueKey = getFavoriteQueueKey(authScope, moverId);
+  const previousRequest = favoriteRequestQueues.get(queueKey) ?? Promise.resolve();
   const request = previousRequest
     .catch(() => undefined)
-    .then(() => (nextIsFavorite ? addFavoriteMover(moverId) : removeFavoriteMover(moverId)));
+    .then(() => {
+      if (getCurrentAuthScope() !== authScope) {
+        throw new StaleFavoriteRequestError();
+      }
+
+      return nextIsFavorite ? addFavoriteMover(moverId) : removeFavoriteMover(moverId);
+    });
   const queueTail = request.then(
     () => undefined,
     () => undefined,
   );
 
-  favoriteRequestQueues.set(moverId, queueTail);
+  favoriteRequestQueues.set(queueKey, queueTail);
   void queueTail.finally(() => {
-    if (favoriteRequestQueues.get(moverId) === queueTail) {
-      favoriteRequestQueues.delete(moverId);
+    if (favoriteRequestQueues.get(queueKey) === queueTail) {
+      favoriteRequestQueues.delete(queueKey);
     }
   });
 
@@ -104,10 +137,17 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   const moverListScopeQueryKey = getMoverListScopeQueryKey(authScope);
   const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(authScope);
   const onErrorRef = useRef(options?.onError);
+  // 큐에 대기 중인 요청이 실행되는 시점에 "현재" 세션을 조회하기 위한 ref.
+  // authScope를 클로저로 그대로 캡처하면 대기 중 값이 바뀌어도 갱신되지 않음.
+  const authScopeRef = useRef(authScope);
 
   useEffect(() => {
     onErrorRef.current = options?.onError;
   }, [options?.onError]);
+
+  useEffect(() => {
+    authScopeRef.current = authScope;
+  }, [authScope]);
 
   const requireLogin = () => {
     if (loginRequiredModal) {
@@ -261,6 +301,11 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         );
       }
 
+      // 세션 전환으로 폐기된 요청은 실제 실패가 아니므로 에러 처리하지 않음
+      if (error instanceof StaleFavoriteRequestError) {
+        return;
+      }
+
       if (isUnauthorizedError(error)) {
         requireLogin();
         return;
@@ -299,7 +344,15 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
 
     const requestId = ++favoriteRequestId;
     latestFavoriteRequestIds.set(variables.moverId, requestId);
-    mutation.mutate({ ...variables, requestId }, mutateOptions);
+    mutation.mutate(
+      {
+        ...variables,
+        requestId,
+        authScope,
+        getCurrentAuthScope: () => authScopeRef.current,
+      },
+      mutateOptions,
+    );
   };
 
   const mutateAsync = (
@@ -321,7 +374,15 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
 
     const requestId = ++favoriteRequestId;
     latestFavoriteRequestIds.set(variables.moverId, requestId);
-    return mutation.mutateAsync({ ...variables, requestId }, mutateOptions);
+    return mutation.mutateAsync(
+      {
+        ...variables,
+        requestId,
+        authScope,
+        getCurrentAuthScope: () => authScopeRef.current,
+      },
+      mutateOptions,
+    );
   };
 
   return { ...mutation, canToggleFavorite, mutate, mutateAsync };
