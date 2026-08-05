@@ -12,7 +12,7 @@ import ProfileMenuTrigger, {
   type ProfileMenuItem,
 } from "@/components/common/Header/ProfileMenuTrigger";
 import { Text } from "@/components/common/Text";
-import { useProfileCompletionGate } from "@/hooks/profile/useProfileCompletionGate";
+import { useProfileCompletionState } from "@/hooks/profile/useProfileCompletionState";
 import { MenuIcon } from "@/icons";
 import type { AuthRole } from "@/lib/auth/role";
 import { loadRole } from "@/lib/auth/role";
@@ -158,12 +158,12 @@ const Header = ({
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
-  const { shouldHideNavLinks, profileCreatePath } = useProfileCompletionGate(resolvedRole);
+  const { isIncomplete, profileCreatePath } = useProfileCompletionState(resolvedRole);
 
   const completedProfileMenuItems =
     resolvedRole === "MOVER" ? MOVER_PROFILE_MENU_ITEMS : CUSTOMER_PROFILE_MENU_ITEMS;
 
-  const profileMenuItems: ProfileMenuItem[] = shouldHideNavLinks
+  const profileMenuItems: ProfileMenuItem[] = isIncomplete
     ? [{ type: "link", label: "프로필 생성", href: profileCreatePath }, PROFILE_LOGOUT_MENU_ITEM]
     : completedProfileMenuItems;
 
@@ -211,7 +211,7 @@ const Header = ({
 
           {/* Mobile은 햄버거 전까지 링크 숨김 — 좁은 폭에서 GNB 가로 스크롤 방지 */}
           {/* 2026.08.04 정슬기 - [수정] */}
-          {!shouldHideNavLinks ? (
+          {!isIncomplete ? (
             <nav aria-label="주요 메뉴" className="hidden min-w-0 xl:block">
               <ul className="flex items-center xl:gap-40">
                 {navLinks.map((link) => {
@@ -296,8 +296,8 @@ const Header = ({
         id={mobileMenuId}
         isOpen={isSideNavOpen}
         onClose={closeSideNav}
-        links={shouldHideNavLinks ? [] : sideNavLinks}
-        emptyMessage={shouldHideNavLinks ? PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE : undefined}
+        links={isIncomplete ? [] : sideNavLinks}
+        emptyMessage={isIncomplete ? PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE : undefined}
       />
     </header>
   );
