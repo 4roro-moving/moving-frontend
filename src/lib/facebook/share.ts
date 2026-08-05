@@ -64,8 +64,13 @@ async function ensureFacebookSdk(): Promise<FacebookSDK> {
 
   // 타임아웃 등으로 init 없이 FB만 남은 경우 — 여기서 초기화
   if (window.FB && !sdkInitialized) {
-    initFacebookSdk(window.FB, appId);
-    return window.FB;
+    try {
+      initFacebookSdk(window.FB, appId);
+      return window.FB;
+    } catch {
+      sdkInitialized = false;
+      throw new Error(FACEBOOK_SDK_INIT_ERROR);
+    }
   }
 
   if (sdkReadyPromise) {
@@ -76,12 +81,15 @@ async function ensureFacebookSdk(): Promise<FacebookSDK> {
     let settled = false;
     const abortController = new AbortController();
     const { signal } = abortController;
+    const previousAsyncInit = window.fbAsyncInit;
 
     const settle = (action: () => void) => {
       if (settled) return;
       settled = true;
       window.clearTimeout(timeoutId);
       abortController.abort();
+      // 성공·실패 모두 전역 핸들러를 이전 값으로 되돌려 늦은 SDK 도착 시 꼬임을 막음
+      window.fbAsyncInit = previousAsyncInit;
       action();
     };
 
@@ -102,8 +110,6 @@ async function ensureFacebookSdk(): Promise<FacebookSDK> {
       fail(new Error(FACEBOOK_SDK_TIMEOUT_ERROR));
     }, FACEBOOK_SDK_LOAD_TIMEOUT_MS);
 
-    const previousAsyncInit = window.fbAsyncInit;
-
     window.fbAsyncInit = () => {
       previousAsyncInit?.();
       if (settled) {
@@ -116,8 +122,12 @@ async function ensureFacebookSdk(): Promise<FacebookSDK> {
         return;
       }
 
-      initFacebookSdk(fb, appId);
-      succeed(fb);
+      try {
+        initFacebookSdk(fb, appId);
+        succeed(fb);
+      } catch {
+        fail(new Error(FACEBOOK_SDK_INIT_ERROR));
+      }
     };
 
     const existing = document.getElementById(FACEBOOK_SDK_ID);

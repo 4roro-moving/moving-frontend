@@ -40,6 +40,11 @@ function loadKakaoSdkScript(): Promise<void> {
         "load",
         () => {
           window.clearTimeout(timeoutId);
+          if (!window.Kakao) {
+            existing.remove();
+            reject(new Error(KAKAO_SDK_LOAD_ERROR));
+            return;
+          }
           resolve();
         },
         { once: true },
@@ -69,6 +74,11 @@ function loadKakaoSdkScript(): Promise<void> {
 
     script.onload = () => {
       window.clearTimeout(timeoutId);
+      if (!window.Kakao) {
+        script.remove();
+        reject(new Error(KAKAO_SDK_LOAD_ERROR));
+        return;
+      }
       resolve();
     };
     script.onerror = () => {
