@@ -10,12 +10,18 @@ function fromVercelHost(raw: string): string {
 
 /**
  * OG·공유 링크용 앱 베이스 URL.
- * NEXT_PUBLIC_APP_URL 우선, 없으면 Vercel 배포 호스트(VERCEL_URL)를 사용합니다.
+ * NEXT_PUBLIC_APP_URL을 우선 사용합니다.
+ * Production에서는 APP_URL을 필수로 두고, Preview/로컬에서만 VERCEL_URL fallback을 허용합니다.
  */
 export function getAppBaseUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.trim();
   if (fromEnv) {
     return normalizeBaseUrl(fromEnv);
+  }
+
+  const isVercelProduction = process.env.VERCEL_ENV === "production";
+  if (isVercelProduction) {
+    throw new Error("Production 환경에서는 NEXT_PUBLIC_APP_URL 환경 변수가 필요합니다.");
   }
 
   const vercelUrl = process.env.VERCEL_URL?.trim();
