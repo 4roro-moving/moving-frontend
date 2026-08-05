@@ -3,10 +3,10 @@
 import { useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
-import { shareKakaoMoverCustom, toKakaoShareImageUrl } from "@/hooks/kakao/share";
+import { shareKakaoMoverCustom, toKakaoShareImageUrl } from "@/lib/kakao/share";
 import { usePageShare } from "@/hooks/usePageShare";
 import { ClipIcon } from "@/icons";
-import { hasFacebookAppId } from "@/hooks/facebook/share";
+import { hasFacebookAppId } from "@/lib/facebook/share";
 import { cn } from "@/lib/utils/cn";
 
 function KakaoIcon({ className }: { className?: string }) {
