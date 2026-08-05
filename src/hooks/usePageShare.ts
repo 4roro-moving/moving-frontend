@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 
-import { shareFacebook } from "@/lib/share/facebookShare";
+import { shareFacebook } from "@/hooks/facebook/share";
 import { copyShareLink } from "@/lib/share/copyLink";
 import { getCurrentPageShareUrl } from "@/lib/share/shareUrl";
 

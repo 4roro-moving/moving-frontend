@@ -1,22 +1,13 @@
-import { ensureFacebookSdk, hasFacebookAppId } from "@/lib/facebook/sdk";
+import { ensureFacebookSdk } from "@/hooks/facebook/sdk";
+import {
+  FACEBOOK_APP_ID_MISSING_MESSAGE,
+  FACEBOOK_SHARE_FALLBACK_ERROR,
+  getFacebookShareErrorMessage,
+  hasFacebookAppId,
+} from "@/lib/facebook/config";
 
 interface ShareFacebookHandlers {
   onError?: (message: string) => void;
-}
-
-const FACEBOOK_SHARE_FALLBACK_ERROR = "페이스북 공유에 실패했습니다.";
-
-function getFacebookShareErrorMessage(response?: FacebookShareResponse): string {
-  const raw = response?.error_message?.trim();
-  if (!raw) {
-    return FACEBOOK_SHARE_FALLBACK_ERROR;
-  }
-
-  try {
-    return decodeURIComponent(raw.replace(/\+/g, " "));
-  } catch {
-    return raw;
-  }
 }
 
 /**
@@ -30,7 +21,7 @@ export async function shareFacebook({
 }: ShareFacebookHandlers & { href: string }): Promise<void> {
   try {
     if (!hasFacebookAppId()) {
-      onError?.("페이스북 앱 설정이 필요합니다.");
+      onError?.(FACEBOOK_APP_ID_MISSING_MESSAGE);
       return;
     }
 
@@ -56,5 +47,3 @@ export async function shareFacebook({
     onError?.(message);
   }
 }
-
-export { getFacebookAppId, hasFacebookAppId } from "@/lib/facebook/sdk";
