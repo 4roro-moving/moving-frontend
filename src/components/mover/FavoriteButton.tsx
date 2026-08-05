@@ -84,6 +84,11 @@ export function FavoriteButton({
     onToggle(!isFavorite);
   };
 
+  const ariaLabel =
+    showCount && favoriteCount !== undefined
+      ? `${moverName} 기사님 찜, 현재 ${favoriteCount}개`
+      : `${moverName} 기사님 찜`;
+
   return (
     <button
       type="button"
@@ -91,7 +96,7 @@ export function FavoriteButton({
         "focus-visible:ring-border-brand rounded-8 flex shrink-0 cursor-pointer items-center focus-visible:ring-2 focus-visible:outline-none",
         className,
       )}
-      aria-label={`${moverName} 기사님 찜`}
+      aria-label={ariaLabel}
       aria-pressed={isFavorite}
       onClick={handleClick}
     >
