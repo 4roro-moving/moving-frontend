@@ -1,7 +1,7 @@
 const FACEBOOK_SDK_ID = "facebook-jssdk";
 const FACEBOOK_SDK_SRC = "https://connect.facebook.net/en_US/sdk.js";
 const FACEBOOK_SDK_LOAD_ERROR = "Facebook SDK 로드에 실패했습니다.";
-const FACEBOOK_SDK_VERSION = "v21.0";
+const FACEBOOK_SDK_VERSION = "v26.0";
 
 let sdkReadyPromise: Promise<FacebookSDK> | null = null;
 
