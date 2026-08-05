@@ -9,11 +9,14 @@ import Input from "@/components/common/Input/Input";
 import NavigationTabs from "@/components/common/NavigationTabs/NavigationTabs";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
+import AddressSelectModal from "@/components/estimate/request/AddressSelectModal";
 import { DriverBadgeIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
 
 type MatchType = "BOTH" | "DEPARTURE" | "DESTINATION";
+type AddressModalKind = "출발지" | "도착지";
 
 const MOVER_NAVIGATION_ITEMS = [
   { href: APP_ROUTES.MOVERS.ROOT, label: "기사님 찾기", match: "exact" },
@@ -233,8 +236,9 @@ function MockMap({
 }
 
 export function MoverRecommendationMapPage() {
-  const [departure, setDeparture] = useState("서울특별시 용산구 서울역");
-  const [destination, setDestination] = useState("경기도 성남시 분당구");
+  const [departure, setDeparture] = useState<AddressSearchItem | null>(null);
+  const [destination, setDestination] = useState<AddressSearchItem | null>(null);
+  const [addressModalKind, setAddressModalKind] = useState<AddressModalKind | null>(null);
   const [moveType, setMoveType] = useState("ALL");
   const [searchedMoveType, setSearchedMoveType] = useState("ALL");
   const [selectedMoverId, setSelectedMoverId] = useState<string | null>(MOCK_MOVERS[0]?.id ?? null);
@@ -254,6 +258,16 @@ export function MoverRecommendationMapPage() {
     setSelectedMoverId(firstMatch?.id ?? null);
   }
 
+  function handleAddressConfirm(address: AddressSearchItem) {
+    if (addressModalKind === "출발지") {
+      setDeparture(address);
+    } else if (addressModalKind === "도착지") {
+      setDestination(address);
+    }
+
+    setAddressModalKind(null);
+  }
+
   return (
     <main className="bg-background-surface flex min-h-[calc(100dvh-88px)] flex-col">
       <NavigationTabs ariaLabel="기사님 찾기 방식" items={MOVER_NAVIGATION_ITEMS} />
@@ -270,10 +284,18 @@ export function MoverRecommendationMapPage() {
 
             <div className="flex flex-col gap-12">
               <Input
-                value={departure}
-                onChange={(event) => setDeparture(event.target.value)}
+                readOnly
+                value={departure?.roadAddress ?? ""}
+                onClick={() => setAddressModalKind("출발지")}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setAddressModalKind("출발지");
+                  }
+                }}
                 placeholder="출발지를 입력해 주세요."
                 aria-label="출발지"
+                aria-haspopup="dialog"
                 leftSlot={
                   <span className="bg-text-secondary flex size-24 shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-white">
                     출
@@ -281,10 +303,18 @@ export function MoverRecommendationMapPage() {
                 }
               />
               <Input
-                value={destination}
-                onChange={(event) => setDestination(event.target.value)}
+                readOnly
+                value={destination?.roadAddress ?? ""}
+                onClick={() => setAddressModalKind("도착지")}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setAddressModalKind("도착지");
+                  }
+                }}
                 placeholder="도착지를 입력해 주세요."
                 aria-label="도착지"
+                aria-haspopup="dialog"
                 leftSlot={
                   <span className="bg-background-brand flex size-24 shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-white">
                     도
@@ -307,7 +337,7 @@ export function MoverRecommendationMapPage() {
               <Button
                 size="cta"
                 fullWidth
-                disabled={!departure.trim() || !destination.trim()}
+                disabled={!departure || !destination}
                 onClick={handleSearch}
               >
                 기사님 검색
@@ -357,6 +387,15 @@ export function MoverRecommendationMapPage() {
           onSelectMover={setSelectedMoverId}
         />
       </div>
+
+      {addressModalKind && (
+        <AddressSelectModal
+          open
+          kind={addressModalKind}
+          onClose={() => setAddressModalKind(null)}
+          onConfirm={handleAddressConfirm}
+        />
+      )}
     </main>
   );
 }
