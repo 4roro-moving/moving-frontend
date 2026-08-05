@@ -112,6 +112,14 @@ export const QUERY_KEYS = {
     MOVER: (moverId: string) => ["favorites", "mover", moverId] as const,
   },
 
+  CHATS: {
+    ALL: ["chats"] as const,
+    ROOM: (roomId: number) => ["chats", "room", roomId] as const,
+    MESSAGES_ROOT: (roomId: number) => ["chats", "room", roomId, "messages"] as const,
+    MESSAGES: (roomId: number, limit: number) =>
+      ["chats", "room", roomId, "messages", { limit }] as const,
+  },
+
   // 2026.07.25 정슬기 - [추가] 리뷰 쿼리 키
   // 2026.07.30 정슬기 - [수정] 견적 관리와 동일하게 ROOT·페이지 팩토리 분리
   REVIEWS: {
