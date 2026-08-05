@@ -2,19 +2,14 @@
 
 import { useCallback, useRef, useState } from "react";
 
+import { shareFacebook } from "@/lib/share/facebookShare";
 import { copyShareLink } from "@/lib/share/copyLink";
-import { openFacebookShare } from "@/lib/share/facebookShare";
 import { getCurrentPageShareUrl } from "@/lib/share/shareUrl";
 
 interface UsePageShareOptions {
   onToastMessage?: (message: string) => void;
 }
 
-/**
- * 페이지 공유 (링크 복사 · Facebook)
- * 카카오 커스텀 템플릿은 MoverDetailShare + hooks/kakao/share 에서 연동합니다.
- * // 2026.07.30 정슬기 - [추가]
- */
 export function usePageShare({ onToastMessage }: UsePageShareOptions = {}) {
   const [busyAction, setBusyAction] = useState<"copy" | "facebook" | null>(null);
   const busyRef = useRef(false);
@@ -53,14 +48,15 @@ export function usePageShare({ onToastMessage }: UsePageShareOptions = {}) {
     });
   }, [onToastMessage, resolveUrl, runExclusive]);
 
-  const shareFacebook = useCallback(() => {
+  const shareFacebookHandler = useCallback(() => {
     void runExclusive("facebook", async () => {
       const url = resolveUrl();
       if (!url) return;
-      const opened = openFacebookShare(url);
-      if (!opened) {
-        onToastMessage?.("팝업이 차단되어 페이스북 공유 창을 열 수 없습니다.");
-      }
+
+      await shareFacebook({
+        href: url,
+        onError: (message: string) => onToastMessage?.(message),
+      });
     });
   }, [onToastMessage, resolveUrl, runExclusive]);
 
@@ -68,6 +64,6 @@ export function usePageShare({ onToastMessage }: UsePageShareOptions = {}) {
     busyAction,
     isBusy: busyAction !== null,
     shareCopy,
-    shareFacebook,
+    shareFacebook: shareFacebookHandler,
   };
 }

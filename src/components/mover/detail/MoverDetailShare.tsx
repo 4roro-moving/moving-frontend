@@ -38,9 +38,8 @@ interface MoverDetailShareProps {
 }
 
 const SHARE_TITLE = "나만 알기엔 아쉬운 기사님인가요?";
-const FACEBOOK_SHARE_UI_ENABLED = false;
+const FACEBOOK_SHARE_UI_ENABLED = true;
 
-/** 기사 상세 링크·카카오톡·Facebook 공유 버튼 그룹 */
 export default function MoverDetailShare({
   favoriteCount,
   moverName,
@@ -63,7 +62,7 @@ export default function MoverDetailShare({
     "disabled:cursor-not-allowed disabled:opacity-60",
   );
 
-  const handleKakaoShare = async () => {
+  const handleKakaoShare = async (): Promise<void> => {
     if (isShareBusy || kakaoSharingRef.current) return;
 
     kakaoSharingRef.current = true;
@@ -71,7 +70,6 @@ export default function MoverDetailShare({
     try {
       await shareKakaoMoverCustom({
         templateArgs: kakaoShare,
-        onMissingConfig: () => onToastMessage?.("카카오톡 공유 설정이 필요합니다."),
         onError: (message) => onToastMessage?.(message),
       });
     } finally {
@@ -127,10 +125,9 @@ export default function MoverDetailShare({
 
         <button
           type="button"
-          aria-label={FACEBOOK_SHARE_UI_ENABLED ? "페이스북 공유" : "페이스북 공유 (준비 중)"}
+          aria-label="페이스북 공유"
           aria-busy={busyAction === "facebook"}
           disabled={!FACEBOOK_SHARE_UI_ENABLED || isShareBusy}
-          title={FACEBOOK_SHARE_UI_ENABLED ? undefined : "준비 중"}
           onClick={shareFacebook}
           className={cn(
             iconButtonClassName,
