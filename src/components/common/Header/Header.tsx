@@ -158,14 +158,22 @@ const Header = ({
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
-  const { isIncomplete, profileCreatePath } = useProfileCompletionState(resolvedRole);
+  const { isIncomplete, isCompletionUnresolved, profileCreatePath } =
+    useProfileCompletionState(resolvedRole);
+
+  // SSR 로그인 힌트와 status 확정 전: 완료 사용자 메뉴/링크가 깜빡이지 않도록 숨김
+  const shouldHideNavLinks = isLogin && (isIncomplete || isCompletionUnresolved);
 
   const completedProfileMenuItems =
     resolvedRole === "MOVER" ? MOVER_PROFILE_MENU_ITEMS : CUSTOMER_PROFILE_MENU_ITEMS;
 
-  const profileMenuItems: ProfileMenuItem[] = isIncomplete
-    ? [{ type: "link", label: "프로필 생성", href: profileCreatePath }, PROFILE_LOGOUT_MENU_ITEM]
-    : completedProfileMenuItems;
+  const profileMenuItems: ProfileMenuItem[] = !isLogin
+    ? completedProfileMenuItems
+    : isIncomplete
+      ? [{ type: "link", label: "프로필 생성", href: profileCreatePath }, PROFILE_LOGOUT_MENU_ITEM]
+      : isCompletionUnresolved
+        ? [PROFILE_LOGOUT_MENU_ITEM]
+        : completedProfileMenuItems;
 
   const openSideNav = useCallback(() => setIsSideNavOpen(true), []);
   const closeSideNav = useCallback(() => setIsSideNavOpen(false), []);
@@ -211,7 +219,7 @@ const Header = ({
 
           {/* Mobile은 햄버거 전까지 링크 숨김 — 좁은 폭에서 GNB 가로 스크롤 방지 */}
           {/* 2026.08.04 정슬기 - [수정] */}
-          {!isIncomplete ? (
+          {!shouldHideNavLinks ? (
             <nav aria-label="주요 메뉴" className="hidden min-w-0 xl:block">
               <ul className="flex items-center xl:gap-40">
                 {navLinks.map((link) => {
@@ -296,7 +304,7 @@ const Header = ({
         id={mobileMenuId}
         isOpen={isSideNavOpen}
         onClose={closeSideNav}
-        links={isIncomplete ? [] : sideNavLinks}
+        links={shouldHideNavLinks ? [] : sideNavLinks}
         emptyMessage={isIncomplete ? PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE : undefined}
       />
     </header>
