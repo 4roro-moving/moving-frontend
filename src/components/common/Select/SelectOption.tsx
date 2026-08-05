@@ -14,14 +14,14 @@ interface SelectOptionProps {
 
 function getOptionTextVariant(isSort: boolean, isMultiColumn: boolean): TextVariantProp {
   if (isSort) {
-    return { base: "xs-medium", lg: "md-medium" };
+    return { base: "xs-medium", xl: "md-medium" };
   }
 
   if (isMultiColumn) {
-    return { base: "md-medium", lg: "2lg-medium" };
+    return { base: "md-medium", xl: "2lg-medium" };
   }
 
-  return { base: "md-medium", lg: "lg-medium" };
+  return { base: "md-medium", xl: "lg-medium" };
 }
 
 const SelectOption = ({ children, value }: SelectOptionProps) => {
@@ -38,12 +38,12 @@ const SelectOption = ({ children, value }: SelectOptionProps) => {
       className={cn(
         "hover:bg-background-hover w-full text-left whitespace-nowrap",
         isSort &&
-          "first:rounded-t-8 last:rounded-b-8 h-32 py-6 pr-6 pl-10 lg:h-auto lg:px-12 lg:py-8",
+          "first:rounded-t-8 last:rounded-b-8 h-32 py-6 pr-6 pl-10 xl:h-auto xl:px-12 xl:py-8",
         !isSort &&
           !isMultiColumn &&
-          "first:rounded-t-8 last:rounded-b-8 lg:first:rounded-t-12 lg:last:rounded-b-12 h-40 px-14 lg:h-60 lg:py-16 lg:pr-12 lg:pl-20",
+          "first:rounded-t-8 last:rounded-b-8 xl:first:rounded-t-12 xl:last:rounded-b-12 h-40 px-14 xl:h-60 xl:py-16 xl:pr-12 xl:pl-20",
         isMultiColumn &&
-          "border-border-default h-36 border-r px-14 even:border-r-0 lg:h-64 lg:px-24 lg:py-16",
+          "border-border-default h-36 border-r px-14 even:border-r-0 xl:h-64 xl:px-24 xl:py-16",
         isSelected && "bg-background-hover",
       )}
       onClick={() => handleChange(value)}

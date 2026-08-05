@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
@@ -13,8 +15,6 @@ import { formatPrice, formatRating } from "@/lib/utils/estimateFormat";
 import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 import type { ReceivedEstimateListItem } from "@/types/estimate";
 import type { MoveType } from "@/types/move";
-
-import { MoveTypeChip, DesignatedChip } from "./MoveTypeChip";
 
 interface EstimateOfferCardProps {
   offer: ReceivedEstimateListItem;

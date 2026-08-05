@@ -19,7 +19,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textare
         ref={ref}
         aria-invalid={!!error}
         className={cn(
-          "rounded-16 h-[180px] w-full border px-20 py-12",
+          "rounded-16 h-[180px] w-full border px-16 py-14",
           "border-border-default bg-background-surface text-text-primary transition-colors",
           "placeholder:text-text-placeholder disabled:bg-background-disabled disabled:text-text-disabled focus:outline-none",
           "hover:bg-background-hover",

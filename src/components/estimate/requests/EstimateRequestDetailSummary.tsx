@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
-import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { ConfirmedCheckIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import type { MoveType } from "@/types/move";

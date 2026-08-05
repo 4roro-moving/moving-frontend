@@ -13,7 +13,7 @@ import { Text } from "@/components/common/Text";
 export default function LandingHero() {
   return (
     <section className="relative w-full overflow-hidden">
-      <div className="relative flex h-[313px] w-full items-center justify-center min-[744px]:h-[405px]">
+      <div className="relative flex h-[313px] w-full items-center justify-center md:h-[405px]">
         <Image
           src="/images/landing/hero-bg.jpg"
           alt=""
@@ -24,28 +24,28 @@ export default function LandingHero() {
         />
         <div aria-hidden className="bg-landing-hero-overlay absolute inset-0" />
 
-        <div className="relative z-10 flex flex-col items-center gap-20 px-32 text-center min-[375px]:px-56 min-[744px]:gap-28 min-[744px]:px-24">
+        <div className="relative z-10 flex flex-col items-center gap-20 px-32 text-center min-[375px]:px-56 md:gap-28 md:px-24">
           <Image
             src="/images/landing/hero-truck.svg"
             alt=""
             width={160}
             height={99}
-            className="h-[62px] w-[100px] object-contain min-[744px]:h-[99px] min-[744px]:w-160"
+            className="h-[62px] w-[100px] object-contain md:h-[99px] md:w-160"
             unoptimized
           />
 
-          <div className="flex w-full max-w-[265px] flex-col items-center gap-8 min-[744px]:max-w-[431px] min-[744px]:gap-16">
+          <div className="flex w-full max-w-[327px] flex-col items-center gap-8 md:max-w-[431px] md:gap-16">
             <Text
               as="h1"
               variant={{ base: "xl-bold", md: "3xl-bold" }}
-              className="text-text-inverse min-[744px]:text-[length:var(--font-size-32)] min-[744px]:leading-[var(--line-height-46)]"
+              className="text-text-inverse md:text-[length:var(--font-size-32)] md:leading-[var(--line-height-46)]"
             >
               이사업체, 어떻게 고르세요?
             </Text>
             <Text
               as="p"
               variant={{ base: "lg-regular", md: "2lg-regular" }}
-              className="text-gray-300 min-[744px]:text-[length:var(--font-size-18)] min-[744px]:leading-[var(--line-height-26)] min-[744px]:text-gray-200"
+              className="whitespace-nowrap text-gray-300 md:text-[length:var(--font-size-18)] md:leading-[var(--line-height-26)] md:text-gray-200"
             >
               무빙은 여러 견적을 한눈에 비교해
               <br />

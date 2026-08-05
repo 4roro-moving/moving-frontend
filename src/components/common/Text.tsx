@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils/cn";
  *
  * `variant` 사용 방식 (우선순위: 역할명 → 반응형 객체 → 원자 스타일)
  * 1. 역할(semantic): `pageTitle`, `fieldLabel` …
- * 2. 반응형 객체: `{ base, md?, lg? }`
+ * 2. 반응형 객체: `{ base, md?, xl? }`
  * 3. 원자 스타일: `lg-semibold` (Figma Text/Lg/Semibold)
  *
- * md:/lg: 클래스는 런타임 문자열 연결이 아니라 아래 맵에 리터럴로 둬야 Tailwind가 CSS를 생성합니다.
+ * md:/xl: 클래스는 런타임 문자열 연결이 아니라 아래 맵에 리터럴로 둬야 Tailwind가 CSS를 생성합니다.
  */
 
 /** base (모바일 기본) */
@@ -129,74 +129,74 @@ const TEXT_VARIANT_STYLES_MD = {
     "md:text-[length:var(--font-size-40)] md:leading-[var(--line-height-48)] md:font-medium",
 } as const;
 
-/** lg: (데스크톱) — 키는 TEXT_VARIANT_STYLES와 동일 */
-const TEXT_VARIANT_STYLES_LG = {
+/** xl: (데스크톱) — 키는 TEXT_VARIANT_STYLES와 동일 */
+const TEXT_VARIANT_STYLES_XL = {
   "xs-regular":
-    "lg:text-[length:var(--font-size-12)] lg:leading-[var(--line-height-18)] lg:font-regular",
+    "xl:text-[length:var(--font-size-12)] xl:leading-[var(--line-height-18)] xl:font-regular",
   "xs-medium":
-    "lg:text-[length:var(--font-size-12)] lg:leading-[var(--line-height-18)] lg:font-medium",
+    "xl:text-[length:var(--font-size-12)] xl:leading-[var(--line-height-18)] xl:font-medium",
   "xs-semibold":
-    "lg:text-[length:var(--font-size-12)] lg:leading-[var(--line-height-18)] lg:font-semibold",
+    "xl:text-[length:var(--font-size-12)] xl:leading-[var(--line-height-18)] xl:font-semibold",
 
   "sm-medium":
-    "lg:text-[length:var(--font-size-13)] lg:leading-[var(--line-height-22)] lg:font-medium",
+    "xl:text-[length:var(--font-size-13)] xl:leading-[var(--line-height-22)] xl:font-medium",
   "sm-semibold":
-    "lg:text-[length:var(--font-size-13)] lg:leading-[var(--line-height-22)] lg:font-semibold",
+    "xl:text-[length:var(--font-size-13)] xl:leading-[var(--line-height-22)] xl:font-semibold",
 
   "md-regular":
-    "lg:text-[length:var(--font-size-14)] lg:leading-[var(--line-height-24)] lg:font-regular",
+    "xl:text-[length:var(--font-size-14)] xl:leading-[var(--line-height-24)] xl:font-regular",
   "md-medium":
-    "lg:text-[length:var(--font-size-14)] lg:leading-[var(--line-height-24)] lg:font-medium",
+    "xl:text-[length:var(--font-size-14)] xl:leading-[var(--line-height-24)] xl:font-medium",
   "md-semibold":
-    "lg:text-[length:var(--font-size-14)] lg:leading-[var(--line-height-24)] lg:font-semibold",
-  "md-bold": "lg:text-[length:var(--font-size-14)] lg:leading-[var(--line-height-24)] lg:font-bold",
+    "xl:text-[length:var(--font-size-14)] xl:leading-[var(--line-height-24)] xl:font-semibold",
+  "md-bold": "xl:text-[length:var(--font-size-14)] xl:leading-[var(--line-height-24)] xl:font-bold",
 
   "lg-regular":
-    "lg:text-[length:var(--font-size-16)] lg:leading-[var(--line-height-26)] lg:font-regular",
+    "xl:text-[length:var(--font-size-16)] xl:leading-[var(--line-height-26)] xl:font-regular",
   "lg-medium":
-    "lg:text-[length:var(--font-size-16)] lg:leading-[var(--line-height-26)] lg:font-medium",
+    "xl:text-[length:var(--font-size-16)] xl:leading-[var(--line-height-26)] xl:font-medium",
   "lg-semibold":
-    "lg:text-[length:var(--font-size-16)] lg:leading-[var(--line-height-26)] lg:font-semibold",
-  "lg-bold": "lg:text-[length:var(--font-size-16)] lg:leading-[var(--line-height-26)] lg:font-bold",
+    "xl:text-[length:var(--font-size-16)] xl:leading-[var(--line-height-26)] xl:font-semibold",
+  "lg-bold": "xl:text-[length:var(--font-size-16)] xl:leading-[var(--line-height-26)] xl:font-bold",
 
   "2lg-regular":
-    "lg:text-[length:var(--font-size-18)] lg:leading-[var(--line-height-26)] lg:font-regular",
+    "xl:text-[length:var(--font-size-18)] xl:leading-[var(--line-height-26)] xl:font-regular",
   "2lg-medium":
-    "lg:text-[length:var(--font-size-18)] lg:leading-[var(--line-height-26)] lg:font-medium",
+    "xl:text-[length:var(--font-size-18)] xl:leading-[var(--line-height-26)] xl:font-medium",
   "2lg-semibold":
-    "lg:text-[length:var(--font-size-18)] lg:leading-[var(--line-height-26)] lg:font-semibold",
+    "xl:text-[length:var(--font-size-18)] xl:leading-[var(--line-height-26)] xl:font-semibold",
   "2lg-bold":
-    "lg:text-[length:var(--font-size-18)] lg:leading-[var(--line-height-26)] lg:font-bold",
+    "xl:text-[length:var(--font-size-18)] xl:leading-[var(--line-height-26)] xl:font-bold",
 
   "xl-regular":
-    "lg:text-[length:var(--font-size-20)] lg:leading-[var(--line-height-32)] lg:font-regular",
+    "xl:text-[length:var(--font-size-20)] xl:leading-[var(--line-height-32)] xl:font-regular",
   "xl-medium":
-    "lg:text-[length:var(--font-size-20)] lg:leading-[var(--line-height-32)] lg:font-medium",
+    "xl:text-[length:var(--font-size-20)] xl:leading-[var(--line-height-32)] xl:font-medium",
   "xl-semibold":
-    "lg:text-[length:var(--font-size-20)] lg:leading-[var(--line-height-32)] lg:font-semibold",
-  "xl-bold": "lg:text-[length:var(--font-size-20)] lg:leading-[var(--line-height-32)] lg:font-bold",
+    "xl:text-[length:var(--font-size-20)] xl:leading-[var(--line-height-32)] xl:font-semibold",
+  "xl-bold": "xl:text-[length:var(--font-size-20)] xl:leading-[var(--line-height-32)] xl:font-bold",
 
   "2xl-regular":
-    "lg:text-[length:var(--font-size-24)] lg:leading-[var(--line-height-32)] lg:font-regular",
+    "xl:text-[length:var(--font-size-24)] xl:leading-[var(--line-height-32)] xl:font-regular",
   "2xl-medium":
-    "lg:text-[length:var(--font-size-24)] lg:leading-[var(--line-height-32)] lg:font-medium",
+    "xl:text-[length:var(--font-size-24)] xl:leading-[var(--line-height-32)] xl:font-medium",
   "2xl-semibold":
-    "lg:text-[length:var(--font-size-24)] lg:leading-[var(--line-height-32)] lg:font-semibold",
+    "xl:text-[length:var(--font-size-24)] xl:leading-[var(--line-height-32)] xl:font-semibold",
   "2xl-bold":
-    "lg:text-[length:var(--font-size-24)] lg:leading-[var(--line-height-32)] lg:font-bold",
+    "xl:text-[length:var(--font-size-24)] xl:leading-[var(--line-height-32)] xl:font-bold",
 
   "3xl-semibold":
-    "lg:text-[length:var(--font-size-32)] lg:leading-[var(--line-height-46)] lg:font-semibold",
+    "xl:text-[length:var(--font-size-32)] xl:leading-[var(--line-height-46)] xl:font-semibold",
   "3xl-bold":
-    "lg:text-[length:var(--font-size-32)] lg:leading-[var(--line-height-46)] lg:font-bold",
+    "xl:text-[length:var(--font-size-32)] xl:leading-[var(--line-height-46)] xl:font-bold",
 
   "link-xs":
-    "lg:text-[length:var(--font-size-12)] lg:leading-[var(--line-height-18)] lg:font-semibold lg:underline",
+    "xl:text-[length:var(--font-size-12)] xl:leading-[var(--line-height-18)] xl:font-semibold xl:underline",
   "link-xl":
-    "lg:text-[length:var(--font-size-20)] lg:leading-[var(--line-height-32)] lg:font-semibold lg:underline",
+    "xl:text-[length:var(--font-size-20)] xl:leading-[var(--line-height-32)] xl:font-semibold xl:underline",
 
   "rating-score":
-    "lg:text-[length:var(--font-size-40)] lg:leading-[var(--line-height-48)] lg:font-medium",
+    "xl:text-[length:var(--font-size-40)] xl:leading-[var(--line-height-48)] xl:font-medium",
 } as const;
 
 const textVariants = cva("tracking-[var(--letter-spacing-0)]", {
@@ -215,7 +215,7 @@ export type TextVariant = keyof typeof TEXT_VARIANT_STYLES;
 export interface ResponsiveTextVariant {
   base: TextVariant;
   md?: TextVariant;
-  lg?: TextVariant;
+  xl?: TextVariant;
 }
 
 /**
@@ -224,8 +224,9 @@ export interface ResponsiveTextVariant {
  * 원자 Text Style과 구분하기 위해 역할 기반 camelCase 이름을 사용합니다.
  */
 export const SEMANTIC_TEXT_VARIANTS = {
-  pageTitle: { base: "2lg-semibold", lg: "2xl-semibold" },
-  fieldLabel: { base: "lg-semibold", lg: "xl-semibold" },
+  pageTitle: { base: "2lg-semibold", xl: "2xl-semibold" },
+  fieldLabel: { base: "lg-semibold", xl: "xl-semibold" },
+  modalTitle: { base: "2lg-semibold", xl: "2xl-semibold" },
 } as const satisfies Record<string, ResponsiveTextVariant>;
 
 export type SemanticTextVariant = keyof typeof SEMANTIC_TEXT_VARIANTS;
@@ -273,7 +274,7 @@ export function getTextVariantClass(variant: TextVariantProp | undefined) {
   return cn(
     textVariants({ variant: resolved.base }),
     resolved.md && TEXT_VARIANT_STYLES_MD[resolved.md],
-    resolved.lg && TEXT_VARIANT_STYLES_LG[resolved.lg],
+    resolved.xl && TEXT_VARIANT_STYLES_XL[resolved.xl],
   );
 }
 

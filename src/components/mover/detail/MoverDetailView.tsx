@@ -8,7 +8,7 @@ import { useMoverDetail } from "@/hooks/useMoverDetail";
 
 import Toast from "@/components/common/Toast/Toast";
 import DetailHeroBanner from "@/components/common/DetailHeroBanner";
-import EstimateDetailHeader from "@/components/estimate/detail/EstimateDetailHeader";
+import { PageHeader } from "@/components/common/PageHeader";
 import DesignateSuccessModal from "@/components/estimate/DesignateSuccessModal";
 import EstimateRequestRequiredModal from "@/components/estimate/EstimateRequestRequiredModal";
 
@@ -40,7 +40,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   if (isInitialLoading) {
     return (
       <div className="bg-background-default flex w-full max-w-full flex-col overflow-x-hidden">
-        <EstimateDetailHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+        <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
         <MoverDetailPageSkeleton />
       </div>
     );
@@ -50,7 +50,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     if (isNotFound) {
       return (
         <div className="bg-background-default flex w-full max-w-full flex-col overflow-x-hidden">
-          <EstimateDetailHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+          <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
           <MoverDetailNotFoundStatus />
         </div>
       );
@@ -58,7 +58,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
 
     return (
       <div className="bg-background-default flex w-full flex-1 flex-col overflow-x-hidden">
-        <EstimateDetailHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+        <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
         <div className="flex w-full flex-1 flex-col items-center justify-center">
           <MoversErrorPanel
             title="불러오지 못했어요"
@@ -101,13 +101,13 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   };
 
   return (
-    <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] lg:pb-0">
-      <EstimateDetailHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+    <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] xl:pb-0">
+      <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
       <DetailHeroBanner imageUrl={detail.profileImageSrc} name={detail.name} />
 
-      <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 lg:px-0 lg:pb-[150px]">
-        <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-32 md:gap-40 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex w-full min-w-0 flex-col gap-40 md:gap-40 lg:w-[766px]">
+      <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 xl:px-0 xl:pb-[150px]">
+        <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-32 md:gap-40 xl:flex-row xl:items-start xl:justify-between">
+          <div className="flex w-full min-w-0 flex-col gap-40 md:gap-40 xl:w-[766px]">
             <MoverDetailProfile
               detail={detail}
               onToggleFavorite={toggleFavorite}
@@ -115,9 +115,9 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
             />
             <MoverDetailServices detail={detail} />
 
-            <div className="border-border-subtle w-full border-t lg:hidden" aria-hidden="true" />
+            <div className="border-border-subtle w-full border-t xl:hidden" aria-hidden="true" />
 
-            <div className="lg:hidden">
+            <div className="xl:hidden">
               <MoverDetailShare {...shareProps} onToastMessage={setToastMessage} />
             </div>
 
@@ -131,7 +131,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
             />
           </div>
 
-          <aside className="hidden w-full min-w-0 flex-col items-start gap-40 lg:flex lg:w-[320px] lg:gap-70 lg:pt-40">
+          <aside className="hidden w-full min-w-0 flex-col items-start gap-40 xl:flex xl:w-[320px] xl:gap-70 xl:pt-40">
             {designation.showCustomerActions ? (
               <MoverDetailActions layout="sidebar" {...actionsProps} />
             ) : null}

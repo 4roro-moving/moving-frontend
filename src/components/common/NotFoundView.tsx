@@ -31,7 +31,7 @@ export default function NotFoundView() {
   };
 
   return (
-    <div className="bg-background-default px-margin-mobile md:px-margin-tablet flex w-full flex-1 flex-col items-center justify-center py-64 lg:px-0">
+    <div className="bg-background-default px-margin-mobile md:px-margin-tablet flex w-full flex-1 flex-col items-center justify-center py-64 xl:px-0">
       <div className="max-w-container-desktop flex w-full flex-col items-center gap-32 md:gap-40">
         <div className="flex flex-col items-center gap-16 md:gap-20">
           <Text

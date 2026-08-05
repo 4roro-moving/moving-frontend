@@ -21,13 +21,13 @@ export default function ReviewPageFrame({ title, children, className }: ReviewPa
         className,
       )}
     >
-      <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop mx-auto flex w-full flex-col pt-24 pb-16 md:pt-40 md:pb-24 lg:px-0 lg:pt-48">
+      <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop mx-auto flex w-full flex-col pt-24 pb-16 md:pt-40 md:pb-24 xl:px-0 xl:pt-48">
         <Text as="h1" variant={{ base: "2xl-bold", md: "3xl-bold" }} className="text-text-primary">
           {title}
         </Text>
       </div>
 
-      <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop mx-auto flex w-full flex-col pb-64 md:pb-80 lg:px-0">
+      <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop mx-auto flex w-full flex-col pb-64 md:pb-80 xl:px-0">
         {children}
       </div>
     </div>

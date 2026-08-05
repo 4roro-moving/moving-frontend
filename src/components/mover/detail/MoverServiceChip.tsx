@@ -1,5 +1,4 @@
-import { Text } from "@/components/common/Text";
-import { cn } from "@/lib/utils/cn";
+import SelectableChip from "@/components/common/Chip/SelectableChip";
 import { getMoveTypeLabel } from "@/lib/utils/estimateFormat";
 import type { MoveType } from "@/types/move";
 
@@ -12,31 +11,11 @@ interface MoverServiceChipProps {
   className?: string;
 }
 
-const chipVariantClassName: Record<MoverServiceChipVariant, string> = {
-  service: "border-border-brand bg-brand-primary-subtle text-text-brand border",
-  region: "border-border-muted bg-background-subtle text-text-secondary border",
-};
-
 export function MoverServiceChip({ label, variant = "service", className }: MoverServiceChipProps) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center justify-center rounded-full px-12 py-6 md:px-20 md:py-10",
-        chipVariantClassName[variant],
-        className,
-      )}
-    >
-      <Text
-        as="span"
-        variant={
-          variant === "service"
-            ? { base: "md-medium", md: "2lg-medium" }
-            : { base: "md-regular", md: "2lg-regular" }
-        }
-      >
-        {label}
-      </Text>
-    </span>
+    <SelectableChip size="responsive" selected={variant === "service"} className={className}>
+      {label}
+    </SelectableChip>
   );
 }
 

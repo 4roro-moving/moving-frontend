@@ -1,14 +1,7 @@
 "use client";
 
+import AlertModal from "@/components/common/Modal/AlertModal";
 import Modal from "@/components/common/Modal/Modal";
-import { cn } from "@/lib/utils/cn";
-
-const PANEL_CLASSNAME = cn(
-  "items-stretch text-left",
-  "rounded-24 md:rounded-32",
-  "w-full max-w-[292px] gap-30 px-16 py-24",
-  "md:max-w-[480px] md:gap-40 md:px-24 md:pt-32 md:pb-40",
-);
 
 export interface FavoriteMoversDeleteConfirmModalProps {
   open: boolean;
@@ -26,20 +19,15 @@ export default function FavoriteMoversDeleteConfirmModal({
   onClose,
   onConfirm,
 }: FavoriteMoversDeleteConfirmModalProps) {
-  if (!open) {
-    return null;
-  }
-
   return (
-    <Modal onClose={isPending ? undefined : onClose} className={PANEL_CLASSNAME}>
-      <div className="flex w-full items-center justify-between gap-12">
-        <Modal.Title variant={{ base: "2lg-bold", md: "2xl-semibold" }}>찜 해제 확인</Modal.Title>
-        <Modal.Close onClose={onClose} disabled={isPending} />
-      </div>
-
-      <div className="flex w-full flex-col items-stretch gap-30 md:gap-40">
-        <Modal.Desc variant="2lg-medium">찜한 기사님 {count}명의 찜을 모두 해제할까요?</Modal.Desc>
-
+    <AlertModal
+      open={open}
+      onClose={onClose}
+      closeDisabled={isPending}
+      size="sm"
+      title="찜 해제 확인"
+      description={`찜한 기사님 ${count}명의 찜을 모두 해제할까요?`}
+      actions={
         <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
           <Modal.Button
             type="button"
@@ -64,7 +52,7 @@ export default function FavoriteMoversDeleteConfirmModal({
             {isPending ? "해제 중..." : "모두 해제"}
           </Modal.Button>
         </div>
-      </div>
-    </Modal>
+      }
+    />
   );
 }

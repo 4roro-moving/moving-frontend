@@ -37,7 +37,7 @@ export default function LandingFeatureRequest() {
       </section>
 
       {/* Tablet — frame 679×835, rect 783×835 @ x=-66 → inset left -9.72% right -5.6% */}
-      <section className="bg-background-default relative hidden w-full overflow-x-hidden pb-36 min-[744px]:block xl:hidden">
+      <section className="bg-background-default relative hidden w-full overflow-x-hidden pb-36 md:block xl:hidden">
         <div className="relative mx-auto w-full max-w-[744px] overflow-hidden">
           <div className="relative aspect-[679/835] w-full overflow-hidden">
             <div className="absolute inset-[0_-5.6%_0_-9.72%]">
@@ -63,7 +63,7 @@ export default function LandingFeatureRequest() {
       </section>
 
       {/* Mobile — frame 375×496, rect 439×495 @ x=-52 → inset left -13.84% right -3.41% */}
-      <section className="relative w-full overflow-x-hidden pb-16 min-[744px]:hidden">
+      <section className="relative w-full overflow-x-hidden pb-16 md:hidden">
         <div className="relative aspect-[375/496] w-full overflow-hidden">
           <div className="absolute inset-[0_-3.41%_0.1%_-13.84%]">
             <Image
@@ -77,7 +77,7 @@ export default function LandingFeatureRequest() {
           <Text
             as="h2"
             variant="xl-bold"
-            className="text-text-inverse absolute top-[5.8%] right-[8.5%] left-auto z-10 w-[64%] max-w-[239px] text-right"
+            className="text-text-inverse absolute top-[5.8%] right-[8.5%] left-auto z-10 w-[239px] max-w-[calc(100%-64px)] text-right"
           >
             원하는 이사 서비스를 요청하고
             <br />

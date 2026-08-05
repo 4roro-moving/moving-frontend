@@ -43,7 +43,7 @@ export default function FavoriteMoversToolbar({
         type="button"
         disabled={!canDelete}
         className={cn(
-          "rounded-8 focus-visible:ring-border-brand px-8 transition-colors focus-visible:ring-2 focus-visible:outline-none min-[744px]:px-12",
+          "rounded-8 focus-visible:ring-border-brand px-8 transition-colors focus-visible:ring-2 focus-visible:outline-none md:px-12",
           canDelete
             ? "text-text-subtle hover:text-text-secondary"
             : "text-text-subtle cursor-not-allowed opacity-50",

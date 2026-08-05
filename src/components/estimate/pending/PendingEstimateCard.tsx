@@ -5,7 +5,8 @@ import Link from "next/link";
 
 import Button, { buttonVariants } from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
-import { MoveTypeChip, DesignatedChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
