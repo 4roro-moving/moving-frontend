@@ -65,6 +65,8 @@ export interface AddressSearchItem {
   roadAddress: string;
   jibunAddress: string;
   sido: string;
+  latitude: number;
+  longitude: number;
 }
 
 /** 괄호 안 건물명 제거 후 도로명 기준 비교용 */
@@ -208,6 +210,8 @@ export function mapKakaoDocumentToAddressItem(
     roadAddress,
     jibunAddress: jibun?.address_name || "",
     sido: extractSido(jibun?.address_name || roadBase),
+    latitude: Number(document.y),
+    longitude: Number(document.x),
   };
 }
 
@@ -232,6 +236,8 @@ export function mapKakaoKeywordToAddressItem(
     roadAddress,
     jibunAddress: jibun,
     sido: extractSido(jibun || roadAddress),
+    latitude: Number(document.y),
+    longitude: Number(document.x),
   };
 }
 
