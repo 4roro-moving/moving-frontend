@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
+import ProfileCompletionGuard from "@/components/auth/ProfileCompletionGuard";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { buildLoginPath, getRoleHomePath } from "@/lib/auth/redirect";
@@ -53,9 +54,17 @@ export default function CustomerAuthGate({
     }
   }, [isPending, isAuthenticated, isCustomer, user?.role, pathname, router]);
 
+  const resolvedLoadingFallback = loadingFallback ?? (
+    <EstimatesQueryStatus message={loadingMessage} />
+  );
+
   if (isPending || !canFetch) {
-    return loadingFallback ?? <EstimatesQueryStatus message={loadingMessage} />;
+    return resolvedLoadingFallback;
   }
 
-  return children;
+  return (
+    <ProfileCompletionGuard loadingFallback={resolvedLoadingFallback}>
+      {children}
+    </ProfileCompletionGuard>
+  );
 }

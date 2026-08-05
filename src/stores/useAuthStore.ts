@@ -243,7 +243,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
 
         const token = getAccessToken();
-        const displayName = loadNickname();
         const status = error instanceof ApiError ? error.status : undefined;
 
         // 인증 만료·역할 불일치 → 토큰·닉네임·role 정리 후 비로그인
@@ -253,10 +252,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           return;
         }
 
-        // 네트워크·5xx 등 → 기존 access가 있으면 화면만 낙관 유지
+        // 프로필 미생성(me 404 등) 또는 일시 오류: JWT 힌트로 user를 채워
+        // role/userId가 있어야 status 가드·AuthGate가 동작한다.
         if (token) {
+          const hintedUser = resolveAuthUserFromTokenHint();
+          if (hintedUser) {
+            setAuthenticatedUser(set, hintedUser, false);
+            return;
+          }
+
           set({
-            displayName,
+            displayName: loadNickname(),
             isAuthenticated: true,
             isCheckingAuth: false,
             hasHydrated: true,

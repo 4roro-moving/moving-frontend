@@ -10,7 +10,7 @@ interface ProfileRequiredModalProps {
   profileCreatePath: string;
 }
 
-/** 프로필 미완료 사용자가 메뉴·기능을 눌렀을 때 안내 */
+/** 프로필 미완료 사용자가 보호 라우트에 들어왔을 때 안내 */
 const ProfileRequiredModal = ({ open, onClose, profileCreatePath }: ProfileRequiredModalProps) => {
   const router = useRouter();
 
@@ -22,9 +22,9 @@ const ProfileRequiredModal = ({ open, onClose, profileCreatePath }: ProfileRequi
       description="해당 기능은 프로필을 완성한 뒤 이용할 수 있어요."
       primaryAction={{
         label: "프로필 만들러 가기",
+        // onClose(이탈)와 겹치지 않도록 생성만 이동
         onClick: () => {
-          onClose();
-          router.push(profileCreatePath);
+          router.replace(profileCreatePath);
         },
       }}
     />

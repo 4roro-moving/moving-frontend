@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import MoverAuthGate from "@/components/auth/MoverAuthGate";
 import SentEstimateDetailPage from "@/components/estimate/sent/SentEstimateDetailPage";
 
 export const metadata: Metadata = {
@@ -20,5 +21,9 @@ export default async function SentEstimateDetailRoute({ params }: PageProps) {
     notFound();
   }
 
-  return <SentEstimateDetailPage estimateId={estimateId} />;
+  return (
+    <MoverAuthGate loadingMessage="보낸 견적을 불러오는 중입니다.">
+      <SentEstimateDetailPage estimateId={estimateId} />
+    </MoverAuthGate>
+  );
 }

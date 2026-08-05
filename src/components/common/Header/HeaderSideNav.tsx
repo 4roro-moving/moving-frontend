@@ -22,21 +22,12 @@ interface HeaderSideNavProps {
   isOpen: boolean;
   onClose: () => void;
   links: HeaderSideNavLink[];
-  /** 프로필 미완료 생성 화면 등 — 링크 대신 표시할 안내 */
+  /** 프로필 미완료 시 — 링크 대신 표시할 안내 */
   emptyMessage?: string;
-  /** 있으면 이동 대신 호출 (프로필 미완료 가드) */
-  onLinkClick?: () => void;
 }
 
 /** tablet·mobile GNB 사이드 네비게이션 — exit 애니메이션 후 unmount */
-const HeaderSideNav = ({
-  id,
-  isOpen,
-  onClose,
-  links,
-  emptyMessage,
-  onLinkClick,
-}: HeaderSideNavProps) => {
+const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideNavProps) => {
   const pathname = usePathname();
   const panelRef = useRef<HTMLElement>(null);
   const [shouldRender, setShouldRender] = useState(false);
@@ -163,15 +154,7 @@ const HeaderSideNav = ({
                           ? "text-text-primary"
                           : "text-text-primary hover:bg-background-hover",
                       )}
-                      onClick={(event) => {
-                        if (onLinkClick) {
-                          event.preventDefault();
-                          onClose();
-                          onLinkClick();
-                          return;
-                        }
-                        onClose();
-                      }}
+                      onClick={onClose}
                     >
                       <Text as="span" variant="lg-medium">
                         {link.label}
