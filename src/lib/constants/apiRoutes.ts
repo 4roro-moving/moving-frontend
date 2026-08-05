@@ -58,6 +58,11 @@ export const API_ROUTES = {
     MOVERS: "/favorites/movers",
     MOVER: (moverId: string) => `/favorites/movers/${moverId}`,
   },
+  CHATS: {
+    ROOMS: "/chats/rooms",
+    ROOM: (roomId: number) => `/chats/rooms/${roomId}`,
+    MESSAGES: (roomId: number) => `/chats/rooms/${roomId}/messages`,
+  },
   // 2026.07.25 정슬기 - [추가] 리뷰 API 경로
   REVIEWS: {
     ROOT: "/reviews",

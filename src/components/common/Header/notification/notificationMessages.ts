@@ -76,12 +76,12 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
       suffix: " 문의에 답변이 등록되었어요",
     },
     CONTENT_HIDDEN: {
-      prefix: "게시글이 숨김 처리되었어요. 사유: ",
-      suffix: "",
+      prefix: "",
+      suffix: "에 대한 리뷰가 숨김처리 되었습니다.",
     },
     CONTENT_RESTORED: {
       prefix: "",
-      suffix: "",
+      suffix: "에 대한 리뷰가 복구되었습니다.",
     },
   };
 
