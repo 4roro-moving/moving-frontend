@@ -1,0 +1,87 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+import { Text } from "@/components/common/Text";
+import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
+import { loadKakaoMaps } from "@/lib/kakao/loadKakaoMaps";
+
+interface KakaoMapProps {
+  departure: AddressSearchItem;
+  destination: AddressSearchItem;
+}
+
+export default function KakaoMap({ departure, destination }: KakaoMapProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    let disposed = false;
+    const markers: KakaoMapMarker[] = [];
+
+    void loadKakaoMaps()
+      .then((maps) => {
+        if (disposed || !containerRef.current) return;
+
+        const departurePosition = new maps.LatLng(departure.latitude, departure.longitude);
+        const destinationPosition = new maps.LatLng(destination.latitude, destination.longitude);
+        const map = new maps.Map(containerRef.current, {
+          center: departurePosition,
+          level: 7,
+        });
+
+        markers.push(
+          new maps.Marker({ map, position: departurePosition, title: "출발지" }),
+          new maps.Marker({ map, position: destinationPosition, title: "도착지" }),
+        );
+
+        const bounds = new maps.LatLngBounds();
+        bounds.extend(departurePosition);
+        bounds.extend(destinationPosition);
+        map.setBounds(bounds, 80, 80, 80, 80);
+
+        setStatus("ready");
+      })
+      .catch((error: unknown) => {
+        console.error("[KakaoMap] 지도 SDK 초기화 실패", error);
+
+        if (!disposed) {
+          setErrorMessage(
+            error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.",
+          );
+          setStatus("error");
+        }
+      });
+
+    return () => {
+      disposed = true;
+      markers.forEach((marker) => marker.setMap(null));
+    };
+  }, [departure, destination]);
+
+  return (
+    <section
+      aria-label="출발지와 도착지 지도"
+      className="bg-background-subtle relative min-h-[520px] flex-1 lg:min-h-0"
+    >
+      <div ref={containerRef} className="absolute inset-0" />
+
+      {status === "loading" && (
+        <div className="bg-background-subtle absolute inset-0 z-10 flex items-center justify-center">
+          <Text as="p" variant="md-medium" className="text-text-muted">
+            지도를 불러오는 중입니다.
+          </Text>
+        </div>
+      )}
+
+      {status === "error" && (
+        <div className="bg-background-subtle absolute inset-0 z-10 flex items-center justify-center px-24 text-center">
+          <Text as="p" variant="md-medium" className="text-text-error">
+            지도를 불러오지 못했습니다. {errorMessage}
+          </Text>
+        </div>
+      )}
+    </section>
+  );
+}

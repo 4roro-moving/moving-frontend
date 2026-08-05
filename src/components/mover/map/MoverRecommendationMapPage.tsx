@@ -10,6 +10,7 @@ import NavigationTabs from "@/components/common/NavigationTabs/NavigationTabs";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import AddressSelectModal from "@/components/estimate/request/AddressSelectModal";
+import KakaoMap from "@/components/mover/map/KakaoMap";
 import { DriverBadgeIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
@@ -159,78 +160,15 @@ function RecommendationCard({
   );
 }
 
-function MockMap({
-  movers,
-  selectedMoverId,
-  onSelectMover,
-}: {
-  movers: MockMover[];
-  selectedMoverId: string | null;
-  onSelectMover: (id: string) => void;
-}) {
+function MapSearchPrompt() {
   return (
     <section
-      aria-label="추천 기사님 지도 미리보기"
-      className="relative min-h-[520px] flex-1 overflow-hidden bg-[#eef1ed] lg:min-h-0"
+      aria-label="지도 검색 안내"
+      className="bg-background-subtle flex min-h-[520px] flex-1 items-center justify-center px-24 text-center lg:min-h-0"
     >
-      <div className="absolute inset-0 opacity-80" aria-hidden="true">
-        <div className="absolute top-[18%] left-[-8%] h-24 w-[116%] rotate-[7deg] bg-white/90 shadow-[0_0_0_1px_#d9ddd8]" />
-        <div className="absolute top-[-8%] left-[38%] h-[116%] w-20 rotate-[-12deg] bg-white/90 shadow-[0_0_0_1px_#d9ddd8]" />
-        <div className="absolute top-[66%] left-[-4%] h-16 w-[112%] rotate-[-5deg] bg-[#d9e8f5]" />
-        <div className="absolute top-[40%] left-[2%] h-10 w-[96%] rotate-[18deg] bg-white/80" />
-        <div className="absolute top-[8%] left-[12%] size-48 rounded-full bg-[#dcebd8]" />
-        <div className="absolute right-[8%] bottom-[10%] size-64 rounded-full bg-[#dcebd8]" />
-      </div>
-
-      <div className="absolute top-24 left-24 rounded-full bg-white px-14 py-8 text-[13px] font-semibold shadow-md">
-        서울 → 경기
-      </div>
-
-      <div className="absolute top-[25%] left-[22%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-        <span className="bg-text-secondary rounded-full px-10 py-5 text-[12px] font-bold text-white shadow-md">
-          출발
-        </span>
-        <span className="bg-text-secondary h-8 w-2" />
-      </div>
-      <div className="absolute top-[74%] left-[79%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-        <span className="bg-background-brand rounded-full px-10 py-5 text-[12px] font-bold text-white shadow-md">
-          도착
-        </span>
-        <span className="bg-background-brand h-8 w-2" />
-      </div>
-
-      {movers.map((mover, index) => {
-        const selected = selectedMoverId === mover.id;
-        return (
-          <button
-            key={mover.id}
-            type="button"
-            aria-pressed={selected}
-            onClick={() => onSelectMover(mover.id)}
-            style={mover.marker}
-            className="absolute -translate-x-1/2 -translate-y-1/2"
-            aria-label={`${mover.nickname} 기사님 마커`}
-          >
-            <span
-              className={cn(
-                "flex size-44 items-center justify-center rounded-full border-4 border-white font-bold text-white shadow-lg transition-transform",
-                selected ? "bg-background-brand scale-125" : "bg-text-secondary hover:scale-110",
-              )}
-            >
-              {index + 1}
-            </span>
-            {selected && (
-              <span className="text-text-secondary rounded-8 absolute top-52 left-1/2 w-max -translate-x-1/2 bg-white px-10 py-6 text-[12px] font-semibold shadow-md">
-                {mover.nickname} 기사님
-              </span>
-            )}
-          </button>
-        );
-      })}
-
-      <div className="text-text-muted rounded-8 absolute right-20 bottom-20 bg-white/95 px-12 py-8 text-[12px] shadow-sm">
-        지도 영역 목업 · 추후 Kakao Map 연결
-      </div>
+      <Text as="p" variant="lg-medium" className="text-text-muted">
+        출발지와 도착지를 선택하고 기사님을 검색하면 지도가 표시됩니다.
+      </Text>
     </section>
   );
 }
@@ -238,6 +176,8 @@ function MockMap({
 export function MoverRecommendationMapPage() {
   const [departure, setDeparture] = useState<AddressSearchItem | null>(null);
   const [destination, setDestination] = useState<AddressSearchItem | null>(null);
+  const [searchedDeparture, setSearchedDeparture] = useState<AddressSearchItem | null>(null);
+  const [searchedDestination, setSearchedDestination] = useState<AddressSearchItem | null>(null);
   const [addressModalKind, setAddressModalKind] = useState<AddressModalKind | null>(null);
   const [moveType, setMoveType] = useState("ALL");
   const [searchedMoveType, setSearchedMoveType] = useState("ALL");
@@ -252,6 +192,10 @@ export function MoverRecommendationMapPage() {
   );
 
   function handleSearch() {
+    if (!departure || !destination) return;
+
+    setSearchedDeparture(departure);
+    setSearchedDestination(destination);
     setSearchedMoveType(moveType);
     const firstMatch =
       moveType === "ALL" ? MOCK_MOVERS[0] : MOCK_MOVERS.find((mover) => mover.service === moveType);
@@ -381,11 +325,15 @@ export function MoverRecommendationMapPage() {
           </div>
         </aside>
 
-        <MockMap
-          movers={visibleMovers}
-          selectedMoverId={selectedMoverId}
-          onSelectMover={setSelectedMoverId}
-        />
+        {searchedDeparture && searchedDestination ? (
+          <KakaoMap
+            key={`${searchedDeparture.id}-${searchedDestination.id}`}
+            departure={searchedDeparture}
+            destination={searchedDestination}
+          />
+        ) : (
+          <MapSearchPrompt />
+        )}
       </div>
 
       {addressModalKind && (
