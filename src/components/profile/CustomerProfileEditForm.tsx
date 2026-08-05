@@ -56,6 +56,7 @@ const CustomerProfileEditForm = ({
     setFocus,
     getValues,
     reset,
+    resetField,
     formState: { errors, isValid, isSubmitting, dirtyFields },
   } = useForm<CustomerProfileEditFormValues>({
     resolver: zodResolver(customerProfileEditSchema),
@@ -104,14 +105,14 @@ const CustomerProfileEditForm = ({
         await updateCustomerBasicInfo.mutateAsync(basic);
         didBasicSucceed = true;
 
-        // 현재 값을 새 default로 승격 → 성공한 필드는 dirty에서 제외
+        // basic/비밀번호만 default 승격. profile 필드 dirty는 유지
+        // (profile PATCH 실패 후 재시도 시 payload가 비지 않도록)
         const current = getValues();
-        reset({
-          ...current,
-          currentPassword: "",
-          newPassword: "",
-          newPasswordConfirm: "",
-        });
+        resetField("name", { defaultValue: current.name });
+        resetField("phone", { defaultValue: current.phone });
+        resetField("currentPassword", { defaultValue: "" });
+        resetField("newPassword", { defaultValue: "" });
+        resetField("newPasswordConfirm", { defaultValue: "" });
       }
 
       if (profile) {

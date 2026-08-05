@@ -1,4 +1,4 @@
-import ProfileSelectableChip from "@/components/profile/ProfileSelectableChip";
+import SelectableChip from "@/components/common/Chip/SelectableChip";
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
@@ -73,13 +73,15 @@ const ProfileChipGroup = <T extends string | number>(props: ProfileChipGroupProp
         aria-labelledby={ariaLabelledby}
       >
         {options.map((option) => (
-          <ProfileSelectableChip
+          <SelectableChip
             key={String(option.value)}
-            label={option.label}
+            size="responsive"
             selected={isSelected(props, option.value)}
             onClick={() => handleSelect(props, option.value)}
             className={chipClassName}
-          />
+          >
+            {option.label}
+          </SelectableChip>
         ))}
       </div>
       {error ? (

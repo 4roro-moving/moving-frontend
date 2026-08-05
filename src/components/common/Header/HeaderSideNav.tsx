@@ -24,7 +24,7 @@ interface HeaderSideNavProps {
   links: HeaderSideNavLink[];
 }
 
-/** tablet·mobile GNB 사이드 네비게이션 (오른쪽 슬라이드) */
+/** tablet·mobile GNB 사이드 네비게이션 (오른쪽 슬라이드) — 열릴 때만 mount */
 const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
   const pathname = usePathname();
   const panelRef = useRef<HTMLElement>(null);
@@ -73,7 +73,7 @@ const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
     };
   }, [isOpen]);
 
-  if (typeof document === "undefined") {
+  if (typeof document === "undefined" || !isOpen) {
     return null;
   }
 
@@ -82,12 +82,7 @@ const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
       <button
         type="button"
         aria-label="메뉴 닫기"
-        aria-hidden={!isOpen}
-        tabIndex={isOpen ? 0 : -1}
-        className={cn(
-          "bg-overlay-scrim fixed inset-0 z-[9999] transition-opacity duration-200 xl:hidden",
-          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-        )}
+        className="bg-overlay-scrim fixed inset-0 z-[9999] xl:hidden"
         onClick={onClose}
       />
 
@@ -97,13 +92,8 @@ const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
         role="dialog"
         aria-modal="true"
         aria-label="주요 메뉴"
-        aria-hidden={!isOpen}
-        inert={!isOpen}
         tabIndex={-1}
-        className={cn(
-          "bg-background-surface fixed inset-y-0 right-0 z-[10000] flex w-[220px] flex-col transition-transform duration-200 ease-out focus:outline-none xl:hidden",
-          isOpen ? "translate-x-0" : "translate-x-full",
-        )}
+        className="bg-background-surface fixed inset-y-0 right-0 z-[10000] flex w-[220px] flex-col focus:outline-none xl:hidden"
       >
         <div className="border-border-subtle flex h-54 shrink-0 items-center justify-end border-b px-16 py-10">
           <button
