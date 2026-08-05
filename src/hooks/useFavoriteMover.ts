@@ -62,12 +62,14 @@ interface FavoriteMoverVariables {
   nextIsFavorite: boolean;
 }
 
+type AuthScope = ReturnType<typeof useAuthQueryScope>["authScope"];
+
 interface FavoriteMoverRequest extends FavoriteMoverVariables {
   requestId: number;
   /** 요청을 큐에 넣은 시점의 세션 스코프. 실행 직전 현재 스코프와 비교해 계정 전환을 감지 */
-  authScope: string;
+  authScope: AuthScope;
   /** 실행 직전 현재 세션 스코프를 조회. ref 기반이라 큐 대기 중 값이 바뀌어도 최신값을 봄 */
-  getCurrentAuthScope: () => string;
+  getCurrentAuthScope: () => AuthScope;
 }
 
 interface FavoriteMutationContext {
@@ -85,7 +87,7 @@ const latestFavoriteRequestIds = new Map<string, number>();
 let favoriteRequestId = 0;
 
 /** moverId만으로는 계정 전환 시 큐가 세션을 넘나들며 공유되므로 authScope까지 키에 포함 */
-function getFavoriteQueueKey(authScope: string, moverId: string) {
+function getFavoriteQueueKey(authScope: AuthScope, moverId: string) {
   return `${authScope}:${moverId}`;
 }
 
@@ -145,8 +147,6 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   const isCustomer = auth.user?.role === "CUSTOMER";
   const canToggleFavorite = !auth.isPending && (!auth.isAuthenticated || isCustomer);
   const { authScope } = useAuthQueryScope();
-  const moverListScopeQueryKey = getMoverListScopeQueryKey(authScope);
-  const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(authScope);
   const onErrorRef = useRef(options?.onError);
   // 큐에 대기 중인 요청이 실행되는 시점에 현재 세션을 조회하기 위한 ref
   // authScope를 클로저로 그대로 캡처하면 대기 중 값이 바뀌어도 갱신되지 않음
@@ -177,7 +177,9 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       // cancelQueries~setQueryData(낙관적 업데이트) 구간을 클릭 순서대로 강제
       // 큐에 등록하는 시점은 항상 동기적으로 클릭 순서를 따르므로, 실제 cancelQueries 완료 순서가 뒤바뀌어도 마지막 클릭 상태가 최종적으로 반영됨
       return runSerialized(favoriteOptimisticQueues, queueKey, async () => {
-        const moverDetailQueryKey = getMoverDetailQueryKey(authScope, moverId);
+        const moverListScopeQueryKey = getMoverListScopeQueryKey(requestAuthScope);
+        const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(requestAuthScope);
+        const moverDetailQueryKey = getMoverDetailQueryKey(requestAuthScope, moverId);
 
         await Promise.all([
           queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
@@ -299,8 +301,8 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       });
     },
     onError: (error, variables, context) => {
-      const isLatestRequest =
-        latestFavoriteRequestIds.get(variables.moverId) === variables.requestId;
+      const requestKey = getFavoriteQueueKey(variables.authScope, variables.moverId);
+      const isLatestRequest = latestFavoriteRequestIds.get(requestKey) === variables.requestId;
 
       if (context && isLatestRequest) {
         queryClient.setQueryData(QUERY_KEYS.ESTIMATES.RECEIVED, context.previousReceived);
@@ -317,7 +319,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
           queryClient.setQueryData(queryKey, data);
         });
         queryClient.setQueryData(
-          getMoverDetailQueryKey(authScope, variables.moverId),
+          getMoverDetailQueryKey(variables.authScope, variables.moverId),
           context.previousMoverDetail,
         );
       }
@@ -339,12 +341,14 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       }
     },
     onSettled: (_data, _error, variables) => {
-      if (latestFavoriteRequestIds.get(variables.moverId) !== variables.requestId) {
+      const requestKey = getFavoriteQueueKey(variables.authScope, variables.moverId);
+
+      if (latestFavoriteRequestIds.get(requestKey) !== variables.requestId) {
         return;
       }
 
-      latestFavoriteRequestIds.delete(variables.moverId);
-      void invalidateFavoriteRelatedQueries(queryClient, authScope);
+      latestFavoriteRequestIds.delete(requestKey);
+      void invalidateFavoriteRelatedQueries(queryClient, variables.authScope);
     },
   });
 
@@ -366,7 +370,8 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
     }
 
     const requestId = ++favoriteRequestId;
-    latestFavoriteRequestIds.set(variables.moverId, requestId);
+    const requestKey = getFavoriteQueueKey(authScope, variables.moverId);
+    latestFavoriteRequestIds.set(requestKey, requestId);
     mutation.mutate(
       {
         ...variables,
@@ -396,7 +401,8 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
     }
 
     const requestId = ++favoriteRequestId;
-    latestFavoriteRequestIds.set(variables.moverId, requestId);
+    const requestKey = getFavoriteQueueKey(authScope, variables.moverId);
+    latestFavoriteRequestIds.set(requestKey, requestId);
     return mutation.mutateAsync(
       {
         ...variables,
