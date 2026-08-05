@@ -94,7 +94,14 @@ const resolveAuthUser = async (): Promise<AuthUser> => {
   return toAuthUserFromCustomerProfile(profile);
 };
 
-/** auth 페이지 재진입용 — profile/me 없이 JWT·쿠키만으로 세션 힌트 */
+/**
+ * auth 페이지 재진입·/me 실패 시 — profile/me 없이 JWT·쿠키만으로 세션 힌트.
+ *
+ * 용도: Header·AuthGate·ProfileCompletionGuard 등 클라이언트 Soft UX.
+ * 비목적: 권한·인가의 근거. 보호 API는 fetchInstance 사용 시 Access Token의 백엔드 검증에 의존한다.
+ * /me 네트워크·5xx에서도 동일 경로를 쓰므로, user.id/role을
+ * “서버가 보장한 프로필 상태”로 취급하지 않는다.
+ */
 const resolveAuthUserFromTokenHint = (): AuthUser | null => {
   const accessToken = getAccessToken();
   if (!accessToken) return null;
@@ -252,8 +259,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           return;
         }
 
-        // 프로필 미생성(me 404 등) 또는 일시 오류: JWT 힌트로 user를 채워
-        // role/userId가 있어야 status 가드·AuthGate가 동작한다.
+        // 프로필 미생성(me 404)·일시 오류(5xx 등): JWT 힌트로 user를 채움.
+        // UI 가드용 임시 상태일 뿐이며, 보호 API 권한은 백엔드 토큰 검증에 맡긴다.
         if (token) {
           const hintedUser = resolveAuthUserFromTokenHint();
           if (hintedUser) {

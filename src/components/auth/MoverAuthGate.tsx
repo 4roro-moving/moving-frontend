@@ -21,6 +21,11 @@ interface MoverAuthGateProps {
  * - 세션 복구 중: 로딩
  * - 비로그인: 기사 로그인 페이지로 이동 (?redirect=)
  * - MOVER 아님(고객·ADMIN·역할 미확정): getRoleHomePath로 이동
+ * - 프로필 미완료: ProfileCompletionGuard (모달)
+ *
+ * `(mover)/(protected)` layout 밖 페이지에서만 사용한다.
+ * layout 안에서는 RoleGuard + layout의 ProfileCompletionGuard만 쓰고,
+ * 이 Gate를 겹쳐 두지 않는다.
  *
  * // 2026.07.31 정슬기 - [추가] CustomerAuthGate와 대칭인 기사님 가드
  *

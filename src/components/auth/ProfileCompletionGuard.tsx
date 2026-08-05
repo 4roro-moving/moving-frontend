@@ -20,6 +20,10 @@ interface ProfileCompletionGuardProps {
  * - 프로필 없음(404 등): incomplete → ProfileRequiredModal (닫기 불가, CTA만)
  * - 그 외 status 실패: fail-open
  * - 공개 페이지에는 사용하지 않음
+ *
+ * 적용 위치 (같은 트리에 Layout + AuthGate로 중복 적용하지 말 것):
+ * - `(protected)` Route Group → layout에서 RoleGuard와 함께
+ * - Group 밖 보호 페이지 → CustomerAuthGate / MoverAuthGate에서 처리
  */
 const ProfileCompletionGuard = ({
   children,
