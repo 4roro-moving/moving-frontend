@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type MouseEvent } from "react";
 
 import NotificationTrigger from "@/components/common/Header/notification";
 import HeaderSideNav from "@/components/common/Header/HeaderSideNav";
@@ -12,6 +12,8 @@ import ProfileMenuTrigger, {
   type ProfileMenuItem,
 } from "@/components/common/Header/ProfileMenuTrigger";
 import { Text } from "@/components/common/Text";
+import ProfileRequiredModal from "@/components/profile/ProfileRequiredModal";
+import { useProfileCompletionGate } from "@/hooks/profile/useProfileCompletionGate";
 import { MenuIcon } from "@/icons";
 import type { AuthRole } from "@/lib/auth/role";
 import { loadRole } from "@/lib/auth/role";
@@ -19,6 +21,8 @@ import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
+
+const PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE = "프로필을 완성한 뒤 이용할 수 있어요.";
 
 const LOGGED_OUT_LINKS = [
   {
@@ -111,6 +115,7 @@ const Header = ({
   const pathname = usePathname();
   const mobileMenuId = useId();
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
+  const [isProfileRequiredOpen, setIsProfileRequiredOpen] = useState(false);
   const [sideNavPathname, setSideNavPathname] = useState(pathname);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const wasSideNavOpenRef = useRef(false);
@@ -160,8 +165,19 @@ const Header = ({
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
+  const { shouldHideNavLinks, shouldInterceptNav, shouldInterceptProfileMenu, profileCreatePath } =
+    useProfileCompletionGate(resolvedRole);
+
   const openSideNav = useCallback(() => setIsSideNavOpen(true), []);
   const closeSideNav = useCallback(() => setIsSideNavOpen(false), []);
+  const openProfileRequiredModal = useCallback(() => setIsProfileRequiredOpen(true), []);
+  const closeProfileRequiredModal = useCallback(() => setIsProfileRequiredOpen(false), []);
+
+  const handleNavIntent = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!shouldInterceptNav) return;
+    event.preventDefault();
+    openProfileRequiredModal();
+  };
 
   return (
     <header className="border-border-subtle bg-background-surface relative z-40 w-full max-w-full border-b">
@@ -204,30 +220,33 @@ const Header = ({
 
           {/* Mobile은 햄버거 전까지 링크 숨김 — 좁은 폭에서 GNB 가로 스크롤 방지 */}
           {/* 2026.08.04 정슬기 - [수정] */}
-          <nav aria-label="주요 메뉴" className="hidden min-w-0 xl:block">
-            <ul className="flex items-center xl:gap-40">
-              {navLinks.map((link) => {
-                const isActive = isNavLinkActive(pathname, link.href);
+          {!shouldHideNavLinks ? (
+            <nav aria-label="주요 메뉴" className="hidden min-w-0 xl:block">
+              <ul className="flex items-center xl:gap-40">
+                {navLinks.map((link) => {
+                  const isActive = isNavLinkActive(pathname, link.href);
 
-                return (
-                  <li key={link.label} className="shrink-0">
-                    <Link
-                      href={link.href}
-                      aria-current={isActive ? "page" : undefined}
-                      className={cn(
-                        "transition-colors",
-                        isActive
-                          ? "text-nav-text-active"
-                          : "text-nav-text-default hover:text-nav-text-active",
-                      )}
-                    >
-                      <Text variant="2lg-bold">{link.label}</Text>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+                  return (
+                    <li key={link.label} className="shrink-0">
+                      <Link
+                        href={link.href}
+                        aria-current={isActive ? "page" : undefined}
+                        onClick={handleNavIntent}
+                        className={cn(
+                          "transition-colors",
+                          isActive
+                            ? "text-nav-text-active"
+                            : "text-nav-text-default hover:text-nav-text-active",
+                        )}
+                      >
+                        <Text variant="2lg-bold">{link.label}</Text>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          ) : null}
         </div>
 
         {showAuthSkeleton ? (
@@ -247,6 +266,8 @@ const Header = ({
               nickname={nickname}
               items={profileMenuItems}
               role={resolvedRole}
+              shouldInterceptNav={shouldInterceptProfileMenu}
+              onInterceptNav={openProfileRequiredModal}
             />
             <button
               ref={menuButtonRef}
@@ -287,7 +308,15 @@ const Header = ({
         id={mobileMenuId}
         isOpen={isSideNavOpen}
         onClose={closeSideNav}
-        links={sideNavLinks}
+        links={shouldHideNavLinks ? [] : sideNavLinks}
+        emptyMessage={shouldHideNavLinks ? PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE : undefined}
+        onLinkClick={shouldInterceptNav ? openProfileRequiredModal : undefined}
+      />
+
+      <ProfileRequiredModal
+        open={isProfileRequiredOpen}
+        onClose={closeProfileRequiredModal}
+        profileCreatePath={profileCreatePath}
       />
     </header>
   );

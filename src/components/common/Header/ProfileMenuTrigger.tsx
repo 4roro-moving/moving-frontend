@@ -27,12 +27,17 @@ interface ProfileMenuTriggerProps {
   items: ProfileMenuItem[];
   /** 로그아웃 후 이동 경로 분기용 */
   role?: AuthRole | null;
+  /** 프로필 미완료 시 링크 이동 대신 호출 */
+  shouldInterceptNav?: boolean;
+  onInterceptNav?: () => void;
 }
 
 export default function ProfileMenuTrigger({
   nickname,
   items,
   role = null,
+  shouldInterceptNav = false,
+  onInterceptNav,
 }: ProfileMenuTriggerProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -166,6 +171,26 @@ export default function ProfileMenuTrigger({
             <div className="flex w-full flex-col">
               {linkItems.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+                if (shouldInterceptNav) {
+                  return (
+                    <button
+                      key={item.href}
+                      type="button"
+                      role="menuitem"
+                      tabIndex={-1}
+                      className={cn(LINK_ITEM_CLASS, "text-text-secondary")}
+                      onClick={() => {
+                        closeQuiet();
+                        onInterceptNav?.();
+                      }}
+                    >
+                      <Text as="span" variant="lg-medium">
+                        {item.label}
+                      </Text>
+                    </button>
+                  );
+                }
 
                 return (
                   <Link
