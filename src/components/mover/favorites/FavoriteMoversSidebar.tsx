@@ -113,7 +113,7 @@ export function FavoriteMoversSidebar() {
         ) : null}
       </div>
       <Text as="p" variant="md-regular" className="text-text-muted">
-        최근 찜한 기사님을 최대 3명까지 표시합니다.
+        최근 찜한 기사님을 최대 {FAVORITE_MOVERS_SIDEBAR_LIMIT}명까지 표시합니다.
       </Text>
 
       {isInitialLoading ? (
