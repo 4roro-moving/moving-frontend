@@ -37,6 +37,7 @@ export { useBulkRemoveFavoriteMovers } from "@/hooks/useBulkRemoveFavoriteMovers
 
 const LOGIN_REQUIRED_MESSAGE = "로그인이 필요한 서비스입니다.";
 const CUSTOMER_REQUIRED_MESSAGE = "고객만 이용할 수 있는 서비스입니다.";
+const FAVORITE_SYNC_ERROR_MESSAGE = "찜 상태를 확인하지 못했습니다. 잠시 후 다시 확인해주세요.";
 
 /** 세션(authScope)이 바뀐 뒤 뒤늦게 실행되려는 요청을 조용히 폐기하기 위한 sentinel 에러 */
 class StaleFavoriteRequestError extends Error {
@@ -168,6 +169,20 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       return;
     }
     router.push(getLoginRedirectPath());
+  };
+
+  /**
+   * 마지막 찜 요청 이후 관련 캐시를 서버 상태와 재동기화합니다.
+   * 찜 mutation 실패와 별개인 조회 실패이므로 추가 롤백 없이 사용자에게만 안내합니다.
+   */
+  const reconcileFavoriteQueries = async (requestAuthScope: AuthScope) => {
+    try {
+      await invalidateFavoriteRelatedQueries(queryClient, requestAuthScope, {
+        throwOnError: true,
+      });
+    } catch {
+      onErrorRef.current?.(FAVORITE_SYNC_ERROR_MESSAGE);
+    }
   };
 
   const mutation = useMutation({
@@ -361,7 +376,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       }
 
       latestFavoriteRequestIds.delete(requestKey);
-      void invalidateFavoriteRelatedQueries(queryClient, variables.authScope);
+      void reconcileFavoriteQueries(variables.authScope);
     },
   });
 
