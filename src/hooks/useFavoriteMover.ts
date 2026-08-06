@@ -368,7 +368,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         onErrorRef.current?.(getApiErrorMessage(error));
       }
     },
-    onSettled: (_data, _error, variables) => {
+    onSettled: (_data, error, variables) => {
       const requestKey = getFavoriteQueueKey(variables.authScope, variables.moverId);
 
       if (latestFavoriteRequestIds.get(requestKey) !== variables.requestId) {
@@ -376,6 +376,12 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       }
 
       latestFavoriteRequestIds.delete(requestKey);
+
+      // 세션 변경으로 폐기됐거나 인증이 만료된 요청은 재동기화하지 않음
+      if (error instanceof StaleFavoriteRequestError || isUnauthorizedError(error)) {
+        return;
+      }
+
       void reconcileFavoriteQueries(variables.authScope);
     },
   });
