@@ -11,8 +11,8 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { usePathname } from "next/navigation";
 
+import { useCloseOnPathnameChange } from "@/hooks/useCloseOnPathnameChange";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useIsClient } from "@/hooks/useIsClient";
 import { cn } from "@/lib/utils/cn";
@@ -49,10 +49,7 @@ const ModalMain = ({
   "aria-label": ariaLabel,
 }: ModalMainProps) => {
   const isMounted = useIsClient();
-  const pathname = usePathname();
   const panelRef = useRef<HTMLDivElement>(null);
-  const initialPathnameRef = useRef(pathname);
-  const onCloseRef = useRef(onClose);
   const titleId = useId();
   const descriptionId = useId();
 
@@ -61,17 +58,7 @@ const ModalMain = ({
   const [hasTitle, setHasTitle] = useState(false);
   const [hasDescription, setHasDescription] = useState(false);
 
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
-  // 뒤로가기 등을 통해 pathname이 바뀌면 유지 중인 모달도 함께 닫음
-  useEffect(() => {
-    if (initialPathnameRef.current === pathname) return;
-
-    initialPathnameRef.current = pathname;
-    onCloseRef.current?.();
-  }, [pathname]);
+  useCloseOnPathnameChange(onClose);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
