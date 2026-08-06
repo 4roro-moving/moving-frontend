@@ -69,14 +69,18 @@ export default function MoverDetailShare({
     kakaoSharingRef.current = true;
     setIsKakaoSharing(true);
     try {
+      const PATH = toKakaoSharePath();
       await shareKakaoMoverCustom({
         templateArgs: {
           ...kakaoShare,
-          PATH: toKakaoSharePath(),
+          PATH,
         },
         onMissingConfig: () => onToastMessage?.("카카오톡 공유 설정이 필요합니다."),
         onError: (message) => onToastMessage?.(message),
       });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "카카오톡 공유에 실패했습니다.";
+      onToastMessage?.(message);
     } finally {
       kakaoSharingRef.current = false;
       setIsKakaoSharing(false);

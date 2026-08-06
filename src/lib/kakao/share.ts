@@ -173,7 +173,13 @@ export function toKakaoShareImageUrl(src: string | null | undefined): string {
 /** 클라이언트 현재 경로를 카카오 템플릿 ${PATH} 인자로 변환 */
 export function toKakaoSharePath(): string {
   if (typeof window === "undefined") {
-    return "";
+    throw new Error("카카오톡 공유 경로는 브라우저에서만 사용할 수 있습니다.");
   }
-  return buildKakaoSharePath(window.location.pathname, window.location.search);
+
+  const path = buildKakaoSharePath(window.location.pathname, window.location.search);
+  if (!path) {
+    throw new Error("카카오톡 공유 경로를 확인할 수 없습니다.");
+  }
+
+  return path;
 }
