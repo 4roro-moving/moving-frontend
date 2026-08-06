@@ -19,6 +19,8 @@ export interface PaginationProps {
   pageCount: number;
   /** 페이지 이동 시 실행할 콜백 */
   onPageChange: (page: number) => void;
+  /** 페이지 버튼에 포인터를 올렸을 때 실행할 콜백 */
+  onPagePrefetch?: (page: number) => void;
   className?: string;
 }
 
@@ -135,7 +137,13 @@ const getPageItems = (currentPage: number, pageCount: number, rangeSize: number)
   return items;
 };
 
-const Pagination = ({ currentPage, pageCount, onPageChange, className }: PaginationProps) => {
+const Pagination = ({
+  currentPage,
+  pageCount,
+  onPageChange,
+  onPagePrefetch,
+  className,
+}: PaginationProps) => {
   const isLg = useSyncExternalStore(subscribeToXl, getXlSnapshot, getServerSnapshot);
 
   const [openEllipsisIndex, setOpenEllipsisIndex] = useState<number | null>(null);
@@ -159,6 +167,14 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
     onPageChange(nextPage);
   };
 
+  const prefetchPage = (page: number) => {
+    const nextPage = Math.min(Math.max(page, 1), pageCount);
+
+    if (nextPage !== currentPage) {
+      onPagePrefetch?.(nextPage);
+    }
+  };
+
   const itemClassName = cn(
     "flex items-center justify-center p-10",
     isLg ? "size-48 rounded-8" : "size-34 rounded-6",
@@ -177,6 +193,7 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
             "text-text-secondary enabled:hover:bg-background-hover disabled:text-text-weak transition disabled:cursor-not-allowed",
           )}
           onClick={() => goToPage(currentPage - 1)}
+          onPointerEnter={() => prefetchPage(currentPage - 1)}
           disabled={isPrevDisabled}
           aria-label="이전 페이지"
         >
@@ -208,6 +225,7 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
                       : "text-text-weak enabled:hover:bg-background-hover cursor-pointer",
                   )}
                   onClick={() => goToPage(item.page)}
+                  onPointerEnter={() => prefetchPage(item.page)}
                   disabled={item.page === currentPage}
                   aria-label={`${item.page} 페이지`}
                   aria-current={item.page === currentPage ? "page" : undefined}
@@ -238,6 +256,7 @@ const Pagination = ({ currentPage, pageCount, onPageChange, className }: Paginat
             "text-text-secondary enabled:hover:bg-background-hover disabled:text-text-weak transition disabled:cursor-not-allowed",
           )}
           onClick={() => goToPage(currentPage + 1)}
+          onPointerEnter={() => prefetchPage(currentPage + 1)}
           disabled={isNextDisabled}
           aria-label="다음 페이지"
         >
