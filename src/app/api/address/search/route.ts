@@ -166,10 +166,18 @@ export async function GET(request: Request) {
     await enrichZipCodesByAddressQueries(missingAddressQueries, apiKey, lookups);
   }
 
-  const addressResults = (addressDocuments ?? []).map(mapKakaoDocumentToAddressItem);
-  const keywordResults = keywordDocuments.map((document, index) =>
-    mapKakaoKeywordToAddressItem(document, index, resolveKeywordZipCode(document, lookups)),
-  );
+  const addressResults = (addressDocuments ?? []).flatMap((document, index) => {
+    const item = mapKakaoDocumentToAddressItem(document, index);
+    return item ? [item] : [];
+  });
+  const keywordResults = keywordDocuments.flatMap((document, index) => {
+    const item = mapKakaoKeywordToAddressItem(
+      document,
+      index,
+      resolveKeywordZipCode(document, lookups),
+    );
+    return item ? [item] : [];
+  });
   const results = mergeAddressSearchResults(addressResults, keywordResults);
 
   return NextResponse.json({ results });

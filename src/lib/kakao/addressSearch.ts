@@ -69,6 +69,28 @@ export interface AddressSearchItem {
   longitude: number;
 }
 
+// 2026.08.06 윤소정 - [추가] 카카오 주소 검색 좌표 유효성 검사
+function parseCoordinates(x: string, y: string): { latitude: number; longitude: number } | null {
+  if (!x.trim() || !y.trim()) return null;
+
+  const latitude = Number(y);
+  const longitude = Number(x);
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    latitude === 0 ||
+    longitude === 0 ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return null;
+  }
+
+  return { latitude, longitude };
+}
+
 /** 괄호 안 건물명 제거 후 도로명 기준 비교용 */
 export function normalizeRoadAddress(roadAddress: string): string {
   return roadAddress.replace(/\s*\([^)]*\)\s*/g, "").trim();
@@ -195,7 +217,10 @@ export function collectAddressQueriesForMissingZip(
 export function mapKakaoDocumentToAddressItem(
   document: KakaoAddressDocument,
   index: number,
-): AddressSearchItem {
+): AddressSearchItem | null {
+  const coordinates = parseCoordinates(document.x, document.y);
+  if (!coordinates) return null;
+
   const road = document.road_address;
   const jibun = document.address;
 
@@ -210,8 +235,7 @@ export function mapKakaoDocumentToAddressItem(
     roadAddress,
     jibunAddress: jibun?.address_name || "",
     sido: extractSido(jibun?.address_name || roadBase),
-    latitude: Number(document.y),
-    longitude: Number(document.x),
+    ...coordinates,
   };
 }
 
@@ -220,7 +244,10 @@ export function mapKakaoKeywordToAddressItem(
   document: KakaoKeywordDocument,
   index: number,
   resolvedZipCode = "",
-): AddressSearchItem {
+): AddressSearchItem | null {
+  const coordinates = parseCoordinates(document.x, document.y);
+  if (!coordinates) return null;
+
   const road = document.road_address_name.trim();
   const place = document.place_name.trim();
   const jibun = document.address_name.trim();
@@ -236,8 +263,7 @@ export function mapKakaoKeywordToAddressItem(
     roadAddress,
     jibunAddress: jibun,
     sido: extractSido(jibun || roadAddress),
-    latitude: Number(document.y),
-    longitude: Number(document.x),
+    ...coordinates,
   };
 }
 
