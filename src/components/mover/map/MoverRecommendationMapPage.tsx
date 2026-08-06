@@ -6,12 +6,23 @@ import { useMemo, useState } from "react";
 
 import Button from "@/components/common/Button/Button";
 import Input from "@/components/common/Input/Input";
+import NavigationTabs from "@/components/common/NavigationTabs/NavigationTabs";
+import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
+import AddressSelectModal from "@/components/estimate/request/AddressSelectModal";
+import KakaoMap from "@/components/mover/map/KakaoMap";
 import { DriverBadgeIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
 
 type MatchType = "BOTH" | "DEPARTURE" | "DESTINATION";
+type AddressModalKind = "출발지" | "도착지";
+
+const MOVER_NAVIGATION_ITEMS = [
+  { href: APP_ROUTES.MOVERS.ROOT, label: "기사님 찾기", match: "exact" },
+  { href: APP_ROUTES.MOVERS.MAP, label: "기사님 추천", match: "exact" },
+] as const;
 
 interface MockMover {
   id: string;
@@ -149,85 +160,25 @@ function RecommendationCard({
   );
 }
 
-function MockMap({
-  movers,
-  selectedMoverId,
-  onSelectMover,
-}: {
-  movers: MockMover[];
-  selectedMoverId: string | null;
-  onSelectMover: (id: string) => void;
-}) {
+function MapSearchPrompt() {
   return (
     <section
-      aria-label="추천 기사님 지도 미리보기"
-      className="relative min-h-[520px] flex-1 overflow-hidden bg-[#eef1ed] lg:min-h-0"
+      aria-label="지도 검색 안내"
+      className="bg-background-subtle flex min-h-[520px] flex-1 items-center justify-center px-24 text-center lg:min-h-0"
     >
-      <div className="absolute inset-0 opacity-80" aria-hidden="true">
-        <div className="absolute top-[18%] left-[-8%] h-24 w-[116%] rotate-[7deg] bg-white/90 shadow-[0_0_0_1px_#d9ddd8]" />
-        <div className="absolute top-[-8%] left-[38%] h-[116%] w-20 rotate-[-12deg] bg-white/90 shadow-[0_0_0_1px_#d9ddd8]" />
-        <div className="absolute top-[66%] left-[-4%] h-16 w-[112%] rotate-[-5deg] bg-[#d9e8f5]" />
-        <div className="absolute top-[40%] left-[2%] h-10 w-[96%] rotate-[18deg] bg-white/80" />
-        <div className="absolute top-[8%] left-[12%] size-48 rounded-full bg-[#dcebd8]" />
-        <div className="absolute right-[8%] bottom-[10%] size-64 rounded-full bg-[#dcebd8]" />
-      </div>
-
-      <div className="absolute top-24 left-24 rounded-full bg-white px-14 py-8 text-[13px] font-semibold shadow-md">
-        서울 → 경기
-      </div>
-
-      <div className="absolute top-[25%] left-[22%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-        <span className="bg-text-secondary rounded-full px-10 py-5 text-[12px] font-bold text-white shadow-md">
-          출발
-        </span>
-        <span className="bg-text-secondary h-8 w-2" />
-      </div>
-      <div className="absolute top-[74%] left-[79%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-        <span className="bg-background-brand rounded-full px-10 py-5 text-[12px] font-bold text-white shadow-md">
-          도착
-        </span>
-        <span className="bg-background-brand h-8 w-2" />
-      </div>
-
-      {movers.map((mover, index) => {
-        const selected = selectedMoverId === mover.id;
-        return (
-          <button
-            key={mover.id}
-            type="button"
-            aria-pressed={selected}
-            onClick={() => onSelectMover(mover.id)}
-            style={mover.marker}
-            className="absolute -translate-x-1/2 -translate-y-1/2"
-            aria-label={`${mover.nickname} 기사님 마커`}
-          >
-            <span
-              className={cn(
-                "flex size-44 items-center justify-center rounded-full border-4 border-white font-bold text-white shadow-lg transition-transform",
-                selected ? "bg-background-brand scale-125" : "bg-text-secondary hover:scale-110",
-              )}
-            >
-              {index + 1}
-            </span>
-            {selected && (
-              <span className="text-text-secondary rounded-8 absolute top-52 left-1/2 w-max -translate-x-1/2 bg-white px-10 py-6 text-[12px] font-semibold shadow-md">
-                {mover.nickname} 기사님
-              </span>
-            )}
-          </button>
-        );
-      })}
-
-      <div className="text-text-muted rounded-8 absolute right-20 bottom-20 bg-white/95 px-12 py-8 text-[12px] shadow-sm">
-        지도 영역 목업 · 추후 Kakao Map 연결
-      </div>
+      <Text as="p" variant="lg-medium" className="text-text-muted">
+        출발지와 도착지를 선택하고 기사님을 검색하면 지도가 표시됩니다.
+      </Text>
     </section>
   );
 }
 
 export function MoverRecommendationMapPage() {
-  const [departure, setDeparture] = useState("서울특별시 용산구 서울역");
-  const [destination, setDestination] = useState("경기도 성남시 분당구");
+  const [departure, setDeparture] = useState<AddressSearchItem | null>(null);
+  const [destination, setDestination] = useState<AddressSearchItem | null>(null);
+  const [searchedDeparture, setSearchedDeparture] = useState<AddressSearchItem | null>(null);
+  const [searchedDestination, setSearchedDestination] = useState<AddressSearchItem | null>(null);
+  const [addressModalKind, setAddressModalKind] = useState<AddressModalKind | null>(null);
   const [moveType, setMoveType] = useState("ALL");
   const [searchedMoveType, setSearchedMoveType] = useState("ALL");
   const [selectedMoverId, setSelectedMoverId] = useState<string | null>(MOCK_MOVERS[0]?.id ?? null);
@@ -241,32 +192,29 @@ export function MoverRecommendationMapPage() {
   );
 
   function handleSearch() {
+    if (!departure || !destination) return;
+
+    setSearchedDeparture(departure);
+    setSearchedDestination(destination);
     setSearchedMoveType(moveType);
     const firstMatch =
       moveType === "ALL" ? MOCK_MOVERS[0] : MOCK_MOVERS.find((mover) => mover.service === moveType);
     setSelectedMoverId(firstMatch?.id ?? null);
   }
 
+  function handleAddressConfirm(address: AddressSearchItem) {
+    if (addressModalKind === "출발지") {
+      setDeparture(address);
+    } else if (addressModalKind === "도착지") {
+      setDestination(address);
+    }
+
+    setAddressModalKind(null);
+  }
+
   return (
     <main className="bg-background-surface flex min-h-[calc(100dvh-88px)] flex-col">
-      <nav
-        aria-label="기사님 찾기 방식"
-        className="border-border-subtle flex h-64 shrink-0 items-end border-b px-24 lg:px-40"
-      >
-        <Link
-          href={APP_ROUTES.MOVERS.ROOT}
-          className="text-text-muted flex h-52 items-center border-b-2 border-transparent px-16 text-[16px] font-semibold"
-        >
-          기사님 찾기
-        </Link>
-        <Link
-          href={APP_ROUTES.MOVERS.MAP}
-          aria-current="page"
-          className="text-text-brand border-border-brand flex h-52 items-center border-b-2 px-16 text-[16px] font-semibold"
-        >
-          기사님 추천
-        </Link>
-      </nav>
+      <NavigationTabs ariaLabel="기사님 찾기 방식" items={MOVER_NAVIGATION_ITEMS} />
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <aside className="border-border-subtle z-10 flex w-full shrink-0 flex-col border-b bg-white lg:w-[430px] lg:border-r lg:border-b-0">
@@ -280,10 +228,18 @@ export function MoverRecommendationMapPage() {
 
             <div className="flex flex-col gap-12">
               <Input
-                value={departure}
-                onChange={(event) => setDeparture(event.target.value)}
+                readOnly
+                value={departure?.roadAddress ?? ""}
+                onClick={() => setAddressModalKind("출발지")}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setAddressModalKind("출발지");
+                  }
+                }}
                 placeholder="출발지를 입력해 주세요."
                 aria-label="출발지"
+                aria-haspopup="dialog"
                 leftSlot={
                   <span className="bg-text-secondary flex size-24 shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-white">
                     출
@@ -291,31 +247,41 @@ export function MoverRecommendationMapPage() {
                 }
               />
               <Input
-                value={destination}
-                onChange={(event) => setDestination(event.target.value)}
+                readOnly
+                value={destination?.roadAddress ?? ""}
+                onClick={() => setAddressModalKind("도착지")}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setAddressModalKind("도착지");
+                  }
+                }}
                 placeholder="도착지를 입력해 주세요."
                 aria-label="도착지"
+                aria-haspopup="dialog"
                 leftSlot={
                   <span className="bg-background-brand flex size-24 shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-white">
                     도
                   </span>
                 }
               />
-              <select
-                value={moveType}
-                onChange={(event) => setMoveType(event.target.value)}
-                aria-label="이사 유형"
-                className="border-border-default text-text-secondary rounded-16 h-54 w-full border bg-white px-16 text-[16px] outline-none focus:border-[var(--color-border-brand)]"
+              <Select
+                desc="이사 유형 전체"
+                label="이사 유형"
+                defaultValue={moveType}
+                placeholderValue="ALL"
+                onChange={setMoveType}
+                className="w-full [&>button]:w-full"
               >
-                <option value="ALL">이사 유형 전체</option>
-                <option value="소형이사">소형이사</option>
-                <option value="가정이사">가정이사</option>
-                <option value="사무실이사">사무실이사</option>
-              </select>
+                <Select.Option value="ALL">이사 유형 전체</Select.Option>
+                <Select.Option value="소형이사">소형이사</Select.Option>
+                <Select.Option value="가정이사">가정이사</Select.Option>
+                <Select.Option value="사무실이사">사무실이사</Select.Option>
+              </Select>
               <Button
                 size="cta"
                 fullWidth
-                disabled={!departure.trim() || !destination.trim()}
+                disabled={!departure || !destination}
                 onClick={handleSearch}
               >
                 기사님 검색
@@ -359,12 +325,25 @@ export function MoverRecommendationMapPage() {
           </div>
         </aside>
 
-        <MockMap
-          movers={visibleMovers}
-          selectedMoverId={selectedMoverId}
-          onSelectMover={setSelectedMoverId}
-        />
+        {searchedDeparture && searchedDestination ? (
+          <KakaoMap
+            key={`${searchedDeparture.id}-${searchedDestination.id}`}
+            departure={searchedDeparture}
+            destination={searchedDestination}
+          />
+        ) : (
+          <MapSearchPrompt />
+        )}
       </div>
+
+      {addressModalKind && (
+        <AddressSelectModal
+          open
+          kind={addressModalKind}
+          onClose={() => setAddressModalKind(null)}
+          onConfirm={handleAddressConfirm}
+        />
+      )}
     </main>
   );
 }
