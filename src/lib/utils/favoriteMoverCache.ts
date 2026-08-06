@@ -206,10 +206,9 @@ export function addMoverToFavoriteMoversCache(
     if (!firstPage) {
       return data;
     }
-    if (firstPage.data.some((item) => item.id === entry.id)) {
-      return data;
-    }
-
+    if (data.pages.some((page) => page.data.some((item) => item.id === entry.id))) {
+       return data;
+     }
     return {
       ...data,
       pages: [
