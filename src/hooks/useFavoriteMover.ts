@@ -17,6 +17,8 @@ import {
   QUERY_KEYS,
 } from "@/lib/constants/queryKeys";
 import {
+  addMoverToFavoriteMoversCache,
+  findMoverListItemSnapshot,
   invalidateFavoriteRelatedQueries,
   patchMoverFavorite,
   removeIdsFromFavoriteMoversCache,
@@ -181,6 +183,12 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(requestAuthScope);
         const moverDetailQueryKey = getMoverDetailQueryKey(requestAuthScope, moverId);
 
+        // 찜 추가일 때만: 검색/목록 캐시에서 이 mover의 스냅샷을 미리 찾아둠
+        // (cancelQueries 전에 읽어야 취소 중 데이터가 아니라 현재 화면에 보이는 데이터를 그대로 씀)
+        const moverSnapshot = nextIsFavorite
+          ? findMoverListItemSnapshot(queryClient, moverListScopeQueryKey, moverId)
+          : undefined;
+
         await Promise.all([
           queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
           queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
@@ -279,6 +287,11 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
           queryClient.setQueriesData<FavoriteMoversCacheData>(
             { queryKey: favoriteMoversScopeQueryKey },
             (list) => removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1),
+          );
+        } else if (moverSnapshot) {
+          queryClient.setQueriesData<FavoriteMoversCacheData>(
+            { queryKey: favoriteMoversScopeQueryKey },
+            (list) => addMoverToFavoriteMoversCache(list, moverSnapshot),
           );
         }
 

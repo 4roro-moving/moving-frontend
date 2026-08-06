@@ -1,6 +1,7 @@
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 
 import type { FavoriteMoversListResult } from "@/lib/api/favorites";
+import type { MoverListItem, MoversListResult } from "@/types/mover";
 import {
   getFavoriteMoversScopeQueryKey,
   getMoverDetailScopeQueryKey,
@@ -170,4 +171,75 @@ export async function invalidateFavoriteRelatedQueries(
     queryClient.invalidateQueries({ queryKey: getMoverDetailScopeQueryKey(authScope) }),
     queryClient.invalidateQueries({ queryKey: getFavoriteMoversScopeQueryKey(authScope) }),
   ]);
+}
+
+/** moverListScopeQueryKey 캐시(검색/목록 페이지)에서 특정 mover의 최신 스냅샷을 찾음 */
+export function findMoverListItemSnapshot(
+  queryClient: QueryClient,
+  moverListScopeQueryKey: readonly unknown[],
+  moverId: string,
+): MoverListItem | undefined {
+  const queries = queryClient.getQueriesData<InfiniteData<MoversListResult>>({
+    queryKey: moverListScopeQueryKey,
+  });
+
+  for (const [, data] of queries) {
+    if (!data) continue;
+    for (const page of data.pages) {
+      const found = page.data.find((item) => item.id === moverId);
+      if (found) return found;
+    }
+  }
+
+  return undefined;
+}
+
+/** 찜 추가 낙관적 업데이트 — 목록 맨 앞에 삽입 (이미 있으면 스킵) */
+export function addMoverToFavoriteMoversCache(
+  data: FavoriteMoversCacheData | undefined,
+  mover: MoverListItem,
+): FavoriteMoversCacheData | undefined {
+  const entry: MoverListItem = { ...mover, isFavorite: true };
+
+  if (isFavoriteMoversInfiniteData(data)) {
+    const firstPage = data.pages[0];
+    if (!firstPage) {
+      return data;
+    }
+    if (firstPage.data.some((item) => item.id === entry.id)) {
+      return data;
+    }
+
+    return {
+      ...data,
+      pages: [
+        {
+          ...firstPage,
+          data: [entry, ...firstPage.data],
+          pagination: {
+            ...firstPage.pagination,
+            totalCount: firstPage.pagination.totalCount + 1,
+          },
+        },
+        ...data.pages.slice(1),
+      ],
+    };
+  }
+
+  if (isFavoriteMoversListResult(data)) {
+    if (data.data.some((item) => item.id === entry.id)) {
+      return data;
+    }
+
+    return {
+      ...data,
+      data: [entry, ...data.data],
+      pagination: {
+        ...data.pagination,
+        totalCount: data.pagination.totalCount + 1,
+      },
+    };
+  }
+
+  return data;
 }
