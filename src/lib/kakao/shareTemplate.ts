@@ -1,10 +1,20 @@
 import { DEFAULT_MOVER_PROFILE_IMAGE } from "@/lib/utils/moverProfileImage";
 
-/** 기사님 상세 카카오톡 메시지 공유 템플릿 인자 */
+/**
+ * 기사님 상세 카카오톡 메시지 공유 템플릿 인자
+ * PATH: 템플릿 링크 `https://도메인/${PATH}` 용 (앞 슬래시 없이, 예: movers/{id})
+ */
 export interface KakaoMoverShareTemplateArgs {
+  PATH: string;
   driver_name: string;
   like_count: string;
   driver_profile: string;
+}
+
+/** 카카오 템플릿 ${PATH}용 — `/movers/1` → `movers/1` */
+export function buildKakaoSharePath(pathname: string, search = ""): string {
+  const path = pathname.replace(/^\//, "");
+  return search ? `${path}${search}` : path;
 }
 
 export function parseKakaoTemplateId(raw: string | undefined): number | null {

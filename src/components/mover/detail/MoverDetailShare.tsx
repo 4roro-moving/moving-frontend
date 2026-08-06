@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
-import { shareKakaoMoverCustom, toKakaoShareImageUrl } from "@/lib/kakao/share";
+import { shareKakaoMoverCustom, toKakaoShareImageUrl, toKakaoSharePath } from "@/lib/kakao/share";
 import { usePageShare } from "@/hooks/usePageShare";
 import { ClipIcon } from "@/icons";
 import { hasFacebookAppId } from "@/lib/facebook/share";
@@ -70,7 +70,11 @@ export default function MoverDetailShare({
     setIsKakaoSharing(true);
     try {
       await shareKakaoMoverCustom({
-        templateArgs: kakaoShare,
+        templateArgs: {
+          ...kakaoShare,
+          PATH: toKakaoSharePath(),
+        },
+        onMissingConfig: () => onToastMessage?.("카카오톡 공유 설정이 필요합니다."),
         onError: (message) => onToastMessage?.(message),
       });
     } finally {

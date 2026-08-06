@@ -1,5 +1,6 @@
 import {
   buildKakaoShareImageUrl,
+  buildKakaoSharePath,
   getKakaoJavascriptKey,
   getMoverShareTemplateId,
   hasKakaoJavascriptKey,
@@ -167,4 +168,12 @@ export async function shareKakaoMoverCustom({
 export function toKakaoShareImageUrl(src: string | null | undefined): string {
   const origin = typeof window !== "undefined" ? window.location.origin : undefined;
   return buildKakaoShareImageUrl(src, origin);
+}
+
+/** 클라이언트 현재 경로를 카카오 템플릿 ${PATH} 인자로 변환 */
+export function toKakaoSharePath(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+  return buildKakaoSharePath(window.location.pathname, window.location.search);
 }
