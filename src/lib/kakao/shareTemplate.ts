@@ -13,7 +13,7 @@ export interface KakaoMoverShareTemplateArgs {
 
 /** 카카오 템플릿 ${PATH}용 — `/movers/1` → `movers/1` */
 export function buildKakaoSharePath(pathname: string, search = ""): string {
-  const path = pathname.replace(/^\//, "");
+  const path = pathname.replace(/^\/+/, "");
   return search ? `${path}${search}` : path;
 }
 
