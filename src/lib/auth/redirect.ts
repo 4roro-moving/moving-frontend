@@ -148,7 +148,10 @@ export const getPostAuthRedirectPath = async (params?: {
   }
 };
 
-/** 이미 로그인된 채 auth 페이지 재진입 — API 없이 역할 홈 */
+/**
+ * 이미 로그인된 채 auth 페이지 재진입용 동기 fallback (역할 홈).
+ * 프로필 완료 여부가 필요하면 GuestOnly에서 getPostAuthRedirectPath를 사용한다.
+ */
 export const getAuthenticatedAuthPageRedirectPath = (role: AuthRole | null | undefined): string => {
   return getRoleHomePath(role);
 };

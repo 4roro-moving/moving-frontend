@@ -3,7 +3,11 @@
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
-import { getAuthenticatedAuthPageRedirectPath } from "@/lib/auth/redirect";
+import {
+  getAuthAudienceFromRole,
+  getPostAuthRedirectPath,
+  getRoleHomePath,
+} from "@/lib/auth/redirect";
 import { loadRole } from "@/lib/auth/role";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -12,7 +16,8 @@ interface GuestOnlyProps {
 }
 
 /**
- * 로그인·회원가입 전용 — 이미 인증된 사용자는 예약 경로 또는 역할 홈으로 보냄
+ * 로그인·회원가입 전용 — 이미 인증된 사용자는 예약 경로 또는
+ * 프로필 완료 여부에 따른 경로(미완료 → 프로필 생성, 완료 → 역할 홈)로 보냄
  * 로그인/가입 폼은 establishSession 전에 setPostAuthRedirectPath로 목적지를 예약합니다.
  */
 const GuestOnly = ({ children }: GuestOnlyProps) => {
@@ -25,11 +30,28 @@ const GuestOnly = ({ children }: GuestOnlyProps) => {
   useEffect(() => {
     if (!hasHydrated || isCheckingAuth || !isAuthenticated) return;
 
-    const intentPath =
-      useAuthStore.getState().consumePostAuthRedirectPath() ??
-      getAuthenticatedAuthPageRedirectPath(role ?? loadRole());
+    let cancelled = false;
 
-    router.replace(intentPath);
+    const redirect = async () => {
+      const reservedPath = useAuthStore.getState().consumePostAuthRedirectPath();
+      if (reservedPath) {
+        if (!cancelled) router.replace(reservedPath);
+        return;
+      }
+
+      const resolvedRole = role ?? loadRole();
+      const intentPath = await getPostAuthRedirectPath({
+        audience: getAuthAudienceFromRole(resolvedRole),
+        fallbackPath: getRoleHomePath(resolvedRole),
+      });
+
+      if (!cancelled) router.replace(intentPath);
+    };
+
+    void redirect();
+    return () => {
+      cancelled = true;
+    };
   }, [hasHydrated, isCheckingAuth, isAuthenticated, role, router]);
 
   if (!hasHydrated || isCheckingAuth) {
