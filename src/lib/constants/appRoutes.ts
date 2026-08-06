@@ -62,4 +62,8 @@ export const APP_ROUTES = {
     SENT_DETAIL: (estimateId: number) => `/estimate/sent/${estimateId}`,
     REJECTED: "/estimate/rejected",
   },
+  // 2026.08.06 김성현 - [추가] 채팅방 상세 페이지 경로
+  CHATS: {
+    ROOM: (roomId: number) => `/chats/${roomId}`,
+  },
 } as const;

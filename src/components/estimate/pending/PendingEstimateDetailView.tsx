@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import Toast from "@/components/common/Toast/Toast";
+import EstimateChatAction from "@/components/estimate/detail/EstimateChatAction";
 import EstimateDetailActions from "@/components/estimate/detail/EstimateDetailActions";
 import EstimateDetailComment from "@/components/estimate/detail/EstimateDetailComment";
 import EstimateDetailDriverSummary from "@/components/estimate/detail/EstimateDetailDriverSummary";
@@ -42,6 +43,7 @@ function PendingEstimateDetailContent({ estimateId, data }: PendingEstimateDetai
   const estimateRequestId = data.estimateRequest.id;
   const canCancelRequest = isCancelableEstimateRequestStatus(data.estimateRequest.status);
   const displayName = data.mover.nickname || data.mover.name;
+  const showChatAction = data.status === "SENT";
 
   const confirmMutation = useConfirmEstimate(estimateId, {
     onSuccess: () => setConfirmToastMessage("견적이 확정되었습니다."),
@@ -77,19 +79,22 @@ function PendingEstimateDetailContent({ estimateId, data }: PendingEstimateDetai
           </>
         }
         aside={
-          <EstimateDetailActions
-            price={data.price}
-            buttonSize="detail"
-            isConfirmed={data.isConfirmed}
-            canConfirm={data.canConfirm}
-            confirmDisabledReason={data.confirmDisabledReason}
-            isConfirming={confirmMutation.isPending}
-            onConfirm={() => confirmMutation.mutate()}
-            canCancelRequest={canCancelRequest}
-            isCanceling={cancelFlow.isCancelPending}
-            onCancelRequest={cancelFlow.openCancelModal}
-            cancelButtonRef={cancelFlow.cancelButtonRef}
-          />
+          <div className="flex w-full flex-col gap-16">
+            <EstimateDetailActions
+              price={data.price}
+              buttonSize="detail"
+              isConfirmed={data.isConfirmed}
+              canConfirm={data.canConfirm}
+              confirmDisabledReason={data.confirmDisabledReason}
+              isConfirming={confirmMutation.isPending}
+              onConfirm={() => confirmMutation.mutate()}
+              canCancelRequest={canCancelRequest}
+              isCanceling={cancelFlow.isCancelPending}
+              onCancelRequest={cancelFlow.openCancelModal}
+              cancelButtonRef={cancelFlow.cancelButtonRef}
+            />
+            {showChatAction ? <EstimateChatAction estimateId={estimateId} /> : null}
+          </div>
         }
       />
 
@@ -119,6 +124,7 @@ function PendingEstimateDetailContent({ estimateId, data }: PendingEstimateDetai
  * // 2026.07.25 정슬기 - [추가]
  * // 2026.07.30 정슬기 - [수정] useEstimateDetail·Layout·Actions 통합
  * // 2026.08.03 정슬기 - [수정] 레이아웃·코멘트·요청 취소 액션 · Header 뒤로가기
+ * // 2026.08.06 김성현 - [수정] 대기 견적 상세 채팅방 진입 CTA 추가
  */
 export default function PendingEstimateDetailView({ estimateId }: PendingEstimateDetailViewProps) {
   const { data, isLoading, isError, error, refetch } = useEstimateDetail(estimateId);
