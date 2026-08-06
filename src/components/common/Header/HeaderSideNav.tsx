@@ -22,10 +22,12 @@ interface HeaderSideNavProps {
   isOpen: boolean;
   onClose: () => void;
   links: HeaderSideNavLink[];
+  /** 프로필 미완료 시 — 링크 대신 표시할 안내 */
+  emptyMessage?: string;
 }
 
 /** tablet·mobile GNB 사이드 네비게이션 — exit 애니메이션 후 unmount */
-const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
+const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideNavProps) => {
   const pathname = usePathname();
   const panelRef = useRef<HTMLElement>(null);
   const [shouldRender, setShouldRender] = useState(false);
@@ -132,31 +134,37 @@ const HeaderSideNav = ({ id, isOpen, onClose, links }: HeaderSideNavProps) => {
         </div>
 
         <nav aria-label="모바일 주요 메뉴">
-          <ul className="flex flex-col items-start">
-            {links.map((link) => {
-              const isActive = isNavLinkActive(pathname, link.href);
+          {emptyMessage ? (
+            <Text as="p" variant="lg-medium" className="text-text-subtle px-20 py-24">
+              {emptyMessage}
+            </Text>
+          ) : (
+            <ul className="flex flex-col items-start">
+              {links.map((link) => {
+                const isActive = isNavLinkActive(pathname, link.href);
 
-              return (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    aria-current={isActive ? "page" : undefined}
-                    className={cn(
-                      "flex w-[220px] items-center overflow-hidden px-20 py-24 transition-colors",
-                      isActive
-                        ? "text-text-primary"
-                        : "text-text-primary hover:bg-background-hover",
-                    )}
-                    onClick={onClose}
-                  >
-                    <Text as="span" variant="lg-medium">
-                      {link.label}
-                    </Text>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      aria-current={isActive ? "page" : undefined}
+                      className={cn(
+                        "flex w-[220px] items-center overflow-hidden px-20 py-24 transition-colors",
+                        isActive
+                          ? "text-text-primary"
+                          : "text-text-primary hover:bg-background-hover",
+                      )}
+                      onClick={onClose}
+                    >
+                      <Text as="span" variant="lg-medium">
+                        {link.label}
+                      </Text>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </nav>
       </aside>
     </>,

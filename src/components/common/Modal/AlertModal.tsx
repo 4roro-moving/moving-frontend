@@ -17,7 +17,7 @@ export interface AlertModalProps {
   open: boolean;
   title: ReactNode;
   description?: ReactNode;
-  onClose: () => void;
+  onClose?: () => void;
   closeDisabled?: boolean;
   size?: AlertModalSize;
   primaryAction?: AlertPrimaryAction;
@@ -90,7 +90,7 @@ export default function AlertModal({
     <Modal onClose={closeDisabled ? undefined : onClose} className={alertPanelClassName(size)}>
       <div className="flex w-full items-center justify-between gap-12">
         <Modal.Title>{title}</Modal.Title>
-        <Modal.Close onClose={onClose} disabled={closeDisabled} />
+        {onClose ? <Modal.Close onClose={onClose} disabled={closeDisabled} /> : null}
       </div>
 
       <div className="flex w-full flex-col items-stretch gap-30 md:gap-40">

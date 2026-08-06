@@ -159,7 +159,7 @@ function AlertWithTrigger(args: React.ComponentProps<typeof AlertModal>) {
 
   const close = () => {
     setOpen(false);
-    args.onClose();
+    args.onClose?.();
   };
 
   return (
@@ -190,7 +190,7 @@ function AlertWithCustomActions(args: React.ComponentProps<typeof AlertModal>) {
 
   const close = () => {
     setOpen(false);
-    args.onClose();
+    args.onClose?.();
   };
 
   const handleConfirm = () => {

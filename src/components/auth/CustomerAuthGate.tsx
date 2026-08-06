@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
+import ProfileCompletionGuard from "@/components/auth/ProfileCompletionGuard";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { buildLoginPath, getRoleHomePath } from "@/lib/auth/redirect";
@@ -20,6 +21,12 @@ interface CustomerAuthGateProps {
  * - 세션 복구 중: 로딩
  * - 비로그인: 로그인 페이지로 이동 (?redirect=)
  * - CUSTOMER 아님(기사님·ADMIN·역할 미확정): getRoleHomePath로 이동
+ * - 프로필 미완료: ProfileCompletionGuard (모달)
+ *
+ * `(customer)/(protected)` layout 밖 페이지에서만 사용한다.
+ * layout 안에서는 RoleGuard + layout의 ProfileCompletionGuard만 쓰고,
+ * 이 Gate를 겹쳐 두지 않는다.
+ *
  * // 2026.07.30 정슬기 - [추가]
  * // 2026.07.30 정슬기 - [수정] 리다이렉트를 router.replace로 통일 (하드 새로고침 불필요)
  * // 2026.08.03 정슬기 - [수정] CUSTOMER 명시 판별로 canFetch·비고객 리다이렉트
@@ -53,9 +60,17 @@ export default function CustomerAuthGate({
     }
   }, [isPending, isAuthenticated, isCustomer, user?.role, pathname, router]);
 
+  const resolvedLoadingFallback = loadingFallback ?? (
+    <EstimatesQueryStatus message={loadingMessage} />
+  );
+
   if (isPending || !canFetch) {
-    return loadingFallback ?? <EstimatesQueryStatus message={loadingMessage} />;
+    return resolvedLoadingFallback;
   }
 
-  return children;
+  return (
+    <ProfileCompletionGuard loadingFallback={resolvedLoadingFallback}>
+      {children}
+    </ProfileCompletionGuard>
+  );
 }

@@ -14,6 +14,7 @@ const MoverProfileEditView = () => {
   const { data: moverProfile, isPending: isProfilePending, isError } = useMoverProfileMe(canFetch);
 
   // RoleGuard가 비인증·역할 불일치를 처리. 비활성 쿼리 isPending은 로딩으로 보지 않음
+  // 프로필 미완료 접근은 ProfileCompletionGuard(모달)가 담당
   if (isAuthPending || (canLoadProfile && isProfilePending)) {
     return <ProfileFormSkeleton title="프로필 수정" layout="twoColumn" />;
   }

@@ -12,6 +12,7 @@ import ProfileMenuTrigger, {
   type ProfileMenuItem,
 } from "@/components/common/Header/ProfileMenuTrigger";
 import { Text } from "@/components/common/Text";
+import { useProfileCompletionState } from "@/hooks/profile/useProfileCompletionState";
 import { MenuIcon } from "@/icons";
 import type { AuthRole } from "@/lib/auth/role";
 import { loadRole } from "@/lib/auth/role";
@@ -19,6 +20,14 @@ import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
+
+const PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE = "프로필을 완성한 뒤 이용할 수 있어요.";
+
+const PROFILE_LOGOUT_MENU_ITEM: ProfileMenuItem = {
+  type: "action",
+  label: "로그아웃",
+  action: "logout",
+};
 
 const LOGGED_OUT_LINKS = [
   {
@@ -69,11 +78,7 @@ const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     label: "이사 리뷰",
     href: APP_ROUTES.REVIEWS.WRITABLE,
   },
-  {
-    type: "action",
-    label: "로그아웃",
-    action: "logout",
-  },
+  PROFILE_LOGOUT_MENU_ITEM,
 ];
 
 const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
@@ -87,11 +92,7 @@ const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     label: "기본정보 수정",
     href: APP_ROUTES.MOVER_BASIC_EDIT,
   },
-  {
-    type: "action",
-    label: "로그아웃",
-    action: "logout",
-  },
+  PROFILE_LOGOUT_MENU_ITEM,
 ];
 
 export interface HeaderProps {
@@ -146,19 +147,39 @@ const Header = ({
     ? LOGGED_OUT_LINKS
     : resolvedRole === "MOVER"
       ? MOVER_LOGGED_IN_LINKS
-      : CUSTOMER_LOGGED_IN_LINKS;
+      : resolvedRole === "CUSTOMER"
+        ? CUSTOMER_LOGGED_IN_LINKS
+        : []; // role 미확정·ADMIN 등 — 고객 링크 기본값 사용 안 함
 
   const sideNavLinks = !isLogin
     ? [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
     : navLinks;
 
-  const profileMenuItems =
-    resolvedRole === "MOVER" ? MOVER_PROFILE_MENU_ITEMS : CUSTOMER_PROFILE_MENU_ITEMS;
-
   // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
   const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
+
+  const { isIncomplete, isCompletionUnresolved, profileCreatePath } =
+    useProfileCompletionState(resolvedRole);
+
+  // SSR 로그인 힌트와 status 확정 전: 완료 사용자 메뉴/링크가 깜빡이지 않도록 숨김
+  const shouldHideNavLinks = isLogin && (isIncomplete || isCompletionUnresolved);
+
+  const completedProfileMenuItems =
+    resolvedRole === "MOVER"
+      ? MOVER_PROFILE_MENU_ITEMS
+      : resolvedRole === "CUSTOMER"
+        ? CUSTOMER_PROFILE_MENU_ITEMS
+        : [PROFILE_LOGOUT_MENU_ITEM];
+
+  const profileMenuItems: ProfileMenuItem[] = !isLogin
+    ? completedProfileMenuItems
+    : isIncomplete
+      ? [{ type: "link", label: "프로필 생성", href: profileCreatePath }, PROFILE_LOGOUT_MENU_ITEM]
+      : isCompletionUnresolved
+        ? [PROFILE_LOGOUT_MENU_ITEM]
+        : completedProfileMenuItems;
 
   const openSideNav = useCallback(() => setIsSideNavOpen(true), []);
   const closeSideNav = useCallback(() => setIsSideNavOpen(false), []);
@@ -204,30 +225,32 @@ const Header = ({
 
           {/* Mobile은 햄버거 전까지 링크 숨김 — 좁은 폭에서 GNB 가로 스크롤 방지 */}
           {/* 2026.08.04 정슬기 - [수정] */}
-          <nav aria-label="주요 메뉴" className="hidden min-w-0 xl:block">
-            <ul className="flex items-center xl:gap-40">
-              {navLinks.map((link) => {
-                const isActive = isNavLinkActive(pathname, link.href);
+          {!shouldHideNavLinks ? (
+            <nav aria-label="주요 메뉴" className="hidden min-w-0 xl:block">
+              <ul className="flex items-center xl:gap-40">
+                {navLinks.map((link) => {
+                  const isActive = isNavLinkActive(pathname, link.href);
 
-                return (
-                  <li key={link.label} className="shrink-0">
-                    <Link
-                      href={link.href}
-                      aria-current={isActive ? "page" : undefined}
-                      className={cn(
-                        "transition-colors",
-                        isActive
-                          ? "text-nav-text-active"
-                          : "text-nav-text-default hover:text-nav-text-active",
-                      )}
-                    >
-                      <Text variant="2lg-bold">{link.label}</Text>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+                  return (
+                    <li key={link.label} className="shrink-0">
+                      <Link
+                        href={link.href}
+                        aria-current={isActive ? "page" : undefined}
+                        className={cn(
+                          "transition-colors",
+                          isActive
+                            ? "text-nav-text-active"
+                            : "text-nav-text-default hover:text-nav-text-active",
+                        )}
+                      >
+                        <Text variant="2lg-bold">{link.label}</Text>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          ) : null}
         </div>
 
         {showAuthSkeleton ? (
@@ -287,7 +310,8 @@ const Header = ({
         id={mobileMenuId}
         isOpen={isSideNavOpen}
         onClose={closeSideNav}
-        links={sideNavLinks}
+        links={shouldHideNavLinks ? [] : sideNavLinks}
+        emptyMessage={isIncomplete ? PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE : undefined}
       />
     </header>
   );
