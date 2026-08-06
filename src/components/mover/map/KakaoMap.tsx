@@ -14,7 +14,6 @@ interface KakaoMapProps {
 export default function KakaoMap({ departure, destination }: KakaoMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     let disposed = false;
@@ -47,9 +46,6 @@ export default function KakaoMap({ departure, destination }: KakaoMapProps) {
         console.error("[KakaoMap] 지도 SDK 초기화 실패", error);
 
         if (!disposed) {
-          setErrorMessage(
-            error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.",
-          );
           setStatus("error");
         }
       });
@@ -78,7 +74,7 @@ export default function KakaoMap({ departure, destination }: KakaoMapProps) {
       {status === "error" && (
         <div className="bg-background-subtle absolute inset-0 z-10 flex items-center justify-center px-24 text-center">
           <Text as="p" variant="md-medium" className="text-text-error">
-            지도를 불러오지 못했습니다. {errorMessage}
+            지도를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
           </Text>
         </div>
       )}
