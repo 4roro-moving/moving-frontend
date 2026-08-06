@@ -10,7 +10,7 @@ import {
   mergeCoordDocumentIntoZipLookups,
   resolveKeywordZipCode,
   setZipLookup,
-  toCoordinateKey,
+  toValidCoordinateKey,
   type KakaoAddressDocument,
   type KakaoCoord2AddressDocument,
   type KakaoKeywordDocument,
@@ -151,9 +151,10 @@ export async function GET(request: Request) {
 
   const missingCoordinateKeys = [
     ...new Set(
-      keywordDocuments
-        .map((document) => toCoordinateKey(document.x, document.y))
-        .filter((coordinateKey) => !lookups.byCoordinate.has(coordinateKey)),
+      keywordDocuments.flatMap((document) => {
+        const coordinateKey = toValidCoordinateKey(document.x, document.y);
+        return coordinateKey && !lookups.byCoordinate.has(coordinateKey) ? [coordinateKey] : [];
+      }),
     ),
   ];
 

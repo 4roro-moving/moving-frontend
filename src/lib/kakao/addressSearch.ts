@@ -70,8 +70,8 @@ export interface AddressSearchItem {
 }
 
 // 2026.08.06 윤소정 - [추가] 카카오 주소 검색 좌표 유효성 검사
-function parseCoordinates(x: string, y: string): { latitude: number; longitude: number } | null {
-  if (!x.trim() || !y.trim()) return null;
+function parseCoordinates(x: unknown, y: unknown): { latitude: number; longitude: number } | null {
+  if (typeof x !== "string" || typeof y !== "string" || !x.trim() || !y.trim()) return null;
 
   const latitude = Number(y);
   const longitude = Number(x);
@@ -89,6 +89,11 @@ function parseCoordinates(x: string, y: string): { latitude: number; longitude: 
   }
 
   return { latitude, longitude };
+}
+
+export function toValidCoordinateKey(x: unknown, y: unknown): string | null {
+  if (!parseCoordinates(x, y)) return null;
+  return toCoordinateKey(x as string, y as string);
 }
 
 /** 괄호 안 건물명 제거 후 도로명 기준 비교용 */
