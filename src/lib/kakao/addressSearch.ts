@@ -92,8 +92,9 @@ function parseCoordinates(x: unknown, y: unknown): { latitude: number; longitude
 }
 
 export function toValidCoordinateKey(x: unknown, y: unknown): string | null {
-  if (!parseCoordinates(x, y)) return null;
-  return toCoordinateKey(x as string, y as string);
+  const coordinates = parseCoordinates(x, y);
+  if (!coordinates) return null;
+  return toCoordinateKey(String(coordinates.longitude), String(coordinates.latitude));
 }
 
 /** 괄호 안 건물명 제거 후 도로명 기준 비교용 */
@@ -161,7 +162,7 @@ export function mergeAddressDocumentIntoZipLookups(
   const zipCode = extractZipCodeFromAddressDocument(document);
   if (!zipCode) return "";
 
-  setZipLookup(lookups.byCoordinate, toCoordinateKey(document.x, document.y), zipCode);
+  setZipLookup(lookups.byCoordinate, toValidCoordinateKey(document.x, document.y) ?? "", zipCode);
   setZipLookup(lookups.byJibun, document.address?.address_name ?? "", zipCode);
   setZipLookup(lookups.byJibun, document.address_name, zipCode);
   setZipLookup(lookups.byRoad, document.road_address?.address_name ?? "", zipCode);
@@ -191,9 +192,10 @@ export function resolveKeywordZipCode(
 ): string {
   const road = document.road_address_name.trim();
   const jibun = document.address_name.trim();
+  const coordinateKey = toValidCoordinateKey(document.x, document.y);
 
   return (
-    lookups.byCoordinate.get(toCoordinateKey(document.x, document.y)) ||
+    (coordinateKey ? lookups.byCoordinate.get(coordinateKey) : undefined) ||
     lookups.byJibun.get(jibun) ||
     lookups.byRoad.get(road) ||
     ""
