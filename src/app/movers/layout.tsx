@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import BlockMoverFromMoversBrowse from "@/components/auth/BlockMoverFromMoversBrowse";
 import { LoginRequiredModalProvider } from "@/components/auth/LoginRequiredModalProvider";
 
 interface MoversLayoutProps {
@@ -7,5 +8,9 @@ interface MoversLayoutProps {
 }
 
 export default function MoversLayout({ children }: MoversLayoutProps) {
-  return <LoginRequiredModalProvider>{children}</LoginRequiredModalProvider>;
+  return (
+    <LoginRequiredModalProvider>
+      <BlockMoverFromMoversBrowse>{children}</BlockMoverFromMoversBrowse>
+    </LoginRequiredModalProvider>
+  );
 }
