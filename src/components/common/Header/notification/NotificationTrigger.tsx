@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useId, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import { Text } from "@/components/common/Text";
 import { useUnreadNotificationCount } from "@/hooks/notifications/useUnreadNotificationCount";
@@ -11,14 +12,24 @@ import { AlarmIcon } from "@/icons";
 import NotificationPanel from "./NotificationPanel";
 
 export default function NotificationTrigger() {
+  const pathname = usePathname();
   const notificationPanelId = useId();
   const { authScope } = useAuthQueryScope();
   // 현재 authScope 와 같을 때만 열린 것으로 간주 → 계정 전환 시 자동으로 닫힘
   const [openScope, setOpenScope] = useState<string | null>(null);
+  const [panelPathname, setPanelPathname] = useState(pathname);
   const isOpen = openScope === authScope;
   const { data } = useUnreadNotificationCount();
   const unreadCount = data?.unreadCount ?? 0;
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // pathname 변경 시 알림 패널 닫음
+  if (pathname !== panelPathname) {
+    setPanelPathname(pathname);
+    if (isOpen) {
+      setOpenScope(null);
+    }
+  }
 
   /** Escape / 닫기 버튼 / 알림 이동 — 트리거로 포커스 복귀 */
   const closeWithFocus = useCallback(() => {
