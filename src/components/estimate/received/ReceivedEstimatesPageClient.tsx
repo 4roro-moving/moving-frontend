@@ -5,6 +5,10 @@ import { useState } from "react";
 import Toast from "@/components/common/Toast/Toast";
 import { ReceivedEstimatesLoadingSkeleton } from "@/components/estimate/EstimateLoadingSkeletons";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
+import {
+  ESTIMATE_STATUS_PANEL_CLASSNAME,
+  ESTIMATE_STATUS_PANEL_COMPACT_CLASSNAME,
+} from "@/components/estimate/estimateSurfaceStyles";
 import ReceivedEstimatesList from "@/components/estimate/received/ReceivedEstimatesList";
 import { useReceivedEstimates } from "@/hooks/useReceivedEstimates";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
@@ -38,7 +42,7 @@ export default function ReceivedEstimatesPageClient() {
             onAction={() => {
               void refetch();
             }}
-            className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle border-0 px-20 py-40 shadow-none md:border-[0.5px] md:px-40 md:py-56 md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)]"
+            className={ESTIMATE_STATUS_PANEL_CLASSNAME}
           />
         </div>
       ) : null}
@@ -54,7 +58,7 @@ export default function ReceivedEstimatesPageClient() {
                 onAction={() => {
                   void refetch();
                 }}
-                className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle border-0 px-20 py-24 shadow-none md:border-[0.5px] md:px-28 md:py-28 md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)]"
+                className={ESTIMATE_STATUS_PANEL_COMPACT_CLASSNAME}
               />
             </div>
           ) : null}

@@ -176,7 +176,7 @@ export default function PendingEstimateDetailView({ estimateId }: PendingEstimat
         }}
         actionBusy={isFetching}
         backFallbackHref={APP_ROUTES.ESTIMATES.PENDING}
-        className="min-h-[320px]"
+        className="min-h-320"
       />
     );
   }

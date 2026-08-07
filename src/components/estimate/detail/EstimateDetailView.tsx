@@ -152,7 +152,7 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
         }}
         actionBusy={isFetching}
         backFallbackHref={APP_ROUTES.ESTIMATES.RECEIVED}
-        className="min-h-[320px]"
+        className="min-h-320"
       />
     );
   }

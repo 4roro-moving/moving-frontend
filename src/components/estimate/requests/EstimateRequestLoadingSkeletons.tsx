@@ -2,7 +2,12 @@ import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import EstimateDetailLayout, {
   ESTIMATE_DETAIL_LAYOUT_CLASSES,
 } from "@/components/estimate/detail/EstimateDetailLayout";
+import {
+  ESTIMATE_LIST_PANEL_PADDING_CLASSNAME,
+  ESTIMATE_LIST_PANEL_SURFACE_CLASSNAME,
+} from "@/components/estimate/estimateSurfaceStyles";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { cn } from "@/lib/utils/cn";
 
 interface EstimateRequestListSkeletonProps {
   count?: number;
@@ -12,7 +17,11 @@ interface EstimateRequestListSkeletonProps {
 function EstimateRequestCardSkeleton() {
   return (
     <div
-      className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle flex w-full flex-col border-0 px-0 py-0 shadow-none md:border-[0.5px] md:px-28 md:py-32 md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)] xl:px-40 xl:pt-48 xl:pb-40"
+      className={cn(
+        ESTIMATE_LIST_PANEL_SURFACE_CLASSNAME,
+        ESTIMATE_LIST_PANEL_PADDING_CLASSNAME,
+        "flex w-full flex-col",
+      )}
       aria-hidden="true"
     >
       <div className="flex w-full flex-col gap-16 md:gap-20">
@@ -58,7 +67,7 @@ export function EstimateRequestListSkeleton({
     >
       {showFilter ? (
         <div className="flex w-full justify-end" aria-hidden="true">
-          <Skeleton className="rounded-12 h-54 w-[128px] md:w-[160px]" />
+          <Skeleton className="rounded-12 h-54 w-128 md:w-160" />
         </div>
       ) : null}
 

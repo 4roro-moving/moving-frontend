@@ -60,7 +60,7 @@ export default function EstimateOfferSection({
           desc="전체"
           defaultValue="all"
           size="lg"
-          className="w-[128px] md:w-[160px]"
+          className="w-128 md:w-160"
           onChange={(value) => {
             if (isEstimateOfferFilter(value)) {
               setFilter(value);
@@ -79,7 +79,7 @@ export default function EstimateOfferSection({
         <ul className={OFFER_LIST_CLASS_NAME}>
           <li className="w-full">
             <div className="bg-background-default flex w-full flex-col items-stretch gap-8 border-0 py-20 md:px-8">
-              <div className="border-border-muted rounded-12 flex min-h-[268px] w-full items-center border border-solid px-12 py-12 pr-20 shadow-none">
+              <div className="border-border-muted rounded-12 flex min-h-268 w-full items-center border border-solid px-12 py-12 pr-20 shadow-none">
                 <EstimatesQueryStatus
                   message="해당 조건의 견적이 없어요."
                   className="min-h-0 px-0 py-0"

@@ -94,7 +94,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
               <div className="flex w-full min-w-0 flex-col items-start">
                 <div className="flex min-w-0 items-center gap-6">
                   <DriverBadgeIcon
-                    className="h-[18.2px] w-16 shrink-0 xl:h-23 xl:w-20"
+                    className="h-18 w-16 shrink-0 xl:h-23 xl:w-20"
                     aria-hidden="true"
                   />
                   <Text
@@ -127,7 +127,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
               />
             </div>
 
-            <div className="hidden w-[160px] shrink-0 flex-col items-end xl:flex">
+            <div className="hidden w-160 shrink-0 flex-col items-end xl:flex">
               <Text as="span" variant="lg-medium" className="text-text-muted w-full text-right">
                 견적 금액
               </Text>
@@ -181,7 +181,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
             variant="solid"
             size="cta"
             fullWidth
-            className="xl:w-[160px] xl:shrink-0"
+            className="xl:w-160 xl:shrink-0"
             onClick={() => onWriteClick(item)}
             aria-label={`${moverLabel} 리뷰 작성하기`}
           >

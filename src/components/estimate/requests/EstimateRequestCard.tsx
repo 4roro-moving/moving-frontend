@@ -4,6 +4,10 @@ import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import {
+  ESTIMATE_LIST_PANEL_PADDING_CLASSNAME,
+  ESTIMATE_LIST_PANEL_SURFACE_CLASSNAME,
+} from "@/components/estimate/estimateSurfaceStyles";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -37,11 +41,9 @@ export default function EstimateRequestCard({ request }: EstimateRequestCardProp
       onClick={(event) => markInternalDetailNavigationOnClick(event, href)}
       aria-labelledby={titleId}
       className={cn(
-        "bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle",
-        "flex w-full flex-col border-0 px-0 py-0 shadow-none",
-        "md:border-[0.5px] md:px-28 md:py-32",
-        "md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)]",
-        "xl:px-40 xl:pt-48 xl:pb-40",
+        ESTIMATE_LIST_PANEL_SURFACE_CLASSNAME,
+        ESTIMATE_LIST_PANEL_PADDING_CLASSNAME,
+        "flex w-full flex-col",
         "focus-visible:ring-border-brand rounded-0 md:rounded-20 focus-visible:ring-2 focus-visible:outline-none",
         "hover:bg-background-subtle/40 md:hover:bg-background-surface transition-colors",
       )}

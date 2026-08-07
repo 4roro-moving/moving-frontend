@@ -22,7 +22,7 @@ export default function ReviewPageFrame({ title, children, className }: ReviewPa
         {title}
       </Text>
 
-      <div className="px-margin-mobile md:px-margin-tablet mx-auto flex w-full max-w-[880px] flex-col pt-24 pb-64 md:pt-32 md:pb-80 xl:px-0">
+      <div className="px-margin-mobile md:px-margin-tablet mx-auto flex w-full max-w-220 flex-col pt-24 pb-64 md:pt-32 md:pb-80 xl:px-0">
         {children}
       </div>
     </div>

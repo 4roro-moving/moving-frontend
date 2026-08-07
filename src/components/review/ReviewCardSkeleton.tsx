@@ -39,7 +39,7 @@ export default function ReviewCardSkeleton({ count = 4 }: ReviewCardSkeletonProp
               </div>
             </div>
 
-            <div className="border-border-muted flex w-full flex-col gap-16 border-t pt-16 md:gap-20 xl:w-[240px] xl:shrink-0 xl:border-t-0 xl:pt-0">
+            <div className="border-border-muted flex w-full flex-col gap-16 border-t pt-16 md:gap-20 xl:w-240 xl:shrink-0 xl:border-t-0 xl:pt-0">
               <div className="flex items-end justify-between gap-12 xl:flex-col xl:items-end">
                 <Skeleton className="h-16 w-56" />
                 <Skeleton className="h-28 w-100" />

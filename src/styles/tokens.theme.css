@@ -263,6 +263,14 @@
   --spacing-103: 6.4375rem;
   --spacing-104: 6.5rem;
   --spacing-120: 7.5rem;
+  /* 2026.08.07 정슬기 - [추가] Select/필터 폭 · 패널 요약 열 · 상태 min-height */
+  --spacing-128: 8rem;
+  --spacing-240: 15rem;
+  --spacing-260: 16.25rem;
+  --spacing-268: 16.75rem;
+  --spacing-320: 20rem;
+  /* 220px min-width — spacing-220(880px 레이아웃)과 충돌 방지용 */
+  --spacing-55: 13.75rem;
   /* 2026.07.25 정슬기 - [추가] Figma Desktop sub-header height 124 / Tablet 202 */
   --spacing-124: 7.75rem;
   --spacing-202: 12.625rem;

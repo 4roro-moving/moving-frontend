@@ -1,4 +1,9 @@
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
+import {
+  ESTIMATE_LIST_PANEL_PADDING_CLASSNAME,
+  ESTIMATE_LIST_PANEL_SURFACE_CLASSNAME,
+} from "@/components/estimate/estimateSurfaceStyles";
+import { cn } from "@/lib/utils/cn";
 
 function PendingEstimateCardSkeleton() {
   return (
@@ -19,7 +24,7 @@ function PendingEstimateCardSkeleton() {
           </div>
 
           <div className="border-border-muted flex items-center gap-8 border-b pt-12 pb-20">
-            <Skeleton className="size-50 rounded-12 shrink-0" />
+            <Skeleton className="rounded-12 size-50 shrink-0" />
             <div className="flex min-w-0 flex-1 flex-col gap-8">
               <div className="flex items-center justify-between gap-8">
                 <Skeleton className="h-24 w-140" />
@@ -43,8 +48,8 @@ function PendingEstimateCardSkeleton() {
       </div>
 
       <div className="flex flex-col-reverse gap-11 md:flex-row">
-        <Skeleton className="h-54 w-full rounded-16 md:h-64 md:flex-1" />
-        <Skeleton className="h-54 w-full rounded-16 md:h-64 md:flex-1" />
+        <Skeleton className="rounded-16 h-54 w-full md:h-64 md:flex-1" />
+        <Skeleton className="rounded-16 h-54 w-full md:h-64 md:flex-1" />
       </div>
     </div>
   );
@@ -69,7 +74,7 @@ function ReceivedOfferCardSkeleton() {
 
         <div className="border-border-muted rounded-12 flex items-end justify-between gap-12 border px-12 py-12 pr-20">
           <div className="flex min-w-0 flex-1 items-end gap-12">
-            <Skeleton className="size-50 rounded-12 shrink-0" />
+            <Skeleton className="rounded-12 size-50 shrink-0" />
             <div className="flex min-w-0 flex-1 flex-col gap-8">
               <Skeleton className="h-24 w-132" />
               <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
@@ -98,9 +103,15 @@ function ReceivedOfferCardSkeleton() {
 
 function ReceivedEstimatePanelSkeleton() {
   return (
-    <div className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle flex w-full flex-col items-center border-0 px-0 py-0 shadow-none md:border-[0.5px] md:px-28 md:py-32 md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)] xl:px-40 xl:pt-48 xl:pb-40">
+    <div
+      className={cn(
+        ESTIMATE_LIST_PANEL_SURFACE_CLASSNAME,
+        ESTIMATE_LIST_PANEL_PADDING_CLASSNAME,
+        "flex w-full flex-col items-center",
+      )}
+    >
       <div className="flex w-full flex-col items-stretch gap-28 md:gap-40 xl:flex-row xl:items-start xl:gap-60">
-        <div className="flex w-full flex-col gap-16 md:gap-24 xl:w-[260px] xl:shrink-0 xl:gap-40">
+        <div className="flex w-full flex-col gap-16 md:gap-24 xl:w-260 xl:shrink-0 xl:gap-40">
           <div className="flex items-center justify-between">
             <Skeleton className="h-32 w-104" />
             <Skeleton className="hidden h-24 w-72 md:block" />
@@ -128,7 +139,7 @@ function ReceivedEstimatePanelSkeleton() {
             <Skeleton className="h-32 w-112" />
             <Skeleton className="h-32 w-16" />
           </div>
-          <Skeleton className="h-48 w-[128px] md:w-[160px]" />
+          <Skeleton className="h-48 w-128 md:w-160" />
           <div className="flex flex-col">
             <ReceivedOfferCardSkeleton />
             <ReceivedOfferCardSkeleton />
@@ -145,7 +156,7 @@ export function PendingEstimatesLoadingSkeleton() {
       <div className="bg-background-default shadow-sub-header flex w-full flex-col">
         <div className="px-margin-mobile md:px-margin-tablet xl:px-sub-header-padding-left-desktop xl:pr-sub-header-padding-right-desktop py-24 md:py-28 xl:py-24">
           <div className="max-w-container-pending-mobile md:max-w-container-pending-tablet xl:max-w-container-pending-desktop mx-auto flex w-full flex-col gap-20 md:gap-28 xl:flex-row xl:items-center xl:justify-between xl:gap-20">
-            <div className="flex min-w-0 flex-col gap-8 xl:min-w-[220px] xl:shrink-0">
+            <div className="flex min-w-0 flex-col gap-8 xl:min-w-55 xl:shrink-0">
               <Skeleton className="h-32 w-140" />
               <Skeleton className="h-18 w-120" />
             </div>
