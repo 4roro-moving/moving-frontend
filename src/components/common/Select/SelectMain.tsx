@@ -219,6 +219,7 @@ const SelectMain = ({
               onKeyDown={handleListboxKeyDown}
               className={cn(
                 "bg-background-surface absolute z-50 my-4",
+                "animate-dropdown-in origin-top motion-reduce:animate-none",
                 variant === "sort" &&
                   "rounded-8 border-border-subtle flex w-[91px] min-w-[91px] flex-col items-start border xl:w-[114px] xl:min-w-[114px]",
                 variant === "default" &&

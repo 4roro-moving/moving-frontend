@@ -53,7 +53,7 @@ const PaginationEllipsis = ({
           ref={listboxRef}
           role="listbox"
           onKeyDown={handleListboxKeyDown}
-          className="border-border-default bg-background-surface rounded-4 absolute bottom-0 z-10 flex max-h-[180px] w-full flex-col items-center overflow-y-auto border shadow-md"
+          className="border-border-default bg-background-surface rounded-4 animate-dropdown-in absolute bottom-0 z-10 flex max-h-[180px] w-full origin-bottom flex-col items-center overflow-y-auto border shadow-md motion-reduce:animate-none"
         >
           {hiddenPages.map((page) => (
             <li key={page} className="w-full">

@@ -71,7 +71,7 @@ export default function DatePickerField({ value, onChange, className }: DatePick
           id="estimate-date-picker-popup"
           role="region"
           aria-label="날짜 선택"
-          className="absolute top-full left-0 z-20 mt-8 w-full"
+          className="animate-dropdown-in absolute top-full left-0 z-20 mt-8 w-full origin-top motion-reduce:animate-none"
         >
           <Calendar
             selected={value}

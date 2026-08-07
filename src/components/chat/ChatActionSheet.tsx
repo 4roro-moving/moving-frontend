@@ -80,7 +80,7 @@ export default function ChatActionSheet({
     <div
       role="region"
       aria-label="채팅 메뉴"
-      className="border-border-subtle bg-background-surface shrink-0 border-t px-40 pt-16 pb-20"
+      className="border-border-subtle bg-background-surface animate-modal-sheet-in shrink-0 border-t px-40 pt-16 pb-20 motion-reduce:animate-none"
     >
       {/* // 2026.08.07 김성현 - [수정] 아이콘 축소 + w-fit 중앙 그룹으로 좌우 여백 확보 */}
       <div className="mx-auto flex w-fit items-start justify-center gap-32">

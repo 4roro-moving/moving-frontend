@@ -46,6 +46,7 @@ const Toast = ({ children, onClose }: ToastProps) => {
           "rounded-12 max-w-[360px] px-24 py-14",
           "md:max-w-[640px]",
           "xl:max-w-container-desktop xl:rounded-16 xl:px-32 xl:py-20",
+          "animate-toast-in motion-reduce:animate-none",
         )}
       >
         <Text

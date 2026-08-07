@@ -154,7 +154,7 @@ export default function ProfileMenuTrigger({
           id={`${menuId}-menu`}
           role="menu"
           aria-labelledby={`${menuId}-trigger`}
-          className="border-border-default bg-background-surface shadow-profile-menu rounded-16 absolute top-[calc(100%+18px)] right-0 z-50 flex w-[248px] flex-col items-start border px-4 pt-16 pb-6"
+          className="border-border-default bg-background-surface shadow-profile-menu rounded-16 animate-dropdown-in absolute top-[calc(100%+18px)] right-0 z-50 flex w-[248px] origin-top flex-col items-start border px-4 pt-16 pb-6 motion-reduce:animate-none"
         >
           <div className="flex w-full items-center py-14 pr-12 pl-24">
             <Text as="p" variant="2lg-bold" className="text-text-secondary">

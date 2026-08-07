@@ -88,11 +88,20 @@ const ModalMain = ({
     }
   };
 
+  // bottom-sheet / responsive(모바일)는 아래에서 올라오는 sheet 모션
+  const panelMotionClassName =
+    presentation === "bottom-sheet"
+      ? "animate-modal-sheet-in motion-reduce:animate-none"
+      : presentation === "responsive"
+        ? "animate-modal-sheet-in md:animate-modal-content-in motion-reduce:animate-none"
+        : "animate-modal-content-in motion-reduce:animate-none";
+
   return createPortal(
     <ModalContext.Provider value={{ titleId, descriptionId, setHasTitle, setHasDescription }}>
       <div
         className={cn(
           "bg-overlay-scrim fixed inset-0 z-[9999] flex items-center justify-center",
+          "animate-modal-overlay-in motion-reduce:animate-none",
           presentation === "bottom-sheet" && "items-end px-0",
           presentation === "responsive" && "items-end px-0 md:items-center md:px-24",
           overlayClassName,
@@ -109,6 +118,7 @@ const ModalMain = ({
           tabIndex={-1}
           className={cn(
             "rounded-24 bg-background-surface relative flex flex-col items-center gap-40 p-40 shadow-lg focus:outline-none",
+            panelMotionClassName,
             presentation === "bottom-sheet" && "rounded-t-32 w-full max-w-none rounded-b-none",
             presentation === "responsive" &&
               "rounded-t-32 md:rounded-32 w-full max-w-none rounded-b-none",
