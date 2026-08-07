@@ -1,17 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 
 import MoverEstimateTabs from "@/components/estimate/MoverEstimateTabs";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import SentEstimateCard from "@/components/estimate/sent/SentEstimateCard";
 import { useSentEstimates } from "@/hooks/useSentEstimates";
-import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { markInternalDetailNavigation } from "@/lib/utils/detailNavigation";
 
 export default function SentEstimatesPage() {
-  const router = useRouter();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const query = useSentEstimates();
   const { fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError } = query;
@@ -67,12 +63,6 @@ export default function SentEstimatesPage() {
                     moveDate: estimate.estimateRequest.moveDate,
                     price: estimate.price,
                     status: estimate.status,
-                  }}
-                  onViewDetail={(estimateId) => {
-                    const detailHref = APP_ROUTES.MOVER_ESTIMATES.SENT_DETAIL(estimateId);
-
-                    markInternalDetailNavigation(detailHref);
-                    router.push(detailHref);
                   }}
                 />
               </div>
