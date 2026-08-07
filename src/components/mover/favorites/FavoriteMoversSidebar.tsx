@@ -112,6 +112,9 @@ export function FavoriteMoversSidebar() {
           </Link>
         ) : null}
       </div>
+      <Text as="p" variant="md-regular" className="text-text-muted">
+        최근 찜한 기사님을 최대 {FAVORITE_MOVERS_SIDEBAR_LIMIT}명까지 표시합니다.
+      </Text>
 
       {isInitialLoading ? (
         <MoverCardSkeletonList
