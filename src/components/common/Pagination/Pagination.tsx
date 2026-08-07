@@ -194,6 +194,7 @@ const Pagination = ({
           )}
           onClick={() => goToPage(currentPage - 1)}
           onPointerEnter={() => prefetchPage(currentPage - 1)}
+          onFocus={() => prefetchPage(currentPage - 1)}
           disabled={isPrevDisabled}
           aria-label="이전 페이지"
         >
@@ -226,6 +227,7 @@ const Pagination = ({
                   )}
                   onClick={() => goToPage(item.page)}
                   onPointerEnter={() => prefetchPage(item.page)}
+                  onFocus={() => prefetchPage(item.page)}
                   disabled={item.page === currentPage}
                   aria-label={`${item.page} 페이지`}
                   aria-current={item.page === currentPage ? "page" : undefined}
@@ -257,6 +259,7 @@ const Pagination = ({
           )}
           onClick={() => goToPage(currentPage + 1)}
           onPointerEnter={() => prefetchPage(currentPage + 1)}
+          onFocus={() => prefetchPage(currentPage + 1)}
           disabled={isNextDisabled}
           aria-label="다음 페이지"
         >

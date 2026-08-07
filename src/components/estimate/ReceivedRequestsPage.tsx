@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
 import SelectableChip from "@/components/common/Chip/SelectableChip";
