@@ -42,6 +42,7 @@ const GuestOnly = ({ children }: GuestOnlyProps) => {
 
         router.replace(reservedPath);
         useAuthStore.getState().consumePostAuthRedirectPath();
+        return;
       }
 
       const resolvedRole = role ?? loadRole();
