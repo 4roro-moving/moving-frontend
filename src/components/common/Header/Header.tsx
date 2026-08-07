@@ -13,6 +13,7 @@ import ProfileMenuTrigger, {
 } from "@/components/common/Header/ProfileMenuTrigger";
 import { Text } from "@/components/common/Text";
 import { useResolvedAuthRole } from "@/hooks/auth/useResolvedAuthRole";
+import { useCloseOnPathnameChange } from "@/hooks/useCloseOnPathnameChange";
 import { useProfileCompletionState } from "@/hooks/profile/useProfileCompletionState";
 import { MenuIcon } from "@/icons";
 import type { AuthRole } from "@/lib/auth/role";
@@ -112,16 +113,13 @@ const Header = ({
   const pathname = usePathname();
   const mobileMenuId = useId();
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
-  const [sideNavPathname, setSideNavPathname] = useState(pathname);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const wasSideNavOpenRef = useRef(false);
 
-  if (pathname !== sideNavPathname) {
-    setSideNavPathname(pathname);
-    if (isSideNavOpen) {
-      setIsSideNavOpen(false);
-    }
-  }
+  const openSideNav = useCallback(() => setIsSideNavOpen(true), []);
+  const closeSideNav = useCallback(() => setIsSideNavOpen(false), []);
+
+  useCloseOnPathnameChange(closeSideNav);
 
   useEffect(() => {
     if (wasSideNavOpenRef.current && !isSideNavOpen) {
@@ -179,9 +177,6 @@ const Header = ({
       : isCompletionUnresolved
         ? [PROFILE_LOGOUT_MENU_ITEM]
         : completedProfileMenuItems;
-
-  const openSideNav = useCallback(() => setIsSideNavOpen(true), []);
-  const closeSideNav = useCallback(() => setIsSideNavOpen(false), []);
 
   return (
     <header className="border-border-subtle bg-background-surface relative z-40 w-full max-w-full border-b">

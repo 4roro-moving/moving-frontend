@@ -17,6 +17,8 @@ import {
   QUERY_KEYS,
 } from "@/lib/constants/queryKeys";
 import {
+  addMoverToFavoriteMoversCache,
+  findMoverListItemSnapshot,
   invalidateFavoriteRelatedQueries,
   patchMoverFavorite,
   removeIdsFromFavoriteMoversCache,
@@ -35,6 +37,7 @@ export { useBulkRemoveFavoriteMovers } from "@/hooks/useBulkRemoveFavoriteMovers
 
 const LOGIN_REQUIRED_MESSAGE = "로그인이 필요한 서비스입니다.";
 const CUSTOMER_REQUIRED_MESSAGE = "고객만 이용할 수 있는 서비스입니다.";
+const FAVORITE_SYNC_ERROR_MESSAGE = "찜 상태를 확인하지 못했습니다. 잠시 후 다시 확인해주세요.";
 
 /** 세션(authScope)이 바뀐 뒤 뒤늦게 실행되려는 요청을 조용히 폐기하기 위한 sentinel 에러 */
 class StaleFavoriteRequestError extends Error {
@@ -168,6 +171,20 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
     router.push(getLoginRedirectPath());
   };
 
+  /**
+   * 마지막 찜 요청 이후 관련 캐시를 서버 상태와 재동기화합니다.
+   * 찜 mutation 실패와 별개인 조회 실패이므로 추가 롤백 없이 사용자에게만 안내합니다.
+   */
+  const reconcileFavoriteQueries = async (requestAuthScope: AuthScope) => {
+    try {
+      await invalidateFavoriteRelatedQueries(queryClient, requestAuthScope, {
+        throwOnError: true,
+      });
+    } catch {
+      onErrorRef.current?.(FAVORITE_SYNC_ERROR_MESSAGE);
+    }
+  };
+
   const mutation = useMutation({
     mutationFn: enqueueFavoriteRequest,
     onMutate: async (variables): Promise<FavoriteMutationContext> => {
@@ -180,6 +197,12 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         const moverListScopeQueryKey = getMoverListScopeQueryKey(requestAuthScope);
         const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(requestAuthScope);
         const moverDetailQueryKey = getMoverDetailQueryKey(requestAuthScope, moverId);
+
+        // 찜 추가일 때만: 검색/목록 캐시에서 이 mover의 스냅샷을 미리 찾아둠
+        // (cancelQueries 전에 읽어야 취소 중 데이터가 아니라 현재 화면에 보이는 데이터를 그대로 씀)
+        const moverSnapshot = nextIsFavorite
+          ? findMoverListItemSnapshot(queryClient, moverListScopeQueryKey, moverId)
+          : undefined;
 
         await Promise.all([
           queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
@@ -280,6 +303,11 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
             { queryKey: favoriteMoversScopeQueryKey },
             (list) => removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1),
           );
+        } else if (moverSnapshot) {
+          queryClient.setQueriesData<FavoriteMoversCacheData>(
+            { queryKey: favoriteMoversScopeQueryKey },
+            (list) => addMoverToFavoriteMoversCache(list, moverSnapshot),
+          );
         }
 
         queryClient.setQueryData<MoverDetail>(moverDetailQueryKey, (detail) => {
@@ -340,7 +368,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         onErrorRef.current?.(getApiErrorMessage(error));
       }
     },
-    onSettled: (_data, _error, variables) => {
+    onSettled: (_data, error, variables) => {
       const requestKey = getFavoriteQueueKey(variables.authScope, variables.moverId);
 
       if (latestFavoriteRequestIds.get(requestKey) !== variables.requestId) {
@@ -348,7 +376,13 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       }
 
       latestFavoriteRequestIds.delete(requestKey);
-      void invalidateFavoriteRelatedQueries(queryClient, variables.authScope);
+
+      // 세션 변경으로 폐기됐거나 인증이 만료된 요청은 재동기화하지 않음
+      if (error instanceof StaleFavoriteRequestError || isUnauthorizedError(error)) {
+        return;
+      }
+
+      void reconcileFavoriteQueries(variables.authScope);
     },
   });
 

@@ -42,8 +42,7 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
     (nextFilters: MoversSearchParamsState) => {
       latestFiltersRef.current = nextFilters;
       const queryString = buildMoversQueryString(nextFilters);
-      // 필터 URL 동기화로 인한 불필요한 스크롤 이동 방지
-      router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false });
+      router.replace(queryString ? `${pathname}?${queryString}` : pathname);
     },
     [pathname, router],
   );
