@@ -36,7 +36,9 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
   );
 
   const submitSearch = useCallback(() => {
-    replaceUrl({ ...latestFiltersRef.current, keyword });
+    const normalizedKeyword = keyword.trim();
+    setKeyword(normalizedKeyword);
+    replaceUrl({ ...latestFiltersRef.current, keyword: normalizedKeyword });
   }, [keyword, replaceUrl]);
 
   const clearSearch = useCallback(() => {
