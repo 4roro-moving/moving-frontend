@@ -15,6 +15,7 @@ interface EstimateChatActionProps {
   estimateId: number;
   className?: string;
   buttonClassName?: string;
+  onClick?: () => void;
 }
 
 /**
@@ -25,12 +26,18 @@ export default function EstimateChatAction({
   estimateId,
   className,
   buttonClassName,
+  onClick,
 }: EstimateChatActionProps) {
   const router = useRouter();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const chatRoomMutation = useGetOrCreateChatRoom();
 
   const handleClick = async () => {
+    if (onClick) {
+      onClick();
+      return;
+    }
+
     try {
       const room = await chatRoomMutation.mutateAsync({ estimateId });
       router.push(APP_ROUTES.CHATS.ROOM(room.id));
