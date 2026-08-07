@@ -53,6 +53,31 @@ export function formatKoreanDateTime(date: string): string {
   return `${getPart("year")}년 ${getPart("month")}월 ${getPart("day")}일 (${getPart("weekday")})`;
 }
 
+/** ISO datetime → KST 기준 "2025년 07월 01일 (화) 14:30" */
+export function formatKoreanDateTimeWithTime(date: string): string {
+  const parsed = new Date(date);
+
+  if (Number.isNaN(parsed.getTime())) {
+    throw new RangeError("유효하지 않은 날짜입니다.");
+  }
+
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: "Asia/Seoul",
+  }).formatToParts(parsed);
+
+  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+
+  return `${getPart("year")}년 ${getPart("month")}월 ${getPart("day")}일 (${getPart("weekday")}) ${getPart("hour")}:${getPart("minute")}`;
+}
+
 /**
  * 로컬 자정 기준 날짜 전용 Date를 생성합니다.
  * `new Date(year, monthIndex, day)`는 year 0~99를 1900~1999로 보정하므로 setFullYear를 사용합니다.
