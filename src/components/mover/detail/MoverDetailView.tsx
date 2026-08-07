@@ -21,15 +21,18 @@ import MoverDetailServices from "@/components/mover/detail/MoverDetailServices";
 import MoverDetailShare from "@/components/mover/detail/MoverDetailShare";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import type { MoverDetail } from "@/types/moverDetail";
 
 interface MoverDetailViewProps {
   moverId: string;
+  /** 인증 초기화 중 먼저 렌더링할 서버 prefetch 상세 정보 */
+  initialDetail: MoverDetail | null;
 }
 
-export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
+export default function MoverDetailView({ moverId, initialDetail }: MoverDetailViewProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const { detail, isInitialLoading, isNotFound, query } = useMoverDetail(moverId);
+  const { detail: queryDetail, isInitialLoading, isNotFound, query } = useMoverDetail(moverId);
   const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
   const designation = useMoverDesignation({
     moverId,
@@ -37,7 +40,9 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   });
 
   // SSR guest 상세가 로그인 사용자 정보보다 먼저 노출되지 않도록 세션 확인 완료까지 대기합니다.
-  if (isInitialLoading) {
+  const displayedDetail = isInitialLoading && initialDetail ? initialDetail : queryDetail;
+
+  if (isInitialLoading && !displayedDetail) {
     return (
       <div className="bg-background-default flex w-full max-w-full flex-col overflow-x-hidden">
         <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
@@ -46,7 +51,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     );
   }
 
-  if (!detail) {
+  if (!displayedDetail) {
     if (isNotFound) {
       return (
         <div className="bg-background-default flex w-full max-w-full flex-col overflow-x-hidden">
@@ -74,6 +79,8 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
     );
   }
 
+  const detail = displayedDetail;
+
   const toggleFavorite = () => {
     favoriteMutation.mutate({
       moverId: detail.id,
@@ -99,7 +106,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] xl:pb-0">
       <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
-      <DetailHeroBanner imageUrl={detail.profileImageSrc} name={detail.name} />
+      <DetailHeroBanner imageUrl={detail.profileImageSrc} name={detail.name} preloadProfileImage />
 
       <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 xl:px-0 xl:pb-[150px]">
         <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-32 md:gap-40 xl:flex-row xl:items-start xl:justify-between">
