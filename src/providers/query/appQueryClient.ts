@@ -2,7 +2,10 @@ import type { QueryClient } from "@tanstack/react-query";
 
 let appQueryClient: QueryClient | null = null;
 
-/** AppProviders에서 QueryClient 인스턴스를 등록합니다. */
+/**
+ * AppProviders(AppQueryClientRegistrar)에서 Provider와 동일한 client를 등록합니다.
+ * useState 초기화 시점 set은 SSR에만 실행되므로 사용하지 않습니다.
+ */
 export const setAppQueryClient = (queryClient: QueryClient): void => {
   appQueryClient = queryClient;
 };

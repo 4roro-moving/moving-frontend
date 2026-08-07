@@ -1,14 +1,21 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, useState, type ReactNode } from "react";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { useState, type ReactNode } from "react";
 
-import { setAppQueryClient } from "@/lib/query/appQueryClient";
+import { setAppQueryClient } from "@/providers/query/appQueryClient";
 import { AuthProvider } from "@/providers/AuthProvider";
 
 interface AppProvidersProps {
   children: ReactNode;
 }
+
+/** Provider와 동일한 client를 브라우저 모듈에 동기 등록 */
+const AppQueryClientRegistrar = ({ children }: { children: ReactNode }) => {
+  const queryClient = useQueryClient();
+  setAppQueryClient(queryClient);
+  return children;
+};
 
 export const AppProviders = ({ children }: AppProvidersProps) => {
   const [queryClient] = useState(
@@ -27,13 +34,11 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
       }),
   );
 
-  useEffect(() => {
-    setAppQueryClient(queryClient);
-  }, [queryClient]);
-
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
+      <AppQueryClientRegistrar>
+        <AuthProvider>{children}</AuthProvider>
+      </AppQueryClientRegistrar>
     </QueryClientProvider>
   );
 };
