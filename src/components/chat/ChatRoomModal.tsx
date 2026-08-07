@@ -108,6 +108,7 @@ function ChatRoomModalContent({
         </button>
 
         <input
+          aria-label="채팅 메시지 입력"
           value={messageValue}
           onChange={(event) => onMessageChange?.(event.target.value)}
           placeholder={messagePlaceholder}
