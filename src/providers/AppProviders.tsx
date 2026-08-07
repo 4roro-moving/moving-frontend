@@ -1,8 +1,9 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
+import { setAppQueryClient } from "@/lib/query/appQueryClient";
 import { AuthProvider } from "@/providers/AuthProvider";
 
 interface AppProvidersProps {
@@ -25,6 +26,10 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
         },
       }),
   );
+
+  useEffect(() => {
+    setAppQueryClient(queryClient);
+  }, [queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>

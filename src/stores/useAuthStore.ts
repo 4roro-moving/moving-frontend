@@ -15,6 +15,7 @@ import { isAuthPagePath, isOAuthCallbackPath } from "@/lib/auth/redirect";
 import { clearNickname, loadNickname, saveNickname } from "@/lib/auth/nickname";
 import { clearRole, loadRole, saveRole } from "@/lib/auth/role";
 import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
+import { clearAppQueryCache } from "@/lib/query/appQueryClient";
 import { ApiError } from "@/types/api";
 
 interface AuthState {
@@ -155,6 +156,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     clearAuthTokens();
     clearNickname();
     clearRole();
+    clearAppQueryCache();
     set({ ...UNAUTHENTICATED_STATE });
   },
 
