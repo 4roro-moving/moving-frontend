@@ -228,14 +228,14 @@ const SelectMain = ({
                 "bg-background-surface absolute z-50 my-4",
                 dropdownMotionClassName(isListboxVisible),
                 variant === "sort" &&
-                  "rounded-8 border-border-subtle flex w-[91px] min-w-[91px] flex-col items-start border xl:w-[114px] xl:min-w-[114px]",
+                  "rounded-8 border-border-subtle flex w-22.75 min-w-22.75 flex-col items-start border xl:w-28.5 xl:min-w-28.5",
                 variant === "default" &&
                   !isMultiColumn &&
-                  "rounded-8 border-border-default shadow-select xl:rounded-12 flex w-full min-w-[106px] flex-col items-start border xl:min-w-[160px]",
+                  "rounded-8 border-border-default shadow-select xl:rounded-12 flex w-full min-w-26.5 flex-col items-start border xl:min-w-160",
                 variant === "default" &&
                   isMultiColumn &&
                   // sm: 75×36 × 2열 / md: 164×64 × 2열, 보이는 행 5개
-                  "rounded-8 border-border-default shadow-select xl:rounded-16 grid max-h-[180px] w-[150px] grid-cols-2 overflow-y-auto border xl:max-h-[320px] xl:w-[328px]",
+                  "rounded-8 border-border-default shadow-select xl:rounded-16 w-37-5 grid max-h-45 grid-cols-2 overflow-y-auto border xl:max-h-320 xl:w-82",
               )}
             >
               {children}

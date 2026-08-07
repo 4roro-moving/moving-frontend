@@ -43,7 +43,7 @@ function PendingEstimateCardSkeleton() {
 
         <div className="flex h-47 items-end justify-between gap-24 md:h-52">
           <Skeleton className="h-24 w-84" />
-          <Skeleton className="h-32 w-144 md:h-36 md:w-176" />
+          <Skeleton className="h-32 w-xl md:h-36 md:w-176" />
         </div>
       </div>
 
@@ -136,7 +136,7 @@ function ReceivedEstimatePanelSkeleton() {
 
         <div className="flex min-w-0 flex-1 flex-col gap-16 md:gap-20">
           <div className="flex items-start gap-8">
-            <Skeleton className="h-32 w-112" />
+            <Skeleton className="h-32 w-md" />
             <Skeleton className="h-32 w-16" />
           </div>
           <Skeleton className="h-48 w-128 md:w-160" />

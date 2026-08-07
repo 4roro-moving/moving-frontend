@@ -74,7 +74,7 @@ export default function PendingEstimateRequestHeader({
                 <Text
                   as="dd"
                   variant="2lg-semibold"
-                  className="text-text-primary m-0 min-w-0 break-words"
+                  className="text-text-primary m-0 min-w-0 wrap-break-word"
                 >
                   {request.fromAddress}
                 </Text>
@@ -91,7 +91,7 @@ export default function PendingEstimateRequestHeader({
                 <Text
                   as="dd"
                   variant="2lg-semibold"
-                  className="text-text-primary m-0 min-w-0 break-words"
+                  className="text-text-primary m-0 min-w-0 wrap-break-word"
                 >
                   {request.toAddress}
                 </Text>

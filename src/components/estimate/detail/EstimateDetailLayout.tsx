@@ -58,7 +58,9 @@ export default function EstimateDetailLayout({
           contentClassName,
         )}
       >
-        {statusBanner ? <div className="max-w-container-desktop mb-20 w-full">{statusBanner}</div> : null}
+        {statusBanner ? (
+          <div className="max-w-container-desktop mb-20 w-full">{statusBanner}</div>
+        ) : null}
 
         <div
           className={cn(
@@ -203,7 +205,7 @@ export function EstimateDetailLoadingState({
               <div className="bg-background-surface border-border-subtle shadow-estimate-card rounded-20 flex w-full items-center gap-20 border-[0.5px] px-20 py-24 md:px-32 md:py-28">
                 <div className="flex flex-col gap-8">
                   <Skeleton className="h-24 w-88" />
-                  <Skeleton className="h-36 w-160 md:h-40 md:w-192" />
+                  <Skeleton className="h-36 w-160 md:h-40 md:w-3xl" />
                 </div>
               </div>
             </div>
@@ -211,10 +213,10 @@ export function EstimateDetailLoadingState({
             <div className="flex w-full flex-col gap-20 md:gap-28">
               <section className="flex w-full flex-col gap-20" aria-hidden="true">
                 <div className="flex flex-col gap-12">
-                  <Skeleton className="h-24 w-112" />
+                  <Skeleton className="h-24 w-md" />
                   <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-20">
-                    <Skeleton className="h-92 w-full rounded-16" />
-                    <Skeleton className="h-92 w-full rounded-16" />
+                    <Skeleton className="rounded-16 h-92 w-full" />
+                    <Skeleton className="rounded-16 h-92 w-full" />
                   </div>
                 </div>
                 <Skeleton className="h-px w-full rounded-none" />
@@ -222,7 +224,7 @@ export function EstimateDetailLoadingState({
 
               <section className="flex w-full flex-col gap-12" aria-hidden="true">
                 <Skeleton className="h-24 w-120" />
-                <Skeleton className="h-96 w-full rounded-20" />
+                <Skeleton className="rounded-20 h-96 w-full" />
               </section>
             </div>
           </main>
@@ -236,8 +238,8 @@ export function EstimateDetailLoadingState({
 
               <div className="flex w-full flex-col gap-12">
                 <div className="flex w-full flex-row items-center gap-8 md:gap-12">
-                  <Skeleton className="size-64 shrink-0 rounded-16" />
-                  <Skeleton className="h-64 flex-1 rounded-16" />
+                  <Skeleton className="rounded-16 size-64 shrink-0" />
+                  <Skeleton className="rounded-16 h-64 flex-1" />
                 </div>
                 <Skeleton className="h-20 w-4/5 self-center" />
               </div>

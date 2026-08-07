@@ -20,7 +20,7 @@ export default function EstimatesListEmptyState({
   href,
 }: EstimatesListEmptyStateProps) {
   return (
-    <div className="px-margin-mobile mx-auto flex min-h-[60vh] w-full max-w-[var(--container-desktop)] flex-col items-center justify-start md:min-h-[70vh] md:px-72 xl:px-0">
+    <div className="px-margin-mobile mx-auto flex min-h-[60vh] w-full max-w-(--container-desktop) flex-col items-center justify-start md:min-h-[70vh] md:px-72 xl:px-0">
       <EmptyState
         size="sm"
         imageSrc="/images/empty/character.png"

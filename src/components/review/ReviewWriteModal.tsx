@@ -145,7 +145,7 @@ function ReviewWriteModalContent({
               disabled={isPending}
               placeholder={`최소 ${MIN_CONTENT_LENGTH}자 이상 입력해 주세요`}
               error={contentValidationError}
-              className="h-[160px]"
+              className="h-160"
               onChange={(event) => {
                 setContent(event.target.value);
                 setSubmitError(undefined);

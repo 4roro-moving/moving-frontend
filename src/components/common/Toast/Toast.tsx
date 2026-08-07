@@ -55,7 +55,7 @@ const Toast = ({ children, onClose }: ToastProps) => {
       role="status"
       aria-live="polite"
       className={cn(
-        "pointer-events-none fixed inset-x-0 z-[9999] flex justify-center",
+        "pointer-events-none fixed inset-x-0 z-9999 flex justify-center",
         "top-70 xl:top-103",
         "px-8 md:px-52 xl:px-0",
       )}
@@ -65,7 +65,7 @@ const Toast = ({ children, onClose }: ToastProps) => {
           "bg-toast-background text-toast-text pointer-events-auto flex w-full items-center",
           "shadow-toast",
           "rounded-12 max-w-[360px] px-24 py-14",
-          "md:max-w-[640px]",
+          "md:max-w-auth-container-tablet",
           "xl:max-w-container-desktop xl:rounded-16 xl:px-32 xl:py-20",
           toastMotionClassName(isVisible),
         )}

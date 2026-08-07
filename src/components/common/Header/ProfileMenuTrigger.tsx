@@ -162,7 +162,7 @@ export default function ProfileMenuTrigger({
           aria-hidden={!isMenuVisible}
           aria-labelledby={`${menuId}-trigger`}
           className={cn(
-            "border-border-default bg-background-surface shadow-profile-menu rounded-16 absolute top-[calc(100%+18px)] right-0 z-50 flex w-[248px] flex-col items-start border px-4 pt-16 pb-6",
+            "border-border-default bg-background-surface shadow-profile-menu rounded-16 absolute top-[calc(100%+18px)] right-0 z-50 flex w-62 flex-col items-start border px-4 pt-16 pb-6",
             dropdownMotionClassName(isMenuVisible),
           )}
         >

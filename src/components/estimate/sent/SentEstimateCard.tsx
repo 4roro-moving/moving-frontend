@@ -28,7 +28,7 @@ interface SentEstimateCardProps {
 
 function RouteArrow() {
   return (
-    <span className="mb-[9px] flex w-[18px] items-center" aria-hidden="true">
+    <span className="mb-2.25 flex w-18 items-center" aria-hidden="true">
       <span className="bg-text-secondary h-px flex-1" />
       <span className="border-text-secondary -ml-1 size-1.5 rotate-45 border-t border-r" />
     </span>
@@ -43,14 +43,14 @@ export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
   return (
     <article
       className={cn(
-        "group border-border-subtle bg-background-default shadow-estimate-card rounded-20 hover:border-border-brand hover:shadow-notification relative flex min-h-[333px] w-full flex-col gap-24 overflow-hidden border-[0.5px] px-20 py-24 transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-2 md:min-h-[322px] md:gap-32 md:px-40 md:py-32 xl:min-h-[324px]",
+        "group border-border-subtle bg-background-default shadow-estimate-card rounded-20 hover:border-border-brand hover:shadow-notification relative flex min-h-83.25 w-full flex-col gap-24 overflow-hidden border-[0.5px] px-20 py-24 transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-2 md:min-h-80.5 md:gap-32 md:px-40 md:py-32 xl:min-h-81",
         isCompleted && "select-none",
       )}
     >
       <Link
         href={detailHref}
         aria-label={`${estimate.customerName} 고객님 견적 상세보기`}
-        className="rounded-20 absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-border-brand)]"
+        className="rounded-20 absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-border-brand)"
         onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
       />
       <div className="flex flex-1 flex-col gap-16 md:gap-24">
@@ -120,13 +120,13 @@ export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
       <div className="border-border-default flex h-47 items-end justify-between border-t md:h-52">
         <Text
           variant={{ base: "md-medium", md: "lg-medium" }}
-          className="text-text-muted md:text-[length:var(--font-size-16)] md:leading-[var(--line-height-26)]"
+          className="text-text-muted md:text-(length:--font-size-16) md:leading-26"
         >
           견적 금액
         </Text>
         <Text
           variant={{ base: "2lg-bold", md: "2xl-bold" }}
-          className="text-text-secondary md:text-[length:var(--font-size-24)] md:leading-[var(--line-height-32)]"
+          className="text-text-secondary md:text-(length:--font-size-24) md:leading-32"
         >
           {estimate.price.toLocaleString("ko-KR")}원
         </Text>

@@ -139,7 +139,7 @@ export default function SendEstimateModal({
               onBlur={() => {
                 setIsCommentTouched(true);
               }}
-              className="h-[160px] resize-none"
+              className="h-160 resize-none"
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
               {comment.length}/{MAX_COMMENT_LENGTH}

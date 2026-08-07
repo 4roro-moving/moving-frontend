@@ -35,7 +35,7 @@ function EstimateRequestCardSkeleton() {
 
         <div className="flex min-w-0 flex-col gap-6">
           <Skeleton className="h-26 w-120" />
-          <Skeleton className="h-14 w-144" />
+          <Skeleton className="h-14 w-xl" />
         </div>
 
         <div className="flex w-full flex-col gap-10 md:gap-12">

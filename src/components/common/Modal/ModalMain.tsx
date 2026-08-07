@@ -150,7 +150,7 @@ const ModalMain = ({
     <ModalContext.Provider value={{ titleId, descriptionId, setHasTitle, setHasDescription }}>
       <div
         className={cn(
-          "bg-overlay-scrim fixed inset-0 z-[9999] flex items-center justify-center",
+          "bg-overlay-scrim fixed inset-0 z-9999 flex items-center justify-center",
           overlayMotionClassName,
           !isVisible && "pointer-events-none",
           presentation === "bottom-sheet" && "items-end px-0",
@@ -174,15 +174,13 @@ const ModalMain = ({
             presentation === "bottom-sheet" && "rounded-t-32 w-full max-w-none rounded-b-none",
             presentation === "responsive" &&
               "rounded-t-32 md:rounded-32 w-full max-w-none rounded-b-none",
-            size === "sm" && "w-full max-w-[293px]",
+            size === "sm" && "w-full max-w-73.25",
             size === "md" &&
-              (presentation === "responsive"
-                ? "md:w-[375px] md:max-w-[375px]"
-                : "w-full max-w-[375px]"),
+              (presentation === "responsive" ? "md:w-93.75 md:max-w-93.75" : "w-full max-w-93.75"),
             size === "lg" &&
               (presentation === "responsive"
-                ? "md:w-[375px] md:max-w-[375px] xl:w-full xl:max-w-[608px]"
-                : "w-full max-w-[608px]"),
+                ? "md:w-93.75 md:max-w-93.75 xl:w-full xl:max-w-152"
+                : "w-full max-w-152"),
             className,
           )}
         >

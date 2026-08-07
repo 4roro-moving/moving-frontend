@@ -61,7 +61,7 @@ const PaginationEllipsis = ({
           aria-hidden={!isListboxVisible}
           onKeyDown={handleListboxKeyDown}
           className={cn(
-            "border-border-default bg-background-surface rounded-4 absolute bottom-0 z-10 flex max-h-[180px] w-full flex-col items-center overflow-y-auto border shadow-md",
+            "border-border-default bg-background-surface rounded-4 absolute bottom-0 z-10 flex max-h-45 w-full flex-col items-center overflow-y-auto border shadow-md",
             dropdownMotionClassName(isListboxVisible, "bottom"),
           )}
         >

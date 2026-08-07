@@ -48,7 +48,11 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
           <Text as="dt" variant="lg-semibold" className="text-text-brand shrink-0">
             이사 유형
           </Text>
-          <Text as="dd" variant="lg-semibold" className="text-text-primary text-right break-words">
+          <Text
+            as="dd"
+            variant="lg-semibold"
+            className="text-text-primary text-right wrap-break-word"
+          >
             {getMoveTypeLabel(data.moveType)}
           </Text>
         </div>
@@ -63,7 +67,7 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
           <Text
             as="dd"
             variant="lg-semibold"
-            className="text-text-primary min-w-0 text-right break-words"
+            className="text-text-primary min-w-0 text-right wrap-break-word"
           >
             {data.fromAddress}
           </Text>
@@ -75,7 +79,7 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
           <Text
             as="dd"
             variant="lg-semibold"
-            className="text-text-primary min-w-0 text-right break-words"
+            className="text-text-primary min-w-0 text-right wrap-break-word"
           >
             {data.toAddress}
           </Text>
@@ -88,7 +92,11 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
           <Text as="dt" variant="lg-semibold" className="text-text-brand shrink-0">
             이용일
           </Text>
-          <Text as="dd" variant="lg-semibold" className="text-text-primary text-right break-words">
+          <Text
+            as="dd"
+            variant="lg-semibold"
+            className="text-text-primary text-right wrap-break-word"
+          >
             {formatMoveDateLabel(data.moveDate)}
           </Text>
         </div>

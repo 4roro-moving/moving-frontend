@@ -93,7 +93,7 @@ export default function NotificationPanel({ id, onClose, className }: Notificati
       aria-busy={isLoading || isFetching}
       tabIndex={-1}
       className={cn(
-        "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-0 z-50 mt-8 w-[359px] border px-16 py-10 focus:outline-none",
+        "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-0 z-50 mt-8 w-89.75 border px-16 py-10 focus:outline-none",
         className,
       )}
     >
@@ -117,19 +117,19 @@ export default function NotificationPanel({ id, onClose, className }: Notificati
       </div>
 
       {isLoading ? (
-        <div className="flex h-[220px] w-full items-center justify-center px-24">
+        <div className="flex h-55 w-full items-center justify-center px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
             알림을 불러오는 중이에요
           </Text>
         </div>
       ) : isError ? (
-        <div className="flex h-[220px] w-full items-center justify-center px-24">
+        <div className="flex h-55 w-full items-center justify-center px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
             알림을 불러오지 못했어요
           </Text>
         </div>
       ) : isEmpty ? (
-        <div className="flex h-[220px] w-full items-center justify-center px-24">
+        <div className="flex h-55 w-full items-center justify-center px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
             새로운 알림이 없습니다
           </Text>

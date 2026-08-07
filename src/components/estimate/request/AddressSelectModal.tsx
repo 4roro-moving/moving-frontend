@@ -29,7 +29,7 @@ const PANEL_CLASSNAME = cn(
 
 function AddressChip({ label }: { label: string }) {
   return (
-    <span className="bg-background-brand-muted rounded-16 inline-flex w-[54px] shrink-0 items-center justify-center px-4 py-2">
+    <span className="bg-background-brand-muted rounded-16 inline-flex w-54 shrink-0 items-center justify-center px-4 py-2">
       <Text as="span" variant="md-semibold" className="text-text-brand">
         {label}
       </Text>

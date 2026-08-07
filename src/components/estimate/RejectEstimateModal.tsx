@@ -92,7 +92,7 @@ export default function RejectEstimateModal({
               onBlur={() => {
                 setIsReasonTouched(true);
               }}
-              className="h-[160px] resize-none px-24 py-14 text-lg"
+              className="h-160 resize-none px-24 py-14 text-lg"
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
               {reason.length}/{MAX_REASON_LENGTH}

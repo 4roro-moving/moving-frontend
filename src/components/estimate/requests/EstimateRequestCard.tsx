@@ -95,7 +95,7 @@ export default function EstimateRequestCard({ request }: EstimateRequestCardProp
             <Text
               as="dd"
               variant="md-semibold"
-              className="text-text-primary m-0 min-w-0 text-right break-words"
+              className="text-text-primary m-0 min-w-0 text-right wrap-break-word"
             >
               {request.fromAddress}
             </Text>
@@ -107,7 +107,7 @@ export default function EstimateRequestCard({ request }: EstimateRequestCardProp
             <Text
               as="dd"
               variant="md-semibold"
-              className="text-text-primary m-0 min-w-0 text-right break-words"
+              className="text-text-primary m-0 min-w-0 text-right wrap-break-word"
             >
               {request.toAddress}
             </Text>

@@ -62,7 +62,7 @@ export default function EstimateRequestsList({
         desc={selectedLabel}
         defaultValue={statusFilter}
         size="lg"
-        className="w-[128px] md:w-[160px]"
+        className="w-128 md:w-160"
         onChange={(value) => {
           if (isStatusFilter(value)) {
             onStatusFilterChange(value);

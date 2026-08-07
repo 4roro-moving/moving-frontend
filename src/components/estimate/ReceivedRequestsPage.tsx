@@ -111,9 +111,9 @@ export default function ReceivedRequestsPage() {
     <>
       <PageHeader title="받은 요청" />
 
-      <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-24 pb-80 md:px-[72px] xl:gap-40 xl:px-0">
+      <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-24 pb-80 md:px-72 xl:gap-40 xl:px-0">
         <section className="flex flex-col gap-24">
-          <form onSubmit={submitSearch} className="mx-10 w-[calc(100%_-_20px)] xl:mx-0 xl:w-full">
+          <form onSubmit={submitSearch} className="mx-10 w-[calc(100%-20px)] xl:mx-0 xl:w-full">
             <Search
               size="responsive"
               value={searchText}
@@ -203,7 +203,7 @@ export default function ReceivedRequestsPage() {
             </Text>
           )}
           {!query.isPending && !query.isError && items.length === 0 && (
-            <div className="flex flex-col items-center gap-32 py-[96px]">
+            <div className="py-page-header-height-desktop flex flex-col items-center gap-32">
               <Image
                 className="opacity-50"
                 src="/images/empty-received-requests.png"
@@ -218,7 +218,7 @@ export default function ReceivedRequestsPage() {
           )}
           {items.length > 0 && (
             <>
-              <div className="grid w-full grid-cols-1 gap-24 md:max-w-[588px] xl:max-w-none xl:grid-cols-2">
+              <div className="grid w-full grid-cols-1 gap-24 md:max-w-147 xl:max-w-none xl:grid-cols-2">
                 {items.map((request) => (
                   <ReceivedRequestCard
                     key={request.id}
@@ -239,7 +239,7 @@ export default function ReceivedRequestsPage() {
                   type="button"
                   disabled={query.isFetchingNextPage}
                   onClick={() => query.fetchNextPage()}
-                  className="border-border-brand text-text-brand disabled:text-text-disabled disabled:border-border-disabled mx-auto h-[54px] w-full max-w-[327px] rounded-xl border font-semibold disabled:cursor-not-allowed"
+                  className="border-border-brand text-text-brand disabled:text-text-disabled disabled:border-border-disabled mx-auto h-54 w-full max-w-[327px] rounded-xl border font-semibold disabled:cursor-not-allowed"
                 >
                   {query.isFetchingNextPage ? "불러오는 중..." : "더 보기"}
                 </button>
