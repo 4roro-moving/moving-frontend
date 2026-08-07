@@ -35,10 +35,13 @@ const GuestOnly = ({ children }: GuestOnlyProps) => {
     // 예약된 경로가 있으면 예약된 경로로 이동
     // 예약된 경로가 없으면 역할 + 프로필 완료 판단 후 경로 결정 및 이동
     const redirect = async () => {
-      const reservedPath = useAuthStore.getState().consumePostAuthRedirectPath();
+      const reservedPath = useAuthStore.getState().postAuthRedirectPath;
+
       if (reservedPath) {
-        if (!cancelled) router.replace(reservedPath);
-        return;
+        if (cancelled) return;
+
+        router.replace(reservedPath);
+        useAuthStore.getState().consumePostAuthRedirectPath();
       }
 
       const resolvedRole = role ?? loadRole();
@@ -47,7 +50,8 @@ const GuestOnly = ({ children }: GuestOnlyProps) => {
         fallbackPath: getRoleHomePath(resolvedRole),
       });
 
-      if (!cancelled) router.replace(intentPath);
+      if (cancelled) return;
+      router.replace(intentPath);
     };
 
     void redirect();
