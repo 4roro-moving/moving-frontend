@@ -10,9 +10,12 @@ import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { useMovers } from "@/hooks/useMovers";
 import { type MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
+import type { Mover } from "@/types/mover";
 
 interface MoversListProps {
   filters: MoversSearchParamsState;
+  /** 인증 상태·사용자별 찜 여부 확인 전 표시할 서버 prefetch 목록 */
+  initialMovers: Mover[];
 }
 
 const MOVERS_EMPTY_DESCRIPTION = (
@@ -29,13 +32,15 @@ const MOVERS_LIST_SKELETON_COUNT = 5;
 /** 다음 페이지 fetch 중 하단 스켈레톤 카드 수 */
 const MOVERS_NEXT_PAGE_SKELETON_COUNT = 2;
 
-export function MoversList({ filters }: MoversListProps) {
+export function MoversList({ filters, initialMovers }: MoversListProps) {
   const { movers, isInitialLoading, query } = useMovers(filters);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const isShowingInitialMovers = isInitialLoading && initialMovers.length > 0;
+  const displayedMovers = isShowingInitialMovers ? initialMovers : movers;
 
   const sentinelRef = useMoversInfiniteScroll({
-    enabled: !isInitialLoading && !query.isError && movers.length > 0,
+    enabled: !isInitialLoading && !query.isError && displayedMovers.length > 0,
     hasNextPage,
     isFetchingNextPage,
     isFetchNextPageError,
@@ -44,7 +49,7 @@ export function MoversList({ filters }: MoversListProps) {
 
   let content: ReactNode;
 
-  if (isInitialLoading) {
+  if (isInitialLoading && !isShowingInitialMovers) {
     content = (
       <MoverCardSkeletonList
         variant="full"
@@ -52,7 +57,7 @@ export function MoversList({ filters }: MoversListProps) {
         label="기사님 목록을 불러오는 중"
       />
     );
-  } else if (query.isError) {
+  } else if (query.isError && !isShowingInitialMovers) {
     content = (
       <MoversErrorPanel
         title="불러오지 못했어요"
@@ -64,7 +69,7 @@ export function MoversList({ filters }: MoversListProps) {
         }}
       />
     );
-  } else if (movers.length === 0) {
+  } else if (displayedMovers.length === 0) {
     content = (
       <EmptyState
         size="sm"
@@ -76,9 +81,14 @@ export function MoversList({ filters }: MoversListProps) {
     content = (
       <div className="flex flex-col gap-20">
         <ul className="flex flex-col gap-20">
-          {movers.map((mover) => (
+          {displayedMovers.map((mover, index) => (
             <li key={mover.id}>
-              <MoverCard mover={mover} variant="full" onFavoriteError={setToastMessage} />
+              <MoverCard
+                mover={mover}
+                variant="full"
+                priorityProfileImage={index === 0}
+                onFavoriteError={setToastMessage}
+              />
             </li>
           ))}
         </ul>

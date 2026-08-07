@@ -25,6 +25,8 @@ interface MoverCardSelection {
 interface MoverCardProps {
   mover: Mover;
   variant?: "full" | "compact";
+  /** 기사님 찾기 첫 카드의 데스크톱 프로필 이미지 LCP 우선 로딩 여부 */
+  priorityProfileImage?: boolean;
   className?: string;
   onFavoriteError?: (message: string) => void;
   /** 찜 목록 등에서 카드 선택용. 있으면 우상단 체크박스 표시 */
@@ -48,6 +50,7 @@ function areMoverCardPropsEqual(prev: MoverCardProps, next: MoverCardProps): boo
   return (
     prev.mover === next.mover &&
     prev.variant === next.variant &&
+    prev.priorityProfileImage === next.priorityProfileImage &&
     prev.className === next.className &&
     prev.onFavoriteError === next.onFavoriteError &&
     areSelectionPropsEqual(prev.selection, next.selection)
@@ -57,6 +60,7 @@ function areMoverCardPropsEqual(prev: MoverCardProps, next: MoverCardProps): boo
 function MoverCard({
   mover,
   variant = "full",
+  priorityProfileImage = false,
   className,
   onFavoriteError,
   selection,
@@ -253,6 +257,8 @@ function MoverCard({
               src={mover.profileImageSrc}
               width={192}
               height={192}
+              priority={priorityProfileImage}
+              fetchPriority={priorityProfileImage ? "high" : undefined}
               className="absolute top-[-16px] left-[-29px] size-[192px] max-w-none object-cover"
             />
           </div>

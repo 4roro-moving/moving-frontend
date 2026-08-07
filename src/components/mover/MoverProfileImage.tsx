@@ -18,6 +18,8 @@ interface MoverProfileImageProps {
   className?: string;
   /** 목록 상단 카드 등 LCP에 가까운 이미지에만 지정 */
   priority?: boolean;
+  /** LCP 이미지의 preload 요청 우선순위 */
+  fetchPriority?: "high" | "low" | "auto";
 }
 
 function MoverProfileImageInner({
@@ -26,6 +28,7 @@ function MoverProfileImageInner({
   height,
   className,
   priority = false,
+  fetchPriority,
 }: MoverProfileImageProps) {
   const [hasError, setHasError] = useState(false);
   const currentSrc = hasError ? DEFAULT_MOVER_PROFILE_IMAGE : src;
@@ -37,6 +40,7 @@ function MoverProfileImageInner({
       width={width}
       height={height}
       priority={priority}
+      fetchPriority={fetchPriority}
       className={cn(className)}
       onError={() => {
         if (currentSrc !== DEFAULT_MOVER_PROFILE_IMAGE) {
