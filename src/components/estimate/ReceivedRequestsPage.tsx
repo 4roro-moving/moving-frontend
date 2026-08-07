@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
+import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import Toast from "@/components/common/Toast/Toast";
 import {
   useMoverEstimateRequests,
@@ -143,13 +144,21 @@ export default function ReceivedRequestsPage() {
         </section>
 
         <section className="flex flex-col gap-12 xl:gap-24">
-          <Text as="p" variant="2lg-semibold" className="text-text-secondary hidden xl:block">
-            전체 {totalCount}건
-          </Text>
-          <div className="flex min-h-40 flex-wrap items-center justify-between gap-12 px-10 xl:px-0">
-            <Text as="p" variant="md-semibold" className="text-text-secondary xl:hidden">
+          {query.isPending ? (
+            <Skeleton className="hidden h-26 w-72 xl:block" />
+          ) : (
+            <Text as="p" variant="2lg-semibold" className="text-text-secondary hidden xl:block">
               전체 {totalCount}건
             </Text>
+          )}
+          <div className="flex min-h-40 flex-wrap items-center justify-between gap-12 px-10 xl:px-0">
+            {query.isPending ? (
+              <Skeleton className="h-20 w-64 xl:hidden" />
+            ) : (
+              <Text as="p" variant="md-semibold" className="text-text-secondary xl:hidden">
+                전체 {totalCount}건
+              </Text>
+            )}
             <div className="hidden flex-wrap items-center gap-12 text-base xl:flex">
               <Checkbox
                 checked={includeDesignated}

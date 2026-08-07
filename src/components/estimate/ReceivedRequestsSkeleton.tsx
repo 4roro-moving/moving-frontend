@@ -1,6 +1,5 @@
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { PageHeader } from "@/components/common/PageHeader";
-import { Text } from "@/components/common/Text";
 import { ESTIMATE_REQUEST_DETAIL_CARD_CLASSNAME } from "@/components/estimate/EstimateRequestSummaryContent";
 
 function ReceivedRequestCardSkeleton() {
@@ -68,14 +67,10 @@ export function ReceivedRequestsPageSkeleton() {
         </section>
 
         <section className="flex flex-col gap-12 xl:gap-24">
-          <Text as="p" variant="2lg-semibold" className="text-text-secondary hidden xl:block">
-            전체 0건
-          </Text>
+          <Skeleton className="hidden h-26 w-72 xl:block" />
 
           <div className="flex min-h-40 items-center justify-between gap-12 px-10 xl:px-0">
-            <Text as="p" variant="md-semibold" className="text-text-secondary xl:hidden">
-              전체 0건
-            </Text>
+            <Skeleton className="h-20 w-64 xl:hidden" />
             <div className="hidden items-center gap-12 xl:flex">
               <Skeleton className="h-24 w-112" />
               <Skeleton className="h-24 w-112" />
