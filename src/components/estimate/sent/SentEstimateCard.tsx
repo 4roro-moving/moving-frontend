@@ -34,9 +34,22 @@ function RouteArrow() {
 export default function SentEstimateCard({ estimate, onViewDetail }: SentEstimateCardProps) {
   const isConfirmed = estimate.status !== "SENT";
   const isCompleted = estimate.status === "COMPLETED";
+  const viewDetail = () => onViewDetail?.(estimate.id);
 
   return (
-    <article className="border-border-subtle bg-background-default shadow-estimate-card rounded-20 relative flex min-h-[333px] w-full flex-col gap-24 overflow-hidden border-[0.5px] px-20 py-24 md:min-h-[322px] md:gap-32 md:px-40 md:py-32 xl:min-h-[324px]">
+    <article
+      role="link"
+      tabIndex={0}
+      aria-label={`${estimate.customerName} 고객님 견적 상세보기`}
+      className="border-border-subtle bg-background-default shadow-estimate-card rounded-20 relative flex min-h-[333px] w-full cursor-pointer flex-col gap-24 overflow-hidden border-[0.5px] px-20 py-24 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-border-brand)] md:min-h-[322px] md:gap-32 md:px-40 md:py-32 xl:min-h-[324px]"
+      onClick={viewDetail}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          viewDetail();
+        }
+      }}
+    >
       <div className="flex flex-1 flex-col gap-16 md:gap-24">
         <div className="flex min-h-26 items-center justify-between">
           <div className="flex items-center gap-8">
@@ -125,7 +138,10 @@ export default function SentEstimateCard({ estimate, onViewDetail }: SentEstimat
             <button
               type="button"
               className="bg-background-brand-muted border-border-brand text-text-brand shadow-cta rounded-12 flex h-54 w-full items-center justify-center border"
-              onClick={() => onViewDetail?.(estimate.id)}
+              onClick={(event) => {
+                event.stopPropagation();
+                viewDetail();
+              }}
             >
               <Text variant="lg-semibold">견적 상세보기</Text>
             </button>
