@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 
 import Toast from "@/components/common/Toast/Toast";
@@ -10,6 +11,7 @@ import EstimateDetailDriverSummary from "@/components/estimate/detail/EstimateDe
 import EstimateDetailInfo from "@/components/estimate/detail/EstimateDetailInfo";
 import EstimateDetailLayout, {
   ESTIMATE_DETAIL_LAYOUT_CLASSES,
+  EstimateDetailLoadingState,
   EstimateDetailQueryState,
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
@@ -21,6 +23,7 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { isCancelableEstimateRequestStatus } from "@/lib/utils/estimateFormat";
+import { ApiError } from "@/types/api";
 import type { EstimateDetail } from "@/types/estimate";
 
 interface PendingEstimateDetailViewProps {
@@ -30,14 +33,14 @@ interface PendingEstimateDetailViewProps {
 interface PendingEstimateDetailContentProps {
   estimateId: number;
   data: EstimateDetail;
+  statusBanner?: ReactNode;
 }
 
-/**
- * 데이터 로드 후 본문 — estimateRequest.id로 취소 Hook 연결
- * // 2026.08.03 정슬기 - [추가]
- * // 2026.08.04 정슬기 - [수정] 공통 cancel flow 훅 · 포커스 복귀
- */
-function PendingEstimateDetailContent({ estimateId, data }: PendingEstimateDetailContentProps) {
+function PendingEstimateDetailContent({
+  estimateId,
+  data,
+  statusBanner,
+}: PendingEstimateDetailContentProps) {
   const [confirmToastMessage, setConfirmToastMessage] = useState<string | null>(null);
 
   const estimateRequestId = data.estimateRequest.id;
@@ -46,7 +49,7 @@ function PendingEstimateDetailContent({ estimateId, data }: PendingEstimateDetai
   const showChatAction = data.status === "SENT";
 
   const confirmMutation = useConfirmEstimate(estimateId, {
-    onSuccess: () => setConfirmToastMessage("견적이 확정되었습니다."),
+    onSuccess: () => setConfirmToastMessage("견적이 확정되었어요."),
     onError: setConfirmToastMessage,
   });
 
@@ -63,6 +66,7 @@ function PendingEstimateDetailContent({ estimateId, data }: PendingEstimateDetai
         mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
         asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "xl:gap-80 xl:pt-40")}
         backFallbackHref={APP_ROUTES.ESTIMATES.PENDING}
+        statusBanner={statusBanner}
         main={
           <>
             <div className="flex w-full flex-col gap-26">
@@ -121,37 +125,62 @@ function PendingEstimateDetailContent({ estimateId, data }: PendingEstimateDetai
   );
 }
 
-/**
- * 대기 견적 상세 Desktop (Figma 8091:47263)
- * // 2026.07.25 정슬기 - [추가]
- * // 2026.07.30 정슬기 - [수정] useEstimateDetail·Layout·Actions 통합
- * // 2026.08.03 정슬기 - [수정] 레이아웃·코멘트·요청 취소 액션 · Header 뒤로가기
- * // 2026.08.06 김성현 - [수정] 대기 견적 상세 채팅방 진입 CTA 추가
- */
-export default function PendingEstimateDetailView({ estimateId }: PendingEstimateDetailViewProps) {
-  const { data, isLoading, isError, error, refetch } = useEstimateDetail(estimateId);
+export default function PendingEstimateDetailView({
+  estimateId,
+}: PendingEstimateDetailViewProps) {
+  const { data, isError, error, isFetching, isPending, refetch } = useEstimateDetail(estimateId);
+  const hasData = data !== undefined;
+  const showInitialSkeleton = isPending && !hasData;
+  const showBlockingError = isError && !hasData;
+  const showRefetchError = isError && hasData;
+  const fallbackMessage = "견적 상세를 불러오지 못했어요.";
+  const isNotFound = error instanceof ApiError && error.status === 404;
+  const blockingMessage = isNotFound
+    ? "존재하지 않거나 더 이상 확인할 수 없는 견적입니다."
+    : getApiErrorMessage(error, fallbackMessage);
 
-  if (isLoading) {
+  if (showInitialSkeleton) {
     return (
-      <EstimateDetailQueryState
-        message="견적 상세를 불러오는 중입니다."
+      <EstimateDetailLoadingState
         backFallbackHref={APP_ROUTES.ESTIMATES.PENDING}
+        contentClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName, "pt-28")}
+        rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
+        mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
+        asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "xl:gap-80 xl:pt-40")}
       />
     );
   }
 
-  if (isError || !data) {
+  if (showBlockingError || !data) {
     return (
       <EstimateDetailQueryState
-        message={getApiErrorMessage(error, "견적 상세를 불러오지 못했습니다.")}
-        actionLabel="다시 시도"
+        message={blockingMessage}
+        actionLabel={isNotFound ? undefined : "다시 시도"}
         onAction={() => {
           void refetch();
         }}
+        actionBusy={isFetching}
         backFallbackHref={APP_ROUTES.ESTIMATES.PENDING}
+        className="min-h-[320px]"
       />
     );
   }
 
-  return <PendingEstimateDetailContent estimateId={estimateId} data={data} />;
+  return (
+    <PendingEstimateDetailContent
+      estimateId={estimateId}
+      data={data}
+      statusBanner={
+        showRefetchError ? (
+          <div
+            className="border-error bg-red-100 text-text-error rounded-16 border px-16 py-12"
+            role="status"
+            aria-live="polite"
+          >
+            {getApiErrorMessage(error, fallbackMessage)}
+          </div>
+        ) : undefined
+      }
+    />
+  );
 }

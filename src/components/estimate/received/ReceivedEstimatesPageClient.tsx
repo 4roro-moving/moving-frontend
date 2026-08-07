@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import Toast from "@/components/common/Toast/Toast";
+import { ReceivedEstimatesLoadingSkeleton } from "@/components/estimate/EstimateLoadingSkeletons";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import ReceivedEstimatesList from "@/components/estimate/received/ReceivedEstimatesList";
 import { useReceivedEstimates } from "@/hooks/useReceivedEstimates";
@@ -10,14 +11,15 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { cn } from "@/lib/utils/cn";
 
 export default function ReceivedEstimatesPageClient() {
-  // 2026.07.24 정슬기 - [추가] 받은 견적 목록 API 연동 (Mock 제거)
-  const { data, isLoading, isError, error, refetch } = useReceivedEstimates();
+  const { data, isError, error, isFetching, isPending, refetch } = useReceivedEstimates();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const hasData = data !== undefined;
+  const showInitialSkeleton = isPending && !hasData;
+  const showBlockingError = isError && !hasData;
+  const showRefetchError = isError && hasData;
+  const isEmpty =
+    !showInitialSkeleton && !showBlockingError && Array.isArray(data) && data.length === 0;
 
-  // 2026.07.29 정슬기 - [수정] Empty는 EstimatesListEmptyState가 세로 여백을 담당 — 페이지 py 중복 제거
-  const isEmpty = !isLoading && !isError && Array.isArray(data) && data.length === 0;
-
-  // 2026.07.24 정슬기 - [수정] Mobile 배경을 Figma처럼 default로 맞춰 카드가 튀지 않게 함 (md+는 기존 subtle 유지)
   return (
     <div
       className={cn(
@@ -25,20 +27,40 @@ export default function ReceivedEstimatesPageClient() {
         !isEmpty && "py-38 md:py-32 xl:py-64",
       )}
     >
-      {isLoading ? <EstimatesQueryStatus message="받은 견적을 불러오는 중입니다." /> : null}
+      {showInitialSkeleton ? <ReceivedEstimatesLoadingSkeleton /> : null}
 
-      {isError ? (
-        <EstimatesQueryStatus
-          message={getApiErrorMessage(error, "받은 견적을 불러오지 못했습니다.")}
-          actionLabel="다시 시도"
-          onAction={() => {
-            void refetch();
-          }}
-        />
+      {showBlockingError ? (
+        <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow w-full xl:px-0">
+          <EstimatesQueryStatus
+            message={getApiErrorMessage(error, "받은 견적을 불러오지 못했습니다.")}
+            actionLabel={isFetching ? "다시 시도 중..." : "다시 시도"}
+            actionBusy={isFetching}
+            onAction={() => {
+              void refetch();
+            }}
+            className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)] border-0 px-20 py-40 shadow-none md:border-[0.5px] md:px-40 md:py-56"
+          />
+        </div>
       ) : null}
 
-      {!isLoading && !isError && data ? (
-        <ReceivedEstimatesList panels={data} onFavoriteError={setToastMessage} />
+      {hasData ? (
+        <>
+          {showRefetchError ? (
+            <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow w-full pb-24 xl:px-0">
+              <EstimatesQueryStatus
+                message={getApiErrorMessage(error, "최신 받은 견적을 다시 불러오지 못했습니다.")}
+                actionLabel={isFetching ? "다시 시도 중..." : "다시 시도"}
+                actionBusy={isFetching}
+                onAction={() => {
+                  void refetch();
+                }}
+                className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)] border-0 px-20 py-24 shadow-none md:border-[0.5px] md:px-28 md:py-28"
+              />
+            </div>
+          ) : null}
+
+          <ReceivedEstimatesList panels={data} onFavoriteError={setToastMessage} />
+        </>
       ) : null}
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
