@@ -1,9 +1,10 @@
 import MoverAuthGate from "@/components/auth/MoverAuthGate";
 import ReceivedRequestsPage from "@/components/estimate/ReceivedRequestsPage";
+import { ReceivedRequestsPageSkeleton } from "@/components/estimate/ReceivedRequestsSkeleton";
 
 export default function Page() {
   return (
-    <MoverAuthGate loadingMessage="받은 요청을 불러오는 중입니다.">
+    <MoverAuthGate loadingFallback={<ReceivedRequestsPageSkeleton />}>
       <div className="bg-background-default text-text-primary min-h-screen">
         <ReceivedRequestsPage />
       </div>

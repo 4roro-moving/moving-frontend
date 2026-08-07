@@ -6,6 +6,7 @@ import DesignatedChip from "@/components/estimate/DesignatedChip";
 import FrameIcon from "@/icons/frame.svg";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { formatKoreanDateTime } from "@/lib/utils/date";
+import { cn } from "@/lib/utils/cn";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import type { MoveType } from "@/types/move";
 
@@ -40,7 +41,12 @@ export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
   const detailHref = APP_ROUTES.MOVER_ESTIMATES.SENT_DETAIL(estimate.id);
 
   return (
-    <article className="border-border-subtle bg-background-default shadow-estimate-card rounded-20 relative flex min-h-[333px] w-full flex-col gap-24 overflow-hidden border-[0.5px] px-20 py-24 md:min-h-[322px] md:gap-32 md:px-40 md:py-32 xl:min-h-[324px]">
+    <article
+      className={cn(
+        "group border-border-subtle bg-background-default shadow-estimate-card rounded-20 hover:border-border-brand hover:shadow-notification relative flex min-h-[333px] w-full flex-col gap-24 overflow-hidden border-[0.5px] px-20 py-24 transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-2 md:min-h-[322px] md:gap-32 md:px-40 md:py-32 xl:min-h-[324px]",
+        isCompleted && "select-none",
+      )}
+    >
       <Link
         href={detailHref}
         aria-label={`${estimate.customerName} 고객님 견적 상세보기`}
@@ -127,19 +133,10 @@ export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
       </div>
 
       {isCompleted ? (
-        <div className="bg-overlay-card-disabled border-border-dimmed rounded-20 pointer-events-none absolute inset-[-0.5px] z-20 flex items-center justify-center border">
-          <div className="flex w-[200px] flex-col items-center gap-20">
-            <Text variant="2lg-semibold" className="text-text-inverse">
-              이사 완료된 견적이에요
-            </Text>
-            <Link
-              href={detailHref}
-              className="bg-background-brand-muted border-border-brand text-text-brand shadow-cta rounded-12 pointer-events-auto flex h-54 w-full items-center justify-center border"
-              onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
-            >
-              <Text variant="lg-semibold">견적 상세보기</Text>
-            </Link>
-          </div>
+        <div className="bg-overlay-card-disabled border-border-dimmed rounded-20 group-hover:border-border-brand pointer-events-none absolute inset-[-0.5px] z-20 flex items-center justify-center border transition-colors duration-200">
+          <Text variant="2lg-semibold" className="text-text-inverse">
+            이사 완료된 견적이에요
+          </Text>
         </div>
       ) : null}
     </article>

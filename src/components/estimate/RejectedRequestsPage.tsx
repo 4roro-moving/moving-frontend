@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 
 import { Text } from "@/components/common/Text";
 import MoverEstimateTabs from "@/components/estimate/MoverEstimateTabs";
+import { MoverEstimateCardGridSkeleton } from "@/components/estimate/MoverEstimateListSkeleton";
 import RejectedRequestCard from "@/components/estimate/RejectedRequestCard";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { useRejectedEstimateRequests } from "@/hooks/useMoverEstimateRequests";
@@ -37,7 +38,7 @@ export default function RejectedRequestsPage() {
       <main className="bg-background-subtle min-h-[calc(100vh-108px)] px-24 pt-24 pb-40 md:min-h-[calc(100vh-142px)] md:px-72 md:pt-32 xl:min-h-[calc(100vh-168px)] xl:px-0 xl:pt-[59px] xl:pb-[107px]">
         <h1 className="sr-only">반려 요청</h1>
 
-        {query.isPending ? <EstimatesQueryStatus message="반려 요청을 불러오는 중이에요." /> : null}
+        {query.isPending ? <MoverEstimateCardGridSkeleton /> : null}
 
         {query.isError ? (
           <EstimatesQueryStatus

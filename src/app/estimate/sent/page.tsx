@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import MoverAuthGate from "@/components/auth/MoverAuthGate";
+import MoverEstimateListPageSkeleton from "@/components/estimate/MoverEstimateListSkeleton";
 import SentEstimatesPage from "@/components/estimate/sent/SentEstimatesPage";
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function SentEstimatesRoute() {
   return (
-    <MoverAuthGate loadingMessage="보낸 견적을 불러오는 중입니다.">
+    <MoverAuthGate loadingFallback={<MoverEstimateListPageSkeleton />}>
       <SentEstimatesPage />
     </MoverAuthGate>
   );
