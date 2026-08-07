@@ -1,5 +1,6 @@
 import { Text } from "@/components/common/Text";
-import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { formatKoreanDateTime } from "@/lib/utils/date";
 import type { RejectedEstimateRequestItem } from "@/types/moverEstimateRequest";
 

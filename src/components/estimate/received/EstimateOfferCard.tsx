@@ -4,15 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import DesignatedChip from "@/components/estimate/DesignatedChip";
+import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
+import { ConfirmedCheckIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import { formatPrice, formatRating } from "@/lib/utils/estimateFormat";
 import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 import type { ReceivedEstimateListItem } from "@/types/estimate";
 import type { MoveType } from "@/types/move";
-
-import { MoveTypeChip, DesignatedChip } from "./MoveTypeChip";
 
 interface EstimateOfferCardProps {
   offer: ReceivedEstimateListItem;
@@ -49,6 +52,7 @@ export default function EstimateOfferCard({
   const { mover, status, isDesignated, price } = offer;
   const displayName = mover.nickname || mover.name;
   const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
+  const detailHref = APP_ROUTES.ESTIMATES.DETAIL(offer.id);
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
 
   return (
@@ -91,7 +95,8 @@ export default function EstimateOfferCard({
           {/* 2026.07.24 정슬기 - [수정] 상세 이동과 찜 동작이 충돌하지 않도록 Link와 버튼 영역 분리 */}
           <div className="border-border-muted rounded-12 flex w-full items-end justify-between gap-12 border border-solid py-12 pr-20 pl-12 shadow-none">
             <Link
-              href={`/estimates/${offer.id}`}
+              href={detailHref}
+              onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
               className="focus-visible:ring-border-brand rounded-8 flex min-w-0 flex-1 items-end gap-12 focus-visible:ring-2 focus-visible:outline-none"
               aria-label={`${displayName} 기사님 견적 상세 보기`}
             >
@@ -169,32 +174,16 @@ export default function EstimateOfferCard({
               </div>
             </Link>
 
-            {/* 2026.07.24 정슬기 - [추가] 찜 버튼을 Link 바깥 독립 버튼으로 연결 */}
-            <button
-              type="button"
-              className="focus-visible:ring-border-brand rounded-8 flex min-h-44 min-w-44 shrink-0 items-center justify-center gap-2 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-              aria-label={`${displayName} 기사님 찜, 현재 찜 ${mover.favoriteCount}개`}
-              aria-pressed={mover.isFavorite}
-              disabled={favoriteMutation.isPending}
-              onClick={() =>
-                favoriteMutation.mutate({
-                  moverId: mover.id,
-                  nextIsFavorite: !mover.isFavorite,
-                })
-              }
-            >
-              {/* 2026.07.24 정슬기 - [수정] 찜 상태를 LikeIcon isFavorite로 전달해 채움 표시 */}
-              <LikeIcon
-                isFavorite={mover.isFavorite}
-                className={cn(
-                  "size-24",
-                  mover.isFavorite ? "text-text-brand" : "text-icon-default",
-                )}
-              />
-              <Text as="span" variant="md-regular" className="text-text-muted" aria-hidden="true">
-                {mover.favoriteCount}
-              </Text>
-            </button>
+            <FavoriteButton
+              moverName={displayName}
+              isFavorite={mover.isFavorite}
+              favoriteCount={mover.favoriteCount}
+              showCount
+              className="min-h-44 min-w-44 justify-center gap-2 px-4 py-2"
+              onToggle={(nextIsFavorite) => {
+                favoriteMutation.mutate({ moverId: mover.id, nextIsFavorite });
+              }}
+            />
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 
 import { getFocusableElements } from "@/lib/utils/focusable";
 
@@ -20,6 +20,12 @@ export function useFocusTrap({
   enabled = true,
   onEscape,
 }: UseFocusTrapOptions): void {
+  const onEscapeRef = useRef(onEscape);
+
+  useEffect(() => {
+    onEscapeRef.current = onEscape;
+  }, [onEscape]);
+
   useEffect(() => {
     if (!enabled) return;
 
@@ -31,7 +37,7 @@ export function useFocusTrap({
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        onEscape?.();
+        onEscapeRef.current?.();
         return;
       }
 
@@ -83,5 +89,5 @@ export function useFocusTrap({
         previousActiveElement.focus();
       }
     };
-  }, [containerRef, enabled, onEscape]);
+  }, [containerRef, enabled]);
 }

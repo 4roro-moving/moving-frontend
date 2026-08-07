@@ -2,12 +2,11 @@
 
 import { useCallback, useState } from "react";
 
-import Modal from "@/components/common/Modal";
+import Modal from "@/components/common/Modal/Modal";
+import Search from "@/components/common/Search/Search";
 import { Text } from "@/components/common/Text";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
-
-import { ClearCircleIcon, SearchIcon } from "../icons";
 
 export type AddressItem = AddressSearchItem;
 
@@ -21,6 +20,12 @@ interface AddressSelectModalProps {
 }
 
 const RESULT_AREA_HEIGHT_CLASS = "h-[280px] max-h-[280px]";
+
+const PANEL_CLASSNAME = cn(
+  "items-stretch text-left overflow-hidden",
+  "h-auto min-h-[446px] max-h-[90vh] w-full max-w-[292px] gap-0 rounded-24 px-16 py-24",
+  "md:h-[620px] md:max-w-[608px] md:rounded-32 md:px-24 md:pt-32 md:pb-40",
+);
 
 function AddressChip({ label }: { label: string }) {
   return (
@@ -135,58 +140,44 @@ export default function AddressSelectModal({
     setHasSearched(false);
   }
 
+  if (!open) {
+    return null;
+  }
+
   return (
-    <Modal
-      open={open}
-      title={`${kind}를 선택해주세요`}
-      confirmLabel="선택완료"
-      confirmDisabled={!selected}
-      onClose={onClose}
-      onConfirm={() => {
-        if (!selected) return;
-        onConfirm(selected);
-      }}
-      className="h-[640px] max-h-[90vh]"
-    >
-      <div className="flex h-full min-h-0 w-full flex-col gap-24">
-        <div className="bg-background-muted rounded-16 flex h-64 shrink-0 items-center gap-16 overflow-hidden px-24">
-          <input
-            type="text"
+    <Modal onClose={onClose} presentation="modal" size="lg" className={PANEL_CLASSNAME}>
+      <div className="mb-30 flex w-full shrink-0 items-center justify-between gap-16 md:mb-40">
+        <Modal.Title variant={{ base: "2lg-bold", md: "2xl-semibold" }}>
+          {kind}를 선택해주세요
+        </Modal.Title>
+        <Modal.Close
+          size="sm"
+          onClose={onClose}
+          className="md:size-36"
+          iconClassName="md:size-36"
+        />
+      </div>
+
+      <div className="mb-24 flex min-h-0 w-full flex-col gap-24 overflow-hidden md:mb-40 md:flex-1">
+        <form
+          className="w-full shrink-0"
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleSearch();
+          }}
+        >
+          <Search
+            size="responsive"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                handleSearch();
-              }
-            }}
+            onClear={handleClear}
             placeholder="주소를 검색해주세요"
-            className="text-text-secondary placeholder:text-text-placeholder font-regular min-w-0 flex-1 bg-transparent text-[length:var(--font-size-18)] leading-[var(--line-height-26)] outline-none"
             aria-label={`${kind} 주소 검색`}
+            className="w-full"
           />
-          <div className="flex shrink-0 items-center gap-16">
-            {query.length > 0 && (
-              <button
-                type="button"
-                onClick={handleClear}
-                aria-label="검색어 지우기"
-                className="flex size-36 items-center justify-center"
-              >
-                <ClearCircleIcon className="text-icon-subtle" />
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handleSearch}
-              aria-label="주소 검색"
-              className="flex size-36 items-center justify-center"
-            >
-              <SearchIcon className="text-icon-default" />
-            </button>
-          </div>
-        </div>
+        </form>
 
-        <div className={cn("min-h-0 w-full flex-1 overflow-y-auto", RESULT_AREA_HEIGHT_CLASS)}>
+        <div className={cn("min-h-0 w-full shrink-0 overflow-y-auto", RESULT_AREA_HEIGHT_CLASS)}>
           {isSearching ? (
             <div className="flex h-full items-center justify-center">
               <Text as="p" variant="md-regular" className="text-text-placeholder">
@@ -211,8 +202,12 @@ export default function AddressSelectModal({
               ))}
             </div>
           ) : (
-            <div className="flex h-full items-center justify-center px-24">
-              <Text as="p" variant="md-regular" className="text-text-placeholder text-center">
+            <div className="flex h-full items-center justify-center px-0 xl:px-24">
+              <Text
+                as="p"
+                variant={{ base: "md-regular", md: "lg-regular" }}
+                className="text-text-placeholder text-center"
+              >
                 {hasSearched
                   ? "검색 결과가 없습니다. 다른 주소로 검색해보세요."
                   : "주소를 검색하면 결과가 여기에 표시됩니다"}
@@ -221,6 +216,19 @@ export default function AddressSelectModal({
           )}
         </div>
       </div>
+
+      <Modal.Button
+        fullWidth
+        size="cta"
+        className="mt-auto md:h-64"
+        disabled={!selected}
+        onClick={() => {
+          if (!selected) return;
+          onConfirm(selected);
+        }}
+      >
+        선택 완료
+      </Modal.Button>
     </Modal>
   );
 }

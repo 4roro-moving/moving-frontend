@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
-import { MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { ProfileDefaultIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { formatKoreanDateLong, getReviewMoverDisplayName } from "@/lib/utils/estimateFormat";
 import type { MyReviewItem } from "@/types/review";
 
@@ -27,8 +28,11 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
   return (
     <Link
       href={APP_ROUTES.MOVERS.DETAIL(mover.id)}
+      onClick={(event) =>
+        markInternalDetailNavigationOnClick(event, APP_ROUTES.MOVERS.DETAIL(mover.id))
+      }
       aria-labelledby={titleId}
-      className="bg-background-surface border-border-subtle shadow-estimate-card rounded-16 md:rounded-20 focus-visible:ring-border-brand flex w-full flex-col gap-12 border-[0.5px] px-16 py-20 focus-visible:ring-2 focus-visible:outline-none md:gap-16 md:px-24 md:py-28 lg:gap-20 lg:px-32 lg:py-32"
+      className="bg-background-surface border-border-subtle shadow-estimate-card rounded-16 md:rounded-20 focus-visible:ring-border-brand flex w-full flex-col gap-12 border-[0.5px] px-16 py-20 focus-visible:ring-2 focus-visible:outline-none md:gap-16 md:px-24 md:py-28 xl:gap-20 xl:px-32 xl:py-32"
     >
       <div className="flex w-full flex-col gap-12 md:gap-16">
         <div className="flex flex-wrap items-center gap-8">

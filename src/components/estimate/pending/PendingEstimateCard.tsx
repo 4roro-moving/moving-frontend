@@ -5,10 +5,14 @@ import Link from "next/link";
 
 import Button, { buttonVariants } from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
-import { MoveTypeChip, DesignatedChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import DesignatedChip from "@/components/estimate/DesignatedChip";
+import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
+import { ConfirmedCheckIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import {
   formatPrice,
@@ -43,6 +47,7 @@ export default function PendingEstimateCard({
   const displayName = mover.nickname || mover.name;
   const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
   const moverTitleId = `offer-${offer.id}-mover`;
+  const detailHref = APP_ROUTES.ESTIMATES.PENDING_DETAIL(offer.id);
   // 찜: PENDING_LIST / RECEIVED / DETAIL 캐시는 useFavoriteMover가 갱신
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
   // BE mapListEstimate에는 canConfirm 없음 — SENT만 확정 후보 (pending 목록은 SENT-only)
@@ -137,35 +142,16 @@ export default function PendingEstimateCard({
                       {displayName} 기사님
                     </Text>
                   </div>
-                  <button
-                    type="button"
-                    className="focus-visible:ring-border-brand rounded-8 flex shrink-0 items-center gap-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-                    aria-label={`${displayName} 기사님 찜, 현재 찜 ${mover.favoriteCount}개`}
-                    aria-pressed={mover.isFavorite}
-                    disabled={favoriteMutation.isPending}
-                    onClick={() => {
-                      favoriteMutation.mutate({
-                        moverId: mover.id,
-                        nextIsFavorite: !mover.isFavorite,
-                      });
+                  <FavoriteButton
+                    moverName={displayName}
+                    isFavorite={mover.isFavorite}
+                    favoriteCount={mover.favoriteCount}
+                    showCount
+                    className="gap-2"
+                    onToggle={(nextIsFavorite) => {
+                      favoriteMutation.mutate({ moverId: mover.id, nextIsFavorite });
                     }}
-                  >
-                    <LikeIcon
-                      isFavorite={mover.isFavorite}
-                      className={cn(
-                        "size-24",
-                        mover.isFavorite ? "text-text-brand" : "text-icon-default",
-                      )}
-                    />
-                    <Text
-                      as="span"
-                      variant="md-regular"
-                      className="text-text-muted"
-                      aria-hidden="true"
-                    >
-                      {mover.favoriteCount}
-                    </Text>
-                  </button>
+                  />
                 </div>
 
                 <div className="flex w-full flex-wrap items-center gap-x-8 gap-y-4">
@@ -226,7 +212,8 @@ export default function PendingEstimateCard({
       {/* 상세: /estimates/pending/[estimateId] */}
       <div className="flex w-full flex-col-reverse gap-11 md:flex-row">
         <Link
-          href={`/estimates/pending/${offer.id}`}
+          href={detailHref}
+          onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
           className={cn(
             buttonVariants({ variant: "outline", size: "cta", fullWidth: true }),
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none md:flex-1",

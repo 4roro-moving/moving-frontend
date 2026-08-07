@@ -29,7 +29,7 @@ const OAuthLayout = ({
   const href = isError ? loginHref : undefined;
 
   return (
-    <div className="bg-background-subtle px-margin-mobile flex w-full flex-1 flex-col items-center justify-center md:px-72 lg:px-0">
+    <div className="bg-background-subtle px-margin-mobile flex w-full flex-1 flex-col items-center justify-center md:px-72 xl:px-0">
       <EmptyState
         size="sm"
         imageSrc={imageSrc}
@@ -37,7 +37,7 @@ const OAuthLayout = ({
         buttonLabel={buttonLabel}
         href={href}
         imageAlt=""
-        className="lg:hidden"
+        className="xl:hidden"
       />
       <EmptyState
         size="lg"
@@ -46,7 +46,7 @@ const OAuthLayout = ({
         buttonLabel={buttonLabel}
         href={href}
         imageAlt=""
-        className="hidden lg:flex"
+        className="hidden xl:flex"
       />
     </div>
   );

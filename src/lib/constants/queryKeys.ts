@@ -63,6 +63,13 @@ export const QUERY_KEYS = {
     DETAIL: (userId: string) => ["users", userId],
   },
 
+  PROFILES: {
+    CUSTOMER_ME: ["profiles", "customer", "me"] as const,
+    CUSTOMER_STATUS: ["profiles", "customer", "status"] as const,
+    MOVER_ME: ["profiles", "mover", "me"] as const,
+    MOVER_STATUS: ["profiles", "mover", "status"] as const,
+  },
+
   MOVERS: {
     ALL: ["movers"] as const,
     LIST: ["movers", "list"] as const,
@@ -86,6 +93,9 @@ export const QUERY_KEYS = {
     ALL: ["estimates"],
     SENT_LIST_ROOT: ["estimates", "sent", "list"] as const,
     SENT_LIST: (status?: string) => ["estimates", "sent", "list", { status }] as const,
+    // DETAIL_ROOT(["estimates","detail"])와 접두사가 다름 — 취소 시 별도 invalidate 필요
+    // 2026.08.04 정슬기 - [추가]
+    SENT_DETAIL_ROOT: ["estimates", "sent", "detail"] as const,
     SENT_DETAIL: (estimateId: number) => ["estimates", "sent", "detail", estimateId] as const,
     RECEIVED: ["estimates", "received"] as const,
     // 받았던/대기 상세 모두 GET /estimates/:estimateId — 동일 DETAIL 키 공유
@@ -112,6 +122,16 @@ export const QUERY_KEYS = {
     MOVER: (moverId: string) => ["favorites", "mover", moverId] as const,
   },
 
+  CHATS: {
+    ALL: ["chats"] as const,
+    ROOM: (authScope: AuthQueryScope, roomId: number) =>
+      ["chats", authScope, "room", roomId] as const,
+    MESSAGES_ROOT: (authScope: AuthQueryScope, roomId: number) =>
+      ["chats", authScope, "room", roomId, "messages"] as const,
+    MESSAGES: (authScope: AuthQueryScope, roomId: number, limit: number) =>
+      ["chats", authScope, "room", roomId, "messages", { limit }] as const,
+  },
+
   // 2026.07.25 정슬기 - [추가] 리뷰 쿼리 키
   // 2026.07.30 정슬기 - [수정] 견적 관리와 동일하게 ROOT·페이지 팩토리 분리
   REVIEWS: {
@@ -127,7 +147,11 @@ export const QUERY_KEYS = {
   NOTIFICATIONS: {
     ALL: ["notifications"] as const,
     LIST_ROOT: ["notifications", "list"] as const,
-    LIST: (page: number, limit: number) => ["notifications", "list", { page, limit }] as const,
-    UNREAD_COUNT: ["notifications", "unread-count"] as const,
+    LIST_SCOPE: (authScope: AuthQueryScope) => ["notifications", "list", authScope] as const,
+    LIST: (authScope: AuthQueryScope, page: number, limit: number) =>
+      ["notifications", "list", authScope, { page, limit }] as const,
+    UNREAD_COUNT_ROOT: ["notifications", "unread-count"] as const,
+    UNREAD_COUNT: (authScope: AuthQueryScope) =>
+      ["notifications", "unread-count", authScope] as const,
   },
 } as const;

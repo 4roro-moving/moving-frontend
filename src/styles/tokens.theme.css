@@ -258,8 +258,10 @@
   --spacing-78: 4.875rem;
   --spacing-80: 5rem;
   --spacing-90: 5.625rem;
+  --spacing-100: 6.25rem;
   /* Toast Desktop top offset (Figma 103) */
   --spacing-103: 6.4375rem;
+  --spacing-104: 6.5rem;
   --spacing-120: 7.5rem;
   /* 2026.07.25 정슬기 - [추가] Figma Desktop sub-header height 124 / Tablet 202 */
   --spacing-124: 7.75rem;
@@ -267,6 +269,10 @@
   --spacing-160: 10rem;
   /* 2026.07.30 정슬기 - [추가] Figma 견적 상세 Desktop main column 740 */
   --spacing-185: 46.25rem;
+  /* 2026.08.03 정슬기 - [추가] 견적 상세 Desktop main — 여유 폭(840) */
+  --spacing-210: 52.5rem;
+  /* 2026.08.03 정슬기 - [추가] 견적 상세 Desktop main — 한 단계 확장(880) */
+  --spacing-220: 55rem;
   /* 2026.07.25 정슬기 - [추가] Figma Empty illustration 200 / 280 */
   --spacing-200: 12.5rem;
   --spacing-280: 17.5rem;

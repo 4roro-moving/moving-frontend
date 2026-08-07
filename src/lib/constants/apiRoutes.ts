@@ -16,10 +16,15 @@ export const API_ROUTES = {
   },
   PROFILES: {
     ROOT: "/profiles",
+    IMAGE_UPLOAD_URL: "/profiles/image/upload-url",
+    CUSTOMER: "/profiles/customer",
     CUSTOMER_STATUS: "/profiles/customer/status",
     CUSTOMER_ME: "/profiles/customer/me",
+    CUSTOMER_BASIC: "/profiles/customer/me/basic",
+    MOVER: "/profiles/mover",
     MOVER_STATUS: "/profiles/mover/status",
     MOVER_ME: "/profiles/mover/me",
+    MOVER_BASIC: "/profiles/mover/me/basic",
   },
   MOVERS: {
     ROOT: "/movers",
@@ -29,6 +34,8 @@ export const API_ROUTES = {
   ESTIMATE_REQUESTS: {
     ROOT: "/estimate-requests",
     DETAIL: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
+    // 2026.08.03 정슬기 - [추가] 견적 요청 soft cancel (DELETE)
+    DELETE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
     ACTIVE: "/estimate-requests/active",
     DESIGNATE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}/designate`,
   },
@@ -50,6 +57,11 @@ export const API_ROUTES = {
   FAVORITES: {
     MOVERS: "/favorites/movers",
     MOVER: (moverId: string) => `/favorites/movers/${moverId}`,
+  },
+  CHATS: {
+    ROOMS: "/chats/rooms",
+    ROOM: (roomId: number) => `/chats/rooms/${roomId}`,
+    MESSAGES: (roomId: number) => `/chats/rooms/${roomId}/messages`,
   },
   // 2026.07.25 정슬기 - [추가] 리뷰 API 경로
   REVIEWS: {

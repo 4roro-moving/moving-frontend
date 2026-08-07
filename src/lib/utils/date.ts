@@ -30,7 +30,7 @@ export function formatRelativeTime(date: string | Date): string {
   return `${Math.floor(hours / 24)}일 전`;
 }
 
-/** ISO 날짜 문자열 → KST 기준 "2025. 07. 01. (화)" */
+/** ISO 날짜 문자열 → KST 기준 "2025년 07월 01일 (화)" */
 export function formatKoreanDateTime(date: string): string {
   // 2026.07.24 정슬기 - [수정] date-only는 parseDateOnly로 파싱해 타임존 밀림 방지
   const parsed = /^\d{4}-\d{2}-\d{2}$/.test(date) ? parseDateOnly(date) : new Date(date);
@@ -39,13 +39,18 @@ export function formatKoreanDateTime(date: string): string {
     throw new RangeError("유효하지 않은 날짜입니다.");
   }
 
-  return new Intl.DateTimeFormat("ko-KR", {
+  const parts = new Intl.DateTimeFormat("ko-KR", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
     weekday: "short",
     timeZone: "Asia/Seoul",
-  }).format(parsed);
+  }).formatToParts(parsed);
+
+  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+
+  return `${getPart("year")}년 ${getPart("month")}월 ${getPart("day")}일 (${getPart("weekday")})`;
 }
 
 /**

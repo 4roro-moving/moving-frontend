@@ -14,10 +14,8 @@ export interface ToastProps {
 }
 
 /**
- * toast
- * - Desktop: 1200×66, top 103, rounded-16, px-32 py-20, 2lg-semibold
- * - Tablet: 640×54, top 70, inset 52, rounded-12, px-24 py-14, lg-semibold
- * - Mobile: 360×54, top 70, inset 8, rounded-12, px-24 py-14, lg-semibold
+ * 공통 Toast
+ * - 사용: `{message ? <Toast onClose={...}>{message}</Toast> : null}`
  */
 const Toast = ({ children, onClose }: ToastProps) => {
   const onCloseRef = useRef(onClose);
@@ -37,8 +35,8 @@ const Toast = ({ children, onClose }: ToastProps) => {
       aria-live="polite"
       className={cn(
         "pointer-events-none fixed inset-x-0 z-[9999] flex justify-center",
-        "top-70 lg:top-103",
-        "px-8 md:px-52 lg:px-0",
+        "top-70 xl:top-103",
+        "px-8 md:px-52 xl:px-0",
       )}
     >
       <div
@@ -47,12 +45,12 @@ const Toast = ({ children, onClose }: ToastProps) => {
           "shadow-toast",
           "rounded-12 max-w-[360px] px-24 py-14",
           "md:max-w-[640px]",
-          "lg:max-w-container-desktop lg:rounded-16 lg:px-32 lg:py-20",
+          "xl:max-w-container-desktop xl:rounded-16 xl:px-32 xl:py-20",
         )}
       >
         <Text
           as="p"
-          variant={{ base: "lg-semibold", lg: "2lg-semibold" }}
+          variant={{ base: "lg-semibold", xl: "2lg-semibold" }}
           className="text-toast-text"
         >
           {children}

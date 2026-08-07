@@ -52,13 +52,13 @@ function FullMoverCardSkeleton({
       className={cn(
         "border-border-subtle bg-background-surface flex w-full flex-col border-[0.5px]",
         "rounded-16 gap-8 p-20",
-        "min-[744px]:rounded-20 min-[744px]:gap-20 min-[744px]:px-28 min-[744px]:py-24",
+        "md:rounded-20 md:gap-20 md:px-28 md:py-24",
         CARD_SHADOW,
         className,
       )}
     >
       {/* Mobile */}
-      <div className="flex flex-col gap-8 min-[744px]:hidden">
+      <div className="flex flex-col gap-8 md:hidden">
         <div className="flex min-h-36 items-center justify-between gap-8">
           <Skeleton className="h-28 w-72 rounded-full" />
           {showSelection ? <Skeleton className="rounded-4 size-36 shrink-0" /> : null}
@@ -84,7 +84,7 @@ function FullMoverCardSkeleton({
       </div>
 
       {/* Tablet / Desktop */}
-      <div className="hidden min-[744px]:contents">
+      <div className="hidden md:contents">
         <div className="flex min-h-36 items-center justify-between gap-8">
           <Skeleton className="h-32 w-120 rounded-full" />
           {showSelection ? <Skeleton className="rounded-4 size-36 shrink-0" /> : null}

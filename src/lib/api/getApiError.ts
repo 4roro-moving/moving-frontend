@@ -1,5 +1,6 @@
 import { isAxiosError } from "axios";
 
+import { getValidationDataMessage } from "@/lib/api/getValidationDataMessage";
 import { ApiError } from "@/types/api";
 
 export interface ApiErrorBody {
@@ -7,23 +8,34 @@ export interface ApiErrorBody {
   error?: {
     code?: string;
     message?: string;
+    data?: unknown;
   };
   message?: string;
 }
 
 /** Axios / ApiError / Error에서 백엔드 공통 에러 형식({ error: { code, message } })을 꺼냅니다. */
-export function getApiError(error: unknown): { code?: string; message?: string } {
+export const getApiError = (error: unknown): { code?: string; message?: string } => {
   if (error instanceof ApiError) {
+    const validationMessage =
+      error.code === "VALIDATION_ERROR" ? getValidationDataMessage(error.data?.details) : undefined;
+
     return {
       code: error.code,
-      message: error.message,
+      message: validationMessage ?? error.message,
     };
   }
 
   if (isAxiosError<ApiErrorBody>(error)) {
+    const code = error.response?.data?.error?.code;
+    const validationMessage =
+      code === "VALIDATION_ERROR"
+        ? getValidationDataMessage(error.response?.data?.error?.data)
+        : undefined;
+
     return {
-      code: error.response?.data?.error?.code,
-      message: error.response?.data?.error?.message ?? error.response?.data?.message,
+      code,
+      message:
+        validationMessage ?? error.response?.data?.error?.message ?? error.response?.data?.message,
     };
   }
 
@@ -32,4 +44,4 @@ export function getApiError(error: unknown): { code?: string; message?: string }
   }
 
   return {};
-}
+};

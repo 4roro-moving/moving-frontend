@@ -5,12 +5,14 @@ import { memo } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
 import { Text } from "@/components/common/Text";
+import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { MoverMeta } from "@/components/mover/MoverMeta";
 import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
 import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { DriverBadgeIcon, LikeIcon } from "@/icons";
+import { DriverBadgeIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import type { Mover } from "@/types/mover";
 
@@ -52,68 +54,6 @@ function areMoverCardPropsEqual(prev: MoverCardProps, next: MoverCardProps): boo
   );
 }
 
-interface FavoriteButtonProps {
-  canToggle: boolean;
-  moverName: string;
-  isFavorite: boolean;
-  favoriteCount?: number;
-  showCount?: boolean;
-  iconClassName: string;
-  onToggle: (nextIsFavorite: boolean) => void;
-}
-
-function FavoriteButton({
-  canToggle,
-  moverName,
-  isFavorite,
-  favoriteCount,
-  showCount,
-  iconClassName,
-  onToggle,
-}: FavoriteButtonProps) {
-  return (
-    <div className="pointer-events-auto flex shrink-0 items-center justify-center gap-2">
-      {canToggle ? (
-        <button
-          type="button"
-          className="focus-visible:ring-border-brand rounded-8 cursor-pointer focus-visible:ring-2 focus-visible:outline-none"
-          aria-label={`${moverName} 기사님 찜`}
-          aria-pressed={isFavorite}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onToggle(!isFavorite);
-          }}
-        >
-          <LikeIcon
-            isFavorite={isFavorite}
-            className={cn(
-              iconClassName,
-              isFavorite ? "text-like-active-fill" : "text-like-default-stroke",
-            )}
-          />
-        </button>
-      ) : (
-        <span aria-label={`${moverName} 기사님 찜 상태`}>
-          <LikeIcon
-            isFavorite={isFavorite}
-            className={cn(
-              iconClassName,
-              isFavorite ? "text-like-active-fill" : "text-like-default-stroke",
-            )}
-          />
-        </span>
-      )}
-      {showCount && favoriteCount !== undefined ? (
-        <Text as="span" variant="md-regular" className="text-text-muted">
-          <span aria-hidden="true">{favoriteCount}</span>
-          <span className="sr-only">현재 찜 {favoriteCount}개</span>
-        </Text>
-      ) : null}
-    </div>
-  );
-}
-
 function MoverCard({
   mover,
   variant = "full",
@@ -124,7 +64,7 @@ function MoverCard({
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
 
   const toggleFavorite = (nextIsFavorite: boolean) => {
-    if (favoriteMutation.isPending || mover.isFavorite === nextIsFavorite) {
+    if (mover.isFavorite === nextIsFavorite) {
       return;
     }
 
@@ -135,7 +75,7 @@ function MoverCard({
   };
 
   const favoriteButtonProps = {
-    canToggle: favoriteMutation.canToggleFavorite,
+    interactive: favoriteMutation.canToggleFavorite,
     moverName: mover.name,
     isFavorite: mover.isFavorite,
     favoriteCount: mover.favoriteCount,
@@ -174,6 +114,7 @@ function MoverCard({
       >
         <Link
           href={detailHref}
+          onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
           aria-label={detailLabel}
           className="focus-visible:ring-border-brand rounded-16 absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none"
         />
@@ -201,7 +142,11 @@ function MoverCard({
                       {mover.name} 기사님
                     </Text>
                   </div>
-                  <FavoriteButton {...favoriteButtonProps} iconClassName="size-20" />
+                  <FavoriteButton
+                    {...favoriteButtonProps}
+                    className="pointer-events-auto justify-center gap-2"
+                    iconClassName="size-20"
+                  />
                 </div>
                 <MoverMeta
                   rating={mover.rating}
@@ -222,17 +167,18 @@ function MoverCard({
       className={cn(
         "border-border-subtle bg-background-surface relative flex w-full flex-col border-[0.5px]",
         "rounded-16 gap-8 p-20",
-        "min-[744px]:rounded-20 min-[744px]:gap-20 min-[744px]:px-28 min-[744px]:py-24",
+        "md:rounded-20 md:gap-20 md:px-28 md:py-24",
         "shadow-[-2px_-2px_10px_0px_rgba(220,220,220,0.2),2px_2px_10px_0px_rgba(220,220,220,0.2)]",
         className,
       )}
     >
       <Link
         href={detailHref}
+        onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
         aria-label={detailLabel}
-        className="focus-visible:ring-border-brand rounded-16 min-[744px]:rounded-20 absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none"
+        className="focus-visible:ring-border-brand rounded-16 md:rounded-20 absolute inset-0 z-0 focus-visible:ring-2 focus-visible:outline-none"
       />
-      <div className="pointer-events-none relative z-10 flex flex-col gap-8 min-[744px]:hidden">
+      <div className="pointer-events-none relative z-10 flex flex-col gap-8 md:hidden">
         <div className="flex min-h-36 items-center justify-between gap-8">
           <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
           {selectionControl}
@@ -275,7 +221,12 @@ function MoverCard({
                     기사님
                   </Text>
                 </div>
-                <FavoriteButton {...favoriteButtonProps} showCount iconClassName="size-24" />
+                <FavoriteButton
+                  {...favoriteButtonProps}
+                  showCount
+                  className="pointer-events-auto justify-center gap-2"
+                  iconClassName="size-24"
+                />
               </div>
 
               <MoverMeta
@@ -290,7 +241,7 @@ function MoverCard({
         </div>
       </div>
 
-      <div className="pointer-events-none relative z-10 hidden min-[744px]:flex min-[744px]:flex-col min-[744px]:gap-20">
+      <div className="pointer-events-none relative z-10 hidden md:flex md:flex-col md:gap-20">
         <div className="flex min-h-36 items-center justify-between gap-8">
           <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="md" />
           {selectionControl}
@@ -340,7 +291,12 @@ function MoverCard({
                 />
               </div>
 
-              <FavoriteButton {...favoriteButtonProps} showCount iconClassName="size-24" />
+              <FavoriteButton
+                {...favoriteButtonProps}
+                showCount
+                className="pointer-events-auto justify-center gap-2"
+                iconClassName="size-24"
+              />
             </div>
           </div>
         </div>

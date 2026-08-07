@@ -3,9 +3,10 @@
 import { useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
-import { shareKakaoMoverCustom, toKakaoShareImageUrl } from "@/hooks/kakao/share";
+import { shareKakaoMoverCustom, toKakaoShareImageUrl, toKakaoSharePath } from "@/lib/kakao/share";
 import { usePageShare } from "@/hooks/usePageShare";
 import { ClipIcon } from "@/icons";
+import { hasFacebookAppId } from "@/lib/facebook/share";
 import { cn } from "@/lib/utils/cn";
 
 function KakaoIcon({ className }: { className?: string }) {
@@ -38,9 +39,8 @@ interface MoverDetailShareProps {
 }
 
 const SHARE_TITLE = "나만 알기엔 아쉬운 기사님인가요?";
-const FACEBOOK_SHARE_UI_ENABLED = false;
+const FACEBOOK_SHARE_UI_ENABLED = hasFacebookAppId();
 
-/** 기사 상세 링크·카카오톡·Facebook 공유 버튼 그룹 */
 export default function MoverDetailShare({
   favoriteCount,
   moverName,
@@ -63,17 +63,24 @@ export default function MoverDetailShare({
     "disabled:cursor-not-allowed disabled:opacity-60",
   );
 
-  const handleKakaoShare = async () => {
+  const handleKakaoShare = async (): Promise<void> => {
     if (isShareBusy || kakaoSharingRef.current) return;
 
     kakaoSharingRef.current = true;
     setIsKakaoSharing(true);
     try {
+      const PATH = toKakaoSharePath();
       await shareKakaoMoverCustom({
-        templateArgs: kakaoShare,
+        templateArgs: {
+          ...kakaoShare,
+          PATH,
+        },
         onMissingConfig: () => onToastMessage?.("카카오톡 공유 설정이 필요합니다."),
         onError: (message) => onToastMessage?.(message),
       });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "카카오톡 공유에 실패했습니다.";
+      onToastMessage?.(message);
     } finally {
       kakaoSharingRef.current = false;
       setIsKakaoSharing(false);
@@ -88,7 +95,7 @@ export default function MoverDetailShare({
     >
       <Text
         as="h2"
-        variant={{ base: "lg-semibold", lg: "xl-semibold" }}
+        variant={{ base: "lg-semibold", xl: "xl-semibold" }}
         className="text-text-secondary"
       >
         {SHARE_TITLE}

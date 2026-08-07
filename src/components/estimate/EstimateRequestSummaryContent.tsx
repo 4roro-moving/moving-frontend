@@ -1,14 +1,16 @@
 import type { ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
-import { DesignatedChip, MoveTypeChip } from "@/components/estimate/received/MoveTypeChip";
+import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import DesignatedChip from "@/components/estimate/DesignatedChip";
+import { ArrowRightIcon } from "@/icons";
 import { formatKoreanDateTime } from "@/lib/utils/date";
 import { cn } from "@/lib/utils/cn";
 import type { MoveType } from "@/types/move";
 
 /** 기사님 받은 요청 카드·모달과 동일한 상세 카드 셸 */
 export const ESTIMATE_REQUEST_DETAIL_CARD_CLASSNAME =
-  "border-border-subtle bg-background-surface rounded-20 flex w-full flex-col gap-24 border px-20 py-24 shadow-[0_0_10px_rgba(220,220,220,0.2)] min-[744px]:gap-32 min-[744px]:px-40 min-[744px]:py-32 lg:px-40 lg:py-32";
+  "border-border-subtle bg-background-surface rounded-20 flex w-full flex-col gap-24 border px-20 py-24 shadow-[0_0_10px_rgba(220,220,220,0.2)] md:gap-32 md:px-40 md:py-32 xl:px-40 xl:py-32";
 
 interface EstimateRequestSummaryContentProps {
   moveType: MoveType;
@@ -43,12 +45,14 @@ export default function EstimateRequestSummaryContent({
   density = "card",
 }: EstimateRequestSummaryContentProps) {
   const isModal = density === "modal";
-  const locationValueVariant = isModal ? "lg-medium" : "lg-semibold";
+  const locationValueVariant = isModal
+    ? ({ base: "md-medium", xl: "lg-medium" } as const)
+    : "lg-semibold";
   const locationValueClass = isModal ? "text-text-secondary" : "text-text-primary";
 
   return (
     <div
-      className={cn("flex flex-col", isModal ? "gap-20" : "gap-16 min-[744px]:gap-24", className)}
+      className={cn("flex flex-col", isModal ? "gap-16 xl:gap-20" : "gap-16 md:gap-24", className)}
     >
       <div className="flex min-h-32 items-center justify-between gap-12">
         <div className="flex flex-wrap gap-8">
@@ -73,12 +77,12 @@ export default function EstimateRequestSummaryContent({
         className={cn(
           "flex flex-col",
           isModal
-            ? "gap-16 sm:flex-row sm:items-end sm:gap-48"
-            : "gap-12 sm:flex-row sm:justify-between sm:gap-20",
+            ? "gap-8 xl:flex-row xl:items-end xl:gap-48"
+            : "gap-12 xl:flex-row xl:justify-between xl:gap-20",
         )}
       >
         <div className="flex items-end gap-12">
-          <div>
+          <div className={cn(isModal && "flex items-center gap-8 xl:block")}>
             <Text as="dt" variant="md-regular" className="text-text-muted">
               출발지
             </Text>
@@ -90,14 +94,11 @@ export default function EstimateRequestSummaryContent({
               {fromLabel}
             </Text>
           </div>
-          <span
-            className={cn("mb-[9px] flex items-center", isModal ? "w-16" : "w-[18px]")}
-            aria-hidden="true"
-          >
-            <span className="bg-text-secondary h-px flex-1" />
-            <span className="border-text-secondary -ml-1 h-1.5 w-1.5 rotate-45 border-t border-r" />
-          </span>
-          <div>
+          <ArrowRightIcon
+            size={16}
+            className={cn("shrink-0", isModal ? "mb-8 xl:mb-[9px]" : "mb-[9px]")}
+          />
+          <div className={cn(isModal && "flex items-center gap-8 xl:block")}>
             <Text as="dt" variant="md-regular" className="text-text-muted">
               도착지
             </Text>
@@ -110,7 +111,7 @@ export default function EstimateRequestSummaryContent({
             </Text>
           </div>
         </div>
-        <div>
+        <div className={cn(isModal && "flex items-center gap-8 xl:block")}>
           <Text as="dt" variant="md-regular" className="text-text-muted">
             이사일
           </Text>
@@ -124,7 +125,7 @@ export default function EstimateRequestSummaryContent({
         </div>
       </dl>
 
-      {isModal ? <div className="bg-border-subtle h-px" /> : null}
+      {isModal ? <div className="bg-border-subtle mt-4 h-px xl:mt-0" /> : null}
     </div>
   );
 }
