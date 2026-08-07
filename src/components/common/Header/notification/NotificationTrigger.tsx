@@ -3,6 +3,7 @@
 import { useCallback, useId, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
+import { useCloseOnPathnameChange } from "@/hooks/useCloseOnPathnameChange";
 import { useUnreadNotificationCount } from "@/hooks/notifications/useUnreadNotificationCount";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { useClickOutside } from "@/hooks/useClickOutside";
@@ -30,6 +31,8 @@ export default function NotificationTrigger() {
   const closeQuiet = useCallback(() => {
     setOpenScope(null);
   }, []);
+
+  useCloseOnPathnameChange(closeQuiet);
 
   const ref = useClickOutside<HTMLDivElement>(closeQuiet);
 

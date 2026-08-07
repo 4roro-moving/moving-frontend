@@ -2,10 +2,12 @@
 
 import { Text } from "@/components/common/Text";
 import EstimateDetailLayout, {
+  ESTIMATE_DETAIL_LAYOUT_CLASSES,
   EstimateDetailQueryState,
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import { EstimateDetailInfoSection } from "@/components/estimate/detail/EstimateDetailInfoSection";
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
+import SentEstimateChatAction from "@/components/estimate/sent/SentEstimateChatAction";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { useSentEstimateDetail } from "@/hooks/useSentEstimates";
@@ -124,14 +126,17 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
 
   const estimate = query.data;
   const request = estimate.estimateRequest;
+  // 2026.08.06 김성현 - [수정] 견적 조율 가능한 보낸 견적에서 채팅방 진입 CTA 노출
+  const showChatAction = estimate.status === "SENT";
 
   return (
     <EstimateDetailLayout
       showProfile={false}
       backFallbackHref={APP_ROUTES.MOVER_ESTIMATES.SENT}
       contentClassName="pt-35 pb-64 md:pt-[46px] md:pb-80 lg:pt-[43px] lg:pb-37-5"
-      rowClassName="gap-20 md:gap-32 lg:gap-0"
-      mainClassName="gap-20 md:gap-30 lg:w-210"
+      rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
+      mainClassName="gap-20 md:gap-30 xl:w-210 xl:shrink-0"
+      asideClassName="items-end gap-28 md:gap-40 xl:w-80 xl:shrink-0"
       main={
         <>
           <div className="flex w-full flex-col gap-20 md:gap-26">
@@ -170,6 +175,7 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
           <SentEstimateComment comment={estimate.comment} />
         </>
       }
+      aside={showChatAction ? <SentEstimateChatAction estimateId={estimate.id} /> : undefined}
     />
   );
 }

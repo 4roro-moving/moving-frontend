@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
 import Toast from "@/components/common/Toast/Toast";
@@ -9,10 +9,7 @@ import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { useMovers } from "@/hooks/useMovers";
-import {
-  buildMoversQueryString,
-  type MoversSearchParamsState,
-} from "@/lib/utils/moversSearchParams";
+import { type MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
 
 interface MoversListProps {
   filters: MoversSearchParamsState;
@@ -36,18 +33,6 @@ export function MoversList({ filters }: MoversListProps) {
   const { movers, isInitialLoading, query } = useMovers(filters);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const listStartRef = useRef<HTMLDivElement>(null);
-  const filterKey = buildMoversQueryString(filters);
-  const previousFilterKeyRef = useRef(filterKey);
-
-  useEffect(() => {
-    if (previousFilterKeyRef.current === filterKey) {
-      return;
-    }
-
-    previousFilterKeyRef.current = filterKey;
-    listStartRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
-  }, [filterKey]);
 
   const sentinelRef = useMoversInfiniteScroll({
     enabled: !isInitialLoading && !query.isError && movers.length > 0,
@@ -125,7 +110,7 @@ export function MoversList({ filters }: MoversListProps) {
   }
 
   return (
-    <div ref={listStartRef} className="scroll-mt-24">
+    <div className="scroll-mt-24">
       {content}
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </div>

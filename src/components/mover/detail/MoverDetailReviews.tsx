@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 
 import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
@@ -10,7 +11,8 @@ import MoverRatingSummary from "@/components/mover/detail/MoverRatingSummary";
 import MoverReviewList from "@/components/mover/detail/MoverReviewList";
 import { useMoverReviews } from "@/hooks/useMoverReviews";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { MOVER_REVIEW_PAGE_LIMIT } from "@/lib/api/movers";
+import { getMoverReviews, MOVER_REVIEW_PAGE_LIMIT } from "@/lib/api/movers";
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import type { MoverDetail } from "@/types/moverDetail";
 
 interface MoverDetailReviewsProps {
@@ -31,6 +33,7 @@ export default function MoverDetailReviews({
   ratingDistribution,
 }: MoverDetailReviewsProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, error, isFetching, refetch } = useMoverReviews(moverId, {
     page: currentPage,
   });
@@ -51,6 +54,16 @@ export default function MoverDetailReviews({
   // 헤더 개수도 목록 totalCount와 맞춤 (없을 때만 상세 reviewCount fallback)
   // 2026.07.30 정슬기 - [수정]
   const displayedReviewCount = data?.pagination.totalCount ?? reviewCount;
+  const prefetchReviewPage = useCallback(
+    (page: number) => {
+      void queryClient.prefetchQuery({
+        queryKey: QUERY_KEYS.REVIEWS.BY_MOVER(moverId, page, MOVER_REVIEW_PAGE_LIMIT),
+        queryFn: () => getMoverReviews(moverId, { page, limit: MOVER_REVIEW_PAGE_LIMIT }),
+      });
+    },
+    [moverId, queryClient],
+  );
+
   return (
     <section className="flex w-full flex-col gap-24 md:gap-32" aria-labelledby="mover-reviews">
       <Text
@@ -100,6 +113,7 @@ export default function MoverDetailReviews({
               currentPage={currentPage}
               pageCount={pageCount}
               onPageChange={setCurrentPage}
+              onPagePrefetch={prefetchReviewPage}
               className="self-center"
             />
           ) : null}
