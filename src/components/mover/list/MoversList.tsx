@@ -3,6 +3,7 @@
 import { type ReactNode, useState } from "react";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
+import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import MoverCard from "@/components/mover/MoverCard";
 import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
@@ -28,9 +29,6 @@ const MOVERS_EMPTY_DESCRIPTION = (
 
 /** 초기 로딩 스켈레톤 카드 수 */
 const MOVERS_LIST_SKELETON_COUNT = 5;
-
-/** 다음 페이지 fetch 중 하단 스켈레톤 카드 수 */
-const MOVERS_NEXT_PAGE_SKELETON_COUNT = 2;
 
 export function MoversList({ filters, initialMovers }: MoversListProps) {
   const { movers, isInitialLoading, query } = useMovers(filters);
@@ -96,11 +94,19 @@ export function MoversList({ filters, initialMovers }: MoversListProps) {
         <div ref={sentinelRef} className="h-1 w-full" aria-hidden="true" />
 
         {isFetchingNextPage ? (
-          <MoverCardSkeletonList
-            variant="full"
-            count={MOVERS_NEXT_PAGE_SKELETON_COUNT}
-            label="다음 기사님 목록을 불러오는 중"
-          />
+          <div
+            className="flex items-center justify-center gap-8 py-12"
+            role="status"
+            aria-live="polite"
+          >
+            <span
+              className="border-border-brand size-20 animate-spin rounded-full border-2 border-t-transparent"
+              aria-hidden="true"
+            />
+            <Text as="p" variant="sm-medium" className="text-text-muted">
+              기사님을 더 불러오는 중이에요
+            </Text>
+          </div>
         ) : null}
 
         {/* 재시도 중에는 스켈레톤만 보여 패널·스켈레톤이 겹치지 않게 함 */}
