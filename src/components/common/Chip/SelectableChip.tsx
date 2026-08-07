@@ -15,8 +15,7 @@ const selectableChipVariants = cva(
       },
       selected: {
         true: "border-border-brand bg-background-brand-muted text-text-brand",
-        false:
-          "border-border-muted bg-background-subtle text-text-secondary hover:border-border-brand",
+        false: "border-border-muted bg-background-subtle text-text-secondary",
       },
     },
     defaultVariants: {
@@ -75,6 +74,7 @@ export default function SelectableChip({
         onClick={onClick}
         className={cn(
           selectableChipVariants({ size: resolvedSize, selected: isSelected }),
+          "hover:border-border-brand",
           className,
         )}
       >

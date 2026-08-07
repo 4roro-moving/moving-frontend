@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 
+import ChatRoomModal from "@/components/chat/ChatRoomModal";
 import Toast from "@/components/common/Toast/Toast";
 import EstimateChatAction from "@/components/estimate/detail/EstimateChatAction";
 import EstimateDetailActions from "@/components/estimate/detail/EstimateDetailActions";
@@ -42,6 +43,8 @@ function PendingEstimateDetailContent({
   statusBanner,
 }: PendingEstimateDetailContentProps) {
   const [confirmToastMessage, setConfirmToastMessage] = useState<string | null>(null);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState("");
 
   const estimateRequestId = data.estimateRequest.id;
   const canCancelRequest = isCancelableEstimateRequestStatus(data.estimateRequest.status);
@@ -98,10 +101,24 @@ function PendingEstimateDetailContent({
               cancelButtonRef={cancelFlow.cancelButtonRef}
             />
             {showChatAction ? (
-              <EstimateChatAction estimateId={estimateId} buttonClassName="w-full" />
+              <EstimateChatAction
+                estimateId={estimateId}
+                buttonClassName="w-full"
+                onClick={() => setIsChatModalOpen(true)}
+              />
             ) : null}
           </div>
         }
+      />
+
+      <ChatRoomModal
+        open={isChatModalOpen}
+        participantRole="CUSTOMER"
+        participantName={displayName}
+        estimateSummary={`견적가 - ${data.price.toLocaleString("ko-KR")}원`}
+        messageValue={chatMessage}
+        onMessageChange={setChatMessage}
+        onClose={() => setIsChatModalOpen(false)}
       />
 
       <EstimateRequestCancelConfirmModal

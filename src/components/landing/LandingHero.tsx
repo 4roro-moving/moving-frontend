@@ -19,7 +19,8 @@ export default function LandingHero() {
           alt=""
           fill
           priority
-          className="object-cover object-bottom opacity-80"
+          draggable={false}
+          className="pointer-events-none select-none object-cover object-bottom opacity-80"
           sizes="100vw"
         />
         <div aria-hidden className="bg-landing-hero-overlay absolute inset-0" />
@@ -30,7 +31,8 @@ export default function LandingHero() {
             alt=""
             width={160}
             height={99}
-            className="h-[62px] w-[100px] object-contain md:h-[99px] md:w-160"
+            draggable={false}
+            className="pointer-events-none select-none h-[62px] w-[100px] object-contain md:h-[99px] md:w-160"
             unoptimized
           />
 

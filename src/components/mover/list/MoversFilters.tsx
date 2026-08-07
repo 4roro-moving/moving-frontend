@@ -27,21 +27,35 @@ interface MoversFiltersProps {
 }
 
 export function MoversFilters({ filters }: MoversFiltersProps) {
-  const { filterKey, keyword, replaceFilters, resetFilters, setKeyword } =
-    useMoversFilters(filters);
+  const {
+    clearSearch,
+    filterKey,
+    keyword,
+    replaceFilters,
+    resetFilters,
+    setKeyword,
+    submitSearch,
+  } = useMoversFilters(filters);
 
   return (
     <>
       <div className="w-full py-10">
-        <Search
-          size="responsive"
-          value={keyword}
-          onChange={(event) => setKeyword(event.target.value)}
-          onClear={() => setKeyword("")}
-          placeholder="텍스트를 입력해 주세요."
-          aria-label="기사님 검색"
-          className="w-full"
-        />
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            submitSearch();
+          }}
+        >
+          <Search
+            size="responsive"
+            value={keyword}
+            onChange={(event) => setKeyword(event.target.value)}
+            onClear={clearSearch}
+            placeholder="텍스트를 입력해 주세요."
+            aria-label="기사님 검색"
+            className="w-full"
+          />
+        </form>
       </div>
 
       <div className="flex w-full flex-nowrap items-center justify-between gap-8">
