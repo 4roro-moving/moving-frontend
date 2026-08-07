@@ -31,3 +31,9 @@ button {
 button:disabled {
   cursor: not-allowed;
 }
+
+img,
+svg {
+  -webkit-user-drag: none;
+  user-select: none;
+}
