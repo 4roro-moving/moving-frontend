@@ -93,7 +93,9 @@ function PendingEstimateDetailContent({ estimateId, data }: PendingEstimateDetai
               onCancelRequest={cancelFlow.openCancelModal}
               cancelButtonRef={cancelFlow.cancelButtonRef}
             />
-            {showChatAction ? <EstimateChatAction estimateId={estimateId} /> : null}
+            {showChatAction ? (
+              <EstimateChatAction estimateId={estimateId} buttonClassName="w-full" />
+            ) : null}
           </div>
         }
       />

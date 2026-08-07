@@ -14,13 +14,18 @@ import { cn } from "@/lib/utils/cn";
 interface EstimateChatActionProps {
   estimateId: number;
   className?: string;
+  buttonClassName?: string;
 }
 
 /**
  * 견적 상세 채팅방 진입 CTA
  * // 2026.08.06 김성현 - [추가] 고객·기사 상세 공통 채팅방 생성 및 이동
  */
-export default function EstimateChatAction({ estimateId, className }: EstimateChatActionProps) {
+export default function EstimateChatAction({
+  estimateId,
+  className,
+  buttonClassName,
+}: EstimateChatActionProps) {
   const router = useRouter();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const chatRoomMutation = useGetOrCreateChatRoom();
@@ -40,7 +45,7 @@ export default function EstimateChatAction({ estimateId, className }: EstimateCh
         <Button
           variant="outline"
           size="cta"
-          className="w-[200px] whitespace-nowrap"
+          className={cn("w-[200px] whitespace-nowrap", buttonClassName)}
           disabled={chatRoomMutation.isPending}
           aria-busy={chatRoomMutation.isPending}
           onClick={() => void handleClick()}
