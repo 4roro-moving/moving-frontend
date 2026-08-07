@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
+import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import Toast from "@/components/common/Toast/Toast";
 import {
   useMoverEstimateRequests,
@@ -21,6 +22,7 @@ import type { MoveType } from "@/types/move";
 import type { MoverEstimateRequest, RequestSort } from "@/types/moverEstimateRequest";
 
 import ReceivedRequestCard from "./ReceivedRequestCard";
+import ReceivedRequestsSkeleton from "./ReceivedRequestsSkeleton";
 import RejectEstimateModal from "./RejectEstimateModal";
 import SendEstimateModal, { type SendEstimateInput } from "./SendEstimateModal";
 
@@ -142,13 +144,17 @@ export default function ReceivedRequestsPage() {
         </section>
 
         <section className="flex flex-col gap-12 xl:gap-24">
-          {!query.isPending && (
+          {query.isPending ? (
+            <Skeleton className="hidden h-26 w-72 xl:block" />
+          ) : (
             <Text as="p" variant="2lg-semibold" className="text-text-secondary hidden xl:block">
               전체 {totalCount}건
             </Text>
           )}
           <div className="flex min-h-40 flex-wrap items-center justify-between gap-12 px-10 xl:px-0">
-            {!query.isPending && (
+            {query.isPending ? (
+              <Skeleton className="h-20 w-64 xl:hidden" />
+            ) : (
               <Text as="p" variant="md-semibold" className="text-text-secondary xl:hidden">
                 전체 {totalCount}건
               </Text>
@@ -188,11 +194,7 @@ export default function ReceivedRequestsPage() {
             </div>
           </div>
 
-          {query.isPending && (
-            <Text as="p" variant="lg-regular" className="text-text-subtle py-80 text-center">
-              받은 요청을 불러오는 중이에요.
-            </Text>
-          )}
+          {query.isPending ? <ReceivedRequestsSkeleton /> : null}
           {query.isError && (
             <Text as="p" variant="lg-regular" className="text-text-error py-80 text-center">
               받은 요청을 불러오지 못했어요.
