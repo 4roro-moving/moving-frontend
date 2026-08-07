@@ -40,6 +40,7 @@ export function MoverEstimateCardGridSkeleton() {
   return (
     <div
       className="mx-auto grid w-full min-w-0 grid-cols-1 gap-20 md:max-w-[600px] md:gap-32 xl:max-w-[1200px] xl:grid-cols-2 xl:gap-24"
+      role="status"
       aria-label="견적 목록을 불러오는 중입니다."
       aria-busy="true"
     >

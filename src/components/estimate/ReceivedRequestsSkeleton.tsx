@@ -29,7 +29,7 @@ function ReceivedRequestCardSkeleton() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-[11px] sm:grid sm:grid-cols-2">
+      <div className="flex flex-col gap-12 sm:grid sm:grid-cols-2">
         <Skeleton className="rounded-16 h-64 w-full" />
         <Skeleton className="rounded-16 h-64 w-full" />
       </div>
@@ -41,6 +41,7 @@ export default function ReceivedRequestsSkeleton() {
   return (
     <div
       className="grid w-full grid-cols-1 gap-24 md:max-w-[588px] xl:max-w-none xl:grid-cols-2"
+      role="status"
       aria-label="받은 요청을 불러오는 중입니다."
       aria-busy="true"
     >
