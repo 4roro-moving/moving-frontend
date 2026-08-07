@@ -3,6 +3,7 @@
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
+import { useResolvedAuthRole } from "@/hooks/auth/useResolvedAuthRole";
 import { getRoleHomePath } from "@/lib/auth/redirect";
 import type { AuthRole } from "@/lib/auth/role";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -26,17 +27,13 @@ const BlockMoverFromMoversBrowse = ({
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const role = useAuthStore((state) => state.user?.role);
+  const resolvedRole = useResolvedAuthRole(initialRole);
 
   const isAuthReady = hasHydrated && !isCheckingAuth;
   /** 세션 확정 후: 실제 MOVER만 차단·리다이렉트 */
-  const shouldBlock = isAuthReady && isAuthenticated && role === "MOVER";
-  /**
-   * checkAuth 전: 서버와 동일한 initialRole 힌트만 사용 (loadRole는 SSR 불일치 유발)
-   * 힌트만 있고 최종이 비로그인/고객이면 isAuthReady 후 children 복구
-   */
-  const shouldHideContent =
-    shouldBlock || (!isAuthReady && (role === "MOVER" || initialRole === "MOVER"));
+  const shouldBlock = isAuthReady && isAuthenticated && resolvedRole === "MOVER";
+  /** checkAuth 전: resolvedRole(SSR initialRole)이 MOVER면 목록 미노출 */
+  const shouldHideContent = shouldBlock || (!isAuthReady && resolvedRole === "MOVER");
 
   useEffect(() => {
     if (!shouldBlock) return;

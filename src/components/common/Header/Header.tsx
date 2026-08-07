@@ -12,10 +12,10 @@ import ProfileMenuTrigger, {
   type ProfileMenuItem,
 } from "@/components/common/Header/ProfileMenuTrigger";
 import { Text } from "@/components/common/Text";
+import { useResolvedAuthRole } from "@/hooks/auth/useResolvedAuthRole";
 import { useProfileCompletionState } from "@/hooks/profile/useProfileCompletionState";
 import { MenuIcon } from "@/icons";
 import type { AuthRole } from "@/lib/auth/role";
-import { loadRole } from "@/lib/auth/role";
 import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
@@ -140,8 +140,7 @@ const Header = ({
   // checkAuth 완료 후: 실제 세션(access) 기준
   const isLogin = !hasHydrated || isCheckingAuth ? Boolean(initialIsLogin) : isAuthenticated;
 
-  const resolvedRole: AuthRole | null =
-    user?.role ?? (!hasHydrated || isCheckingAuth ? initialRole : loadRole());
+  const resolvedRole = useResolvedAuthRole(initialRole);
 
   const navLinks = !isLogin
     ? LOGGED_OUT_LINKS
