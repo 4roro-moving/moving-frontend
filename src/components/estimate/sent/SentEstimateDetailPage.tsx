@@ -15,7 +15,11 @@ import { useSentEstimateDetail } from "@/hooks/useSentEstimates";
 import FrameIcon from "@/icons/frame.svg";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
-import { formatKoreanDateTime, formatKoreanDateTimeWithTime } from "@/lib/utils/date";
+import {
+  formatKoreanDateTime,
+  formatKoreanDateTimeWithTime,
+  isKstDateOnOrAfter,
+} from "@/lib/utils/date";
 import type { SentEstimate } from "@/types/sentEstimate";
 
 interface SentEstimateDetailPageProps {
@@ -130,7 +134,8 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
   const request = estimate.estimateRequest;
   // 2026.08.06 김성현 - [수정] 견적 조율 가능한 보낸 견적에서 채팅방 진입 CTA 노출
   const showChatAction = estimate.status === "SENT";
-  const showCompleteAction = estimate.status === "CONFIRMED";
+  const showCompleteAction =
+    estimate.status === "CONFIRMED" && isKstDateOnOrAfter(request.moveDate);
 
   return (
     <EstimateDetailLayout
@@ -173,7 +178,7 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
                 ...(request.completedAt
                   ? [
                       {
-                        label: "이사 완료일",
+                        label: "이사 완료일시",
                         value: formatKoreanDateTimeWithTime(request.completedAt),
                       },
                     ]
