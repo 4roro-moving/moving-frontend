@@ -156,11 +156,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     clearAuthTokens();
     clearNickname();
     clearRole();
-    clearAppQueryCache();
-    set({ ...UNAUTHENTICATED_STATE });
+    get().markUnauthenticated();
   },
 
   markUnauthenticated: () => {
+    clearAppQueryCache();
     set({ ...UNAUTHENTICATED_STATE });
   },
 
