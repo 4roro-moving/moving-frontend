@@ -8,7 +8,10 @@ import {
 
 import { MoversPageView } from "@/components/mover/list/MoversPageView";
 import { AUTH_QUERY_GUEST_SCOPE } from "@/lib/constants/queryKeys";
-import { getMoversInfiniteQueryOptions } from "@/lib/queryOptions/movers";
+import {
+  MOVERS_LIST_STALE_TIME_MS,
+  getMoversInfiniteQueryOptions,
+} from "@/lib/queryOptions/movers";
 import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import { parseMoversSearchParams, toMoversListQuery } from "@/lib/utils/moversSearchParams";
 import type { Mover, MoversListResult } from "@/types/mover";
@@ -30,7 +33,7 @@ export default async function MoversPage({ searchParams }: MoversPageProps) {
     defaultOptions: {
       queries: {
         // 클라이언트 QueryProvider(60s)와 맞춤. dehydrate 직후 바로 stale 되지 않도록 함
-        staleTime: 60 * 1000,
+        staleTime: MOVERS_LIST_STALE_TIME_MS,
       },
     },
   });
