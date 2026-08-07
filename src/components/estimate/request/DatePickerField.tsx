@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
+import { usePresence } from "@/hooks/usePresence";
 import { cn } from "@/lib/utils/cn";
 import { formatKoreanDate } from "@/lib/utils/date";
+import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 
 import Calendar from "./Calendar";
 import { CalendarIcon, ChevronDownIcon } from "../icons";
@@ -17,6 +19,10 @@ interface DatePickerFieldProps {
 
 export default function DatePickerField({ value, onChange, className }: DatePickerFieldProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { isRendered: isPopupRendered, isVisible: isPopupVisible } = usePresence(
+    isOpen,
+    DROPDOWN_EXIT_DURATION_MS,
+  );
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -66,12 +72,16 @@ export default function DatePickerField({ value, onChange, className }: DatePick
         />
       </button>
 
-      {isOpen && (
+      {isPopupRendered ? (
         <div
           id="estimate-date-picker-popup"
           role="region"
           aria-label="날짜 선택"
-          className="animate-dropdown-in absolute top-full left-0 z-20 mt-8 w-full origin-top motion-reduce:animate-none"
+          aria-hidden={!isPopupVisible}
+          className={cn(
+            "absolute top-full left-0 z-20 mt-8 w-full",
+            dropdownMotionClassName(isPopupVisible),
+          )}
         >
           <Calendar
             selected={value}
@@ -81,7 +91,7 @@ export default function DatePickerField({ value, onChange, className }: DatePick
             }}
           />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

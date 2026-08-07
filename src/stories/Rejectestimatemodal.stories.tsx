@@ -25,11 +25,12 @@ const meta = {
     docs: {
       description: {
         component:
-          "기사님이 견적 요청을 반려할 때 사유를 입력받는 모달입니다. `open` prop이 따로 없어 부모가 조건부 렌더링으로 열고 닫습니다.",
+          "기사님이 견적 요청을 반려할 때 사유를 입력받는 모달입니다. `open`으로 등장/퇴장 모션을 제어합니다.",
       },
     },
   },
   args: {
+    open: true,
     request: mockRequest,
     isPending: false,
     onClose: fn(),

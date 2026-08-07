@@ -3,8 +3,10 @@
 import type { ComponentType, SVGProps } from "react";
 
 import { Text } from "@/components/common/Text";
+import { usePresence } from "@/hooks/usePresence";
 import { ConfirmedCheckIcon, GalleryIcon, WriteIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
+import { SHEET_EXIT_DURATION_MS } from "@/lib/utils/uiMotion";
 
 export type ChatParticipantRole = "CUSTOMER" | "MOVER";
 
@@ -62,7 +64,9 @@ export default function ChatActionSheet({
   onClose,
   actions,
 }: ChatActionSheetProps) {
-  if (!open) return null;
+  const { isRendered, isVisible } = usePresence(open, SHEET_EXIT_DURATION_MS);
+
+  if (!isRendered) return null;
 
   const actionItems = CHAT_ACTIONS_BY_ROLE[participantRole].map((item) => ({
     ...item,
@@ -80,7 +84,12 @@ export default function ChatActionSheet({
     <div
       role="region"
       aria-label="채팅 메뉴"
-      className="border-border-subtle bg-background-surface animate-modal-sheet-in shrink-0 border-t px-40 pt-16 pb-20 motion-reduce:animate-none"
+      aria-hidden={!isVisible}
+      className={cn(
+        "border-border-subtle bg-background-surface shrink-0 border-t px-40 pt-16 pb-20",
+        "motion-reduce:animate-none",
+        isVisible ? "animate-modal-sheet-in" : "animate-modal-sheet-out pointer-events-none",
+      )}
     >
       {/* // 2026.08.07 김성현 - [수정] 아이콘 축소 + w-fit 중앙 그룹으로 좌우 여백 확보 */}
       <div className="mx-auto flex w-fit items-start justify-center gap-32">

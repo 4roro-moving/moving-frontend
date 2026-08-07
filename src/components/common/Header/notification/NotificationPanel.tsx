@@ -93,8 +93,7 @@ export default function NotificationPanel({ id, onClose, className }: Notificati
       aria-busy={isLoading || isFetching}
       tabIndex={-1}
       className={cn(
-        "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-0 z-50 mt-8 w-[359px] origin-top border px-16 py-10 focus:outline-none",
-        "animate-dropdown-in motion-reduce:animate-none",
+        "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-0 z-50 mt-8 w-[359px] border px-16 py-10 focus:outline-none",
         className,
       )}
     >

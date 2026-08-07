@@ -14,7 +14,9 @@ import {
 import { Text, type TextVariantProp } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useListboxKeyboardNav } from "@/hooks/useListboxKeyboardNav";
+import { usePresence } from "@/hooks/usePresence";
 import { cn } from "@/lib/utils/cn";
+import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { ChevronDownIcon, ChevronUpIcon } from "@/icons";
 
 type SelectVariant = "default" | "sort";
@@ -127,6 +129,10 @@ const SelectMain = ({
   // 수정 등 폼에 미리 있어야하는 값이 있다면 이전 값을 저장해둠
   const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
   const listboxId = useId();
+  const { isRendered: isListboxRendered, isVisible: isListboxVisible } = usePresence(
+    isOpen,
+    DROPDOWN_EXIT_DURATION_MS,
+  );
   const containerRef = useClickOutside<HTMLDivElement>(() => setIsOpen(false));
   const { triggerRef, listboxRef, handleTriggerKeyDown, handleListboxKeyDown, focusTrigger } =
     useListboxKeyboardNav<HTMLButtonElement, HTMLDivElement>({
@@ -211,15 +217,16 @@ const SelectMain = ({
             )}
           </button>
 
-          {isOpen && (
+          {isListboxRendered ? (
             <div
               ref={listboxRef}
               id={listboxId}
               role="listbox"
+              aria-hidden={!isListboxVisible}
               onKeyDown={handleListboxKeyDown}
               className={cn(
                 "bg-background-surface absolute z-50 my-4",
-                "animate-dropdown-in origin-top motion-reduce:animate-none",
+                dropdownMotionClassName(isListboxVisible),
                 variant === "sort" &&
                   "rounded-8 border-border-subtle flex w-[91px] min-w-[91px] flex-col items-start border xl:w-[114px] xl:min-w-[114px]",
                 variant === "default" &&
@@ -233,7 +240,7 @@ const SelectMain = ({
             >
               {children}
             </div>
-          )}
+          ) : null}
         </div>
         {error && (
           <Text variant="xs-regular" className="text-text-error">

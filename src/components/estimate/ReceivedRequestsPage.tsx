@@ -35,7 +35,9 @@ export default function ReceivedRequestsPage() {
   const [sort, setSort] = useState<RequestSort>("requestedAt");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<MoverEstimateRequest | null>(null);
+  const [isSendOpen, setIsSendOpen] = useState(false);
   const [requestToReject, setRequestToReject] = useState<MoverEstimateRequest | null>(null);
+  const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const query = useMoverEstimateRequests({
@@ -72,7 +74,7 @@ export default function ReceivedRequestsPage() {
       },
       {
         onSuccess: () => {
-          setSelectedRequest(null);
+          setIsSendOpen(false);
           setToastMessage("견적을 보냈습니다.");
         },
         onError: (error) => {
@@ -92,7 +94,7 @@ export default function ReceivedRequestsPage() {
       },
       {
         onSuccess: () => {
-          setRequestToReject(null);
+          setIsRejectOpen(false);
           setToastMessage("요청을 반려했습니다.");
         },
         onError: (error) => {
@@ -221,8 +223,14 @@ export default function ReceivedRequestsPage() {
                   <ReceivedRequestCard
                     key={request.id}
                     request={request}
-                    onSendEstimate={setSelectedRequest}
-                    onRejectEstimate={setRequestToReject}
+                    onSendEstimate={(next) => {
+                      setSelectedRequest(next);
+                      setIsSendOpen(true);
+                    }}
+                    onRejectEstimate={(next) => {
+                      setRequestToReject(next);
+                      setIsRejectOpen(true);
+                    }}
                   />
                 ))}
               </div>
@@ -241,93 +249,96 @@ export default function ReceivedRequestsPage() {
         </section>
       </main>
 
-      {isFilterOpen ? (
-        <Modal
-          onClose={() => setIsFilterOpen(false)}
-          presentation="responsive"
-          size="md"
-          overlayClassName="xl:hidden"
-          className="items-stretch gap-32 px-24 py-32 text-left"
-        >
-          <div className="flex w-full flex-col gap-28">
-            <div className="flex w-full shrink-0 items-center justify-between">
-              <Modal.Title variant="2lg-bold">필터</Modal.Title>
-              <Modal.Close size="sm" onClose={() => setIsFilterOpen(false)} />
-            </div>
-
-            <section className="flex flex-col gap-8">
-              <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
-                이사 유형
-              </Text>
-              <div className="flex flex-wrap gap-12">
-                {MOVE_TYPE_OPTIONS.map((moveType) => {
-                  const isSelected = moveTypes.includes(moveType.value);
-                  return (
-                    <SelectableChip
-                      key={moveType.value}
-                      size="sm"
-                      selected={isSelected}
-                      onClick={() => toggleMoveType(moveType.value)}
-                    >
-                      {moveType.label}
-                    </SelectableChip>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="flex flex-col gap-8">
-              <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
-                지역 및 견적
-              </Text>
-              <div className="flex flex-col gap-12">
-                {[
-                  {
-                    label: "지정 견적 요청",
-                    checked: includeDesignated,
-                    onChange: setIncludeDesignated,
-                  },
-                  {
-                    label: "서비스 가능 지역",
-                    checked: serviceAreaOnly,
-                    onChange: setServiceAreaOnly,
-                  },
-                ].map((filter) => (
-                  <Checkbox
-                    key={filter.label}
-                    checked={filter.checked}
-                    onCheckedChange={filter.onChange}
-                    label={filter.label}
-                    labelClassName="text-text-secondary"
-                  />
-                ))}
-              </div>
-            </section>
+      <Modal
+        open={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        presentation="responsive"
+        size="md"
+        overlayClassName="xl:hidden"
+        className="items-stretch gap-32 px-24 py-32 text-left"
+      >
+        <div className="flex w-full flex-col gap-28">
+          <div className="flex w-full shrink-0 items-center justify-between">
+            <Modal.Title variant="2lg-bold">필터</Modal.Title>
+            <Modal.Close size="sm" onClose={() => setIsFilterOpen(false)} />
           </div>
 
-          <Modal.Button fullWidth size="cta" onClick={() => setIsFilterOpen(false)}>
-            조회하기
-          </Modal.Button>
-        </Modal>
-      ) : null}
+          <section className="flex flex-col gap-8">
+            <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
+              이사 유형
+            </Text>
+            <div className="flex flex-wrap gap-12">
+              {MOVE_TYPE_OPTIONS.map((moveType) => {
+                const isSelected = moveTypes.includes(moveType.value);
+                return (
+                  <SelectableChip
+                    key={moveType.value}
+                    size="sm"
+                    selected={isSelected}
+                    onClick={() => toggleMoveType(moveType.value)}
+                  >
+                    {moveType.label}
+                  </SelectableChip>
+                );
+              })}
+            </div>
+          </section>
 
-      {selectedRequest && (
+          <section className="flex flex-col gap-8">
+            <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
+              지역 및 견적
+            </Text>
+            <div className="flex flex-col gap-12">
+              {[
+                {
+                  label: "지정 견적 요청",
+                  checked: includeDesignated,
+                  onChange: setIncludeDesignated,
+                },
+                {
+                  label: "서비스 가능 지역",
+                  checked: serviceAreaOnly,
+                  onChange: setServiceAreaOnly,
+                },
+              ].map((filter) => (
+                <Checkbox
+                  key={filter.label}
+                  checked={filter.checked}
+                  onCheckedChange={filter.onChange}
+                  label={filter.label}
+                  labelClassName="text-text-secondary"
+                />
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <Modal.Button fullWidth size="cta" onClick={() => setIsFilterOpen(false)}>
+          조회하기
+        </Modal.Button>
+      </Modal>
+
+      {selectedRequest ? (
         <SendEstimateModal
+          open={isSendOpen}
           request={selectedRequest}
           isPending={sendEstimateMutation.isPending}
           onSubmit={handleSendEstimate}
-          onClose={() => setSelectedRequest(null)}
+          onClose={() => setIsSendOpen(false)}
+          onExitComplete={() => setSelectedRequest(null)}
         />
-      )}
+      ) : null}
 
-      {requestToReject && (
+      {requestToReject ? (
         <RejectEstimateModal
+          open={isRejectOpen}
           request={requestToReject}
           isPending={rejectEstimateMutation.isPending}
           onSubmit={handleRejectEstimate}
-          onClose={() => setRequestToReject(null)}
+          onClose={() => setIsRejectOpen(false)}
+          onExitComplete={() => setRequestToReject(null)}
         />
-      )}
+      ) : null}
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </>

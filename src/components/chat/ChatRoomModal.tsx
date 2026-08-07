@@ -23,15 +23,15 @@ export interface ChatRoomModalProps {
   actions?: Partial<Record<ChatActionItem["id"], Pick<ChatActionItem, "onSelect" | "disabled">>>;
 }
 
-type ChatRoomModalContentProps = Omit<ChatRoomModalProps, "open">;
-
 /**
  * 채팅방 모달 공통 UI
  * // 2026.08.07 김성현 - [추가] 채팅 모달과 역할별 + 메뉴 바텀시트 구성
  * // 2026.08.07 김성현 - [수정] 액션 시트를 채팅 모달 내부에서 렌더
  * // 2026.08.07 김성현 - [수정] + 메뉴를 입력바 아래 스택으로 배치해 채팅바와 함께 상승
+ * // 2026.08.07 정슬기 - [수정] open prop으로 exit 모션 지원
  */
 function ChatRoomModalContent({
+  open,
   participantRole,
   participantName,
   estimateSummary,
@@ -43,11 +43,12 @@ function ChatRoomModalContent({
   onMessageChange,
   onSendMessage,
   actions,
-}: ChatRoomModalContentProps) {
+}: ChatRoomModalProps) {
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
 
   return (
     <Modal
+      open={open}
       onClose={onClose}
       aria-label={`${participantName} 채팅방`}
       className={cn(
@@ -143,8 +144,6 @@ function ChatRoomModalContent({
   );
 }
 
-export default function ChatRoomModal({ open, ...props }: ChatRoomModalProps) {
-  if (!open) return null;
-
+export default function ChatRoomModal(props: ChatRoomModalProps) {
   return <ChatRoomModalContent {...props} />;
 }

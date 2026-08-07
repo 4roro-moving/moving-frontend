@@ -13,22 +13,27 @@ const MIN_REASON_LENGTH = 10;
 const MAX_REASON_LENGTH = 1000;
 
 interface RejectEstimateModalProps {
+  open: boolean;
   request: MoverEstimateRequest;
   isPending?: boolean;
   onClose: () => void;
+  onExitComplete?: () => void;
   onSubmit: (reason: string) => void;
 }
 
 export default function RejectEstimateModal({
+  open,
   request,
   isPending = false,
   onClose,
+  onExitComplete,
   onSubmit,
 }: RejectEstimateModalProps) {
   const [reason, setReason] = useState("");
   const [isReasonTouched, setIsReasonTouched] = useState(false);
 
   const handleClose = () => {
+    if (isPending) return;
     setReason("");
     setIsReasonTouched(false);
     onClose();
@@ -44,7 +49,9 @@ export default function RejectEstimateModal({
 
   return (
     <Modal
+      open={open}
       onClose={isPending ? undefined : handleClose}
+      onExitComplete={onExitComplete}
       presentation="responsive"
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}

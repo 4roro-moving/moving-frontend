@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils/cn";
 const PANEL_CLASSNAME = cn(
   "items-stretch text-left",
   "rounded-24 md:rounded-32",
-  "w-full max-w-[292px] gap-30 px-16 py-24",
-  "md:max-w-[480px] md:gap-40 md:px-24 md:pt-32 md:pb-40",
+  "w-[calc(100%-32px)] max-w-[340px] gap-20 px-16 py-20",
+  "md:w-full md:max-w-[480px] md:gap-40 md:px-24 md:pt-32 md:pb-40",
 );
 
 export interface DesignatedMoverCancelConfirmModalProps {
@@ -23,6 +23,7 @@ export interface DesignatedMoverCancelConfirmModalProps {
  * 지정 견적 요청(개별 기사) 취소 확인
  * 전체 견적 요청 취소(EstimateRequestCancelConfirmModal)와 별도.
  * // 2026.08.07 정슬기 - [추가]
+ * // 2026.08.07 정슬기 - [수정] 모바일 타이포·폭·간격 조정
  */
 export default function DesignatedMoverCancelConfirmModal({
   open,
@@ -31,25 +32,21 @@ export default function DesignatedMoverCancelConfirmModal({
   onClose,
   onConfirm,
 }: DesignatedMoverCancelConfirmModalProps) {
-  if (!open) {
-    return null;
-  }
-
   return (
-    <Modal onClose={isPending ? undefined : onClose} className={PANEL_CLASSNAME}>
-      <div className="flex w-full items-center justify-between gap-12">
-        <Modal.Title variant={{ base: "2lg-bold", md: "2xl-semibold" }}>
+    <Modal open={open} onClose={isPending ? undefined : onClose} className={PANEL_CLASSNAME}>
+      <div className="flex w-full items-start justify-between gap-10">
+        <Modal.Title variant={{ base: "xl-bold", md: "2xl-semibold" }}>
           지정 견적 요청을 취소할까요?
         </Modal.Title>
         <Modal.Close onClose={onClose} disabled={isPending} />
       </div>
 
-      <div className="flex w-full flex-col items-stretch gap-30 md:gap-40">
-        <Modal.Desc variant="2lg-medium">
+      <div className="flex w-full flex-col items-stretch gap-20 md:gap-40">
+        <Modal.Desc variant={{ base: "md-medium", md: "2lg-medium" }}>
           {moverDisplayName}에게 보낸 지정 견적 요청이 취소됩니다.
         </Modal.Desc>
 
-        <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
+        <div className="flex w-full flex-col-reverse gap-8 md:flex-row md:gap-12">
           <Modal.Button
             type="button"
             variant="outline"
@@ -68,7 +65,7 @@ export default function DesignatedMoverCancelConfirmModal({
             fullWidth
             disabled={isPending}
             onClick={onConfirm}
-            className="bg-status-error hover:bg-status-error/90 disabled:bg-background-disabled md:flex-1"
+            className="md:flex-1"
           >
             {isPending ? "취소 중..." : "지정 취소"}
           </Modal.Button>

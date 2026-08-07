@@ -8,11 +8,13 @@ import { useCallback, useEffect, useId, useRef, useState, type FocusEvent } from
 
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { usePresence } from "@/hooks/usePresence";
 import type { AuthRole } from "@/lib/auth/role";
 import { isPublicPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { cn } from "@/lib/utils/cn";
+import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export type ProfileMenuItem =
@@ -40,6 +42,10 @@ export default function ProfileMenuTrigger({
   const logout = useAuthStore((state) => state.logout);
 
   const [isOpen, setIsOpen] = useState(false);
+  const { isRendered: isMenuRendered, isVisible: isMenuVisible } = usePresence(
+    isOpen,
+    DROPDOWN_EXIT_DURATION_MS,
+  );
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -148,13 +154,17 @@ export default function ProfileMenuTrigger({
         </Text>
       </button>
 
-      {isOpen ? (
+      {isMenuRendered ? (
         <div
           ref={menuRef}
           id={`${menuId}-menu`}
           role="menu"
+          aria-hidden={!isMenuVisible}
           aria-labelledby={`${menuId}-trigger`}
-          className="border-border-default bg-background-surface shadow-profile-menu rounded-16 animate-dropdown-in absolute top-[calc(100%+18px)] right-0 z-50 flex w-[248px] origin-top flex-col items-start border px-4 pt-16 pb-6 motion-reduce:animate-none"
+          className={cn(
+            "border-border-default bg-background-surface shadow-profile-menu rounded-16 absolute top-[calc(100%+18px)] right-0 z-50 flex w-[248px] flex-col items-start border px-4 pt-16 pb-6",
+            dropdownMotionClassName(isMenuVisible),
+          )}
         >
           <div className="flex w-full items-center py-14 pr-12 pl-24">
             <Text as="p" variant="2lg-bold" className="text-text-secondary">

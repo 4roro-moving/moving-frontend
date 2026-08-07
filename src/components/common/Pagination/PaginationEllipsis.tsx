@@ -2,7 +2,9 @@
 
 import { Text } from "@/components/common/Text";
 import { useListboxKeyboardNav } from "@/hooks/useListboxKeyboardNav";
+import { usePresence } from "@/hooks/usePresence";
 import { cn } from "@/lib/utils/cn";
+import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 
 interface PaginationEllipsisProps {
   isOpen: boolean;
@@ -24,6 +26,10 @@ const PaginationEllipsis = ({
   className,
 }: PaginationEllipsisProps) => {
   const hiddenPages = Array.from({ length: Math.max(0, end - start - 1) }, (_, i) => start + 1 + i);
+  const { isRendered: isListboxRendered, isVisible: isListboxVisible } = usePresence(
+    isOpen,
+    DROPDOWN_EXIT_DURATION_MS,
+  );
   const { triggerRef, listboxRef, handleTriggerKeyDown, handleListboxKeyDown, focusTrigger } =
     useListboxKeyboardNav<HTMLButtonElement, HTMLUListElement>({
       isOpen,
@@ -48,12 +54,16 @@ const PaginationEllipsis = ({
         </Text>
       </button>
 
-      {isOpen && (
+      {isListboxRendered ? (
         <ul
           ref={listboxRef}
           role="listbox"
+          aria-hidden={!isListboxVisible}
           onKeyDown={handleListboxKeyDown}
-          className="border-border-default bg-background-surface rounded-4 animate-dropdown-in absolute bottom-0 z-10 flex max-h-[180px] w-full origin-bottom flex-col items-center overflow-y-auto border shadow-md motion-reduce:animate-none"
+          className={cn(
+            "border-border-default bg-background-surface rounded-4 absolute bottom-0 z-10 flex max-h-[180px] w-full flex-col items-center overflow-y-auto border shadow-md",
+            dropdownMotionClassName(isListboxVisible, "bottom"),
+          )}
         >
           {hiddenPages.map((page) => (
             <li key={page} className="w-full">
@@ -79,7 +89,7 @@ const PaginationEllipsis = ({
             </li>
           ))}
         </ul>
-      )}
+      ) : null}
     </div>
   );
 };

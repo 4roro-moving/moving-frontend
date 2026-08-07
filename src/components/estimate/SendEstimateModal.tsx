@@ -20,15 +20,20 @@ export interface SendEstimateInput {
 }
 
 interface SendEstimateModalProps {
+  open: boolean;
   request: MoverEstimateRequest;
   onClose: () => void;
+  /** exit 모션 종료 후 부모 state(request) 정리용 */
+  onExitComplete?: () => void;
   onSubmit: (input: SendEstimateInput) => void;
   isPending?: boolean;
 }
 
 export default function SendEstimateModal({
+  open,
   request,
   onClose,
+  onExitComplete,
   onSubmit,
   isPending = false,
 }: SendEstimateModalProps) {
@@ -37,6 +42,7 @@ export default function SendEstimateModal({
   const [isCommentTouched, setIsCommentTouched] = useState(false);
 
   const handleClose = () => {
+    if (isPending) return;
     setPrice("");
     setComment("");
     setIsCommentTouched(false);
@@ -72,7 +78,9 @@ export default function SendEstimateModal({
 
   return (
     <Modal
+      open={open}
       onClose={isPending ? undefined : handleClose}
+      onExitComplete={onExitComplete}
       presentation="responsive"
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
