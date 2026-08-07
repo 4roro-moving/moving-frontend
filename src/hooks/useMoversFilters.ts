@@ -17,16 +17,17 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
   const latestFiltersRef = useRef(filters);
   // 사용자가 URL 반영 전 새로 입력한 검색어가 있는지 여부
   const isKeywordDirtyRef = useRef(false);
-  // router.replace로 요청한 검색어. 이전 라우팅 결과가 늦게 도착하면 무시하기 위해 사용
-  const pendingKeywordRef = useRef<string | undefined>(undefined);
+  // router.replace로 요청한 전체 쿼리. 이전 라우팅 결과가 늦게 도착하면 무시하기 위해 사용
+  const pendingQueryRef = useRef<string | undefined>(undefined);
 
-  // URL 필터 변경 시 입력값을 동기화하되, 라우팅 중 새로 입력한 검색어는 덮어쓰지 읺음
+  // URL 필터 변경 시 입력값을 동기화하되, 라우팅 중 새로 입력한 검색어는 덮어쓰지 않음
   useEffect(() => {
-    if (pendingKeywordRef.current !== undefined) {
-      if (filters.keyword !== pendingKeywordRef.current) {
+    const queryString = buildMoversQueryString(filters);
+    if (pendingQueryRef.current !== undefined) {
+      if (queryString !== pendingQueryRef.current) {
         return;
       }
-      pendingKeywordRef.current = undefined;
+      pendingQueryRef.current = undefined;
     }
 
     latestFiltersRef.current = filters;
@@ -40,8 +41,14 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
 
   const replaceUrl = useCallback(
     (nextFilters: MoversSearchParamsState) => {
-      latestFiltersRef.current = nextFilters;
       const queryString = buildMoversQueryString(nextFilters);
+      if (queryString === buildMoversQueryString(latestFiltersRef.current)) {
+        return;
+      }
+
+      // 이전 라우팅 결과가 최신 필터 상태를 덮어쓰지 않도록 현재 요청 쿼리 기록
+      pendingQueryRef.current = queryString;
+      latestFiltersRef.current = nextFilters;
       router.replace(queryString ? `${pathname}?${queryString}` : pathname);
     },
     [pathname, router],
@@ -58,11 +65,6 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
       isKeywordDirtyRef.current = false;
       setKeyword(normalizedKeyword);
 
-      if (normalizedKeyword === latestFiltersRef.current.keyword) {
-        return;
-      }
-
-      pendingKeywordRef.current = normalizedKeyword;
       replaceUrl({ ...latestFiltersRef.current, keyword: normalizedKeyword });
     },
     [replaceUrl],
@@ -87,10 +89,6 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
     isKeywordDirtyRef.current = false;
     setKeyword(MOVERS_SEARCH_DEFAULTS.keyword);
     setFilterKey((previousKey) => previousKey + 1);
-    const isAlreadyDefault =
-      buildMoversQueryString(latestFiltersRef.current) ===
-      buildMoversQueryString(MOVERS_SEARCH_DEFAULTS);
-    pendingKeywordRef.current = isAlreadyDefault ? undefined : MOVERS_SEARCH_DEFAULTS.keyword;
     replaceUrl({ ...MOVERS_SEARCH_DEFAULTS });
   }, [replaceUrl]);
 
