@@ -9,15 +9,12 @@ import {
   type MoversSearchParamsState,
 } from "@/lib/utils/moversSearchParams";
 
-const SEARCH_DEBOUNCE_MS = 300;
-
 export function useMoversFilters(filters: MoversSearchParamsState) {
   const router = useRouter();
   const pathname = usePathname();
   const [keyword, setKeyword] = useState(filters.keyword);
   const [previousKeyword, setPreviousKeyword] = useState(filters.keyword);
   const [filterKey, setFilterKey] = useState(0);
-  const searchDebounceTimerRef = useRef<number | null>(null);
   const latestFiltersRef = useRef(filters);
 
   if (filters.keyword !== previousKeyword) {
@@ -29,15 +26,6 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
     latestFiltersRef.current = filters;
   }, [filters]);
 
-  const clearSearchDebounceTimer = useCallback(() => {
-    if (searchDebounceTimerRef.current === null) {
-      return;
-    }
-
-    window.clearTimeout(searchDebounceTimerRef.current);
-    searchDebounceTimerRef.current = null;
-  }, []);
-
   const replaceUrl = useCallback(
     (nextFilters: MoversSearchParamsState) => {
       latestFiltersRef.current = nextFilters;
@@ -47,40 +35,35 @@ export function useMoversFilters(filters: MoversSearchParamsState) {
     [pathname, router],
   );
 
-  useEffect(() => {
-    if (keyword === latestFiltersRef.current.keyword) {
-      return;
-    }
+  const submitSearch = useCallback(() => {
+    replaceUrl({ ...latestFiltersRef.current, keyword });
+  }, [keyword, replaceUrl]);
 
-    clearSearchDebounceTimer();
-    searchDebounceTimerRef.current = window.setTimeout(() => {
-      searchDebounceTimerRef.current = null;
-      replaceUrl({ ...latestFiltersRef.current, keyword });
-    }, SEARCH_DEBOUNCE_MS);
-
-    return clearSearchDebounceTimer;
-  }, [keyword, replaceUrl, clearSearchDebounceTimer]);
+  const clearSearch = useCallback(() => {
+    setKeyword(MOVERS_SEARCH_DEFAULTS.keyword);
+    replaceUrl({ ...latestFiltersRef.current, keyword: MOVERS_SEARCH_DEFAULTS.keyword });
+  }, [replaceUrl]);
 
   const replaceFilters = useCallback(
     (patch: Partial<MoversSearchParamsState>) => {
-      clearSearchDebounceTimer();
-      replaceUrl({ ...latestFiltersRef.current, keyword, ...patch });
+      replaceUrl({ ...latestFiltersRef.current, ...patch });
     },
-    [clearSearchDebounceTimer, keyword, replaceUrl],
+    [replaceUrl],
   );
 
   const resetFilters = useCallback(() => {
-    clearSearchDebounceTimer();
     setKeyword(MOVERS_SEARCH_DEFAULTS.keyword);
     setFilterKey((previousKey) => previousKey + 1);
     replaceUrl({ ...MOVERS_SEARCH_DEFAULTS });
-  }, [clearSearchDebounceTimer, replaceUrl]);
+  }, [replaceUrl]);
 
   return {
+    clearSearch,
     filterKey,
     keyword,
     replaceFilters,
     resetFilters,
     setKeyword,
+    submitSearch,
   };
 }
