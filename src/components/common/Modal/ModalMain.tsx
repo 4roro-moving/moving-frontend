@@ -12,6 +12,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
+import { useCloseOnPathnameChange } from "@/hooks/useCloseOnPathnameChange";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useIsClient } from "@/hooks/useIsClient";
 import { cn } from "@/lib/utils/cn";
@@ -56,6 +57,8 @@ const ModalMain = ({
   // dialog에 aria-labelledby / aria-describedby를 연결합니다.
   const [hasTitle, setHasTitle] = useState(false);
   const [hasDescription, setHasDescription] = useState(false);
+
+  useCloseOnPathnameChange(onClose);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
