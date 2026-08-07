@@ -125,12 +125,10 @@ function PendingEstimateDetailContent({
   );
 }
 
-export default function PendingEstimateDetailView({
-  estimateId,
-}: PendingEstimateDetailViewProps) {
-  const { data, isError, error, isFetching, isPending, refetch } = useEstimateDetail(estimateId);
+export default function PendingEstimateDetailView({ estimateId }: PendingEstimateDetailViewProps) {
+  const { data, isError, error, isFetching, isLoading, refetch } = useEstimateDetail(estimateId);
   const hasData = data !== undefined;
-  const showInitialSkeleton = isPending && !hasData;
+  const showInitialSkeleton = isLoading && !hasData;
   const showBlockingError = isError && !hasData;
   const showRefetchError = isError && hasData;
   const fallbackMessage = "견적 상세를 불러오지 못했어요.";
@@ -173,7 +171,7 @@ export default function PendingEstimateDetailView({
       statusBanner={
         showRefetchError ? (
           <div
-            className="border-error bg-red-100 text-text-error rounded-16 border px-16 py-12"
+            className="border-error text-text-error rounded-16 border bg-red-100 px-16 py-12"
             role="status"
             aria-live="polite"
           >

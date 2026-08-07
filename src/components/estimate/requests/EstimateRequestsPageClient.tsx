@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import Toast from "@/components/common/Toast/Toast";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
+import { EstimateRequestListSkeleton } from "@/components/estimate/requests/EstimateRequestLoadingSkeletons";
 import { ESTIMATE_REQUEST_CANCELED_TOAST_KEY } from "@/components/estimate/requests/estimateRequestCancelToast";
 import EstimateRequestsList from "@/components/estimate/requests/EstimateRequestsList";
 import { useEstimateRequestList } from "@/hooks/useEstimateRequestList";
@@ -84,7 +85,7 @@ export default function EstimateRequestsPageClient() {
         !isEmpty && "py-38 md:py-32 xl:py-64",
       )}
     >
-      {isLoading ? <EstimatesQueryStatus message="보낸 견적 요청을 불러오는 중입니다." /> : null}
+      {isLoading ? <EstimateRequestListSkeleton showFilter /> : null}
 
       {isError ? (
         <EstimatesQueryStatus

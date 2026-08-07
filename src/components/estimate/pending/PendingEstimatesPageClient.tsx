@@ -10,10 +10,10 @@ import { usePendingEstimateSections } from "@/hooks/usePendingEstimateSections";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 
 export default function PendingEstimatesPageClient() {
-  const { data, isError, error, isFetching, isPending, refetch } = usePendingEstimateSections();
+  const { data, isError, error, isFetching, isLoading, refetch } = usePendingEstimateSections();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const hasData = data !== undefined;
-  const showInitialSkeleton = isPending && !hasData;
+  const showInitialSkeleton = isLoading && !hasData;
   const showBlockingError = isError && !hasData;
   const showRefetchError = isError && hasData;
 
@@ -31,7 +31,7 @@ export default function PendingEstimatesPageClient() {
               onAction={() => {
                 void refetch();
               }}
-              className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)] border-0 px-20 py-40 shadow-none md:border-[0.5px] md:px-40 md:py-56"
+              className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle border-0 px-20 py-40 shadow-none md:border-[0.5px] md:px-40 md:py-56 md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)]"
             />
           </div>
         </div>
@@ -49,7 +49,7 @@ export default function PendingEstimatesPageClient() {
                   onAction={() => {
                     void refetch();
                   }}
-                  className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)] border-0 px-20 py-24 shadow-none md:border-[0.5px] md:px-28 md:py-28"
+                  className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle border-0 px-20 py-24 shadow-none md:border-[0.5px] md:px-28 md:py-28 md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)]"
                 />
               </div>
             </div>

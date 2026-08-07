@@ -27,11 +27,11 @@ function shouldShowTabs(pathname: string): boolean {
 
 export default function EstimatesShell({ children }: EstimatesShellProps) {
   const pathname = usePathname();
-  const { canFetch } = useCustomerAuthReady();
+  const { canFetch, isPending } = useCustomerAuthReady();
 
   return (
     <>
-      {shouldShowTabs(pathname) && canFetch ? <MyEstimateTabs /> : null}
+      {shouldShowTabs(pathname) && (canFetch || isPending) ? <MyEstimateTabs /> : null}
       {children}
     </>
   );

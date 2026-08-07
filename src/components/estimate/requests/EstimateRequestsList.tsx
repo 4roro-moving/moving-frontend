@@ -1,8 +1,8 @@
 import Pagination from "@/components/common/Pagination/Pagination";
 import Select from "@/components/common/Select/Select";
 import EstimatesListEmptyState from "@/components/estimate/EstimatesListEmptyState";
-import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import EstimateRequestCard from "@/components/estimate/requests/EstimateRequestCard";
+import { EstimateRequestListSkeleton } from "@/components/estimate/requests/EstimateRequestLoadingSkeletons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import type { EstimateRequestListStatusFilter, MyEstimateRequestItem } from "@/types/estimate";
 import type { Pagination as PaginationMeta } from "@/types/pagination";
@@ -80,12 +80,11 @@ export default function EstimateRequestsList({
 
   if (isPlaceholderData) {
     return (
-      <div
-        className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow flex w-full flex-col gap-24 md:gap-40 xl:px-0"
-        aria-busy="true"
-      >
-        {filterSelect}
-        <EstimatesQueryStatus message="보낸 견적 요청을 불러오는 중입니다." />
+      <div className="flex w-full flex-col gap-24 md:gap-40" aria-busy="true">
+        <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto w-full xl:px-0">
+          {filterSelect}
+        </div>
+        <EstimateRequestListSkeleton />
       </div>
     );
   }

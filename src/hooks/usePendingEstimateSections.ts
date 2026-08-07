@@ -14,7 +14,6 @@ import type { MyEstimateRequestListQuery } from "@/types/estimate";
 /**
  * 대기 중인 견적 목록 (GET /estimates/pending)
  * // 2026.07.25 정슬기 - [추가]
- * // 2026.07.28 정슬기 - [수정] mock → 실 API, Query Key를 PENDING_LIST로 분리
  * // 2026.07.30 정슬기 - [수정] useMyEstimateRequests → usePendingEstimateSections
  * // 2026.07.30 정슬기 - [수정] 인증 준비 후 조회
  */

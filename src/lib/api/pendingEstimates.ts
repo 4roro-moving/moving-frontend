@@ -12,7 +12,6 @@ export const PENDING_ESTIMATE_PAGE_LIMIT = 10;
  * 대기 중인 견적 목록
  * BE: GET /api/estimates/pending?page&limit
  * 응답: { success, data: sections[], pagination }
- * // 2026.07.28 정슬기 - [수정] mock → 실 API 연동
  * // 2026.07.30 정슬기 - [수정] myEstimateRequests.ts → pendingEstimates.ts
  */
 export async function fetchPendingEstimateSections(

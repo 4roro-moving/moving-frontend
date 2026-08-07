@@ -36,11 +36,7 @@ interface EstimateDetailContentProps {
   statusBanner?: ReactNode;
 }
 
-function EstimateDetailContent({
-  estimateId,
-  data,
-  statusBanner,
-}: EstimateDetailContentProps) {
+function EstimateDetailContent({ estimateId, data, statusBanner }: EstimateDetailContentProps) {
   const [confirmToastMessage, setConfirmToastMessage] = useState<string | null>(null);
 
   const estimateRequestId = data.estimateRequest.id;
@@ -123,9 +119,9 @@ function EstimateDetailContent({
 }
 
 export default function EstimateDetailView({ estimateId }: EstimateDetailViewProps) {
-  const { data, isError, error, isFetching, isPending, refetch } = useEstimateDetail(estimateId);
+  const { data, isError, error, isFetching, isLoading, refetch } = useEstimateDetail(estimateId);
   const hasData = data !== undefined;
-  const showInitialSkeleton = isPending && !hasData;
+  const showInitialSkeleton = isLoading && !hasData;
   const showBlockingError = isError && !hasData;
   const showRefetchError = isError && hasData;
   const fallbackMessage = "견적 상세를 불러오지 못했어요.";
@@ -168,7 +164,7 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
       statusBanner={
         showRefetchError ? (
           <div
-            className="border-error bg-red-100 text-text-error rounded-16 border px-16 py-12"
+            className="border-error text-text-error rounded-16 border bg-red-100 px-16 py-12"
             role="status"
             aria-live="polite"
           >

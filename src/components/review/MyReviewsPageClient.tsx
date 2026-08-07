@@ -6,6 +6,7 @@ import Pagination from "@/components/common/Pagination/Pagination";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import MyReviewCard from "@/components/review/MyReviewCard";
 import ReviewEmptyState from "@/components/review/ReviewEmptyState";
+import ReviewCardSkeleton from "@/components/review/ReviewCardSkeleton";
 import ReviewPageFrame from "@/components/review/ReviewPageFrame";
 import { useMyReviews } from "@/hooks/useMyReviews";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
@@ -48,7 +49,7 @@ export default function MyReviewsPageClient() {
 
   return (
     <ReviewPageFrame title="내가 작성한 리뷰">
-      {isLoading ? <EstimatesQueryStatus message="작성한 리뷰를 불러오는 중입니다." /> : null}
+      {isLoading ? <ReviewCardSkeleton /> : null}
 
       {isError ? (
         <EstimatesQueryStatus

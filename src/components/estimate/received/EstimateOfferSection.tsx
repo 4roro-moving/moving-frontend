@@ -17,6 +17,7 @@ const FILTER_OPTIONS: { value: EstimateOfferFilter; label: string }[] = [
 ];
 
 const FILTER_VALUES = new Set<EstimateOfferFilter>(FILTER_OPTIONS.map((option) => option.value));
+const OFFER_LIST_CLASS_NAME = "flex w-full flex-col items-start";
 
 function isEstimateOfferFilter(value: string): value is EstimateOfferFilter {
   return FILTER_VALUES.has(value as EstimateOfferFilter);
@@ -75,14 +76,20 @@ export default function EstimateOfferSection({
       </div>
 
       {filteredOffers.length === 0 ? (
-        <div className="bg-background-surface border-border-subtle rounded-20 border-[0.5px]">
-          <EstimatesQueryStatus
-            message="해당 조건의 견적이 없어요."
-            className="min-h-[220px] px-20 py-24 md:min-h-[260px] md:px-28 md:py-32 xl:px-40 xl:py-40"
-          />
-        </div>
+        <ul className={OFFER_LIST_CLASS_NAME}>
+          <li className="w-full">
+            <div className="bg-background-default flex w-full flex-col items-stretch gap-8 border-0 py-20 md:px-8">
+              <div className="border-border-muted rounded-12 flex min-h-[268px] w-full items-center border border-solid px-12 py-12 pr-20 shadow-none">
+                <EstimatesQueryStatus
+                  message="해당 조건의 견적이 없어요."
+                  className="min-h-0 px-0 py-0"
+                />
+              </div>
+            </div>
+          </li>
+        </ul>
       ) : (
-        <ul className="flex w-full flex-col items-start">
+        <ul className={OFFER_LIST_CLASS_NAME}>
           {filteredOffers.map((offer) => (
             <li key={offer.id} className="w-full">
               <EstimateOfferCard

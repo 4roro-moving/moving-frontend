@@ -45,7 +45,7 @@ export default function PendingEstimateCard({
 }: PendingEstimateCardProps) {
   const { mover, status, isDesignated, price } = offer;
   const displayName = mover.nickname || mover.name;
-  const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
+  const intro = mover.shortIntro?.trim() || null;
   const moverTitleId = `offer-${offer.id}-mover`;
   const detailHref = APP_ROUTES.ESTIMATES.PENDING_DETAIL(offer.id);
   // 찜: PENDING_LIST / RECEIVED / DETAIL 캐시는 useFavoriteMover가 갱신
@@ -98,20 +98,24 @@ export default function PendingEstimateCard({
 
           <div className="flex w-full flex-col gap-4">
             {/* Figma sm: 16 semibold / lg: 18 semibold */}
-            <Text
-              as="p"
-              variant="lg-semibold"
-              className="text-text-secondary break-words md:hidden"
-            >
-              {intro}
-            </Text>
-            <Text
-              as="p"
-              variant="2lg-semibold"
-              className="text-text-secondary hidden break-words md:block"
-            >
-              {intro}
-            </Text>
+            {intro ? (
+              <>
+                <Text
+                  as="p"
+                  variant="lg-semibold"
+                  className="text-text-secondary break-words md:hidden"
+                >
+                  {intro}
+                </Text>
+                <Text
+                  as="p"
+                  variant="2lg-semibold"
+                  className="text-text-secondary hidden break-words md:block"
+                >
+                  {intro}
+                </Text>
+              </>
+            ) : null}
 
             <div className="border-border-muted flex w-full items-center gap-8 border-b pt-12 pb-20">
               <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">

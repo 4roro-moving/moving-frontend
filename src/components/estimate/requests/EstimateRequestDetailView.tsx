@@ -13,6 +13,7 @@ import { EstimateDetailInfoSection } from "@/components/estimate/detail/Estimate
 import EstimateRequestCancelConfirmModal from "@/components/estimate/requests/EstimateRequestCancelConfirmModal";
 import EstimateRequestDesignatedMovers from "@/components/estimate/requests/EstimateRequestDesignatedMovers";
 import EstimateRequestDetailSummary from "@/components/estimate/requests/EstimateRequestDetailSummary";
+import { EstimateRequestDetailSkeleton } from "@/components/estimate/requests/EstimateRequestLoadingSkeletons";
 import { useEstimateRequestCancelFlow } from "@/hooks/useEstimateRequestCancelFlow";
 import { useEstimateRequestDetail } from "@/hooks/useEstimateRequestDetail";
 import { TrashIcon } from "@/icons";
@@ -120,13 +121,7 @@ export default function EstimateRequestDetailView({
   const cancelFlow = useEstimateRequestCancelFlow(estimateRequestId);
 
   if (isLoading) {
-    return (
-      <EstimateDetailQueryState
-        title="견적 상세"
-        message="견적 요청 상세를 불러오는 중입니다."
-        backFallbackHref={APP_ROUTES.ESTIMATES.REQUESTS}
-      />
-    );
+    return <EstimateRequestDetailSkeleton />;
   }
 
   if (isError || !data) {
