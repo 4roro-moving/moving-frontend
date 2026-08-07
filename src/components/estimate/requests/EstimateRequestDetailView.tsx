@@ -182,7 +182,11 @@ export default function EstimateRequestDetailView({
               showConfirmedIcon={showConfirmedIcon}
             />
             <EstimateDetailInfoSection rows={toRequestInfoRows(data)} />
-            <EstimateRequestDesignatedMovers designatedMovers={data.designatedMovers} />
+            <EstimateRequestDesignatedMovers
+              estimateRequestId={estimateRequestId}
+              designatedMovers={data.designatedMovers}
+              canCancelDesignation={canCancel}
+            />
             {canCancel ? (
               <EstimateRequestCancelAction
                 cancelButtonRef={cancelFlow.cancelButtonRef}
