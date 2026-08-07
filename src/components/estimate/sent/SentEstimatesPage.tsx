@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import MoverEstimateTabs from "@/components/estimate/MoverEstimateTabs";
+import { MoverEstimateCardGridSkeleton } from "@/components/estimate/MoverEstimateListSkeleton";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import SentEstimateCard from "@/components/estimate/sent/SentEstimateCard";
 import { useSentEstimates } from "@/hooks/useSentEstimates";
@@ -34,7 +35,7 @@ export default function SentEstimatesPage() {
       <main className="bg-background-subtle min-h-[calc(100vh-108px)] px-24 pt-24 pb-[77px] md:min-h-[calc(100vh-142px)] md:px-72 md:pt-32 md:pb-40 xl:min-h-[calc(100vh-168px)] xl:px-0 xl:pt-[59px] xl:pb-[107px]">
         <h1 className="sr-only">보낸 견적 조회</h1>
 
-        {query.isPending ? <EstimatesQueryStatus message="보낸 견적을 불러오는 중이에요." /> : null}
+        {query.isPending ? <MoverEstimateCardGridSkeleton /> : null}
 
         {query.isError ? (
           <EstimatesQueryStatus

@@ -21,6 +21,7 @@ import type { MoveType } from "@/types/move";
 import type { MoverEstimateRequest, RequestSort } from "@/types/moverEstimateRequest";
 
 import ReceivedRequestCard from "./ReceivedRequestCard";
+import ReceivedRequestsSkeleton from "./ReceivedRequestsSkeleton";
 import RejectEstimateModal from "./RejectEstimateModal";
 import SendEstimateModal, { type SendEstimateInput } from "./SendEstimateModal";
 
@@ -142,17 +143,13 @@ export default function ReceivedRequestsPage() {
         </section>
 
         <section className="flex flex-col gap-12 xl:gap-24">
-          {!query.isPending && (
-            <Text as="p" variant="2lg-semibold" className="text-text-secondary hidden xl:block">
+          <Text as="p" variant="2lg-semibold" className="text-text-secondary hidden xl:block">
+            전체 {totalCount}건
+          </Text>
+          <div className="flex min-h-40 flex-wrap items-center justify-between gap-12 px-10 xl:px-0">
+            <Text as="p" variant="md-semibold" className="text-text-secondary xl:hidden">
               전체 {totalCount}건
             </Text>
-          )}
-          <div className="flex min-h-40 flex-wrap items-center justify-between gap-12 px-10 xl:px-0">
-            {!query.isPending && (
-              <Text as="p" variant="md-semibold" className="text-text-secondary xl:hidden">
-                전체 {totalCount}건
-              </Text>
-            )}
             <div className="hidden flex-wrap items-center gap-12 text-base xl:flex">
               <Checkbox
                 checked={includeDesignated}
@@ -188,11 +185,7 @@ export default function ReceivedRequestsPage() {
             </div>
           </div>
 
-          {query.isPending && (
-            <Text as="p" variant="lg-regular" className="text-text-subtle py-80 text-center">
-              받은 요청을 불러오는 중이에요.
-            </Text>
-          )}
+          {query.isPending ? <ReceivedRequestsSkeleton /> : null}
           {query.isError && (
             <Text as="p" variant="lg-regular" className="text-text-error py-80 text-center">
               받은 요청을 불러오지 못했어요.
