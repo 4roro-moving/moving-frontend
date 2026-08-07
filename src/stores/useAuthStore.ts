@@ -160,8 +160,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   markUnauthenticated: () => {
-    clearAppQueryCache();
     set({ ...UNAUTHENTICATED_STATE });
+    clearAppQueryCache();
   },
 
   setPostAuthRedirectPath: (path) => {

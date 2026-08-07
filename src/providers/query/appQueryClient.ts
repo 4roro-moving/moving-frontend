@@ -12,5 +12,8 @@ export const setAppQueryClient = (queryClient: QueryClient): void => {
 
 /** 로그아웃·세션 만료 시 사용자 데이터가 섞이지 않도록 캐시를 비웁니다. */
 export const clearAppQueryCache = (): void => {
-  appQueryClient?.clear();
+  if (!appQueryClient) return;
+  // active query 끊기
+  void appQueryClient.cancelQueries();
+  appQueryClient.clear();
 };
