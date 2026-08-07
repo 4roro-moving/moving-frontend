@@ -1,8 +1,13 @@
+import Link from "next/link";
+
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
 import FrameIcon from "@/icons/frame.svg";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { formatKoreanDateTime } from "@/lib/utils/date";
+import { cn } from "@/lib/utils/cn";
+import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import type { MoveType } from "@/types/move";
 
 export interface SentEstimateItem {
@@ -19,7 +24,6 @@ export interface SentEstimateItem {
 
 interface SentEstimateCardProps {
   estimate: SentEstimateItem;
-  onViewDetail?: (estimateId: number) => void;
 }
 
 function RouteArrow() {
@@ -31,12 +35,24 @@ function RouteArrow() {
   );
 }
 
-export default function SentEstimateCard({ estimate, onViewDetail }: SentEstimateCardProps) {
+export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
   const isConfirmed = estimate.status !== "SENT";
   const isCompleted = estimate.status === "COMPLETED";
+  const detailHref = APP_ROUTES.MOVER_ESTIMATES.SENT_DETAIL(estimate.id);
 
   return (
-    <article className="border-border-subtle bg-background-default shadow-estimate-card rounded-20 relative flex min-h-[333px] w-full flex-col gap-24 overflow-hidden border-[0.5px] px-20 py-24 md:min-h-[322px] md:gap-32 md:px-40 md:py-32 xl:min-h-[324px]">
+    <article
+      className={cn(
+        "group border-border-subtle bg-background-default shadow-estimate-card rounded-20 hover:border-border-brand hover:shadow-notification relative flex min-h-[333px] w-full flex-col gap-24 overflow-hidden border-[0.5px] px-20 py-24 transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-2 md:min-h-[322px] md:gap-32 md:px-40 md:py-32 xl:min-h-[324px]",
+        isCompleted && "select-none",
+      )}
+    >
+      <Link
+        href={detailHref}
+        aria-label={`${estimate.customerName} 고객님 견적 상세보기`}
+        className="rounded-20 absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-border-brand)]"
+        onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
+      />
       <div className="flex flex-1 flex-col gap-16 md:gap-24">
         <div className="flex min-h-26 items-center justify-between">
           <div className="flex items-center gap-8">
@@ -117,19 +133,10 @@ export default function SentEstimateCard({ estimate, onViewDetail }: SentEstimat
       </div>
 
       {isCompleted ? (
-        <div className="bg-overlay-card-disabled border-border-dimmed rounded-20 absolute inset-[-0.5px] flex items-center justify-center border">
-          <div className="flex w-[200px] flex-col items-center gap-20">
-            <Text variant="2lg-semibold" className="text-text-inverse">
-              이사 완료된 견적이에요
-            </Text>
-            <button
-              type="button"
-              className="bg-background-brand-muted border-border-brand text-text-brand shadow-cta rounded-12 flex h-54 w-full items-center justify-center border"
-              onClick={() => onViewDetail?.(estimate.id)}
-            >
-              <Text variant="lg-semibold">견적 상세보기</Text>
-            </button>
-          </div>
+        <div className="bg-overlay-card-disabled border-border-dimmed rounded-20 group-hover:border-border-brand pointer-events-none absolute inset-[-0.5px] z-20 flex items-center justify-center border transition-colors duration-200">
+          <Text variant="2lg-semibold" className="text-text-inverse">
+            이사 완료된 견적이에요
+          </Text>
         </div>
       ) : null}
     </article>

@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 
 import ProfileFormSkeleton from "@/components/profile/ProfileFormSkeleton";
+import { ReceivedRequestsPageSkeleton } from "@/components/estimate/ReceivedRequestsSkeleton";
+import MoverEstimateListPageSkeleton from "@/components/estimate/MoverEstimateListSkeleton";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
 /** RoleGuard auth 대기 중 기사 protected layout용 로딩 UI
@@ -8,6 +10,17 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
  * pathname: 현재 페이지 경로
  */
 export const getMoverProtectedLoadingFallback = (pathname: string): ReactNode => {
+  if (pathname === APP_ROUTES.MOVER_ESTIMATES.RECEIVED_REQUESTS) {
+    return <ReceivedRequestsPageSkeleton />;
+  }
+
+  if (
+    pathname === APP_ROUTES.MOVER_ESTIMATES.SENT ||
+    pathname === APP_ROUTES.MOVER_ESTIMATES.REJECTED
+  ) {
+    return <MoverEstimateListPageSkeleton />;
+  }
+
   if (pathname === APP_ROUTES.MOVER_PROFILE) {
     return (
       <ProfileFormSkeleton
