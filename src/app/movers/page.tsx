@@ -1,10 +1,20 @@
 import type { Metadata } from "next";
-import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
 
 import { MoversPageView } from "@/components/mover/list/MoversPageView";
 import { AUTH_QUERY_GUEST_SCOPE } from "@/lib/constants/queryKeys";
-import { getMoversInfiniteQueryOptions } from "@/lib/queryOptions/movers";
+import {
+  MOVERS_LIST_STALE_TIME_MS,
+  getMoversInfiniteQueryOptions,
+} from "@/lib/queryOptions/movers";
+import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import { parseMoversSearchParams, toMoversListQuery } from "@/lib/utils/moversSearchParams";
+import type { Mover, MoversListResult } from "@/types/mover";
 
 export const metadata: Metadata = {
   title: "기사님 찾기",
@@ -22,26 +32,34 @@ export default async function MoversPage({ searchParams }: MoversPageProps) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        // 클라이언트 QueryProvider(60s)와 맞춤. dehydrate 직후 바로 stale 되지 않게 함.
-        staleTime: 60 * 1000,
+        // 클라이언트 QueryProvider(60s)와 맞춤. dehydrate 직후 바로 stale 되지 않도록 함
+        staleTime: MOVERS_LIST_STALE_TIME_MS,
       },
     },
   });
+  const moversQueryOptions = getMoversInfiniteQueryOptions(AUTH_QUERY_GUEST_SCOPE, listQuery);
+  let initialMovers: Mover[] = [];
 
   try {
     // infinite query는 await 필수 (미대기 dehydrate 시 클라이언트 hydrate 깨질 수 있음)
     await queryClient.prefetchInfiniteQuery({
       // 서버 prefetch에는 access token이 없으므로 guest 캐시로 분리합니다.
-      ...getMoversInfiniteQueryOptions(AUTH_QUERY_GUEST_SCOPE, listQuery),
+      ...moversQueryOptions,
       pages: 1,
     });
+
+    const prefetchedMovers = queryClient.getQueryData<InfiniteData<MoversListResult>>(
+      moversQueryOptions.queryKey,
+    );
+    initialMovers =
+      prefetchedMovers?.pages.flatMap((page) => page.data).map(mapMoverListItemToMover) ?? [];
   } catch {
     // prefetch 실패해도 페이지는 렌더 — MoversList가 클라이언트에서 재요청
   }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <MoversPageView filters={filters} />
+      <MoversPageView filters={filters} initialMovers={initialMovers} />
     </HydrationBoundary>
   );
 }

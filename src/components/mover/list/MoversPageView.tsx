@@ -4,12 +4,15 @@ import { FavoriteMoversSidebar } from "@/components/mover/favorites/FavoriteMove
 import { MoversFilters } from "@/components/mover/list/MoversFilters";
 import { MoversList } from "@/components/mover/list/MoversList";
 import type { MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
+import type { Mover } from "@/types/mover";
 
 interface MoversPageViewProps {
   filters: MoversSearchParamsState;
+  /** 서버에서 prefetch한 공개 목록. 인증 초기화 중 첫 화면을 즉시 렌더링. */
+  initialMovers: Mover[];
 }
 
-export function MoversPageView({ filters }: MoversPageViewProps) {
+export function MoversPageView({ filters, initialMovers }: MoversPageViewProps) {
   return (
     <div className="bg-background-default flex w-full flex-col">
       <div className="hidden xl:block">
@@ -22,7 +25,7 @@ export function MoversPageView({ filters }: MoversPageViewProps) {
           aria-label="기사님 목록"
         >
           <MoversFilters filters={filters} />
-          <MoversList filters={filters} />
+          <MoversList filters={filters} initialMovers={initialMovers} />
         </section>
 
         <FavoriteMoversSidebar />

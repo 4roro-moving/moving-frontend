@@ -4,12 +4,13 @@ import { useMemo } from "react";
 
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { useApiInfiniteQuery } from "@/hooks/queries/useApiInfiniteQuery";
-import { getMoversInfiniteQueryOptions } from "@/lib/queryOptions/movers";
+import {
+  MOVERS_LIST_STALE_TIME_MS,
+  getMoversInfiniteQueryOptions,
+} from "@/lib/queryOptions/movers";
 import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import { toMoversListQuery, type MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
 import { useAuthStore } from "@/stores/useAuthStore";
-
-const MOVERS_LIST_STALE_TIME_MS = 60 * 1000;
 
 export function useMovers(filters: MoversSearchParamsState) {
   const listQuery = toMoversListQuery(filters);
