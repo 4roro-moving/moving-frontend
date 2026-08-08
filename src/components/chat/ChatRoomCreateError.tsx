@@ -2,7 +2,6 @@
 
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
-import { InfoIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 
 export interface ChatRoomCreateErrorProps {
@@ -34,10 +33,10 @@ export default function ChatRoomCreateError({
       )}
     >
       <div
-        className="bg-background-brand-muted text-icon-brand flex size-64 items-center justify-center rounded-full"
+        className="bg-background-brand-muted text-text-brand flex size-64 items-center justify-center rounded-full"
         aria-hidden="true"
       >
-        <InfoIcon className="size-28" />
+        <span className="text-[28px] leading-[42px] font-semibold">i</span>
       </div>
 
       <div className="flex flex-col items-center gap-8">
@@ -53,7 +52,7 @@ export default function ChatRoomCreateError({
         type="button"
         variant="solid"
         size="cta"
-        className="min-w-[200px]"
+        className="w-[200px]"
         disabled={isRetrying}
         aria-busy={isRetrying}
         onClick={onRetry}
