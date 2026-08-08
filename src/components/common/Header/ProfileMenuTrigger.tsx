@@ -26,6 +26,7 @@ interface ProfileMenuTriggerProps {
   /** 로그아웃 후 이동 경로 분기용 */
   role?: AuthRole | null;
   imageUrl?: string | null;
+  isAvartarPending?: boolean;
 }
 
 export default function ProfileMenuTrigger({
@@ -33,6 +34,7 @@ export default function ProfileMenuTrigger({
   items,
   role = null,
   imageUrl,
+  isAvartarPending,
 }: ProfileMenuTriggerProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -134,7 +136,15 @@ export default function ProfileMenuTrigger({
         className="focus-visible:ring-border-brand rounded-8 flex items-center focus-visible:ring-2 focus-visible:outline-none xl:gap-16"
         onClick={() => setIsOpen((open) => !open)}
       >
-        {imageUrl ? (
+        {isAvartarPending ? (
+          <Image
+            src="/icons/profile-default.svg"
+            alt=""
+            width={36}
+            height={36}
+            className="rounded-4 size-24 xl:size-36 xl:rounded-none"
+          />
+        ) : imageUrl ? (
           <div className="rounded-100 overflow-hidden">
             <Image
               src={imageUrl}

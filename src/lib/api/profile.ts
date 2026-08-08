@@ -158,18 +158,20 @@ export const toAuthUserFromMoverProfile = (profile: MoverProfileMe): AuthUser =>
   imageUrl: profile.imageUrl,
 });
 
-export const getProfileImageUrl = async (
-  role: "CUSTOMER" | "MOVER" | "ADMIN",
-): Promise<string | null> => {
-  if (role === "CUSTOMER") {
-    const profile = await getCustomerProfileMe();
+export const getProfileImageUser = async (user: AuthUser): Promise<AuthUser> => {
+  const sessionUser = { ...user, imageUrl: null as string | null };
 
-    return profile.imageUrl ?? null;
-  } else if (role === "MOVER") {
-    const profile = await getMoverProfileMe();
+  try {
+    if (user.role === "CUSTOMER") {
+      const profile = await getCustomerProfileMe();
+      sessionUser.imageUrl = profile.imageUrl ?? null;
+    } else if (user.role === "MOVER") {
+      const profile = await getCustomerProfileMe();
+      sessionUser.imageUrl = profile.imageUrl ?? null;
+    }
 
-    return profile.imageUrl ?? null;
+    return sessionUser;
+  } catch (error) {
+    return sessionUser;
   }
-
-  return null;
 };

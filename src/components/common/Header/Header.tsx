@@ -138,9 +138,11 @@ const Header = ({
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
+  const isAuthPending = !hasHydrated || isCheckingAuth;
+
   // hydrate 전·checkAuth 중: SSR refresh 쿠키 힌트 유지
   // checkAuth 완료 후: 실제 세션(access) 기준
-  const isLogin = !hasHydrated || isCheckingAuth ? Boolean(initialIsLogin) : isAuthenticated;
+  const isLogin = isAuthPending ? Boolean(initialIsLogin) : isAuthenticated;
 
   const resolvedRole = useResolvedAuthRole(initialRole);
 
@@ -157,13 +159,14 @@ const Header = ({
     : navLinks;
 
   // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
-  const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;
+  const showAuthSkeleton = isAuthPending && !initialIsLogin;
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
-  const imageUrl =
-    !hasHydrated || isCheckingAuth
-      ? (profileImage ?? initialProfileImage ?? null)
-      : (user?.imageUrl ?? profileImage ?? null);
+
+  const hintedImageUrl = profileImage ?? initialProfileImage ?? null;
+  const imageUrl = isAuthPending ? hintedImageUrl : (user?.imageUrl ?? profileImage ?? null);
+
+  const isAvartarPending = isAuthPending && !hintedImageUrl;
 
   const { isIncomplete, isCompletionUnresolved, profileCreatePath } =
     useProfileCompletionState(resolvedRole);
@@ -273,6 +276,7 @@ const Header = ({
               imageUrl={imageUrl}
               items={profileMenuItems}
               role={resolvedRole}
+              isAvartarPending={isAvartarPending}
             />
             <button
               ref={menuButtonRef}

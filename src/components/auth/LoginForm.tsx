@@ -26,12 +26,7 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/loginSchema";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
-import {
-  getCustomerProfileMe,
-  getMoverProfileMe,
-  getProfileImageUrl,
-  mapCustomerProfileMeResponse,
-} from "@/lib/api/profile";
+import { getProfileImageUser } from "@/lib/api/profile";
 
 interface LoginFormProps {
   audience?: AuthAudience;
@@ -79,16 +74,8 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
         fallbackPath: getRoleHomePath(result.user.role),
       });
 
-      const sessionUser = { ...result.user, imageUrl: null as string | null };
-
-      const imageUrl = await getProfileImageUrl(result.user.role);
-
-      if (imageUrl) {
-        sessionUser.imageUrl = imageUrl;
-      }
-
       setPostAuthRedirectPath(nextPath);
-      establishSession(sessionUser);
+      establishSession(await getProfileImageUser(result.user));
     } catch (error) {
       setSubmitError(getApiErrorMessage(error));
     }
