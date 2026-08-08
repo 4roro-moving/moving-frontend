@@ -90,35 +90,33 @@ export default function EstimateRequestsList({
   }
 
   if (pagination.totalCount === 0) {
-    return (
-      <div className="flex w-full flex-col">
+    return isAllFilter ? (
+      <EstimatesListEmptyState
+        description={
+          <>
+            아직 보낸 견적 요청이 없어요
+            <br />
+            견적 요청을 작성하고 기사님의 견적을 받아보세요
+          </>
+        }
+        buttonLabel="견적 요청하기"
+        href={APP_ROUTES.ESTIMATE_REQUEST}
+      />
+    ) : (
+      <div className="flex w-full flex-col gap-24 md:gap-32">
         <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto w-full xl:px-0">
           {filterSelect}
         </div>
 
-        {isAllFilter ? (
-          <EstimatesListEmptyState
-            description={
-              <>
-                아직 보낸 견적 요청이 없어요
-                <br />
-                견적 요청을 작성하고 기사님의 견적을 받아보세요
-              </>
-            }
-            buttonLabel="견적 요청하기"
-            href={APP_ROUTES.ESTIMATE_REQUEST}
-          />
-        ) : (
-          <EstimatesListEmptyState
-            description={
-              <>
-                해당 상태의 견적 요청이 없어요.
-                <br />
-                다른 상태를 선택해 확인해보세요.
-              </>
-            }
-          />
-        )}
+        <EstimatesListEmptyState
+          description={
+            <>
+              해당 상태의 견적 요청이 없어요.
+              <br />
+              다른 상태를 선택해 확인해보세요.
+            </>
+          }
+        />
       </div>
     );
   }

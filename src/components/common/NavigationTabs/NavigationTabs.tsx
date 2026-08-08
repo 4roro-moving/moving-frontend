@@ -49,8 +49,9 @@ export default function NavigationTabs({ ariaLabel, items, className }: Navigati
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "flex h-full shrink-0 items-center whitespace-nowrap xl:h-64",
-                  isActive && "border-nav-indicator-active border-b-2",
+                  "relative flex h-full shrink-0 items-center whitespace-nowrap xl:h-64",
+                  isActive &&
+                    "after:bg-nav-indicator-active after:absolute after:right-0 after:bottom-0 after:left-0 after:h-2",
                 )}
               >
                 <Text
