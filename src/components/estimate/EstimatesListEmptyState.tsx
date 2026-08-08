@@ -26,7 +26,7 @@ export default function EstimatesListEmptyState({
     <div
       className={cn(
         "px-margin-mobile mx-auto flex min-h-[60vh] w-full max-w-(--container-desktop) flex-col items-center justify-start md:min-h-[70vh] md:px-72 xl:px-0",
-        alignWithFilter && "pt-[96px] md:pt-[104px] xl:pt-[112px]",
+        alignWithFilter && "pt-page-header-height-desktop md:pt-104 xl:pt-[112px]",
       )}
     >
       <EmptyState
