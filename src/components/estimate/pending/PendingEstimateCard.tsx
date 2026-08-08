@@ -103,14 +103,14 @@ export default function PendingEstimateCard({
                 <Text
                   as="p"
                   variant="lg-semibold"
-                  className="text-text-secondary break-words md:hidden"
+                  className="text-text-secondary wrap-break-word md:hidden"
                 >
                   {intro}
                 </Text>
                 <Text
                   as="p"
                   variant="2lg-semibold"
-                  className="text-text-secondary hidden break-words md:block"
+                  className="text-text-secondary hidden wrap-break-word md:block"
                 >
                   {intro}
                 </Text>

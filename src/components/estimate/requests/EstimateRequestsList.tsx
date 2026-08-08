@@ -91,10 +91,11 @@ export default function EstimateRequestsList({
 
   if (pagination.totalCount === 0) {
     return (
-      <div className="flex w-full flex-col gap-24 md:gap-32">
+      <div className="flex w-full flex-col">
         <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto w-full xl:px-0">
           {filterSelect}
         </div>
+
         {isAllFilter ? (
           <EstimatesListEmptyState
             description={
