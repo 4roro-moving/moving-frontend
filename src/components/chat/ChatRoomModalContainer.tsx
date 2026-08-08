@@ -224,6 +224,7 @@ export default function ChatRoomModalContainer({
         participantName={participantName}
         estimateSummary={estimateSummary}
         sendDisabled
+        composerDisabled
         onClose={onClose}
         actions={actions}
       >

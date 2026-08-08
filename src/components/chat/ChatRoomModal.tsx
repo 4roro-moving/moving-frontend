@@ -18,6 +18,7 @@ export interface ChatRoomModalProps {
   messageValue?: string;
   messagePlaceholder?: string;
   sendDisabled?: boolean;
+  composerDisabled?: boolean;
   onMessageChange?: (value: string) => void;
   onSendMessage?: () => void;
   actions?: Partial<Record<ChatActionItem["id"], Pick<ChatActionItem, "onSelect" | "disabled">>>;
@@ -40,12 +41,14 @@ function ChatRoomModalContent({
   messageValue = "",
   messagePlaceholder = "메시지를 입력하세요",
   sendDisabled = false,
+  composerDisabled = false,
   onMessageChange,
   onSendMessage,
   actions,
 }: ChatRoomModalProps) {
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
-  const isSendDisabled = sendDisabled || !messageValue.trim();
+  const isActionSheetVisible = isActionSheetOpen && !composerDisabled;
+  const isSendDisabled = composerDisabled || sendDisabled || !messageValue.trim();
 
   return (
     <Modal
@@ -97,12 +100,16 @@ function ChatRoomModalContent({
           type="button"
           className={cn(
             "bg-background-brand text-text-inverse flex size-36 shrink-0 items-center justify-center rounded-full",
-            "hover:bg-background-brand-hover transition-colors",
+            "hover:bg-background-brand-hover disabled:bg-background-disabled disabled:text-text-disabled transition-colors disabled:cursor-not-allowed",
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
           )}
-          aria-label={isActionSheetOpen ? "채팅 메뉴 닫기" : "채팅 메뉴 열기"}
-          aria-expanded={isActionSheetOpen}
-          onClick={() => setIsActionSheetOpen((prev) => !prev)}
+          aria-label={isActionSheetVisible ? "채팅 메뉴 닫기" : "채팅 메뉴 열기"}
+          aria-expanded={isActionSheetVisible}
+          disabled={composerDisabled}
+          onClick={() => {
+            if (composerDisabled) return;
+            setIsActionSheetOpen((prev) => !prev);
+          }}
         >
           <span className="text-[24px] leading-none" aria-hidden="true">
             +
@@ -114,9 +121,11 @@ function ChatRoomModalContent({
           value={messageValue}
           onChange={(event) => onMessageChange?.(event.target.value)}
           placeholder={messagePlaceholder}
+          disabled={composerDisabled}
           className={cn(
             "bg-background-subtle text-text-primary h-44 min-w-0 flex-1 rounded-full px-16",
-            "placeholder:text-text-muted focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+            "placeholder:text-text-muted disabled:bg-background-disabled disabled:text-text-disabled disabled:cursor-not-allowed",
+            "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
           )}
         />
 
@@ -124,19 +133,17 @@ function ChatRoomModalContent({
           type="submit"
           className={cn(
             "bg-background-brand text-text-inverse rounded-12 flex h-44 shrink-0 items-center justify-center px-16",
-            "hover:bg-background-brand-hover disabled:bg-background-disabled transition-colors disabled:cursor-not-allowed",
+            "hover:bg-background-brand-hover disabled:bg-background-disabled disabled:text-text-disabled transition-colors disabled:cursor-not-allowed",
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
           )}
           disabled={isSendDisabled}
         >
-          <Text variant="md-semibold" className="text-text-inverse">
-            전송
-          </Text>
+          <Text variant="md-semibold">전송</Text>
         </button>
       </form>
 
       <ChatActionSheet
-        open={isActionSheetOpen}
+        open={isActionSheetVisible}
         participantRole={participantRole}
         actions={actions}
         onClose={() => setIsActionSheetOpen(false)}
