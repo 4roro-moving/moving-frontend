@@ -27,6 +27,7 @@ export interface AuthUser {
   name: string;
   phone: string | null;
   role: "CUSTOMER" | "MOVER" | "ADMIN";
+  imageUrl?: string | null;
 }
 
 export interface PublicAuthTokens {

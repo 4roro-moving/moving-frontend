@@ -91,6 +91,7 @@ export const toAuthUserFromCustomerProfile = (profile: CustomerProfileMe): AuthU
   email: profile.email,
   phone: profile.phone,
   role: "CUSTOMER",
+  imageUrl: profile.imageUrl,
 });
 
 export const getMoverProfileStatus = (options?: FetchRequestOptions) =>
@@ -154,4 +155,5 @@ export const toAuthUserFromMoverProfile = (profile: MoverProfileMe): AuthUser =>
   email: profile.email ?? "",
   phone: profile.phone,
   role: "MOVER",
+  imageUrl: profile.imageUrl,
 });

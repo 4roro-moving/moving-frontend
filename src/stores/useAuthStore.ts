@@ -13,6 +13,7 @@ import {
 import { getAccessTokenPayload, getAccessTokenRole } from "@/lib/auth/accessTokenPayload";
 import { isAuthPagePath, isOAuthCallbackPath } from "@/lib/auth/redirect";
 import { clearNickname, loadNickname, saveNickname } from "@/lib/auth/nickname";
+import { clearProfileImage, saveProfileImage } from "@/lib/auth/profileImage";
 import { clearRole, loadRole, saveRole } from "@/lib/auth/role";
 import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
 import { clearAppQueryCache } from "@/providers/query/appQueryClient";
@@ -69,6 +70,7 @@ const setAuthenticatedUser = (
 ) => {
   saveNickname(user.name);
   saveRole(user.role);
+  saveProfileImage(user.imageUrl ?? "");
   set({
     user,
     displayName: user.name,
@@ -156,6 +158,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     clearAuthTokens();
     clearNickname();
     clearRole();
+    clearProfileImage();
     get().markUnauthenticated();
   },
 

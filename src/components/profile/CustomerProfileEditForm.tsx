@@ -19,7 +19,7 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
 import { buildCustomerProfileEditPayloads } from "@/lib/profile/buildCustomerProfileEditPayloads";
-import { uploadProfileImageIfNeeded } from "@/lib/profile/uploadProfileImage";
+import { uploadProfileImage } from "@/lib/profile/uploadProfileImage";
 import {
   customerProfileEditSchema,
   type CustomerProfileEditFormValues,
@@ -86,7 +86,7 @@ const CustomerProfileEditForm = ({
         return;
       }
 
-      const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
+      const imageUrl = await uploadProfileImage(formValues.imageFile);
       const { basic, profile } = buildCustomerProfileEditPayloads({
         formValues,
         dirtyFields,

@@ -25,12 +25,14 @@ interface ProfileMenuTriggerProps {
   items: ProfileMenuItem[];
   /** 로그아웃 후 이동 경로 분기용 */
   role?: AuthRole | null;
+  imageUrl?: string | null;
 }
 
 export default function ProfileMenuTrigger({
   nickname,
   items,
   role = null,
+  imageUrl,
 }: ProfileMenuTriggerProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -132,13 +134,23 @@ export default function ProfileMenuTrigger({
         className="focus-visible:ring-border-brand rounded-8 flex items-center focus-visible:ring-2 focus-visible:outline-none xl:gap-16"
         onClick={() => setIsOpen((open) => !open)}
       >
-        <Image
-          src="/icons/profile-default.svg"
-          alt=""
-          width={36}
-          height={36}
-          className="rounded-4 size-24 xl:size-36 xl:rounded-none"
-        />
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt=""
+            width={36}
+            height={36}
+            className="rounded-4 size-24 xl:size-36 xl:rounded-none"
+          />
+        ) : (
+          <Image
+            src="/icons/profile-default.svg"
+            alt=""
+            width={36}
+            height={36}
+            className="rounded-4 size-24 xl:size-36 xl:rounded-none"
+          />
+        )}
         <Text as="span" variant="2lg-medium" className="text-text-primary hidden xl:block">
           {nickname}
         </Text>

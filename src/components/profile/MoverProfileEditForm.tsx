@@ -17,7 +17,7 @@ import { useUpdateMoverProfile } from "@/hooks/profile/useUpdateMoverProfile";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
-import { uploadProfileImageIfNeeded } from "@/lib/profile/uploadProfileImage";
+import { uploadProfileImage } from "@/lib/profile/uploadProfileImage";
 import { moverProfileSchema, type MoverProfileFormValues } from "@/lib/schemas/moverProfileSchema";
 import { ApiError } from "@/types/api";
 import type { MoveType } from "@/types/move";
@@ -63,7 +63,7 @@ const MoverProfileEditForm = ({
     setSubmitError(null);
 
     try {
-      const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
+      const imageUrl = await uploadProfileImage(formValues.imageFile);
 
       await updateMoverProfile.mutateAsync({
         nickname: formValues.nickname,
