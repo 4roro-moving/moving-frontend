@@ -1,13 +1,22 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
+
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import { SORT_OPTIONS } from "@/components/mover/list/constants";
+import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { useMoversFilters } from "@/hooks/useMoversFilters";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS } from "@/lib/constants/region";
-import { MOVERS_ALL_VALUE, type MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
+import { getMoversInfiniteQueryOptions } from "@/lib/queryOptions/movers";
+import {
+  MOVERS_ALL_VALUE,
+  toMoversListQuery,
+  type MoversSearchParamsState,
+} from "@/lib/utils/moversSearchParams";
 import type { MoverSort } from "@/types/mover";
 
 const ALL_OPTION = { value: MOVERS_ALL_VALUE, label: "전체" } as const;
@@ -27,6 +36,8 @@ interface MoversFiltersProps {
 }
 
 export function MoversFilters({ filters }: MoversFiltersProps) {
+  const queryClient = useQueryClient();
+  const { authScope, isAuthQueryReady } = useAuthQueryScope();
   const {
     clearSearch,
     filterKey,
@@ -36,6 +47,26 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
     setKeyword,
     submitSearch,
   } = useMoversFilters(filters);
+
+  const prefetchMovers = useCallback(
+    (patch: Partial<MoversSearchParamsState>) => {
+      if (!isAuthQueryReady) return;
+
+      const nextFilters = { ...filters, ...patch };
+      if (
+        nextFilters.serviceArea === filters.serviceArea &&
+        nextFilters.moveType === filters.moveType &&
+        nextFilters.sort === filters.sort
+      ) {
+        return;
+      }
+
+      void queryClient.prefetchInfiniteQuery(
+        getMoversInfiniteQueryOptions(authScope, toMoversListQuery(nextFilters)),
+      );
+    },
+    [authScope, filters, isAuthQueryReady, queryClient],
+  );
 
   return (
     <>
@@ -74,7 +105,11 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
                 onChange={(value) => replaceFilters({ serviceArea: value })}
               >
                 {REGION_FILTER_OPTIONS.map((option) => (
-                  <Select.Option key={option.value} value={option.value}>
+                  <Select.Option
+                    key={option.value}
+                    value={option.value}
+                    onPrefetch={() => prefetchMovers({ serviceArea: option.value })}
+                  >
                     {option.label}
                   </Select.Option>
                 ))}
@@ -92,7 +127,11 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
                 onChange={(value) => replaceFilters({ moveType: value })}
               >
                 {MOVE_TYPE_FILTER_OPTIONS.map((option) => (
-                  <Select.Option key={option.value} value={option.value}>
+                  <Select.Option
+                    key={option.value}
+                    value={option.value}
+                    onPrefetch={() => prefetchMovers({ moveType: option.value })}
+                  >
                     {option.label}
                   </Select.Option>
                 ))}
@@ -121,7 +160,11 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
             onChange={(value) => replaceFilters({ sort: value as MoverSort })}
           >
             {SORT_OPTIONS.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
+              <Select.Option
+                key={option.value}
+                value={option.value}
+                onPrefetch={() => prefetchMovers({ sort: option.value })}
+              >
                 {option.label}
               </Select.Option>
             ))}

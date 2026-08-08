@@ -49,6 +49,7 @@ export const API_ROUTES = {
     REJECTIONS: "/estimates/rejections",
     SENT: "/estimates/sent",
     SENT_DETAIL: (estimateId: number) => `/estimates/sent/${estimateId}`,
+    COMPLETE_SENT: (estimateId: number) => `/estimates/sent/${estimateId}/complete`,
     PENDING: "/estimates/pending",
     RECEIVED: "/estimates/received",
     DETAIL: (estimateId: number) => `/estimates/${estimateId}`,

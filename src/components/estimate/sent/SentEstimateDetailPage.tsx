@@ -10,14 +10,20 @@ import EstimateDetailLayout, {
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import { EstimateDetailInfoSection } from "@/components/estimate/detail/EstimateDetailInfoSection";
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
+import EstimateDetailPageSkeleton from "@/components/estimate/detail/EstimateDetailPageSkeleton";
 import SentEstimateChatAction from "@/components/estimate/sent/SentEstimateChatAction";
+import SentEstimateCompleteAction from "@/components/estimate/sent/SentEstimateCompleteAction";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { useSentEstimateDetail } from "@/hooks/useSentEstimates";
 import FrameIcon from "@/icons/frame.svg";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
-import { formatKoreanDateTime } from "@/lib/utils/date";
+import {
+  formatKoreanDateTime,
+  formatKoreanDateTimeWithTime,
+  isKstDateOnOrAfter,
+} from "@/lib/utils/date";
 import type { SentEstimate } from "@/types/sentEstimate";
 
 interface SentEstimateDetailPageProps {
@@ -30,6 +36,7 @@ function formatAddress(address: string, detailAddress: string | null) {
 
 function SentEstimateSummary({ estimate }: { estimate: SentEstimate }) {
   const isConfirmed = estimate.status !== "SENT";
+  const statusLabel = estimate.status === "COMPLETED" ? "이사완료" : "확정견적";
 
   return (
     <section className="flex w-full flex-col gap-20 md:gap-26" aria-label="보낸 견적 요약">
@@ -57,7 +64,7 @@ function SentEstimateSummary({ estimate }: { estimate: SentEstimate }) {
           {isConfirmed ? (
             <span className="text-text-brand flex shrink-0 items-center gap-4">
               <FrameIcon className="text-icon-brand size-20 shrink-0" />
-              <Text variant="lg-bold">확정견적</Text>
+              <Text variant="lg-bold">{statusLabel}</Text>
             </span>
           ) : null}
         </div>
@@ -108,13 +115,7 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
   const query = useSentEstimateDetail(estimateId);
 
   if (query.isPending) {
-    return (
-      <EstimateDetailQueryState
-        title="견적 상세"
-        message="견적을 불러오는 중이에요."
-        backFallbackHref={APP_ROUTES.MOVER_ESTIMATES.SENT}
-      />
-    );
+    return <EstimateDetailPageSkeleton />;
   }
 
   if (query.isError || !query.data) {
@@ -133,6 +134,8 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
   const request = estimate.estimateRequest;
   // 2026.08.06 김성현 - [수정] 견적 조율 가능한 보낸 견적에서 채팅방 진입 CTA 노출
   const showChatAction = estimate.status === "SENT";
+  const showCompleteAction =
+    estimate.status === "CONFIRMED" && isKstDateOnOrAfter(request.moveDate);
 
   return (
     <>
@@ -173,12 +176,21 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
                     label: "도착지",
                     value: formatAddress(request.toAddress, request.toDetailAddress),
                   },
+                  ...(request.completedAt
+                    ? [
+                        {
+                          label: "이사 완료일시",
+                          value: formatKoreanDateTimeWithTime(request.completedAt),
+                        },
+                      ]
+                    : []),
                 ]}
               />
               <div className="border-border-subtle w-full border-t" aria-hidden="true" />
             </div>
 
             <SentEstimateComment comment={estimate.comment} />
+            {showCompleteAction ? <SentEstimateCompleteAction estimateId={estimate.id} /> : null}
           </>
         }
         aside={
