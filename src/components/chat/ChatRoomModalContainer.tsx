@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 import ChatRoomCreateError from "@/components/chat/ChatRoomCreateError";
 import ChatRoomModal from "@/components/chat/ChatRoomModal";
 import Toast from "@/components/common/Toast/Toast";
@@ -58,6 +60,17 @@ function ChatMessageList({
   hasNextPage,
   onFetchNextPage,
 }: ChatMessageListProps) {
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const latestMessageId = messages.at(-1)?.id ?? null;
+
+  useEffect(() => {
+    if (latestMessageId === null) {
+      return;
+    }
+
+    bottomRef.current?.scrollIntoView({ block: "end" });
+  }, [latestMessageId]);
+
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -135,6 +148,8 @@ function ChatMessageList({
           </div>
         );
       })}
+
+      <div ref={bottomRef} aria-hidden="true" />
     </div>
   );
 }
