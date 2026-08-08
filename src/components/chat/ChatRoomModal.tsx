@@ -99,7 +99,7 @@ function ChatRoomModalContent({
           type="button"
           className={cn(
             "bg-background-brand text-text-inverse flex size-36 shrink-0 items-center justify-center rounded-full",
-            "hover:bg-background-brand-hover disabled:bg-background-disabled transition-colors disabled:cursor-not-allowed",
+            "hover:bg-background-brand-hover disabled:bg-background-disabled disabled:text-text-disabled transition-colors disabled:cursor-not-allowed",
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
           )}
           aria-label={isActionSheetVisible ? "채팅 메뉴 닫기" : "채팅 메뉴 열기"}
@@ -123,7 +123,7 @@ function ChatRoomModalContent({
           disabled={composerDisabled}
           className={cn(
             "bg-background-subtle text-text-primary h-44 min-w-0 flex-1 rounded-full px-16",
-            "placeholder:text-text-muted disabled:text-text-muted disabled:cursor-not-allowed",
+            "placeholder:text-text-muted disabled:bg-background-disabled disabled:text-text-disabled disabled:cursor-not-allowed",
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
           )}
         />
@@ -132,14 +132,12 @@ function ChatRoomModalContent({
           type="submit"
           className={cn(
             "bg-background-brand text-text-inverse rounded-12 flex h-44 shrink-0 items-center justify-center px-16",
-            "hover:bg-background-brand-hover disabled:bg-background-disabled transition-colors disabled:cursor-not-allowed",
+            "hover:bg-background-brand-hover disabled:bg-background-disabled disabled:text-text-disabled transition-colors disabled:cursor-not-allowed",
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
           )}
           disabled={isSendDisabled}
         >
-          <Text variant="md-semibold" className="text-text-inverse">
-            전송
-          </Text>
+          <Text variant="md-semibold">전송</Text>
         </button>
       </form>
 
