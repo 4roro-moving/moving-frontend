@@ -13,6 +13,9 @@ import { PROFILE_IMAGE_STORAGE_KEY } from "@/lib/auth/profileImage";
 export const metadata: Metadata = {
   title: "무빙",
   description: "이사 견적을 비교하고 믿을 수 있는 기사님을 찾는 플랫폼, 무빙",
+  icons: {
+    icon: "/icons/moving-logo-icon.svg",
+  },
 };
 
 interface RootLayoutProps {

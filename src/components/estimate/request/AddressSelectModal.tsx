@@ -29,7 +29,7 @@ const PANEL_CLASSNAME = cn(
 
 function AddressChip({ label }: { label: string }) {
   return (
-    <span className="bg-background-brand-muted rounded-16 inline-flex w-[54px] shrink-0 items-center justify-center px-4 py-2">
+    <span className="bg-background-brand-muted rounded-16 inline-flex w-54 shrink-0 items-center justify-center px-4 py-2">
       <Text as="span" variant="md-semibold" className="text-text-brand">
         {label}
       </Text>
@@ -140,12 +140,8 @@ export default function AddressSelectModal({
     setHasSearched(false);
   }
 
-  if (!open) {
-    return null;
-  }
-
   return (
-    <Modal onClose={onClose} presentation="modal" size="lg" className={PANEL_CLASSNAME}>
+    <Modal open={open} onClose={onClose} presentation="modal" size="lg" className={PANEL_CLASSNAME}>
       <div className="mb-30 flex w-full shrink-0 items-center justify-between gap-16 md:mb-40">
         <Modal.Title variant={{ base: "2lg-bold", md: "2xl-semibold" }}>
           {kind}를 선택해주세요

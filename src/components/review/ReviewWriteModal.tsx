@@ -25,16 +25,20 @@ interface ReviewWriteModalProps {
 }
 
 interface ReviewWriteModalContentProps {
+  open: boolean;
   item: ReviewableEstimateItem;
   onClose: () => void;
+  onExitComplete?: () => void;
   onSuccess?: () => void;
   onError?: (message: string) => void;
   preview?: boolean;
 }
 
 function ReviewWriteModalContent({
+  open,
   item,
   onClose,
+  onExitComplete,
   onSuccess,
   onError,
   preview = false,
@@ -44,19 +48,11 @@ function ReviewWriteModalContent({
   const [isContentTouched, setIsContentTouched] = useState(false);
   const [submitError, setSubmitError] = useState<string | undefined>();
 
-  const handleClose = () => {
-    setRating(0);
-    setContent("");
-    setIsContentTouched(false);
-    setSubmitError(undefined);
-    onClose();
-  };
-
   const createMutation = useCreateReview({
     moverId: item.mover.id,
     onSuccess: () => {
       onSuccess?.();
-      handleClose();
+      onClose();
     },
     onError: (message) => {
       // Modal과 Toast가 동일 z-index라 실패 시 Toast가 가려질 수 있어 모달 내 인라인 표시
@@ -67,6 +63,15 @@ function ReviewWriteModalContent({
 
   const trimmedContent = content.trim();
   const isPending = createMutation.isPending;
+
+  const handleClose = () => {
+    if (isPending) return;
+    setRating(0);
+    setContent("");
+    setIsContentTouched(false);
+    setSubmitError(undefined);
+    onClose();
+  };
   const isContentValid =
     trimmedContent.length >= MIN_CONTENT_LENGTH && trimmedContent.length <= MAX_CONTENT_LENGTH;
   const contentValidationError =
@@ -90,7 +95,9 @@ function ReviewWriteModalContent({
 
   return (
     <Modal
+      open={open}
       onClose={isPending ? undefined : handleClose}
+      onExitComplete={onExitComplete}
       presentation="responsive"
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
@@ -138,7 +145,7 @@ function ReviewWriteModalContent({
               disabled={isPending}
               placeholder={`최소 ${MIN_CONTENT_LENGTH}자 이상 입력해 주세요`}
               error={contentValidationError}
-              className="h-[160px]"
+              className="h-160"
               onChange={(event) => {
                 setContent(event.target.value);
                 setSubmitError(undefined);
@@ -169,6 +176,7 @@ function ReviewWriteModalContent({
 
 // 2026.07.27 정슬기 - [추가] 리뷰 작성 모달 (별점·내용·POST /reviews)
 // 2026.07.27 정슬기 - [수정] Mobile bottom-sheet형 / Tablet·Desktop 중앙 모달
+// 2026.08.07 정슬기 - [수정] exit 모션을 위해 item 캐시 후 open으로 제어
 export default function ReviewWriteModal({
   open,
   item,
@@ -177,13 +185,23 @@ export default function ReviewWriteModal({
   onError,
   preview = false,
 }: ReviewWriteModalProps) {
-  if (!open || !item) return null;
+  const [cachedItem, setCachedItem] = useState<ReviewableEstimateItem | null>(item);
+
+  if (item != null && item !== cachedItem) {
+    setCachedItem(item);
+  }
+
+  if (!cachedItem) {
+    return null;
+  }
 
   return (
     <ReviewWriteModalContent
-      key={item.estimateId}
-      item={item}
+      key={cachedItem.estimateId}
+      open={open}
+      item={cachedItem}
       onClose={onClose}
+      onExitComplete={() => setCachedItem(null)}
       onSuccess={onSuccess}
       onError={onError}
       preview={preview}

@@ -79,15 +79,15 @@ export default function AlertModal({
   primaryAction,
   actions,
 }: AlertModalProps) {
-  if (!open) {
-    return null;
-  }
-
   const actionContent =
     actions ?? (primaryAction ? <AlertPrimaryActionButtons {...primaryAction} /> : null);
 
   return (
-    <Modal onClose={closeDisabled ? undefined : onClose} className={alertPanelClassName(size)}>
+    <Modal
+      open={open}
+      onClose={closeDisabled ? undefined : onClose}
+      className={alertPanelClassName(size)}
+    >
       <div className="flex w-full items-center justify-between gap-12">
         <Modal.Title>{title}</Modal.Title>
         {onClose ? <Modal.Close onClose={onClose} disabled={closeDisabled} /> : null}
