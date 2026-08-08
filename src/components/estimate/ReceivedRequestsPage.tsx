@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
@@ -12,12 +13,14 @@ import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import Toast from "@/components/common/Toast/Toast";
+import { getMoverEstimateRequests } from "@/lib/api/moverEstimateRequests";
 import {
   useMoverEstimateRequests,
   useRejectMoverEstimate,
   useSendMoverEstimate,
 } from "@/hooks/useMoverEstimateRequests";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import type { MoveType } from "@/types/move";
 import type { MoverEstimateRequest, RequestSort } from "@/types/moverEstimateRequest";
 
@@ -27,6 +30,7 @@ import RejectEstimateModal from "./RejectEstimateModal";
 import SendEstimateModal, { type SendEstimateInput } from "./SendEstimateModal";
 
 export default function ReceivedRequestsPage() {
+  const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState("");
   const [keyword, setKeyword] = useState("");
   const [moveTypes, setMoveTypes] = useState<MoveType[]>([]);
@@ -40,14 +44,15 @@ export default function ReceivedRequestsPage() {
   const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const query = useMoverEstimateRequests({
+  const requestQuery = {
     keyword: keyword || undefined,
     moveType: moveTypes.length ? moveTypes : undefined,
     isDesignated: includeDesignated ? true : undefined,
     isServiceArea: serviceAreaOnly ? true : undefined,
     sort,
     limit: 10,
-  });
+  };
+  const query = useMoverEstimateRequests(requestQuery);
   const sendEstimateMutation = useSendMoverEstimate();
   const rejectEstimateMutation = useRejectMoverEstimate();
 
@@ -62,6 +67,25 @@ export default function ReceivedRequestsPage() {
     } else {
       setMoveTypes([...moveTypes, moveType]);
     }
+  }
+
+  function prefetchRequests(patch: Partial<typeof requestQuery>) {
+    const nextQuery = { ...requestQuery, ...patch };
+
+    void queryClient.prefetchInfiniteQuery({
+      queryKey: [...QUERY_KEYS.ESTIMATES.ALL, nextQuery],
+      queryFn: ({ pageParam }) =>
+        getMoverEstimateRequests({ ...nextQuery, cursor: pageParam as string | undefined }),
+      initialPageParam: undefined as string | undefined,
+      getNextPageParam: (lastPage: Awaited<ReturnType<typeof getMoverEstimateRequests>>) =>
+        lastPage.pagination.nextCursor ?? undefined,
+    });
+  }
+
+  function getNextMoveTypes(moveType: MoveType) {
+    return moveTypes.includes(moveType)
+      ? moveTypes.filter((item) => item !== moveType)
+      : [...moveTypes, moveType];
   }
 
   function handleSendEstimate(input: SendEstimateInput) {
@@ -137,6 +161,12 @@ export default function ReceivedRequestsPage() {
                   size="md"
                   selected={isSelected}
                   onClick={() => toggleMoveType(moveType.value)}
+                  onPrefetch={() => {
+                    const nextMoveTypes = getNextMoveTypes(moveType.value);
+                    prefetchRequests({
+                      moveType: nextMoveTypes.length ? nextMoveTypes : undefined,
+                    });
+                  }}
                 >
                   {moveType.label}
                 </SelectableChip>
@@ -165,11 +195,17 @@ export default function ReceivedRequestsPage() {
               <Checkbox
                 checked={includeDesignated}
                 onCheckedChange={setIncludeDesignated}
+                onPrefetch={() =>
+                  prefetchRequests({ isDesignated: includeDesignated ? undefined : true })
+                }
                 label="지정 견적 요청"
               />
               <Checkbox
                 checked={serviceAreaOnly}
                 onCheckedChange={setServiceAreaOnly}
+                onPrefetch={() =>
+                  prefetchRequests({ isServiceArea: serviceAreaOnly ? undefined : true })
+                }
                 label="서비스 가능 지역"
               />
             </div>
@@ -182,8 +218,18 @@ export default function ReceivedRequestsPage() {
                 defaultValue={sort}
                 onChange={(value) => setSort(value as RequestSort)}
               >
-                <Select.Option value="requestedAt">요청일 빠른순</Select.Option>
-                <Select.Option value="moveDate">이사 빠른순</Select.Option>
+                <Select.Option
+                  value="requestedAt"
+                  onPrefetch={() => prefetchRequests({ sort: "requestedAt" })}
+                >
+                  요청일 빠른순
+                </Select.Option>
+                <Select.Option
+                  value="moveDate"
+                  onPrefetch={() => prefetchRequests({ sort: "moveDate" })}
+                >
+                  이사 빠른순
+                </Select.Option>
               </Select>
               <button
                 type="button"
@@ -263,55 +309,72 @@ export default function ReceivedRequestsPage() {
             <Modal.Close size="sm" onClose={() => setIsFilterOpen(false)} />
           </div>
 
-          <section className="flex flex-col gap-8">
-            <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
-              이사 유형
-            </Text>
-            <div className="flex flex-wrap gap-12">
-              {MOVE_TYPE_OPTIONS.map((moveType) => {
-                const isSelected = moveTypes.includes(moveType.value);
-                return (
-                  <SelectableChip
-                    key={moveType.value}
-                    size="sm"
-                    selected={isSelected}
-                    onClick={() => toggleMoveType(moveType.value)}
-                  >
-                    {moveType.label}
-                  </SelectableChip>
-                );
-              })}
-            </div>
-          </section>
+            <section className="flex flex-col gap-8">
+              <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
+                이사 유형
+              </Text>
+              <div className="flex flex-wrap gap-12">
+                {MOVE_TYPE_OPTIONS.map((moveType) => {
+                  const isSelected = moveTypes.includes(moveType.value);
+                  return (
+                    <SelectableChip
+                      key={moveType.value}
+                      size="sm"
+                      selected={isSelected}
+                      onClick={() => toggleMoveType(moveType.value)}
+                      onPrefetch={() => {
+                        const nextMoveTypes = getNextMoveTypes(moveType.value);
+                        prefetchRequests({
+                          moveType: nextMoveTypes.length ? nextMoveTypes : undefined,
+                        });
+                      }}
+                    >
+                      {moveType.label}
+                    </SelectableChip>
+                  );
+                })}
+              </div>
+            </section>
 
-          <section className="flex flex-col gap-8">
-            <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
-              지역 및 견적
-            </Text>
-            <div className="flex flex-col gap-12">
-              {[
-                {
-                  label: "지정 견적 요청",
-                  checked: includeDesignated,
-                  onChange: setIncludeDesignated,
-                },
-                {
-                  label: "서비스 가능 지역",
-                  checked: serviceAreaOnly,
-                  onChange: setServiceAreaOnly,
-                },
-              ].map((filter) => (
-                <Checkbox
-                  key={filter.label}
-                  checked={filter.checked}
-                  onCheckedChange={filter.onChange}
-                  label={filter.label}
-                  labelClassName="text-text-secondary"
-                />
-              ))}
-            </div>
-          </section>
-        </div>
+            <section className="flex flex-col gap-8">
+              <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
+                지역 및 견적
+              </Text>
+              <div className="flex flex-col gap-12">
+                {[
+                  {
+                    label: "지정 견적 요청",
+                    checked: includeDesignated,
+                    onChange: setIncludeDesignated,
+                  },
+                  {
+                    label: "서비스 가능 지역",
+                    checked: serviceAreaOnly,
+                    onChange: setServiceAreaOnly,
+                  },
+                ].map((filter) => (
+                  <Checkbox
+                    key={filter.label}
+                    checked={filter.checked}
+                    onCheckedChange={filter.onChange}
+                    onPrefetch={() => {
+                      if (filter.label === "지정 견적 요청") {
+                        prefetchRequests({
+                          isDesignated: includeDesignated ? undefined : true,
+                        });
+                      } else {
+                        prefetchRequests({
+                          isServiceArea: serviceAreaOnly ? undefined : true,
+                        });
+                      }
+                    }}
+                    label={filter.label}
+                    labelClassName="text-text-secondary"
+                  />
+                ))}
+              </div>
+            </section>
+          </div>
 
         <Modal.Button fullWidth size="cta" onClick={() => setIsFilterOpen(false)}>
           조회하기

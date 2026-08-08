@@ -43,6 +43,8 @@ export interface SelectableChipProps extends VariantProps<typeof selectableChipV
   children: ReactNode;
   /** 클릭 시 선택 상태를 변경하는 핸들러. 전달하면 button으로 렌더링합니다. */
   onClick?: () => void;
+  /** 선택 전에 필요한 데이터를 미리 준비합니다. */
+  onPrefetch?: () => void;
   disabled?: boolean;
   className?: string;
 }
@@ -52,6 +54,7 @@ export default function SelectableChip({
   size = "sm",
   selected = false,
   onClick,
+  onPrefetch,
   disabled,
   className,
 }: SelectableChipProps) {
@@ -72,6 +75,8 @@ export default function SelectableChip({
         aria-pressed={isSelected}
         disabled={disabled}
         onClick={onClick}
+        onFocus={onPrefetch}
+        onPointerEnter={onPrefetch}
         className={cn(
           selectableChipVariants({ size: resolvedSize, selected: isSelected }),
           "hover:border-border-brand",
