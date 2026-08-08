@@ -94,10 +94,7 @@ export default function EstimateRequestSummaryContent({
               {fromLabel}
             </Text>
           </div>
-          <ArrowRightIcon
-            size={16}
-            className={cn("shrink-0", isModal ? "mb-8 xl:mb-[9px]" : "mb-[9px]")}
-          />
+          <ArrowRightIcon size={16} className={cn("shrink-0", isModal ? "mb-8 xl:mb-9" : "mb-9")} />
           <div className={cn(isModal && "flex items-center gap-8 xl:block")}>
             <Text as="dt" variant="md-regular" className="text-text-muted">
               도착지

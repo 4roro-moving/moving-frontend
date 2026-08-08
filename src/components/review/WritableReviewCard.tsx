@@ -18,6 +18,12 @@ interface WritableReviewCardProps {
   onWriteClick: (item: ReviewableEstimateItem) => void;
 }
 
+interface InfoFieldProps {
+  label: string;
+  value: string;
+  fullValue?: string;
+}
+
 function summarizeAddress(address: string): string {
   const [region = "", district = ""] = address.trim().split(/\s+/);
   const shortenedRegion = region
@@ -29,15 +35,7 @@ function summarizeAddress(address: string): string {
   return [shortenedRegion, district].filter(Boolean).join(" ");
 }
 
-function InfoField({
-  label,
-  value,
-  fullValue = value,
-}: {
-  label: string;
-  value: string;
-  fullValue?: string;
-}) {
+function InfoField({ label, value, fullValue = value }: InfoFieldProps) {
   return (
     <div className="flex min-w-0 flex-col items-start justify-center">
       <Text as="dt" variant={{ base: "xs-regular", xl: "md-regular" }} className="text-text-muted">
@@ -63,9 +61,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
   const { mover, estimateRequest, price } = item;
   const moverLabel = getReviewMoverDisplayName(mover);
   const titleId = `writable-review-${item.estimateId}-title`;
-
-  const shortIntro =
-    "shortIntro" in mover && typeof mover.shortIntro === "string" ? mover.shortIntro : "";
+  const shortIntro = mover.shortIntro?.trim() ?? "";
 
   return (
     <article
@@ -157,7 +153,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
               fullValue={estimateRequest.fromAddress}
             />
 
-            <span
+            <div
               className="bg-border-subtle hidden h-50 w-px shrink-0 md:block"
               aria-hidden="true"
             />
@@ -168,7 +164,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
               fullValue={estimateRequest.toAddress}
             />
 
-            <span
+            <div
               className="bg-border-subtle hidden h-50 w-px shrink-0 md:block"
               aria-hidden="true"
             />

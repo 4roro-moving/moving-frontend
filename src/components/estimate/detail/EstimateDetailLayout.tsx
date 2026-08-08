@@ -107,7 +107,7 @@ export function EstimateDetailQueryState({
   const headerTitle = title ?? "견적 상세";
 
   return (
-    <div className="bg-background-default flex w-full max-w-full flex-col overflow-x-hidden">
+    <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
       <PageHeader title={headerTitle} backFallbackHref={backFallbackHref} />
 
       <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center xl:px-0">
@@ -146,7 +146,12 @@ export function EstimateDetailLoadingState({
   asideClassName,
 }: EstimateDetailLoadingStateProps) {
   return (
-    <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
+    <div
+      role="status"
+      className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden"
+    >
+      <span className="sr-only">견적 상세를 불러오는 중</span>
+
       <PageHeader title={title ?? "견적 상세"} backFallbackHref={backFallbackHref} />
 
       <DetailHeroBanner showProfile={showProfile} />

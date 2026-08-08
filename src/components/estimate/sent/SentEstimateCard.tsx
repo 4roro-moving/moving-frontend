@@ -28,7 +28,7 @@ interface SentEstimateCardProps {
 
 function RouteArrow() {
   return (
-    <span className="mb-2.25 flex w-18 items-center" aria-hidden="true">
+    <span className="mb-9 flex w-18 items-center" aria-hidden="true">
       <span className="bg-text-secondary h-px flex-1" />
       <span className="border-text-secondary -ml-1 size-1.5 rotate-45 border-t border-r" />
     </span>

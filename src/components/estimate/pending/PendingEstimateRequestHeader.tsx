@@ -43,7 +43,11 @@ export default function PendingEstimateRequestHeader({
               <Text as="dt" variant="md-regular" className="text-text-muted">
                 출발지
               </Text>
-              <Text as="dd" variant="md-semibold" className="text-text-primary m-0 text-right">
+              <Text
+                as="dd"
+                variant="md-semibold"
+                className="text-text-primary m-0 min-w-0 flex-1 text-right wrap-break-word"
+              >
                 {request.fromAddress}
               </Text>
             </div>
@@ -51,7 +55,11 @@ export default function PendingEstimateRequestHeader({
               <Text as="dt" variant="md-regular" className="text-text-muted">
                 도착지
               </Text>
-              <Text as="dd" variant="md-semibold" className="text-text-primary m-0 text-right">
+              <Text
+                as="dd"
+                variant="md-semibold"
+                className="text-text-primary m-0 min-w-0 flex-1 text-right wrap-break-word"
+              >
                 {request.toAddress}
               </Text>
             </div>

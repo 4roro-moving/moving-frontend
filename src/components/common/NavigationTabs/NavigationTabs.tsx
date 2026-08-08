@@ -35,8 +35,8 @@ export default function NavigationTabs({ ariaLabel, items, className }: Navigati
         className,
       )}
     >
-      <div className="px-margin-mobile md:px-margin-tablet mx-auto flex h-full w-full max-w-[calc(var(--container-desktop)+var(--margin-tablet)+var(--margin-tablet))] items-end">
-        <div className="flex h-full min-w-max items-end gap-24 xl:gap-32">
+      <div className="px-margin-mobile md:px-margin-tablet mx-auto h-full w-full max-w-[var(--container-desktop)] xl:px-0">
+        <div className="flex h-full items-center gap-24 md:gap-32 xl:gap-40">
           {items.map((item) => {
             const isActive =
               item.match === "exact"
@@ -57,7 +57,7 @@ export default function NavigationTabs({ ariaLabel, items, className }: Navigati
                   as="span"
                   variant={isActive ? "md-bold" : "md-semibold"}
                   className={cn(
-                    "xl:text-[length:var(--font-size-20)] xl:leading-[var(--line-height-32)] xl:font-semibold",
+                    "xl:text-(length:--font-size-20) xl:leading-32 xl:font-semibold",
                     isActive ? "text-nav-text-active" : "text-nav-text-default",
                   )}
                 >
