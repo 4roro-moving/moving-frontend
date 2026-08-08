@@ -14,6 +14,10 @@ const isProfileImageSize = (size: number): boolean => {
   return size <= PROFILE_IMAGE_MAX_SIZE;
 };
 
+/**
+ * Presigned URL로 S3에 업로드한 뒤, 프로필 API에 넣을 S3 key를 반환합니다.
+ * Header 표시용 URL은 프로필 저장 응답의 imageUrl을 사용합니다.
+ */
 export const uploadProfileImage = async (
   imageFile: File | null | undefined,
 ): Promise<string | undefined> => {

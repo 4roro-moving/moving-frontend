@@ -86,12 +86,12 @@ const CustomerProfileEditForm = ({
         return;
       }
 
-      const imageUrl = await uploadProfileImage(formValues.imageFile);
+      const imageKey = await uploadProfileImage(formValues.imageFile);
       const { basic, profile } = buildCustomerProfileEditPayloads({
         formValues,
         dirtyFields,
         hasPassword,
-        uploadedImageUrl: imageUrl,
+        uploadedImageUrl: imageKey,
       });
 
       if (!basic && !profile) {

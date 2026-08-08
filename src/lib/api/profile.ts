@@ -159,19 +159,22 @@ export const toAuthUserFromMoverProfile = (profile: MoverProfileMe): AuthUser =>
 });
 
 export const resolveAuthUserImage = async (user: AuthUser): Promise<AuthUser> => {
-  const sessionUser = { ...user, imageUrl: null as string | null };
+  if (typeof user.imageUrl === "string" && user.imageUrl.trim().length > 0) {
+    return user;
+  }
 
   try {
     if (user.role === "CUSTOMER") {
       const profile = await getCustomerProfileMe();
-      sessionUser.imageUrl = profile.imageUrl ?? null;
+      return { ...user, imageUrl: profile.imageUrl ?? null };
     } else if (user.role === "MOVER") {
       const profile = await getMoverProfileMe();
-      sessionUser.imageUrl = profile.imageUrl ?? null;
+      return { ...user, imageUrl: profile.imageUrl ?? null };
     }
 
-    return sessionUser;
+    return { ...user, imageUrl: null };
   } catch (error) {
-    return sessionUser;
+    // imageUrl 필드를 건들이지 않는다.
+    return user;
   }
 };

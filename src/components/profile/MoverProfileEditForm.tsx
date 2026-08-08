@@ -63,7 +63,7 @@ const MoverProfileEditForm = ({
     setSubmitError(null);
 
     try {
-      const imageUrl = await uploadProfileImage(formValues.imageFile);
+      const imageKey = await uploadProfileImage(formValues.imageFile);
 
       await updateMoverProfile.mutateAsync({
         nickname: formValues.nickname,
@@ -72,7 +72,7 @@ const MoverProfileEditForm = ({
         description: formValues.description,
         regionIds: formValues.regionIds,
         serviceTypes: formValues.serviceTypes,
-        ...(imageUrl ? { imageUrl } : {}),
+        ...(imageKey ? { imageUrl: imageKey } : {}),
       });
       setToastMessage("프로필이 수정되었습니다.");
     } catch (error) {

@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, type ChangeEvent } from "react";
 
+import { PROFILE_IMAGE_CONTENT_TYPES } from "@/types/profile";
 import { Text } from "@/components/common/Text";
 import { GalleryIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
@@ -16,8 +17,6 @@ interface ProfileImageUploaderProps {
   error?: string;
   className?: string;
 }
-
-const PROFILE_IMAGE_UPLOAD_DISABLED_MESSAGE = "이미지 업로드 기능은 아직 지원하지 않습니다.";
 
 /** 프로필 이미지 업로드 트리거 (Figma profile/image-uploader) */
 const ProfileImageUploader = ({
@@ -48,6 +47,8 @@ const ProfileImageUploader = ({
     };
   }, [objectUrl]);
 
+  const PROFILE_IMAGE_ACCEPT = PROFILE_IMAGE_CONTENT_TYPES.join(",");
+
   const previewUrl = objectUrl ?? initialPreviewUrl;
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -61,7 +62,7 @@ const ProfileImageUploader = ({
         ref={inputRef}
         id={inputId}
         type="file"
-        accept="image/*"
+        accept={PROFILE_IMAGE_ACCEPT}
         className="sr-only"
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}

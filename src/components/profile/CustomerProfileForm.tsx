@@ -70,11 +70,11 @@ const CustomerProfileForm = ({
         return;
       }
 
-      const imageUrl = await uploadProfileImage(formValues.imageFile);
+      const imageKey = await uploadProfileImage(formValues.imageFile);
 
       await createCustomerProfile.mutateAsync({
         ...(requiresPhone && formValues.phone ? { phone: formValues.phone } : {}),
-        ...(imageUrl ? { imageUrl } : {}),
+        ...(imageKey ? { imageUrl: imageKey } : {}),
         regionIds: [formValues.regionId],
         serviceTypes: formValues.serviceTypes,
       });
