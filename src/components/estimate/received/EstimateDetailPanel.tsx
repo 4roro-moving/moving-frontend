@@ -1,5 +1,10 @@
 import { getMoveTypeLabel } from "@/lib/utils/estimateFormat";
 import type { ReceivedEstimatePanel } from "@/types/estimate";
+import { cn } from "@/lib/utils/cn";
+import {
+  ESTIMATE_LIST_PANEL_PADDING_CLASSNAME,
+  ESTIMATE_LIST_PANEL_SURFACE_CLASSNAME,
+} from "@/components/estimate/estimateSurfaceStyles";
 
 import EstimateOfferSection from "./EstimateOfferSection";
 import EstimateRequestSummary from "./EstimateRequestSummary";
@@ -15,8 +20,12 @@ export default function EstimateDetailPanel({ panel, onFavoriteError }: Estimate
   return (
     <article
       // 2026.07.24 정슬기 - [수정] Mobile은 Figma처럼 border/shadow 없는 flat surface, md+는 기존 패널 스타일 유지
-      // 2026.07.24 정슬기 - [수정] aria-label을 요청 id 대신 이사 유형·경로로 제공
-      className="bg-background-default md:bg-background-surface md:rounded-20 md:border-border-subtle flex w-full flex-col items-center border-0 px-0 py-0 shadow-none md:border-[0.5px] md:px-28 md:py-32 md:shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.14),2px_2px_10px_0_rgba(220,220,220,0.14)] xl:px-40 xl:pt-48 xl:pb-40"
+      // 2026.08.07 정슬기 - [수정] 패널 surface를 공통 토큰 클래스로 통일
+      className={cn(
+        ESTIMATE_LIST_PANEL_SURFACE_CLASSNAME,
+        ESTIMATE_LIST_PANEL_PADDING_CLASSNAME,
+        "flex w-full flex-col items-center",
+      )}
       aria-label={`${getMoveTypeLabel(moveType)} · ${fromAddress} → ${toAddress}`}
     >
       <div className="flex w-full flex-col items-stretch gap-28 md:gap-40 xl:flex-row xl:items-start xl:gap-60">

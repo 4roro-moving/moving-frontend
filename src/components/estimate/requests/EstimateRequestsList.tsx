@@ -1,8 +1,8 @@
 import Pagination from "@/components/common/Pagination/Pagination";
 import Select from "@/components/common/Select/Select";
 import EstimatesListEmptyState from "@/components/estimate/EstimatesListEmptyState";
-import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import EstimateRequestCard from "@/components/estimate/requests/EstimateRequestCard";
+import { EstimateRequestListSkeleton } from "@/components/estimate/requests/EstimateRequestLoadingSkeletons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import type { EstimateRequestListStatusFilter, MyEstimateRequestItem } from "@/types/estimate";
 import type { Pagination as PaginationMeta } from "@/types/pagination";
@@ -62,7 +62,7 @@ export default function EstimateRequestsList({
         desc={selectedLabel}
         defaultValue={statusFilter}
         size="lg"
-        className="w-[128px] md:w-[160px]"
+        className="w-128 md:w-160"
         onChange={(value) => {
           if (isStatusFilter(value)) {
             onStatusFilterChange(value);
@@ -80,45 +80,43 @@ export default function EstimateRequestsList({
 
   if (isPlaceholderData) {
     return (
-      <div
-        className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow flex w-full flex-col gap-24 md:gap-40 xl:px-0"
-        aria-busy="true"
-      >
-        {filterSelect}
-        <EstimatesQueryStatus message="보낸 견적 요청을 불러오는 중입니다." />
+      <div className="flex w-full flex-col gap-24 md:gap-40" aria-busy="true">
+        <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto w-full xl:px-0">
+          {filterSelect}
+        </div>
+        <EstimateRequestListSkeleton />
       </div>
     );
   }
 
   if (pagination.totalCount === 0) {
-    return (
+    return isAllFilter ? (
+      <EstimatesListEmptyState
+        description={
+          <>
+            아직 보낸 견적 요청이 없어요
+            <br />
+            견적 요청을 작성하고 기사님의 견적을 받아보세요
+          </>
+        }
+        buttonLabel="견적 요청하기"
+        href={APP_ROUTES.ESTIMATE_REQUEST}
+      />
+    ) : (
       <div className="flex w-full flex-col gap-24 md:gap-32">
         <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto w-full xl:px-0">
           {filterSelect}
         </div>
-        {isAllFilter ? (
-          <EstimatesListEmptyState
-            description={
-              <>
-                아직 보낸 견적 요청이 없어요
-                <br />
-                견적 요청을 작성하고 기사님의 견적을 받아보세요
-              </>
-            }
-            buttonLabel="견적 요청하기"
-            href={APP_ROUTES.ESTIMATE_REQUEST}
-          />
-        ) : (
-          <EstimatesListEmptyState
-            description={
-              <>
-                해당 상태의 견적 요청이 없어요.
-                <br />
-                다른 상태를 선택해 확인해보세요.
-              </>
-            }
-          />
-        )}
+
+        <EstimatesListEmptyState
+          description={
+            <>
+              해당 상태의 견적 요청이 없어요.
+              <br />
+              다른 상태를 선택해 확인해보세요.
+            </>
+          }
+        />
       </div>
     );
   }

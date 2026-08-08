@@ -38,6 +38,9 @@ export const API_ROUTES = {
     DELETE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
     ACTIVE: "/estimate-requests/active",
     DESIGNATE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}/designate`,
+    // 2026.08.07 정슬기 - [추가] 지정 기사 개별 취소
+    CANCEL_DESIGNATE: (estimateRequestId: number, moverId: string) =>
+      `/estimate-requests/${estimateRequestId}/designate/${moverId}`,
   },
   // 2026.07.24 정슬기 - [추가] 받은 견적 목록·상세·확정 API 경로
   // 2026.07.28 정슬기 - [수정] 대기 중인 견적 목록 경로 추가 (BE GET /estimates/pending)

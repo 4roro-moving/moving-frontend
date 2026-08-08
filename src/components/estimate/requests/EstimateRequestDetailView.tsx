@@ -10,10 +10,13 @@ import EstimateDetailLayout, {
   EstimateDetailQueryState,
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import { EstimateDetailInfoSection } from "@/components/estimate/detail/EstimateDetailInfoSection";
+import DesignatedMoverCancelConfirmModal from "@/components/estimate/requests/DesignatedMoverCancelConfirmModal";
 import EstimateRequestCancelConfirmModal from "@/components/estimate/requests/EstimateRequestCancelConfirmModal";
+import EstimateRequestCancelHubModal from "@/components/estimate/requests/EstimateRequestCancelHubModal";
 import EstimateRequestDesignatedMovers from "@/components/estimate/requests/EstimateRequestDesignatedMovers";
 import EstimateRequestDetailSummary from "@/components/estimate/requests/EstimateRequestDetailSummary";
-import { useEstimateRequestCancelFlow } from "@/hooks/useEstimateRequestCancelFlow";
+import { EstimateRequestDetailSkeleton } from "@/components/estimate/requests/EstimateRequestLoadingSkeletons";
+import { useEstimateRequestCancelHubFlow } from "@/hooks/useEstimateRequestCancelHubFlow";
 import { useEstimateRequestDetail } from "@/hooks/useEstimateRequestDetail";
 import { TrashIcon } from "@/icons";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
@@ -112,21 +115,20 @@ function EstimateRequestCancelAction({
  * // 2026.08.03 정슬기 - [추가] PENDING|OPEN 취소 액션
  * // 2026.08.04 정슬기 - [수정] Header → 상세 액션 영역으로 취소 버튼 이동
  * // 2026.08.04 정슬기 - [수정] aside(320px 고정폭) → main 하단으로 이동
+ * // 2026.08.07 정슬기 - [수정] 취소 허브에서 지정·전체 취소 선택 후 확인 모달
  */
 export default function EstimateRequestDetailView({
   estimateRequestId,
 }: EstimateRequestDetailViewProps) {
   const { data, isLoading, isError, error, refetch } = useEstimateRequestDetail(estimateRequestId);
-  const cancelFlow = useEstimateRequestCancelFlow(estimateRequestId);
+  // 훅은 로딩 중에도 호출 — designatedMovers는 data 없을 때 빈 배열
+  const cancelHub = useEstimateRequestCancelHubFlow(
+    estimateRequestId,
+    data?.designatedMovers ?? [],
+  );
 
   if (isLoading) {
-    return (
-      <EstimateDetailQueryState
-        title="견적 상세"
-        message="견적 요청 상세를 불러오는 중입니다."
-        backFallbackHref={APP_ROUTES.ESTIMATES.REQUESTS}
-      />
-    );
+    return <EstimateRequestDetailSkeleton />;
   }
 
   if (isError || !data) {
@@ -190,24 +192,41 @@ export default function EstimateRequestDetailView({
             <EstimateRequestDesignatedMovers designatedMovers={data.designatedMovers} />
             {canCancel ? (
               <EstimateRequestCancelAction
-                cancelButtonRef={cancelFlow.cancelButtonRef}
-                isCancelPending={cancelFlow.isCancelPending}
-                onCancel={cancelFlow.openCancelModal}
+                cancelButtonRef={cancelHub.cancelButtonRef}
+                isCancelPending={cancelHub.isBusy}
+                onCancel={cancelHub.openHub}
               />
             ) : null}
           </>
         }
       />
 
-      <EstimateRequestCancelConfirmModal
-        open={cancelFlow.isCancelModalOpen}
-        isPending={cancelFlow.isCancelPending}
-        onClose={cancelFlow.closeCancelModal}
-        onConfirm={cancelFlow.confirmCancel}
+      <EstimateRequestCancelHubModal
+        open={cancelHub.isHubOpen}
+        designatedMovers={data.designatedMovers}
+        closeDisabled={cancelHub.isBusy}
+        onClose={cancelHub.closeAll}
+        onSelectDesignateCancel={cancelHub.openDesignateConfirm}
+        onSelectFullCancel={cancelHub.openFullConfirm}
       />
 
-      {cancelFlow.toastMessage ? (
-        <Toast onClose={cancelFlow.clearToast}>{cancelFlow.toastMessage}</Toast>
+      <DesignatedMoverCancelConfirmModal
+        open={cancelHub.isDesignateConfirmOpen}
+        moverDisplayName={cancelHub.designateDisplayName}
+        isPending={cancelHub.isDesignateCancelPending}
+        onClose={cancelHub.closeConfirmBackToHub}
+        onConfirm={cancelHub.confirmDesignateCancel}
+      />
+
+      <EstimateRequestCancelConfirmModal
+        open={cancelHub.isFullConfirmOpen}
+        isPending={cancelHub.isFullCancelPending}
+        onClose={cancelHub.closeConfirmBackToHub}
+        onConfirm={cancelHub.confirmFullCancel}
+      />
+
+      {cancelHub.toastMessage ? (
+        <Toast onClose={cancelHub.clearToast}>{cancelHub.toastMessage}</Toast>
       ) : null}
     </>
   );
