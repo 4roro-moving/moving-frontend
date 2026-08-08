@@ -78,6 +78,22 @@ export function formatKoreanDateTimeWithTime(date: string): string {
   return `${getPart("year")}년 ${getPart("month")}월 ${getPart("day")}일 (${getPart("weekday")}) ${getPart("hour")}:${getPart("minute")}`;
 }
 
+/** 한국 시간 기준으로 기준일이 대상 날짜와 같거나 이후인지 확인합니다. */
+export function isKstDateOnOrAfter(date: string | Date, now = new Date()): boolean {
+  const target = date instanceof Date ? date : new Date(date);
+
+  if (Number.isNaN(target.getTime()) || Number.isNaN(now.getTime())) {
+    return false;
+  }
+
+  const toKstDateValue = (value: Date) => {
+    const kstDate = new Date(value.getTime() + 9 * 60 * 60 * 1000);
+    return Date.UTC(kstDate.getUTCFullYear(), kstDate.getUTCMonth(), kstDate.getUTCDate());
+  };
+
+  return toKstDateValue(now) >= toKstDateValue(target);
+}
+
 /**
  * 로컬 자정 기준 날짜 전용 Date를 생성합니다.
  * `new Date(year, monthIndex, day)`는 year 0~99를 1900~1999로 보정하므로 setFullYear를 사용합니다.
