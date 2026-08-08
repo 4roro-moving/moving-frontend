@@ -10,6 +10,7 @@ import EstimateDetailLayout, {
 } from "@/components/estimate/detail/EstimateDetailLayout";
 import { EstimateDetailInfoSection } from "@/components/estimate/detail/EstimateDetailInfoSection";
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
+import EstimateDetailPageSkeleton from "@/components/estimate/detail/EstimateDetailPageSkeleton";
 import SentEstimateChatAction from "@/components/estimate/sent/SentEstimateChatAction";
 import SentEstimateCompleteAction from "@/components/estimate/sent/SentEstimateCompleteAction";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
@@ -114,13 +115,7 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
   const query = useSentEstimateDetail(estimateId);
 
   if (query.isPending) {
-    return (
-      <EstimateDetailQueryState
-        title="견적 상세"
-        message="견적을 불러오는 중이에요."
-        backFallbackHref={APP_ROUTES.MOVER_ESTIMATES.SENT}
-      />
-    );
+    return <EstimateDetailPageSkeleton />;
   }
 
   if (query.isError || !query.data) {
