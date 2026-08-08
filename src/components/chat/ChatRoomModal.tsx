@@ -45,6 +45,7 @@ function ChatRoomModalContent({
   actions,
 }: ChatRoomModalContentProps) {
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
+  const isSendDisabled = sendDisabled || !messageValue.trim();
 
   return (
     <Modal
@@ -87,7 +88,7 @@ function ChatRoomModalContent({
         className="border-border-subtle flex shrink-0 items-center gap-8 border-t px-16 py-14 md:px-20"
         onSubmit={(event) => {
           event.preventDefault();
-          if (sendDisabled || !messageValue.trim()) return;
+          if (isSendDisabled) return;
           onSendMessage?.();
         }}
       >
@@ -125,7 +126,7 @@ function ChatRoomModalContent({
             "hover:bg-background-brand-hover disabled:bg-background-disabled transition-colors disabled:cursor-not-allowed",
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
           )}
-          disabled={sendDisabled || !messageValue.trim()}
+          disabled={isSendDisabled}
         >
           <Text variant="md-semibold" className="text-text-inverse">
             전송

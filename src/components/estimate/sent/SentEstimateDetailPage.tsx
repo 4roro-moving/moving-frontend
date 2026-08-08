@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import ChatRoomModal from "@/components/chat/ChatRoomModal";
+import ChatRoomModalContainer from "@/components/chat/ChatRoomModalContainer";
 import { Text } from "@/components/common/Text";
 import EstimateDetailLayout, {
   ESTIMATE_DETAIL_LAYOUT_CLASSES,
@@ -111,7 +111,6 @@ function SentEstimateComment({ comment }: { comment: string }) {
 
 export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetailPageProps) {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
-  const [chatMessage, setChatMessage] = useState("");
   const query = useSentEstimateDetail(estimateId);
 
   if (query.isPending) {
@@ -203,13 +202,12 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
         }
       />
 
-      <ChatRoomModal
+      <ChatRoomModalContainer
         open={isChatModalOpen}
+        estimateId={estimate.id}
         participantRole="MOVER"
         participantName={estimate.customer.name}
         estimateSummary={`견적가 - ${estimate.price.toLocaleString("ko-KR")}원`}
-        messageValue={chatMessage}
-        onMessageChange={setChatMessage}
         onClose={() => setIsChatModalOpen(false)}
       />
     </>
