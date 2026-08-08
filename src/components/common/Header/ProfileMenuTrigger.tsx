@@ -7,6 +7,7 @@ import { useCallback, useEffect, useId, useRef, useState, type FocusEvent } from
 
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import type { AuthRole } from "@/lib/auth/role";
 import { isPublicPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
@@ -26,7 +27,7 @@ interface ProfileMenuTriggerProps {
   /** 로그아웃 후 이동 경로 분기용 */
   role?: AuthRole | null;
   imageUrl?: string | null;
-  isAvartarPending?: boolean;
+  isAvatarPending?: boolean;
 }
 
 export default function ProfileMenuTrigger({
@@ -34,7 +35,7 @@ export default function ProfileMenuTrigger({
   items,
   role = null,
   imageUrl,
-  isAvartarPending,
+  isAvatarPending,
 }: ProfileMenuTriggerProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -136,14 +137,8 @@ export default function ProfileMenuTrigger({
         className="focus-visible:ring-border-brand rounded-8 flex items-center focus-visible:ring-2 focus-visible:outline-none xl:gap-16"
         onClick={() => setIsOpen((open) => !open)}
       >
-        {isAvartarPending ? (
-          <Image
-            src="/icons/profile-default.svg"
-            alt=""
-            width={36}
-            height={36}
-            className="rounded-4 size-24 xl:size-36 xl:rounded-none"
-          />
+        {isAvatarPending ? (
+          <Skeleton className="size-24 rounded-full xl:size-36" />
         ) : imageUrl ? (
           <div className="rounded-100 overflow-hidden">
             <Image

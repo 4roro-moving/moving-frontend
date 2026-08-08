@@ -166,7 +166,7 @@ const Header = ({
   const hintedImageUrl = profileImage ?? initialProfileImage ?? null;
   const imageUrl = isAuthPending ? hintedImageUrl : (user?.imageUrl ?? profileImage ?? null);
 
-  const isAvartarPending = isAuthPending && !hintedImageUrl;
+  const isAvatarPending = isAuthPending && !hintedImageUrl;
 
   const { isIncomplete, isCompletionUnresolved, profileCreatePath } =
     useProfileCompletionState(resolvedRole);
@@ -276,7 +276,7 @@ const Header = ({
               imageUrl={imageUrl}
               items={profileMenuItems}
               role={resolvedRole}
-              isAvartarPending={isAvartarPending}
+              isAvatarPending={isAvatarPending}
             />
             <button
               ref={menuButtonRef}
