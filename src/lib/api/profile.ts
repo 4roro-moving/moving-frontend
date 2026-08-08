@@ -172,6 +172,6 @@ export const resolveAuthUserImage = async (user: AuthUser): Promise<AuthUser> =>
 
     return sessionUser;
   } catch (error) {
-    throw new ApiError("프로필 이미지 조회에 실패했습니다.");
+    return sessionUser;
   }
 };

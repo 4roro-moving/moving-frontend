@@ -138,7 +138,13 @@ export default function ProfileMenuTrigger({
         onClick={() => setIsOpen((open) => !open)}
       >
         {isAvatarPending ? (
-          <Skeleton className="size-24 rounded-full xl:size-36" />
+          <Image
+            src="/icons/profile-default.svg"
+            alt=""
+            width={36}
+            height={36}
+            className="rounded-4 size-24 blur-sm xl:size-36 xl:rounded-none"
+          />
         ) : imageUrl ? (
           <div className="rounded-100 overflow-hidden">
             <Image
