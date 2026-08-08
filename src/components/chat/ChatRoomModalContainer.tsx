@@ -1,5 +1,6 @@
 "use client";
 
+import ChatRoomCreateError from "@/components/chat/ChatRoomCreateError";
 import ChatRoomModal from "@/components/chat/ChatRoomModal";
 import Toast from "@/components/common/Toast/Toast";
 import { Text } from "@/components/common/Text";
@@ -217,29 +218,29 @@ export default function ChatRoomModalContainer({
 
   if (!activeRoom) {
     return (
-      <>
-        <ChatRoomModal
-          open={open}
-          participantRole={participantRole}
-          participantName={participantName}
-          estimateSummary={estimateSummary}
-          sendDisabled
-          onClose={onClose}
-          actions={actions}
-        >
+      <ChatRoomModal
+        open={open}
+        participantRole={participantRole}
+        participantName={participantName}
+        estimateSummary={estimateSummary}
+        sendDisabled
+        onClose={onClose}
+        actions={actions}
+      >
+        {chatRoom.createErrorMessage ? (
+          <ChatRoomCreateError
+            message={chatRoom.createErrorMessage}
+            isRetrying={chatRoom.isChatRoomPending}
+            onRetry={chatRoom.retryCreateChatRoom}
+          />
+        ) : (
           <div className="flex h-full items-center justify-center">
             <Text variant="lg-medium" className="text-text-muted">
-              {chatRoom.isChatRoomPending
-                ? "채팅방을 준비하는 중입니다."
-                : "채팅방을 열 수 없습니다."}
+              채팅방을 준비하는 중입니다.
             </Text>
           </div>
-        </ChatRoomModal>
-
-        {chatRoom.toastMessage ? (
-          <Toast onClose={chatRoom.clearToastMessage}>{chatRoom.toastMessage}</Toast>
-        ) : null}
-      </>
+        )}
+      </ChatRoomModal>
     );
   }
 

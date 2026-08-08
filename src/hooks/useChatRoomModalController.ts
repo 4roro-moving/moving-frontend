@@ -41,6 +41,7 @@ function mergeMessages(messages: ChatMessage[]): ChatMessage[] {
 /**
  * 채팅 모달 진입 시 견적 기준 채팅방을 준비하는 훅
  * // 2026.08.07 김성현 - [추가] 채팅방 생성/조회 로직 분리
+ * // 2026.08.08 김성현 - [수정] 생성 실패 메시지를 모달 내 재시도 UI로 전달
  */
 export function useChatRoomModalController({
   open,
@@ -48,9 +49,30 @@ export function useChatRoomModalController({
 }: UseChatRoomModalControllerOptions) {
   const [room, setRoom] = useState<ChatRoom | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [createErrorMessage, setCreateErrorMessage] = useState<string | null>(null);
   const requestedEstimateIdRef = useRef<number | null>(null);
   const { mutate: getOrCreateChatRoom, isPending: isChatRoomPending } = useGetOrCreateChatRoom();
   const activeRoom = room?.estimateId === estimateId ? room : null;
+
+  const requestChatRoom = useCallback(() => {
+    requestedEstimateIdRef.current = estimateId;
+    setToastMessage(null);
+
+    getOrCreateChatRoom(
+      { estimateId },
+      {
+        onSuccess: (nextRoom) => {
+          setRoom(nextRoom);
+          setCreateErrorMessage(null);
+        },
+        onError: (error) => {
+          setCreateErrorMessage(
+            getApiErrorMessage(error, "일시적인 오류로 채팅방을 열 수 없습니다."),
+          );
+        },
+      },
+    );
+  }, [estimateId, getOrCreateChatRoom]);
 
   useEffect(() => {
     if (!open) {
@@ -62,26 +84,14 @@ export function useChatRoomModalController({
       return;
     }
 
-    requestedEstimateIdRef.current = estimateId;
-    setToastMessage(null);
-
-    getOrCreateChatRoom(
-      { estimateId },
-      {
-        onSuccess: (nextRoom) => {
-          setRoom(nextRoom);
-        },
-        onError: (error) => {
-          requestedEstimateIdRef.current = null;
-          setToastMessage(getApiErrorMessage(error, "채팅방을 준비하지 못했습니다."));
-        },
-      },
-    );
-  }, [activeRoom, estimateId, getOrCreateChatRoom, open]);
+    requestChatRoom();
+  }, [activeRoom, estimateId, open, requestChatRoom]);
 
   return {
     activeRoom,
     isChatRoomPending,
+    createErrorMessage,
+    retryCreateChatRoom: requestChatRoom,
     toastMessage,
     clearToastMessage: () => setToastMessage(null),
   };
@@ -151,20 +161,22 @@ export function useConnectedChatRoomModalController({
     setToastMessage(null);
     setIsSending(true);
 
-    const response = await sendMessage({
-      roomId: room.id,
-      content,
-      clientMessageId: createClientMessageId(),
-    });
+    try {
+      const response = await sendMessage({
+        roomId: room.id,
+        content,
+        clientMessageId: createClientMessageId(),
+      });
 
-    setIsSending(false);
+      if (!response.ok) {
+        setToastMessage(response.error.message);
+        return;
+      }
 
-    if (!response.ok) {
-      setToastMessage(response.error.message);
-      return;
+      setMessageValue("");
+    } finally {
+      setIsSending(false);
     }
-
-    setMessageValue("");
   };
 
   const messagesErrorMessage = messagesQuery.isError
