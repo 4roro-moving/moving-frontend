@@ -135,13 +135,15 @@ export default function ProfileMenuTrigger({
         onClick={() => setIsOpen((open) => !open)}
       >
         {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt=""
-            width={36}
-            height={36}
-            className="rounded-4 size-24 xl:size-36 xl:rounded-none"
-          />
+          <div className="rounded-100 overflow-hidden">
+            <Image
+              src={imageUrl}
+              alt=""
+              width={36}
+              height={36}
+              className="rounded-4 size-24 xl:size-36 xl:rounded-none"
+            />
+          </div>
         ) : (
           <Image
             src="/icons/profile-default.svg"

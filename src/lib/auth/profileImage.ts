@@ -28,6 +28,7 @@ export const loadProfileImage = (): string | null => {
 
 export const clearProfileImage = (): void => {
   if (typeof window === "undefined") return;
+
   localStorage.removeItem(PROFILE_IMAGE_STORAGE_KEY);
   document.cookie = `${PROFILE_IMAGE_STORAGE_KEY}=; Path=/; Max-Age=0; SameSite=Lax`;
 };

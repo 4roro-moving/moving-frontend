@@ -27,6 +27,7 @@ import {
   type AuthAudience,
 } from "@/lib/auth/redirect";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { getCustomerProfileMe, getMoverProfileMe, getProfileImageUrl } from "@/lib/api/profile";
 
 const failOAuthCallback = (message: string, setError: (value: string) => void): void => {
   clearOAuthPendingSession();
@@ -132,6 +133,14 @@ const OAuthCallbackContent = () => {
           returnPath: pending.returnPath,
           fallbackPath: getRoleHomePath(result.user.role),
         });
+
+        const sessionUser = { ...result.user, imageUrl: null as string | null };
+
+        const imageUrl = await getProfileImageUrl(result.user.role);
+
+        if (imageUrl) {
+          sessionUser.imageUrl = imageUrl;
+        }
 
         // GuestOnly 밖이므로 postAuthRedirectPath 대신 직접 이동
         establishSession(result.user);

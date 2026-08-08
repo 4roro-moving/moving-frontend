@@ -21,7 +21,6 @@ import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { loadProfileImage } from "@/lib/auth/profileImage";
 
 const PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE = "프로필을 완성한 뒤 이용할 수 있어요.";
 
@@ -134,6 +133,7 @@ const Header = ({
 
   const user = useAuthStore((state) => state.user);
   const displayName = useAuthStore((state) => state.displayName);
+  const profileImage = useAuthStore((state) => state.profileImage);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -160,7 +160,10 @@ const Header = ({
   const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
-  const profileImage = user?.imageUrl ?? loadProfileImage() ?? initialProfileImage ?? null;
+  const imageUrl =
+    !hasHydrated || isCheckingAuth
+      ? (profileImage ?? initialProfileImage ?? null)
+      : (user?.imageUrl ?? profileImage ?? null);
 
   const { isIncomplete, isCompletionUnresolved, profileCreatePath } =
     useProfileCompletionState(resolvedRole);
@@ -267,7 +270,7 @@ const Header = ({
             <ProfileMenuTrigger
               key={pathname}
               nickname={nickname}
-              imageUrl={profileImage}
+              imageUrl={imageUrl}
               items={profileMenuItems}
               role={resolvedRole}
             />
