@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+
+import ChatRoomModal from "@/components/chat/ChatRoomModal";
 import { Text } from "@/components/common/Text";
 import EstimateDetailLayout, {
   ESTIMATE_DETAIL_LAYOUT_CLASSES,
@@ -106,6 +109,8 @@ function SentEstimateComment({ comment }: { comment: string }) {
 }
 
 export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetailPageProps) {
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState("");
   const query = useSentEstimateDetail(estimateId);
 
   if (query.isPending) {
@@ -138,61 +143,80 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
     estimate.status === "CONFIRMED" && isKstDateOnOrAfter(request.moveDate);
 
   return (
-    <EstimateDetailLayout
-      showProfile={false}
-      backFallbackHref={APP_ROUTES.MOVER_ESTIMATES.SENT}
-      contentClassName="pt-35 pb-64 md:pt-[46px] md:pb-80 lg:pt-[43px] lg:pb-37-5"
-      rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
-      mainClassName="gap-20 md:gap-30 xl:w-210 xl:shrink-0"
-      asideClassName="items-end gap-28 md:gap-40 xl:w-80 xl:shrink-0"
-      main={
-        <>
-          <div className="flex w-full flex-col gap-20 md:gap-26">
-            <SentEstimateSummary estimate={estimate} />
-            <EstimateDetailPrice price={estimate.price} />
-          </div>
+    <>
+      <EstimateDetailLayout
+        showProfile={false}
+        backFallbackHref={APP_ROUTES.MOVER_ESTIMATES.SENT}
+        contentClassName="pt-35 pb-64 md:pt-[46px] md:pb-80 lg:pt-[43px] lg:pb-37-5"
+        rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
+        mainClassName="gap-20 md:gap-30 xl:w-210 xl:shrink-0"
+        asideClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName}
+        main={
+          <>
+            <div className="flex w-full flex-col gap-20 md:gap-26">
+              <SentEstimateSummary estimate={estimate} />
+              <EstimateDetailPrice price={estimate.price} />
+            </div>
 
-          <div className="flex w-full flex-col gap-20 md:gap-28">
-            <EstimateDetailInfoSection
-              rows={[
-                {
-                  label: "견적 요청일",
-                  value: formatKoreanDateTime(request.requestedAt),
-                },
-                {
-                  label: "서비스",
-                  value: MOVE_TYPE_LABEL[request.moveType],
-                },
-                {
-                  label: "이용일",
-                  value: formatKoreanDateTime(request.moveDate),
-                },
-                {
-                  label: "출발지",
-                  value: formatAddress(request.fromAddress, request.fromDetailAddress),
-                },
-                {
-                  label: "도착지",
-                  value: formatAddress(request.toAddress, request.toDetailAddress),
-                },
-                ...(request.completedAt
-                  ? [
-                      {
-                        label: "이사 완료일시",
-                        value: formatKoreanDateTimeWithTime(request.completedAt),
-                      },
-                    ]
-                  : []),
-              ]}
+            <div className="flex w-full flex-col gap-20 md:gap-28">
+              <EstimateDetailInfoSection
+                rows={[
+                  {
+                    label: "견적 요청일",
+                    value: formatKoreanDateTime(request.requestedAt),
+                  },
+                  {
+                    label: "서비스",
+                    value: MOVE_TYPE_LABEL[request.moveType],
+                  },
+                  {
+                    label: "이용일",
+                    value: formatKoreanDateTime(request.moveDate),
+                  },
+                  {
+                    label: "출발지",
+                    value: formatAddress(request.fromAddress, request.fromDetailAddress),
+                  },
+                  {
+                    label: "도착지",
+                    value: formatAddress(request.toAddress, request.toDetailAddress),
+                  },
+                  ...(request.completedAt
+                    ? [
+                        {
+                          label: "이사 완료일시",
+                          value: formatKoreanDateTimeWithTime(request.completedAt),
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+              <div className="border-border-subtle w-full border-t" aria-hidden="true" />
+            </div>
+
+            <SentEstimateComment comment={estimate.comment} />
+            {showCompleteAction ? <SentEstimateCompleteAction estimateId={estimate.id} /> : null}
+          </>
+        }
+        aside={
+          showChatAction ? (
+            <SentEstimateChatAction
+              estimateId={estimate.id}
+              onClick={() => setIsChatModalOpen(true)}
             />
-            <div className="border-border-subtle w-full border-t" aria-hidden="true" />
-          </div>
+          ) : undefined
+        }
+      />
 
-          <SentEstimateComment comment={estimate.comment} />
-          {showCompleteAction ? <SentEstimateCompleteAction estimateId={estimate.id} /> : null}
-        </>
-      }
-      aside={showChatAction ? <SentEstimateChatAction estimateId={estimate.id} /> : undefined}
-    />
+      <ChatRoomModal
+        open={isChatModalOpen}
+        participantRole="MOVER"
+        participantName={estimate.customer.name}
+        estimateSummary={`견적가 - ${estimate.price.toLocaleString("ko-KR")}원`}
+        messageValue={chatMessage}
+        onMessageChange={setChatMessage}
+        onClose={() => setIsChatModalOpen(false)}
+      />
+    </>
   );
 }
