@@ -14,6 +14,8 @@ export interface CheckboxProps extends Omit<
   /** 체크박스 옆 표시 라벨. 없으면 aria-label 필수 */
   label?: ReactNode;
   labelClassName?: string;
+  /** 체크 상태 변경 전에 필요한 데이터를 미리 준비합니다. */
+  onPrefetch?: () => void;
 }
 
 /**
@@ -25,6 +27,7 @@ export default function Checkbox({
   onCheckedChange,
   label,
   labelClassName,
+  onPrefetch,
   className,
   disabled,
   id,
@@ -33,6 +36,8 @@ export default function Checkbox({
 }: CheckboxProps) {
   return (
     <label
+      onFocus={onPrefetch}
+      onPointerEnter={onPrefetch}
       className={cn(
         "inline-flex cursor-pointer items-center gap-4",
         disabled && "cursor-not-allowed opacity-50",
