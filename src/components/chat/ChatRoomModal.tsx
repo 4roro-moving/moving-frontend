@@ -78,7 +78,7 @@ function ChatRoomModalContent({
         <Modal.Close onClose={onClose} size="sm" />
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-12 overflow-y-auto px-20 py-20 md:px-24">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-20 py-20 md:px-24">
         {children ?? (
           <div className="flex h-full items-center justify-center">
             <Text variant="lg-medium" className="text-text-muted">
