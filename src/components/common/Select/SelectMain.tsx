@@ -14,7 +14,9 @@ import {
 import { Text, type TextVariantProp } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useListboxKeyboardNav } from "@/hooks/useListboxKeyboardNav";
+import { usePresence } from "@/hooks/usePresence";
 import { cn } from "@/lib/utils/cn";
+import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { ChevronDownIcon, ChevronUpIcon } from "@/icons";
 
 type SelectVariant = "default" | "sort";
@@ -127,6 +129,10 @@ const SelectMain = ({
   // 수정 등 폼에 미리 있어야하는 값이 있다면 이전 값을 저장해둠
   const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
   const listboxId = useId();
+  const { isRendered: isListboxRendered, isVisible: isListboxVisible } = usePresence(
+    isOpen,
+    DROPDOWN_EXIT_DURATION_MS,
+  );
   const containerRef = useClickOutside<HTMLDivElement>(() => setIsOpen(false));
   const { triggerRef, listboxRef, handleTriggerKeyDown, handleListboxKeyDown, focusTrigger } =
     useListboxKeyboardNav<HTMLButtonElement, HTMLDivElement>({
@@ -211,28 +217,30 @@ const SelectMain = ({
             )}
           </button>
 
-          {isOpen && (
+          {isListboxRendered ? (
             <div
               ref={listboxRef}
               id={listboxId}
               role="listbox"
+              aria-hidden={!isListboxVisible}
               onKeyDown={handleListboxKeyDown}
               className={cn(
                 "bg-background-surface absolute z-50 my-4",
+                dropdownMotionClassName(isListboxVisible),
                 variant === "sort" &&
-                  "rounded-8 border-border-subtle flex w-[91px] min-w-[91px] flex-col items-start border xl:w-[114px] xl:min-w-[114px]",
+                  "rounded-8 border-border-subtle flex w-22.75 min-w-22.75 flex-col items-start border xl:w-28.5 xl:min-w-28.5",
                 variant === "default" &&
                   !isMultiColumn &&
-                  "rounded-8 border-border-default shadow-select xl:rounded-12 flex w-full min-w-[106px] flex-col items-start border xl:min-w-[160px]",
+                  "rounded-8 border-border-default shadow-select xl:rounded-12 flex w-full min-w-26.5 flex-col items-start border xl:min-w-160",
                 variant === "default" &&
                   isMultiColumn &&
                   // sm: 75×36 × 2열 / md: 164×64 × 2열, 보이는 행 5개
-                  "rounded-8 border-border-default shadow-select xl:rounded-16 grid max-h-[180px] w-[150px] grid-cols-2 overflow-y-auto border xl:max-h-[320px] xl:w-[328px]",
+                  "rounded-8 border-border-default shadow-select xl:rounded-16 w-37-5 grid max-h-45 grid-cols-2 overflow-y-auto border xl:max-h-320 xl:w-82",
               )}
             >
               {children}
             </div>
-          )}
+          ) : null}
         </div>
         {error && (
           <Text variant="xs-regular" className="text-text-error">

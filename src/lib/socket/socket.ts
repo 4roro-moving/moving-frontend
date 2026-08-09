@@ -18,9 +18,12 @@ export const getSocket = (): Socket => {
     socket = io(SOCKET_URL, {
       autoConnect: false,
       withCredentials: true,
-      auth: () => ({
-        token: getAccessToken(),
-      }),
+      // 2026.08.08 김성현 - [수정] Socket.IO 함수형 auth는 callback으로 토큰을 전달
+      auth: (callback) => {
+        callback({
+          token: getAccessToken(),
+        });
+      },
     });
   }
 

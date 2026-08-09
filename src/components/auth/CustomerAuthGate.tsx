@@ -64,8 +64,12 @@ export default function CustomerAuthGate({
     <EstimatesQueryStatus message={loadingMessage} />
   );
 
-  if (isPending || !canFetch) {
+  if (isPending) {
     return resolvedLoadingFallback;
+  }
+
+  if (!isAuthenticated || !isCustomer || !canFetch) {
+    return null;
   }
 
   return (

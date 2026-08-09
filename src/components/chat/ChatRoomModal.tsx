@@ -18,20 +18,21 @@ export interface ChatRoomModalProps {
   messageValue?: string;
   messagePlaceholder?: string;
   sendDisabled?: boolean;
+  composerDisabled?: boolean;
   onMessageChange?: (value: string) => void;
   onSendMessage?: () => void;
   actions?: Partial<Record<ChatActionItem["id"], Pick<ChatActionItem, "onSelect" | "disabled">>>;
 }
-
-type ChatRoomModalContentProps = Omit<ChatRoomModalProps, "open">;
 
 /**
  * 채팅방 모달 공통 UI
  * // 2026.08.07 김성현 - [추가] 채팅 모달과 역할별 + 메뉴 바텀시트 구성
  * // 2026.08.07 김성현 - [수정] 액션 시트를 채팅 모달 내부에서 렌더
  * // 2026.08.07 김성현 - [수정] + 메뉴를 입력바 아래 스택으로 배치해 채팅바와 함께 상승
+ * // 2026.08.07 정슬기 - [수정] open prop으로 exit 모션 지원
  */
 function ChatRoomModalContent({
+  open,
   participantRole,
   participantName,
   estimateSummary,
@@ -40,14 +41,18 @@ function ChatRoomModalContent({
   messageValue = "",
   messagePlaceholder = "메시지를 입력하세요",
   sendDisabled = false,
+  composerDisabled = false,
   onMessageChange,
   onSendMessage,
   actions,
-}: ChatRoomModalContentProps) {
+}: ChatRoomModalProps) {
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
+  const isActionSheetVisible = isActionSheetOpen && !composerDisabled;
+  const isSendDisabled = composerDisabled || sendDisabled || !messageValue.trim();
 
   return (
     <Modal
+      open={open}
       onClose={onClose}
       aria-label={`${participantName} 채팅방`}
       className={cn(
@@ -87,7 +92,7 @@ function ChatRoomModalContent({
         className="border-border-subtle flex shrink-0 items-center gap-8 border-t px-16 py-14 md:px-20"
         onSubmit={(event) => {
           event.preventDefault();
-          if (sendDisabled || !messageValue.trim()) return;
+          if (isSendDisabled) return;
           onSendMessage?.();
         }}
       >
@@ -95,12 +100,16 @@ function ChatRoomModalContent({
           type="button"
           className={cn(
             "bg-background-brand text-text-inverse flex size-36 shrink-0 items-center justify-center rounded-full",
-            "hover:bg-background-brand-hover transition-colors",
+            "hover:bg-background-brand-hover disabled:bg-background-disabled disabled:text-text-disabled transition-colors disabled:cursor-not-allowed",
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
           )}
-          aria-label={isActionSheetOpen ? "채팅 메뉴 닫기" : "채팅 메뉴 열기"}
-          aria-expanded={isActionSheetOpen}
-          onClick={() => setIsActionSheetOpen((prev) => !prev)}
+          aria-label={isActionSheetVisible ? "채팅 메뉴 닫기" : "채팅 메뉴 열기"}
+          aria-expanded={isActionSheetVisible}
+          disabled={composerDisabled}
+          onClick={() => {
+            if (composerDisabled) return;
+            setIsActionSheetOpen((prev) => !prev);
+          }}
         >
           <span className="text-[24px] leading-none" aria-hidden="true">
             +
@@ -112,9 +121,11 @@ function ChatRoomModalContent({
           value={messageValue}
           onChange={(event) => onMessageChange?.(event.target.value)}
           placeholder={messagePlaceholder}
+          disabled={composerDisabled}
           className={cn(
             "bg-background-subtle text-text-primary h-44 min-w-0 flex-1 rounded-full px-16",
-            "placeholder:text-text-muted focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+            "placeholder:text-text-muted disabled:bg-background-disabled disabled:text-text-disabled disabled:cursor-not-allowed",
+            "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
           )}
         />
 
@@ -122,19 +133,17 @@ function ChatRoomModalContent({
           type="submit"
           className={cn(
             "bg-background-brand text-text-inverse rounded-12 flex h-44 shrink-0 items-center justify-center px-16",
-            "hover:bg-background-brand-hover disabled:bg-background-disabled transition-colors disabled:cursor-not-allowed",
+            "hover:bg-background-brand-hover disabled:bg-background-disabled disabled:text-text-disabled transition-colors disabled:cursor-not-allowed",
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
           )}
-          disabled={sendDisabled || !messageValue.trim()}
+          disabled={isSendDisabled}
         >
-          <Text variant="md-semibold" className="text-text-inverse">
-            전송
-          </Text>
+          <Text variant="md-semibold">전송</Text>
         </button>
       </form>
 
       <ChatActionSheet
-        open={isActionSheetOpen}
+        open={isActionSheetVisible}
         participantRole={participantRole}
         actions={actions}
         onClose={() => setIsActionSheetOpen(false)}
@@ -143,8 +152,6 @@ function ChatRoomModalContent({
   );
 }
 
-export default function ChatRoomModal({ open, ...props }: ChatRoomModalProps) {
-  if (!open) return null;
-
+export default function ChatRoomModal(props: ChatRoomModalProps) {
   return <ChatRoomModalContent {...props} />;
 }

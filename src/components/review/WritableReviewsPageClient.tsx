@@ -6,6 +6,7 @@ import Pagination from "@/components/common/Pagination/Pagination";
 import Toast from "@/components/common/Toast/Toast";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import ReviewEmptyState from "@/components/review/ReviewEmptyState";
+import ReviewCardSkeleton from "@/components/review/ReviewCardSkeleton";
 import ReviewPageFrame from "@/components/review/ReviewPageFrame";
 import ReviewWriteModal from "@/components/review/ReviewWriteModal";
 import WritableReviewCard from "@/components/review/WritableReviewCard";
@@ -57,7 +58,7 @@ export default function WritableReviewsPageClient() {
 
   return (
     <ReviewPageFrame title="작성 가능한 리뷰">
-      {isLoading ? <EstimatesQueryStatus message="작성 가능한 리뷰를 불러오는 중입니다." /> : null}
+      {isLoading ? <ReviewCardSkeleton /> : null}
 
       {isError ? (
         <EstimatesQueryStatus
