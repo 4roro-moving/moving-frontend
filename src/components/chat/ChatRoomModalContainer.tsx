@@ -106,8 +106,17 @@ function ChatMessageList({
   }
 
   return (
-    <div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto">
-      <div className="flex min-h-full flex-col justify-end gap-12">
+    <div
+      ref={scrollContainerRef}
+      role="region"
+      aria-label="채팅 메시지 목록"
+      tabIndex={0}
+      className={cn(
+        "h-full min-h-0 overflow-y-auto",
+        "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+      )}
+    >
+      <div className="flex min-h-full flex-col gap-12">
         {hasNextPage ? (
           <button
             type="button"
@@ -126,46 +135,48 @@ function ChatMessageList({
           </button>
         ) : null}
 
-        {messages.map((message) => {
-          const isMine = message.sender.role === participantRole;
+        <div className="mt-auto flex flex-col gap-12">
+          {messages.map((message) => {
+            const isMine = message.sender.role === participantRole;
 
-          return (
-            <div
-              key={message.id}
-              className={cn("flex w-full flex-col gap-4", isMine ? "items-end" : "items-start")}
-            >
-              {!isMine ? (
-                <Text variant="sm-medium" className="text-text-muted">
-                  {message.sender.name}
-                </Text>
-              ) : null}
+            return (
               <div
-                className={cn(
-                  "rounded-16 max-w-[78%] px-14 py-10",
-                  isMine
-                    ? "bg-background-brand text-text-inverse rounded-br-4"
-                    : "bg-background-subtle text-text-primary rounded-bl-4",
-                )}
+                key={message.id}
+                className={cn("flex w-full flex-col gap-4", isMine ? "items-end" : "items-start")}
               >
-                <Text
-                  as="p"
-                  variant="md-medium"
+                {!isMine ? (
+                  <Text variant="sm-medium" className="text-text-muted">
+                    {message.sender.name}
+                  </Text>
+                ) : null}
+                <div
                   className={cn(
-                    "wrap-break-word whitespace-pre-wrap",
-                    isMine ? "text-text-inverse" : "text-text-primary",
+                    "rounded-16 max-w-[78%] px-14 py-10",
+                    isMine
+                      ? "bg-background-brand text-text-inverse rounded-br-4"
+                      : "bg-background-subtle text-text-primary rounded-bl-4",
                   )}
                 >
-                  {message.content}
+                  <Text
+                    as="p"
+                    variant="md-medium"
+                    className={cn(
+                      "wrap-break-word whitespace-pre-wrap",
+                      isMine ? "text-text-inverse" : "text-text-primary",
+                    )}
+                  >
+                    {message.content}
+                  </Text>
+                </div>
+                <Text variant="xs-medium" className="text-text-muted">
+                  {formatMessageTime(message.createdAt)}
                 </Text>
               </div>
-              <Text variant="xs-medium" className="text-text-muted">
-                {formatMessageTime(message.createdAt)}
-              </Text>
-            </div>
-          );
-        })}
+            );
+          })}
 
-        <div ref={bottomRef} aria-hidden="true" />
+          <div ref={bottomRef} aria-hidden="true" />
+        </div>
       </div>
     </div>
   );
