@@ -1,97 +1,45 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import Button from "@/components/common/Button/Button";
 import Input from "@/components/common/Input/Input";
-import NavigationTabs from "@/components/common/NavigationTabs/NavigationTabs";
 import Select from "@/components/common/Select/Select";
+import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { Text } from "@/components/common/Text";
 import AddressSelectModal from "@/components/estimate/request/AddressSelectModal";
+import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
+import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips";
 import KakaoMap from "@/components/mover/map/KakaoMap";
+import {
+  type MoverRecommendation,
+  type MoverRecommendationMatchType,
+  useMoverRecommendations,
+} from "@/hooks/useMoverRecommendations";
 import { DriverBadgeIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { getRegionIdBySido } from "@/lib/constants/region";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { cn } from "@/lib/utils/cn";
+import type { MoveType } from "@/types/move";
 
-type MatchType = "BOTH" | "DEPARTURE" | "DESTINATION";
-type AddressModalKind = "출발지" | "도착지";
+type AddressModalKind = "출발지" | "도착지"; // 모달 종류
+type MoveTypeFilter = "ALL" | MoveType; //이사 유형 필터
 
-const MOVER_NAVIGATION_ITEMS = [
-  { href: APP_ROUTES.MOVERS.ROOT, label: "기사님 찾기", match: "exact" },
-  { href: APP_ROUTES.MOVERS.MAP, label: "기사님 추천", match: "exact" },
-] as const;
-
-interface MockMover {
-  id: string;
-  nickname: string;
-  title: string;
-  rating: number;
-  reviewCount: number;
-  career: number;
-  confirmedCount: number;
-  service: string;
-  regions: string[];
-  matchType: MatchType;
-  marker: { left: string; top: string };
-}
-
-const MOCK_MOVERS: MockMover[] = [
-  {
-    id: "11111111-1111-1111-1111-111111111111",
-    nickname: "김코드",
-    title: "고객님의 물품을 안전하게 운송해 드립니다.",
-    rating: 5,
-    reviewCount: 178,
-    career: 7,
-    confirmedCount: 334,
-    service: "가정이사",
-    regions: ["서울", "경기"],
-    matchType: "BOTH",
-    marker: { left: "38%", top: "34%" },
-  },
-  {
-    id: "22222222-2222-2222-2222-222222222222",
-    nickname: "이무빙",
-    title: "꼼꼼하고 편안한 이사를 약속드립니다.",
-    rating: 4.9,
-    reviewCount: 126,
-    career: 5,
-    confirmedCount: 219,
-    service: "소형이사",
-    regions: ["서울", "인천"],
-    matchType: "DEPARTURE",
-    marker: { left: "57%", top: "48%" },
-  },
-  {
-    id: "33333333-3333-3333-3333-333333333333",
-    nickname: "박안심",
-    title: "처음부터 끝까지 책임지고 함께하겠습니다.",
-    rating: 4.8,
-    reviewCount: 94,
-    career: 9,
-    confirmedCount: 287,
-    service: "사무실이사",
-    regions: ["경기", "인천"],
-    matchType: "DESTINATION",
-    marker: { left: "69%", top: "63%" },
-  },
-];
-
-const MATCH_LABEL: Record<MatchType, string> = {
+const MATCH_LABEL: Record<MoverRecommendationMatchType, string> = {
   BOTH: "출발지·도착지 모두 가능",
   DEPARTURE: "출발지 지역 서비스",
   DESTINATION: "도착지 지역 서비스",
-};
+}; // 서버에서 받아오는 값 아니고 useMoverRecommendations에서 API 비교 후 생성
 
+//기사 표시 카드
 function RecommendationCard({
   mover,
   selected,
   onSelect,
 }: {
-  mover: MockMover;
+  mover: MoverRecommendation;
   selected: boolean;
   onSelect: () => void;
 }) {
@@ -106,9 +54,8 @@ function RecommendationCard({
     >
       <button type="button" aria-pressed={selected} onClick={onSelect} className="w-full text-left">
         <div className="mb-12 flex items-center justify-between gap-8">
-          <span className="bg-background-brand-muted text-text-brand rounded-4 px-8 py-2 text-[13px] font-semibold">
-            {mover.service}
-          </span>
+          {/* 실제 서비스 유형 */}
+          <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
           <span className="text-text-brand text-[12px] font-semibold">
             {MATCH_LABEL[mover.matchType]}
           </span>
@@ -120,11 +67,11 @@ function RecommendationCard({
 
         <div className="flex items-center gap-12">
           <div className="bg-background-avatar rounded-12 relative size-56 shrink-0 overflow-hidden">
-            <Image
-              src="/images/profile-character.png"
-              alt=""
-              width={84}
-              height={84}
+            {/* 실제 프로필 이미지 */}
+            <MoverProfileImage
+              src={mover.profileImageSrc}
+              width={88}
+              height={88}
               className="absolute -top-8 -left-14 size-84 max-w-none object-cover"
             />
           </div>
@@ -133,7 +80,7 @@ function RecommendationCard({
             <div className="mb-4 flex items-center gap-4">
               <DriverBadgeIcon className="h-20 w-18 shrink-0" />
               <Text as="span" variant="md-semibold" className="text-text-secondary">
-                {mover.nickname} 기사님
+                {mover.name} 기사님
               </Text>
             </div>
             <div className="text-text-muted flex flex-wrap items-center gap-6 text-[13px]">
@@ -142,7 +89,7 @@ function RecommendationCard({
               </span>
               <span>({mover.reviewCount})</span>
               <span aria-hidden="true">·</span>
-              <span>경력 {mover.career}년</span>
+              <span>경력 {mover.careerYears}년</span>
               <span aria-hidden="true">·</span>
               <span>{mover.confirmedCount}건 확정</span>
             </div>
@@ -160,6 +107,7 @@ function RecommendationCard({
   );
 }
 
+// 검색 전 안내 화면
 function MapSearchPrompt() {
   return (
     <section
@@ -176,32 +124,49 @@ function MapSearchPrompt() {
 export function MoverRecommendationMapPage() {
   const [departure, setDeparture] = useState<AddressSearchItem | null>(null);
   const [destination, setDestination] = useState<AddressSearchItem | null>(null);
+  const [moveType, setMoveType] = useState<MoveTypeFilter>("ALL");
+
   const [searchedDeparture, setSearchedDeparture] = useState<AddressSearchItem | null>(null);
   const [searchedDestination, setSearchedDestination] = useState<AddressSearchItem | null>(null);
+  const [searchedMoveType, setSearchedMoveType] = useState<MoveTypeFilter>("ALL");
+
   const [addressModalKind, setAddressModalKind] = useState<AddressModalKind | null>(null);
-  const [moveType, setMoveType] = useState("ALL");
-  const [searchedMoveType, setSearchedMoveType] = useState("ALL");
-  const [selectedMoverId, setSelectedMoverId] = useState<string | null>(MOCK_MOVERS[0]?.id ?? null);
+  //선택된 기사 처리
+  const [selectedMoverIdOverride, setSelectedMoverIdOverride] = useState<string | null>(null);
+  const departureRegionId = searchedDeparture ? getRegionIdBySido(searchedDeparture.sido) : null;
 
-  const visibleMovers = useMemo(
-    () =>
-      searchedMoveType === "ALL"
-        ? MOCK_MOVERS
-        : MOCK_MOVERS.filter((mover) => mover.service === searchedMoveType),
-    [searchedMoveType],
-  );
+  //주소 지역 ID로 변환 (시/도 데이터가 문자열로 들어오기 때문)
+  const destinationRegionId = searchedDestination
+    ? getRegionIdBySido(searchedDestination.sido)
+    : null;
 
+  //검색 여부
+  const hasSearched = searchedDeparture !== null && searchedDestination !== null;
+
+  //실제 기사 조회
+  const { movers, isLoading, isError, refetch } = useMoverRecommendations({
+    departureRegionId,
+    destinationRegionId,
+    ...(searchedMoveType !== "ALL" ? { moveType: searchedMoveType } : {}),
+  });
+
+  //사용자가 선택한 기사가 결과에 있으면 해당 기사 유지, 없으면 첫번째 기사 선택
+  const selectedMoverId =
+    selectedMoverIdOverride && movers.some((mover) => mover.id === selectedMoverIdOverride)
+      ? selectedMoverIdOverride
+      : (movers[0]?.id ?? null);
+
+  //검색 버튼 클릭 시 현재 입력값을 검색 조건으로 확정
   function handleSearch() {
     if (!departure || !destination) return;
 
     setSearchedDeparture(departure);
     setSearchedDestination(destination);
     setSearchedMoveType(moveType);
-    const firstMatch =
-      moveType === "ALL" ? MOCK_MOVERS[0] : MOCK_MOVERS.find((mover) => mover.service === moveType);
-    setSelectedMoverId(firstMatch?.id ?? null);
+    setSelectedMoverIdOverride(null);
   }
 
+  //주소 선택 시 현재 모달 종류에 따라 출발지 또는 도착지에 저장
   function handleAddressConfirm(address: AddressSearchItem) {
     if (addressModalKind === "출발지") {
       setDeparture(address);
@@ -213,12 +178,10 @@ export function MoverRecommendationMapPage() {
   }
 
   return (
-    <main className="bg-background-surface flex min-h-[calc(100dvh-88px)] flex-col">
-      <NavigationTabs ariaLabel="기사님 찾기 방식" items={MOVER_NAVIGATION_ITEMS} />
-
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <aside className="border-border-subtle z-10 flex w-full shrink-0 flex-col border-b bg-white lg:w-[430px] lg:border-r lg:border-b-0">
-          <div className="border-border-subtle border-b p-24 lg:p-28">
+    <main className="bg-background-surface flex min-h-[calc(100dvh-var(--gnb-height-mobile))] flex-col lg:h-[calc(100dvh-var(--gnb-height-tablet))] lg:min-h-0 lg:overflow-hidden xl:h-[calc(100dvh-var(--gnb-height-desktop))]">
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row lg:overflow-hidden">
+        <aside className="border-border-subtle z-10 flex w-full shrink-0 flex-col border-b bg-white lg:h-full lg:w-[430px] lg:overflow-hidden lg:border-r lg:border-b-0">
+          <div className="border-border-subtle shrink-0 border-b p-24 lg:p-28">
             <Text as="h1" variant="2xl-semibold" className="text-text-secondary mb-8">
               지역 맞춤 기사님 추천
             </Text>
@@ -270,13 +233,13 @@ export function MoverRecommendationMapPage() {
                 label="이사 유형"
                 defaultValue={moveType}
                 placeholderValue="ALL"
-                onChange={setMoveType}
+                onChange={(value) => setMoveType(value as MoveTypeFilter)}
                 className="w-full [&>button]:w-full"
               >
                 <Select.Option value="ALL">이사 유형 전체</Select.Option>
-                <Select.Option value="소형이사">소형이사</Select.Option>
-                <Select.Option value="가정이사">가정이사</Select.Option>
-                <Select.Option value="사무실이사">사무실이사</Select.Option>
+                <Select.Option value="SMALL">소형이사</Select.Option>
+                <Select.Option value="HOME">가정이사</Select.Option>
+                <Select.Option value="OFFICE">사무실이사</Select.Option>
               </Select>
               <Button
                 size="cta"
@@ -289,11 +252,11 @@ export function MoverRecommendationMapPage() {
             </div>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col p-24 lg:overflow-y-auto lg:p-20">
+          <div className="flex min-h-0 flex-1 flex-col p-24 lg:overflow-y-auto lg:overscroll-contain lg:p-20">
             <div className="mb-16 flex items-end justify-between gap-12">
               <div>
                 <Text as="h2" variant="xl-semibold" className="text-text-secondary">
-                  추천 기사님 {visibleMovers.length}명
+                  추천 기사님 {movers.length}명
                 </Text>
                 <Text as="p" variant="sm-medium" className="text-text-muted mt-2">
                   지역 일치도 우선 · 평점 높은 순
@@ -302,18 +265,45 @@ export function MoverRecommendationMapPage() {
             </div>
 
             <div className="rounded-12 mb-16 flex min-h-60 flex-col justify-center gap-2 bg-[#fff6f3] px-14 py-10 text-[12px] leading-[18px] text-[#8a4a3d]">
-              <span className="block">지도 위치는 대표 서비스 지역 기준입니다.</span>
+              <span className="block">추천 목록은 등록된 서비스 가능 지역 기준입니다.</span>
               <span className="block">실제 가능 여부는 견적 요청 시 확인해 주세요.</span>
             </div>
 
-            {visibleMovers.length > 0 ? (
+            {!hasSearched ? (
+              <div className="text-text-muted rounded-16 border-border-subtle flex min-h-160 items-center justify-center border px-20 text-center text-[14px]">
+                출발지와 도착지를 입력하고 기사님을 검색해 주세요.
+              </div>
+            ) : departureRegionId === null || destinationRegionId === null ? (
+              <div className="text-text-error rounded-16 border-border-subtle flex min-h-160 items-center justify-center border px-20 text-center text-[14px]">
+                선택한 주소의 지역 정보를 확인할 수 없습니다.
+              </div>
+            ) : isLoading ? (
+              <div className="flex flex-col gap-12" aria-label="추천 기사님을 불러오는 중">
+                {Array.from({ length: 3 }, (_, index) => (
+                  <Skeleton key={index} className="rounded-16 h-176 w-full" />
+                ))}
+              </div>
+            ) : isError ? (
+              <div className="rounded-16 border-border-subtle flex min-h-160 flex-col items-center justify-center gap-12 border px-20 text-center">
+                <Text as="p" variant="sm-medium" className="text-text-error">
+                  추천 기사님을 불러오지 못했습니다.
+                </Text>
+                <button
+                  type="button"
+                  className="text-text-brand text-[14px] font-semibold"
+                  onClick={() => void refetch()}
+                >
+                  다시 시도
+                </button>
+              </div>
+            ) : movers.length > 0 ? (
               <div className="flex flex-col gap-12">
-                {visibleMovers.map((mover) => (
+                {movers.map((mover) => (
                   <RecommendationCard
                     key={mover.id}
                     mover={mover}
                     selected={selectedMoverId === mover.id}
-                    onSelect={() => setSelectedMoverId(mover.id)}
+                    onSelect={() => setSelectedMoverIdOverride(mover.id)}
                   />
                 ))}
               </div>
@@ -325,6 +315,7 @@ export function MoverRecommendationMapPage() {
           </div>
         </aside>
 
+        {/* 실제 지도 표시 - key에 두 주소 ID를 넣어서 주소 변경시 카카오 맵 새로 생성 */}
         {searchedDeparture && searchedDestination ? (
           <KakaoMap
             key={`${searchedDeparture.id}-${searchedDestination.id}`}
