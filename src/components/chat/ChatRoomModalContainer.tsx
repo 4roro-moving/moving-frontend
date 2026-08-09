@@ -62,6 +62,9 @@ function ChatMessageList({
 }: ChatMessageListProps) {
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const latestMessageId = messages.at(-1)?.id ?? null;
+  const previousMessagesButtonLabel = isFetchingNextPage
+    ? "이전 메시지 불러오는 중"
+    : "이전 메시지 더보기";
 
   useEffect(() => {
     if (latestMessageId === null) {
@@ -97,16 +100,17 @@ function ChatMessageList({
         <button
           type="button"
           className={cn(
-            "text-text-brand rounded-12 mx-auto px-12 py-8",
-            "hover:bg-background-brand-muted disabled:text-text-disabled",
+            "text-text-brand rounded-12 mx-auto px-12 py-8 transition-colors",
             "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+            isFetchingNextPage
+              ? "text-text-disabled cursor-not-allowed"
+              : "hover:bg-background-brand-muted",
           )}
           disabled={isFetchingNextPage}
+          aria-busy={isFetchingNextPage}
           onClick={onFetchNextPage}
         >
-          <Text variant="sm-semibold">
-            {isFetchingNextPage ? "이전 메시지 불러오는 중" : "이전 메시지 더보기"}
-          </Text>
+          <Text variant="sm-semibold">{previousMessagesButtonLabel}</Text>
         </button>
       ) : null}
 
