@@ -147,7 +147,6 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
     isRequestDisabled,
     requestButtonLabel,
     requestEstimate,
-    isAuthPending,
     showCustomerActions: !isAuthPending && (!isAuthenticated || isCustomer),
   };
 }
