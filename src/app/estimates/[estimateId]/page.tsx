@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import CustomerAuthGate from "@/components/auth/CustomerAuthGate";
+import {
+  ESTIMATE_DETAIL_LAYOUT_CLASSES,
+  EstimateDetailLoadingState,
+} from "@/components/estimate/detail/EstimateDetailLayout";
 import EstimateDetailView from "@/components/estimate/detail/EstimateDetailView";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { cn } from "@/lib/utils/cn";
 import { parsePositiveIntId } from "@/lib/utils/parsePositiveIntId";
 
 export const metadata: Metadata = {
@@ -14,8 +20,6 @@ interface EstimateDetailPageProps {
   params: Promise<{ estimateId: string }>;
 }
 
-// 2026.07.24 정슬기 - [수정] 상세 라우트를 /estimates/[estimateId]로 정리하고 API 연동 뷰에 연결
-// 2026.07.31 정슬기 - [수정] notFound 시 AuthGate 미마운트 → 404 유지
 export default async function EstimateDetailPage({ params }: EstimateDetailPageProps) {
   const { estimateId } = await params;
   const id = parsePositiveIntId(estimateId);
@@ -25,7 +29,17 @@ export default async function EstimateDetailPage({ params }: EstimateDetailPageP
   }
 
   return (
-    <CustomerAuthGate loadingMessage="견적 관리를 불러오는 중입니다.">
+    <CustomerAuthGate
+      loadingFallback={
+        <EstimateDetailLoadingState
+          backFallbackHref={APP_ROUTES.ESTIMATES.RECEIVED}
+          contentClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName}
+          rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
+          mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
+          asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "xl:pt-40")}
+        />
+      }
+    >
       <EstimateDetailView estimateId={id} />
     </CustomerAuthGate>
   );

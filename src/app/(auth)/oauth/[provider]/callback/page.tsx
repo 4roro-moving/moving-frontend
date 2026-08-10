@@ -27,6 +27,7 @@ import {
   type AuthAudience,
 } from "@/lib/auth/redirect";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { resolveAuthUserImage } from "@/lib/api/profile";
 
 const failOAuthCallback = (message: string, setError: (value: string) => void): void => {
   clearOAuthPendingSession();
@@ -134,7 +135,7 @@ const OAuthCallbackContent = () => {
         });
 
         // GuestOnly 밖이므로 postAuthRedirectPath 대신 직접 이동
-        establishSession(result.user);
+        establishSession(await resolveAuthUserImage(result.user));
         clearOAuthPendingSession();
         window.history.replaceState(null, "", window.location.pathname);
         router.replace(nextPath);

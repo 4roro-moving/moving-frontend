@@ -4,10 +4,13 @@ import { useCallback, useId, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import { useNotificationSse } from "@/hooks/notifications/useNotificationSse";
+import { useCloseOnPathnameChange } from "@/hooks/useCloseOnPathnameChange";
 import { useUnreadNotificationCount } from "@/hooks/notifications/useUnreadNotificationCount";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { usePresence } from "@/hooks/usePresence";
 import { AlarmIcon } from "@/icons";
+import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 
 import NotificationPanel from "./NotificationPanel";
 
@@ -17,6 +20,10 @@ export default function NotificationTrigger() {
   // 현재 authScope 와 같을 때만 열린 것으로 간주 → 계정 전환 시 자동으로 닫힘
   const [openScope, setOpenScope] = useState<string | null>(null);
   const isOpen = openScope === authScope;
+  const { isRendered: isPanelRendered, isVisible: isPanelVisible } = usePresence(
+    isOpen,
+    DROPDOWN_EXIT_DURATION_MS,
+  );
   const { data } = useUnreadNotificationCount();
   const unreadCount = data?.unreadCount ?? 0;
 
@@ -35,10 +42,12 @@ export default function NotificationTrigger() {
     setOpenScope(null);
   }, []);
 
+  useCloseOnPathnameChange(closeQuiet);
+
   const ref = useClickOutside<HTMLDivElement>(closeQuiet);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="static md:relative">
       <button
         ref={triggerRef}
         type="button"
@@ -61,7 +70,14 @@ export default function NotificationTrigger() {
           </Text>
         ) : null}
       </button>
-      {isOpen ? <NotificationPanel id={notificationPanelId} onClose={closeWithFocus} /> : null}
+      {isPanelRendered ? (
+        <NotificationPanel
+          id={notificationPanelId}
+          onClose={closeWithFocus}
+          className={dropdownMotionClassName(isPanelVisible)}
+          isVisible={isPanelVisible}
+        />
+      ) : null}
     </div>
   );
 }

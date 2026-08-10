@@ -7,9 +7,10 @@ import Button, { buttonVariants } from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
+import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { ConfirmedCheckIcon, LikeIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
+import { ConfirmedCheckIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
@@ -44,7 +45,7 @@ export default function PendingEstimateCard({
 }: PendingEstimateCardProps) {
   const { mover, status, isDesignated, price } = offer;
   const displayName = mover.nickname || mover.name;
-  const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
+  const intro = mover.shortIntro?.trim() || null;
   const moverTitleId = `offer-${offer.id}-mover`;
   const detailHref = APP_ROUTES.ESTIMATES.PENDING_DETAIL(offer.id);
   // 찜: PENDING_LIST / RECEIVED / DETAIL 캐시는 useFavoriteMover가 갱신
@@ -97,20 +98,24 @@ export default function PendingEstimateCard({
 
           <div className="flex w-full flex-col gap-4">
             {/* Figma sm: 16 semibold / lg: 18 semibold */}
-            <Text
-              as="p"
-              variant="lg-semibold"
-              className="text-text-secondary break-words md:hidden"
-            >
-              {intro}
-            </Text>
-            <Text
-              as="p"
-              variant="2lg-semibold"
-              className="text-text-secondary hidden break-words md:block"
-            >
-              {intro}
-            </Text>
+            {intro ? (
+              <>
+                <Text
+                  as="p"
+                  variant="lg-semibold"
+                  className="text-text-secondary wrap-break-word md:hidden"
+                >
+                  {intro}
+                </Text>
+                <Text
+                  as="p"
+                  variant="2lg-semibold"
+                  className="text-text-secondary hidden wrap-break-word md:block"
+                >
+                  {intro}
+                </Text>
+              </>
+            ) : null}
 
             <div className="border-border-muted flex w-full items-center gap-8 border-b pt-12 pb-20">
               <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
@@ -141,35 +146,16 @@ export default function PendingEstimateCard({
                       {displayName} 기사님
                     </Text>
                   </div>
-                  <button
-                    type="button"
-                    className="focus-visible:ring-border-brand rounded-8 flex shrink-0 items-center gap-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-                    aria-label={`${displayName} 기사님 찜, 현재 찜 ${mover.favoriteCount}개`}
-                    aria-pressed={mover.isFavorite}
-                    disabled={favoriteMutation.isPending}
-                    onClick={() => {
-                      favoriteMutation.mutate({
-                        moverId: mover.id,
-                        nextIsFavorite: !mover.isFavorite,
-                      });
+                  <FavoriteButton
+                    moverName={displayName}
+                    isFavorite={mover.isFavorite}
+                    favoriteCount={mover.favoriteCount}
+                    showCount
+                    className="gap-2"
+                    onToggle={(nextIsFavorite) => {
+                      favoriteMutation.mutate({ moverId: mover.id, nextIsFavorite });
                     }}
-                  >
-                    <LikeIcon
-                      isFavorite={mover.isFavorite}
-                      className={cn(
-                        "size-24",
-                        mover.isFavorite ? "text-text-brand" : "text-icon-default",
-                      )}
-                    />
-                    <Text
-                      as="span"
-                      variant="md-regular"
-                      className="text-text-muted"
-                      aria-hidden="true"
-                    >
-                      {mover.favoriteCount}
-                    </Text>
-                  </button>
+                  />
                 </div>
 
                 <div className="flex w-full flex-wrap items-center gap-x-8 gap-y-4">

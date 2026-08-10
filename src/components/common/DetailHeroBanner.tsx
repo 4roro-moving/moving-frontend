@@ -8,6 +8,8 @@ interface DetailHeroBannerProps {
   showProfile?: boolean;
   imageUrl?: string | null;
   name?: string;
+  /** 첫 화면 LCP 프로필 이미지를 preload할지 여부 */
+  preloadProfileImage?: boolean;
 }
 
 /**
@@ -18,6 +20,7 @@ export default function DetailHeroBanner({
   showProfile = true,
   imageUrl = null,
   name = "",
+  preloadProfileImage = false,
 }: DetailHeroBannerProps) {
   if (!showProfile) {
     return (
@@ -52,6 +55,7 @@ export default function DetailHeroBanner({
               alt={`${name} 기사님 프로필`}
               fill
               sizes="(max-width: 768px) 86px, (max-width: 1024px) 100px, 129px"
+              preload={preloadProfileImage}
               className="object-cover"
             />
           ) : (

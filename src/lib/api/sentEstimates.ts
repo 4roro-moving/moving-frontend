@@ -26,3 +26,7 @@ export async function fetchSentEstimates(query: SentEstimateListQuery) {
 export function fetchSentEstimateDetail(estimateId: number): Promise<SentEstimate> {
   return fetchInstance.get<SentEstimate>(API_ROUTES.ESTIMATES.SENT_DETAIL(estimateId));
 }
+
+export function completeSentEstimate(estimateId: number): Promise<SentEstimate> {
+  return fetchInstance.patch<SentEstimate>(API_ROUTES.ESTIMATES.COMPLETE_SENT(estimateId));
+}

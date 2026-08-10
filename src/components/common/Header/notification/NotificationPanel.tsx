@@ -18,9 +18,15 @@ interface NotificationPanelProps {
   id: string;
   onClose: () => void;
   className?: string;
+  isVisible: boolean;
 }
 
-export default function NotificationPanel({ id, onClose, className }: NotificationPanelProps) {
+export default function NotificationPanel({
+  id,
+  onClose,
+  className,
+  isVisible,
+}: NotificationPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [knownPageCount, setKnownPageCount] = useState<number | null>(null);
@@ -32,11 +38,13 @@ export default function NotificationPanel({ id, onClose, className }: Notificati
     page: queryPage,
     limit: NOTIFICATION_PAGE_SIZE,
   });
+
   const { mutateAsync: markAsRead } = useReadNotification();
 
   useFocusTrap({
     containerRef: panelRef,
     onEscape: onClose,
+    enabled: isVisible,
   });
 
   const notifications = data?.notifications ?? [];
@@ -88,48 +96,47 @@ export default function NotificationPanel({ id, onClose, className }: Notificati
       ref={panelRef}
       id={id}
       role="dialog"
-      aria-modal="true"
+      aria-modal={isVisible ? "true" : undefined}
+      aria-hidden={!isVisible}
       aria-labelledby="notification-panel-title"
       aria-busy={isLoading || isFetching}
-      tabIndex={-1}
+      inert={!isVisible ? true : undefined}
+      tabIndex={isVisible ? -1 : undefined}
       className={cn(
-        "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-0 z-50 mt-8 w-[359px] border px-16 py-10 focus:outline-none",
+        "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-6 z-50 mt-8 w-[min(348px,calc(100vw-48px))] border px-16 py-10 focus:outline-none md:right-0 md:w-87",
         className,
       )}
     >
-      <div className="flex w-full items-center justify-between py-14 pr-12 pl-24">
-        <Text
-          id="notification-panel-title"
-          as="h2"
-          variant="2lg-bold"
-          className="text-text-primary"
-        >
+      <div className="flex items-center justify-between py-14 pr-12 pl-16 md:pl-24">
+        <Text id="notification-panel-title" as="h2" variant={{ base: "2lg-bold", md: "lg-bold" }}>
           알림
         </Text>
+
         <button
           type="button"
           aria-label="알림 닫기"
           onClick={onClose}
-          className="text-icon-default flex size-24 items-center justify-center"
+          disabled={!isVisible}
+          className="flex size-24 items-center justify-center"
         >
-          <CloseIcon className="size-18" />
+          <CloseIcon className="text-icon-default size-24" />
         </button>
       </div>
 
       {isLoading ? (
-        <div className="flex h-[220px] w-full items-center justify-center px-24">
+        <div className="flex h-55 w-full items-center justify-center px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
             알림을 불러오는 중이에요
           </Text>
         </div>
       ) : isError ? (
-        <div className="flex h-[220px] w-full items-center justify-center px-24">
+        <div className="flex h-55 w-full items-center justify-center px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
             알림을 불러오지 못했어요
           </Text>
         </div>
       ) : isEmpty ? (
-        <div className="flex h-[220px] w-full items-center justify-center px-24">
+        <div className="flex h-55 w-full items-center justify-center px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
             새로운 알림이 없습니다
           </Text>

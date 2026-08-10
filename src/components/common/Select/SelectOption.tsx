@@ -10,6 +10,8 @@ import { useSelectContext } from "./SelectMain";
 interface SelectOptionProps {
   children: ReactNode;
   value: string;
+  /** 옵션 선택 전에 필요한 데이터 prefetch 적용 */
+  onPrefetch?: () => void;
 }
 
 function getOptionTextVariant(isSort: boolean, isMultiColumn: boolean): TextVariantProp {
@@ -24,7 +26,7 @@ function getOptionTextVariant(isSort: boolean, isMultiColumn: boolean): TextVari
   return { base: "md-medium", xl: "lg-medium" };
 }
 
-const SelectOption = ({ children, value }: SelectOptionProps) => {
+const SelectOption = ({ children, value, onPrefetch }: SelectOptionProps) => {
   const { selected, handleChange, variant, columns } = useSelectContext();
   const isSelected = selected === value;
   const isSort = variant === "sort";
@@ -47,6 +49,8 @@ const SelectOption = ({ children, value }: SelectOptionProps) => {
         isSelected && "bg-background-hover",
       )}
       onClick={() => handleChange(value)}
+      onFocus={onPrefetch}
+      onPointerEnter={onPrefetch}
     >
       <Text variant={getOptionTextVariant(isSort, isMultiColumn)} className="text-text-secondary">
         {children}

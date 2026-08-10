@@ -22,6 +22,7 @@ export interface ReviewableEstimateItem {
     id: string;
     nickname: string | null;
     imageUrl: string | null;
+    shortIntro?: string | null;
     career: number | null;
     averageRating: number | null;
     reviewCount: number | null;

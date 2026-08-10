@@ -22,7 +22,8 @@ export default function LandingFeatureCompare() {
             src="/images/landing/img4-lg.png"
             alt="여러 업체의 견적 카드 비교 예시"
             fill
-            className="object-cover object-top"
+            draggable={false}
+            className="pointer-events-none object-cover object-top select-none"
             sizes="(min-width: 1280px) 1920px, 100vw"
           />
           <h2 className="text-text-secondary absolute top-[14.18%] left-[21.72%] z-10 text-[length:calc(32/1920*100cqw)] leading-[calc(42/1920*100cqw)] font-bold whitespace-nowrap">
@@ -40,7 +41,8 @@ export default function LandingFeatureCompare() {
             src="/images/landing/img4-md.png"
             alt="여러 업체의 견적 카드 비교 예시"
             fill
-            className="object-cover object-top"
+            draggable={false}
+            className="pointer-events-none object-cover object-top select-none"
             sizes="100vw"
           />
           <h2 className="text-text-secondary absolute top-[5.6%] left-[4.3%] z-10 text-[length:calc(32/744*100cqw)] leading-[calc(42/744*100cqw)] font-bold whitespace-nowrap">
@@ -58,7 +60,8 @@ export default function LandingFeatureCompare() {
             src="/images/landing/img4-sm.png"
             alt="여러 업체의 견적 카드 비교 예시"
             fill
-            className="object-cover object-top"
+            draggable={false}
+            className="pointer-events-none object-cover object-top select-none"
             sizes="100vw"
           />
           <Text

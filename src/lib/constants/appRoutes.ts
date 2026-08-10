@@ -21,8 +21,12 @@ export const APP_ROUTES = {
   MOVER_PROFILE: "/mover/profile",
   /** 견적 요청 */
   ESTIMATE_REQUEST: "/estimate-request",
-  /** 프로필 수정 — 추후 페이지 연동 */
+  /** 고객 프로필 수정 */
   PROFILE_EDIT: "/profile/edit",
+  /** 기사님 프로필 수정 */
+  MOVER_PROFILE_EDIT: "/mover/profile/edit",
+  /** 기사님 기본정보 수정 */
+  MOVER_BASIC_EDIT: "/mover/basic/edit",
   // 2026.07.27 정슬기 - [추가] 기사님 찾기·상세 페이지 경로
   MOVERS: {
     ROOT: "/movers",
@@ -57,5 +61,9 @@ export const APP_ROUTES = {
     SENT: "/estimate/sent",
     SENT_DETAIL: (estimateId: number) => `/estimate/sent/${estimateId}`,
     REJECTED: "/estimate/rejected",
+  },
+  // 2026.08.06 김성현 - [추가] 채팅방 상세 페이지 경로
+  CHATS: {
+    ROOM: (roomId: number) => `/chats/${roomId}`,
   },
 } as const;

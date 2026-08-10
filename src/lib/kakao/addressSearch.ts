@@ -65,6 +65,36 @@ export interface AddressSearchItem {
   roadAddress: string;
   jibunAddress: string;
   sido: string;
+  latitude: number;
+  longitude: number;
+}
+
+// 2026.08.06 윤소정 - [추가] 카카오 주소 검색 좌표 유효성 검사
+function parseCoordinates(x: unknown, y: unknown): { latitude: number; longitude: number } | null {
+  if (typeof x !== "string" || typeof y !== "string" || !x.trim() || !y.trim()) return null;
+
+  const latitude = Number(y);
+  const longitude = Number(x);
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    latitude === 0 ||
+    longitude === 0 ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return null;
+  }
+
+  return { latitude, longitude };
+}
+
+export function toValidCoordinateKey(x: unknown, y: unknown): string | null {
+  const coordinates = parseCoordinates(x, y);
+  if (!coordinates) return null;
+  return toCoordinateKey(String(coordinates.longitude), String(coordinates.latitude));
 }
 
 /** 괄호 안 건물명 제거 후 도로명 기준 비교용 */
@@ -132,7 +162,7 @@ export function mergeAddressDocumentIntoZipLookups(
   const zipCode = extractZipCodeFromAddressDocument(document);
   if (!zipCode) return "";
 
-  setZipLookup(lookups.byCoordinate, toCoordinateKey(document.x, document.y), zipCode);
+  setZipLookup(lookups.byCoordinate, toValidCoordinateKey(document.x, document.y) ?? "", zipCode);
   setZipLookup(lookups.byJibun, document.address?.address_name ?? "", zipCode);
   setZipLookup(lookups.byJibun, document.address_name, zipCode);
   setZipLookup(lookups.byRoad, document.road_address?.address_name ?? "", zipCode);
@@ -162,9 +192,10 @@ export function resolveKeywordZipCode(
 ): string {
   const road = document.road_address_name.trim();
   const jibun = document.address_name.trim();
+  const coordinateKey = toValidCoordinateKey(document.x, document.y);
 
   return (
-    lookups.byCoordinate.get(toCoordinateKey(document.x, document.y)) ||
+    (coordinateKey ? lookups.byCoordinate.get(coordinateKey) : undefined) ||
     lookups.byJibun.get(jibun) ||
     lookups.byRoad.get(road) ||
     ""
@@ -193,7 +224,10 @@ export function collectAddressQueriesForMissingZip(
 export function mapKakaoDocumentToAddressItem(
   document: KakaoAddressDocument,
   index: number,
-): AddressSearchItem {
+): AddressSearchItem | null {
+  const coordinates = parseCoordinates(document.x, document.y);
+  if (!coordinates) return null;
+
   const road = document.road_address;
   const jibun = document.address;
 
@@ -208,6 +242,7 @@ export function mapKakaoDocumentToAddressItem(
     roadAddress,
     jibunAddress: jibun?.address_name || "",
     sido: extractSido(jibun?.address_name || roadBase),
+    ...coordinates,
   };
 }
 
@@ -216,7 +251,10 @@ export function mapKakaoKeywordToAddressItem(
   document: KakaoKeywordDocument,
   index: number,
   resolvedZipCode = "",
-): AddressSearchItem {
+): AddressSearchItem | null {
+  const coordinates = parseCoordinates(document.x, document.y);
+  if (!coordinates) return null;
+
   const road = document.road_address_name.trim();
   const place = document.place_name.trim();
   const jibun = document.address_name.trim();
@@ -232,6 +270,7 @@ export function mapKakaoKeywordToAddressItem(
     roadAddress,
     jibunAddress: jibun,
     sido: extractSido(jibun || roadAddress),
+    ...coordinates,
   };
 }
 

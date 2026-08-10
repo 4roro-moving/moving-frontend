@@ -78,3 +78,16 @@ export async function designateMover(
     { moverId },
   );
 }
+
+/**
+ * DELETE /estimate-requests/:id/designate/:moverId — 지정 기사 개별 취소
+ * // 2026.08.07 정슬기 - [추가]
+ */
+export async function cancelDesignatedMover(
+  estimateRequestId: number,
+  moverId: string,
+): Promise<MyEstimateRequestItem> {
+  return fetchInstance.delete<MyEstimateRequestItem>(
+    API_ROUTES.ESTIMATE_REQUESTS.CANCEL_DESIGNATE(estimateRequestId, moverId),
+  );
+}

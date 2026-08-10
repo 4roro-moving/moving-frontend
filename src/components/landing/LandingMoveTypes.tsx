@@ -65,7 +65,11 @@ export default function LandingMoveTypes() {
                 alt=""
                 width={item.featured ? 156 : 99}
                 height={item.featured ? 156 : 99}
-                className={cn("max-w-none shrink-0 object-contain", item.imageClassName)}
+                draggable={false}
+                className={cn(
+                  "pointer-events-none max-w-none shrink-0 object-contain select-none",
+                  item.imageClassName,
+                )}
               />
               <div className="flex flex-col items-center gap-2 text-center">
                 <Text

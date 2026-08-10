@@ -5,10 +5,15 @@ import { notFound } from "next/navigation";
 import MoverDetailView from "@/components/mover/detail/MoverDetailView";
 import { getMoverDetailCached } from "@/lib/api/movers";
 import { AUTH_QUERY_GUEST_SCOPE, getMoverDetailQueryKey } from "@/lib/constants/queryKeys";
-import { buildMoverDetailMetadata } from "@/lib/share/metadata";
+import {
+  buildMoverDetailFallbackMetadata,
+  buildMoverDetailMetadata,
+  buildMoverNotFoundMetadata,
+} from "@/lib/share/og";
 import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
 import { mapMoverDetailItemToMoverDetail } from "@/lib/utils/mapMover";
 import { ApiError } from "@/types/api";
+import type { MoverDetail } from "@/types/moverDetail";
 
 interface MoverDetailPageProps {
   params: Promise<{ moverId: string }>;
@@ -20,10 +25,7 @@ export async function generateMetadata({ params }: MoverDetailPageProps): Promis
   const { moverId } = await params;
 
   if (!isMoverDetailId(moverId)) {
-    return {
-      title: "기사님 상세",
-      description: "이사 기사님 상세 정보를 확인하세요.",
-    };
+    return buildMoverDetailFallbackMetadata();
   }
 
   try {
@@ -31,16 +33,11 @@ export async function generateMetadata({ params }: MoverDetailPageProps): Promis
     return buildMoverDetailMetadata(moverId, mover);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
-      return {
-        title: "기사님을 찾을 수 없습니다",
-        description: "요청하신 기사님 정보를 찾을 수 없습니다.",
-      };
+      return buildMoverNotFoundMetadata();
     }
 
-    return {
-      title: "기사님 상세",
-      description: "이사 기사님 상세 정보를 확인하세요.",
-    };
+    // API 실패·APP_URL 이슈 등과 무관하게 og:image가 비지 않도록 fallback 메타 사용
+    return buildMoverDetailFallbackMetadata(moverId);
   }
 }
 
@@ -58,6 +55,7 @@ export default async function MoverDetailPage({ params }: MoverDetailPageProps) 
       },
     },
   });
+  let initialDetail: MoverDetail | null = null;
 
   try {
     await queryClient.prefetchQuery({
@@ -67,13 +65,17 @@ export default async function MoverDetailPage({ params }: MoverDetailPageProps) 
         return mapMoverDetailItemToMoverDetail(item);
       },
     });
+    initialDetail =
+      queryClient.getQueryData<MoverDetail>(
+        getMoverDetailQueryKey(AUTH_QUERY_GUEST_SCOPE, moverId),
+      ) ?? null;
   } catch {
     // prefetch 실패해도 페이지는 렌더 — MoverDetailView가 클라이언트에서 재요청
   }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <MoverDetailView key={moverId} moverId={moverId} />
+      <MoverDetailView key={moverId} moverId={moverId} initialDetail={initialDetail} />
     </HydrationBoundary>
   );
 }

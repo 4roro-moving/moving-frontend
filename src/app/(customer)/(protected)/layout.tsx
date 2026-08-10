@@ -3,31 +3,26 @@
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
+import ProfileCompletionGuard from "@/components/auth/ProfileCompletionGuard";
 import RoleGuard from "@/components/auth/RoleGuard";
-import { PageHeader } from "@/components/common/PageHeader";
-import FavoriteMoversLoadingSkeleton from "@/components/mover/favorites/FavoriteMoversLoadingSkeleton";
-import { FAVORITE_MOVERS_CONTENT_CLASSNAME } from "@/components/mover/favorites/FavoriteMoversContent";
-import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { getCustomerProtectedLoadingFallback } from "@/lib/loading/getCustomerProtectedLoadingFallback";
 
 interface CustomerProtectedLayoutProps {
   children: ReactNode;
 }
 
+/**
+ * 고객 `(protected)` Route Group 공통 가드.
+ * 프로필 완료 검사는 이 layout의 ProfileCompletionGuard에서만 처리한다.
+ * 하위 페이지에 CustomerAuthGate(+ Guard)를 추가로 감싸지 말 것.
+ */
 const CustomerProtectedLayout = ({ children }: CustomerProtectedLayoutProps) => {
   const pathname = usePathname();
-  const loadingFallback =
-    pathname === APP_ROUTES.MOVERS.FAVORITES ? (
-      <div className="bg-background-subtle flex w-full flex-col">
-        <PageHeader title="찜한 기사님" />
-        <div className={FAVORITE_MOVERS_CONTENT_CLASSNAME}>
-          <FavoriteMoversLoadingSkeleton />
-        </div>
-      </div>
-    ) : null;
+  const loadingFallback = getCustomerProtectedLoadingFallback(pathname);
 
   return (
     <RoleGuard allowedRole="CUSTOMER" loadingFallback={loadingFallback}>
-      {children}
+      <ProfileCompletionGuard loadingFallback={loadingFallback}>{children}</ProfileCompletionGuard>
     </RoleGuard>
   );
 };

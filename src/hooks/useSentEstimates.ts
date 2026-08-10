@@ -1,8 +1,12 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+
+import { useApiMutation } from "@/hooks/queries/useApiMutation";
 import { useApiInfiniteQuery } from "@/hooks/queries/useApiInfiniteQuery";
 import { useApiQuery } from "@/hooks/queries/useApiQuery";
 import {
+  completeSentEstimate,
   fetchSentEstimateDetail,
   fetchSentEstimates,
   type SentEstimateListQuery,
@@ -28,5 +32,19 @@ export function useSentEstimateDetail(estimateId: number) {
     queryKey: QUERY_KEYS.ESTIMATES.SENT_DETAIL(estimateId),
     queryFn: () => fetchSentEstimateDetail(estimateId),
     enabled: Number.isSafeInteger(estimateId) && estimateId > 0,
+  });
+}
+
+export function useCompleteSentEstimate(estimateId: number) {
+  const queryClient = useQueryClient();
+
+  return useApiMutation({
+    mutationFn: () => completeSentEstimate(estimateId),
+    onSuccess: async (completedEstimate) => {
+      queryClient.setQueryData(QUERY_KEYS.ESTIMATES.SENT_DETAIL(estimateId), completedEstimate);
+      await queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.ESTIMATES.SENT_LIST_ROOT,
+      });
+    },
   });
 }

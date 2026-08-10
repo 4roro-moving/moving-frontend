@@ -9,79 +9,96 @@ import {
   type MoversSearchParamsState,
 } from "@/lib/utils/moversSearchParams";
 
-const SEARCH_DEBOUNCE_MS = 300;
-
 export function useMoversFilters(filters: MoversSearchParamsState) {
   const router = useRouter();
   const pathname = usePathname();
   const [keyword, setKeyword] = useState(filters.keyword);
-  const [previousKeyword, setPreviousKeyword] = useState(filters.keyword);
   const [filterKey, setFilterKey] = useState(0);
-  const searchDebounceTimerRef = useRef<number | null>(null);
   const latestFiltersRef = useRef(filters);
+  // 사용자가 URL 반영 전 새로 입력한 검색어가 있는지 여부
+  const isKeywordDirtyRef = useRef(false);
+  // router.replace로 요청한 전체 쿼리. 이전 라우팅 결과가 늦게 도착하면 무시하기 위해 사용
+  const pendingQueryRef = useRef<string | undefined>(undefined);
 
-  if (filters.keyword !== previousKeyword) {
-    setPreviousKeyword(filters.keyword);
-    setKeyword(filters.keyword);
-  }
-
+  // URL 필터 변경 시 입력값을 동기화하되, 라우팅 중 새로 입력한 검색어는 덮어쓰지 않음
   useEffect(() => {
-    latestFiltersRef.current = filters;
-  }, [filters]);
+    const queryString = buildMoversQueryString(filters);
+    if (pendingQueryRef.current !== undefined) {
+      if (queryString !== pendingQueryRef.current) {
+        return;
+      }
+      pendingQueryRef.current = undefined;
+    }
 
-  const clearSearchDebounceTimer = useCallback(() => {
-    if (searchDebounceTimerRef.current === null) {
+    latestFiltersRef.current = filters;
+
+    if (isKeywordDirtyRef.current) {
       return;
     }
 
-    window.clearTimeout(searchDebounceTimerRef.current);
-    searchDebounceTimerRef.current = null;
-  }, []);
+    setKeyword(filters.keyword);
+  }, [filters]);
 
   const replaceUrl = useCallback(
     (nextFilters: MoversSearchParamsState) => {
-      latestFiltersRef.current = nextFilters;
       const queryString = buildMoversQueryString(nextFilters);
-      // 필터 URL 동기화로 인한 불필요한 스크롤 이동 방지
-      router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false });
+      if (queryString === buildMoversQueryString(latestFiltersRef.current)) {
+        return;
+      }
+
+      // 이전 라우팅 결과가 최신 필터 상태를 덮어쓰지 않도록 현재 요청 쿼리 기록
+      pendingQueryRef.current = queryString;
+      latestFiltersRef.current = nextFilters;
+      router.replace(queryString ? `${pathname}?${queryString}` : pathname);
     },
     [pathname, router],
   );
 
-  useEffect(() => {
-    if (keyword === latestFiltersRef.current.keyword) {
-      return;
-    }
+  const updateKeyword = useCallback((nextKeyword: string) => {
+    isKeywordDirtyRef.current = true;
+    setKeyword(nextKeyword);
+  }, []);
 
-    clearSearchDebounceTimer();
-    searchDebounceTimerRef.current = window.setTimeout(() => {
-      searchDebounceTimerRef.current = null;
-      replaceUrl({ ...latestFiltersRef.current, keyword });
-    }, SEARCH_DEBOUNCE_MS);
+  const applyKeyword = useCallback(
+    (nextKeyword: string) => {
+      const normalizedKeyword = nextKeyword.trim();
+      isKeywordDirtyRef.current = false;
+      setKeyword(normalizedKeyword);
 
-    return clearSearchDebounceTimer;
-  }, [keyword, replaceUrl, clearSearchDebounceTimer]);
+      replaceUrl({ ...latestFiltersRef.current, keyword: normalizedKeyword });
+    },
+    [replaceUrl],
+  );
+
+  const submitSearch = useCallback(() => {
+    applyKeyword(keyword);
+  }, [applyKeyword, keyword]);
+
+  const clearSearch = useCallback(() => {
+    applyKeyword(MOVERS_SEARCH_DEFAULTS.keyword);
+  }, [applyKeyword]);
 
   const replaceFilters = useCallback(
     (patch: Partial<MoversSearchParamsState>) => {
-      clearSearchDebounceTimer();
-      replaceUrl({ ...latestFiltersRef.current, keyword, ...patch });
+      replaceUrl({ ...latestFiltersRef.current, ...patch });
     },
-    [clearSearchDebounceTimer, keyword, replaceUrl],
+    [replaceUrl],
   );
 
   const resetFilters = useCallback(() => {
-    clearSearchDebounceTimer();
+    isKeywordDirtyRef.current = false;
     setKeyword(MOVERS_SEARCH_DEFAULTS.keyword);
     setFilterKey((previousKey) => previousKey + 1);
     replaceUrl({ ...MOVERS_SEARCH_DEFAULTS });
-  }, [clearSearchDebounceTimer, replaceUrl]);
+  }, [replaceUrl]);
 
   return {
+    clearSearch,
     filterKey,
     keyword,
     replaceFilters,
     resetFilters,
-    setKeyword,
+    setKeyword: updateKeyword,
+    submitSearch,
   };
 }

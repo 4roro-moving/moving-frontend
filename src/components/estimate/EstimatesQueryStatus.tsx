@@ -1,9 +1,13 @@
 import { Text } from "@/components/common/Text";
 
+import { cn } from "@/lib/utils/cn";
+
 interface EstimatesQueryStatusProps {
   message: string;
   actionLabel?: string;
   onAction?: () => void;
+  actionBusy?: boolean;
+  className?: string;
 }
 
 /**
@@ -14,10 +18,15 @@ export default function EstimatesQueryStatus({
   message,
   actionLabel,
   onAction,
+  actionBusy = false,
+  className,
 }: EstimatesQueryStatusProps) {
   return (
     <div
-      className="px-margin-mobile flex w-full flex-col items-center justify-center gap-16 py-64 md:px-0 md:py-80"
+      className={cn(
+        "px-margin-mobile flex w-full flex-col items-center justify-center gap-16 py-64 md:px-0 md:py-80",
+        className,
+      )}
       role={actionLabel ? "alert" : "status"}
       {...(actionLabel ? {} : { "aria-live": "polite" as const })}
     >
@@ -28,6 +37,8 @@ export default function EstimatesQueryStatus({
         <button
           type="button"
           onClick={onAction}
+          disabled={actionBusy}
+          aria-busy={actionBusy}
           className="text-text-brand focus-visible:ring-border-brand rounded-4 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-none"
         >
           <Text as="span" variant="md-semibold" className="text-text-brand">

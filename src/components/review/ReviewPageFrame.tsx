@@ -9,10 +9,6 @@ interface ReviewPageFrameProps {
   className?: string;
 }
 
-/**
- * 리뷰 목록 페이지 공통 프레임 (제목 + 콘텐츠 폭/여백)
- * // 2026.07.27 정슬기 - [추가] Mobile/Tablet/Desktop 여백·타이포 통일
- */
 export default function ReviewPageFrame({ title, children, className }: ReviewPageFrameProps) {
   return (
     <div
@@ -21,13 +17,12 @@ export default function ReviewPageFrame({ title, children, className }: ReviewPa
         className,
       )}
     >
-      <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop mx-auto flex w-full flex-col pt-24 pb-16 md:pt-40 md:pb-24 xl:px-0 xl:pt-48">
-        <Text as="h1" variant={{ base: "2xl-bold", md: "3xl-bold" }} className="text-text-primary">
-          {title}
-        </Text>
-      </div>
+      {/* Figma에는 별도 페이지 제목이 없으므로 접근성용으로만 유지 */}
+      <Text as="h1" variant="2xl-bold" className="sr-only">
+        {title}
+      </Text>
 
-      <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop mx-auto flex w-full flex-col pb-64 md:pb-80 xl:px-0">
+      <div className="px-margin-mobile md:px-margin-tablet mx-auto flex w-full max-w-220 flex-col pt-24 pb-64 md:pt-32 md:pb-80 xl:px-0">
         {children}
       </div>
     </div>

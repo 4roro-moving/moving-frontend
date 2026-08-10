@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { phoneSchema } from "@/lib/schemas/phoneSchema";
+
 export const signUpSchema = z
   .object({
     name: z.string().trim().min(1, "성함을 입력해 주세요"),
@@ -8,12 +10,7 @@ export const signUpSchema = z
       .trim()
       .min(1, "이메일을 입력해 주세요")
       .email("올바른 이메일 형식이 아닙니다"),
-    phone: z
-      .string()
-      .min(1, "전화번호를 입력해 주세요")
-      .regex(/^\d+$/, "숫자만 입력해 주세요")
-      .min(10, "올바른 전화번호를 입력해 주세요")
-      .max(11, "올바른 전화번호를 입력해 주세요"),
+    phone: phoneSchema,
     password: z
       .string()
       .min(1, "비밀번호를 입력해 주세요")

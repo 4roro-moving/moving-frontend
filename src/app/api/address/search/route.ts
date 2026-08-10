@@ -10,7 +10,7 @@ import {
   mergeCoordDocumentIntoZipLookups,
   resolveKeywordZipCode,
   setZipLookup,
-  toCoordinateKey,
+  toValidCoordinateKey,
   type KakaoAddressDocument,
   type KakaoCoord2AddressDocument,
   type KakaoKeywordDocument,
@@ -151,9 +151,10 @@ export async function GET(request: Request) {
 
   const missingCoordinateKeys = [
     ...new Set(
-      keywordDocuments
-        .map((document) => toCoordinateKey(document.x, document.y))
-        .filter((coordinateKey) => !lookups.byCoordinate.has(coordinateKey)),
+      keywordDocuments.flatMap((document) => {
+        const coordinateKey = toValidCoordinateKey(document.x, document.y);
+        return coordinateKey && !lookups.byCoordinate.has(coordinateKey) ? [coordinateKey] : [];
+      }),
     ),
   ];
 
@@ -166,10 +167,18 @@ export async function GET(request: Request) {
     await enrichZipCodesByAddressQueries(missingAddressQueries, apiKey, lookups);
   }
 
-  const addressResults = (addressDocuments ?? []).map(mapKakaoDocumentToAddressItem);
-  const keywordResults = keywordDocuments.map((document, index) =>
-    mapKakaoKeywordToAddressItem(document, index, resolveKeywordZipCode(document, lookups)),
-  );
+  const addressResults = (addressDocuments ?? []).flatMap((document, index) => {
+    const item = mapKakaoDocumentToAddressItem(document, index);
+    return item ? [item] : [];
+  });
+  const keywordResults = keywordDocuments.flatMap((document, index) => {
+    const item = mapKakaoKeywordToAddressItem(
+      document,
+      index,
+      resolveKeywordZipCode(document, lookups),
+    );
+    return item ? [item] : [];
+  });
   const results = mergeAddressSearchResults(addressResults, keywordResults);
 
   return NextResponse.json({ results });

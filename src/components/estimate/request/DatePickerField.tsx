@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
+import { usePresence } from "@/hooks/usePresence";
 import { cn } from "@/lib/utils/cn";
 import { formatKoreanDate } from "@/lib/utils/date";
+import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 
 import Calendar from "./Calendar";
 import { CalendarIcon, ChevronDownIcon } from "../icons";
@@ -17,6 +19,10 @@ interface DatePickerFieldProps {
 
 export default function DatePickerField({ value, onChange, className }: DatePickerFieldProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { isRendered: isPopupRendered, isVisible: isPopupVisible } = usePresence(
+    isOpen,
+    DROPDOWN_EXIT_DURATION_MS,
+  );
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,7 +54,7 @@ export default function DatePickerField({ value, onChange, className }: DatePick
         aria-expanded={isOpen}
         aria-controls="estimate-date-picker-popup"
         className={cn(
-          "rounded-12 bg-background-surface flex h-[50px] w-full items-center gap-8 border pr-12 pl-20",
+          "rounded-12 bg-background-surface flex h-50 w-full items-center gap-8 border pr-12 pl-20",
           isOpen ? "border-border-brand" : "border-border-subtle",
         )}
       >
@@ -66,12 +72,16 @@ export default function DatePickerField({ value, onChange, className }: DatePick
         />
       </button>
 
-      {isOpen && (
+      {isPopupRendered ? (
         <div
           id="estimate-date-picker-popup"
           role="region"
           aria-label="날짜 선택"
-          className="absolute top-full left-0 z-20 mt-8 w-full"
+          aria-hidden={!isPopupVisible}
+          className={cn(
+            "absolute top-full left-0 z-20 mt-8 w-full",
+            dropdownMotionClassName(isPopupVisible),
+          )}
         >
           <Calendar
             selected={value}
@@ -81,7 +91,7 @@ export default function DatePickerField({ value, onChange, className }: DatePick
             }}
           />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

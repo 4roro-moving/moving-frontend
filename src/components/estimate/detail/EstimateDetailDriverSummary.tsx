@@ -3,9 +3,9 @@
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
+import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { ConfirmedCheckIcon, LikeIcon, StarIcon } from "@/icons";
-import { cn } from "@/lib/utils/cn";
+import { ConfirmedCheckIcon, StarIcon } from "@/icons";
 import { formatRating } from "@/lib/utils/estimateFormat";
 import type { EstimateDetail } from "@/types/estimate";
 
@@ -32,7 +32,7 @@ export default function EstimateDetailDriverSummary({
 }: EstimateDetailDriverSummaryProps) {
   const { mover, isConfirmed, isDesignated, estimateRequest } = detail;
   const displayName = mover.nickname || mover.name;
-  const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
+  const intro = mover.shortIntro?.trim() || null;
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
 
   return (
@@ -56,20 +56,24 @@ export default function EstimateDetailDriverSummary({
         {/* md+: 소개 왼쪽 + 상태(확정견적/견적대기) 오른쪽 — 본문 컬럼 안에서 자연스럽게 정렬 */}
         {/* 2026.08.03 정슬기 - [수정] 확정 안내 문구 제거 후 배지만 유지, 과도한 중앙 강제 정렬 제거 */}
         <div className="flex w-full items-center justify-between gap-12">
-          <Text
-            as="p"
-            variant="2lg-semibold"
-            className="text-text-secondary min-w-0 wrap-break-word md:hidden"
-          >
-            {intro}
-          </Text>
-          <Text
-            as="p"
-            variant="2xl-semibold"
-            className="text-text-secondary hidden min-w-0 wrap-break-word md:block"
-          >
-            {intro}
-          </Text>
+          {intro ? (
+            <>
+              <Text
+                as="p"
+                variant="2lg-semibold"
+                className="text-text-secondary min-w-0 wrap-break-word md:hidden"
+              >
+                {intro}
+              </Text>
+              <Text
+                as="p"
+                variant="2xl-semibold"
+                className="text-text-secondary hidden min-w-0 wrap-break-word md:block"
+              >
+                {intro}
+              </Text>
+            </>
+          ) : null}
           <div className="hidden shrink-0 md:block">
             {isConfirmed ? (
               <ConfirmedStatus />
@@ -89,27 +93,18 @@ export default function EstimateDetailDriverSummary({
           <Text as="p" variant="2lg-semibold" className="text-text-primary min-w-0 wrap-break-word">
             {displayName} 기사님
           </Text>
-          <button
-            type="button"
-            className="focus-visible:ring-border-brand rounded-8 flex min-h-44 min-w-44 shrink-0 items-center justify-center gap-4 px-4 py-2 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-            aria-label={`${displayName} 기사님 찜, 현재 찜 ${mover.favoriteCount}개`}
-            aria-pressed={mover.isFavorite}
-            disabled={favoriteMutation.isPending}
-            onClick={() =>
-              favoriteMutation.mutate({
-                moverId: mover.id,
-                nextIsFavorite: !mover.isFavorite,
-              })
-            }
-          >
-            <Text as="span" variant="2lg-medium" className="text-text-muted" aria-hidden="true">
-              {mover.favoriteCount}
-            </Text>
-            <LikeIcon
-              isFavorite={mover.isFavorite}
-              className={cn("size-24", mover.isFavorite ? "text-text-brand" : "text-icon-default")}
-            />
-          </button>
+          <FavoriteButton
+            moverName={displayName}
+            isFavorite={mover.isFavorite}
+            favoriteCount={mover.favoriteCount}
+            showCount
+            countPosition="before"
+            countVariant="2lg-medium"
+            className="min-h-44 min-w-44 justify-center gap-4 px-4 py-2"
+            onToggle={(nextIsFavorite) => {
+              favoriteMutation.mutate({ moverId: mover.id, nextIsFavorite });
+            }}
+          />
         </div>
 
         <div className="flex flex-wrap items-center gap-x-8 gap-y-4">

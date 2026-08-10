@@ -1,6 +1,5 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -8,11 +7,13 @@ import { useCallback, useEffect, useId, useRef, useState, type FocusEvent } from
 
 import { Text } from "@/components/common/Text";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { Skeleton } from "@/components/common/Skeleton/Skeleton";
+import { usePresence } from "@/hooks/usePresence";
 import type { AuthRole } from "@/lib/auth/role";
 import { isPublicPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { cn } from "@/lib/utils/cn";
+import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export type ProfileMenuItem =
@@ -27,19 +28,26 @@ interface ProfileMenuTriggerProps {
   items: ProfileMenuItem[];
   /** 로그아웃 후 이동 경로 분기용 */
   role?: AuthRole | null;
+  imageUrl?: string | null;
+  isAvatarPending?: boolean;
 }
 
 export default function ProfileMenuTrigger({
   nickname,
   items,
   role = null,
+  imageUrl,
+  isAvatarPending,
 }: ProfileMenuTriggerProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const logout = useAuthStore((state) => state.logout);
 
   const [isOpen, setIsOpen] = useState(false);
+  const { isRendered: isMenuRendered, isVisible: isMenuVisible } = usePresence(
+    isOpen,
+    DROPDOWN_EXIT_DURATION_MS,
+  );
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -109,7 +117,6 @@ export default function ProfileMenuTrigger({
     const logoutPath = role === "MOVER" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
 
     await logout();
-    queryClient.removeQueries({ queryKey: QUERY_KEYS.NOTIFICATIONS.ALL });
 
     if (isPublicPage) {
       router.refresh();
@@ -136,25 +143,43 @@ export default function ProfileMenuTrigger({
         className="focus-visible:ring-border-brand rounded-8 flex items-center focus-visible:ring-2 focus-visible:outline-none xl:gap-16"
         onClick={() => setIsOpen((open) => !open)}
       >
-        <Image
-          src="/icons/profile-default.svg"
-          alt=""
-          width={36}
-          height={36}
-          className="rounded-4 size-24 xl:size-36 xl:rounded-none"
-        />
+        {isAvatarPending ? (
+          <Skeleton className="size-24 rounded-full xl:size-36" />
+        ) : imageUrl ? (
+          <div className="rounded-100 overflow-hidden">
+            <Image
+              src={imageUrl}
+              alt=""
+              width={36}
+              height={36}
+              className="rounded-4 size-24 xl:size-36 xl:rounded-none"
+            />
+          </div>
+        ) : (
+          <Image
+            src="/icons/profile-default.svg"
+            alt=""
+            width={36}
+            height={36}
+            className="rounded-4 size-24 xl:size-36 xl:rounded-none"
+          />
+        )}
         <Text as="span" variant="2lg-medium" className="text-text-primary hidden xl:block">
           {nickname}
         </Text>
       </button>
 
-      {isOpen ? (
+      {isMenuRendered ? (
         <div
           ref={menuRef}
           id={`${menuId}-menu`}
           role="menu"
+          aria-hidden={!isMenuVisible}
           aria-labelledby={`${menuId}-trigger`}
-          className="border-border-default bg-background-surface shadow-profile-menu rounded-16 absolute top-[calc(100%+18px)] right-0 z-50 flex w-[248px] flex-col items-start border px-4 pt-16 pb-6"
+          className={cn(
+            "border-border-default bg-background-surface shadow-profile-menu rounded-16 absolute top-[calc(100%+18px)] right-0 z-50 flex w-62 flex-col items-start border px-4 pt-16 pb-6",
+            dropdownMotionClassName(isMenuVisible),
+          )}
         >
           <div className="flex w-full items-center py-14 pr-12 pl-24">
             <Text as="p" variant="2lg-bold" className="text-text-secondary">

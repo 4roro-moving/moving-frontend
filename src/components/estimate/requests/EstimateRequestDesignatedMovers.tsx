@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 
 import { Text } from "@/components/common/Text";
@@ -6,13 +8,15 @@ import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 import type { MyEstimateRequestDesignatedMover } from "@/types/estimate";
 
 interface EstimateRequestDesignatedMoversProps {
-  /** API designatedMovers — moverId를 key·향후 수정 플로우용으로 유지 */
+  /** API designatedMovers — moverId를 list key로 사용 */
   designatedMovers: MyEstimateRequestDesignatedMover[];
 }
 
 /**
  * 보낸 견적 요청 상세 — 지정 요청 대상 기사님 목록
+ * 개별 지정 취소는 견적 요청 취소 허브 모달에서 처리한다.
  * // 2026.07.30 정슬기 - [추가] 지정 견적 요청 기사님 정보 표시
+ * // 2026.08.07 정슬기 - [수정] 지정 취소는 취소 허브 모달로 이동
  */
 export default function EstimateRequestDesignatedMovers({
   designatedMovers,

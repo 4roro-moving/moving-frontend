@@ -1,21 +1,22 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
+import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import MoverCard from "@/components/mover/MoverCard";
 import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { useMovers } from "@/hooks/useMovers";
-import {
-  buildMoversQueryString,
-  type MoversSearchParamsState,
-} from "@/lib/utils/moversSearchParams";
+import { type MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
+import type { Mover } from "@/types/mover";
 
 interface MoversListProps {
   filters: MoversSearchParamsState;
+  /** 인증 상태·사용자별 찜 여부 확인 전 표시할 서버 prefetch 목록 */
+  initialMovers: Mover[];
 }
 
 const MOVERS_EMPTY_DESCRIPTION = (
@@ -29,28 +30,15 @@ const MOVERS_EMPTY_DESCRIPTION = (
 /** 초기 로딩 스켈레톤 카드 수 */
 const MOVERS_LIST_SKELETON_COUNT = 5;
 
-/** 다음 페이지 fetch 중 하단 스켈레톤 카드 수 */
-const MOVERS_NEXT_PAGE_SKELETON_COUNT = 2;
-
-export function MoversList({ filters }: MoversListProps) {
+export function MoversList({ filters, initialMovers }: MoversListProps) {
   const { movers, isInitialLoading, query } = useMovers(filters);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const listStartRef = useRef<HTMLDivElement>(null);
-  const filterKey = buildMoversQueryString(filters);
-  const previousFilterKeyRef = useRef(filterKey);
-
-  useEffect(() => {
-    if (previousFilterKeyRef.current === filterKey) {
-      return;
-    }
-
-    previousFilterKeyRef.current = filterKey;
-    listStartRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
-  }, [filterKey]);
+  const isShowingInitialMovers = isInitialLoading && initialMovers.length > 0;
+  const displayedMovers = isShowingInitialMovers ? initialMovers : movers;
 
   const sentinelRef = useMoversInfiniteScroll({
-    enabled: !isInitialLoading && !query.isError && movers.length > 0,
+    enabled: !isInitialLoading && !query.isError && displayedMovers.length > 0,
     hasNextPage,
     isFetchingNextPage,
     isFetchNextPageError,
@@ -59,7 +47,7 @@ export function MoversList({ filters }: MoversListProps) {
 
   let content: ReactNode;
 
-  if (isInitialLoading) {
+  if (isInitialLoading && !isShowingInitialMovers) {
     content = (
       <MoverCardSkeletonList
         variant="full"
@@ -67,7 +55,7 @@ export function MoversList({ filters }: MoversListProps) {
         label="기사님 목록을 불러오는 중"
       />
     );
-  } else if (query.isError) {
+  } else if (query.isError && !isShowingInitialMovers) {
     content = (
       <MoversErrorPanel
         title="불러오지 못했어요"
@@ -79,7 +67,7 @@ export function MoversList({ filters }: MoversListProps) {
         }}
       />
     );
-  } else if (movers.length === 0) {
+  } else if (displayedMovers.length === 0) {
     content = (
       <EmptyState
         size="sm"
@@ -91,9 +79,14 @@ export function MoversList({ filters }: MoversListProps) {
     content = (
       <div className="flex flex-col gap-20">
         <ul className="flex flex-col gap-20">
-          {movers.map((mover) => (
+          {displayedMovers.map((mover, index) => (
             <li key={mover.id}>
-              <MoverCard mover={mover} variant="full" onFavoriteError={setToastMessage} />
+              <MoverCard
+                mover={mover}
+                variant="full"
+                priorityProfileImage={index === 0}
+                onFavoriteError={setToastMessage}
+              />
             </li>
           ))}
         </ul>
@@ -101,11 +94,19 @@ export function MoversList({ filters }: MoversListProps) {
         <div ref={sentinelRef} className="h-1 w-full" aria-hidden="true" />
 
         {isFetchingNextPage ? (
-          <MoverCardSkeletonList
-            variant="full"
-            count={MOVERS_NEXT_PAGE_SKELETON_COUNT}
-            label="다음 기사님 목록을 불러오는 중"
-          />
+          <div
+            className="flex items-center justify-center gap-8 py-12"
+            role="status"
+            aria-live="polite"
+          >
+            <span
+              className="border-border-brand size-20 animate-spin rounded-full border-2 border-t-transparent"
+              aria-hidden="true"
+            />
+            <Text as="p" variant="sm-medium" className="text-text-muted">
+              기사님을 더 불러오는 중이에요
+            </Text>
+          </div>
         ) : null}
 
         {/* 재시도 중에는 스켈레톤만 보여 패널·스켈레톤이 겹치지 않게 함 */}
@@ -125,7 +126,7 @@ export function MoversList({ filters }: MoversListProps) {
   }
 
   return (
-    <div ref={listStartRef} className="scroll-mt-24">
+    <div className="scroll-mt-24">
       {content}
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </div>
