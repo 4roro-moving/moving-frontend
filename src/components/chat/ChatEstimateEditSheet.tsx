@@ -1,5 +1,7 @@
 "use client";
 
+import type { RefObject } from "react";
+
 import { Text } from "@/components/common/Text";
 import { usePresence } from "@/hooks/usePresence";
 import { cn } from "@/lib/utils/cn";
@@ -16,6 +18,7 @@ export interface ChatEstimateEditSheetProps {
   onCancel: () => void;
   onSubmit: () => boolean | void | Promise<boolean | void>;
   isSubmitting?: boolean;
+  focusRef?: RefObject<HTMLDivElement | null>;
   className?: string;
 }
 
@@ -32,6 +35,7 @@ export default function ChatEstimateEditSheet({
   onCancel,
   onSubmit,
   isSubmitting = false,
+  focusRef,
   className,
 }: ChatEstimateEditSheetProps) {
   const { isRendered, isVisible } = usePresence(open, SHEET_EXIT_DURATION_MS);
@@ -40,11 +44,14 @@ export default function ChatEstimateEditSheet({
 
   return (
     <div
+      ref={focusRef}
       role="region"
       aria-label="견적 수정"
       aria-hidden={!isVisible}
+      tabIndex={-1}
       className={cn(
         "bg-background-surface shrink-0 px-24 py-20",
+        "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
         "motion-reduce:animate-none",
         isVisible ? "animate-modal-sheet-in" : "animate-modal-sheet-out pointer-events-none",
         className,

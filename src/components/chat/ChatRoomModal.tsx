@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import Modal from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
@@ -60,6 +60,8 @@ function ChatRoomModalContent({
   actions,
   estimateEdit,
 }: ChatRoomModalProps) {
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const estimateEditSheetRef = useRef<HTMLDivElement>(null);
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
   const [isEstimateEditSheetOpen, setIsEstimateEditSheetOpen] = useState(false);
 
@@ -82,6 +84,18 @@ function ChatRoomModalContent({
     },
   };
 
+  useEffect(() => {
+    if (isEstimateEditSheetVisible) {
+      estimateEditSheetRef.current?.focus();
+    }
+  }, [isEstimateEditSheetVisible]);
+
+  const focusMenuButton = () => {
+    window.requestAnimationFrame(() => {
+      menuButtonRef.current?.focus();
+    });
+  };
+
   const handleToggleMenu = () => {
     if (composerDisabled) return;
 
@@ -95,6 +109,7 @@ function ChatRoomModalContent({
 
   const handleEstimateEditCancel = () => {
     setIsEstimateEditSheetOpen(false);
+    focusMenuButton();
   };
 
   const handleEstimateEditSubmit = async () => {
@@ -102,6 +117,7 @@ function ChatRoomModalContent({
 
     if (shouldClose === true) {
       setIsEstimateEditSheetOpen(false);
+      focusMenuButton();
     }
   };
 
@@ -156,6 +172,7 @@ function ChatRoomModalContent({
 
       {isEstimateEditSheetVisible ? (
         <ChatEstimateEditSheet
+          focusRef={estimateEditSheetRef}
           open={isEstimateEditSheetVisible}
           moveDateLabel={estimateEdit?.moveDateLabel ?? "-"}
           priceLabel={estimateEdit?.priceLabel ?? "-"}
@@ -175,6 +192,7 @@ function ChatRoomModalContent({
           }}
         >
           <button
+            ref={menuButtonRef}
             type="button"
             className={cn(
               "bg-background-brand text-text-inverse flex size-36 shrink-0 items-center justify-center rounded-full",
