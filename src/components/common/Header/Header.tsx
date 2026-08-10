@@ -22,6 +22,12 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
 
+const isLoginPagePath = (pathname: string): boolean => {
+  return [APP_ROUTES.LOGIN, APP_ROUTES.MOVER_LOGIN].some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+};
+
 const PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE = "프로필을 완성한 뒤 이용할 수 있어요.";
 
 const PROFILE_LOGOUT_MENU_ITEM: ProfileMenuItem = {
@@ -183,8 +189,12 @@ const Header = ({
 
   const navLinks = getHeaderNavLinks(isLogin, roleForNav);
 
+  const isLoginPage = isLoginPagePath(pathname);
+
   const sideNavLinks = !isLogin
-    ? [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
+    ? isLoginPage
+      ? LOGGED_OUT_LINKS
+      : [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
     : navLinks;
 
   // hydrate/checkAuth 전·로그인 힌트(refresh·role) 없으면 스켈레톤 — isLogin과 기준 맞춤
@@ -316,12 +326,14 @@ const Header = ({
           </div>
         ) : (
           <div className="flex shrink-0 items-center gap-16">
-            <Link
-              href={getLoginRedirectPath()}
-              className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 hidden h-40 items-center px-20 transition-colors xl:flex"
-            >
-              <Text variant="md-semibold">로그인</Text>
-            </Link>
+            {!isLoginPage ? (
+              <Link
+                href={getLoginRedirectPath()}
+                className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 hidden h-40 items-center px-20 transition-colors xl:flex"
+              >
+                <Text variant="md-semibold">로그인</Text>
+              </Link>
+            ) : null}
             <button
               ref={menuButtonRef}
               type="button"
