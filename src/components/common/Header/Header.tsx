@@ -16,6 +16,7 @@ import { useResolvedAuthRole } from "@/hooks/auth/useResolvedAuthRole";
 import { useCloseOnPathnameChange } from "@/hooks/useCloseOnPathnameChange";
 import { useProfileCompletionState } from "@/hooks/profile/useProfileCompletionState";
 import { MenuIcon } from "@/icons";
+import { isOAuthCallbackPath } from "@/lib/auth/redirect";
 import type { AuthRole } from "@/lib/auth/role";
 import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
@@ -190,15 +191,21 @@ const Header = ({
   const navLinks = getHeaderNavLinks(isLogin, roleForNav);
 
   const isLoginPage = isLoginPagePath(pathname);
+  const isOAuthCallbackPage = isOAuthCallbackPath(pathname);
+  /** 로그인·OAuth callback — 이탈용 GNB/로그인 CTA 숨김 */
+  const shouldHideAuthChrome = isLoginPage || isOAuthCallbackPage;
 
   const sideNavLinks = !isLogin
-    ? isLoginPage
-      ? LOGGED_OUT_LINKS
-      : [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
+    ? isOAuthCallbackPage
+      ? []
+      : isLoginPage
+        ? LOGGED_OUT_LINKS
+        : [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
     : navLinks;
 
   // hydrate/checkAuth 전·로그인 힌트(refresh·role) 없으면 스켈레톤 — isLogin과 기준 맞춤
-  const showAuthSkeleton = isAuthPending && !initialIsLogin && !initialRole;
+  // OAuth callback은 code 교환 중이므로 우측 액션·스켈레톤도 숨김
+  const showAuthSkeleton = !isOAuthCallbackPage && isAuthPending && !initialIsLogin && !initialRole;
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
@@ -212,8 +219,38 @@ const Header = ({
     initialProfileCompleted,
   );
 
-  // 프로필 미완료가 확정·낙관된 경우에만 GNB 숨김
-  const shouldHideNavLinks = isLogin && isIncomplete;
+  // 프로필 미완료·OAuth callback 중 GNB 숨김
+  const shouldHideNavLinks = (isLogin && isIncomplete) || isOAuthCallbackPage;
+
+  const logoImages = isLogin ? (
+    <>
+      <Image
+        src="/icons/moving-logo-icon.svg"
+        alt="무빙"
+        width={32}
+        height={32}
+        priority
+        className="md:hidden"
+      />
+      <Image
+        src="/icons/logo_full.svg"
+        alt="무빙"
+        width={116}
+        height={44}
+        priority
+        className="hidden h-[34px] w-[88px] object-contain md:block xl:h-[44px] xl:w-[116px]"
+      />
+    </>
+  ) : (
+    <Image
+      src="/icons/logo_full.svg"
+      alt="무빙"
+      width={116}
+      height={44}
+      priority
+      className="h-[34px] w-[88px] object-contain xl:h-[44px] xl:w-[116px]"
+    />
+  );
 
   const completedProfileMenuItems = getCompletedProfileMenuItems(roleForNav);
 
@@ -230,37 +267,13 @@ const Header = ({
       {/* overflow-x-hidden을 header 전체에 두면 알림·프로필 드롭다운이 잘리므로 좌측 nav 영역에만 적용 */}
       <div className="h-gnb-height-mobile md:h-gnb-height-tablet xl:h-gnb-height-desktop px-margin-mobile md:px-margin-tablet xl:px-gnb-padding-x-desktop flex w-full max-w-full items-center justify-between gap-12 py-16 xl:py-26">
         <div className="flex min-w-0 flex-1 items-center gap-24 overflow-x-hidden xl:gap-80">
-          <Link href="/" className="shrink-0">
-            {isLogin ? (
-              <>
-                <Image
-                  src="/icons/moving-logo-icon.svg"
-                  alt="무빙"
-                  width={32}
-                  height={32}
-                  priority
-                  className="md:hidden"
-                />
-                <Image
-                  src="/icons/logo_full.svg"
-                  alt="무빙"
-                  width={116}
-                  height={44}
-                  priority
-                  className="hidden h-[34px] w-[88px] object-contain md:block xl:h-[44px] xl:w-[116px]"
-                />
-              </>
-            ) : (
-              <Image
-                src="/icons/logo_full.svg"
-                alt="무빙"
-                width={116}
-                height={44}
-                priority
-                className="h-[34px] w-[88px] object-contain xl:h-[44px] xl:w-[116px]"
-              />
-            )}
-          </Link>
+          {isOAuthCallbackPage ? (
+            <div className="shrink-0">{logoImages}</div>
+          ) : (
+            <Link href="/" className="shrink-0">
+              {logoImages}
+            </Link>
+          )}
 
           {/* Mobile은 햄버거 전까지 링크 숨김 — 좁은 폭에서 GNB 가로 스크롤 방지 */}
           {/* 2026.08.04 정슬기 - [수정] */}
@@ -292,7 +305,7 @@ const Header = ({
           ) : null}
         </div>
 
-        {showAuthSkeleton ? (
+        {isOAuthCallbackPage ? null : showAuthSkeleton ? (
           <div className="flex shrink-0 items-center gap-16 xl:gap-32" aria-hidden>
             <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
             <div className="flex items-center gap-16">
@@ -326,7 +339,7 @@ const Header = ({
           </div>
         ) : (
           <div className="flex shrink-0 items-center gap-16">
-            {!isLoginPage ? (
+            {!shouldHideAuthChrome ? (
               <Link
                 href={getLoginRedirectPath()}
                 className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 hidden h-40 items-center px-20 transition-colors xl:flex"
