@@ -108,7 +108,7 @@ export default function NotificationPanel({
       )}
     >
       <div className="flex items-center justify-between py-14 pr-12 pl-16 md:pl-24">
-        <Text id="notification-panel-title" as="h2" variant="xl-bold">
+        <Text id="notification-panel-title" as="h2" variant={{ base: "2lg-bold", md: "lg-bold" }}>
           알림
         </Text>
 
