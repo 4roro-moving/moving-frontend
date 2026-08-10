@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { NICKNAME_STORAGE_KEY } from "@/lib/auth/nickname";
-import { ROLE_STORAGE_KEY } from "@/lib/auth/role";
+import { CLIENT_STORAGE_HINT_KEYS } from "@/lib/auth/clientStorageHint";
 import { REFRESH_TOKEN_COOKIE_BACKEND_PATH } from "@/lib/auth/token";
 import {
   buildBackendHeaders,
@@ -69,8 +68,9 @@ const clearClientAuthCookies = (res: NextResponse): void => {
     res.headers.append("Set-Cookie", buildClearRefreshTokenCookie(path));
   }
 
-  appendClearCookie(res, NICKNAME_STORAGE_KEY, "/", { sameSite: "Lax" });
-  appendClearCookie(res, ROLE_STORAGE_KEY, "/", { sameSite: "Lax" });
+  for (const key of CLIENT_STORAGE_HINT_KEYS) {
+    appendClearCookie(res, key, "/", { sameSite: "Lax" });
+  }
 };
 
 /**

@@ -6,6 +6,7 @@ import {
   mapCustomerProfileMeResponse,
   toAuthUserFromCustomerProfile,
 } from "@/lib/api/profile";
+import { saveProfileCompleted } from "@/lib/auth/profileCompleted";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import type { CreateCustomerProfileInput } from "@/types/profile";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -18,6 +19,7 @@ export const useCreateCustomerProfile = () => {
     mutationFn: (input: CreateCustomerProfileInput) => createCustomerProfile(input),
     onSuccess: async (data) => {
       const profile = mapCustomerProfileMeResponse(data);
+      saveProfileCompleted(true);
       establishSession(toAuthUserFromCustomerProfile(profile));
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.CUSTOMER_ME }),

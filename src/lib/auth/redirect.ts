@@ -1,4 +1,5 @@
 import { getCustomerProfileStatus, getMoverProfileStatus } from "@/lib/api/profile";
+import { saveProfileCompleted } from "@/lib/auth/profileCompleted";
 import type { AuthRole } from "@/lib/auth/role";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
@@ -137,6 +138,8 @@ export const getPostAuthRedirectPath = async (params?: {
       audience === "mover"
         ? await getMoverProfileStatus(statusOptions)
         : await getCustomerProfileStatus(statusOptions);
+
+    saveProfileCompleted(status.isProfileCompleted);
 
     return resolvePostLoginPath({
       isProfileCompleted: status.isProfileCompleted,

@@ -135,6 +135,8 @@ export interface HeaderProps {
   initialRole?: AuthRole | null;
   /** Server에서 profileImage 쿠키로 전달. hydrate 전 프로필 이미지 표시용 */
   initialProfileImage?: string | null;
+  /** Server에서 profileCompleted 쿠키. 미완료 시 GNB 숨김 낙관용 */
+  initialProfileCompleted?: boolean | null;
 }
 
 const Header = ({
@@ -142,6 +144,7 @@ const Header = ({
   initialNickname = null,
   initialRole = null,
   initialProfileImage = null,
+  initialProfileCompleted = null,
 }: HeaderProps) => {
   const pathname = usePathname();
   const mobileMenuId = useId();
@@ -184,8 +187,8 @@ const Header = ({
     ? [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
     : navLinks;
 
-  // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
-  const showAuthSkeleton = isAuthPending && !initialIsLogin;
+  // hydrate/checkAuth 전·로그인 힌트(refresh·role) 없으면 스켈레톤 — isLogin과 기준 맞춤
+  const showAuthSkeleton = isAuthPending && !initialIsLogin && !initialRole;
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
@@ -194,9 +197,12 @@ const Header = ({
 
   const isAvatarPending = isAuthPending && !hintedImageUrl;
 
-  const { isIncomplete, profileCreatePath } = useProfileCompletionState(roleForNav);
+  const { isIncomplete, profileCreatePath } = useProfileCompletionState(
+    roleForNav,
+    initialProfileCompleted,
+  );
 
-  // SSR 로그인 힌트와 status 확정 전: 완료 사용자 메뉴/링크가 깜빡이지 않도록 숨김
+  // 프로필 미완료가 확정·낙관된 경우에만 GNB 숨김
   const shouldHideNavLinks = isLogin && isIncomplete;
 
   const completedProfileMenuItems = getCompletedProfileMenuItems(roleForNav);

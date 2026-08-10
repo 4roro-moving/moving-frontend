@@ -12,9 +12,10 @@ import {
 } from "@/lib/api/profile";
 import { getAccessTokenPayload, getAccessTokenRole } from "@/lib/auth/accessTokenPayload";
 import { isAuthPagePath, isOAuthCallbackPath } from "@/lib/auth/redirect";
-import { clearNickname, loadNickname, saveNickname } from "@/lib/auth/nickname";
-import { clearProfileImage, loadProfileImage, saveProfileImage } from "@/lib/auth/profileImage";
-import { clearRole, loadRole, saveRole } from "@/lib/auth/role";
+import { clearAllClientStorageHints } from "@/lib/auth/clientStorageHint";
+import { loadNickname, saveNickname } from "@/lib/auth/nickname";
+import { loadProfileImage, saveProfileImage } from "@/lib/auth/profileImage";
+import { loadRole, saveRole } from "@/lib/auth/role";
 import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
 import { clearAppQueryCache } from "@/providers/query/appQueryClient";
 import { ApiError } from "@/types/api";
@@ -167,9 +168,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   clearSession: () => {
     curSessionGeneration++;
     clearAuthTokens();
-    clearNickname();
-    clearRole();
-    clearProfileImage();
+    clearAllClientStorageHints();
     get().markUnauthenticated();
   },
 

@@ -6,6 +6,7 @@ import {
   mapMoverProfileMeResponse,
   toAuthUserFromMoverProfile,
 } from "@/lib/api/profile";
+import { saveProfileCompleted } from "@/lib/auth/profileCompleted";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import type { CreateMoverProfileInput } from "@/types/profile";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -18,6 +19,7 @@ export const useCreateMoverProfile = () => {
     mutationFn: (input: CreateMoverProfileInput) => createMoverProfile(input),
     onSuccess: async (data) => {
       const profile = mapMoverProfileMeResponse(data);
+      saveProfileCompleted(true);
       establishSession(toAuthUserFromMoverProfile(profile));
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.MOVER_ME }),
