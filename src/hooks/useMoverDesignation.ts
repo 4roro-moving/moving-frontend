@@ -30,6 +30,9 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
 
   const [isEstimateRequestModalOpen, setIsEstimateRequestModalOpen] = useState(false);
   const [isDesignateSuccessModalOpen, setIsDesignateSuccessModalOpen] = useState(false);
+  const [designatedEstimateRequestId, setDesignatedEstimateRequestId] = useState<number | null>(
+    null,
+  );
   const loginRequiredModal = useLoginRequiredModal();
   const { isPending: isAuthPending, isAuthenticated, user } = useCustomerAuthReady();
   const isCustomer = user?.role === "CUSTOMER";
@@ -46,7 +49,8 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
   });
 
   const designateMutation = useDesignateMover({
-    onSuccess: () => {
+    onSuccess: (request) => {
+      setDesignatedEstimateRequestId(request.id);
       setIsDesignateSuccessModalOpen(true);
     },
     onError,
@@ -136,9 +140,13 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
   };
 
   return {
-    closeDesignateSuccessModal: () => setIsDesignateSuccessModalOpen(false),
+    closeDesignateSuccessModal: () => {
+      setIsDesignateSuccessModalOpen(false);
+      setDesignatedEstimateRequestId(null);
+    },
     closeEstimateRequestModal: () => setIsEstimateRequestModalOpen(false),
     isDesignateSuccessModalOpen,
+    designatedEstimateRequestId,
     isEstimateRequestModalOpen,
     isRequestDisabled,
     requestButtonLabel,

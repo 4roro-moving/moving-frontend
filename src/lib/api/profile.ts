@@ -91,6 +91,7 @@ export const toAuthUserFromCustomerProfile = (profile: CustomerProfileMe): AuthU
   email: profile.email,
   phone: profile.phone,
   role: "CUSTOMER",
+  imageUrl: profile.imageUrl,
 });
 
 export const getMoverProfileStatus = (options?: FetchRequestOptions) =>
@@ -154,4 +155,26 @@ export const toAuthUserFromMoverProfile = (profile: MoverProfileMe): AuthUser =>
   email: profile.email ?? "",
   phone: profile.phone,
   role: "MOVER",
+  imageUrl: profile.imageUrl,
 });
+
+export const resolveAuthUserImage = async (user: AuthUser): Promise<AuthUser> => {
+  if (typeof user.imageUrl === "string" && user.imageUrl.trim().length > 0) {
+    return user;
+  }
+
+  try {
+    if (user.role === "CUSTOMER") {
+      const profile = await getCustomerProfileMe();
+      return { ...user, imageUrl: profile.imageUrl ?? null };
+    } else if (user.role === "MOVER") {
+      const profile = await getMoverProfileMe();
+      return { ...user, imageUrl: profile.imageUrl ?? null };
+    }
+
+    return { ...user, imageUrl: null };
+  } catch (error) {
+    // imageUrl 필드를 건들이지 않는다.
+    return user;
+  }
+};

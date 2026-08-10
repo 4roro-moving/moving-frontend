@@ -13,6 +13,7 @@ import {
 import { getAccessTokenPayload, getAccessTokenRole } from "@/lib/auth/accessTokenPayload";
 import { isAuthPagePath, isOAuthCallbackPath } from "@/lib/auth/redirect";
 import { clearNickname, loadNickname, saveNickname } from "@/lib/auth/nickname";
+import { clearProfileImage, loadProfileImage, saveProfileImage } from "@/lib/auth/profileImage";
 import { clearRole, loadRole, saveRole } from "@/lib/auth/role";
 import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
 import { clearAppQueryCache } from "@/providers/query/appQueryClient";
@@ -21,6 +22,7 @@ import { ApiError } from "@/types/api";
 interface AuthState {
   user: AuthUser | null;
   displayName: string | null;
+  profileImage: string | null;
   /** 로그인 상태 여부 */
   isAuthenticated: boolean;
   /** 인증 중 여부 */
@@ -54,6 +56,7 @@ interface AuthState {
 const UNAUTHENTICATED_STATE = {
   user: null,
   displayName: null,
+  profileImage: null,
   isAuthenticated: false,
   isCheckingAuth: false,
   hasHydrated: true,
@@ -69,9 +72,15 @@ const setAuthenticatedUser = (
 ) => {
   saveNickname(user.name);
   saveRole(user.role);
+
+  if (user.imageUrl !== undefined) {
+    saveProfileImage(user.imageUrl ?? "");
+  }
+
   set({
     user,
     displayName: user.name,
+    ...(user.imageUrl !== undefined && { profileImage: user.imageUrl }),
     isAuthenticated: true,
     isCheckingAuth,
     hasHydrated: true,
@@ -119,6 +128,7 @@ const resolveAuthUserFromTokenHint = (): AuthUser | null => {
     name,
     phone: null,
     role,
+    imageUrl: loadProfileImage(),
   };
 };
 
@@ -131,6 +141,7 @@ let curSessionGeneration: number = 0;
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   displayName: null,
+  profileImage: null,
   isAuthenticated: false,
   isCheckingAuth: true,
   hasHydrated: false,
@@ -141,11 +152,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     const token = getAccessToken();
     const displayName = loadNickname();
+    const profileImage = loadProfileImage();
 
     set({
       hasHydrated: true,
       isCheckingAuth: true,
       displayName,
+      profileImage,
       isAuthenticated: Boolean(token),
       user: null,
     });
@@ -156,6 +169,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     clearAuthTokens();
     clearNickname();
     clearRole();
+    clearProfileImage();
     get().markUnauthenticated();
   },
 
@@ -272,6 +286,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
           set({
             displayName: loadNickname(),
+            profileImage: loadProfileImage(),
             isAuthenticated: true,
             isCheckingAuth: false,
             hasHydrated: true,

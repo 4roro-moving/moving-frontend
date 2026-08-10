@@ -309,72 +309,72 @@ export default function ReceivedRequestsPage() {
             <Modal.Close size="sm" onClose={() => setIsFilterOpen(false)} />
           </div>
 
-            <section className="flex flex-col gap-8">
-              <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
-                이사 유형
-              </Text>
-              <div className="flex flex-wrap gap-12">
-                {MOVE_TYPE_OPTIONS.map((moveType) => {
-                  const isSelected = moveTypes.includes(moveType.value);
-                  return (
-                    <SelectableChip
-                      key={moveType.value}
-                      size="sm"
-                      selected={isSelected}
-                      onClick={() => toggleMoveType(moveType.value)}
-                      onPrefetch={() => {
-                        const nextMoveTypes = getNextMoveTypes(moveType.value);
-                        prefetchRequests({
-                          moveType: nextMoveTypes.length ? nextMoveTypes : undefined,
-                        });
-                      }}
-                    >
-                      {moveType.label}
-                    </SelectableChip>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="flex flex-col gap-8">
-              <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
-                지역 및 견적
-              </Text>
-              <div className="flex flex-col gap-12">
-                {[
-                  {
-                    label: "지정 견적 요청",
-                    checked: includeDesignated,
-                    onChange: setIncludeDesignated,
-                  },
-                  {
-                    label: "서비스 가능 지역",
-                    checked: serviceAreaOnly,
-                    onChange: setServiceAreaOnly,
-                  },
-                ].map((filter) => (
-                  <Checkbox
-                    key={filter.label}
-                    checked={filter.checked}
-                    onCheckedChange={filter.onChange}
+          <section className="flex flex-col gap-8">
+            <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
+              이사 유형
+            </Text>
+            <div className="flex flex-wrap gap-12">
+              {MOVE_TYPE_OPTIONS.map((moveType) => {
+                const isSelected = moveTypes.includes(moveType.value);
+                return (
+                  <SelectableChip
+                    key={moveType.value}
+                    size="sm"
+                    selected={isSelected}
+                    onClick={() => toggleMoveType(moveType.value)}
                     onPrefetch={() => {
-                      if (filter.label === "지정 견적 요청") {
-                        prefetchRequests({
-                          isDesignated: includeDesignated ? undefined : true,
-                        });
-                      } else {
-                        prefetchRequests({
-                          isServiceArea: serviceAreaOnly ? undefined : true,
-                        });
-                      }
+                      const nextMoveTypes = getNextMoveTypes(moveType.value);
+                      prefetchRequests({
+                        moveType: nextMoveTypes.length ? nextMoveTypes : undefined,
+                      });
                     }}
-                    label={filter.label}
-                    labelClassName="text-text-secondary"
-                  />
-                ))}
-              </div>
-            </section>
-          </div>
+                  >
+                    {moveType.label}
+                  </SelectableChip>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="flex flex-col gap-8">
+            <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
+              지역 및 견적
+            </Text>
+            <div className="flex flex-col gap-12">
+              {[
+                {
+                  label: "지정 견적 요청",
+                  checked: includeDesignated,
+                  onChange: setIncludeDesignated,
+                },
+                {
+                  label: "서비스 가능 지역",
+                  checked: serviceAreaOnly,
+                  onChange: setServiceAreaOnly,
+                },
+              ].map((filter) => (
+                <Checkbox
+                  key={filter.label}
+                  checked={filter.checked}
+                  onCheckedChange={filter.onChange}
+                  onPrefetch={() => {
+                    if (filter.label === "지정 견적 요청") {
+                      prefetchRequests({
+                        isDesignated: includeDesignated ? undefined : true,
+                      });
+                    } else {
+                      prefetchRequests({
+                        isServiceArea: serviceAreaOnly ? undefined : true,
+                      });
+                    }
+                  }}
+                  label={filter.label}
+                  labelClassName="text-text-secondary"
+                />
+              ))}
+            </div>
+          </section>
+        </div>
 
         <Modal.Button fullWidth size="cta" onClick={() => setIsFilterOpen(false)}>
           조회하기

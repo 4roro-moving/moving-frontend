@@ -114,6 +114,7 @@ export interface UpdateMoverBasicInfoInput {
 }
 
 export const PROFILE_IMAGE_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const PROFILE_IMAGE_MAX_SIZE = 2 * 1024 * 1024; // 2MB
 
 export type ProfileImageContentType = (typeof PROFILE_IMAGE_CONTENT_TYPES)[number];
 

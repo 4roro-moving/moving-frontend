@@ -147,6 +147,7 @@ export default function MoverDetailView({ moverId }: MoverDetailViewProps) {
 
       <DesignateSuccessModal
         open={designation.isDesignateSuccessModalOpen}
+        estimateRequestId={designation.designatedEstimateRequestId}
         onClose={designation.closeDesignateSuccessModal}
       />
 
