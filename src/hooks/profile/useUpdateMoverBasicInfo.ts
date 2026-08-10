@@ -7,7 +7,7 @@ import {
   updateMoverBasicInfo,
 } from "@/lib/api/profile";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
-import { useAuthStore } from "@/stores/useAuthStore";
+import { getAuthSessionSnapshot, isAuthSessionCurrent, useAuthStore } from "@/stores/useAuthStore";
 import type { UpdateMoverBasicInfoInput } from "@/types/profile";
 
 export const useUpdateMoverBasicInfo = () => {
@@ -16,8 +16,20 @@ export const useUpdateMoverBasicInfo = () => {
 
   return useApiMutation({
     mutationFn: (input: UpdateMoverBasicInfoInput) => updateMoverBasicInfo(input),
-    onSuccess: (data) => {
+    onMutate: () => ({ sessionSnapshot: getAuthSessionSnapshot() }),
+    onSuccess: (data, _variables, context) => {
+      if (!context || !isAuthSessionCurrent(context.sessionSnapshot)) return;
+
       const profile = mapMoverProfileMeResponse(data);
+      const currentUserId = useAuthStore.getState().user?.id;
+      if (
+        (context.sessionSnapshot.userId !== null &&
+          profile.userId !== context.sessionSnapshot.userId) ||
+        (currentUserId != null && profile.userId !== currentUserId)
+      ) {
+        return;
+      }
+
       establishSession(toAuthUserFromMoverProfile(profile));
       queryClient.setQueryData([...QUERY_KEYS.PROFILES.MOVER_ME, profile.userId] as const, profile);
     },

@@ -20,8 +20,30 @@ export interface EnsureAccessTokenOptions {
 
 let refreshPromise: Promise<string> | null = null;
 
+interface RefreshFailureMeta {
+  accessTokenReplaced: boolean;
+}
+
 const isRefreshRejectedStatus = (status: number | undefined): boolean => {
   return status === 401 || status === 404;
+};
+
+const withRefreshFailureMeta = (error: unknown, meta: RefreshFailureMeta): unknown => {
+  if (typeof error === "object" && error !== null) {
+    Object.assign(error, meta);
+    return error;
+  }
+  return Object.assign(new Error("세션 갱신에 실패했습니다."), { cause: error, ...meta });
+};
+
+const getAccessTokenReplaced = (error: unknown): boolean => {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+  if (!("accessTokenReplaced" in error)) {
+    return false;
+  }
+  return (error as RefreshFailureMeta).accessTokenReplaced === true;
 };
 
 /**
@@ -102,14 +124,15 @@ export const ensureAccessTokenRefreshed = async (
       refreshPromise = refreshAccessTokenOnce()
         .catch((error: unknown) => {
           const status = error instanceof ApiError ? error.status : undefined;
+          const accessTokenReplaced = getAccessToken() !== accessTokenBeforeRefresh;
 
           // refresh 시작 시점과 access가 같을 때만 정리 (login이 새 access를 넣었으면 유지)
-          if (isRefreshRejectedStatus(status) && getAccessToken() === accessTokenBeforeRefresh) {
+          if (isRefreshRejectedStatus(status) && !accessTokenReplaced) {
             clearAuthTokens();
             notifyAuthSessionChange();
           }
 
-          throw error;
+          throw withRefreshFailureMeta(error, { accessTokenReplaced });
         })
         .finally(() => {
           refreshPromise = null;
@@ -119,10 +142,12 @@ export const ensureAccessTokenRefreshed = async (
     return await refreshPromise;
   } catch (error) {
     const status = error instanceof ApiError ? error.status : undefined;
+    const accessTokenReplaced = getAccessTokenReplaced(error);
 
-    if (notifyOnFailure) {
+    // 로그인으로 access가 교체된 뒤의 refresh 실패는 새 세션을 지우지 않음
+    if (notifyOnFailure && !accessTokenReplaced) {
       window.dispatchEvent(new CustomEvent("auth:expired"));
-    } else if (!isRefreshRejectedStatus(status)) {
+    } else if (!notifyOnFailure && !isRefreshRejectedStatus(status)) {
       notifyAuthSessionChange();
     }
 

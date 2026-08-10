@@ -124,7 +124,7 @@ export const POST = async (request: Request, context: { params: Promise<{ path: 
     res.headers.set("X-Debug-Backend-Url", backendBaseUrl);
 
     if (authPath === "logout") {
-      // refresh 실패 응답에서 쿠키를 지우지 않음(동시 성공 Set-Cookie와 경합 방지)
+      // 로그아웃 응답: 브라우저에 남은 refresh·힌트 쿠키를 강제로 제거
       clearClientAuthCookies(res);
     }
 

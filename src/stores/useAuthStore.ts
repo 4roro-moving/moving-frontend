@@ -141,6 +141,28 @@ const resolveAuthUserFromTokenHint = (): AuthUser | null => {
 // 세션 세대 관리
 let curSessionGeneration: number = 0;
 
+export interface AuthSessionSnapshot {
+  generation: number;
+  userId: string | null;
+}
+
+/** mutation 시작 시점의 세션 소유권 스냅샷 */
+export const getAuthSessionSnapshot = (): AuthSessionSnapshot => ({
+  generation: curSessionGeneration,
+  userId: useAuthStore.getState().user?.id ?? null,
+});
+
+/** 스냅샷이 현재 로그인 세션과 일치하는지 여부 */
+export const isAuthSessionCurrent = (snapshot: AuthSessionSnapshot): boolean => {
+  if (snapshot.generation !== curSessionGeneration) return false;
+
+  const { user } = useAuthStore.getState();
+  // hydrate 직후 user 미설정이면 세대만으로 동일 세션으로 본다
+  if (snapshot.userId === null) return true;
+
+  return user?.id === snapshot.userId;
+};
+
 /**
  * 인증 상태 관리 스토어
  */
@@ -319,24 +341,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async (options) => {
     const logoutGeneration = curSessionGeneration;
     const deferUiClear = options?.deferUiClear ?? false;
+    let logoutError: unknown;
 
     try {
       await logoutApi();
-    } finally {
-      if (logoutGeneration !== curSessionGeneration) {
-        return;
-      }
+    } catch (error) {
+      logoutError = error;
+    }
 
+    // 로그아웃 중 다른 세션이 들어섰으면 로컬 정리는 스킵 (에러는 그대로 전파)
+    if (logoutGeneration === curSessionGeneration) {
       if (deferUiClear) {
         // hard navigate 직전: 토큰·힌트만 정리하고 비로그인 UI paint는 생략
         curSessionGeneration++;
         clearAuthTokens();
         clearAllClientStorageHints();
         clearAppQueryCache();
-        return;
+      } else {
+        get().clearSession();
       }
+    }
 
-      get().clearSession();
+    if (logoutError !== undefined) {
+      throw logoutError;
     }
   },
 }));

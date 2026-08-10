@@ -7,7 +7,7 @@ import {
   updateCustomerBasicInfo,
 } from "@/lib/api/profile";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
-import { useAuthStore } from "@/stores/useAuthStore";
+import { getAuthSessionSnapshot, isAuthSessionCurrent, useAuthStore } from "@/stores/useAuthStore";
 import type { UpdateCustomerBasicInfoInput } from "@/types/profile";
 
 export const useUpdateCustomerBasicInfo = () => {
@@ -16,8 +16,20 @@ export const useUpdateCustomerBasicInfo = () => {
 
   return useApiMutation({
     mutationFn: (input: UpdateCustomerBasicInfoInput) => updateCustomerBasicInfo(input),
-    onSuccess: (data) => {
+    onMutate: () => ({ sessionSnapshot: getAuthSessionSnapshot() }),
+    onSuccess: (data, _variables, context) => {
+      if (!context || !isAuthSessionCurrent(context.sessionSnapshot)) return;
+
       const profile = mapCustomerProfileMeResponse(data);
+      const currentUserId = useAuthStore.getState().user?.id;
+      if (
+        (context.sessionSnapshot.userId !== null &&
+          profile.userId !== context.sessionSnapshot.userId) ||
+        (currentUserId != null && profile.userId !== currentUserId)
+      ) {
+        return;
+      }
+
       establishSession(toAuthUserFromCustomerProfile(profile));
       queryClient.setQueryData(
         [...QUERY_KEYS.PROFILES.CUSTOMER_ME, profile.userId] as const,
