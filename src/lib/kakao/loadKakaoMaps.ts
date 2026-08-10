@@ -70,9 +70,9 @@ export function loadKakaoMaps(): Promise<KakaoMapsNamespace> {
       return;
     }
 
-    const javascriptKey = getKakaoJavascriptKey();
+    const javascriptKey = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY?.trim() || getKakaoJavascriptKey();
     if (!javascriptKey) {
-      reject(new Error("NEXT_PUBLIC_KAKAO_JS_KEY가 필요합니다."));
+      reject(new Error("NEXT_PUBLIC_KAKAO_MAP_KEY 또는 NEXT_PUBLIC_KAKAO_JS_KEY가 필요합니다."));
       return;
     }
 
