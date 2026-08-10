@@ -43,7 +43,7 @@ export default function NotificationTrigger() {
   const ref = useClickOutside<HTMLDivElement>(closeQuiet);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="static md:relative">
       <button
         ref={triggerRef}
         type="button"

@@ -76,7 +76,7 @@ export default function NotificationItem({
   return (
     <li
       className={cn(
-        "flex w-full flex-col gap-2 px-24 py-16",
+        "flex w-full flex-col gap-2 px-16 py-16 md:px-24",
         showDivider && "border-border-default border-b",
       )}
     >
