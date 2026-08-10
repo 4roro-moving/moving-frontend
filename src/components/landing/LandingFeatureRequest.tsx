@@ -21,7 +21,7 @@ export default function LandingFeatureRequest() {
               alt="견적 상세 화면 예시"
               fill
               draggable={false}
-              className="pointer-events-none select-none object-cover object-left-top"
+              className="pointer-events-none object-cover object-left-top select-none"
               sizes="(min-width: 1280px) 1400px, 100vw"
             />
             <Text
@@ -47,7 +47,7 @@ export default function LandingFeatureRequest() {
                 alt="견적 상세 화면 예시"
                 fill
                 draggable={false}
-                className="pointer-events-none select-none object-cover object-top"
+                className="pointer-events-none object-cover object-top select-none"
                 sizes="100vw"
               />
             </div>
@@ -73,7 +73,7 @@ export default function LandingFeatureRequest() {
               alt="견적 상세 화면 예시"
               fill
               draggable={false}
-              className="pointer-events-none select-none object-cover object-top"
+              className="pointer-events-none object-cover object-top select-none"
               sizes="100vw"
             />
           </div>

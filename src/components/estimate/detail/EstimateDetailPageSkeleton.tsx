@@ -21,7 +21,7 @@ export default function EstimateDetailPageSkeleton() {
   return (
     <div aria-busy="true" aria-label="견적 상세 정보를 불러오는 중입니다.">
       <EstimateDetailLayout
-        showProfile={false}
+        showProfile
         backFallbackHref={APP_ROUTES.MOVER_ESTIMATES.SENT}
         contentClassName="pt-35 pb-64 md:pt-[46px] md:pb-80 lg:pt-[43px] lg:pb-37-5"
         rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}

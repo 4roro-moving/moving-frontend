@@ -67,7 +67,7 @@ export default function LandingMoveTypes() {
                 height={item.featured ? 156 : 99}
                 draggable={false}
                 className={cn(
-                  "pointer-events-none select-none max-w-none shrink-0 object-contain",
+                  "pointer-events-none max-w-none shrink-0 object-contain select-none",
                   item.imageClassName,
                 )}
               />
