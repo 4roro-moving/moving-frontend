@@ -60,15 +60,29 @@ function ChatMessageList({
   hasNextPage,
   onFetchNextPage,
 }: ChatMessageListProps) {
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const latestMessageId = messages.at(-1)?.id ?? null;
+  const previousMessagesButtonLabel = isFetchingNextPage
+    ? "이전 메시지 불러오는 중"
+    : "이전 메시지 더보기";
 
   useEffect(() => {
     if (latestMessageId === null) {
       return;
     }
 
-    bottomRef.current?.scrollIntoView({ block: "end" });
+    const frameId = requestAnimationFrame(() => {
+      const scrollContainer = scrollContainerRef.current;
+
+      if (!scrollContainer) {
+        return;
+      }
+
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    });
+
+    return () => cancelAnimationFrame(frameId);
   }, [latestMessageId]);
 
   if (isLoading) {
@@ -92,64 +106,78 @@ function ChatMessageList({
   }
 
   return (
-    <div className="flex min-h-full flex-col justify-end gap-12">
-      {hasNextPage ? (
-        <button
-          type="button"
-          className={cn(
-            "text-text-brand rounded-12 mx-auto px-12 py-8",
-            "hover:bg-background-brand-muted disabled:text-text-disabled",
-            "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
-          )}
-          disabled={isFetchingNextPage}
-          onClick={onFetchNextPage}
-        >
-          <Text variant="sm-semibold">
-            {isFetchingNextPage ? "이전 메시지 불러오는 중" : "이전 메시지 더보기"}
-          </Text>
-        </button>
-      ) : null}
-
-      {messages.map((message) => {
-        const isMine = message.sender.role === participantRole;
-
-        return (
-          <div
-            key={message.id}
-            className={cn("flex w-full flex-col gap-4", isMine ? "items-end" : "items-start")}
+    <div
+      ref={scrollContainerRef}
+      role="region"
+      aria-label="채팅 메시지 목록"
+      tabIndex={0}
+      className={cn(
+        "h-full min-h-0 overflow-y-auto",
+        "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+      )}
+    >
+      <div className="flex min-h-full flex-col gap-12">
+        {hasNextPage ? (
+          <button
+            type="button"
+            className={cn(
+              "text-text-brand rounded-12 mx-auto px-12 py-8 transition-colors",
+              "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+              isFetchingNextPage
+                ? "text-text-disabled cursor-not-allowed"
+                : "hover:bg-background-brand-muted",
+            )}
+            disabled={isFetchingNextPage}
+            aria-busy={isFetchingNextPage}
+            onClick={onFetchNextPage}
           >
-            {!isMine ? (
-              <Text variant="sm-medium" className="text-text-muted">
-                {message.sender.name}
-              </Text>
-            ) : null}
-            <div
-              className={cn(
-                "rounded-16 max-w-[78%] px-14 py-10",
-                isMine
-                  ? "bg-background-brand text-text-inverse rounded-br-4"
-                  : "bg-background-subtle text-text-primary rounded-bl-4",
-              )}
-            >
-              <Text
-                as="p"
-                variant="md-medium"
-                className={cn(
-                  "wrap-break-word whitespace-pre-wrap",
-                  isMine ? "text-text-inverse" : "text-text-primary",
-                )}
-              >
-                {message.content}
-              </Text>
-            </div>
-            <Text variant="xs-medium" className="text-text-muted">
-              {formatMessageTime(message.createdAt)}
-            </Text>
-          </div>
-        );
-      })}
+            <Text variant="sm-semibold">{previousMessagesButtonLabel}</Text>
+          </button>
+        ) : null}
 
-      <div ref={bottomRef} aria-hidden="true" />
+        <div className="mt-auto flex flex-col gap-12">
+          {messages.map((message) => {
+            const isMine = message.sender.role === participantRole;
+
+            return (
+              <div
+                key={message.id}
+                className={cn("flex w-full flex-col gap-4", isMine ? "items-end" : "items-start")}
+              >
+                {!isMine ? (
+                  <Text variant="sm-medium" className="text-text-muted">
+                    {message.sender.name}
+                  </Text>
+                ) : null}
+                <div
+                  className={cn(
+                    "rounded-16 max-w-[78%] px-14 py-10",
+                    isMine
+                      ? "bg-background-brand text-text-inverse rounded-br-4"
+                      : "bg-background-subtle text-text-primary rounded-bl-4",
+                  )}
+                >
+                  <Text
+                    as="p"
+                    variant="md-medium"
+                    className={cn(
+                      "wrap-break-word whitespace-pre-wrap",
+                      isMine ? "text-text-inverse" : "text-text-primary",
+                    )}
+                  >
+                    {message.content}
+                  </Text>
+                </div>
+                <Text variant="xs-medium" className="text-text-muted">
+                  {formatMessageTime(message.createdAt)}
+                </Text>
+              </div>
+            );
+          })}
+
+          <div ref={bottomRef} aria-hidden="true" />
+        </div>
+      </div>
     </div>
   );
 }
