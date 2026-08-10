@@ -12,6 +12,7 @@ import {
 } from "@/hooks/useChatRoomModalController";
 import { cn } from "@/lib/utils/cn";
 import type { ChatActionItem, ChatParticipantRole } from "@/components/chat/ChatActionSheet";
+import type { ChatEstimateEditConfig } from "@/components/chat/ChatRoomModal";
 import type { ChatMessage, ChatRoom } from "@/types/chat";
 
 interface ChatRoomModalContainerProps {
@@ -22,6 +23,7 @@ interface ChatRoomModalContainerProps {
   estimateSummary: string;
   onClose: () => void;
   actions?: Partial<Record<ChatActionItem["id"], Pick<ChatActionItem, "onSelect" | "disabled">>>;
+  estimateEdit?: ChatEstimateEditConfig;
 }
 
 interface ConnectedChatRoomModalProps extends Omit<ChatRoomModalContainerProps, "estimateId"> {
@@ -190,6 +192,7 @@ function ConnectedChatRoomModal({
   estimateSummary,
   onClose,
   actions,
+  estimateEdit,
 }: ConnectedChatRoomModalProps) {
   const chat = useConnectedChatRoomModalController({ open, room });
 
@@ -206,6 +209,7 @@ function ConnectedChatRoomModal({
         onSendMessage={() => void chat.handleSendMessage()}
         onClose={onClose}
         actions={actions}
+        estimateEdit={estimateEdit}
       >
         {chat.isMessagesError ? (
           <div className="flex h-full flex-col items-center justify-center gap-12">
@@ -251,6 +255,7 @@ export default function ChatRoomModalContainer({
   estimateSummary,
   onClose,
   actions,
+  estimateEdit,
 }: ChatRoomModalContainerProps) {
   const chatRoom = useChatRoomModalController({ open, estimateId });
   const activeRoom = chatRoom.activeRoom;
@@ -270,6 +275,7 @@ export default function ChatRoomModalContainer({
         composerDisabled
         onClose={onClose}
         actions={actions}
+        estimateEdit={estimateEdit}
       >
         {chatRoom.createErrorMessage ? (
           <ChatRoomCreateError
@@ -297,6 +303,7 @@ export default function ChatRoomModalContainer({
       estimateSummary={estimateSummary}
       onClose={onClose}
       actions={actions}
+      estimateEdit={estimateEdit}
     />
   );
 }

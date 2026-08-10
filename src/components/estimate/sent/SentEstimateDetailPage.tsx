@@ -24,6 +24,7 @@ import {
   formatKoreanDateTimeWithTime,
   isKstDateOnOrAfter,
 } from "@/lib/utils/date";
+import { formatPrice } from "@/lib/utils/estimateFormat";
 import type { SentEstimate } from "@/types/sentEstimate";
 
 interface SentEstimateDetailPageProps {
@@ -208,6 +209,10 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
         participantRole="MOVER"
         participantName={estimate.customer.name}
         estimateSummary={`견적가 - ${estimate.price.toLocaleString("ko-KR")}원`}
+        estimateEdit={{
+          moveDateLabel: formatKoreanDateTime(request.moveDate),
+          priceLabel: formatPrice(estimate.price),
+        }}
         onClose={() => setIsChatModalOpen(false)}
       />
     </>
