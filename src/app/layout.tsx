@@ -26,7 +26,8 @@ interface RootLayoutProps {
 
 const RootLayout = async ({ children }: RootLayoutProps) => {
   const cookieStore = await cookies();
-  const initialIsLogin = Boolean(cookieStore.get(REFRESH_TOKEN_COOKIE_NAME));
+  /** SSR 시점 HttpOnly refreshToken 쿠키 존재 여부 (로그인 Soft UX·선제 refresh 힌트) */
+  const hasRefreshCookie = Boolean(cookieStore.get(REFRESH_TOKEN_COOKIE_NAME));
   const rawProfileImage = cookieStore.get(PROFILE_IMAGE_STORAGE_KEY)?.value;
   const initialProfileImage = rawProfileImage ? safeDecodeCookieValue(rawProfileImage) : null;
   const rawNickname = cookieStore.get(NICKNAME_STORAGE_KEY)?.value;
@@ -42,7 +43,7 @@ const RootLayout = async ({ children }: RootLayoutProps) => {
     <html lang="ko">
       <body className="flex min-h-screen flex-col">
         <AppShell
-          initialIsLogin={initialIsLogin}
+          hasRefreshCookie={hasRefreshCookie}
           initialNickname={initialNickname}
           initialRole={initialRole}
           initialProfileImage={initialProfileImage}

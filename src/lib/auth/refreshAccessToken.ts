@@ -1,10 +1,11 @@
-import { clearAuthTokens, setAccessToken } from "@/lib/auth/token";
+import { clearAuthTokens, getAccessToken, setAccessToken } from "@/lib/auth/token";
 import { notifyAuthSessionChange } from "@/lib/auth/session";
 import { AUTH_BFF_BASE } from "@/lib/constants/authBff";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { ApiError, type ApiSuccessResponse, type ApiErrorResponse } from "@/types/api";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
+const REFRESH_LOCK_NAME = "moving:auth-refresh";
 
 interface RefreshTokenResponse {
   tokens: {
@@ -19,11 +20,15 @@ export interface EnsureAccessTokenOptions {
 
 let refreshPromise: Promise<string> | null = null;
 
+const isRefreshRejectedStatus = (status: number | undefined): boolean => {
+  return status === 401 || status === 404;
+};
+
 /**
  * Next auth BFF(`/api/auth/refresh`)로 access를 재발급합니다.
  * fetchInstance와 순환 참조를 피하기 위해 same-origin fetch를 사용합니다.
  */
-const refreshAccessTokenOnce = async (): Promise<string> => {
+const requestRefreshAccessToken = async (): Promise<string> => {
   const res = await fetch(`${AUTH_BFF_BASE}${API_ROUTES.AUTH.REFRESH}`, {
     method: "POST",
     credentials: "include",
@@ -63,6 +68,20 @@ const refreshAccessTokenOnce = async (): Promise<string> => {
 };
 
 /**
+ * 여러 탭·연타 F5가 같은 refreshToken으로 동시에 갱신하는 것을 막습니다.
+ * 잠금 후 다음 요청은 이 브라우저 쿠키 jar의 최신 refresh를 사용합니다.
+ */
+const refreshAccessTokenOnce = async (): Promise<string> => {
+  const locks = typeof navigator !== "undefined" ? navigator.locks : undefined;
+
+  if (!locks?.request) {
+    return requestRefreshAccessToken();
+  }
+
+  return locks.request(REFRESH_LOCK_NAME, () => requestRefreshAccessToken());
+};
+
+/**
  * refresh 요청을 1회로 합칩니다.
  * 실패 시 부수효과는 호출부 options(notifyOnFailure)로만 제어합니다.
  */
@@ -77,23 +96,33 @@ export const ensureAccessTokenRefreshed = async (
 
   try {
     if (!refreshPromise) {
-      refreshPromise = refreshAccessTokenOnce().finally(() => {
-        refreshPromise = null;
-      });
+      // promise 생성 시에만 스냅샷 — 공유 await 호출부가 login access를 지우지 않도록
+      const accessTokenBeforeRefresh = getAccessToken();
+
+      refreshPromise = refreshAccessTokenOnce()
+        .catch((error: unknown) => {
+          const status = error instanceof ApiError ? error.status : undefined;
+
+          // refresh 시작 시점과 access가 같을 때만 정리 (login이 새 access를 넣었으면 유지)
+          if (isRefreshRejectedStatus(status) && getAccessToken() === accessTokenBeforeRefresh) {
+            clearAuthTokens();
+            notifyAuthSessionChange();
+          }
+
+          throw error;
+        })
+        .finally(() => {
+          refreshPromise = null;
+        });
     }
 
     return await refreshPromise;
   } catch (error) {
     const status = error instanceof ApiError ? error.status : undefined;
 
-    if (status === 401) {
-      clearAuthTokens();
-      notifyAuthSessionChange();
-    }
-
     if (notifyOnFailure) {
       window.dispatchEvent(new CustomEvent("auth:expired"));
-    } else if (status !== 401) {
+    } else if (!isRefreshRejectedStatus(status)) {
       notifyAuthSessionChange();
     }
 

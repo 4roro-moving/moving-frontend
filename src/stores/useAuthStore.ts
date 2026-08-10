@@ -38,7 +38,7 @@ interface AuthState {
   /** localStorage에서 인증 상태 초기화 */
   hydrateFromStorage: () => void;
   /** 인증 상태 확인 */
-  checkAuth: () => Promise<void>;
+  checkAuth: (options?: { hasRefreshCookie?: boolean }) => Promise<void>;
   /** 세션 생성 */
   establishSession: (user: AuthUser) => void;
   /** 로그인/회원가입 성공 후 이동 경로 예약 (establishSession 전에 호출) */
@@ -65,6 +65,8 @@ const UNAUTHENTICATED_STATE = {
 } as const satisfies Partial<AuthState>;
 
 let checkAuthPromise: Promise<void> | null = null;
+/** 동시 checkAuth 호출 시 hasRefreshCookie를 OR로 승격 */
+let pendingHasRefreshCookie = false;
 
 const setAuthenticatedUser = (
   set: (partial: Partial<AuthState>) => void,
@@ -194,11 +196,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     setAuthenticatedUser(set, user, false);
   },
 
-  checkAuth: async () => {
+  checkAuth: async (options) => {
+    if (options?.hasRefreshCookie) {
+      pendingHasRefreshCookie = true;
+    }
+
     if (checkAuthPromise) {
       await checkAuthPromise;
       return;
     }
+
+    const hasRefreshCookie = pendingHasRefreshCookie;
+    pendingHasRefreshCookie = false;
 
     checkAuthPromise = (async () => {
       const startSessionGeneration = curSessionGeneration;
@@ -219,8 +228,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           return;
         }
 
-        // Access 없음 → 선제 refresh 후 profile 1회 시도
-        if (!getAccessToken()) {
+        // Access 없음 + refresh 쿠키 있을 때만 선제 refresh (게스트 404 방지)
+        // HttpOnly라 클라이언트에서 쿠키를 못 읽으므로 SSR 힌트를 사용
+        if (!getAccessToken() && hasRefreshCookie) {
           await refreshSession({ notifyOnFailure: false });
         }
 
@@ -257,18 +267,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           return;
         }
 
+        const token = getAccessToken();
+        const status = error instanceof ApiError ? error.status : undefined;
+
         if (process.env.NODE_ENV === "development") {
-          const status = error instanceof ApiError ? error.status : undefined;
-          if (status !== 401) {
+          // 401·refresh 부재(404+access 없음)는 예상 실패로 로그 생략
+          if (status !== 401 && !(status === 404 && !token)) {
             console.error("[checkAuth] 세션 복구 실패", error);
           }
         }
 
-        const token = getAccessToken();
-        const status = error instanceof ApiError ? error.status : undefined;
-
-        // 인증 만료·역할 불일치 → 토큰·닉네임·role 정리 후 비로그인
-        if (status === 401 || status === 403) {
+        // 인증 만료·역할 불일치·refresh 부재(404이고 access 없음)
+        // me 404(프로필 미생성)는 access가 있으므로 아래 힌트 경로로 감
+        if (status === 401 || status === 403 || (status === 404 && !token)) {
           get().clearSession();
           set({ isCheckingAuth: false });
           return;

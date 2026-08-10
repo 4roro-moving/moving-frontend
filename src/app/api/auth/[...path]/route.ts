@@ -102,6 +102,7 @@ export const POST = async (request: Request, context: { params: Promise<{ path: 
     const res = await forwardBackendResponse(backendRes);
 
     if (authPath === "logout") {
+      // refresh 실패 응답에서 쿠키를 지우지 않음(동시 성공 Set-Cookie와 경합 방지)
       clearClientAuthCookies(res);
     }
 
