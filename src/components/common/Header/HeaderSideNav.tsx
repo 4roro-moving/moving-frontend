@@ -68,8 +68,9 @@ const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideN
     };
   }, [isOpen, onClose]);
 
+  // 모바일 화면에서 주요 메뉴 열림 시 body overflow 조정
   useEffect(() => {
-    if (!shouldRender) {
+    if (!isOpen) {
       return;
     }
 
@@ -79,7 +80,7 @@ const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideN
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [shouldRender]);
+  }, [isOpen]);
 
   const handlePanelTransitionEnd = (event: TransitionEvent<HTMLElement>) => {
     if (event.target !== event.currentTarget) return;
