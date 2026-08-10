@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 
 import Textarea from "@/components/common/Input/Textarea";
 import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
@@ -31,11 +31,14 @@ export default function RejectEstimateModal({
 }: RejectEstimateModalProps) {
   const [reason, setReason] = useState("");
   const [isReasonTouched, setIsReasonTouched] = useState(false);
+  const [hasSubmissionStarted, setHasSubmissionStarted] = useState(false);
+  const isSubmitting = isPending || (hasSubmissionStarted && !open);
 
   const handleClose = () => {
-    if (isPending) return;
+    if (isSubmitting) return;
     setReason("");
     setIsReasonTouched(false);
+    setHasSubmissionStarted(false);
     onClose();
   };
 
@@ -47,10 +50,26 @@ export default function RejectEstimateModal({
       ? `반려 사유는 ${MIN_REASON_LENGTH}자 이상 ${MAX_REASON_LENGTH}자 이하로 입력해 주세요.`
       : undefined;
 
+  const handleSubmit = () => {
+    if (!isReasonValid || isSubmitting) return;
+
+    setHasSubmissionStarted(true);
+    onSubmit(trimmedReason);
+  };
+
+  const handleReasonKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Enter" || event.nativeEvent.isComposing || !isReasonValid || isSubmitting) {
+      return;
+    }
+
+    event.preventDefault();
+    handleSubmit();
+  };
+
   return (
     <Modal
       open={open}
-      onClose={isPending ? undefined : handleClose}
+      onClose={isSubmitting ? undefined : handleClose}
       onExitComplete={onExitComplete}
       presentation="responsive"
       size="lg"
@@ -58,7 +77,7 @@ export default function RejectEstimateModal({
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
         <Modal.Title>제안 반려</Modal.Title>
-        <Modal.Close onClose={handleClose} disabled={isPending} />
+        <Modal.Close onClose={handleClose} disabled={isSubmitting} />
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-16 overflow-y-auto">
@@ -87,15 +106,16 @@ export default function RejectEstimateModal({
               maxLength={MAX_REASON_LENGTH}
               placeholder="최소 10자 이상 입력해 주세요"
               error={reasonError}
-              disabled={isPending}
+              disabled={isSubmitting}
               onChange={(event) => setReason(event.target.value)}
               onBlur={() => {
                 setIsReasonTouched(true);
               }}
+              onKeyDown={handleReasonKeyDown}
               className="h-160 resize-none px-24 py-14 text-lg"
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
-              {reason.length}/{MAX_REASON_LENGTH}
+              {trimmedReason.length}/{MAX_REASON_LENGTH}
             </Text>
           </div>
         </FormField>
@@ -104,10 +124,10 @@ export default function RejectEstimateModal({
       <Modal.Button
         fullWidth
         size="cta"
-        disabled={!isReasonValid || isPending}
-        onClick={() => isReasonValid && onSubmit(trimmedReason)}
+        disabled={!isReasonValid || isSubmitting}
+        onClick={handleSubmit}
       >
-        {isPending ? "반려하는 중..." : "반려하기"}
+        {isSubmitting ? "반려하는 중..." : "반려하기"}
       </Modal.Button>
     </Modal>
   );
