@@ -1,4 +1,5 @@
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
+import { ApiError } from "@/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
 
@@ -34,7 +35,7 @@ export async function subscribeNotificationSse(
   });
 
   if (!response.ok) {
-    throw new Error(`SSE 연결 실패 (${String(response.status)})`);
+    throw new ApiError(`SSE 연결 실패 (${String(response.status)})`, response.status);
   }
 
   if (!response.body) {

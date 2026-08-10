@@ -9,6 +9,7 @@ import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
 import { getAccessToken } from "@/lib/auth/token";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { ApiError } from "@/types/api";
 import type { UnreadNotificationCountResponse } from "@/types/notification";
 
 const INITIAL_RETRY_DELAY_MS = 1_000;
@@ -96,15 +97,23 @@ export function useNotificationSse() {
             onEvent: handleSseEvent,
           });
 
-          // 정상 종료(서버 재시작 등) 후 짧게 재연결
+          if (disposed || abortController.signal.aborted) {
+            return;
+          }
+
+          // 정상 종료(서버 재시작 등) 후에도 지연을 두어 연결 폭주를 막는다
           retryDelayMs = INITIAL_RETRY_DELAY_MS;
+          try {
+            await sleep(INITIAL_RETRY_DELAY_MS, abortController.signal);
+          } catch {
+            return;
+          }
         } catch (error) {
           if (disposed || abortController.signal.aborted) {
             return;
           }
 
-          const message = error instanceof Error ? error.message : "";
-          if (message.includes("(401)")) {
+          if (error instanceof ApiError && error.status === 401) {
             try {
               await ensureAccessTokenRefreshed({ notifyOnFailure: false });
             } catch {
