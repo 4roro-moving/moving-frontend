@@ -47,6 +47,7 @@ function ReviewWriteModalContent({
   const [content, setContent] = useState("");
   const [isContentTouched, setIsContentTouched] = useState(false);
   const [submitError, setSubmitError] = useState<string | undefined>();
+  const [hasSubmissionStarted, setHasSubmissionStarted] = useState(false);
 
   const createMutation = useCreateReview({
     moverId: item.mover.id,
@@ -63,7 +64,7 @@ function ReviewWriteModalContent({
 
   const trimmedContent = content.trim();
   const isMutationPending = createMutation.isPending;
-  const isSubmitting = isMutationPending || !open;
+  const isSubmitting = isMutationPending || (hasSubmissionStarted && !open);
 
   const handleClose = () => {
     if (isSubmitting) return;
@@ -71,6 +72,7 @@ function ReviewWriteModalContent({
     setContent("");
     setIsContentTouched(false);
     setSubmitError(undefined);
+    setHasSubmissionStarted(false);
     onClose();
   };
   const isContentValid =
@@ -87,6 +89,7 @@ function ReviewWriteModalContent({
     setSubmitError(undefined);
     if (preview) return;
 
+    setHasSubmissionStarted(true);
     createMutation.mutate({
       estimateId: item.estimateId,
       rating,

@@ -40,13 +40,15 @@ export default function SendEstimateModal({
   const [price, setPrice] = useState("");
   const [comment, setComment] = useState("");
   const [isCommentTouched, setIsCommentTouched] = useState(false);
-  const isSubmitting = isPending || !open;
+  const [hasSubmissionStarted, setHasSubmissionStarted] = useState(false);
+  const isSubmitting = isPending || (hasSubmissionStarted && !open);
 
   const handleClose = () => {
     if (isSubmitting) return;
     setPrice("");
     setComment("");
     setIsCommentTouched(false);
+    setHasSubmissionStarted(false);
     onClose();
   };
 
@@ -71,6 +73,7 @@ export default function SendEstimateModal({
   const handleSubmit = () => {
     if (!canSubmit) return;
 
+    setHasSubmissionStarted(true);
     onSubmit({
       price: numericPrice,
       comment: trimmedComment,

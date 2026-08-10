@@ -31,12 +31,14 @@ export default function RejectEstimateModal({
 }: RejectEstimateModalProps) {
   const [reason, setReason] = useState("");
   const [isReasonTouched, setIsReasonTouched] = useState(false);
-  const isSubmitting = isPending || !open;
+  const [hasSubmissionStarted, setHasSubmissionStarted] = useState(false);
+  const isSubmitting = isPending || (hasSubmissionStarted && !open);
 
   const handleClose = () => {
     if (isSubmitting) return;
     setReason("");
     setIsReasonTouched(false);
+    setHasSubmissionStarted(false);
     onClose();
   };
 
@@ -51,6 +53,7 @@ export default function RejectEstimateModal({
   const handleSubmit = () => {
     if (!isReasonValid || isSubmitting) return;
 
+    setHasSubmissionStarted(true);
     onSubmit(trimmedReason);
   };
 
