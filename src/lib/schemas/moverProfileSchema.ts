@@ -27,7 +27,11 @@ export const createMoverProfileSchema = (options: { requiresPhone: boolean }) =>
   z.object({
     phone: options.requiresPhone ? phoneSchema : z.string().optional(),
     imageFile: z.custom<File | null>().nullable().optional(),
-    nickname: z.string().trim().min(2, "별명은 2자 이상 입력해 주세요"),
+    nickname: z
+      .string()
+      .trim()
+      .min(2, "별명은 2자 이상 입력해 주세요")
+      .max(20, "별명은 20자 이하로 입력해 주세요"),
     career: z
       .string()
       .trim()
@@ -37,8 +41,16 @@ export const createMoverProfileSchema = (options: { requiresPhone: boolean }) =>
         const career = Number(value);
         return Number.isInteger(career) && career >= 0 && career <= 100;
       }, "경력은 0 이상 100 이하의 정수여야 합니다"),
-    shortIntro: z.string().trim().min(1, "한 줄 소개를 입력해 주세요"),
-    description: z.string().trim().min(1, "상세 설명을 입력해 주세요"),
+    shortIntro: z
+      .string()
+      .trim()
+      .min(1, "한 줄 소개를 입력해 주세요")
+      .max(100, "한 줄 소개는 100자 이하로 입력해 주세요"),
+    description: z
+      .string()
+      .trim()
+      .min(1, "상세 설명을 입력해 주세요")
+      .max(1000, "상세 설명은 1000자 이하로 입력해 주세요"),
     serviceTypes: z.array(moveTypeSchema).min(1, "제공 서비스를 선택해 주세요"),
     regionIds: z.array(regionIdSchema).min(1, "서비스 가능 지역을 선택해 주세요"),
   });

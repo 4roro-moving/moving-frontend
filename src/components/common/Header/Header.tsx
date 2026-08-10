@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import NotificationTrigger from "@/components/common/Header/notification";
-import HeaderSideNav from "@/components/common/Header/HeaderSideNav";
+import HeaderSideNav, { type HeaderSideNavLink } from "@/components/common/Header/HeaderSideNav";
 import { isNavLinkActive } from "@/components/common/Header/isNavLinkActive";
 import ProfileMenuTrigger, {
   type ProfileMenuItem,
@@ -96,6 +96,36 @@ const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   PROFILE_LOGOUT_MENU_ITEM,
 ];
 
+/** nav role 분기 — 미확정 시 고객 메뉴 (F5 깜빡임 방지) */
+const getHeaderNavLinks = (isLogin: boolean, role: AuthRole | null): HeaderSideNavLink[] => {
+  if (!isLogin) {
+    return LOGGED_OUT_LINKS;
+  }
+
+  switch (role) {
+    case "MOVER":
+      return MOVER_LOGGED_IN_LINKS;
+    case "ADMIN":
+      return [];
+    case "CUSTOMER":
+    default:
+      return CUSTOMER_LOGGED_IN_LINKS;
+  }
+};
+
+/** nav와 동일한 role 분기 — 미확정 시 고객 메뉴 (F5 깜빡임 방지) */
+const getCompletedProfileMenuItems = (role: AuthRole | null): ProfileMenuItem[] => {
+  switch (role) {
+    case "MOVER":
+      return MOVER_PROFILE_MENU_ITEMS;
+    case "ADMIN":
+      return [PROFILE_LOGOUT_MENU_ITEM];
+    case "CUSTOMER":
+    default:
+      return CUSTOMER_PROFILE_MENU_ITEMS;
+  }
+};
+
 export interface HeaderProps {
   /** Server에서 refresh 쿠키로 전달. hydrate 전 깜빡임 방지용 */
   isLogin?: boolean;
@@ -105,6 +135,8 @@ export interface HeaderProps {
   initialRole?: AuthRole | null;
   /** Server에서 profileImage 쿠키로 전달. hydrate 전 프로필 이미지 표시용 */
   initialProfileImage?: string | null;
+  /** Server에서 profileCompleted 쿠키. 미완료 시 GNB 숨김 낙관용 */
+  initialProfileCompleted?: boolean | null;
 }
 
 const Header = ({
@@ -112,6 +144,7 @@ const Header = ({
   initialNickname = null,
   initialRole = null,
   initialProfileImage = null,
+  initialProfileCompleted = null,
 }: HeaderProps) => {
   const pathname = usePathname();
   const mobileMenuId = useId();
@@ -142,24 +175,20 @@ const Header = ({
 
   // hydrate 전·checkAuth 중: SSR refresh 쿠키 힌트 유지
   // checkAuth 완료 후: 실제 세션(access) 기준
-  const isLogin = isAuthPending ? Boolean(initialIsLogin) : isAuthenticated;
+  const isLogin = isAuthPending ? Boolean(initialIsLogin || initialRole) : isAuthenticated;
 
   const resolvedRole = useResolvedAuthRole(initialRole);
+  // 확정 후 loadRole 공백 시에도 SSR role 힌트 유지 (Header 표시용)
+  const roleForNav = resolvedRole ?? initialRole;
 
-  const navLinks = !isLogin
-    ? LOGGED_OUT_LINKS
-    : resolvedRole === "MOVER"
-      ? MOVER_LOGGED_IN_LINKS
-      : resolvedRole === "CUSTOMER"
-        ? CUSTOMER_LOGGED_IN_LINKS
-        : []; // role 미확정·ADMIN 등 — 고객 링크 기본값 사용 안 함
+  const navLinks = getHeaderNavLinks(isLogin, roleForNav);
 
   const sideNavLinks = !isLogin
     ? [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
     : navLinks;
 
-  // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
-  const showAuthSkeleton = isAuthPending && !initialIsLogin;
+  // hydrate/checkAuth 전·로그인 힌트(refresh·role) 없으면 스켈레톤 — isLogin과 기준 맞춤
+  const showAuthSkeleton = isAuthPending && !initialIsLogin && !initialRole;
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
@@ -168,26 +197,21 @@ const Header = ({
 
   const isAvatarPending = isAuthPending && !hintedImageUrl;
 
-  const { isIncomplete, isCompletionUnresolved, profileCreatePath } =
-    useProfileCompletionState(resolvedRole);
+  const { isIncomplete, profileCreatePath } = useProfileCompletionState(
+    roleForNav,
+    initialProfileCompleted,
+  );
 
-  // SSR 로그인 힌트와 status 확정 전: 완료 사용자 메뉴/링크가 깜빡이지 않도록 숨김
-  const shouldHideNavLinks = isLogin && (isIncomplete || isCompletionUnresolved);
+  // 프로필 미완료가 확정·낙관된 경우에만 GNB 숨김
+  const shouldHideNavLinks = isLogin && isIncomplete;
 
-  const completedProfileMenuItems =
-    resolvedRole === "MOVER"
-      ? MOVER_PROFILE_MENU_ITEMS
-      : resolvedRole === "CUSTOMER"
-        ? CUSTOMER_PROFILE_MENU_ITEMS
-        : [PROFILE_LOGOUT_MENU_ITEM];
+  const completedProfileMenuItems = getCompletedProfileMenuItems(roleForNav);
 
   const profileMenuItems: ProfileMenuItem[] = !isLogin
     ? completedProfileMenuItems
     : isIncomplete
       ? [{ type: "link", label: "프로필 생성", href: profileCreatePath }, PROFILE_LOGOUT_MENU_ITEM]
-      : isCompletionUnresolved
-        ? [PROFILE_LOGOUT_MENU_ITEM]
-        : completedProfileMenuItems;
+      : completedProfileMenuItems;
 
   return (
     <header className="border-border-subtle bg-background-surface relative z-40 w-full max-w-full border-b">
@@ -275,7 +299,7 @@ const Header = ({
               nickname={nickname}
               imageUrl={imageUrl}
               items={profileMenuItems}
-              role={resolvedRole}
+              role={roleForNav}
               isAvatarPending={isAvatarPending}
             />
             <button

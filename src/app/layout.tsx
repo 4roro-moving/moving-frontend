@@ -3,12 +3,14 @@ import { type Metadata } from "next";
 import { cookies } from "next/headers";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { NICKNAME_STORAGE_KEY, safeDecodeCookieValue } from "@/lib/auth/nickname";
+import { safeDecodeCookieValue } from "@/lib/auth/clientStorageHint";
+import { NICKNAME_STORAGE_KEY } from "@/lib/auth/nickname";
+import { PROFILE_COMPLETED_STORAGE_KEY, parseProfileCompleted } from "@/lib/auth/profileCompleted";
+import { PROFILE_IMAGE_STORAGE_KEY } from "@/lib/auth/profileImage";
 import { ROLE_STORAGE_KEY, parseAuthRole } from "@/lib/auth/role";
 import { REFRESH_TOKEN_COOKIE_NAME } from "@/lib/auth/token";
 
 import "./globals.css";
-import { PROFILE_IMAGE_STORAGE_KEY } from "@/lib/auth/profileImage";
 
 export const metadata: Metadata = {
   title: "무빙",
@@ -32,6 +34,9 @@ const RootLayout = async ({ children }: RootLayoutProps) => {
   const rawRole = cookieStore.get(ROLE_STORAGE_KEY)?.value;
   const decodedRole = rawRole ? safeDecodeCookieValue(rawRole) : null;
   const initialRole = parseAuthRole(decodedRole);
+  const initialProfileCompleted = parseProfileCompleted(
+    cookieStore.get(PROFILE_COMPLETED_STORAGE_KEY)?.value,
+  );
 
   return (
     <html lang="ko">
@@ -41,6 +46,7 @@ const RootLayout = async ({ children }: RootLayoutProps) => {
           initialNickname={initialNickname}
           initialRole={initialRole}
           initialProfileImage={initialProfileImage}
+          initialProfileCompleted={initialProfileCompleted}
         >
           {children}
         </AppShell>
