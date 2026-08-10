@@ -28,7 +28,6 @@ import Calendar from "./Calendar";
 import DatePickerField from "./DatePickerField";
 import MoveTypeCard from "./MoveTypeCard";
 
-const TOAST_SUCCESS_MESSAGE = "견적 요청이 완료되었습니다.";
 const TOAST_FAILURE_MESSAGE = "견적 요청이 실패하였습니다.";
 const TOAST_EXISTING_REQUEST_MESSAGE =
   "견적 요청에 실패하였습니다. 기존 견적이 있는지 확인해주세요.";
@@ -93,14 +92,19 @@ interface RegionFieldProps {
 
 function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
   return (
-    <div className="flex w-full flex-1 flex-col gap-12">
+    <div className="flex w-full min-w-0 flex-1 flex-col gap-12">
       <Text as="span" variant="lg-medium" className="text-text-primary">
         {kind}
       </Text>
-      <div className="flex flex-col items-end gap-8">
+      <div className="flex min-w-0 flex-col items-end gap-8">
         {value ? (
-          <div className="rounded-12 border-border-brand flex h-[54px] w-full items-center border px-24 py-16">
-            <Text as="p" variant="lg-medium" className="text-text-brand truncate">
+          <div className="rounded-12 border-border-brand flex h-[54px] w-full min-w-0 items-center overflow-hidden border px-24 py-16">
+            <Text
+              as="p"
+              variant="lg-medium"
+              title={value}
+              className="text-text-brand block w-full min-w-0 truncate"
+            >
               {value}
             </Text>
           </div>
@@ -211,12 +215,13 @@ export default function EstimateRequestForm() {
           refetchType: "none",
         }),
       ]);
-      setToastMessage(TOAST_SUCCESS_MESSAGE);
       if (response) {
         queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, response);
       } else {
         await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE });
       }
+      // 제출 성공 후 보낸 견적 요청 목록으로 이동
+      router.replace(APP_ROUTES.ESTIMATES.REQUESTS);
     },
     onError: async (error) => {
       const { code } = getApiError(error);
@@ -335,11 +340,7 @@ export default function EstimateRequestForm() {
             )
           }
           buttonLabel={isConfirmedRequest ? "진행 중인 견적 보기" : "대기 중인 견적 보기"}
-          href={
-            isConfirmedRequest
-              ? activeRequestDetailHref
-              : APP_ROUTES.ESTIMATES.PENDING
-          }
+          href={isConfirmedRequest ? activeRequestDetailHref : APP_ROUTES.ESTIMATES.PENDING}
           onButtonClick={
             isConfirmedRequest
               ? (event) => markInternalDetailNavigationOnClick(event, activeRequestDetailHref)
@@ -436,7 +437,7 @@ export default function EstimateRequestForm() {
             <Text as="h2" variant="2lg-bold" className="text-text-tertiary hidden md:block">
               이사 지역
             </Text>
-            <div className="flex w-full flex-col gap-24 md:w-[520px] md:flex-row md:gap-16">
+            <div className="flex w-full min-w-0 flex-col gap-24 md:w-[520px] md:max-w-full md:flex-row md:gap-16">
               <RegionField
                 kind="출발지"
                 value={fromAddress ? normalizeRoadAddress(fromAddress.roadAddress) : null}

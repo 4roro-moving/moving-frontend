@@ -11,74 +11,62 @@ export interface NotificationMessageTemplate {
  */
 export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, NotificationMessageTemplate> =
   {
+    //고객이 견적 요청을 올린 경우 관련 기사에게 알림 문구
     ESTIMATE_REQUEST_RECEIVED: {
       prefix: "",
       suffix: " 견적 요청이 도착했어요",
     },
+    //고객이 지정 견적 요청한 경우 기사에게 알림 문구
     DESIGNATED_REQUEST_RECEIVED: {
       prefix: "나를 지정한 ",
       suffix: " 견적 요청이 도착했어요",
     },
+    //기사가 견적을 보낸 경우 알림 문구
     ESTIMATE_RECEIVED: {
       prefix: "",
       suffix: "이 도착했어요",
     },
+    //고객이 견적을 확정한 경우 알림 문구
     ESTIMATE_CONFIRMED: {
       prefix: "",
       suffix: "견적이 확정 되었어요",
     },
+    //기사가 견적 요청을 반려했을 때 알림 문구
     ESTIMATE_REQUEST_REJECTED: {
       prefix: "",
       suffix: " 님이 견적 요청을 반려했어요",
     },
+    //고객이 견적 요청을 취소했을 때 알림 문구
     ESTIMATE_REQUEST_CANCELED: {
       prefix: "",
       suffix: " 님이 견적 요청을 취소했어요",
     },
-    MOVE_DAY_REMINDER: {
-      prefix: "내일은 ",
-      suffix: "이에요.",
-    },
-    ESTIMATE_EXPIRATION_REMINDER: {
-      prefix: "",
-      suffix: " 견적 요청이 곧 만료돼요",
-    },
-    REVIEW_AVAILABLE: {
-      prefix: "작성 가능한 ",
-      suffix: "가 있어요",
-    },
+    //고객이 리뷰를 남긴 경우 기사에게 알림 문구
     REVIEW_RECEIVED: {
       prefix: "",
       suffix: " 리뷰를 남겼어요",
     },
+    //메세지 도착 알림 post 아직 없음
     CHAT_MESSAGE_RECEIVED: {
       prefix: "",
       suffix: " 새 메시지가 도착했어요",
     },
-    ESTIMATE_REVISION_REQUESTED: {
-      prefix: "",
-      suffix: " 견적 수정 요청이 도착했어요",
-    },
-    ESTIMATE_REVISION_APPROVED: {
-      prefix: "",
-      suffix: " 견적 수정 요청이 승인되었어요",
-    },
-    ESTIMATE_REVISION_REJECTED: {
-      prefix: "",
-      suffix: " 견적 수정 요청이 거절되었어요",
-    },
+    //공지사항 추가 알림 문구
     NOTICE_RECEIVED: {
       prefix: "",
       suffix: "",
     },
+    //문의 답변 등록 알림 문구
     INQUIRY_ANSWERED: {
       prefix: "",
       suffix: " 문의에 답변이 등록되었어요",
     },
+    //관리자가 리뷰 숨김 처리한 경우 고객에게 알림 문구
     CONTENT_HIDDEN: {
       prefix: "",
       suffix: "에 대한 리뷰가 숨김처리 되었습니다.",
     },
+    //관리자가 리뷰 복구 처리한 경우 고객에게 알림 문구
     CONTENT_RESTORED: {
       prefix: "",
       suffix: "에 대한 리뷰가 복구되었습니다.",

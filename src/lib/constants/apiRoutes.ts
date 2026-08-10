@@ -63,5 +63,7 @@ export const API_ROUTES = {
     ROOT: "/notifications",
     UNREAD_COUNT: "/notifications/unread-count",
     READ: (notificationId: number) => `/notifications/${notificationId}/read`,
+    /** GET text/event-stream — Authorization Bearer 필요 */
+    SSE_SUBSCRIBE: "/notifications/sse/subscribe",
   },
 } as const;
