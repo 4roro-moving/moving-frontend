@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { useMoverDesignation } from "@/hooks/useMoverDesignation";
@@ -29,10 +29,25 @@ interface MoverDetailViewProps {
   moverId: string;
   /** 인증 초기화 중 먼저 렌더링할 서버 prefetch 상세 정보 */
   initialDetail: MoverDetail | null;
+  /** 임시 배포 진단용 SSR prefetch 오류 */
+  initialDetailError: string | null;
 }
 
-export default function MoverDetailView({ moverId, initialDetail }: MoverDetailViewProps) {
+export default function MoverDetailView({
+  moverId,
+  initialDetail,
+  initialDetailError,
+}: MoverDetailViewProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialDetailError) {
+      console.error("[MoverDetail] SSR 상세 prefetch 실패", {
+        moverId,
+        error: initialDetailError,
+      });
+    }
+  }, [initialDetailError, moverId]);
 
   const { detail: queryDetail, isInitialLoading, isNotFound, query } = useMoverDetail(moverId);
   const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
