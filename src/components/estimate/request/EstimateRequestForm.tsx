@@ -306,6 +306,18 @@ export default function EstimateRequestForm() {
     );
   }
 
+  // 생성 성공 후 ACTIVE 캐시가 채워지면 ActiveEstimateBlocked가 잠깐 보일 수 있어
+  // 목록 이동이 끝나기 전에는 안내 화면 대신 로딩만 유지한다.
+  if (createMutation.isSuccess) {
+    return (
+      <div className="flex min-h-[40vh] w-full items-center justify-center">
+        <Text as="p" variant="lg-regular" className="text-text-subtle">
+          불러오는 중...
+        </Text>
+      </div>
+    );
+  }
+
   if (isActiveError) {
     return (
       <>
