@@ -56,7 +56,17 @@ export default function ProfileMenuTrigger({
   const logoutItem = items.find((item) => item.type === "action" && item.action === "logout");
   const nicknameSuffix = role === "MOVER" ? "기사님" : "고객님";
 
-  const closeQuiet = useCallback(() => setIsOpen(false), []);
+  const closeQuiet = useCallback(() => {
+    const active = document.activeElement;
+    const focus = active instanceof HTMLElement && Boolean(menuRef.current?.contains(active));
+
+    setIsOpen(false);
+
+    if (focus) {
+      triggerRef.current?.focus();
+    }
+  }, []);
+
   const closeWithFocus = useCallback(() => {
     setIsOpen(false);
     triggerRef.current?.focus();
@@ -203,7 +213,7 @@ export default function ProfileMenuTrigger({
                       LINK_ITEM_CLASS,
                       isActive ? "text-text-brand" : "text-text-secondary",
                     )}
-                    onClick={closeQuiet}
+                    onClick={closeWithFocus}
                   >
                     <Text as="span" variant="lg-medium">
                       {item.label}
