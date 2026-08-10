@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { Text } from "@/components/common/Text";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
 const FOOTER_LINKS = [
   { label: "자주 묻는 질문", href: "/" },
@@ -11,6 +13,13 @@ const FOOTER_LINKS = [
 ];
 
 const Footer = () => {
+  const pathname = usePathname();
+
+  // 2026.08.08 윤소정 - [추가] /movers/map 경로인 경우 footer 제거 (지도에서 스크롤 생기지 않게 하기 위함)
+  if (pathname === APP_ROUTES.MOVERS.MAP) {
+    return null;
+  }
+
   return (
     <footer className="border-border-default bg-background-subtle w-full border-t">
       <div className="px-margin-mobile max-w-container-desktop mx-auto flex w-full flex-col items-center gap-16 py-40 md:px-40">

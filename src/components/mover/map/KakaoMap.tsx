@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { loadKakaoMaps } from "@/lib/kakao/loadKakaoMaps";
@@ -14,6 +15,7 @@ interface KakaoMapProps {
 export default function KakaoMap({ departure, destination }: KakaoMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let disposed = false;
@@ -54,7 +56,7 @@ export default function KakaoMap({ departure, destination }: KakaoMapProps) {
       disposed = true;
       markers.forEach((marker) => marker.setMap(null));
     };
-  }, [departure, destination]);
+  }, [departure, destination, retryCount]);
 
   return (
     <section
@@ -72,10 +74,22 @@ export default function KakaoMap({ departure, destination }: KakaoMapProps) {
       )}
 
       {status === "error" && (
-        <div className="bg-background-subtle absolute inset-0 z-10 flex items-center justify-center px-24 text-center">
+        <div
+          role="alert"
+          className="bg-background-subtle absolute inset-0 z-10 flex flex-col items-center justify-center gap-16 px-24 text-center"
+        >
           <Text as="p" variant="md-medium" className="text-text-error">
             지도를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
           </Text>
+          <Button
+            size="md"
+            onClick={() => {
+              setStatus("loading");
+              setRetryCount((count) => count + 1);
+            }}
+          >
+            다시 시도
+          </Button>
         </div>
       )}
     </section>
