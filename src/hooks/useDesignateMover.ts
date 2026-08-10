@@ -39,14 +39,9 @@ export function useDesignateMover(options?: UseDesignateMoverOptions) {
         data,
       );
       queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, data);
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST_ROOT,
-        }),
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
-        }),
-      ]);
+      await queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
+      });
       onSuccessRef.current?.(data);
     },
     onError: (error) => {
