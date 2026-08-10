@@ -33,7 +33,11 @@ export function useDesignateMover(options?: UseDesignateMoverOptions) {
   return useApiMutation({
     mutationFn: ({ estimateRequestId, moverId }: DesignateMoverVariables) =>
       designateMover(estimateRequestId, moverId),
-    onSuccess: async (data) => {
+    onSuccess: async (data, variables) => {
+      queryClient.setQueryData(
+        QUERY_KEYS.ESTIMATE_REQUESTS.DETAIL(variables.estimateRequestId),
+        data,
+      );
       queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, data);
       await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
