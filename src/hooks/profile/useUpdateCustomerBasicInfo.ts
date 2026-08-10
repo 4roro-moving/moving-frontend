@@ -16,14 +16,13 @@ export const useUpdateCustomerBasicInfo = () => {
 
   return useApiMutation({
     mutationFn: (input: UpdateCustomerBasicInfoInput) => updateCustomerBasicInfo(input),
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       const profile = mapCustomerProfileMeResponse(data);
       establishSession(toAuthUserFromCustomerProfile(profile));
-
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.CUSTOMER_ME }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.CUSTOMER_STATUS }),
-      ]);
+      queryClient.setQueryData(
+        [...QUERY_KEYS.PROFILES.CUSTOMER_ME, profile.userId] as const,
+        profile,
+      );
     },
   });
 };

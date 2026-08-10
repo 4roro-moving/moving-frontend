@@ -16,14 +16,10 @@ export const useUpdateMoverBasicInfo = () => {
 
   return useApiMutation({
     mutationFn: (input: UpdateMoverBasicInfoInput) => updateMoverBasicInfo(input),
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       const profile = mapMoverProfileMeResponse(data);
       establishSession(toAuthUserFromMoverProfile(profile));
-
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.MOVER_ME }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.MOVER_STATUS }),
-      ]);
+      queryClient.setQueryData([...QUERY_KEYS.PROFILES.MOVER_ME, profile.userId] as const, profile);
     },
   });
 };
