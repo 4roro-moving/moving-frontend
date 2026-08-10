@@ -56,20 +56,22 @@ export default function ProfileMenuTrigger({
   const logoutItem = items.find((item) => item.type === "action" && item.action === "logout");
   const nicknameSuffix = role === "MOVER" ? "기사님" : "고객님";
 
-  const closeQuiet = useCallback(() => {
+  const restoreTriggerFocusIfNeeded = () => {
     const active = document.activeElement;
-    const focus = active instanceof HTMLElement && Boolean(menuRef.current?.contains(active));
-
-    setIsOpen(false);
-
-    if (focus) {
+    if (active instanceof HTMLElement && menuRef.current?.contains(active)) {
       triggerRef.current?.focus();
     }
+  };
+
+  const closeQuiet = useCallback(() => {
+    // aria-hidden 적용 전에 포커스를 메뉴 밖으로 이동
+    restoreTriggerFocusIfNeeded();
+    setIsOpen(false);
   }, []);
 
   const closeWithFocus = useCallback(() => {
-    setIsOpen(false);
     triggerRef.current?.focus();
+    setIsOpen(false);
   }, []);
 
   const containerRef = useClickOutside<HTMLDivElement>(closeQuiet);
@@ -121,6 +123,7 @@ export default function ProfileMenuTrigger({
   };
 
   const handleLogout = async () => {
+    triggerRef.current?.focus();
     setIsOpen(false);
 
     const isPublicPage = isPublicPath(pathname);
@@ -184,7 +187,7 @@ export default function ProfileMenuTrigger({
           ref={menuRef}
           id={`${menuId}-menu`}
           role="menu"
-          aria-hidden={!isMenuVisible}
+          inert={!isMenuVisible ? true : undefined}
           aria-labelledby={`${menuId}-trigger`}
           className={cn(
             "border-border-default bg-background-surface shadow-profile-menu rounded-16 absolute top-[calc(100%+18px)] right-0 z-50 flex w-62 flex-col items-start border px-4 pt-16 pb-6",
