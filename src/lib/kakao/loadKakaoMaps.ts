@@ -80,18 +80,15 @@ export function loadKakaoMaps(): Promise<KakaoMapsNamespace> {
       KAKAO_MAPS_SCRIPT_ID,
     ) as HTMLScriptElement | null;
     if (existingScript) {
-      if (existingScript.dataset.loadStatus === "loaded") {
-        reject(new Error(KAKAO_MAPS_LOAD_ERROR));
-        return;
-      }
-      if (existingScript.dataset.loadStatus === "error") {
+      if (
+        existingScript.dataset.loadStatus === "loaded" ||
+        existingScript.dataset.loadStatus === "error"
+      ) {
         existingScript.remove();
-        reject(new Error(KAKAO_MAPS_LOAD_ERROR));
+      } else {
+        waitForScript(existingScript, resolve, reject);
         return;
       }
-
-      waitForScript(existingScript, resolve, reject);
-      return;
     }
 
     const script = document.createElement("script");

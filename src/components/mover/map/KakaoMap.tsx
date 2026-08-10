@@ -74,7 +74,10 @@ export default function KakaoMap({ departure, destination }: KakaoMapProps) {
       )}
 
       {status === "error" && (
-        <div className="bg-background-subtle absolute inset-0 z-10 flex flex-col items-center justify-center gap-16 px-24 text-center">
+        <div
+          role="alert"
+          className="bg-background-subtle absolute inset-0 z-10 flex flex-col items-center justify-center gap-16 px-24 text-center"
+        >
           <Text as="p" variant="md-medium" className="text-text-error">
             지도를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
           </Text>
