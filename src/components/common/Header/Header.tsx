@@ -287,7 +287,7 @@ const Header = ({
               className="focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none xl:hidden"
               onClick={openSideNav}
             >
-              <MenuIcon aria-hidden="true" className="size-24" />
+              <MenuIcon className="text-icon-muted size-24" />
             </button>
           </div>
         ) : (

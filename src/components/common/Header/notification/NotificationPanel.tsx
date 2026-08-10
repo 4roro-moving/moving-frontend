@@ -103,11 +103,11 @@ export default function NotificationPanel({
       inert={!isVisible ? true : undefined}
       tabIndex={isVisible ? -1 : undefined}
       className={cn(
-        "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-0 z-50 mt-8 w-89.75 border px-16 py-10 focus:outline-none",
+        "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-4 z-50 mt-8 w-87 border px-16 py-10 focus:outline-none md:right-0",
         className,
       )}
     >
-      <div className="flex items-center justify-between py-8">
+      <div className="flex items-center justify-between py-14 pr-12 pl-16 md:pl-24">
         <Text id="notification-panel-title" as="h2" variant="xl-bold">
           알림
         </Text>
@@ -119,7 +119,7 @@ export default function NotificationPanel({
           disabled={!isVisible}
           className="flex size-24 items-center justify-center"
         >
-          <CloseIcon />
+          <CloseIcon className="text-icon-default size-24" />
         </button>
       </div>
 
