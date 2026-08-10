@@ -27,20 +27,36 @@ export const safeDecodeCookieValue = (raw: string): string | null => {
 export const setClientStorageHint = (key: ClientStorageHintKey, value: string): void => {
   if (typeof window === "undefined") return;
 
-  localStorage.setItem(key, value);
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // QuotaExceeded / SecurityError 등 — cookie 힌트는 계속 반영
+  }
+
   const secureFlag = window.location.protocol === "https:" ? "; Secure" : "";
   document.cookie = `${key}=${encodeURIComponent(value)}; Path=/; SameSite=Lax; Max-Age=${ONE_YEAR_SECONDS}${secureFlag}`;
 };
 
 export const getClientStorageHint = (key: ClientStorageHintKey): string | null => {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(key);
+
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    // SecurityError 등 — 힌트 없음으로 처리
+    return null;
+  }
 };
 
 export const clearClientStorageHint = (key: ClientStorageHintKey): void => {
   if (typeof window === "undefined") return;
 
-  localStorage.removeItem(key);
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // 삭제 실패해도 cookie는 만료 처리
+  }
+
   document.cookie = `${key}=; Path=/; Max-Age=0; SameSite=Lax`;
 };
 
