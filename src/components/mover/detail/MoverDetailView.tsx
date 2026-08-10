@@ -12,7 +12,9 @@ import { PageHeader } from "@/components/common/PageHeader";
 import DesignateSuccessModal from "@/components/estimate/DesignateSuccessModal";
 import EstimateRequestRequiredModal from "@/components/estimate/EstimateRequestRequiredModal";
 
-import MoverDetailActions from "@/components/mover/detail/MoverDetailActions";
+import MoverDetailActions, {
+  MoverDetailActionsSkeleton,
+} from "@/components/mover/detail/MoverDetailActions";
 import MoverDetailNotFoundStatus from "@/components/mover/detail/MoverDetailNotFoundStatus";
 import MoverDetailPageSkeleton from "@/components/mover/detail/MoverDetailPageSkeleton";
 import MoverDetailProfile from "@/components/mover/detail/MoverDetailProfile";
@@ -80,6 +82,8 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
   }
 
   const detail = displayedDetail;
+  // 찜 상태는 사용자별 상세 Query, 지정 가능 여부는 활성 견적 요청 조회가 끝난 뒤에 확정됩니다.
+  const isActionsLoading = isInitialLoading || designation.isActionsLoading;
 
   const toggleFavorite = () => {
     favoriteMutation.mutate({
@@ -114,7 +118,7 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
             <MoverDetailProfile
               detail={detail}
               onToggleFavorite={toggleFavorite}
-              showFavoriteAction={designation.showCustomerActions}
+              showFavoriteAction={!isInitialLoading && designation.showCustomerActions}
             />
             <MoverDetailServices detail={detail} />
 
@@ -135,7 +139,9 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
           </div>
 
           <aside className="hidden w-full min-w-0 flex-col items-start gap-40 xl:flex xl:w-[320px] xl:gap-70 xl:pt-40">
-            {designation.showCustomerActions ? (
+            {isActionsLoading ? (
+              <MoverDetailActionsSkeleton layout="sidebar" moverName={detail.name} />
+            ) : designation.showCustomerActions ? (
               <MoverDetailActions layout="sidebar" {...actionsProps} />
             ) : null}
             <MoverDetailShare {...shareProps} onToastMessage={setToastMessage} />
@@ -143,7 +149,9 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
         </div>
       </div>
 
-      {designation.showCustomerActions ? (
+      {isActionsLoading ? (
+        <MoverDetailActionsSkeleton layout="sticky" />
+      ) : designation.showCustomerActions ? (
         <MoverDetailActions layout="sticky" {...actionsProps} />
       ) : null}
 

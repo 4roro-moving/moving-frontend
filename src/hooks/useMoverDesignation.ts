@@ -70,6 +70,9 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
       ? "요청 중..."
       : "지정 견적 요청하기");
 
+  // 고객은 활성 견적 요청까지 확인해야 버튼의 활성·비활성 상태가 확정됩니다.
+  const isActionsLoading = isAuthPending || (isCustomerLoggedIn && isActiveLoading);
+
   const requestEstimate = async () => {
     if (isAuthPending) {
       return;
@@ -140,9 +143,11 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
     closeEstimateRequestModal: () => setIsEstimateRequestModalOpen(false),
     isDesignateSuccessModalOpen,
     isEstimateRequestModalOpen,
+    isActionsLoading,
     isRequestDisabled,
     requestButtonLabel,
     requestEstimate,
+    isAuthPending,
     showCustomerActions: !isAuthPending && (!isAuthenticated || isCustomer),
   };
 }
