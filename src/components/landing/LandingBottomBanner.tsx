@@ -21,7 +21,7 @@ export default function LandingBottomBanner() {
             height={60}
             unoptimized
             draggable={false}
-            className="pointer-events-none select-none h-[34px] w-[33px] object-contain md:h-[60px] md:w-[58px]"
+            className="pointer-events-none h-[34px] w-[33px] object-contain select-none md:h-[60px] md:w-[58px]"
           />
         </div>
 

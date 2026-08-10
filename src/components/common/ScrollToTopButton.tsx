@@ -29,6 +29,7 @@ function shouldHideScrollToTop(pathname: string): boolean {
   if (pathname.startsWith("/oauth/")) {
     return true;
   }
+
   return SCROLL_TO_TOP_HIDDEN_PATHS.has(pathname);
 }
 
@@ -37,6 +38,7 @@ function isMoverDetailPath(pathname: string): boolean {
   if (pathname === APP_ROUTES.MOVERS.ROOT || pathname === APP_ROUTES.MOVERS.FAVORITES) {
     return false;
   }
+
   return pathname.startsWith(`${APP_ROUTES.MOVERS.ROOT}/`);
 }
 
@@ -47,10 +49,15 @@ function isMoverDetailPath(pathname: string): boolean {
  */
 export default function ScrollToTopButton() {
   const pathname = usePathname();
+
   const [scrolledPastThreshold, setScrolledPastThreshold] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+
   const hiddenByRoute = shouldHideScrollToTop(pathname);
   const raiseForStickyCta = isMoverDetailPath(pathname);
-  const show = !hiddenByRoute && scrolledPastThreshold;
+
+  // 버튼에 포커스가 남아 있는 동안에는 숨기지 않음
+  const show = !hiddenByRoute && (scrolledPastThreshold || isFocused);
 
   useEffect(() => {
     if (hiddenByRoute) {
@@ -62,11 +69,15 @@ export default function ScrollToTopButton() {
     };
 
     updateVisibility();
-    window.addEventListener("scroll", updateVisibility, { passive: true });
+
+    window.addEventListener("scroll", updateVisibility, {
+      passive: true,
+    });
+
     return () => {
       window.removeEventListener("scroll", updateVisibility);
     };
-  }, [pathname, hiddenByRoute]);
+  }, [hiddenByRoute]);
 
   if (hiddenByRoute) {
     return null;
@@ -76,22 +87,34 @@ export default function ScrollToTopButton() {
     <button
       type="button"
       aria-label="맨 위로"
-      aria-hidden={!show}
       tabIndex={show ? 0 : -1}
+      onFocus={() => {
+        setIsFocused(true);
+      }}
+      onBlur={() => {
+        setIsFocused(false);
+      }}
       onClick={() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
       }}
       className={cn(
         "bg-background-surface shadow-toast rounded-20 fixed z-30 flex size-64 flex-col items-center justify-center gap-2",
+
         // Mobile 16~20 / Desktop 24~32 + Safe Area
         "right-[max(1rem,env(safe-area-inset-right))] md:right-[max(1.5rem,env(safe-area-inset-right))] lg:right-[max(2rem,env(safe-area-inset-right))]",
+
         raiseForStickyCta
           ? "bottom-[calc(7rem+env(safe-area-inset-bottom))] lg:bottom-[max(1.5rem,env(safe-area-inset-bottom))]"
           : "bottom-[max(1rem,env(safe-area-inset-bottom))] md:bottom-[max(1.5rem,env(safe-area-inset-bottom))] lg:bottom-[max(2rem,env(safe-area-inset-bottom))]",
+
         "transition-[opacity,transform,box-shadow] duration-200 ease-out",
         "hover:shadow-notification hover:-translate-y-4",
         "active:translate-y-0 active:scale-95",
         "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+
         show
           ? "pointer-events-auto translate-y-0 opacity-100"
           : "pointer-events-none translate-y-8 opacity-0",
@@ -100,12 +123,13 @@ export default function ScrollToTopButton() {
       <Image
         src={CHARACTER_SRC}
         alt=""
-        width={40}
-        height={40}
-        className="size-40 object-contain"
-        aria-hidden="true"
+        width={28}
+        height={28}
+        draggable={false}
+        className="pointer-events-none size-28 object-contain select-none"
       />
-      <Text as="span" variant="xs-medium" className="text-text-muted leading-none tracking-wide">
+
+      <Text as="span" variant="md-bold" className="text-text-primary">
         TOP
       </Text>
     </button>
