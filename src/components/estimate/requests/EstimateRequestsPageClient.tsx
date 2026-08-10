@@ -64,10 +64,6 @@ export default function EstimateRequestsPageClient() {
   const totalPages = Math.max(1, pagination?.totalPages ?? 1);
   const currentPage = pagination?.page ?? Math.min(Math.max(1, page), totalPages);
   const hasData = !isLoading && !isError && Boolean(pagination);
-  // placeholder(이전 필터) 기준으로 Empty py를 바꾸지 않음
-  const isEmpty =
-    hasData && pagination != null && !isPlaceholderData && pagination.totalCount === 0;
-
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -79,7 +75,7 @@ export default function EstimateRequestsPageClient() {
   };
 
   return (
-    <div className="bg-background-default md:bg-background-subtle flex w-full flex-col items-center py-38 md:py-32 xl:py-64">
+    <div className="bg-background-default md:bg-background-subtle w-full flex-1 flex-col items-center py-38 md:py-32 xl:py-64">
       {isLoading ? <EstimateRequestListSkeleton showFilter /> : null}
 
       {isError ? (
