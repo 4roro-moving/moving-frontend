@@ -21,6 +21,16 @@ interface MoverDetailPageProps {
 
 const MOVER_DETAIL_QUERY_STALE_TIME_MS = 60 * 1000;
 
+function getPrefetchErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    const status = error.status ? ` (HTTP ${error.status})` : "";
+    const code = error.code ? ` [${error.code}]` : "";
+    return `${error.message}${status}${code}`;
+  }
+
+  return error instanceof Error ? error.message : "알 수 없는 오류";
+}
+
 export async function generateMetadata({ params }: MoverDetailPageProps): Promise<Metadata> {
   const { moverId } = await params;
 
@@ -56,26 +66,32 @@ export default async function MoverDetailPage({ params }: MoverDetailPageProps) 
     },
   });
   let initialDetail: MoverDetail | null = null;
+  let initialDetailError: string | null = null;
+  const detailQueryKey = getMoverDetailQueryKey(AUTH_QUERY_GUEST_SCOPE, moverId);
 
-  try {
-    await queryClient.prefetchQuery({
-      queryKey: getMoverDetailQueryKey(AUTH_QUERY_GUEST_SCOPE, moverId),
-      queryFn: async () => {
-        const item = await getMoverDetailCached(moverId);
-        return mapMoverDetailItemToMoverDetail(item);
-      },
-    });
-    initialDetail =
-      queryClient.getQueryData<MoverDetail>(
-        getMoverDetailQueryKey(AUTH_QUERY_GUEST_SCOPE, moverId),
-      ) ?? null;
-  } catch {
-    // prefetch 실패해도 페이지는 렌더 — MoverDetailView가 클라이언트에서 재요청
+  await queryClient.prefetchQuery({
+    queryKey: detailQueryKey,
+    queryFn: async () => {
+      const item = await getMoverDetailCached(moverId);
+      return mapMoverDetailItemToMoverDetail(item);
+    },
+  });
+
+  initialDetail = queryClient.getQueryData<MoverDetail>(detailQueryKey) ?? null;
+
+  const detailQueryState = queryClient.getQueryState(detailQueryKey);
+  if (detailQueryState?.status === "error") {
+    initialDetailError = getPrefetchErrorMessage(detailQueryState.error);
   }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <MoverDetailView key={moverId} moverId={moverId} initialDetail={initialDetail} />
+      <MoverDetailView
+        key={moverId}
+        moverId={moverId}
+        initialDetail={initialDetail}
+        initialDetailError={initialDetailError}
+      />
     </HydrationBoundary>
   );
 }
