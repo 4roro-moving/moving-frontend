@@ -1,0 +1,139 @@
+"use client";
+
+import { Text } from "@/components/common/Text";
+import { usePresence } from "@/hooks/usePresence";
+import { cn } from "@/lib/utils/cn";
+import { SHEET_EXIT_DURATION_MS } from "@/lib/utils/uiMotion";
+
+export interface ChatEstimateEditSheetProps {
+  open: boolean;
+  /** 표시용 이사 일시 문자열 (예: 2024.08.26 오전 10:00) */
+  moveDateLabel: string;
+  /** 표시용 견적 금액 문자열 (예: 200,000원) */
+  priceLabel: string;
+  onChangeDate?: () => void;
+  onEditPrice?: () => void;
+  onCancel: () => void;
+  onSubmit: () => boolean | void | Promise<boolean | void>;
+  isSubmitting?: boolean;
+  className?: string;
+}
+
+/**
+ * 채팅 내 견적 수정 시트 (이사 일시 · 견적 금액)
+ * // 2026.08.10 김성현 - [추가] Figma EstimateEditSheet 기반 presentational 시트
+ */
+export default function ChatEstimateEditSheet({
+  open,
+  moveDateLabel,
+  priceLabel,
+  onChangeDate,
+  onEditPrice,
+  onCancel,
+  onSubmit,
+  isSubmitting = false,
+  className,
+}: ChatEstimateEditSheetProps) {
+  const { isRendered, isVisible } = usePresence(open, SHEET_EXIT_DURATION_MS);
+
+  if (!isRendered) return null;
+
+  return (
+    <div
+      role="region"
+      aria-label="견적 수정"
+      aria-hidden={!isVisible}
+      className={cn(
+        "bg-background-surface shrink-0 px-24 py-20",
+        "motion-reduce:animate-none",
+        isVisible ? "animate-modal-sheet-in" : "animate-modal-sheet-out pointer-events-none",
+        className,
+      )}
+    >
+      <div className="flex w-full flex-col gap-16">
+        <div className="flex flex-col gap-4">
+          <Text as="h2" variant="lg-semibold" className="text-text-primary">
+            견적 수정
+          </Text>
+          <Text as="p" variant="sm-medium" className="text-text-muted">
+            이사 일시와 견적 금액을 수정한 뒤 고객에게 전송하세요.
+          </Text>
+        </div>
+
+        <div className="flex w-full flex-col gap-8">
+          <Text as="p" variant="sm-semibold" className="text-text-secondary">
+            이사 일시
+          </Text>
+          <div className="bg-background-muted rounded-12 flex w-full items-center justify-between gap-12 px-16 py-14">
+            <Text as="span" variant="md-medium" className="text-text-primary truncate">
+              {moveDateLabel}
+            </Text>
+            <button
+              type="button"
+              className="text-text-brand focus-visible:ring-border-brand rounded-4 shrink-0 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={isSubmitting || !onChangeDate}
+              onClick={onChangeDate}
+            >
+              <Text as="span" variant="sm-semibold">
+                변경
+              </Text>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col gap-8">
+          <Text as="p" variant="sm-semibold" className="text-text-secondary">
+            견적 금액
+          </Text>
+          <div className="bg-background-muted rounded-12 flex w-full items-center justify-between gap-12 px-16 py-14">
+            <Text as="span" variant="lg-semibold" className="text-text-primary truncate">
+              {priceLabel}
+            </Text>
+            <button
+              type="button"
+              className="text-text-brand focus-visible:ring-border-brand rounded-4 shrink-0 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={isSubmitting || !onEditPrice}
+              onClick={onEditPrice}
+            >
+              <Text as="span" variant="sm-semibold">
+                수정
+              </Text>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex w-full gap-12">
+          <button
+            type="button"
+            className={cn(
+              "bg-background-muted text-text-secondary hover:bg-background-hover rounded-12 flex h-48 flex-1 items-center justify-center",
+              "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+              "disabled:cursor-not-allowed disabled:opacity-40",
+            )}
+            disabled={isSubmitting}
+            onClick={onCancel}
+          >
+            <Text as="span" variant="md-semibold">
+              취소
+            </Text>
+          </button>
+          <button
+            type="button"
+            className={cn(
+              "bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-12 flex h-48 flex-1 items-center justify-center",
+              "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+              "disabled:bg-background-disabled disabled:hover:bg-background-disabled disabled:cursor-not-allowed",
+            )}
+            disabled={isSubmitting}
+            aria-busy={isSubmitting}
+            onClick={onSubmit}
+          >
+            <Text as="span" variant="md-semibold">
+              {isSubmitting ? "전송 중..." : "고객에게 전송"}
+            </Text>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
