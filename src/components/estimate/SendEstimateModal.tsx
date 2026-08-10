@@ -127,6 +127,7 @@ export default function SendEstimateModal({
             numericOnly
             value={price ? Number(price).toLocaleString("ko-KR") : ""}
             placeholder="견적가 입력"
+            disabled={isSubmitting}
             error={priceError}
             onChange={(event) => setPrice(event.target.value)}
             className="h-54 md:h-54"
@@ -146,6 +147,7 @@ export default function SendEstimateModal({
               maxLength={MAX_COMMENT_LENGTH}
               placeholder="최소 10자 이상 입력해 주세요"
               error={commentError}
+              disabled={isSubmitting}
               onChange={(event) => setComment(event.target.value)}
               onBlur={() => {
                 setIsCommentTouched(true);
