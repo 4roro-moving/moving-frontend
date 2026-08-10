@@ -18,6 +18,7 @@ interface EstimateDetailLayoutProps {
   heroImageUrl?: string | null;
   heroName?: string;
   showProfile?: boolean;
+  preloadProfileImage?: boolean;
   backFallbackHref?: string;
   main: ReactNode;
   aside?: ReactNode;
@@ -34,6 +35,7 @@ export default function EstimateDetailLayout({
   heroImageUrl = null,
   heroName = "",
   showProfile = true,
+  preloadProfileImage = false,
   backFallbackHref,
   main,
   aside,
@@ -50,7 +52,12 @@ export default function EstimateDetailLayout({
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
       <PageHeader title={headerTitle} backFallbackHref={backFallbackHref} />
 
-      <DetailHeroBanner imageUrl={heroImageUrl} name={heroName} showProfile={showProfile} />
+      <DetailHeroBanner
+        imageUrl={heroImageUrl}
+        name={heroName}
+        showProfile={showProfile}
+        preloadProfileImage={preloadProfileImage}
+      />
 
       <div
         className={cn(
