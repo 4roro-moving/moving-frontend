@@ -278,13 +278,20 @@ export function MoverRecommendationMapPage() {
                 선택한 주소의 지역 정보를 확인할 수 없습니다.
               </div>
             ) : isLoading ? (
-              <div className="flex flex-col gap-12" aria-label="추천 기사님을 불러오는 중">
+              <div
+                role="status"
+                className="flex flex-col gap-12"
+                aria-label="추천 기사님을 불러오는 중"
+              >
                 {Array.from({ length: 3 }, (_, index) => (
                   <Skeleton key={index} className="rounded-16 h-176 w-full" />
                 ))}
               </div>
             ) : isError ? (
-              <div className="rounded-16 border-border-subtle flex min-h-160 flex-col items-center justify-center gap-12 border px-20 text-center">
+              <div
+                role="alert"
+                className="rounded-16 border-border-subtle flex min-h-160 flex-col items-center justify-center gap-12 border px-20 text-center"
+              >
                 <Text as="p" variant="sm-medium" className="text-text-error">
                   추천 기사님을 불러오지 못했습니다.
                 </Text>
