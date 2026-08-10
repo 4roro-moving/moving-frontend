@@ -45,8 +45,11 @@ interface AuthState {
   setPostAuthRedirectPath: (path: string) => void;
   /** 예약된 이동 경로를 읽고 비웁니다 */
   consumePostAuthRedirectPath: () => string | null;
-  /** 로그인/회원가입 성공 후 세션 상태만 반영 */
-  logout: () => Promise<void>;
+  /**
+   * 로그아웃. deferUiClear면 토큰·힌트·쿼리만 정리하고
+   * 비로그인 UI paint(markUnauthenticated)는 생략 (hard navigate 직전용)
+   */
+  logout: (options?: { deferUiClear?: boolean }) => Promise<void>;
   /** 세션 초기화 */
   clearSession: () => void;
   /** 비로그인 상태 설정 */
@@ -313,15 +316,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await checkAuthPromise;
   },
 
-  logout: async () => {
+  logout: async (options) => {
     const logoutGeneration = curSessionGeneration;
+    const deferUiClear = options?.deferUiClear ?? false;
 
     try {
       await logoutApi();
     } finally {
-      if (logoutGeneration === curSessionGeneration) {
-        get().clearSession();
+      if (logoutGeneration !== curSessionGeneration) {
+        return;
       }
+
+      if (deferUiClear) {
+        // hard navigate 직전: 토큰·힌트만 정리하고 비로그인 UI paint는 생략
+        curSessionGeneration++;
+        clearAuthTokens();
+        clearAllClientStorageHints();
+        clearAppQueryCache();
+        return;
+      }
+
+      get().clearSession();
     }
   },
 }));

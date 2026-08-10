@@ -129,14 +129,15 @@ export default function ProfileMenuTrigger({
     const isPublicPage = isPublicPath(pathname);
     const logoutPath = role === "MOVER" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
 
-    await logout();
-
     if (isPublicPage) {
+      await logout();
       router.refresh();
       return;
     }
 
-    router.replace(logoutPath);
+    // clearSession → soft replace 사이 비로그인 Header/빈 화면 방지
+    await logout({ deferUiClear: true });
+    window.location.assign(logoutPath);
   };
 
   return (
