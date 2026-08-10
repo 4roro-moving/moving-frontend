@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import CustomerAuthGate from "@/components/auth/CustomerAuthGate";
-import { ReceivedEstimatesLoadingSkeleton } from "@/components/estimate/EstimateLoadingSkeletons";
 import ReceivedEstimatesPageClient from "@/components/estimate/received/ReceivedEstimatesPageClient";
 
 export const metadata: Metadata = {
@@ -11,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function ReceivedEstimatesPage() {
   return (
-    <CustomerAuthGate loadingFallback={<ReceivedEstimatesLoadingSkeleton />}>
+    <CustomerAuthGate>
       <ReceivedEstimatesPageClient />
     </CustomerAuthGate>
   );
