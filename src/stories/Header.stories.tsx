@@ -33,7 +33,7 @@ const notificationListFixture = {
     },
     {
       id: 3,
-      type: "REVIEW_AVAILABLE",
+      type: "REVIEW_RECEIVED",
       title: "리뷰 작성 알림",
       content: "이사 서비스 리뷰",
       linkUrl: null,
