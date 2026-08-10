@@ -31,6 +31,29 @@ const NO_REFRESH_ENDPOINTS: readonly string[] = [
   API_ROUTES.AUTH.NAVER_OAUTH_STATE,
 ];
 
+// NOTE: 다버그 로그로, 원인 확인 후 삭제 예정
+function getNetworkErrorDetails(error: unknown) {
+  if (!(error instanceof Error)) {
+    return { value: String(error) };
+  }
+
+  const cause = error.cause;
+  if (!(cause instanceof Error)) {
+    return { name: error.name, message: error.message };
+  }
+
+  const causeRecord = cause as Error & { code?: string };
+  return {
+    name: error.name,
+    message: error.message,
+    cause: {
+      name: cause.name,
+      message: cause.message,
+      code: causeRecord.code,
+    },
+  };
+}
+
 const safeFetch = async (url: string, init: RequestInit): Promise<Response> => {
   try {
     return await fetch(url, init);
@@ -41,7 +64,9 @@ const safeFetch = async (url: string, init: RequestInit): Promise<Response> => {
       throw new ApiError("요청 시간이 초과되었습니다.");
     }
 
-    throw new ApiError("네트워크 연결이 원활하지 않습니다.");
+    throw new ApiError("네트워크 연결이 원활하지 않습니다.", undefined, undefined, {
+      details: getNetworkErrorDetails(err),
+    });
   }
 };
 

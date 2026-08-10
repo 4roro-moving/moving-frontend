@@ -19,16 +19,27 @@ interface MoverDetailPageProps {
   params: Promise<{ moverId: string }>;
 }
 
+interface SsrPrefetchError {
+  message: string;
+  details: unknown;
+}
+
 const MOVER_DETAIL_QUERY_STALE_TIME_MS = 60 * 1000;
 
-function getPrefetchErrorMessage(error: unknown): string {
+function getPrefetchError(error: unknown): SsrPrefetchError {
   if (error instanceof ApiError) {
     const status = error.status ? ` (HTTP ${error.status})` : "";
     const code = error.code ? ` [${error.code}]` : "";
-    return `${error.message}${status}${code}`;
+    return {
+      message: `${error.message}${status}${code}`,
+      details: error.data?.details ?? null,
+    };
   }
 
-  return error instanceof Error ? error.message : "알 수 없는 오류";
+  return {
+    message: error instanceof Error ? error.message : "알 수 없는 오류",
+    details: null,
+  };
 }
 
 export async function generateMetadata({ params }: MoverDetailPageProps): Promise<Metadata> {
@@ -66,7 +77,7 @@ export default async function MoverDetailPage({ params }: MoverDetailPageProps) 
     },
   });
   let initialDetail: MoverDetail | null = null;
-  let initialDetailError: string | null = null;
+  let initialDetailError: SsrPrefetchError | null = null;
   const detailQueryKey = getMoverDetailQueryKey(AUTH_QUERY_GUEST_SCOPE, moverId);
 
   await queryClient.prefetchQuery({
@@ -81,7 +92,7 @@ export default async function MoverDetailPage({ params }: MoverDetailPageProps) 
 
   const detailQueryState = queryClient.getQueryState(detailQueryKey);
   if (detailQueryState?.status === "error") {
-    initialDetailError = getPrefetchErrorMessage(detailQueryState.error);
+    initialDetailError = getPrefetchError(detailQueryState.error);
   }
 
   return (
@@ -91,6 +102,7 @@ export default async function MoverDetailPage({ params }: MoverDetailPageProps) 
         moverId={moverId}
         initialDetail={initialDetail}
         initialDetailError={initialDetailError}
+        apiBaseUrl={process.env.NEXT_PUBLIC_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_URL ?? null}
       />
     </HydrationBoundary>
   );
