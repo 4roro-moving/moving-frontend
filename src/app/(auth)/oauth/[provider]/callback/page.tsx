@@ -18,6 +18,7 @@ import {
   isOAuthExchangePending,
   markOAuthExchangeFinished,
 } from "@/lib/auth/oauthExchange";
+import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
 import {
   buildLoginPath,
   getAudienceMismatchMessage,
@@ -127,6 +128,9 @@ const OAuthCallbackContent = () => {
         if (!markOAuthExchangeFinished(pending.provider, code)) {
           return;
         }
+
+        // 이전 계정 Soft UX 힌트 제거 후 status로 다시 저장
+        clearProfileCompleted();
 
         const nextPath = await getPostAuthRedirectPath({
           audience: resultAudience,

@@ -14,6 +14,7 @@ interface AppShellProps {
   initialNickname: string | null;
   initialRole: AuthRole | null;
   initialProfileImage: string | null;
+  initialProfileCompleted: boolean | null;
 }
 
 /**
@@ -23,6 +24,7 @@ interface AppShellProps {
  * @param initialNickname - 초기 닉네임
  * @param initialRole - 초기 role (nav 분기 SSR 힌트)
  * @param initialProfileImage - 초기 프로필 이미지
+ * @param initialProfileCompleted - 초기 프로필 완료 여부 (GNB Soft UX 힌트)
  * // 2026.08.03 정슬기 - [수정] 공통 ScrollToTopButton 마운트
  */
 export const AppShell = ({
@@ -31,6 +33,7 @@ export const AppShell = ({
   initialNickname,
   initialRole,
   initialProfileImage,
+  initialProfileCompleted,
 }: AppShellProps) => {
   return (
     <AppProviders>
@@ -39,6 +42,7 @@ export const AppShell = ({
         initialNickname={initialNickname}
         initialRole={initialRole}
         initialProfileImage={initialProfileImage}
+        initialProfileCompleted={initialProfileCompleted}
       />
       <main className="flex flex-1 flex-col">{children}</main>
       <Footer />

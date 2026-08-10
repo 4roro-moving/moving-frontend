@@ -160,6 +160,7 @@ const MoverProfileForm = ({
               size="md"
               placeholder="사이트에 노출될 별명을 입력해 주세요"
               error={errors.nickname?.message}
+              maxLength={20}
               {...register("nickname")}
             />
           </FormField>
@@ -182,6 +183,7 @@ const MoverProfileForm = ({
               size="md"
               placeholder="한 줄 소개를 입력해 주세요"
               error={errors.shortIntro?.message}
+              maxLength={100}
               {...register("shortIntro")}
             />
           </FormField>
@@ -193,6 +195,7 @@ const MoverProfileForm = ({
               id="description"
               placeholder="상세 내용을 입력해 주세요"
               error={errors.description?.message}
+              maxLength={1000}
               {...register("description")}
             />
           </FormField>

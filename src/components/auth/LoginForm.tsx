@@ -14,6 +14,7 @@ import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
 import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
 import {
   getAudienceMismatchMessage,
   getAuthAudienceFromRole,
@@ -67,6 +68,9 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
         setSubmitError(getAudienceMismatchMessage(audience, resultAudience));
         return;
       }
+
+      // 이전 계정 Soft UX 힌트 제거 후 status로 다시 저장
+      clearProfileCompleted();
 
       const nextPath = await getPostAuthRedirectPath({
         audience: resultAudience,

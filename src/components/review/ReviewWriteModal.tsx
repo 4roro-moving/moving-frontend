@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 
 import FormField from "@/components/common/FormField/FormField";
 import Textarea from "@/components/common/Input/Textarea";
@@ -47,6 +47,7 @@ function ReviewWriteModalContent({
   const [content, setContent] = useState("");
   const [isContentTouched, setIsContentTouched] = useState(false);
   const [submitError, setSubmitError] = useState<string | undefined>();
+  const [hasSubmissionStarted, setHasSubmissionStarted] = useState(false);
 
   const createMutation = useCreateReview({
     moverId: item.mover.id,
@@ -62,14 +63,16 @@ function ReviewWriteModalContent({
   });
 
   const trimmedContent = content.trim();
-  const isPending = createMutation.isPending;
+  const isMutationPending = createMutation.isPending;
+  const isSubmitting = isMutationPending || (hasSubmissionStarted && !open);
 
   const handleClose = () => {
-    if (isPending) return;
+    if (isSubmitting) return;
     setRating(0);
     setContent("");
     setIsContentTouched(false);
     setSubmitError(undefined);
+    setHasSubmissionStarted(false);
     onClose();
   };
   const isContentValid =
@@ -78,7 +81,7 @@ function ReviewWriteModalContent({
     isContentTouched && !isContentValid
       ? `리뷰 내용은 ${MIN_CONTENT_LENGTH}자 이상 ${MAX_CONTENT_LENGTH}자 이하로 입력해 주세요.`
       : undefined;
-  const isSubmitDisabled = isPending || rating < 1 || !isContentValid;
+  const isSubmitDisabled = isSubmitting || rating < 1 || !isContentValid;
 
   const handleSubmit = () => {
     if (isSubmitDisabled) return;
@@ -86,6 +89,7 @@ function ReviewWriteModalContent({
     setSubmitError(undefined);
     if (preview) return;
 
+    setHasSubmissionStarted(true);
     createMutation.mutate({
       estimateId: item.estimateId,
       rating,
@@ -93,10 +97,17 @@ function ReviewWriteModalContent({
     });
   };
 
+  const handleContentKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Enter" || event.nativeEvent.isComposing || isSubmitDisabled) return;
+
+    event.preventDefault();
+    handleSubmit();
+  };
+
   return (
     <Modal
       open={open}
-      onClose={isPending ? undefined : handleClose}
+      onClose={isSubmitting ? undefined : handleClose}
       onExitComplete={onExitComplete}
       presentation="responsive"
       size="lg"
@@ -105,7 +116,7 @@ function ReviewWriteModalContent({
     >
       <div className="flex w-full items-start justify-between gap-12 md:gap-16">
         <Modal.Title>리뷰 작성</Modal.Title>
-        <Modal.Close onClose={handleClose} disabled={isPending} />{" "}
+        <Modal.Close onClose={handleClose} disabled={isSubmitting} />{" "}
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-28 overflow-y-auto xl:gap-32">
@@ -127,7 +138,7 @@ function ReviewWriteModalContent({
             }}
             size="lg"
             label="별점"
-            disabled={isPending}
+            disabled={isSubmitting}
           />
         </div>
 
@@ -142,7 +153,7 @@ function ReviewWriteModalContent({
               id="review-content"
               value={content}
               maxLength={MAX_CONTENT_LENGTH}
-              disabled={isPending}
+              disabled={isSubmitting}
               placeholder={`최소 ${MIN_CONTENT_LENGTH}자 이상 입력해 주세요`}
               error={contentValidationError}
               className="h-160"
@@ -153,9 +164,10 @@ function ReviewWriteModalContent({
               onBlur={() => {
                 setIsContentTouched(true);
               }}
+              onKeyDown={handleContentKeyDown}
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
-              {content.length}/{MAX_CONTENT_LENGTH}
+              {trimmedContent.length}/{MAX_CONTENT_LENGTH}
             </Text>
           </div>
         </FormField>
@@ -168,7 +180,7 @@ function ReviewWriteModalContent({
       ) : null}
 
       <Modal.Button fullWidth size="cta" disabled={isSubmitDisabled} onClick={handleSubmit}>
-        {isPending ? "리뷰 등록 중..." : "리뷰 등록"}
+        {isSubmitting ? "리뷰 등록 중..." : "리뷰 등록"}
       </Modal.Button>
     </Modal>
   );
