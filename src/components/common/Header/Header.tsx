@@ -103,12 +103,15 @@ export interface HeaderProps {
   initialNickname?: string | null;
   /** Server에서 role 쿠키로 전달. hydrate 전 nav 분기용 */
   initialRole?: AuthRole | null;
+  /** Server에서 profileImage 쿠키로 전달. hydrate 전 프로필 이미지 표시용 */
+  initialProfileImage?: string | null;
 }
 
 const Header = ({
   isLogin: initialIsLogin,
   initialNickname = null,
   initialRole = null,
+  initialProfileImage = null,
 }: HeaderProps) => {
   const pathname = usePathname();
   const mobileMenuId = useId();
@@ -130,13 +133,16 @@ const Header = ({
 
   const user = useAuthStore((state) => state.user);
   const displayName = useAuthStore((state) => state.displayName);
+  const profileImage = useAuthStore((state) => state.profileImage);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
+  const isAuthPending = !hasHydrated || isCheckingAuth;
+
   // hydrate 전·checkAuth 중: SSR refresh 쿠키 힌트 유지
   // checkAuth 완료 후: 실제 세션(access) 기준
-  const isLogin = !hasHydrated || isCheckingAuth ? Boolean(initialIsLogin) : isAuthenticated;
+  const isLogin = isAuthPending ? Boolean(initialIsLogin) : isAuthenticated;
 
   const resolvedRole = useResolvedAuthRole(initialRole);
 
@@ -153,9 +159,14 @@ const Header = ({
     : navLinks;
 
   // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
-  const showAuthSkeleton = (!hasHydrated || isCheckingAuth) && !initialIsLogin;
+  const showAuthSkeleton = isAuthPending && !initialIsLogin;
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
+
+  const hintedImageUrl = profileImage ?? initialProfileImage ?? null;
+  const imageUrl = isAuthPending ? hintedImageUrl : (user?.imageUrl ?? profileImage ?? null);
+
+  const isAvatarPending = isAuthPending && !hintedImageUrl;
 
   const { isIncomplete, isCompletionUnresolved, profileCreatePath } =
     useProfileCompletionState(resolvedRole);
@@ -262,8 +273,10 @@ const Header = ({
             <ProfileMenuTrigger
               key={pathname}
               nickname={nickname}
+              imageUrl={imageUrl}
               items={profileMenuItems}
               role={resolvedRole}
+              isAvatarPending={isAvatarPending}
             />
             <button
               ref={menuButtonRef}

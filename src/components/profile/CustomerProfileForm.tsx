@@ -17,7 +17,7 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getRoleHomePath } from "@/lib/auth/redirect";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
-import { uploadProfileImageIfNeeded } from "@/lib/profile/uploadProfileImage";
+import { uploadProfileImage } from "@/lib/profile/uploadProfileImage";
 import {
   createCustomerProfileSchema,
   type CustomerProfileFormValues,
@@ -70,11 +70,11 @@ const CustomerProfileForm = ({
         return;
       }
 
-      const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
+      const imageKey = await uploadProfileImage(formValues.imageFile);
 
       await createCustomerProfile.mutateAsync({
         ...(requiresPhone && formValues.phone ? { phone: formValues.phone } : {}),
-        ...(imageUrl ? { imageUrl } : {}),
+        ...(imageKey ? { imageUrl: imageKey } : {}),
         regionIds: [formValues.regionId],
         serviceTypes: formValues.serviceTypes,
       });

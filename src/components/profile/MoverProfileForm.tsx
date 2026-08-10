@@ -18,7 +18,7 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getRoleHomePath } from "@/lib/auth/redirect";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
-import { uploadProfileImageIfNeeded } from "@/lib/profile/uploadProfileImage";
+import { uploadProfileImage } from "@/lib/profile/uploadProfileImage";
 import {
   createMoverProfileSchema,
   type MoverProfileFormValues,
@@ -71,7 +71,7 @@ const MoverProfileForm = ({
     setSubmitError(null);
 
     try {
-      const imageUrl = await uploadProfileImageIfNeeded(formValues.imageFile);
+      const imageKey = await uploadProfileImage(formValues.imageFile);
 
       await createMoverProfile.mutateAsync({
         ...(requiresPhone && formValues.phone ? { phone: formValues.phone } : {}),
@@ -81,7 +81,7 @@ const MoverProfileForm = ({
         description: formValues.description,
         regionIds: formValues.regionIds,
         serviceTypes: formValues.serviceTypes,
-        ...(imageUrl ? { imageUrl } : {}),
+        ...(imageKey ? { imageUrl: imageKey } : {}),
       });
       router.replace(getRoleHomePath("MOVER"));
     } catch (error) {

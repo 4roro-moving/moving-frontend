@@ -26,6 +26,7 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/loginSchema";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { resolveAuthUserImage } from "@/lib/api/profile";
 
 interface LoginFormProps {
   audience?: AuthAudience;
@@ -74,7 +75,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       });
 
       setPostAuthRedirectPath(nextPath);
-      establishSession(result.user);
+      establishSession(await resolveAuthUserImage(result.user));
     } catch (error) {
       setSubmitError(getApiErrorMessage(error));
     }
