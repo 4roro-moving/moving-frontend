@@ -103,7 +103,7 @@ export default function NotificationPanel({
       inert={!isVisible ? true : undefined}
       tabIndex={isVisible ? -1 : undefined}
       className={cn(
-        "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-4 z-50 mt-8 w-87 border px-16 py-10 focus:outline-none md:right-0",
+        "border-border-default bg-background-surface rounded-24 shadow-notification absolute top-full right-6 z-50 mt-8 w-[min(348px,calc(100vw-48px))] border px-16 py-10 focus:outline-none md:right-0 md:w-87",
         className,
       )}
     >
