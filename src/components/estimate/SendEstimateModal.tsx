@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 
 import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
@@ -40,9 +40,10 @@ export default function SendEstimateModal({
   const [price, setPrice] = useState("");
   const [comment, setComment] = useState("");
   const [isCommentTouched, setIsCommentTouched] = useState(false);
+  const isSubmitting = isPending || !open;
 
   const handleClose = () => {
-    if (isPending) return;
+    if (isSubmitting) return;
     setPrice("");
     setComment("");
     setIsCommentTouched(false);
@@ -56,7 +57,7 @@ export default function SendEstimateModal({
   const isCommentValid =
     trimmedComment.length >= MIN_COMMENT_LENGTH && trimmedComment.length <= MAX_COMMENT_LENGTH;
 
-  const canSubmit = isPriceValid && isCommentValid && !isPending;
+  const canSubmit = isPriceValid && isCommentValid && !isSubmitting;
 
   const priceError =
     price.length > 0 && !isPriceValid
@@ -76,10 +77,17 @@ export default function SendEstimateModal({
     });
   };
 
+  const handleCommentKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Enter" || event.nativeEvent.isComposing || !canSubmit) return;
+
+    event.preventDefault();
+    handleSubmit();
+  };
+
   return (
     <Modal
       open={open}
-      onClose={isPending ? undefined : handleClose}
+      onClose={isSubmitting ? undefined : handleClose}
       onExitComplete={onExitComplete}
       presentation="responsive"
       size="lg"
@@ -87,7 +95,7 @@ export default function SendEstimateModal({
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
         <Modal.Title>견적 보내기</Modal.Title>
-        <Modal.Close onClose={handleClose} disabled={isPending} />
+        <Modal.Close onClose={handleClose} disabled={isSubmitting} />
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-20 overflow-y-auto xl:gap-32">
@@ -139,17 +147,18 @@ export default function SendEstimateModal({
               onBlur={() => {
                 setIsCommentTouched(true);
               }}
+              onKeyDown={handleCommentKeyDown}
               className="h-160 resize-none"
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
-              {comment.length}/{MAX_COMMENT_LENGTH}
+              {trimmedComment.length}/{MAX_COMMENT_LENGTH}
             </Text>
           </div>
         </FormField>
       </div>
 
       <Modal.Button fullWidth size="cta" disabled={!canSubmit} onClick={handleSubmit}>
-        {isPending ? "견적 보내는 중..." : "견적 보내기"}
+        {isSubmitting ? "견적 보내는 중..." : "견적 보내기"}
       </Modal.Button>
     </Modal>
   );
