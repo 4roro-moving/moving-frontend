@@ -18,6 +18,7 @@ interface EstimateDetailLayoutProps {
   heroImageUrl?: string | null;
   heroName?: string;
   showProfile?: boolean;
+  preloadProfileImage?: boolean;
   backFallbackHref?: string;
   main: ReactNode;
   aside?: ReactNode;
@@ -34,6 +35,7 @@ export default function EstimateDetailLayout({
   heroImageUrl = null,
   heroName = "",
   showProfile = true,
+  preloadProfileImage = false,
   backFallbackHref,
   main,
   aside,
@@ -50,7 +52,12 @@ export default function EstimateDetailLayout({
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
       <PageHeader title={headerTitle} backFallbackHref={backFallbackHref} />
 
-      <DetailHeroBanner imageUrl={heroImageUrl} name={heroName} showProfile={showProfile} />
+      <DetailHeroBanner
+        imageUrl={heroImageUrl}
+        name={heroName}
+        showProfile={showProfile}
+        preloadProfileImage={preloadProfileImage}
+      />
 
       <div
         className={cn(
@@ -119,6 +126,7 @@ export function EstimateDetailQueryState({
             actionBusy={actionBusy}
             className={className}
           />
+
           {secondaryAction}
         </div>
       </div>
@@ -154,7 +162,17 @@ export function EstimateDetailLoadingState({
 
       <PageHeader title={title ?? "견적 상세"} backFallbackHref={backFallbackHref} />
 
-      <DetailHeroBanner showProfile={showProfile} />
+      {showProfile ? (
+        <div className="relative h-160 w-full shrink-0 md:h-200 xl:h-64.75">
+          <div className="bg-background-brand absolute top-0 left-1/2 h-30.5 w-full max-w-480 -translate-x-1/2 md:h-42.5 xl:h-56.25" />
+
+          <div className="bg-background-avatar rounded-16 md:rounded-12 left-margin-mobile md:left-margin-tablet xl:rounded-20 absolute bottom-0 size-21.5 overflow-hidden md:size-25 xl:top-30.5 xl:bottom-auto xl:left-[max(1rem,calc(50%_-_601px))] xl:h-34.25 xl:w-32.25">
+            <Skeleton className="size-full rounded-none" />
+          </div>
+        </div>
+      ) : (
+        <DetailHeroBanner showProfile={false} />
+      )}
 
       <div
         className={cn(
@@ -183,6 +201,7 @@ export function EstimateDetailLoadingState({
                       <Skeleton className="h-32 w-4/5 md:h-36" />
                       <Skeleton className="h-32 w-3/5 md:h-36" />
                     </div>
+
                     <Skeleton className="hidden h-24 w-96 md:block" />
                   </div>
 
@@ -219,11 +238,13 @@ export function EstimateDetailLoadingState({
               <section className="flex w-full flex-col gap-20" aria-hidden="true">
                 <div className="flex flex-col gap-12">
                   <Skeleton className="h-24 w-md" />
+
                   <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-20">
                     <Skeleton className="rounded-16 h-92 w-full" />
                     <Skeleton className="rounded-16 h-92 w-full" />
                   </div>
                 </div>
+
                 <Skeleton className="h-px w-full rounded-none" />
               </section>
 
@@ -246,6 +267,7 @@ export function EstimateDetailLoadingState({
                   <Skeleton className="rounded-16 size-64 shrink-0" />
                   <Skeleton className="rounded-16 h-64 flex-1" />
                 </div>
+
                 <Skeleton className="h-20 w-4/5 self-center" />
               </div>
             </div>
