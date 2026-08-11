@@ -74,7 +74,7 @@ export default function EstimateRequestDesignatedMovers({
                 </Text>
 
                 {status === "ARRIVED" && (
-                  <span className="border-border-brand bg-background-brand-subtle rounded-8 shrink-0 border px-10 py-6">
+                  <span className="border-border-brand bg-background-brand-muted rounded-8 shrink-0 border px-10 py-6">
                     <Text as="span" variant="sm-semibold" className="text-text-brand">
                       견적 도착
                     </Text>
@@ -83,15 +83,15 @@ export default function EstimateRequestDesignatedMovers({
 
                 {status === "REJECTED" && (
                   <span className="border-border-error rounded-8 shrink-0 border bg-red-100 px-10 py-6">
-                    <Text as="span" variant="sm-semibold" className="text-status-error">
+                    <Text as="span" variant="sm-semibold" className="text-text-error">
                       반려
                     </Text>
                   </span>
                 )}
 
                 {status === "WAITING" && (
-                  <span className="border-border-default bg-background-secondary rounded-8 shrink-0 border px-10 py-6">
-                    <Text as="span" variant="sm-semibold" className="text-text-secondary">
+                  <span className="border-border-default bg-background-muted rounded-8 shrink-0 border px-10 py-6">
+                    <Text as="span" variant="sm-semibold" className="text-text-muted">
                       응답 대기
                     </Text>
                   </span>
@@ -99,7 +99,7 @@ export default function EstimateRequestDesignatedMovers({
               </div>
 
               {item.rejection && (
-                <div className="bg-background-secondary rounded-12 ml-52 px-16 py-12 md:ml-60">
+                <div className="bg-background-muted rounded-12 ml-52 px-16 py-12 md:ml-60">
                   <Text as="p" variant="sm-semibold" className="text-text-secondary">
                     반려 사유
                   </Text>
