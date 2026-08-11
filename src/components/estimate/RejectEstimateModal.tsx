@@ -95,7 +95,7 @@ export default function RejectEstimateModal({
               id="reject-reason"
               value={reason}
               maxLength={MAX_TEXT_CONTENT_LENGTH}
-              placeholder="최소 10자 이상 입력해 주세요"
+              placeholder={`최소 ${MIN_TEXT_CONTENT_LENGTH}자 이상 입력해 주세요`}
               error={reasonError}
               disabled={isSubmitting}
               onChange={(event) => setReason(event.target.value)}
