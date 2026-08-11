@@ -108,7 +108,7 @@ function ReviewWriteModalContent({
     >
       <div className="flex w-full items-start justify-between gap-12 md:gap-16">
         <Modal.Title>리뷰 작성</Modal.Title>
-        <Modal.Close onClose={handleClose} disabled={isSubmitting} />{" "}
+        <Modal.Close onClose={handleClose} disabled={isSubmitting} />
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-28 overflow-y-auto xl:gap-32">
