@@ -8,7 +8,7 @@ import {
 } from "@/lib/api/profile";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import type { UpdateMoverProfileInput } from "@/types/profile";
-import { useAuthStore } from "@/stores/useAuthStore";
+import { getAuthSessionSnapshot, isAuthSessionCurrent, useAuthStore } from "@/stores/useAuthStore";
 
 export const useUpdateMoverProfile = () => {
   const queryClient = useQueryClient();
@@ -16,13 +16,22 @@ export const useUpdateMoverProfile = () => {
 
   return useApiMutation({
     mutationFn: (input: UpdateMoverProfileInput) => updateMoverProfile(input),
-    onSuccess: async (data) => {
+    onMutate: () => ({ sessionSnapshot: getAuthSessionSnapshot() }),
+    onSuccess: (data, _variables, context) => {
+      if (!context || !isAuthSessionCurrent(context.sessionSnapshot)) return;
+
       const profile = mapMoverProfileMeResponse(data);
+      const currentUserId = useAuthStore.getState().user?.id;
+      if (
+        (context.sessionSnapshot.userId !== null &&
+          profile.userId !== context.sessionSnapshot.userId) ||
+        (currentUserId != null && profile.userId !== currentUserId)
+      ) {
+        return;
+      }
+
       establishSession(toAuthUserFromMoverProfile(profile));
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.MOVER_ME }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.MOVER_STATUS }),
-      ]);
+      queryClient.setQueryData([...QUERY_KEYS.PROFILES.MOVER_ME, profile.userId] as const, profile);
     },
   });
 };

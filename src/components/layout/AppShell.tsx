@@ -10,7 +10,8 @@ import { AppProviders } from "@/providers/AppProviders";
 
 interface AppShellProps {
   children: ReactNode;
-  initialIsLogin: boolean;
+  /** SSR: HttpOnly refreshToken 쿠키 존재 여부 */
+  hasRefreshCookie: boolean;
   initialNickname: string | null;
   initialRole: AuthRole | null;
   initialProfileImage: string | null;
@@ -20,7 +21,7 @@ interface AppShellProps {
 /**
  * AppShell 컴포넌트
  * @param children - 자식 컴포넌트
- * @param initialIsLogin - 초기 로그인 상태
+ * @param hasRefreshCookie - SSR refreshToken 쿠키 존재 여부 (Header Soft UX·checkAuth 힌트)
  * @param initialNickname - 초기 닉네임
  * @param initialRole - 초기 role (nav 분기 SSR 힌트)
  * @param initialProfileImage - 초기 프로필 이미지
@@ -29,16 +30,16 @@ interface AppShellProps {
  */
 export const AppShell = ({
   children,
-  initialIsLogin,
+  hasRefreshCookie,
   initialNickname,
   initialRole,
   initialProfileImage,
   initialProfileCompleted,
 }: AppShellProps) => {
   return (
-    <AppProviders>
+    <AppProviders hasRefreshCookie={hasRefreshCookie}>
       <Header
-        isLogin={initialIsLogin}
+        isLogin={hasRefreshCookie}
         initialNickname={initialNickname}
         initialRole={initialRole}
         initialProfileImage={initialProfileImage}

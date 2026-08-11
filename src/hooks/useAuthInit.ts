@@ -10,22 +10,28 @@ import {
 } from "@/lib/auth/redirect";
 import { useAuthStore } from "@/stores/useAuthStore";
 
+interface UseAuthInitOptions {
+  /** SSR: HttpOnly refreshToken 쿠키 존재 여부 */
+  hasRefreshCookie?: boolean;
+}
+
 /**
  * 앱 시작 시 세션 확인 + access 만료(auth:expired) 시 로그인으로 유도
  * // 2026.08.02 정슬기 - [수정] 공개 랜딩(/)에서도 auth:expired 시 로그인 강제 이동하지 않음
  */
-export const useAuthInit = () => {
+export const useAuthInit = (options?: UseAuthInitOptions) => {
   const hydrateFromStorage = useAuthStore((state) => state.hydrateFromStorage);
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const markUnauthenticated = useAuthStore((state) => state.markUnauthenticated);
+  const hasRefreshCookie = options?.hasRefreshCookie ?? false;
 
   useLayoutEffect(() => {
     hydrateFromStorage();
   }, [hydrateFromStorage]);
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    checkAuth({ hasRefreshCookie });
+  }, [checkAuth, hasRefreshCookie]);
 
   useEffect(() => {
     const handleExpired = () => {

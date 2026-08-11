@@ -38,15 +38,18 @@ interface AuthState {
   /** localStorage에서 인증 상태 초기화 */
   hydrateFromStorage: () => void;
   /** 인증 상태 확인 */
-  checkAuth: () => Promise<void>;
+  checkAuth: (options?: { hasRefreshCookie?: boolean }) => Promise<void>;
   /** 세션 생성 */
   establishSession: (user: AuthUser) => void;
   /** 로그인/회원가입 성공 후 이동 경로 예약 (establishSession 전에 호출) */
   setPostAuthRedirectPath: (path: string) => void;
   /** 예약된 이동 경로를 읽고 비웁니다 */
   consumePostAuthRedirectPath: () => string | null;
-  /** 로그인/회원가입 성공 후 세션 상태만 반영 */
-  logout: () => Promise<void>;
+  /**
+   * 로그아웃. deferUiClear면 토큰·힌트·쿼리만 정리하고
+   * 비로그인 UI paint(markUnauthenticated)는 생략 (hard navigate 직전용)
+   */
+  logout: (options?: { deferUiClear?: boolean }) => Promise<void>;
   /** 세션 초기화 */
   clearSession: () => void;
   /** 비로그인 상태 설정 */
@@ -65,6 +68,8 @@ const UNAUTHENTICATED_STATE = {
 } as const satisfies Partial<AuthState>;
 
 let checkAuthPromise: Promise<void> | null = null;
+/** 동시 checkAuth 호출 시 hasRefreshCookie를 OR로 승격 */
+let pendingHasRefreshCookie = false;
 
 const setAuthenticatedUser = (
   set: (partial: Partial<AuthState>) => void,
@@ -136,6 +141,28 @@ const resolveAuthUserFromTokenHint = (): AuthUser | null => {
 // 세션 세대 관리
 let curSessionGeneration: number = 0;
 
+export interface AuthSessionSnapshot {
+  generation: number;
+  userId: string | null;
+}
+
+/** mutation 시작 시점의 세션 소유권 스냅샷 */
+export const getAuthSessionSnapshot = (): AuthSessionSnapshot => ({
+  generation: curSessionGeneration,
+  userId: useAuthStore.getState().user?.id ?? null,
+});
+
+/** 스냅샷이 현재 로그인 세션과 일치하는지 여부 */
+export const isAuthSessionCurrent = (snapshot: AuthSessionSnapshot): boolean => {
+  if (snapshot.generation !== curSessionGeneration) return false;
+
+  const { user } = useAuthStore.getState();
+  // hydrate 직후 user 미설정이면 세대만으로 동일 세션으로 본다
+  if (snapshot.userId === null) return true;
+
+  return user?.id === snapshot.userId;
+};
+
 /**
  * 인증 상태 관리 스토어
  */
@@ -194,11 +221,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     setAuthenticatedUser(set, user, false);
   },
 
-  checkAuth: async () => {
+  checkAuth: async (options) => {
+    if (options?.hasRefreshCookie) {
+      pendingHasRefreshCookie = true;
+    }
+
     if (checkAuthPromise) {
       await checkAuthPromise;
       return;
     }
+
+    const hasRefreshCookie = pendingHasRefreshCookie;
+    pendingHasRefreshCookie = false;
 
     checkAuthPromise = (async () => {
       const startSessionGeneration = curSessionGeneration;
@@ -219,8 +253,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           return;
         }
 
-        // Access 없음 → 선제 refresh 후 profile 1회 시도
-        if (!getAccessToken()) {
+        // Access 없음 + refresh 쿠키 있을 때만 선제 refresh (게스트 404 방지)
+        // HttpOnly라 클라이언트에서 쿠키를 못 읽으므로 SSR 힌트를 사용
+        if (!getAccessToken() && hasRefreshCookie) {
           await refreshSession({ notifyOnFailure: false });
         }
 
@@ -257,18 +292,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           return;
         }
 
+        const token = getAccessToken();
+        const status = error instanceof ApiError ? error.status : undefined;
+
         if (process.env.NODE_ENV === "development") {
-          const status = error instanceof ApiError ? error.status : undefined;
-          if (status !== 401) {
+          // 401·refresh 부재(404+access 없음)는 예상 실패로 로그 생략
+          if (status !== 401 && !(status === 404 && !token)) {
             console.error("[checkAuth] 세션 복구 실패", error);
           }
         }
 
-        const token = getAccessToken();
-        const status = error instanceof ApiError ? error.status : undefined;
-
-        // 인증 만료·역할 불일치 → 토큰·닉네임·role 정리 후 비로그인
-        if (status === 401 || status === 403) {
+        // 인증 만료·역할 불일치·refresh 부재(404이고 access 없음)
+        // me 404(프로필 미생성)는 access가 있으므로 아래 힌트 경로로 감
+        if (status === 401 || status === 403 || (status === 404 && !token)) {
           get().clearSession();
           set({ isCheckingAuth: false });
           return;
@@ -302,15 +338,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await checkAuthPromise;
   },
 
-  logout: async () => {
+  logout: async (options) => {
     const logoutGeneration = curSessionGeneration;
+    const deferUiClear = options?.deferUiClear ?? false;
+    let logoutError: unknown;
 
     try {
       await logoutApi();
-    } finally {
-      if (logoutGeneration === curSessionGeneration) {
+    } catch (error) {
+      logoutError = error;
+    }
+
+    // 로그아웃 중 다른 세션이 들어섰으면 로컬 정리는 스킵 (에러는 그대로 전파)
+    if (logoutGeneration === curSessionGeneration) {
+      if (deferUiClear) {
+        // hard navigate 직전: 토큰·힌트만 정리하고 비로그인 UI paint는 생략
+        curSessionGeneration++;
+        clearAuthTokens();
+        clearAllClientStorageHints();
+        clearAppQueryCache();
+      } else {
         get().clearSession();
       }
+    }
+
+    if (logoutError !== undefined) {
+      throw logoutError;
     }
   },
 }));
