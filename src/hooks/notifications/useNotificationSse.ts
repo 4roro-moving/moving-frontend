@@ -59,7 +59,11 @@ export function useNotificationSse() {
     const handleSseEvent = (eventName: string, data: string) => {
       if (eventName === "notification") {
         try {
-          const notification = JSON.parse(data) as { isRead?: boolean };
+          const notification = JSON.parse(data) as {
+            isRead?: boolean;
+            type?: string;
+          };
+
           if (notification.isRead !== true) {
             queryClient.setQueryData<UnreadNotificationCountResponse>(
               unreadCountQueryKey,
@@ -67,6 +71,13 @@ export function useNotificationSse() {
                 unreadCount: (current?.unreadCount ?? 0) + 1,
               }),
             );
+          }
+
+          // 견적 요청 반려 알림일 경우 견적 요청 캐시 무효화
+          if (notification.type === "ESTIMATE_REQUEST_REJECTED") {
+            void queryClient.invalidateQueries({
+              queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ALL,
+            });
           }
         } catch {
           // JSON 파싱 실패 시 invalidate로 보정
