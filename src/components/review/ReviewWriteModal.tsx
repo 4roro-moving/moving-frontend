@@ -106,6 +106,7 @@ function ReviewWriteModalContent({
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
       aria-label="리뷰 작성"
+      dismissible={false}
     >
       <div className="flex w-full items-start justify-between gap-12 md:gap-16">
         <Modal.Title>리뷰 작성</Modal.Title>

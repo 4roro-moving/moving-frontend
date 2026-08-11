@@ -65,6 +65,7 @@ export default function RejectEstimateModal({
       presentation="responsive"
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
+      dismissible={false}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
         <Modal.Title>제안 반려</Modal.Title>

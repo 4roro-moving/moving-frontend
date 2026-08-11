@@ -132,6 +132,7 @@ function ChatRoomModalContent({
       open={open}
       onClose={handleClose}
       aria-label={`${participantName} 채팅방`}
+      dismissible={false}
       className={cn(
         "h-[min(720px,calc(100dvh-48px))] w-full max-w-[360px] items-stretch gap-0 overflow-hidden p-0",
         "md:max-w-[480px] xl:max-w-[480px]",
