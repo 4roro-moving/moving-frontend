@@ -7,10 +7,8 @@ import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/commo
 import { Text } from "@/components/common/Text";
 import FormField from "@/components/common/FormField/FormField";
 import EstimateRequestSummaryContent from "@/components/estimate/EstimateRequestSummaryContent";
+import { MAX_TEXT_CONTENT_LENGTH, MIN_TEXT_CONTENT_LENGTH } from "@/lib/constants/validation";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
-
-const MIN_REASON_LENGTH = 10;
-const MAX_REASON_LENGTH = 1000;
 
 interface RejectEstimateModalProps {
   open: boolean;
@@ -44,10 +42,11 @@ export default function RejectEstimateModal({
 
   const trimmedReason = reason.trim();
   const isReasonValid =
-    trimmedReason.length >= MIN_REASON_LENGTH && trimmedReason.length <= MAX_REASON_LENGTH;
+    trimmedReason.length >= MIN_TEXT_CONTENT_LENGTH &&
+    trimmedReason.length <= MAX_TEXT_CONTENT_LENGTH;
   const reasonError =
     isReasonTouched && !isReasonValid
-      ? `반려 사유는 ${MIN_REASON_LENGTH}자 이상 ${MAX_REASON_LENGTH}자 이하로 입력해 주세요.`
+      ? `반려 사유는 ${MIN_TEXT_CONTENT_LENGTH}자 이상 ${MAX_TEXT_CONTENT_LENGTH}자 이하로 입력해 주세요.`
       : undefined;
 
   const handleSubmit = () => {
@@ -95,7 +94,7 @@ export default function RejectEstimateModal({
             <Textarea
               id="reject-reason"
               value={reason}
-              maxLength={MAX_REASON_LENGTH}
+              maxLength={MAX_TEXT_CONTENT_LENGTH}
               placeholder="최소 10자 이상 입력해 주세요"
               error={reasonError}
               disabled={isSubmitting}
@@ -106,7 +105,7 @@ export default function RejectEstimateModal({
               className="h-160 resize-none px-24 py-14 text-lg"
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
-              {trimmedReason.length}/{MAX_REASON_LENGTH}
+              {trimmedReason.length}/{MAX_TEXT_CONTENT_LENGTH}
             </Text>
           </div>
         </FormField>
