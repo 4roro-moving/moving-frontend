@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { useMoverDesignation } from "@/hooks/useMoverDesignation";
@@ -25,39 +25,14 @@ import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import type { MoverDetail } from "@/types/moverDetail";
 
-interface SsrPrefetchError {
-  message: string;
-  details: unknown;
-}
-
 interface MoverDetailViewProps {
   moverId: string;
   /** 인증 초기화 중 먼저 렌더링할 서버 prefetch 상세 정보 */
   initialDetail: MoverDetail | null;
-  /** 임시 배포 진단용 SSR prefetch 오류 */
-  initialDetailError: SsrPrefetchError | null;
-  /** 임시 배포 진단용 SSR 요청 API 주소 */
-  apiBaseUrl: string | null;
 }
 
-export default function MoverDetailView({
-  moverId,
-  initialDetail,
-  initialDetailError,
-  apiBaseUrl,
-}: MoverDetailViewProps) {
+export default function MoverDetailView({ moverId, initialDetail }: MoverDetailViewProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (initialDetailError) {
-      console.error("[MoverDetail] SSR 상세 prefetch 실패", {
-        moverId,
-        apiBaseUrl,
-        error: initialDetailError.message,
-        details: initialDetailError.details,
-      });
-    }
-  }, [apiBaseUrl, initialDetailError, moverId]);
 
   const { detail: queryDetail, isInitialLoading, isNotFound, query } = useMoverDetail(moverId);
   const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
