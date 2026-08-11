@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useState } from "react";
 
 import Textarea from "@/components/common/Input/Textarea";
 import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
@@ -57,15 +57,6 @@ export default function RejectEstimateModal({
     onSubmit(trimmedReason);
   };
 
-  const handleReasonKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key !== "Enter" || event.nativeEvent.isComposing || !isReasonValid || isSubmitting) {
-      return;
-    }
-
-    event.preventDefault();
-    handleSubmit();
-  };
-
   return (
     <Modal
       open={open}
@@ -111,7 +102,6 @@ export default function RejectEstimateModal({
               onBlur={() => {
                 setIsReasonTouched(true);
               }}
-              onKeyDown={handleReasonKeyDown}
               className="h-160 resize-none px-24 py-14 text-lg"
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useState } from "react";
 
 import FormField from "@/components/common/FormField/FormField";
 import Textarea from "@/components/common/Input/Textarea";
@@ -97,13 +97,6 @@ function ReviewWriteModalContent({
     });
   };
 
-  const handleContentKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key !== "Enter" || event.nativeEvent.isComposing || isSubmitDisabled) return;
-
-    event.preventDefault();
-    handleSubmit();
-  };
-
   return (
     <Modal
       open={open}
@@ -164,7 +157,6 @@ function ReviewWriteModalContent({
               onBlur={() => {
                 setIsContentTouched(true);
               }}
-              onKeyDown={handleContentKeyDown}
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
               {trimmedContent.length}/{MAX_CONTENT_LENGTH}

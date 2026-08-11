@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useState } from "react";
 
 import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
@@ -80,13 +80,6 @@ export default function SendEstimateModal({
     });
   };
 
-  const handleCommentKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key !== "Enter" || event.nativeEvent.isComposing || !canSubmit) return;
-
-    event.preventDefault();
-    handleSubmit();
-  };
-
   return (
     <Modal
       open={open}
@@ -152,7 +145,6 @@ export default function SendEstimateModal({
               onBlur={() => {
                 setIsCommentTouched(true);
               }}
-              onKeyDown={handleCommentKeyDown}
               className="h-160 resize-none"
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
