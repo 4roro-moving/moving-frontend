@@ -82,8 +82,8 @@ export default function EstimateRequestDesignatedMovers({
                 )}
 
                 {status === "REJECTED" && (
-                  <span className="rounded-8 shrink-0 border border-red-200 bg-red-50 px-10 py-6">
-                    <Text as="span" variant="sm-semibold" className="text-red-500">
+                  <span className="border-border-error rounded-8 shrink-0 border bg-red-100 px-10 py-6">
+                    <Text as="span" variant="sm-semibold" className="text-status-error">
                       반려
                     </Text>
                   </span>
