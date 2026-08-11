@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useState } from "react";
 
 import FormField from "@/components/common/FormField/FormField";
 import Textarea from "@/components/common/Input/Textarea";
@@ -9,10 +9,8 @@ import { Text } from "@/components/common/Text";
 import ReviewEstimateSummary from "@/components/review/ReviewEstimateSummary";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { useCreateReview } from "@/hooks/useCreateReview";
+import { MAX_TEXT_CONTENT_LENGTH, MIN_TEXT_CONTENT_LENGTH } from "@/lib/constants/validation";
 import type { ReviewableEstimateItem } from "@/types/review";
-
-const MIN_CONTENT_LENGTH = 10;
-const MAX_CONTENT_LENGTH = 1000;
 
 interface ReviewWriteModalProps {
   open: boolean;
@@ -76,10 +74,11 @@ function ReviewWriteModalContent({
     onClose();
   };
   const isContentValid =
-    trimmedContent.length >= MIN_CONTENT_LENGTH && trimmedContent.length <= MAX_CONTENT_LENGTH;
+    trimmedContent.length >= MIN_TEXT_CONTENT_LENGTH &&
+    trimmedContent.length <= MAX_TEXT_CONTENT_LENGTH;
   const contentValidationError =
     isContentTouched && !isContentValid
-      ? `리뷰 내용은 ${MIN_CONTENT_LENGTH}자 이상 ${MAX_CONTENT_LENGTH}자 이하로 입력해 주세요.`
+      ? `리뷰 내용은 ${MIN_TEXT_CONTENT_LENGTH}자 이상 ${MAX_TEXT_CONTENT_LENGTH}자 이하로 입력해 주세요.`
       : undefined;
   const isSubmitDisabled = isSubmitting || rating < 1 || !isContentValid;
 
@@ -97,13 +96,6 @@ function ReviewWriteModalContent({
     });
   };
 
-  const handleContentKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key !== "Enter" || event.nativeEvent.isComposing || isSubmitDisabled) return;
-
-    event.preventDefault();
-    handleSubmit();
-  };
-
   return (
     <Modal
       open={open}
@@ -112,11 +104,11 @@ function ReviewWriteModalContent({
       presentation="responsive"
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
-      aria-label="리뷰 작성"
+      dismissible={false}
     >
       <div className="flex w-full items-start justify-between gap-12 md:gap-16">
         <Modal.Title>리뷰 작성</Modal.Title>
-        <Modal.Close onClose={handleClose} disabled={isSubmitting} />{" "}
+        <Modal.Close onClose={handleClose} disabled={isSubmitting} />
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-28 overflow-y-auto xl:gap-32">
@@ -152,9 +144,9 @@ function ReviewWriteModalContent({
             <Textarea
               id="review-content"
               value={content}
-              maxLength={MAX_CONTENT_LENGTH}
+              maxLength={MAX_TEXT_CONTENT_LENGTH}
               disabled={isSubmitting}
-              placeholder={`최소 ${MIN_CONTENT_LENGTH}자 이상 입력해 주세요`}
+              placeholder={`최소 ${MIN_TEXT_CONTENT_LENGTH}자 이상 입력해 주세요`}
               error={contentValidationError}
               className="h-160"
               onChange={(event) => {
@@ -164,10 +156,9 @@ function ReviewWriteModalContent({
               onBlur={() => {
                 setIsContentTouched(true);
               }}
-              onKeyDown={handleContentKeyDown}
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
-              {trimmedContent.length}/{MAX_CONTENT_LENGTH}
+              {trimmedContent.length}/{MAX_TEXT_CONTENT_LENGTH}
             </Text>
           </div>
         </FormField>

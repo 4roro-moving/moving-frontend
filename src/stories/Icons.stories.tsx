@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { ComponentType, SVGProps } from "react";
 
-import DetailHeroBanner from "@/components/common/DetailHeroBanner";
 import { Text } from "@/components/common/Text";
 import {
   AlarmIcon,

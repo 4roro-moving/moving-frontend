@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { fn } from "storybook/test";
 
 import SelectableChip from "@/components/common/Chip/SelectableChip";

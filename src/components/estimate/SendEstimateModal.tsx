@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useState } from "react";
 
 import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
@@ -8,11 +8,10 @@ import Textarea from "@/components/common/Input/Textarea";
 import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
 import EstimateRequestSummaryContent from "@/components/estimate/EstimateRequestSummaryContent";
+import { MAX_TEXT_CONTENT_LENGTH, MIN_TEXT_CONTENT_LENGTH } from "@/lib/constants/validation";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 const MAX_PRICE = 100_000_000;
-const MIN_COMMENT_LENGTH = 10;
-const MAX_COMMENT_LENGTH = 1000;
 
 export interface SendEstimateInput {
   price: number;
@@ -57,7 +56,8 @@ export default function SendEstimateModal({
 
   const isPriceValid = numericPrice > 0 && numericPrice <= MAX_PRICE;
   const isCommentValid =
-    trimmedComment.length >= MIN_COMMENT_LENGTH && trimmedComment.length <= MAX_COMMENT_LENGTH;
+    trimmedComment.length >= MIN_TEXT_CONTENT_LENGTH &&
+    trimmedComment.length <= MAX_TEXT_CONTENT_LENGTH;
 
   const canSubmit = isPriceValid && isCommentValid && !isSubmitting;
 
@@ -67,7 +67,7 @@ export default function SendEstimateModal({
       : undefined;
   const commentError =
     isCommentTouched && !isCommentValid
-      ? `코멘트는 ${MIN_COMMENT_LENGTH}자 이상 ${MAX_COMMENT_LENGTH}자 이하로 입력해 주세요.`
+      ? `코멘트는 ${MIN_TEXT_CONTENT_LENGTH}자 이상 ${MAX_TEXT_CONTENT_LENGTH}자 이하로 입력해 주세요.`
       : undefined;
 
   const handleSubmit = () => {
@@ -80,13 +80,6 @@ export default function SendEstimateModal({
     });
   };
 
-  const handleCommentKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key !== "Enter" || event.nativeEvent.isComposing || !canSubmit) return;
-
-    event.preventDefault();
-    handleSubmit();
-  };
-
   return (
     <Modal
       open={open}
@@ -95,6 +88,7 @@ export default function SendEstimateModal({
       presentation="responsive"
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
+      dismissible={false}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
         <Modal.Title>견적 보내기</Modal.Title>
@@ -144,19 +138,18 @@ export default function SendEstimateModal({
             <Textarea
               id="estimate-comment"
               value={comment}
-              maxLength={MAX_COMMENT_LENGTH}
-              placeholder="최소 10자 이상 입력해 주세요"
+              maxLength={MAX_TEXT_CONTENT_LENGTH}
+              placeholder={`최소 ${MIN_TEXT_CONTENT_LENGTH}자 이상 입력해 주세요`}
               error={commentError}
               disabled={isSubmitting}
               onChange={(event) => setComment(event.target.value)}
               onBlur={() => {
                 setIsCommentTouched(true);
               }}
-              onKeyDown={handleCommentKeyDown}
               className="h-160 resize-none"
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
-              {trimmedComment.length}/{MAX_COMMENT_LENGTH}
+              {trimmedComment.length}/{MAX_TEXT_CONTENT_LENGTH}
             </Text>
           </div>
         </FormField>

@@ -3,14 +3,6 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MoverCardSkeleton } from "@/components/mover/MoverCardSkeleton";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 
-const SKELETON_SOURCE = `<div className="flex items-center gap-16">
-  <Skeleton className="size-48 rounded-full" />
-  <div className="flex flex-1 flex-col gap-8">
-    <Skeleton className="h-20 w-3/5" />
-    <Skeleton className="h-16 w-full" />
-  </div>
-</div>`;
-
 const meta = {
   title: "Feedback/Skeleton",
   component: Skeleton,

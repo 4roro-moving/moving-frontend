@@ -174,7 +174,7 @@ export const resolveAuthUserImage = async (user: AuthUser): Promise<AuthUser> =>
     }
 
     return { ...user, imageUrl: null };
-  } catch (error) {
+  } catch {
     // imageUrl 필드를 건들이지 않는다.
     return user;
   }
