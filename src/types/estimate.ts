@@ -106,6 +106,13 @@ export interface MyEstimateRequestDesignatedMover {
       imageUrl: string | null;
     } | null;
   };
+
+  // 2026.08.10 정슬기 - [추가] 지정 견적 요청 반려 정보
+  rejection: {
+    reason: string;
+    rejectedAt: string;
+  } | null;
+  hasEstimate: boolean;
 }
 
 /**
