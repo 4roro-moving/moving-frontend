@@ -97,7 +97,8 @@ const ModalMain = ({
 
   useCloseOnPathnameChange(isVisible ? onClose : undefined);
 
-  useBodyScrollLock(open);
+  // exit 애니메이션 동안(isRendered)에도 스크롤 잠금 유지
+  useBodyScrollLock(isRendered);
 
   useFocusTrap({
     containerRef: panelRef,

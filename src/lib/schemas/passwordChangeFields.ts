@@ -66,3 +66,8 @@ export const toPasswordChangePayload = (
     newPasswordConfirm: values.newPasswordConfirm,
   };
 };
+
+/** basic/password payload에 실제 비밀번호 변경 필드가 포함됐는지 */
+export const hasPasswordChangePayload = (
+  payload: { currentPassword?: string; newPassword?: string } | null | undefined,
+): boolean => Boolean(payload?.currentPassword && payload?.newPassword);

@@ -16,7 +16,7 @@ import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
 import { useUpdateCustomerBasicInfo } from "@/hooks/profile/useUpdateCustomerBasicInfo";
 import { useUpdateCustomerProfile } from "@/hooks/profile/useUpdateCustomerProfile";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { markPasswordChangedToast } from "@/lib/auth/passwordChangedToast";
+import { reauthAfterPasswordChange } from "@/lib/auth/reauthAfterPasswordChange";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
@@ -26,8 +26,8 @@ import {
   customerProfileEditSchema,
   type CustomerProfileEditFormValues,
 } from "@/lib/schemas/customerProfileEditSchema";
+import { hasPasswordChangePayload } from "@/lib/schemas/passwordChangeFields";
 import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
-import { useAuthStore } from "@/stores/useAuthStore";
 import { ApiError } from "@/types/api";
 import type { MoveType } from "@/types/move";
 
@@ -49,7 +49,6 @@ const CustomerProfileEditForm = ({
 }: CustomerProfileEditFormProps) => {
   const updateCustomerBasicInfo = useUpdateCustomerBasicInfo();
   const updateCustomerProfile = useUpdateCustomerProfile();
-  const logout = useAuthStore((state) => state.logout);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -104,7 +103,7 @@ const CustomerProfileEditForm = ({
         return;
       }
 
-      const didChangePassword = Boolean(basic?.currentPassword && basic?.newPassword);
+      const didChangePassword = hasPasswordChangePayload(basic);
       let didBasicSucceed = false;
 
       if (basic) {
@@ -127,13 +126,7 @@ const CustomerProfileEditForm = ({
         } catch (profileError) {
           if (didBasicSucceed && didChangePassword) {
             // refresh token 이미 폐기됨 → 머무르면 F5 시 강제 로그아웃만 발생
-            markPasswordChangedToast();
-            try {
-              await logout({ deferUiClear: true });
-            } catch {
-              // refresh 폐기 후 logout API 실패해도 로컬 세션은 정리됨
-            }
-            window.location.assign(APP_ROUTES.LOGIN);
+            await reauthAfterPasswordChange(APP_ROUTES.LOGIN);
             return;
           }
 
@@ -147,13 +140,7 @@ const CustomerProfileEditForm = ({
       }
 
       if (didChangePassword) {
-        markPasswordChangedToast();
-        try {
-          await logout({ deferUiClear: true });
-        } catch {
-          // refresh 폐기 후 logout API 실패해도 로컬 세션은 정리됨
-        }
-        window.location.assign(APP_ROUTES.LOGIN);
+        await reauthAfterPasswordChange(APP_ROUTES.LOGIN);
         return;
       }
 

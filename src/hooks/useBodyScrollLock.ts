@@ -46,7 +46,7 @@ const unlockBodyScroll = () => {
  * overlay(Modal, SideNav 등)가 열려 있는 동안 body 스크롤을 잠급니다.
  * 중첩 잠금은 참조 카운트로 관리해, 한쪽이 닫혀도 다른 잠금이 남아 있으면 유지합니다.
  */
-export function useBodyScrollLock(locked: boolean): void {
+export const useBodyScrollLock = (locked: boolean): void => {
   useEffect(() => {
     if (!locked) {
       return;
@@ -58,4 +58,4 @@ export function useBodyScrollLock(locked: boolean): void {
       unlockBodyScroll();
     };
   }, [locked]);
-}
+};
