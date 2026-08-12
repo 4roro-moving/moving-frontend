@@ -10,11 +10,11 @@ import Toast from "@/components/common/Toast/Toast";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { usePresence } from "@/hooks/usePresence";
+import { sanitizeSoftUxProfileImageUrl } from "@/lib/auth/profileImage";
 import type { AuthRole } from "@/lib/auth/role";
 import { isPublicPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
-import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -46,6 +46,7 @@ export default function ProfileMenuTrigger({
   const pathname = usePathname();
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
+  const safeImageUrl = sanitizeSoftUxProfileImageUrl(imageUrl);
 
   const [isOpen, setIsOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -174,10 +175,10 @@ export default function ProfileMenuTrigger({
       >
         {isAvatarPending ? (
           <Skeleton className="size-24 rounded-full xl:size-36" />
-        ) : imageUrl ? (
+        ) : safeImageUrl ? (
           <div className="rounded-100 overflow-hidden">
             <Image
-              src={resolveMoverProfileImageSrc(imageUrl)}
+              src={safeImageUrl}
               alt=""
               width={36}
               height={36}
