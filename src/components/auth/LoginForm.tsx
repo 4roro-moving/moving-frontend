@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import AuthHeader from "@/components/auth/AuthHeader";
@@ -12,8 +12,11 @@ import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
+import Toast from "@/components/common/Toast/Toast";
 import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { resolveAuthUserImage } from "@/lib/api/profile";
+import { consumePasswordChangedToast } from "@/lib/auth/passwordChangedToast";
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
 import {
   audienceToLoginRole,
@@ -26,7 +29,6 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/loginSchema";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { resolveAuthUserImage } from "@/lib/api/profile";
 
 interface LoginFormProps {
   audience?: AuthAudience;
@@ -37,6 +39,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const establishSession = useAuthStore((state) => state.establishSession);
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -50,6 +53,16 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       password: "",
     },
   });
+
+  useEffect(() => {
+    // setState는 effect 본문 동기 호출이 아니라 콜백으로 미룸 (react-hooks/set-state-in-effect)
+    const timerId = window.setTimeout(() => {
+      setToastMessage(consumePasswordChangedToast());
+    }, 0);
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, []);
 
   const signUpHref = audience === "mover" ? APP_ROUTES.MOVER_SIGN_UP : APP_ROUTES.SIGN_UP;
 
@@ -78,6 +91,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
       <AuthHeader audience={audience} />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
