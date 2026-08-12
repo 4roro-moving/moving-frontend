@@ -16,8 +16,7 @@ import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
 import {
-  getAudienceMismatchMessage,
-  getAuthAudienceFromRole,
+  audienceToLoginRole,
   getLoginRedirectParam,
   getPostAuthRedirectPath,
   getRoleHomePath,
@@ -37,7 +36,6 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const { mutateAsync: login, isPending } = useLoginMutation();
   const establishSession = useAuthStore((state) => state.establishSession);
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
-  const logout = useAuthStore((state) => state.logout);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -59,21 +57,14 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
     setSubmitError(null);
 
     try {
-      const result = await login(values);
-      const resultAudience = getAuthAudienceFromRole(result.user.role);
-
-      // audience 불일치: establishSession 전에 롤백 (GuestOnly 홈 이동 방지)
-      if (resultAudience !== audience) {
-        await logout();
-        setSubmitError(getAudienceMismatchMessage(audience, resultAudience));
-        return;
-      }
+      const role = audienceToLoginRole(audience);
+      const result = await login({ ...values, role });
 
       // 이전 계정 Soft UX 힌트 제거 후 status로 다시 저장
       clearProfileCompleted();
 
       const nextPath = await getPostAuthRedirectPath({
-        audience: resultAudience,
+        audience,
         returnPath: getLoginRedirectParam(),
         fallbackPath: getRoleHomePath(result.user.role),
       });

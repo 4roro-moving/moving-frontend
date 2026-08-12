@@ -1,5 +1,5 @@
-import type { AuthAudience } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import type { LoginRole } from "@/lib/auth/role";
 import { ApiError } from "@/types/api";
 
 export type OAuthProvider = "google" | "kakao" | "naver";
@@ -9,7 +9,7 @@ const OAUTH_STATE_KEY = "moving_oauth_state";
 
 export interface OAuthPendingSession {
   provider: OAuthProvider;
-  role: "CUSTOMER" | "MOVER";
+  role: LoginRole;
   returnPath?: string | null;
 }
 
@@ -18,15 +18,6 @@ interface OAuthAuthorizeConfig {
   clientId: string;
   scope?: string;
 }
-
-// 관리자는 포함 안됨
-export const audienceToOAuthRole = (audience: AuthAudience): "CUSTOMER" | "MOVER" => {
-  if (audience === "admin") {
-    throw new ApiError("관리자는 소셜 로그인을 사용할 수 없습니다.");
-  }
-
-  return audience === "mover" ? "MOVER" : "CUSTOMER";
-};
 
 /** oauth 대기 세션 저장 */
 export const saveOAuthPendingSession = (session: OAuthPendingSession): void => {
