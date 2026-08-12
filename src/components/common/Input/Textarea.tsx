@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, type ComponentPropsWithoutRef } from "react";
+import { forwardRef, useId, type ComponentPropsWithoutRef } from "react";
 
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
@@ -10,14 +10,19 @@ export interface TextareaProps extends ComponentPropsWithoutRef<"textarea"> {
 }
 
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
-  { error, className, ...props },
+  { error, className, "aria-describedby": ariaDescribedBy, ...props },
   ref,
 ) {
+  const errorId = useId();
+  const describedBy =
+    [ariaDescribedBy, error ? errorId : undefined].filter(Boolean).join(" ") || undefined;
+
   return (
     <div className="flex w-full flex-col gap-4">
       <textarea
         ref={ref}
         aria-invalid={!!error}
+        aria-describedby={describedBy}
         className={cn(
           "rounded-16 h-[180px] w-full border px-16 py-14",
           "border-border-default bg-background-surface text-text-primary transition-colors",
@@ -31,7 +36,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textare
         {...props}
       />
       {error && (
-        <Text variant="xs-regular" className="text-text-error">
+        <Text id={errorId} variant="xs-regular" className="text-text-error">
           {error}
         </Text>
       )}

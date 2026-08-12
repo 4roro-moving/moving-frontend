@@ -7,13 +7,13 @@ import Modal from "@/components/common/Modal/Modal";
 
 const RESPONSIVE_SOURCE = `const [open, setOpen] = useState(false);
 
-{open ? (
-  <Modal
-    onClose={() => setOpen(false)}
-    presentation="responsive"
-    size="md"
-    className="items-stretch gap-30 px-24 pt-32 pb-40 text-left xl:gap-40"
-  >
+<Modal
+  open={open}
+  onClose={() => setOpen(false)}
+  presentation="responsive"
+  size="md"
+  className="items-stretch gap-30 px-24 pt-32 pb-40 text-left xl:gap-40"
+>
     <div className="flex items-center justify-between gap-12">
       <Modal.Title>모달 제목</Modal.Title>
       <Modal.Close onClose={() => setOpen(false)} />
@@ -24,17 +24,16 @@ const RESPONSIVE_SOURCE = `const [open, setOpen] = useState(false);
     <Modal.Button fullWidth size="cta" onClick={() => setOpen(false)}>
       확인
     </Modal.Button>
-  </Modal>
-) : null}`;
+</Modal>`;
 
 const BOTTOM_SHEET_SOURCE = `const [open, setOpen] = useState(false);
 
-{open ? (
-  <Modal
-    onClose={() => setOpen(false)}
-    presentation="bottom-sheet"
-    className="items-stretch gap-30 px-24 pt-32 pb-40 text-left"
-  >
+<Modal
+  open={open}
+  onClose={() => setOpen(false)}
+  presentation="bottom-sheet"
+  className="items-stretch gap-30 px-24 pt-32 pb-40 text-left"
+>
     <div className="flex items-center justify-between gap-12">
       <Modal.Title>바텀시트 제목</Modal.Title>
       <Modal.Close size="sm" onClose={() => setOpen(false)} />
@@ -45,8 +44,7 @@ const BOTTOM_SHEET_SOURCE = `const [open, setOpen] = useState(false);
     <Modal.Button fullWidth size="cta" onClick={() => setOpen(false)}>
       확인
     </Modal.Button>
-  </Modal>
-) : null}`;
+</Modal>`;
 
 const meta = {
   title: "Overlay/Modal",
@@ -65,10 +63,21 @@ const meta = {
   args: {
     children: null,
     onClose: fn(),
+    onExitComplete: fn(),
     presentation: "responsive",
     size: "md",
   },
   argTypes: {
+    open: {
+      control: false,
+      description: "모달 표시 여부. false가 되면 종료 모션 후 언마운트됩니다.",
+      table: { type: { summary: "boolean" }, defaultValue: { summary: "true" } },
+    },
+    onExitComplete: {
+      control: false,
+      description: "종료 모션이 완료되어 모달이 언마운트되기 직전에 호출되는 핸들러",
+      table: { type: { summary: "() => void" } },
+    },
     presentation: {
       control: "inline-radio",
       options: ["modal", "bottom-sheet", "responsive"],
@@ -106,6 +115,11 @@ const meta = {
       description: "전체 화면 오버레이의 스타일을 확장하는 클래스",
       table: { type: { summary: "string" } },
     },
+    dismissible: {
+      control: "boolean",
+      description: "Escape 키 또는 오버레이 클릭으로 모달을 닫을지 여부",
+      table: { type: { summary: "boolean" }, defaultValue: { summary: "true" } },
+    },
     "aria-label": {
       control: "text",
       description: "Modal.Title을 사용하지 않을 때 dialog에 제공하는 접근성 이름",
@@ -130,22 +144,21 @@ function ModalWithTrigger(args: React.ComponentProps<typeof Modal>) {
       <Button size="cta" onClick={() => setOpen(true)}>
         모달 열기
       </Button>
-      {open ? (
-        <Modal
-          {...args}
-          onClose={close}
-          className="items-stretch gap-30 px-24 pt-32 pb-40 text-left xl:gap-40"
-        >
-          <div className="flex items-center justify-between gap-12">
-            <Modal.Title>모달 제목</Modal.Title>
-            <Modal.Close onClose={close} />
-          </div>
-          <Modal.Desc>모달에 필요한 설명이나 콘텐츠가 들어갑니다.</Modal.Desc>
-          <Modal.Button fullWidth size="cta" onClick={close}>
-            확인
-          </Modal.Button>
-        </Modal>
-      ) : null}
+      <Modal
+        {...args}
+        open={open}
+        onClose={close}
+        className="items-stretch gap-30 px-24 pt-32 pb-40 text-left xl:gap-40"
+      >
+        <div className="flex items-center justify-between gap-12">
+          <Modal.Title>모달 제목</Modal.Title>
+          <Modal.Close onClose={close} />
+        </div>
+        <Modal.Desc>모달에 필요한 설명이나 콘텐츠가 들어갑니다.</Modal.Desc>
+        <Modal.Button fullWidth size="cta" onClick={close}>
+          확인
+        </Modal.Button>
+      </Modal>
     </>
   );
 }
