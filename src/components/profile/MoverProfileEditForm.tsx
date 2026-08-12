@@ -19,6 +19,7 @@ import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
 import { uploadProfileImage } from "@/lib/profile/uploadProfileImage";
 import { moverProfileSchema, type MoverProfileFormValues } from "@/lib/schemas/moverProfileSchema";
+import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
 import { ApiError } from "@/types/api";
 import type { MoveType } from "@/types/move";
 
@@ -97,6 +98,7 @@ const MoverProfileEditForm = ({
     <form
       className="px-margin-mobile mx-auto flex w-full max-w-[1120px] flex-col gap-40 py-32 md:gap-48 md:px-72 md:py-40 lg:px-0 lg:pt-56 lg:pb-70"
       onSubmit={onSubmit}
+      onKeyDown={preventEnterSubmitOnInput}
       noValidate
     >
       <ProfilePageHeader title="프로필 수정" />
