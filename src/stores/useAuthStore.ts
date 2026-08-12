@@ -28,14 +28,14 @@ interface AuthState {
   isAuthenticated: boolean;
   /** 인증 중 여부 */
   isCheckingAuth: boolean;
-  /** localStorage hydrate 완료 여부 — SSR/CSR 첫 페인트 일치용 */
+  /** Soft UX 힌트 hydrate 완료 여부 — SSR/CSR 첫 페인트 일치용 */
   hasHydrated: boolean;
   /**
    * 로그인/가입 직후 GuestOnly가 사용할 목적지.
    * consume 시 한 번만 읽고 null로 비웁니다.
    */
   postAuthRedirectPath: string | null;
-  /** localStorage에서 인증 상태 초기화 */
+  /** Soft UX 쿠키 힌트로 표시 상태 초기화 */
   hydrateFromStorage: () => void;
   /** 인증 상태 확인 */
   checkAuth: (options?: { hasRefreshCookie?: boolean }) => Promise<void>;

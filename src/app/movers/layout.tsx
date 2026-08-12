@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import BlockMoverFromMoversBrowse from "@/components/auth/BlockMoverFromMoversBrowse";
 import { LoginRequiredModalProvider } from "@/components/auth/LoginRequiredModalProvider";
 import { safeDecodeCookieValue } from "@/lib/auth/clientStorageHint";
-import { ROLE_STORAGE_KEY, parseAuthRole } from "@/lib/auth/role";
+import { ROLE_STORAGE_KEY, parseSoftUxAuthRole } from "@/lib/auth/role";
 
 interface MoversLayoutProps {
   children: ReactNode;
@@ -14,7 +14,7 @@ const MoversLayout = async ({ children }: MoversLayoutProps) => {
   const cookieStore = await cookies();
   const rawRole = cookieStore.get(ROLE_STORAGE_KEY)?.value;
   const decodedRole = rawRole ? safeDecodeCookieValue(rawRole) : null;
-  const initialRole = parseAuthRole(decodedRole);
+  const initialRole = parseSoftUxAuthRole(decodedRole);
 
   return (
     <LoginRequiredModalProvider>

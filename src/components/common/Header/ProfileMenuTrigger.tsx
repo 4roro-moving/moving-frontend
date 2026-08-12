@@ -14,6 +14,7 @@ import type { AuthRole } from "@/lib/auth/role";
 import { isPublicPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
+import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -176,7 +177,7 @@ export default function ProfileMenuTrigger({
         ) : imageUrl ? (
           <div className="rounded-100 overflow-hidden">
             <Image
-              src={imageUrl}
+              src={resolveMoverProfileImageSrc(imageUrl)}
               alt=""
               width={36}
               height={36}
