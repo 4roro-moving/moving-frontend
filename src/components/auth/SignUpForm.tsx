@@ -83,6 +83,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
                 autoComplete="name"
                 placeholder="성함을 입력해 주세요"
                 error={errors.name?.message}
+                maxLength={50}
                 {...register("name")}
               />
             </FormField>

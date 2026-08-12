@@ -56,7 +56,6 @@ export default async function MoverDetailPage({ params }: MoverDetailPageProps) 
     },
   });
   let initialDetail: MoverDetail | null = null;
-
   try {
     await queryClient.prefetchQuery({
       queryKey: getMoverDetailQueryKey(AUTH_QUERY_GUEST_SCOPE, moverId),

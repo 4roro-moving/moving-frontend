@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { NICKNAME_STORAGE_KEY } from "@/lib/auth/nickname";
-import { ROLE_STORAGE_KEY } from "@/lib/auth/role";
+import { CLIENT_STORAGE_HINT_KEYS } from "@/lib/auth/clientStorageHint";
 import { REFRESH_TOKEN_COOKIE_BACKEND_PATH } from "@/lib/auth/token";
 import {
   buildBackendHeaders,
@@ -44,21 +43,33 @@ const STRIP_REFRESH_COOKIE_PATHS = new Set([
 
 /**
  * Set-Cookie 삭제 헤더를 붙입니다.
- * 주의: 같은 응답에서 `res.cookies.set`을 쓰면 Next가 Set-Cookie를 재작성해 headers.append로 넣은 refreshToken 삭제가 사라질 수 있습니다. 전부 append만 사용합니다.
+ * 주의: 같은 응답에서 res.cookies.set을 쓰면 Next가 Set-Cookie를 재작성해
+ * headers.append로 넣은 refreshToken 삭제가 사라질 수 있습니다.
+ * 전부 append만 사용합니다.
  */
 const appendClearCookie = (
   res: NextResponse,
   name: string,
   path: string,
-  options?: { httpOnly?: boolean; sameSite?: "Lax" | "None"; secure?: boolean },
+  options?: {
+    httpOnly?: boolean;
+    sameSite?: "Lax" | "None";
+    secure?: boolean;
+  },
 ): void => {
   const sameSite = options?.sameSite ?? "Lax";
   const secure = options?.secure ?? false;
   const httpOnly = options?.httpOnly ?? false;
 
   let value = `${name}=; Path=${path}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=${sameSite}`;
-  if (httpOnly) value += "; HttpOnly";
-  if (secure) value += "; Secure";
+
+  if (httpOnly) {
+    value += "; HttpOnly";
+  }
+
+  if (secure) {
+    value += "; Secure";
+  }
 
   res.headers.append("Set-Cookie", value);
 };
@@ -69,8 +80,9 @@ const clearClientAuthCookies = (res: NextResponse): void => {
     res.headers.append("Set-Cookie", buildClearRefreshTokenCookie(path));
   }
 
-  appendClearCookie(res, NICKNAME_STORAGE_KEY, "/", { sameSite: "Lax" });
-  appendClearCookie(res, ROLE_STORAGE_KEY, "/", { sameSite: "Lax" });
+  for (const key of CLIENT_STORAGE_HINT_KEYS) {
+    appendClearCookie(res, key, "/", { sameSite: "Lax" });
+  }
 };
 
 /**
@@ -82,7 +94,12 @@ export const POST = async (request: Request, context: { params: Promise<{ path: 
 
   if (!ALLOWED_POST_PATHS.has(authPath)) {
     return NextResponse.json(
-      { success: false, error: { message: "지원하지 않는 auth 요청입니다." } },
+      {
+        success: false,
+        error: {
+          message: "지원하지 않는 auth 요청입니다.",
+        },
+      },
       { status: 404 },
     );
   }
@@ -90,7 +107,9 @@ export const POST = async (request: Request, context: { params: Promise<{ path: 
   try {
     const body = BODY_PATHS.has(authPath) ? await request.text() : undefined;
 
-    const backendRes = await fetch(`${getBackendApiBaseUrl()}/auth/${authPath}`, {
+    const backendBaseUrl = getBackendApiBaseUrl();
+
+    const backendRes = await fetch(`${backendBaseUrl}/auth/${authPath}`, {
       method: "POST",
       headers: buildBackendHeaders(request, undefined, {
         stripRefreshToken: STRIP_REFRESH_COOKIE_PATHS.has(authPath),
@@ -101,14 +120,23 @@ export const POST = async (request: Request, context: { params: Promise<{ path: 
 
     const res = await forwardBackendResponse(backendRes);
 
+    // 임시 디버그용 — Vercel 런타임이 실제 읽는 Backend URL 확인
+    res.headers.set("X-Debug-Backend-Url", backendBaseUrl);
+
     if (authPath === "logout") {
+      // 로그아웃 응답: 브라우저에 남은 refresh·힌트 쿠키를 강제로 제거
       clearClientAuthCookies(res);
     }
 
     return res;
   } catch {
     const res = NextResponse.json(
-      { success: false, error: { message: "인증 요청에 실패했습니다." } },
+      {
+        success: false,
+        error: {
+          message: "인증 요청에 실패했습니다.",
+        },
+      },
       { status: 502 },
     );
 
@@ -126,22 +154,39 @@ export const GET = async (request: Request, context: { params: Promise<{ path: s
 
   if (!ALLOWED_GET_PATHS.has(authPath)) {
     return NextResponse.json(
-      { success: false, error: { message: "지원하지 않는 auth 요청입니다." } },
+      {
+        success: false,
+        error: {
+          message: "지원하지 않는 auth 요청입니다.",
+        },
+      },
       { status: 404 },
     );
   }
 
   try {
-    const backendRes = await fetch(`${getBackendApiBaseUrl()}/auth/${authPath}`, {
+    const backendBaseUrl = getBackendApiBaseUrl();
+
+    const backendRes = await fetch(`${backendBaseUrl}/auth/${authPath}`, {
       method: "GET",
       headers: buildBackendHeaders(request),
       cache: "no-store",
     });
 
-    return forwardBackendResponse(backendRes);
+    const res = await forwardBackendResponse(backendRes);
+
+    // 임시 디버그용
+    res.headers.set("X-Debug-Backend-Url", backendBaseUrl);
+
+    return res;
   } catch {
     return NextResponse.json(
-      { success: false, error: { message: "인증 요청에 실패했습니다." } },
+      {
+        success: false,
+        error: {
+          message: "인증 요청에 실패했습니다.",
+        },
+      },
       { status: 502 },
     );
   }

@@ -79,7 +79,12 @@ export default function EstimateRequestsPageClient() {
   };
 
   return (
-    <div className="bg-background-default md:bg-background-subtle flex w-full flex-col items-center py-38 md:py-32 xl:py-64">
+    <div
+      className={cn(
+        "bg-background-default md:bg-background-subtle flex w-full flex-col items-center",
+        isEmpty ? "flex-1" : "py-38 md:py-32 xl:py-64",
+      )}
+    >
       {isLoading ? <EstimateRequestListSkeleton showFilter /> : null}
 
       {isError ? (

@@ -8,6 +8,7 @@ import { AuthProvider } from "@/providers/AuthProvider";
 
 interface AppProvidersProps {
   children: ReactNode;
+  hasRefreshCookie?: boolean;
 }
 
 /** Provider와 동일한 client를 브라우저 모듈에 동기 등록 */
@@ -21,7 +22,7 @@ const AppQueryClientRegistrar = ({ children }: { children: ReactNode }) => {
   return children;
 };
 
-export const AppProviders = ({ children }: AppProvidersProps) => {
+export const AppProviders = ({ children, hasRefreshCookie = false }: AppProvidersProps) => {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -41,7 +42,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
   return (
     <QueryClientProvider client={queryClient}>
       <AppQueryClientRegistrar>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider hasRefreshCookie={hasRefreshCookie}>{children}</AuthProvider>
       </AppQueryClientRegistrar>
     </QueryClientProvider>
   );

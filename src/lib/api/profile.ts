@@ -151,7 +151,8 @@ export const updateMoverBasicInfo = (input: UpdateMoverBasicInfoInput) =>
 /** Header·auth store용 — AuthUser.id = userId */
 export const toAuthUserFromMoverProfile = (profile: MoverProfileMe): AuthUser => ({
   id: profile.userId,
-  name: profile.name,
+  /** Header 표시용 — 공개 별명 우선, 없으면 법적 이름 */
+  name: profile.nickname?.trim() || profile.name,
   email: profile.email ?? "",
   phone: profile.phone,
   role: "MOVER",
@@ -166,14 +167,14 @@ export const resolveAuthUserImage = async (user: AuthUser): Promise<AuthUser> =>
   try {
     if (user.role === "CUSTOMER") {
       const profile = await getCustomerProfileMe();
-      return { ...user, imageUrl: profile.imageUrl ?? null };
+      return toAuthUserFromCustomerProfile(profile);
     } else if (user.role === "MOVER") {
       const profile = await getMoverProfileMe();
-      return { ...user, imageUrl: profile.imageUrl ?? null };
+      return toAuthUserFromMoverProfile(profile);
     }
 
     return { ...user, imageUrl: null };
-  } catch (error) {
+  } catch {
     // imageUrl 필드를 건들이지 않는다.
     return user;
   }

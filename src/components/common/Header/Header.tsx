@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import NotificationTrigger from "@/components/common/Header/notification";
-import HeaderSideNav from "@/components/common/Header/HeaderSideNav";
+import HeaderSideNav, { type HeaderSideNavLink } from "@/components/common/Header/HeaderSideNav";
 import { isNavLinkActive } from "@/components/common/Header/isNavLinkActive";
 import ProfileMenuTrigger, {
   type ProfileMenuItem,
@@ -16,11 +16,18 @@ import { useResolvedAuthRole } from "@/hooks/auth/useResolvedAuthRole";
 import { useCloseOnPathnameChange } from "@/hooks/useCloseOnPathnameChange";
 import { useProfileCompletionState } from "@/hooks/profile/useProfileCompletionState";
 import { MenuIcon } from "@/icons";
+import { isOAuthCallbackPath } from "@/lib/auth/redirect";
 import type { AuthRole } from "@/lib/auth/role";
 import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
+
+const isLoginPagePath = (pathname: string): boolean => {
+  return [APP_ROUTES.LOGIN, APP_ROUTES.MOVER_LOGIN].some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+};
 
 const PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE = "프로필을 완성한 뒤 이용할 수 있어요.";
 
@@ -96,6 +103,36 @@ const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   PROFILE_LOGOUT_MENU_ITEM,
 ];
 
+/** nav role 분기 — 미확정 시 고객 메뉴 (F5 깜빡임 방지) */
+const getHeaderNavLinks = (isLogin: boolean, role: AuthRole | null): HeaderSideNavLink[] => {
+  if (!isLogin) {
+    return LOGGED_OUT_LINKS;
+  }
+
+  switch (role) {
+    case "MOVER":
+      return MOVER_LOGGED_IN_LINKS;
+    case "ADMIN":
+      return [];
+    case "CUSTOMER":
+    default:
+      return CUSTOMER_LOGGED_IN_LINKS;
+  }
+};
+
+/** nav와 동일한 role 분기 — 미확정 시 고객 메뉴 (F5 깜빡임 방지) */
+const getCompletedProfileMenuItems = (role: AuthRole | null): ProfileMenuItem[] => {
+  switch (role) {
+    case "MOVER":
+      return MOVER_PROFILE_MENU_ITEMS;
+    case "ADMIN":
+      return [PROFILE_LOGOUT_MENU_ITEM];
+    case "CUSTOMER":
+    default:
+      return CUSTOMER_PROFILE_MENU_ITEMS;
+  }
+};
+
 export interface HeaderProps {
   /** Server에서 refresh 쿠키로 전달. hydrate 전 깜빡임 방지용 */
   isLogin?: boolean;
@@ -105,6 +142,8 @@ export interface HeaderProps {
   initialRole?: AuthRole | null;
   /** Server에서 profileImage 쿠키로 전달. hydrate 전 프로필 이미지 표시용 */
   initialProfileImage?: string | null;
+  /** Server에서 profileCompleted 쿠키. 미완료 시 GNB 숨김 낙관용 */
+  initialProfileCompleted?: boolean | null;
 }
 
 const Header = ({
@@ -112,6 +151,7 @@ const Header = ({
   initialNickname = null,
   initialRole = null,
   initialProfileImage = null,
+  initialProfileCompleted = null,
 }: HeaderProps) => {
   const pathname = usePathname();
   const mobileMenuId = useId();
@@ -142,24 +182,30 @@ const Header = ({
 
   // hydrate 전·checkAuth 중: SSR refresh 쿠키 힌트 유지
   // checkAuth 완료 후: 실제 세션(access) 기준
-  const isLogin = isAuthPending ? Boolean(initialIsLogin) : isAuthenticated;
+  const isLogin = isAuthPending ? Boolean(initialIsLogin || initialRole) : isAuthenticated;
 
   const resolvedRole = useResolvedAuthRole(initialRole);
+  // 확정 후 loadRole 공백 시에도 SSR role 힌트 유지 (Header 표시용)
+  const roleForNav = resolvedRole ?? initialRole;
 
-  const navLinks = !isLogin
-    ? LOGGED_OUT_LINKS
-    : resolvedRole === "MOVER"
-      ? MOVER_LOGGED_IN_LINKS
-      : resolvedRole === "CUSTOMER"
-        ? CUSTOMER_LOGGED_IN_LINKS
-        : []; // role 미확정·ADMIN 등 — 고객 링크 기본값 사용 안 함
+  const navLinks = getHeaderNavLinks(isLogin, roleForNav);
+
+  const isLoginPage = isLoginPagePath(pathname);
+  const isOAuthCallbackPage = isOAuthCallbackPath(pathname);
+  /** 로그인·OAuth callback — 이탈용 GNB/로그인 CTA 숨김 */
+  const shouldHideAuthChrome = isLoginPage || isOAuthCallbackPage;
 
   const sideNavLinks = !isLogin
-    ? [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
+    ? isOAuthCallbackPage
+      ? []
+      : isLoginPage
+        ? LOGGED_OUT_LINKS
+        : [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
     : navLinks;
 
-  // hydrate/checkAuth 전·SSR 비로그인 힌트면 스켈레톤
-  const showAuthSkeleton = isAuthPending && !initialIsLogin;
+  // hydrate/checkAuth 전·로그인 힌트(refresh·role) 없으면 스켈레톤 — isLogin과 기준 맞춤
+  // OAuth callback은 code 교환 중이므로 우측 액션·스켈레톤도 숨김
+  const showAuthSkeleton = !isOAuthCallbackPage && isAuthPending && !initialIsLogin && !initialRole;
 
   const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
 
@@ -168,26 +214,51 @@ const Header = ({
 
   const isAvatarPending = isAuthPending && !hintedImageUrl;
 
-  const { isIncomplete, isCompletionUnresolved, profileCreatePath } =
-    useProfileCompletionState(resolvedRole);
+  const { isIncomplete, profileCreatePath } = useProfileCompletionState(
+    roleForNav,
+    initialProfileCompleted,
+  );
 
-  // SSR 로그인 힌트와 status 확정 전: 완료 사용자 메뉴/링크가 깜빡이지 않도록 숨김
-  const shouldHideNavLinks = isLogin && (isIncomplete || isCompletionUnresolved);
+  // 프로필 미완료·OAuth callback 중 GNB 숨김
+  const shouldHideNavLinks = (isLogin && isIncomplete) || isOAuthCallbackPage;
 
-  const completedProfileMenuItems =
-    resolvedRole === "MOVER"
-      ? MOVER_PROFILE_MENU_ITEMS
-      : resolvedRole === "CUSTOMER"
-        ? CUSTOMER_PROFILE_MENU_ITEMS
-        : [PROFILE_LOGOUT_MENU_ITEM];
+  const logoImages = isLogin ? (
+    <>
+      <Image
+        src="/icons/moving-logo-icon.svg"
+        alt="무빙"
+        width={32}
+        height={32}
+        priority
+        className="md:hidden"
+      />
+      <Image
+        src="/icons/logo_full.svg"
+        alt="무빙"
+        width={116}
+        height={44}
+        priority
+        className="hidden h-[34px] w-[88px] object-contain md:block xl:h-[44px] xl:w-[116px]"
+      />
+    </>
+  ) : (
+    <Image
+      src="/icons/logo_full.svg"
+      alt="무빙"
+      width={116}
+      height={44}
+      priority
+      className="h-[34px] w-[88px] object-contain xl:h-[44px] xl:w-[116px]"
+    />
+  );
+
+  const completedProfileMenuItems = getCompletedProfileMenuItems(roleForNav);
 
   const profileMenuItems: ProfileMenuItem[] = !isLogin
     ? completedProfileMenuItems
     : isIncomplete
       ? [{ type: "link", label: "프로필 생성", href: profileCreatePath }, PROFILE_LOGOUT_MENU_ITEM]
-      : isCompletionUnresolved
-        ? [PROFILE_LOGOUT_MENU_ITEM]
-        : completedProfileMenuItems;
+      : completedProfileMenuItems;
 
   return (
     <header className="border-border-subtle bg-background-surface relative z-40 w-full max-w-full border-b">
@@ -196,37 +267,13 @@ const Header = ({
       {/* overflow-x-hidden을 header 전체에 두면 알림·프로필 드롭다운이 잘리므로 좌측 nav 영역에만 적용 */}
       <div className="h-gnb-height-mobile md:h-gnb-height-tablet xl:h-gnb-height-desktop px-margin-mobile md:px-margin-tablet xl:px-gnb-padding-x-desktop flex w-full max-w-full items-center justify-between gap-12 py-16 xl:py-26">
         <div className="flex min-w-0 flex-1 items-center gap-24 overflow-x-hidden xl:gap-80">
-          <Link href="/" className="shrink-0">
-            {isLogin ? (
-              <>
-                <Image
-                  src="/icons/moving-logo-icon.svg"
-                  alt="무빙"
-                  width={32}
-                  height={32}
-                  priority
-                  className="md:hidden"
-                />
-                <Image
-                  src="/icons/logo_full.svg"
-                  alt="무빙"
-                  width={116}
-                  height={44}
-                  priority
-                  className="hidden h-[34px] w-[88px] object-contain md:block xl:h-[44px] xl:w-[116px]"
-                />
-              </>
-            ) : (
-              <Image
-                src="/icons/logo_full.svg"
-                alt="무빙"
-                width={116}
-                height={44}
-                priority
-                className="h-[34px] w-[88px] object-contain xl:h-[44px] xl:w-[116px]"
-              />
-            )}
-          </Link>
+          {isOAuthCallbackPage ? (
+            <div className="shrink-0">{logoImages}</div>
+          ) : (
+            <Link href="/" className="shrink-0">
+              {logoImages}
+            </Link>
+          )}
 
           {/* Mobile은 햄버거 전까지 링크 숨김 — 좁은 폭에서 GNB 가로 스크롤 방지 */}
           {/* 2026.08.04 정슬기 - [수정] */}
@@ -258,7 +305,7 @@ const Header = ({
           ) : null}
         </div>
 
-        {showAuthSkeleton ? (
+        {isOAuthCallbackPage ? null : showAuthSkeleton ? (
           <div className="flex shrink-0 items-center gap-16 xl:gap-32" aria-hidden>
             <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
             <div className="flex items-center gap-16">
@@ -275,7 +322,7 @@ const Header = ({
               nickname={nickname}
               imageUrl={imageUrl}
               items={profileMenuItems}
-              role={resolvedRole}
+              role={roleForNav}
               isAvatarPending={isAvatarPending}
             />
             <button
@@ -292,12 +339,14 @@ const Header = ({
           </div>
         ) : (
           <div className="flex shrink-0 items-center gap-16">
-            <Link
-              href={getLoginRedirectPath()}
-              className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 hidden h-40 items-center px-20 transition-colors xl:flex"
-            >
-              <Text variant="md-semibold">로그인</Text>
-            </Link>
+            {!shouldHideAuthChrome ? (
+              <Link
+                href={getLoginRedirectPath()}
+                className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 hidden h-40 items-center px-20 transition-colors xl:flex"
+              >
+                <Text variant="md-semibold">로그인</Text>
+              </Link>
+            ) : null}
             <button
               ref={menuButtonRef}
               type="button"

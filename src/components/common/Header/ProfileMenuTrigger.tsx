@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, type FocusEvent } from "react";
 
 import { Text } from "@/components/common/Text";
+import Toast from "@/components/common/Toast/Toast";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { usePresence } from "@/hooks/usePresence";
@@ -15,6 +16,8 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { useAuthStore } from "@/stores/useAuthStore";
+
+const LOGOUT_FAILURE_TOAST = "로그아웃에 실패했습니다. 다시 시도해 주세요.";
 
 export type ProfileMenuItem =
   | { type: "link"; label: string; href: string }
@@ -44,6 +47,7 @@ export default function ProfileMenuTrigger({
   const logout = useAuthStore((state) => state.logout);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const { isRendered: isMenuRendered, isVisible: isMenuVisible } = usePresence(
     isOpen,
     DROPDOWN_EXIT_DURATION_MS,
@@ -56,10 +60,22 @@ export default function ProfileMenuTrigger({
   const logoutItem = items.find((item) => item.type === "action" && item.action === "logout");
   const nicknameSuffix = role === "MOVER" ? "기사님" : "고객님";
 
-  const closeQuiet = useCallback(() => setIsOpen(false), []);
-  const closeWithFocus = useCallback(() => {
+  const restoreTriggerFocusIfNeeded = () => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && menuRef.current?.contains(active)) {
+      triggerRef.current?.focus();
+    }
+  };
+
+  const closeQuiet = useCallback(() => {
+    // aria-hidden 적용 전에 포커스를 메뉴 밖으로 이동
+    restoreTriggerFocusIfNeeded();
     setIsOpen(false);
+  }, []);
+
+  const closeWithFocus = useCallback(() => {
     triggerRef.current?.focus();
+    setIsOpen(false);
   }, []);
 
   const containerRef = useClickOutside<HTMLDivElement>(closeQuiet);
@@ -111,19 +127,30 @@ export default function ProfileMenuTrigger({
   };
 
   const handleLogout = async () => {
+    triggerRef.current?.focus();
     setIsOpen(false);
 
     const isPublicPage = isPublicPath(pathname);
     const logoutPath = role === "MOVER" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
 
-    await logout();
-
     if (isPublicPage) {
+      try {
+        await logout();
+      } catch {
+        setToastMessage(LOGOUT_FAILURE_TOAST);
+      }
       router.refresh();
       return;
     }
 
-    router.replace(logoutPath);
+    // hard navigate 직전: deferUiClear로 비로그인 UI paint를 건너뜀
+    // API 실패여도 로컬 세션 정리 후 로그인 페이지로 이동
+    try {
+      await logout({ deferUiClear: true });
+    } catch {
+      setToastMessage(LOGOUT_FAILURE_TOAST);
+    }
+    window.location.assign(logoutPath);
   };
 
   return (
@@ -132,6 +159,7 @@ export default function ProfileMenuTrigger({
       className="relative flex items-center xl:gap-16"
       onBlur={handleContainerBlur}
     >
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
       <button
         ref={triggerRef}
         type="button"
@@ -174,7 +202,7 @@ export default function ProfileMenuTrigger({
           ref={menuRef}
           id={`${menuId}-menu`}
           role="menu"
-          aria-hidden={!isMenuVisible}
+          inert={!isMenuVisible ? true : undefined}
           aria-labelledby={`${menuId}-trigger`}
           className={cn(
             "border-border-default bg-background-surface shadow-profile-menu rounded-16 absolute top-[calc(100%+18px)] right-0 z-50 flex w-62 flex-col items-start border px-4 pt-16 pb-6",
@@ -203,7 +231,7 @@ export default function ProfileMenuTrigger({
                       LINK_ITEM_CLASS,
                       isActive ? "text-text-brand" : "text-text-secondary",
                     )}
-                    onClick={closeQuiet}
+                    onClick={closeWithFocus}
                   >
                     <Text as="span" variant="lg-medium">
                       {item.label}

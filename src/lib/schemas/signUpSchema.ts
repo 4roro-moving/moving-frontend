@@ -4,7 +4,11 @@ import { phoneSchema } from "@/lib/schemas/phoneSchema";
 
 export const signUpSchema = z
   .object({
-    name: z.string().trim().min(1, "성함을 입력해 주세요"),
+    name: z
+      .string()
+      .trim()
+      .min(1, "성함을 입력해 주세요")
+      .max(50, "이름은 50자 이하로 입력해 주세요"),
     email: z
       .string()
       .trim()

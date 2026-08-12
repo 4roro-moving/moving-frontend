@@ -9,10 +9,8 @@ import { Text } from "@/components/common/Text";
 import ReviewEstimateSummary from "@/components/review/ReviewEstimateSummary";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { useCreateReview } from "@/hooks/useCreateReview";
+import { MAX_TEXT_CONTENT_LENGTH, MIN_TEXT_CONTENT_LENGTH } from "@/lib/constants/validation";
 import type { ReviewableEstimateItem } from "@/types/review";
-
-const MIN_CONTENT_LENGTH = 10;
-const MAX_CONTENT_LENGTH = 1000;
 
 interface ReviewWriteModalProps {
   open: boolean;
@@ -47,6 +45,7 @@ function ReviewWriteModalContent({
   const [content, setContent] = useState("");
   const [isContentTouched, setIsContentTouched] = useState(false);
   const [submitError, setSubmitError] = useState<string | undefined>();
+  const [hasSubmissionStarted, setHasSubmissionStarted] = useState(false);
 
   const createMutation = useCreateReview({
     moverId: item.mover.id,
@@ -62,23 +61,26 @@ function ReviewWriteModalContent({
   });
 
   const trimmedContent = content.trim();
-  const isPending = createMutation.isPending;
+  const isMutationPending = createMutation.isPending;
+  const isSubmitting = isMutationPending || (hasSubmissionStarted && !open);
 
   const handleClose = () => {
-    if (isPending) return;
+    if (isSubmitting) return;
     setRating(0);
     setContent("");
     setIsContentTouched(false);
     setSubmitError(undefined);
+    setHasSubmissionStarted(false);
     onClose();
   };
   const isContentValid =
-    trimmedContent.length >= MIN_CONTENT_LENGTH && trimmedContent.length <= MAX_CONTENT_LENGTH;
+    trimmedContent.length >= MIN_TEXT_CONTENT_LENGTH &&
+    trimmedContent.length <= MAX_TEXT_CONTENT_LENGTH;
   const contentValidationError =
     isContentTouched && !isContentValid
-      ? `리뷰 내용은 ${MIN_CONTENT_LENGTH}자 이상 ${MAX_CONTENT_LENGTH}자 이하로 입력해 주세요.`
+      ? `리뷰 내용은 ${MIN_TEXT_CONTENT_LENGTH}자 이상 ${MAX_TEXT_CONTENT_LENGTH}자 이하로 입력해 주세요.`
       : undefined;
-  const isSubmitDisabled = isPending || rating < 1 || !isContentValid;
+  const isSubmitDisabled = isSubmitting || rating < 1 || !isContentValid;
 
   const handleSubmit = () => {
     if (isSubmitDisabled) return;
@@ -86,6 +88,7 @@ function ReviewWriteModalContent({
     setSubmitError(undefined);
     if (preview) return;
 
+    setHasSubmissionStarted(true);
     createMutation.mutate({
       estimateId: item.estimateId,
       rating,
@@ -96,16 +99,16 @@ function ReviewWriteModalContent({
   return (
     <Modal
       open={open}
-      onClose={isPending ? undefined : handleClose}
+      onClose={isSubmitting ? undefined : handleClose}
       onExitComplete={onExitComplete}
       presentation="responsive"
       size="lg"
       className={RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME}
-      aria-label="리뷰 작성"
+      dismissible={false}
     >
       <div className="flex w-full items-start justify-between gap-12 md:gap-16">
         <Modal.Title>리뷰 작성</Modal.Title>
-        <Modal.Close onClose={handleClose} disabled={isPending} />{" "}
+        <Modal.Close onClose={handleClose} disabled={isSubmitting} />
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-28 overflow-y-auto xl:gap-32">
@@ -127,7 +130,7 @@ function ReviewWriteModalContent({
             }}
             size="lg"
             label="별점"
-            disabled={isPending}
+            disabled={isSubmitting}
           />
         </div>
 
@@ -141,9 +144,9 @@ function ReviewWriteModalContent({
             <Textarea
               id="review-content"
               value={content}
-              maxLength={MAX_CONTENT_LENGTH}
-              disabled={isPending}
-              placeholder={`최소 ${MIN_CONTENT_LENGTH}자 이상 입력해 주세요`}
+              maxLength={MAX_TEXT_CONTENT_LENGTH}
+              disabled={isSubmitting}
+              placeholder={`최소 ${MIN_TEXT_CONTENT_LENGTH}자 이상 입력해 주세요`}
               error={contentValidationError}
               className="h-160"
               onChange={(event) => {
@@ -155,7 +158,7 @@ function ReviewWriteModalContent({
               }}
             />
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
-              {content.length}/{MAX_CONTENT_LENGTH}
+              {trimmedContent.length}/{MAX_TEXT_CONTENT_LENGTH}
             </Text>
           </div>
         </FormField>
@@ -168,7 +171,7 @@ function ReviewWriteModalContent({
       ) : null}
 
       <Modal.Button fullWidth size="cta" disabled={isSubmitDisabled} onClick={handleSubmit}>
-        {isPending ? "리뷰 등록 중..." : "리뷰 등록"}
+        {isSubmitting ? "리뷰 등록 중..." : "리뷰 등록"}
       </Modal.Button>
     </Modal>
   );
