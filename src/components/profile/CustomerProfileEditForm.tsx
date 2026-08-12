@@ -126,7 +126,7 @@ const CustomerProfileEditForm = ({
         } catch (profileError) {
           if (didBasicSucceed && didChangePassword) {
             // refresh token 이미 폐기됨 → 머무르면 F5 시 강제 로그아웃만 발생
-            await reauthAfterPasswordChange(APP_ROUTES.LOGIN);
+            await reauthAfterPasswordChange(APP_ROUTES.LOGIN, { profileFailed: true });
             return;
           }
 

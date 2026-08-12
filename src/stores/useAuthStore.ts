@@ -14,7 +14,11 @@ import { getAccessTokenPayload, getAccessTokenRole } from "@/lib/auth/accessToke
 import { isAuthPagePath, isOAuthCallbackPath } from "@/lib/auth/redirect";
 import { clearAllClientStorageHints } from "@/lib/auth/clientStorageHint";
 import { loadNickname, saveNickname } from "@/lib/auth/nickname";
-import { loadProfileImage, saveProfileImage } from "@/lib/auth/profileImage";
+import {
+  loadProfileImage,
+  saveProfileImage,
+  sanitizeSoftUxProfileImageUrl,
+} from "@/lib/auth/profileImage";
 import { loadRole, saveRole } from "@/lib/auth/role";
 import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
 import { clearAppQueryCache } from "@/providers/query/appQueryClient";
@@ -83,10 +87,14 @@ const setAuthenticatedUser = (
     saveProfileImage(user.imageUrl ?? "");
   }
 
+  // Soft UX 힌트만 sanitize. user.imageUrl(원본)은 그대로 유지
+  const softUxProfileImage =
+    user.imageUrl === undefined ? undefined : sanitizeSoftUxProfileImageUrl(user.imageUrl);
+
   set({
     user,
     displayName: user.name,
-    ...(user.imageUrl !== undefined && { profileImage: user.imageUrl }),
+    ...(softUxProfileImage !== undefined && { profileImage: softUxProfileImage }),
     isAuthenticated: true,
     isCheckingAuth,
     hasHydrated: true,
