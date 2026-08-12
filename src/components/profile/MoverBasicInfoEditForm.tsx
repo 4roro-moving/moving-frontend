@@ -42,8 +42,9 @@ const MoverBasicInfoEditForm = ({
     handleSubmit,
     setError,
     setFocus,
-    setValue,
-    formState: { errors, isValid, isSubmitting },
+    getValues,
+    reset,
+    formState: { errors, isValid, isSubmitting, isDirty },
   } = useForm<MoverBasicInfoEditFormValues>({
     resolver: zodResolver(moverBasicInfoEditSchema),
     mode: "onChange",
@@ -68,9 +69,14 @@ const MoverBasicInfoEditForm = ({
         phone: formValues.phone,
         ...(hasPassword ? toPasswordChangePayload(formValues) : {}),
       });
-      setValue("currentPassword", "", { shouldValidate: true });
-      setValue("newPassword", "", { shouldValidate: true });
-      setValue("newPasswordConfirm", "", { shouldValidate: true });
+
+      const current = getValues();
+      reset({
+        ...current,
+        currentPassword: "",
+        newPassword: "",
+        newPasswordConfirm: "",
+      });
       setToastMessage("기본정보가 수정되었습니다.");
     } catch (error) {
       if (
@@ -192,7 +198,7 @@ const MoverBasicInfoEditForm = ({
       ) : null}
 
       <ProfileFormActions
-        isSubmitDisabled={!isValid || isPending}
+        isSubmitDisabled={!isValid || isPending || !isDirty}
         className={hasPassword ? undefined : "md:justify-center"}
       />
 

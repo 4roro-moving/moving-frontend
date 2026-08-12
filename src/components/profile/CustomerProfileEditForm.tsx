@@ -58,7 +58,7 @@ const CustomerProfileEditForm = ({
     getValues,
     reset,
     resetField,
-    formState: { errors, isValid, isSubmitting, dirtyFields },
+    formState: { errors, isValid, isSubmitting, dirtyFields, isDirty },
   } = useForm<CustomerProfileEditFormValues>({
     resolver: zodResolver(customerProfileEditSchema),
     mode: "onChange",
@@ -312,7 +312,7 @@ const CustomerProfileEditForm = ({
         </Text>
       ) : null}
 
-      <ProfileFormActions isSubmitDisabled={!isValid || isPending} />
+      <ProfileFormActions isSubmitDisabled={!isValid || isPending || !isDirty} />
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </form>

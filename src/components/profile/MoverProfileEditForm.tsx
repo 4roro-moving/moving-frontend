@@ -42,7 +42,9 @@ const MoverProfileEditForm = ({
     handleSubmit,
     setError,
     setFocus,
-    formState: { errors, isValid, isSubmitting },
+    getValues,
+    reset,
+    formState: { errors, isValid, isSubmitting, isDirty },
   } = useForm<MoverProfileFormValues>({
     resolver: zodResolver(moverProfileSchema),
     mode: "onChange",
@@ -74,6 +76,12 @@ const MoverProfileEditForm = ({
         regionIds: formValues.regionIds,
         serviceTypes: formValues.serviceTypes,
         ...(imageKey ? { imageUrl: imageKey } : {}),
+      });
+
+      const current = getValues();
+      reset({
+        ...current,
+        imageFile: null,
       });
       setToastMessage("프로필이 수정되었습니다.");
     } catch (error) {
@@ -210,7 +218,7 @@ const MoverProfileEditForm = ({
         </Text>
       ) : null}
 
-      <ProfileFormActions isSubmitDisabled={!isValid || isPending} />
+      <ProfileFormActions isSubmitDisabled={!isValid || isPending || !isDirty} />
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </form>
