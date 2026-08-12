@@ -86,11 +86,24 @@ function StepIndicator({ current }: { current: MobileStep }) {
 interface RegionFieldProps {
   kind: RegionKind;
   value: string | null;
+  detailValue: string;
   onSelect: () => void;
   onReset: () => void;
+  onDetailChange: (value: string) => void;
 }
 
-function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
+const DETAIL_ADDRESS_MAX_LENGTH = 255;
+
+function RegionField({
+  kind,
+  value,
+  detailValue,
+  onSelect,
+  onReset,
+  onDetailChange,
+}: RegionFieldProps) {
+  const detailInputId = `${kind}-detail-address`;
+
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col gap-12">
       <Text as="span" variant="lg-medium" className="text-text-primary">
@@ -119,6 +132,25 @@ function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
             </Text>
           </button>
         )}
+
+        <label htmlFor={detailInputId} className="sr-only">
+          {kind} 상세주소
+        </label>
+        <input
+          id={detailInputId}
+          type="text"
+          value={detailValue}
+          onChange={(event) => onDetailChange(event.target.value)}
+          maxLength={DETAIL_ADDRESS_MAX_LENGTH}
+          placeholder="상세주소를 입력해 주세요"
+          className={cn(
+            "rounded-12 border-border-brand text-text-brand placeholder:text-text-weak",
+            "flex h-[54px] w-full min-w-0 items-center border bg-transparent px-24 py-16",
+            "text-[length:var(--font-size-16)] leading-[var(--line-height-26)] font-medium",
+            "focus-visible:ring-border-brand focus-visible:ring-1 focus-visible:outline-none",
+          )}
+        />
+
         {/* 수정하기 영역 높이 고정 → 주소 입력 전후 레이아웃이 밀리지 않음 */}
         <div className="flex h-[26px] w-full items-center justify-end">
           {value && (
@@ -151,6 +183,8 @@ export default function EstimateRequestForm() {
   const [moveDate, setMoveDate] = useState<Date>(() => new Date());
   const [fromAddress, setFromAddress] = useState<AddressItem | null>(null);
   const [toAddress, setToAddress] = useState<AddressItem | null>(null);
+  const [fromDetailAddress, setFromDetailAddress] = useState("");
+  const [toDetailAddress, setToDetailAddress] = useState("");
   const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isAccessDeniedToastVisible, setIsAccessDeniedToastVisible] = useState(true);
@@ -234,8 +268,14 @@ export default function EstimateRequestForm() {
   });
 
   function handleAddressConfirm(address: AddressItem) {
-    if (addressModalKind === "출발지") setFromAddress(address);
-    if (addressModalKind === "도착지") setToAddress(address);
+    if (addressModalKind === "출발지") {
+      setFromAddress(address);
+      setFromDetailAddress("");
+    }
+    if (addressModalKind === "도착지") {
+      setToAddress(address);
+      setToDetailAddress("");
+    }
     setAddressModalKind(null);
   }
 
@@ -266,6 +306,8 @@ export default function EstimateRequestForm() {
       moveDate,
       from: fromAddress,
       to: toAddress,
+      fromDetailAddress,
+      toDetailAddress,
     });
 
     createMutation.mutate(payload);
@@ -453,14 +495,18 @@ export default function EstimateRequestForm() {
               <RegionField
                 kind="출발지"
                 value={fromAddress ? normalizeRoadAddress(fromAddress.roadAddress) : null}
+                detailValue={fromDetailAddress}
                 onSelect={() => setAddressModalKind("출발지")}
                 onReset={() => setAddressModalKind("출발지")}
+                onDetailChange={setFromDetailAddress}
               />
               <RegionField
                 kind="도착지"
                 value={toAddress ? normalizeRoadAddress(toAddress.roadAddress) : null}
+                detailValue={toDetailAddress}
                 onSelect={() => setAddressModalKind("도착지")}
                 onReset={() => setAddressModalKind("도착지")}
+                onDetailChange={setToDetailAddress}
               />
             </div>
           </section>
