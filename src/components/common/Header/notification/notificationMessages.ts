@@ -53,7 +53,7 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
     },
     CHAT_MESSAGE_RECEIVED: {
       prefix: "",
-      suffix: " 새 메시지가 도착했어요",
+      suffix: "님으로부터 메시지가 도착했습니다.",
     },
     ESTIMATE_REVISION_REQUESTED: {
       prefix: "",
