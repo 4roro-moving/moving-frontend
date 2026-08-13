@@ -3,12 +3,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useApiInfiniteQuery } from "@/hooks/queries/useApiInfiniteQuery";
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
 import {
-  getMoverEstimateRequests,
   getRejectedEstimateRequests,
   rejectMoverEstimate,
   sendMoverEstimate,
 } from "@/lib/api/moverEstimateRequests";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { getMoverEstimateRequestsInfiniteQueryOptions } from "@/lib/queryOptions/moverEstimateRequests";
 import type {
   MoverEstimateRequestQuery,
   RejectEstimateRequest,
@@ -17,14 +17,11 @@ import type {
 
 export function useMoverEstimateRequests(query: MoverEstimateRequestQuery) {
   return useApiInfiniteQuery({
-    queryKey: [...QUERY_KEYS.ESTIMATES.ALL, query],
-    queryFn: ({ pageParam }) => getMoverEstimateRequests({ ...query, cursor: pageParam }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.pagination.nextCursor ?? undefined,
+    ...getMoverEstimateRequestsInfiniteQueryOptions(query),
   });
 }
 
-//견적 반려 조회
+// 견적 반려 조회
 export function useRejectedEstimateRequests() {
   return useApiInfiniteQuery({
     queryKey: QUERY_KEYS.ESTIMATES.REJECTED,
@@ -66,28 +63,11 @@ export function useRejectMoverEstimate() {
   return useApiMutation({
     mutationFn: ({ estimateRequestId, input }: RejectMoverEstimateVariables) =>
       rejectMoverEstimate(estimateRequestId, input),
+
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.ESTIMATES.ALL,
       });
     },
   });
-}
-
-export function usePrefetchMoverEstimateRequests() {
-  const queryClient = useQueryClient();
-
-  return (query: MoverEstimateRequestQuery) => {
-    void queryClient.prefetchInfiniteQuery({
-      queryKey: [...QUERY_KEYS.ESTIMATES.ALL, query],
-      queryFn: ({ pageParam }) =>
-        getMoverEstimateRequests({
-          ...query,
-          cursor: pageParam as string | undefined,
-        }),
-      initialPageParam: undefined as string | undefined,
-      getNextPageParam: (lastPage: Awaited<ReturnType<typeof getMoverEstimateRequests>>) =>
-        lastPage.pagination.nextCursor ?? undefined,
-    });
-  };
 }

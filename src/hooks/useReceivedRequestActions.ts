@@ -1,8 +1,7 @@
 import { useState } from "react";
 
-import type { SendEstimateInput } from "@/components/estimate/SendEstimateModal";
 import { useRejectMoverEstimate, useSendMoverEstimate } from "@/hooks/useMoverEstimateRequests";
-import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
+import type { MoverEstimateRequest, SendEstimateInput } from "@/types/moverEstimateRequest";
 
 export function useReceivedRequestActions() {
   const [selectedRequest, setSelectedRequest] = useState<MoverEstimateRequest | null>(null);

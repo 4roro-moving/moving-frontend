@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
@@ -9,15 +10,13 @@ import Modal from "@/components/common/Modal/Modal";
 import { PageHeader } from "@/components/common/PageHeader";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
-import { Text } from "@/components/common/Text";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
+import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
-import {
-  useMoverEstimateRequests,
-  usePrefetchMoverEstimateRequests,
-} from "@/hooks/useMoverEstimateRequests";
+import { useMoverEstimateRequests } from "@/hooks/useMoverEstimateRequests";
 import { useReceivedRequestActions } from "@/hooks/useReceivedRequestActions";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
+import { getMoverEstimateRequestsInfiniteQueryOptions } from "@/lib/queryOptions/moverEstimateRequests";
 import type { MoveType } from "@/types/move";
 import type { RequestSort } from "@/types/moverEstimateRequest";
 
@@ -27,6 +26,7 @@ import RejectEstimateModal from "./RejectEstimateModal";
 import SendEstimateModal from "./SendEstimateModal";
 
 export default function ReceivedRequestsPage() {
+  const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState("");
   const [keyword, setKeyword] = useState("");
   const [moveTypes, setMoveTypes] = useState<MoveType[]>([]);
@@ -34,7 +34,6 @@ export default function ReceivedRequestsPage() {
   const [serviceAreaOnly, setServiceAreaOnly] = useState(false);
   const [sort, setSort] = useState<RequestSort>("requestedAt");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const prefetchMoverEstimateRequests = usePrefetchMoverEstimateRequests();
 
   const requestQuery = {
     keyword: keyword || undefined,
@@ -44,6 +43,7 @@ export default function ReceivedRequestsPage() {
     sort,
     limit: 10,
   };
+
   const query = useMoverEstimateRequests(requestQuery);
   const requestActions = useReceivedRequestActions();
 
@@ -61,10 +61,12 @@ export default function ReceivedRequestsPage() {
   }
 
   function prefetchRequests(patch: Partial<typeof requestQuery>) {
-    prefetchMoverEstimateRequests({
+    const nextQuery = {
       ...requestQuery,
       ...patch,
-    });
+    };
+
+    void queryClient.prefetchInfiniteQuery(getMoverEstimateRequestsInfiniteQueryOptions(nextQuery));
   }
 
   function getNextMoveTypes(moveType: MoveType) {
@@ -100,6 +102,7 @@ export default function ReceivedRequestsPage() {
           <div className="hidden flex-wrap gap-12 xl:flex">
             {MOVE_TYPE_OPTIONS.map((moveType) => {
               const isSelected = moveTypes.includes(moveType.value);
+
               return (
                 <SelectableChip
                   key={moveType.value}
@@ -128,6 +131,7 @@ export default function ReceivedRequestsPage() {
               전체 {totalCount}건
             </Text>
           )}
+
           <div className="flex min-h-40 flex-wrap items-center justify-between gap-12 px-10 xl:px-0">
             {query.isPending ? (
               <Skeleton className="h-20 w-64 xl:hidden" />
@@ -136,24 +140,31 @@ export default function ReceivedRequestsPage() {
                 전체 {totalCount}건
               </Text>
             )}
+
             <div className="hidden flex-wrap items-center gap-12 text-base xl:flex">
               <Checkbox
                 checked={includeDesignated}
                 onCheckedChange={setIncludeDesignated}
                 onPrefetch={() =>
-                  prefetchRequests({ isDesignated: includeDesignated ? undefined : true })
+                  prefetchRequests({
+                    isDesignated: includeDesignated ? undefined : true,
+                  })
                 }
                 label="지정 견적 요청"
               />
+
               <Checkbox
                 checked={serviceAreaOnly}
                 onCheckedChange={setServiceAreaOnly}
                 onPrefetch={() =>
-                  prefetchRequests({ isServiceArea: serviceAreaOnly ? undefined : true })
+                  prefetchRequests({
+                    isServiceArea: serviceAreaOnly ? undefined : true,
+                  })
                 }
                 label="서비스 가능 지역"
               />
             </div>
+
             <div className="flex items-center gap-4">
               <Select
                 desc="정렬"
@@ -176,6 +187,7 @@ export default function ReceivedRequestsPage() {
                   이사 빠른순
                 </Select.Option>
               </Select>
+
               <button
                 type="button"
                 aria-label="필터 열기"
@@ -188,11 +200,13 @@ export default function ReceivedRequestsPage() {
           </div>
 
           {query.isPending ? <ReceivedRequestsSkeleton /> : null}
+
           {query.isError && (
             <Text as="p" variant="lg-regular" className="text-text-error py-80 text-center">
               받은 요청을 불러오지 못했어요.
             </Text>
           )}
+
           {!query.isPending && !query.isError && items.length === 0 && (
             <div className="py-page-header-height-desktop flex flex-col items-center gap-32">
               <Image
@@ -207,6 +221,7 @@ export default function ReceivedRequestsPage() {
               </Text>
             </div>
           )}
+
           {items.length > 0 && (
             <>
               <div className="grid w-full grid-cols-1 gap-24 md:max-w-147 xl:max-w-none xl:grid-cols-2">
@@ -219,6 +234,7 @@ export default function ReceivedRequestsPage() {
                   />
                 ))}
               </div>
+
               {query.hasNextPage && (
                 <button
                   type="button"
@@ -252,9 +268,11 @@ export default function ReceivedRequestsPage() {
             <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
               이사 유형
             </Text>
+
             <div className="flex flex-wrap gap-12">
               {MOVE_TYPE_OPTIONS.map((moveType) => {
                 const isSelected = moveTypes.includes(moveType.value);
+
                 return (
                   <SelectableChip
                     key={moveType.value}
@@ -279,6 +297,7 @@ export default function ReceivedRequestsPage() {
             <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
               지역 및 견적
             </Text>
+
             <div className="flex flex-col gap-12">
               {[
                 {
