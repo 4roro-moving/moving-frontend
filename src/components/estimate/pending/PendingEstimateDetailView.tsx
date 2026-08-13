@@ -18,6 +18,7 @@ import EstimateDetailLayout, {
 import EstimateDetailPrice from "@/components/estimate/detail/EstimateDetailPrice";
 import EstimateRequestCancelConfirmModal from "@/components/estimate/requests/EstimateRequestCancelConfirmModal";
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
+import { useChatModalSearchParam } from "@/hooks/useChatModalSearchParam";
 import { useEstimateDetail } from "@/hooks/useEstimateDetail";
 import { useEstimateRequestCancelFlow } from "@/hooks/useEstimateRequestCancelFlow";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
@@ -44,11 +45,18 @@ function PendingEstimateDetailContent({
 }: PendingEstimateDetailContentProps) {
   const [confirmToastMessage, setConfirmToastMessage] = useState<string | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const { isChatOpenRequested, clearChatOpenSearchParam } = useChatModalSearchParam();
 
   const estimateRequestId = data.estimateRequest.id;
   const canCancelRequest = isCancelableEstimateRequestStatus(data.estimateRequest.status);
   const displayName = data.mover.nickname || data.mover.name;
   const showChatAction = data.status === "SENT";
+  const isChatOpen = isChatModalOpen || (showChatAction && isChatOpenRequested);
+
+  const handleCloseChatModal = () => {
+    setIsChatModalOpen(false);
+    clearChatOpenSearchParam();
+  };
 
   const confirmMutation = useConfirmEstimate(estimateId, {
     onSuccess: () => setConfirmToastMessage("견적이 확정되었어요."),
@@ -111,12 +119,12 @@ function PendingEstimateDetailContent({
       />
 
       <ChatRoomModalContainer
-        open={isChatModalOpen}
+        open={isChatOpen}
         estimateId={estimateId}
         participantRole="CUSTOMER"
         participantName={displayName}
         estimateSummary={`견적가 - ${data.price.toLocaleString("ko-KR")}원`}
-        onClose={() => setIsChatModalOpen(false)}
+        onClose={handleCloseChatModal}
       />
 
       <EstimateRequestCancelConfirmModal

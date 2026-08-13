@@ -15,6 +15,7 @@ import SentEstimateChatAction from "@/components/estimate/sent/SentEstimateChatA
 import SentEstimateCompleteAction from "@/components/estimate/sent/SentEstimateCompleteAction";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
+import { useChatModalSearchParam } from "@/hooks/useChatModalSearchParam";
 import { useSentEstimateDetail } from "@/hooks/useSentEstimates";
 import FrameIcon from "@/icons/frame.svg";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
@@ -112,6 +113,7 @@ function SentEstimateComment({ comment }: { comment: string }) {
 
 export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetailPageProps) {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const { isChatOpenRequested, clearChatOpenSearchParam } = useChatModalSearchParam();
   const query = useSentEstimateDetail(estimateId);
 
   if (query.isPending) {
@@ -136,6 +138,12 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
   const showChatAction = estimate.status === "SENT";
   const showCompleteAction =
     estimate.status === "CONFIRMED" && isKstDateOnOrAfter(request.moveDate);
+  const isChatOpen = isChatModalOpen || (showChatAction && isChatOpenRequested);
+
+  const handleCloseChatModal = () => {
+    setIsChatModalOpen(false);
+    clearChatOpenSearchParam();
+  };
 
   return (
     <>
@@ -204,7 +212,7 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
       />
 
       <ChatRoomModalContainer
-        open={isChatModalOpen}
+        open={isChatOpen}
         estimateId={estimate.id}
         participantRole="MOVER"
         participantName={estimate.customer.name}
@@ -213,7 +221,7 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
           moveDateLabel: formatKoreanDateTime(request.moveDate),
           priceLabel: formatPrice(estimate.price),
         }}
-        onClose={() => setIsChatModalOpen(false)}
+        onClose={handleCloseChatModal}
       />
     </>
   );
