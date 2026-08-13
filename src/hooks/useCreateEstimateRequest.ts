@@ -13,9 +13,9 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import type { MoveType } from "@/types/move";
+import { ERROR_CODES } from "@/lib/constants/errorCodes";
 
 const TOAST_FAILURE_MESSAGE = "견적 요청에 실패했습니다.";
-const TOAST_EXISTING_REQUEST_MESSAGE = "견적 요청에 실패했습니다. 기존 견적이 있는지 확인해주세요.";
 
 interface UseCreateEstimateRequestOptions {
   onError?: (message: string) => void;
@@ -32,7 +32,7 @@ function getCreateEstimateErrorMessage(error: unknown): string {
   const { code } = getApiError(error);
 
   if (code === "ACTIVE_REQUEST_EXISTS") {
-    return TOAST_EXISTING_REQUEST_MESSAGE;
+    return ERROR_CODES.ACTIVE_REQUEST_EXISTS.message;
   }
 
   return TOAST_FAILURE_MESSAGE;
