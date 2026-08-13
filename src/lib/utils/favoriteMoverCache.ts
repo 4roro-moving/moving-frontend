@@ -1,17 +1,33 @@
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 
 import type { FavoriteMoversListResult } from "@/lib/api/favorites";
-import type { MoverListItem, MoversListResult } from "@/types/mover";
 import {
   getFavoriteMoversScopeQueryKey,
+  getMoverDetailQueryKey,
   getMoverDetailScopeQueryKey,
   getMoverListScopeQueryKey,
   QUERY_KEYS,
   type AuthQueryScope,
 } from "@/lib/constants/queryKeys";
+import type {
+  EstimateDetail,
+  PendingEstimateSectionListResult,
+  ReceivedEstimatePanel,
+} from "@/types/estimate";
+import type { MoverListItem, MoversListResult } from "@/types/mover";
+import type { MoverDetail } from "@/types/moverDetail";
 
 export type FavoriteMoversCacheData =
   FavoriteMoversListResult | InfiniteData<FavoriteMoversListResult>;
+
+export interface FavoriteMutationContext {
+  previousReceived: ReceivedEstimatePanel[] | undefined;
+  previousDetails: [readonly unknown[], EstimateDetail | undefined][];
+  previousPendingLists: [readonly unknown[], PendingEstimateSectionListResult | undefined][];
+  previousMoverLists: [readonly unknown[], InfiniteData<MoversListResult> | undefined][];
+  previousFavoriteMovers: [readonly unknown[], FavoriteMoversCacheData | undefined][];
+  previousMoverDetail: MoverDetail | undefined;
+}
 
 function isFavoriteMoversInfiniteData(
   data: FavoriteMoversCacheData | undefined,
@@ -77,12 +93,14 @@ export function removeIdsFromFavoriteMoversCache(
 
   if (isFavoriteMoversListResult(data)) {
     const next = removeIdsFromFavoriteMoversPage(data, idSet, removedTotalDelta);
+
     if (
       next.data.length === data.data.length &&
       next.pagination.totalCount === data.pagination.totalCount
     ) {
       return data;
     }
+
     return next;
   }
 
@@ -97,6 +115,7 @@ export function keepOnlyIdsInFavoriteMoversCache(
 ): FavoriteMoversCacheData | undefined {
   if (isFavoriteMoversInfiniteData(data)) {
     const firstPage = data.pages[0];
+
     if (!firstPage) {
       return data;
     }
@@ -213,9 +232,13 @@ export function findMoverListItemSnapshot(
 
   for (const [, data] of queries) {
     if (!data) continue;
+
     for (const page of data.pages) {
       const found = page.data.find((item) => item.id === moverId);
-      if (found) return found;
+
+      if (found) {
+        return found;
+      }
     }
   }
 
@@ -231,12 +254,15 @@ export function addMoverToFavoriteMoversCache(
 
   if (isFavoriteMoversInfiniteData(data)) {
     const firstPage = data.pages[0];
+
     if (!firstPage) {
       return data;
     }
+
     if (data.pages.some((page) => page.data.some((item) => item.id === entry.id))) {
       return data;
     }
+
     return {
       ...data,
       pages: [
@@ -269,4 +295,199 @@ export function addMoverToFavoriteMoversCache(
   }
 
   return data;
+}
+
+/**
+ * 단건 찜 mutation 전 관련 캐시를 스냅샷으로 저장하고
+ * 원하는 찜 상태를 낙관적으로 반영합니다.
+ */
+export async function applyFavoriteOptimisticUpdate(
+  queryClient: QueryClient,
+  authScope: AuthQueryScope,
+  moverId: string,
+  nextIsFavorite: boolean,
+): Promise<FavoriteMutationContext> {
+  const moverListScopeQueryKey = getMoverListScopeQueryKey(authScope);
+  const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(authScope);
+  const moverDetailQueryKey = getMoverDetailQueryKey(authScope, moverId);
+
+  // 찜 추가인 경우 favorite 목록에 넣기 위한 현재 mover 스냅샷 확보
+  const moverSnapshot = nextIsFavorite
+    ? findMoverListItemSnapshot(queryClient, moverListScopeQueryKey, moverId)
+    : undefined;
+
+  await Promise.all([
+    queryClient.cancelQueries({
+      queryKey: QUERY_KEYS.ESTIMATES.RECEIVED,
+    }),
+    queryClient.cancelQueries({
+      queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT,
+    }),
+    queryClient.cancelQueries({
+      queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
+    }),
+    queryClient.cancelQueries({
+      queryKey: moverListScopeQueryKey,
+    }),
+    queryClient.cancelQueries({
+      queryKey: moverDetailQueryKey,
+    }),
+    queryClient.cancelQueries({
+      queryKey: favoriteMoversScopeQueryKey,
+    }),
+  ]);
+
+  const previousReceived = queryClient.getQueryData<ReceivedEstimatePanel[]>(
+    QUERY_KEYS.ESTIMATES.RECEIVED,
+  );
+
+  const previousDetails = queryClient.getQueriesData<EstimateDetail>({
+    queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT,
+  });
+
+  const previousPendingLists = queryClient.getQueriesData<PendingEstimateSectionListResult>({
+    queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
+  });
+
+  const previousMoverLists = queryClient.getQueriesData<InfiniteData<MoversListResult>>({
+    queryKey: moverListScopeQueryKey,
+  });
+
+  const previousFavoriteMovers = queryClient.getQueriesData<FavoriteMoversCacheData>({
+    queryKey: favoriteMoversScopeQueryKey,
+  });
+
+  const previousMoverDetail = queryClient.getQueryData<MoverDetail>(moverDetailQueryKey);
+
+  queryClient.setQueryData<ReceivedEstimatePanel[]>(QUERY_KEYS.ESTIMATES.RECEIVED, (panels) => {
+    if (!panels) {
+      return panels;
+    }
+
+    return panels.map((panel) => ({
+      ...panel,
+      estimates: panel.estimates.map((estimate) => ({
+        ...estimate,
+        mover: patchMoverFavorite(estimate.mover, moverId, nextIsFavorite),
+      })),
+    }));
+  });
+
+  queryClient.setQueriesData<EstimateDetail>(
+    {
+      queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT,
+    },
+    (detail) => {
+      if (!detail?.mover) {
+        return detail;
+      }
+
+      return {
+        ...detail,
+        mover: patchMoverFavorite(detail.mover, moverId, nextIsFavorite),
+      };
+    },
+  );
+
+  queryClient.setQueriesData<PendingEstimateSectionListResult>(
+    {
+      queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
+    },
+    (list) => {
+      if (!list || !Array.isArray(list.sections)) {
+        return list;
+      }
+
+      return {
+        ...list,
+        sections: list.sections.map((section) => ({
+          ...section,
+          estimates: section.estimates.map((estimate) => ({
+            ...estimate,
+            mover: patchMoverFavorite(estimate.mover, moverId, nextIsFavorite),
+          })),
+        })),
+      };
+    },
+  );
+
+  queryClient.setQueriesData<InfiniteData<MoversListResult>>(
+    {
+      queryKey: moverListScopeQueryKey,
+    },
+    (list) => {
+      if (!list) {
+        return list;
+      }
+
+      return {
+        ...list,
+        pages: list.pages.map((page) => ({
+          ...page,
+          data: page.data.map((mover) => patchMoverFavorite(mover, moverId, nextIsFavorite)),
+        })),
+      };
+    },
+  );
+
+  if (!nextIsFavorite) {
+    queryClient.setQueriesData<FavoriteMoversCacheData>(
+      {
+        queryKey: favoriteMoversScopeQueryKey,
+      },
+      (list) => removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1),
+    );
+  } else if (moverSnapshot) {
+    queryClient.setQueriesData<FavoriteMoversCacheData>(
+      {
+        queryKey: favoriteMoversScopeQueryKey,
+      },
+      (list) => addMoverToFavoriteMoversCache(list, moverSnapshot),
+    );
+  }
+
+  queryClient.setQueryData<MoverDetail>(moverDetailQueryKey, (detail) => {
+    if (!detail) {
+      return detail;
+    }
+
+    return patchMoverFavorite(detail, moverId, nextIsFavorite);
+  });
+
+  return {
+    previousReceived,
+    previousDetails,
+    previousPendingLists,
+    previousMoverLists,
+    previousFavoriteMovers,
+    previousMoverDetail,
+  };
+}
+
+/** 최신 단건 찜 mutation 실패 시 이전 캐시 스냅샷을 복구합니다. */
+export function rollbackFavoriteOptimisticUpdate(
+  queryClient: QueryClient,
+  authScope: AuthQueryScope,
+  moverId: string,
+  context: FavoriteMutationContext,
+): void {
+  queryClient.setQueryData(QUERY_KEYS.ESTIMATES.RECEIVED, context.previousReceived);
+
+  context.previousDetails.forEach(([queryKey, data]) => {
+    queryClient.setQueryData(queryKey, data);
+  });
+
+  context.previousPendingLists.forEach(([queryKey, data]) => {
+    queryClient.setQueryData(queryKey, data);
+  });
+
+  context.previousMoverLists.forEach(([queryKey, data]) => {
+    queryClient.setQueryData(queryKey, data);
+  });
+
+  context.previousFavoriteMovers.forEach(([queryKey, data]) => {
+    queryClient.setQueryData(queryKey, data);
+  });
+
+  queryClient.setQueryData(getMoverDetailQueryKey(authScope, moverId), context.previousMoverDetail);
 }
