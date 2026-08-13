@@ -169,7 +169,7 @@ export async function GET(request: Request) {
 
   const addressResults = (addressDocuments ?? []).flatMap((document, index) => {
     const item = mapKakaoDocumentToAddressItem(document, index);
-    return item?.zipCode.trim() ? [item] : [];
+    return item?.zipCode?.trim() ? [item] : [];
   });
   const keywordResults = keywordDocuments.flatMap((document, index) => {
     const item = mapKakaoKeywordToAddressItem(
@@ -177,7 +177,7 @@ export async function GET(request: Request) {
       index,
       resolveKeywordZipCode(document, lookups),
     );
-    return item?.zipCode.trim() ? [item] : [];
+    return item?.zipCode?.trim() ? [item] : [];
   });
 
   // 우편번호 없는 도로명(REGION/ROAD)이 merge limit을 채우지 않도록,
