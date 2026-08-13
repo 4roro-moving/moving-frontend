@@ -8,7 +8,7 @@ import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/commo
 import { Text } from "@/components/common/Text";
 import ReviewEstimateSummary from "@/components/review/ReviewEstimateSummary";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
-import { useCreateReview } from "@/hooks/useCreateReview";
+import { useReviewWriteForm } from "@/hooks/useReviewWriteForm";
 import { MAX_TEXT_CONTENT_LENGTH, MIN_TEXT_CONTENT_LENGTH } from "@/lib/constants/validation";
 import type { ReviewableEstimateItem } from "@/types/review";
 
@@ -18,7 +18,6 @@ interface ReviewWriteModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   onError?: (message: string) => void;
-  /** 개발용 미리보기에서 실제 리뷰 생성 요청을 차단합니다. */
   preview?: boolean;
 }
 
@@ -41,60 +40,27 @@ function ReviewWriteModalContent({
   onError,
   preview = false,
 }: ReviewWriteModalContentProps) {
-  const [rating, setRating] = useState(0);
-  const [content, setContent] = useState("");
-  const [isContentTouched, setIsContentTouched] = useState(false);
-  const [submitError, setSubmitError] = useState<string | undefined>();
-  const [hasSubmissionStarted, setHasSubmissionStarted] = useState(false);
-
-  const createMutation = useCreateReview({
-    moverId: item.mover.id,
-    onSuccess: () => {
-      onSuccess?.();
-      onClose();
-    },
-    onError: (message) => {
-      // Modal과 Toast가 동일 z-index라 실패 시 Toast가 가려질 수 있어 모달 내 인라인 표시
-      setSubmitError(message);
-      onError?.(message);
-    },
+  const {
+    rating,
+    content,
+    contentLength,
+    submitError,
+    isSubmitting,
+    isSubmitDisabled,
+    contentValidationError,
+    handleClose,
+    handleRatingChange,
+    handleContentChange,
+    handleContentBlur,
+    handleSubmit,
+  } = useReviewWriteForm({
+    open,
+    item,
+    onClose,
+    onSuccess,
+    onError,
+    preview,
   });
-
-  const trimmedContent = content.trim();
-  const isMutationPending = createMutation.isPending;
-  const isSubmitting = isMutationPending || (hasSubmissionStarted && !open);
-
-  const handleClose = () => {
-    if (isSubmitting) return;
-    setRating(0);
-    setContent("");
-    setIsContentTouched(false);
-    setSubmitError(undefined);
-    setHasSubmissionStarted(false);
-    onClose();
-  };
-  const isContentValid =
-    trimmedContent.length >= MIN_TEXT_CONTENT_LENGTH &&
-    trimmedContent.length <= MAX_TEXT_CONTENT_LENGTH;
-  const contentValidationError =
-    isContentTouched && !isContentValid
-      ? `리뷰 내용은 ${MIN_TEXT_CONTENT_LENGTH}자 이상 ${MAX_TEXT_CONTENT_LENGTH}자 이하로 입력해 주세요.`
-      : undefined;
-  const isSubmitDisabled = isSubmitting || rating < 1 || !isContentValid;
-
-  const handleSubmit = () => {
-    if (isSubmitDisabled) return;
-
-    setSubmitError(undefined);
-    if (preview) return;
-
-    setHasSubmissionStarted(true);
-    createMutation.mutate({
-      estimateId: item.estimateId,
-      rating,
-      content: trimmedContent,
-    });
-  };
 
   return (
     <Modal
@@ -122,12 +88,10 @@ function ReviewWriteModalContent({
           >
             평점을 선택해 주세요
           </Text>
+
           <ReviewStarRating
             value={rating}
-            onChange={(next) => {
-              setRating(next);
-              setSubmitError(undefined);
-            }}
+            onChange={handleRatingChange}
             size="lg"
             label="별점"
             disabled={isSubmitting}
@@ -149,16 +113,12 @@ function ReviewWriteModalContent({
               placeholder={`최소 ${MIN_TEXT_CONTENT_LENGTH}자 이상 입력해 주세요`}
               error={contentValidationError}
               className="h-160"
-              onChange={(event) => {
-                setContent(event.target.value);
-                setSubmitError(undefined);
-              }}
-              onBlur={() => {
-                setIsContentTouched(true);
-              }}
+              onChange={(event) => handleContentChange(event.target.value)}
+              onBlur={handleContentBlur}
             />
+
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
-              {trimmedContent.length}/{MAX_TEXT_CONTENT_LENGTH}
+              {contentLength}/{MAX_TEXT_CONTENT_LENGTH}
             </Text>
           </div>
         </FormField>
@@ -177,9 +137,6 @@ function ReviewWriteModalContent({
   );
 }
 
-// 2026.07.27 정슬기 - [추가] 리뷰 작성 모달 (별점·내용·POST /reviews)
-// 2026.07.27 정슬기 - [수정] Mobile bottom-sheet형 / Tablet·Desktop 중앙 모달
-// 2026.08.07 정슬기 - [수정] exit 모션을 위해 item 캐시 후 open으로 제어
 export default function ReviewWriteModal({
   open,
   item,
