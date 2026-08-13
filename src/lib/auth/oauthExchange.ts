@@ -30,6 +30,11 @@ export const markOAuthExchangeFinished = (provider: OAuthProvider, code: string)
   return true;
 };
 
+/** 후처리 실패 시 완료 표시를 지워 다시 시도할 수 있게 한다. */
+export const clearOAuthExchangeFinished = (provider: OAuthProvider, code: string): void => {
+  finishedExchangeKeys.delete(getExchangeKey(provider, code));
+};
+
 /** 성공 후처리(세션 확립·이동)를 1회만 수행. 이미 처리됨이면 false */
 export const isOAuthExchangeFinished = (provider: OAuthProvider, code: string): boolean => {
   return finishedExchangeKeys.has(getExchangeKey(provider, code));

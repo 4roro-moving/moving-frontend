@@ -4,15 +4,18 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 import OAuthLayout from "@/components/auth/OAuthLayout";
+import type { AuthUser, LoginResult } from "@/lib/api/auth";
 import { resolveAuthUserImage } from "@/lib/api/profile";
 import { getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
 import {
   clearOAuthPendingSession,
-  isOAuthProvider,
   consumeOAuthClientState,
+  isOAuthProvider,
   loadOAuthPendingSession,
+  type OAuthProvider,
 } from "@/lib/auth/oauth";
 import {
+  clearOAuthExchangeFinished,
   exchangeOAuthCodeOnce,
   getCompletedOAuthExchange,
   isOAuthExchangeFinished,
@@ -32,6 +35,47 @@ import { useAuthStore } from "@/stores/useAuthStore";
 const failOAuthCallback = (message: string, setError: (value: string) => void): void => {
   clearOAuthPendingSession();
   setError(message);
+};
+
+interface FinalizeOAuthCallbackParams {
+  result: LoginResult;
+  returnPath?: string | null;
+  provider: OAuthProvider;
+  code: string;
+  establishSession: (user: AuthUser) => void;
+  router: ReturnType<typeof useRouter>;
+}
+
+const finalizeOAuthCallback = async ({
+  result,
+  returnPath,
+  provider,
+  code,
+  establishSession,
+  router,
+}: FinalizeOAuthCallbackParams): Promise<void> => {
+  if (!markOAuthExchangeFinished(provider, code)) {
+    return;
+  }
+
+  try {
+    clearProfileCompleted();
+
+    const resultAudience = getAuthAudienceFromRole(result.user.role);
+    const nextPath = await getPostAuthRedirectPath({
+      audience: resultAudience,
+      returnPath,
+      fallbackPath: getRoleHomePath(result.user.role),
+    });
+
+    establishSession(await resolveAuthUserImage(result.user));
+    clearOAuthPendingSession();
+    window.history.replaceState(null, "", window.location.pathname);
+    router.replace(nextPath);
+  } catch (error) {
+    clearOAuthExchangeFinished(provider, code);
+    throw error;
+  }
 };
 
 const OAuthCallbackContent = () => {
@@ -75,14 +119,31 @@ const OAuthCallbackContent = () => {
         return;
       }
 
-      // 성공 후 pending이 지워진 뒤 remount되어도 완료 캐시가 있으면 재처리/오탐 에러 방지
       if (!pending) {
-        if (
-          getCompletedOAuthExchange(routeProvider, code) ||
-          isOAuthExchangeFinished(routeProvider, code)
-        ) {
+        if (isOAuthExchangeFinished(routeProvider, code)) {
           return;
         }
+
+        const completed = getCompletedOAuthExchange(routeProvider, code);
+        if (completed) {
+          try {
+            await finalizeOAuthCallback({
+              result: completed,
+              returnPath: null,
+              provider: routeProvider,
+              code,
+              establishSession,
+              router,
+            });
+          } catch (err) {
+            failOAuthCallback(
+              getLoginErrorMessage(err, getAuthAudienceFromRole(completed.user.role)),
+              setError,
+            );
+          }
+          return;
+        }
+
         failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
         return;
       }
@@ -113,25 +174,14 @@ const OAuthCallbackContent = () => {
           ...(pending.provider === "naver" && state ? { state } : {}),
         });
 
-        if (!markOAuthExchangeFinished(pending.provider, code)) {
-          return;
-        }
-
-        // 이전 계정 Soft UX 힌트 제거 후 status로 다시 저장
-        clearProfileCompleted();
-
-        const resultAudience = getAuthAudienceFromRole(result.user.role);
-        const nextPath = await getPostAuthRedirectPath({
-          audience: resultAudience,
+        await finalizeOAuthCallback({
+          result,
           returnPath: pending.returnPath,
-          fallbackPath: getRoleHomePath(result.user.role),
+          provider: pending.provider,
+          code,
+          establishSession,
+          router,
         });
-
-        // GuestOnly 밖이므로 postAuthRedirectPath 대신 직접 이동
-        establishSession(await resolveAuthUserImage(result.user));
-        clearOAuthPendingSession();
-        window.history.replaceState(null, "", window.location.pathname);
-        router.replace(nextPath);
       } catch (err) {
         failOAuthCallback(getLoginErrorMessage(err, pageAudience), setError);
       }
