@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import CustomerAuthGate from "@/components/auth/CustomerAuthGate";
 import {
@@ -30,19 +31,21 @@ export default async function PendingEstimateDetailPage({
     notFound();
   }
 
+  const loadingFallback = (
+    <EstimateDetailLoadingState
+      backFallbackHref={APP_ROUTES.ESTIMATES.PENDING}
+      contentClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName, "pt-28")}
+      rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
+      mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
+      asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "xl:gap-80 xl:pt-40")}
+    />
+  );
+
   return (
-    <CustomerAuthGate
-      loadingFallback={
-        <EstimateDetailLoadingState
-          backFallbackHref={APP_ROUTES.ESTIMATES.PENDING}
-          contentClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName, "pt-28")}
-          rowClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.rowClassName}
-          mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
-          asideClassName={cn(ESTIMATE_DETAIL_LAYOUT_CLASSES.asideClassName, "xl:gap-80 xl:pt-40")}
-        />
-      }
-    >
-      <PendingEstimateDetailView estimateId={id} />
-    </CustomerAuthGate>
+    <Suspense fallback={loadingFallback}>
+      <CustomerAuthGate loadingFallback={loadingFallback}>
+        <PendingEstimateDetailView estimateId={id} />
+      </CustomerAuthGate>
+    </Suspense>
   );
 }

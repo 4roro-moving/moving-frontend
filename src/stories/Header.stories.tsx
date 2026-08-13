@@ -24,7 +24,7 @@ const notificationListFixture = {
       id: 2,
       type: "CHAT_MESSAGE_RECEIVED",
       title: "새 메시지 알림",
-      content: "이사 견적 관련",
+      content: "튼튼이사기사님",
       linkUrl: null,
       isRead: false,
       readAt: null,
