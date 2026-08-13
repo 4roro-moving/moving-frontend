@@ -1,21 +1,15 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
-import {
-  buildCreateEstimateRequestPayload,
-  createEstimateRequest,
-} from "@/lib/api/estimateRequest";
-import { getApiError } from "@/lib/api/getApiError";
+import { useCreateEstimateRequest } from "@/hooks/useCreateEstimateRequest";
 import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { MOVE_TYPE_CARDS } from "@/lib/constants/moveType";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
@@ -28,9 +22,6 @@ import Calendar from "./Calendar";
 import DatePickerField from "./DatePickerField";
 import MoveTypeCard from "./MoveTypeCard";
 
-const TOAST_FAILURE_MESSAGE = "견적 요청이 실패하였습니다.";
-const TOAST_EXISTING_REQUEST_MESSAGE =
-  "견적 요청에 실패하였습니다. 기존 견적이 있는지 확인해주세요.";
 const TOAST_INVALID_ZIP_MESSAGE = "우편번호 정보가 올바르지 않습니다. 주소를 다시 선택해주세요.";
 const TOAST_FORBIDDEN_ROLE_MESSAGE = "고객 계정으로만 견적을 요청할 수 있어요.";
 const ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE = "고객님의 견적 정보를 불러오지 못했습니다.";
@@ -45,16 +36,6 @@ const MOBILE_STEP_TITLES = {
 
 type RegionKind = "출발지" | "도착지";
 type MobileStep = 1 | 2 | 3;
-
-function getCreateEstimateErrorMessage(error: unknown): string {
-  const { code } = getApiError(error);
-
-  if (code === "ACTIVE_REQUEST_EXISTS") {
-    return TOAST_EXISTING_REQUEST_MESSAGE;
-  }
-
-  return TOAST_FAILURE_MESSAGE;
-}
 
 function StepIndicator({ current }: { current: MobileStep }) {
   return (
@@ -174,7 +155,6 @@ function RegionField({
 
 export default function EstimateRequestForm() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -233,39 +213,9 @@ export default function EstimateRequestForm() {
     enabled: isAuthReady && isCustomer,
   });
 
-  // 2026.07.26 정슬기 - [수정] 생성 성공 시 내 견적 목록 캐시 무효화 (대기 목록이 stale하지 않도록)
-  // 2026.07.29 정슬기 - [수정] PENDING_LIST + 보낸 견적 요청 MY_LIST_ROOT 무효화
-  const createMutation = useMutation({
-    mutationFn: createEstimateRequest,
-    onSuccess: async (response) => {
-      // BE GET /estimates/pending은 견적 도착 여부와 무관하게 미확정·미만료 요청을 내려주므로
-      // 새 요청은 "견적 못 받은" 섹션으로 바로 노출된다. 목록이 열려 있지 않은 시점이라
-      // refetchType: "none"으로 재요청 없이 stale 표시만 하고 다음 진입 때 갱신한다.
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
-          refetchType: "none",
-        }),
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST_ROOT,
-          refetchType: "none",
-        }),
-      ]);
-      if (response) {
-        queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, response);
-      } else {
-        await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE });
-      }
-      // 제출 성공 후 보낸 견적 요청 목록으로 이동
-      router.replace(APP_ROUTES.ESTIMATES.REQUESTS);
-    },
-    onError: async (error) => {
-      const { code } = getApiError(error);
-      if (code === "ACTIVE_REQUEST_EXISTS") {
-        await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE });
-        return;
-      }
-      setToastMessage(getCreateEstimateErrorMessage(error));
+  const createMutation = useCreateEstimateRequest({
+    onError: (message) => {
+      setToastMessage(message);
     },
   });
 
@@ -308,7 +258,7 @@ export default function EstimateRequestForm() {
       return;
     }
 
-    const payload = buildCreateEstimateRequestPayload({
+    createMutation.submitEstimateRequest({
       moveType: selectedType,
       moveDate,
       from: fromAddress,
@@ -316,8 +266,6 @@ export default function EstimateRequestForm() {
       fromDetailAddress,
       toDetailAddress,
     });
-
-    createMutation.mutate(payload);
   }
 
   function handleMobileNext() {
