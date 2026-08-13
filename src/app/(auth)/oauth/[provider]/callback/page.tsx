@@ -4,7 +4,8 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 import OAuthLayout from "@/components/auth/OAuthLayout";
-import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { resolveAuthUserImage } from "@/lib/api/profile";
+import { getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
 import {
   clearOAuthPendingSession,
   isOAuthProvider,
@@ -21,14 +22,12 @@ import {
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
 import {
   buildLoginPath,
-  getAudienceMismatchMessage,
   getAuthAudienceFromRole,
   getPostAuthRedirectPath,
   getRoleHomePath,
   type AuthAudience,
 } from "@/lib/auth/redirect";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { resolveAuthUserImage } from "@/lib/api/profile";
 
 const failOAuthCallback = (message: string, setError: (value: string) => void): void => {
   clearOAuthPendingSession();
@@ -40,7 +39,6 @@ const OAuthCallbackContent = () => {
   const searchParams = useSearchParams();
   const params = useParams<{ provider: string }>();
   const establishSession = useAuthStore((state) => state.establishSession);
-  const logout = useAuthStore((state) => state.logout);
   const [error, setError] = useState<string | null>(null);
   const [loginHref, setLoginHref] = useState(buildLoginPath());
 
@@ -115,16 +113,6 @@ const OAuthCallbackContent = () => {
           ...(pending.provider === "naver" && state ? { state } : {}),
         });
 
-        const resultAudience = getAuthAudienceFromRole(result.user.role);
-
-        // OAuth는 BE가 기존 계정의 role을 강제하지 않으므로 FE에서 세션 롤백이 필요
-        if (resultAudience !== pageAudience) {
-          await logout();
-          failOAuthCallback(getAudienceMismatchMessage(pageAudience, resultAudience), setError);
-          return;
-        }
-
-        // mismatch 통과 후에만 후처리 1회 확정
         if (!markOAuthExchangeFinished(pending.provider, code)) {
           return;
         }
@@ -132,6 +120,7 @@ const OAuthCallbackContent = () => {
         // 이전 계정 Soft UX 힌트 제거 후 status로 다시 저장
         clearProfileCompleted();
 
+        const resultAudience = getAuthAudienceFromRole(result.user.role);
         const nextPath = await getPostAuthRedirectPath({
           audience: resultAudience,
           returnPath: pending.returnPath,
@@ -144,12 +133,12 @@ const OAuthCallbackContent = () => {
         window.history.replaceState(null, "", window.location.pathname);
         router.replace(nextPath);
       } catch (err) {
-        failOAuthCallback(getApiErrorMessage(err), setError);
+        failOAuthCallback(getLoginErrorMessage(err, pageAudience), setError);
       }
     };
 
     void run();
-  }, [searchParams, params.provider, establishSession, logout, router]);
+  }, [searchParams, params.provider, establishSession, router]);
 
   return <OAuthLayout error={error} loginHref={loginHref} />;
 };

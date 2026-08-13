@@ -7,6 +7,7 @@ import type { OAuthProvider } from "@/lib/auth/oauth";
  */
 let pendingExchange: { key: string; promise: Promise<LoginResult> } | null = null;
 let completedExchange: { key: string; result: LoginResult } | null = null;
+let failedExchange: { key: string; error: unknown } | null = null;
 const finishedExchangeKeys = new Set<string>();
 
 const getExchangeKey = (provider: OAuthProvider, code: string): string => {
@@ -49,6 +50,10 @@ export const exchangeOAuthCodeOnce = (
     return Promise.resolve(completedExchange.result);
   }
 
+  if (failedExchange?.key === key) {
+    return Promise.reject(failedExchange.error);
+  }
+
   if (pendingExchange?.key === key) {
     return pendingExchange.promise;
   }
@@ -57,6 +62,10 @@ export const exchangeOAuthCodeOnce = (
     .then((result) => {
       completedExchange = { key, result };
       return result;
+    })
+    .catch((error: unknown) => {
+      failedExchange = { key, error };
+      throw error;
     })
     .finally(() => {
       if (pendingExchange?.key === key) {
