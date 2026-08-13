@@ -196,6 +196,8 @@ export default function ReservationCalendarPage({
                 <button
                   type="button"
                   key={`${key}-${index}`}
+                  aria-label={`${cellDate.getFullYear()}년 ${cellDate.getMonth() + 1}월 ${day}일, ${AVAILABILITY_LABEL[status]}`}
+                  aria-pressed={isSelected}
                   onClick={() => {
                     setSelectedDate(key);
                     if (monthOffset) {
@@ -254,6 +256,7 @@ export default function ReservationCalendarPage({
                 <button
                   key={status}
                   type="button"
+                  aria-pressed={selectedStatus === status}
                   onClick={() => updateSelectedStatus(status)}
                   className={cn(
                     "rounded-8 border px-14 py-10 text-[14px] font-semibold transition-colors md:min-w-100",
