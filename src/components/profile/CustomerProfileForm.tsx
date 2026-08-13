@@ -22,6 +22,7 @@ import {
   createCustomerProfileSchema,
   type CustomerProfileFormValues,
 } from "@/lib/schemas/customerProfileSchema";
+import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
 import { ApiError } from "@/types/api";
 import type { MoveType } from "@/types/move";
 
@@ -100,6 +101,7 @@ const CustomerProfileForm = ({
     <form
       className="px-margin-mobile mx-auto flex w-full max-w-[640px] flex-col gap-40 py-32 md:px-72 md:py-40 lg:px-0 lg:pt-56 lg:pb-70"
       onSubmit={onSubmit}
+      onKeyDown={preventEnterSubmitOnInput}
       noValidate
       autoComplete="off"
     >

@@ -7,11 +7,20 @@ import { cn } from "@/lib/utils/cn";
 const pageButtonClassName =
   "flex size-32 items-center justify-center rounded-6 border border-border-dimmed bg-background-surface transition disabled:cursor-not-allowed";
 
+const VISIBLE_PAGE_COUNT = 5;
+
 interface NotificationPaginationProps {
   pageCount: number;
   currentPage: number;
   isFetching: boolean;
   onChangePage: (page: number) => void;
+}
+
+function getVisiblePages(currentPage: number, pageCount: number): number[] {
+  const windowStart = Math.floor((currentPage - 1) / VISIBLE_PAGE_COUNT) * VISIBLE_PAGE_COUNT + 1;
+  const windowEnd = Math.min(windowStart + VISIBLE_PAGE_COUNT - 1, pageCount);
+
+  return Array.from({ length: windowEnd - windowStart + 1 }, (_, index) => windowStart + index);
 }
 
 export default function NotificationPagination({
@@ -22,6 +31,7 @@ export default function NotificationPagination({
 }: NotificationPaginationProps) {
   const isPrevDisabled = currentPage <= 1 || isFetching;
   const isNextDisabled = currentPage >= pageCount || isFetching;
+  const visiblePages = getVisiblePages(currentPage, pageCount);
 
   return (
     <nav aria-label="알림 페이지네이션" className="flex w-full items-center justify-center py-12">
@@ -41,8 +51,7 @@ export default function NotificationPagination({
           </button>
         </li>
 
-        {Array.from({ length: pageCount }, (_, index) => {
-          const page = index + 1;
+        {visiblePages.map((page) => {
           const isCurrent = page === currentPage;
 
           return (

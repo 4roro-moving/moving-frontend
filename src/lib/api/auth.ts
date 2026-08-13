@@ -1,6 +1,7 @@
 import fetchInstance from "@/lib/api/fetchInstance";
 import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
 import type { EnsureAccessTokenOptions } from "@/lib/auth/refreshAccessToken";
+import type { AuthRole, LoginRole } from "@/lib/auth/role";
 import { setAccessToken } from "@/lib/auth/token";
 import { AUTH_BFF_BASE } from "@/lib/constants/authBff";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
@@ -10,6 +11,7 @@ import { OAuthProvider } from "../auth/oauth";
 export interface LoginInput {
   email: string;
   password: string;
+  role: LoginRole;
 }
 
 export interface SignUpCustomerInput {
@@ -26,7 +28,7 @@ export interface AuthUser {
   email: string;
   name: string;
   phone: string | null;
-  role: "CUSTOMER" | "MOVER" | "ADMIN";
+  role: AuthRole;
   imageUrl?: string | null;
 }
 
@@ -98,7 +100,7 @@ export const logout = async (): Promise<void> => {
 
 export interface OAuthLoginInput {
   code: string;
-  role: "CUSTOMER" | "MOVER";
+  role: LoginRole;
   state?: string;
 }
 

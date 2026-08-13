@@ -1,21 +1,15 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
-import {
-  buildCreateEstimateRequestPayload,
-  createEstimateRequest,
-} from "@/lib/api/estimateRequest";
-import { getApiError } from "@/lib/api/getApiError";
+import { useCreateEstimateRequest } from "@/hooks/useCreateEstimateRequest";
 import { getLoginRedirectPath } from "@/lib/auth/session";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { MOVE_TYPE_CARDS } from "@/lib/constants/moveType";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
@@ -28,9 +22,6 @@ import Calendar from "./Calendar";
 import DatePickerField from "./DatePickerField";
 import MoveTypeCard from "./MoveTypeCard";
 
-const TOAST_FAILURE_MESSAGE = "견적 요청이 실패하였습니다.";
-const TOAST_EXISTING_REQUEST_MESSAGE =
-  "견적 요청에 실패하였습니다. 기존 견적이 있는지 확인해주세요.";
 const TOAST_INVALID_ZIP_MESSAGE = "우편번호 정보가 올바르지 않습니다. 주소를 다시 선택해주세요.";
 const TOAST_FORBIDDEN_ROLE_MESSAGE = "고객 계정으로만 견적을 요청할 수 있어요.";
 const ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE = "고객님의 견적 정보를 불러오지 못했습니다.";
@@ -45,16 +36,6 @@ const MOBILE_STEP_TITLES = {
 
 type RegionKind = "출발지" | "도착지";
 type MobileStep = 1 | 2 | 3;
-
-function getCreateEstimateErrorMessage(error: unknown): string {
-  const { code } = getApiError(error);
-
-  if (code === "ACTIVE_REQUEST_EXISTS") {
-    return TOAST_EXISTING_REQUEST_MESSAGE;
-  }
-
-  return TOAST_FAILURE_MESSAGE;
-}
 
 function StepIndicator({ current }: { current: MobileStep }) {
   return (
@@ -86,11 +67,24 @@ function StepIndicator({ current }: { current: MobileStep }) {
 interface RegionFieldProps {
   kind: RegionKind;
   value: string | null;
+  detailValue: string;
   onSelect: () => void;
   onReset: () => void;
+  onDetailChange: (value: string) => void;
 }
 
-function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
+const DETAIL_ADDRESS_MAX_LENGTH = 255;
+
+function RegionField({
+  kind,
+  value,
+  detailValue,
+  onSelect,
+  onReset,
+  onDetailChange,
+}: RegionFieldProps) {
+  const detailInputId = `${kind}-detail-address`;
+
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col gap-12">
       <Text as="span" variant="lg-medium" className="text-text-primary">
@@ -119,6 +113,27 @@ function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
             </Text>
           </button>
         )}
+
+        <label htmlFor={detailInputId} className="sr-only">
+          {kind} 상세주소
+        </label>
+        <input
+          id={detailInputId}
+          type="text"
+          value={detailValue}
+          onChange={(event) => onDetailChange(event.target.value)}
+          maxLength={DETAIL_ADDRESS_MAX_LENGTH}
+          placeholder={value ? "상세주소를 입력해 주세요" : "주소를 먼저 선택해 주세요"}
+          disabled={!value}
+          className={cn(
+            "rounded-12 border-border-brand text-text-brand placeholder:text-text-weak",
+            "flex h-[54px] w-full min-w-0 items-center border bg-transparent px-24 py-16",
+            "text-[length:var(--font-size-16)] leading-[var(--line-height-26)] font-medium",
+            "focus-visible:ring-border-brand focus-visible:ring-1 focus-visible:outline-none",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+          )}
+        />
+
         {/* 수정하기 영역 높이 고정 → 주소 입력 전후 레이아웃이 밀리지 않음 */}
         <div className="flex h-[26px] w-full items-center justify-end">
           {value && (
@@ -140,7 +155,6 @@ function RegionField({ kind, value, onSelect, onReset }: RegionFieldProps) {
 
 export default function EstimateRequestForm() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -151,6 +165,8 @@ export default function EstimateRequestForm() {
   const [moveDate, setMoveDate] = useState<Date>(() => new Date());
   const [fromAddress, setFromAddress] = useState<AddressItem | null>(null);
   const [toAddress, setToAddress] = useState<AddressItem | null>(null);
+  const [fromDetailAddress, setFromDetailAddress] = useState("");
+  const [toDetailAddress, setToDetailAddress] = useState("");
   const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isAccessDeniedToastVisible, setIsAccessDeniedToastVisible] = useState(true);
@@ -197,45 +213,26 @@ export default function EstimateRequestForm() {
     enabled: isAuthReady && isCustomer,
   });
 
-  // 2026.07.26 정슬기 - [수정] 생성 성공 시 내 견적 목록 캐시 무효화 (대기 목록이 stale하지 않도록)
-  // 2026.07.29 정슬기 - [수정] PENDING_LIST + 보낸 견적 요청 MY_LIST_ROOT 무효화
-  const createMutation = useMutation({
-    mutationFn: createEstimateRequest,
-    onSuccess: async (response) => {
-      // BE GET /estimates/pending은 견적 도착 여부와 무관하게 미확정·미만료 요청을 내려주므로
-      // 새 요청은 "견적 못 받은" 섹션으로 바로 노출된다. 목록이 열려 있지 않은 시점이라
-      // refetchType: "none"으로 재요청 없이 stale 표시만 하고 다음 진입 때 갱신한다.
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
-          refetchType: "none",
-        }),
-        queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.MY_LIST_ROOT,
-          refetchType: "none",
-        }),
-      ]);
-      if (response) {
-        queryClient.setQueryData(QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE, response);
-      } else {
-        await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE });
-      }
-      // 제출 성공 후 보낸 견적 요청 목록으로 이동
-      router.replace(APP_ROUTES.ESTIMATES.REQUESTS);
-    },
-    onError: async (error) => {
-      const { code } = getApiError(error);
-      if (code === "ACTIVE_REQUEST_EXISTS") {
-        await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ACTIVE });
-        return;
-      }
-      setToastMessage(getCreateEstimateErrorMessage(error));
+  const createMutation = useCreateEstimateRequest({
+    onError: (message) => {
+      setToastMessage(message);
     },
   });
 
   function handleAddressConfirm(address: AddressItem) {
-    if (addressModalKind === "출발지") setFromAddress(address);
-    if (addressModalKind === "도착지") setToAddress(address);
+    if (addressModalKind === "출발지") {
+      // 기존 주소를 다른 주소로 바꿀 때만 상세주소를 초기화한다
+      if (fromAddress != null) {
+        setFromDetailAddress("");
+      }
+      setFromAddress(address);
+    }
+    if (addressModalKind === "도착지") {
+      if (toAddress != null) {
+        setToDetailAddress("");
+      }
+      setToAddress(address);
+    }
     setAddressModalKind(null);
   }
 
@@ -261,14 +258,14 @@ export default function EstimateRequestForm() {
       return;
     }
 
-    const payload = buildCreateEstimateRequestPayload({
+    createMutation.submitEstimateRequest({
       moveType: selectedType,
       moveDate,
       from: fromAddress,
       to: toAddress,
+      fromDetailAddress,
+      toDetailAddress,
     });
-
-    createMutation.mutate(payload);
   }
 
   function handleMobileNext() {
@@ -453,14 +450,18 @@ export default function EstimateRequestForm() {
               <RegionField
                 kind="출발지"
                 value={fromAddress ? normalizeRoadAddress(fromAddress.roadAddress) : null}
+                detailValue={fromDetailAddress}
                 onSelect={() => setAddressModalKind("출발지")}
                 onReset={() => setAddressModalKind("출발지")}
+                onDetailChange={setFromDetailAddress}
               />
               <RegionField
                 kind="도착지"
                 value={toAddress ? normalizeRoadAddress(toAddress.roadAddress) : null}
+                detailValue={toDetailAddress}
                 onSelect={() => setAddressModalKind("도착지")}
                 onReset={() => setAddressModalKind("도착지")}
+                onDetailChange={setToDetailAddress}
               />
             </div>
           </section>

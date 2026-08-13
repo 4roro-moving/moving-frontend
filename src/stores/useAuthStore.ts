@@ -14,7 +14,11 @@ import { getAccessTokenPayload, getAccessTokenRole } from "@/lib/auth/accessToke
 import { isAuthPagePath, isOAuthCallbackPath } from "@/lib/auth/redirect";
 import { clearAllClientStorageHints } from "@/lib/auth/clientStorageHint";
 import { loadNickname, saveNickname } from "@/lib/auth/nickname";
-import { loadProfileImage, saveProfileImage } from "@/lib/auth/profileImage";
+import {
+  loadProfileImage,
+  saveProfileImage,
+  sanitizeSoftUxProfileImageUrl,
+} from "@/lib/auth/profileImage";
 import { loadRole, saveRole } from "@/lib/auth/role";
 import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
 import { clearAppQueryCache } from "@/providers/query/appQueryClient";
@@ -28,14 +32,14 @@ interface AuthState {
   isAuthenticated: boolean;
   /** 인증 중 여부 */
   isCheckingAuth: boolean;
-  /** localStorage hydrate 완료 여부 — SSR/CSR 첫 페인트 일치용 */
+  /** Soft UX 힌트 hydrate 완료 여부 — SSR/CSR 첫 페인트 일치용 */
   hasHydrated: boolean;
   /**
    * 로그인/가입 직후 GuestOnly가 사용할 목적지.
    * consume 시 한 번만 읽고 null로 비웁니다.
    */
   postAuthRedirectPath: string | null;
-  /** localStorage에서 인증 상태 초기화 */
+  /** Soft UX 쿠키 힌트로 표시 상태 초기화 */
   hydrateFromStorage: () => void;
   /** 인증 상태 확인 */
   checkAuth: (options?: { hasRefreshCookie?: boolean }) => Promise<void>;
@@ -83,10 +87,14 @@ const setAuthenticatedUser = (
     saveProfileImage(user.imageUrl ?? "");
   }
 
+  // Soft UX 힌트만 sanitize. user.imageUrl(원본)은 그대로 유지
+  const softUxProfileImage =
+    user.imageUrl === undefined ? undefined : sanitizeSoftUxProfileImageUrl(user.imageUrl);
+
   set({
     user,
     displayName: user.name,
-    ...(user.imageUrl !== undefined && { profileImage: user.imageUrl }),
+    ...(softUxProfileImage !== undefined && { profileImage: softUxProfileImage }),
     isAuthenticated: true,
     isCheckingAuth,
     hasHydrated: true,

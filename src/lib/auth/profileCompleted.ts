@@ -5,7 +5,7 @@ import {
 } from "@/lib/auth/clientStorageHint";
 
 /**
- * Header·가드용 프로필 완료 힌트 (cookie + localStorage)
+ * Header·가드용 프로필 완료 힌트 (profileCompleted Soft UX 쿠키)
  * - true: status 생략 가능 (Soft UX)
  * - false: 미완료 낙관 표시 후 status로 확정
  * - null: 힌트 없음 → status 조회
