@@ -48,6 +48,10 @@ export interface ReadNotificationResponse {
   notification: NotificationItem;
 }
 
+export interface ReadAllNotificationsResponse {
+  updatedCount: number;
+}
+
 export interface NotificationListParams {
   page?: number;
   limit?: number;

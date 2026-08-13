@@ -31,13 +31,18 @@ function extractSigungu(value: string): string | undefined {
 }
 
 /** 카카오 검색 결과를 백엔드 주소 스키마로 변환 */
-export function toEstimateAddressPayload(item: AddressSearchItem): EstimateAddressPayload {
+export function toEstimateAddressPayload(
+  item: AddressSearchItem,
+  detailAddress?: string,
+): EstimateAddressPayload {
   const address = normalizeRoadAddress(item.roadAddress);
   const sigunguSource = item.jibunAddress || address;
+  const trimmedDetail = detailAddress?.trim();
 
   return {
     zipCode: item.zipCode,
     address,
+    ...(trimmedDetail ? { detailAddress: trimmedDetail } : {}),
     sido: item.sido,
     sigungu: extractSigungu(sigunguSource),
   };
@@ -48,12 +53,14 @@ export function buildCreateEstimateRequestPayload(params: {
   moveDate: Date;
   from: AddressSearchItem;
   to: AddressSearchItem;
+  fromDetailAddress?: string;
+  toDetailAddress?: string;
 }): CreateEstimateRequestPayload {
   return {
     moveType: params.moveType,
     moveDate: formatDateToISODate(params.moveDate),
-    from: toEstimateAddressPayload(params.from),
-    to: toEstimateAddressPayload(params.to),
+    from: toEstimateAddressPayload(params.from, params.fromDetailAddress),
+    to: toEstimateAddressPayload(params.to, params.toDetailAddress),
   };
 }
 
