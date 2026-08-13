@@ -2,7 +2,8 @@ import { isAllowedImageRemoteUrl } from "@/lib/constants/allowedImageHosts";
 
 export const DEFAULT_MOVER_PROFILE_IMAGE = "/images/profile-character.png";
 
-const isLocalPublicPath = (src: string) => src.startsWith("/") && !src.startsWith("//");
+const isLocalPublicPath = (src: string) =>
+  src.startsWith("/") && !src.startsWith("//") && !src.includes("\\") && !src.includes("..");
 
 /**
  * 카드/목록에 넣을 프로필 이미지 URL.

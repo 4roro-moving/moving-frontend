@@ -58,7 +58,6 @@ const CustomerProfileEditForm = ({
     handleSubmit,
     setError,
     setFocus,
-    getValues,
     reset,
     resetField,
     formState: { errors, isValid, isSubmitting, dirtyFields, isDirty },
@@ -112,9 +111,8 @@ const CustomerProfileEditForm = ({
 
         // basic/비밀번호만 default 승격. profile 필드 dirty는 유지
         // (profile PATCH 실패 후 재시도 시 payload가 비지 않도록)
-        const current = getValues();
-        resetField("name", { defaultValue: current.name });
-        resetField("phone", { defaultValue: current.phone });
+        resetField("name", { defaultValue: formValues.name });
+        resetField("phone", { defaultValue: formValues.phone });
         resetField("currentPassword", { defaultValue: "" });
         resetField("newPassword", { defaultValue: "" });
         resetField("newPasswordConfirm", { defaultValue: "" });
@@ -144,9 +142,8 @@ const CustomerProfileEditForm = ({
         return;
       }
 
-      const current = getValues();
       reset({
-        ...current,
+        ...formValues,
         currentPassword: "",
         newPassword: "",
         newPasswordConfirm: "",
@@ -202,6 +199,7 @@ const CustomerProfileEditForm = ({
               placeholder="성함을 입력해 주세요"
               error={errors.name?.message}
               maxLength={50}
+              disabled={isPending}
               {...register("name")}
             />
           </FormField>
@@ -230,6 +228,7 @@ const CustomerProfileEditForm = ({
                   autoComplete="current-password"
                   placeholder="현재 비밀번호를 입력해 주세요"
                   error={errors.currentPassword?.message}
+                  disabled={isPending}
                   {...register("currentPassword")}
                 />
               </FormField>
@@ -241,6 +240,7 @@ const CustomerProfileEditForm = ({
                   autoComplete="new-password"
                   placeholder="새 비밀번호를 입력해 주세요"
                   error={errors.newPassword?.message}
+                  disabled={isPending}
                   {...register("newPassword")}
                 />
               </FormField>
@@ -252,6 +252,7 @@ const CustomerProfileEditForm = ({
                   autoComplete="new-password"
                   placeholder="새 비밀번호를 다시 입력해 주세요"
                   error={errors.newPasswordConfirm?.message}
+                  disabled={isPending}
                   {...register("newPasswordConfirm")}
                 />
               </FormField>
@@ -271,6 +272,7 @@ const CustomerProfileEditForm = ({
                   initialPreviewUrl={initialImageUrl}
                   onChange={field.onChange}
                   error={errors.imageFile?.message}
+                  disabled={isPending}
                 />
               )}
             />
@@ -292,6 +294,7 @@ const CustomerProfileEditForm = ({
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.serviceTypes?.message}
+                  disabled={isPending}
                 />
               )}
             />
@@ -314,6 +317,7 @@ const CustomerProfileEditForm = ({
                   onChange={field.onChange}
                   error={errors.regionId?.message}
                   className="max-w-[277px] gap-x-8 gap-y-12 md:max-w-none"
+                  disabled={isPending}
                 />
               )}
             />

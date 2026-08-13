@@ -19,9 +19,12 @@ const lockBodyScroll = () => {
 
     // overflow: hidden 시 스크롤바가 사라져 레이아웃이 흔들리지 않도록 보정
     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const existingPaddingRight =
+      Number.parseFloat(window.getComputedStyle(document.body).paddingRight) || 0;
+
     document.body.style.overflow = "hidden";
     if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      document.body.style.paddingRight = `${existingPaddingRight + scrollbarWidth}px`;
     }
   }
 

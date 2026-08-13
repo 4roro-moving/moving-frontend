@@ -47,7 +47,6 @@ const MoverBasicInfoEditForm = ({
     handleSubmit,
     setError,
     setFocus,
-    getValues,
     reset,
     formState: { errors, isValid, isSubmitting, isDirty },
   } = useForm<MoverBasicInfoEditFormValues>({
@@ -83,9 +82,8 @@ const MoverBasicInfoEditForm = ({
         return;
       }
 
-      const current = getValues();
       reset({
-        ...current,
+        ...formValues,
         currentPassword: "",
         newPassword: "",
         newPasswordConfirm: "",
@@ -153,6 +151,7 @@ const MoverBasicInfoEditForm = ({
               placeholder="성함을 입력해 주세요"
               error={errors.name?.message}
               maxLength={50}
+              disabled={isPending}
               {...register("name")}
             />
           </FormField>
@@ -175,6 +174,7 @@ const MoverBasicInfoEditForm = ({
                 autoComplete="current-password"
                 placeholder="현재 비밀번호를 입력해 주세요"
                 error={errors.currentPassword?.message}
+                disabled={isPending}
                 {...register("currentPassword")}
               />
             </FormField>
@@ -186,6 +186,7 @@ const MoverBasicInfoEditForm = ({
                 autoComplete="new-password"
                 placeholder="새 비밀번호를 입력해 주세요"
                 error={errors.newPassword?.message}
+                disabled={isPending}
                 {...register("newPassword")}
               />
             </FormField>
@@ -197,6 +198,7 @@ const MoverBasicInfoEditForm = ({
                 autoComplete="new-password"
                 placeholder="새 비밀번호를 다시 입력해 주세요"
                 error={errors.newPasswordConfirm?.message}
+                disabled={isPending}
                 {...register("newPasswordConfirm")}
               />
             </FormField>

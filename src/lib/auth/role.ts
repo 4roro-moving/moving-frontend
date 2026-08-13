@@ -32,17 +32,20 @@ export const parseSoftUxAuthRole = (value: string | null | undefined): LoginRole
   return null;
 };
 
+export const clearRole = (): void => {
+  clearClientStorageHint(ROLE_STORAGE_KEY);
+};
+
 export const saveRole = (role: AuthRole): void => {
   const softUxRole = parseSoftUxAuthRole(role);
-  if (!softUxRole) return;
+  if (!softUxRole) {
+    clearRole();
+    return;
+  }
 
   setClientStorageHint(ROLE_STORAGE_KEY, softUxRole);
 };
 
 export const loadRole = (): LoginRole | null => {
   return parseSoftUxAuthRole(getClientStorageHint(ROLE_STORAGE_KEY));
-};
-
-export const clearRole = (): void => {
-  clearClientStorageHint(ROLE_STORAGE_KEY);
 };

@@ -15,6 +15,7 @@ interface ProfileImageUploaderProps {
   initialPreviewUrl?: string | null;
   onChange: (file: File | null) => void;
   error?: string;
+  disabled?: boolean;
   className?: string;
 }
 
@@ -25,6 +26,7 @@ const ProfileImageUploader = ({
   initialPreviewUrl = null,
   onChange,
   error,
+  disabled = false,
   className,
 }: ProfileImageUploaderProps) => {
   const generatedId = useId();
@@ -64,6 +66,7 @@ const ProfileImageUploader = ({
         type="file"
         accept={PROFILE_IMAGE_ACCEPT}
         className="sr-only"
+        disabled={disabled}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
         onChange={handleChange}
@@ -72,6 +75,7 @@ const ProfileImageUploader = ({
         type="button"
         aria-label={"프로필 이미지 선택"}
         aria-describedby={error ? errorId : undefined}
+        disabled={disabled}
         onClick={() => {
           inputRef.current?.click();
         }}
@@ -79,6 +83,7 @@ const ProfileImageUploader = ({
           "bg-background-muted rounded-6 relative flex items-center justify-center overflow-hidden",
           "size-100 md:size-160",
           "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+          "disabled:cursor-not-allowed disabled:opacity-50",
         )}
       >
         {previewUrl ? (

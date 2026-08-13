@@ -42,7 +42,6 @@ const MoverProfileEditForm = ({
     handleSubmit,
     setError,
     setFocus,
-    getValues,
     reset,
     formState: { errors, isValid, isSubmitting, isDirty },
   } = useForm<MoverProfileFormValues>({
@@ -78,9 +77,8 @@ const MoverProfileEditForm = ({
         ...(imageKey ? { imageUrl: imageKey } : {}),
       });
 
-      const current = getValues();
       reset({
-        ...current,
+        ...formValues,
         imageFile: null,
       });
       setToastMessage("프로필이 수정되었습니다.");
@@ -124,6 +122,7 @@ const MoverProfileEditForm = ({
                   initialPreviewUrl={initialImageUrl}
                   onChange={field.onChange}
                   error={errors.imageFile?.message}
+                  disabled={isPending}
                 />
               )}
             />
@@ -136,6 +135,7 @@ const MoverProfileEditForm = ({
               placeholder="사이트에 노출될 별명을 입력해 주세요"
               error={errors.nickname?.message}
               maxLength={20}
+              disabled={isPending}
               {...register("nickname")}
             />
           </FormField>
@@ -148,6 +148,7 @@ const MoverProfileEditForm = ({
               numericOnly
               placeholder="기사님의 경력을 입력해 주세요"
               error={errors.career?.message}
+              disabled={isPending}
               {...register("career")}
             />
           </FormField>
@@ -159,6 +160,7 @@ const MoverProfileEditForm = ({
               placeholder="한 줄 소개를 입력해 주세요"
               error={errors.shortIntro?.message}
               maxLength={100}
+              disabled={isPending}
               {...register("shortIntro")}
             />
           </FormField>
@@ -171,6 +173,7 @@ const MoverProfileEditForm = ({
               placeholder="상세 내용을 입력해 주세요"
               error={errors.description?.message}
               maxLength={1000}
+              disabled={isPending}
               {...register("description")}
             />
           </FormField>
@@ -187,6 +190,7 @@ const MoverProfileEditForm = ({
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.serviceTypes?.message}
+                  disabled={isPending}
                 />
               )}
             />
@@ -205,6 +209,7 @@ const MoverProfileEditForm = ({
                   onChange={field.onChange}
                   error={errors.regionIds?.message}
                   className="max-w-[277px] gap-x-8 gap-y-12 md:max-w-none"
+                  disabled={isPending}
                 />
               )}
             />
