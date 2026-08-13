@@ -73,3 +73,21 @@ export function useRejectMoverEstimate() {
     },
   });
 }
+
+export function usePrefetchMoverEstimateRequests() {
+  const queryClient = useQueryClient();
+
+  return (query: MoverEstimateRequestQuery) => {
+    void queryClient.prefetchInfiniteQuery({
+      queryKey: [...QUERY_KEYS.ESTIMATES.ALL, query],
+      queryFn: ({ pageParam }) =>
+        getMoverEstimateRequests({
+          ...query,
+          cursor: pageParam as string | undefined,
+        }),
+      initialPageParam: undefined as string | undefined,
+      getNextPageParam: (lastPage: Awaited<ReturnType<typeof getMoverEstimateRequests>>) =>
+        lastPage.pagination.nextCursor ?? undefined,
+    });
+  };
+}

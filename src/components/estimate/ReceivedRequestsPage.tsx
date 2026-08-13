@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
@@ -13,24 +12,21 @@ import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import Toast from "@/components/common/Toast/Toast";
-import { getMoverEstimateRequests } from "@/lib/api/moverEstimateRequests";
 import {
   useMoverEstimateRequests,
-  useRejectMoverEstimate,
-  useSendMoverEstimate,
+  usePrefetchMoverEstimateRequests,
 } from "@/hooks/useMoverEstimateRequests";
+import { useReceivedRequestActions } from "@/hooks/useReceivedRequestActions";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import type { MoveType } from "@/types/move";
-import type { MoverEstimateRequest, RequestSort } from "@/types/moverEstimateRequest";
+import type { RequestSort } from "@/types/moverEstimateRequest";
 
 import ReceivedRequestCard from "./ReceivedRequestCard";
 import ReceivedRequestsSkeleton from "./ReceivedRequestsSkeleton";
 import RejectEstimateModal from "./RejectEstimateModal";
-import SendEstimateModal, { type SendEstimateInput } from "./SendEstimateModal";
+import SendEstimateModal from "./SendEstimateModal";
 
 export default function ReceivedRequestsPage() {
-  const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState("");
   const [keyword, setKeyword] = useState("");
   const [moveTypes, setMoveTypes] = useState<MoveType[]>([]);
@@ -38,11 +34,7 @@ export default function ReceivedRequestsPage() {
   const [serviceAreaOnly, setServiceAreaOnly] = useState(false);
   const [sort, setSort] = useState<RequestSort>("requestedAt");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<MoverEstimateRequest | null>(null);
-  const [isSendOpen, setIsSendOpen] = useState(false);
-  const [requestToReject, setRequestToReject] = useState<MoverEstimateRequest | null>(null);
-  const [isRejectOpen, setIsRejectOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const prefetchMoverEstimateRequests = usePrefetchMoverEstimateRequests();
 
   const requestQuery = {
     keyword: keyword || undefined,
@@ -53,8 +45,7 @@ export default function ReceivedRequestsPage() {
     limit: 10,
   };
   const query = useMoverEstimateRequests(requestQuery);
-  const sendEstimateMutation = useSendMoverEstimate();
-  const rejectEstimateMutation = useRejectMoverEstimate();
+  const requestActions = useReceivedRequestActions();
 
   function submitSearch(event: FormEvent) {
     event.preventDefault();
@@ -70,15 +61,9 @@ export default function ReceivedRequestsPage() {
   }
 
   function prefetchRequests(patch: Partial<typeof requestQuery>) {
-    const nextQuery = { ...requestQuery, ...patch };
-
-    void queryClient.prefetchInfiniteQuery({
-      queryKey: [...QUERY_KEYS.ESTIMATES.ALL, nextQuery],
-      queryFn: ({ pageParam }) =>
-        getMoverEstimateRequests({ ...nextQuery, cursor: pageParam as string | undefined }),
-      initialPageParam: undefined as string | undefined,
-      getNextPageParam: (lastPage: Awaited<ReturnType<typeof getMoverEstimateRequests>>) =>
-        lastPage.pagination.nextCursor ?? undefined,
+    prefetchMoverEstimateRequests({
+      ...requestQuery,
+      ...patch,
     });
   }
 
@@ -86,46 +71,6 @@ export default function ReceivedRequestsPage() {
     return moveTypes.includes(moveType)
       ? moveTypes.filter((item) => item !== moveType)
       : [...moveTypes, moveType];
-  }
-
-  function handleSendEstimate(input: SendEstimateInput) {
-    if (!selectedRequest) return;
-
-    sendEstimateMutation.mutate(
-      {
-        estimateRequestId: selectedRequest.id,
-        input,
-      },
-      {
-        onSuccess: () => {
-          setIsSendOpen(false);
-          setToastMessage("견적을 보냈습니다.");
-        },
-        onError: (error) => {
-          setToastMessage(error instanceof Error ? error.message : "견적 전송에 실패했습니다.");
-        },
-      },
-    );
-  }
-
-  function handleRejectEstimate(reason: string) {
-    if (!requestToReject) return;
-
-    rejectEstimateMutation.mutate(
-      {
-        estimateRequestId: requestToReject.id,
-        input: { reason },
-      },
-      {
-        onSuccess: () => {
-          setIsRejectOpen(false);
-          setToastMessage("요청을 반려했습니다.");
-        },
-        onError: (error) => {
-          setToastMessage(error instanceof Error ? error.message : "요청 반려에 실패했습니다.");
-        },
-      },
-    );
   }
 
   const items = query.data?.pages.flatMap((page) => page.items) ?? [];
@@ -269,14 +214,8 @@ export default function ReceivedRequestsPage() {
                   <ReceivedRequestCard
                     key={request.id}
                     request={request}
-                    onSendEstimate={(next) => {
-                      setSelectedRequest(next);
-                      setIsSendOpen(true);
-                    }}
-                    onRejectEstimate={(next) => {
-                      setRequestToReject(next);
-                      setIsRejectOpen(true);
-                    }}
+                    onSendEstimate={requestActions.openSendModal}
+                    onRejectEstimate={requestActions.openRejectModal}
                   />
                 ))}
               </div>
@@ -381,29 +320,31 @@ export default function ReceivedRequestsPage() {
         </Modal.Button>
       </Modal>
 
-      {selectedRequest ? (
+      {requestActions.selectedRequest ? (
         <SendEstimateModal
-          open={isSendOpen}
-          request={selectedRequest}
-          isPending={sendEstimateMutation.isPending}
-          onSubmit={handleSendEstimate}
-          onClose={() => setIsSendOpen(false)}
-          onExitComplete={() => setSelectedRequest(null)}
+          open={requestActions.isSendOpen}
+          request={requestActions.selectedRequest}
+          isPending={requestActions.isSendingEstimate}
+          onSubmit={requestActions.sendEstimate}
+          onClose={requestActions.closeSendModal}
+          onExitComplete={requestActions.clearSelectedRequest}
         />
       ) : null}
 
-      {requestToReject ? (
+      {requestActions.requestToReject ? (
         <RejectEstimateModal
-          open={isRejectOpen}
-          request={requestToReject}
-          isPending={rejectEstimateMutation.isPending}
-          onSubmit={handleRejectEstimate}
-          onClose={() => setIsRejectOpen(false)}
-          onExitComplete={() => setRequestToReject(null)}
+          open={requestActions.isRejectOpen}
+          request={requestActions.requestToReject}
+          isPending={requestActions.isRejectingEstimate}
+          onSubmit={requestActions.rejectEstimate}
+          onClose={requestActions.closeRejectModal}
+          onExitComplete={requestActions.clearRequestToReject}
         />
       ) : null}
 
-      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
+      {requestActions.toastMessage ? (
+        <Toast onClose={requestActions.clearToast}>{requestActions.toastMessage}</Toast>
+      ) : null}
     </>
   );
 }
