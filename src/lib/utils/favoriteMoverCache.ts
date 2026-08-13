@@ -464,29 +464,230 @@ export async function applyFavoriteOptimisticUpdate(
   };
 }
 
-/** 최신 단건 찜 mutation 실패 시 이전 캐시 스냅샷을 복구합니다. */
+interface FavoriteState {
+  isFavorite: boolean;
+  favoriteCount: number;
+}
+
+function toFavoriteState(
+  mover: { isFavorite: boolean; favoriteCount: number } | undefined,
+): FavoriteState | undefined {
+  if (!mover) {
+    return undefined;
+  }
+
+  return {
+    isFavorite: mover.isFavorite,
+    favoriteCount: mover.favoriteCount,
+  };
+}
+
+function restoreMoverFavorite<T extends { id: string; isFavorite: boolean; favoriteCount: number }>(
+  mover: T,
+  moverId: string,
+  previousState: FavoriteState,
+): T {
+  if (mover.id !== moverId) {
+    return mover;
+  }
+
+  if (
+    mover.isFavorite === previousState.isFavorite &&
+    mover.favoriteCount === previousState.favoriteCount
+  ) {
+    return mover;
+  }
+
+  return {
+    ...mover,
+    isFavorite: previousState.isFavorite,
+    favoriteCount: previousState.favoriteCount,
+  };
+}
+
+function findMoverInFavoriteMoversCache(
+  data: FavoriteMoversCacheData | undefined,
+  moverId: string,
+): MoverListItem | undefined {
+  if (isFavoriteMoversInfiniteData(data)) {
+    for (const page of data.pages) {
+      const mover = page.data.find((item) => item.id === moverId);
+      if (mover) {
+        return mover;
+      }
+    }
+
+    return undefined;
+  }
+
+  if (isFavoriteMoversListResult(data)) {
+    return data.data.find((item) => item.id === moverId);
+  }
+
+  return undefined;
+}
+
+function findPreviousFavoriteState(
+  context: FavoriteMutationContext,
+  moverId: string,
+): FavoriteState | undefined {
+  const detailState =
+    context.previousMoverDetail?.id === moverId
+      ? toFavoriteState(context.previousMoverDetail)
+      : undefined;
+
+  if (detailState) {
+    return detailState;
+  }
+
+  for (const [, data] of context.previousMoverLists) {
+    if (!data) continue;
+
+    for (const page of data.pages) {
+      const mover = page.data.find((item) => item.id === moverId);
+      const state = toFavoriteState(mover);
+
+      if (state) {
+        return state;
+      }
+    }
+  }
+
+  for (const [, data] of context.previousFavoriteMovers) {
+    const state = toFavoriteState(findMoverInFavoriteMoversCache(data, moverId));
+
+    if (state) {
+      return state;
+    }
+  }
+
+  for (const panel of context.previousReceived ?? []) {
+    for (const estimate of panel.estimates) {
+      const state = toFavoriteState(estimate.mover.id === moverId ? estimate.mover : undefined);
+
+      if (state) {
+        return state;
+      }
+    }
+  }
+
+  for (const [, detail] of context.previousDetails) {
+    const state = toFavoriteState(detail?.mover?.id === moverId ? detail.mover : undefined);
+
+    if (state) {
+      return state;
+    }
+  }
+
+  for (const [, list] of context.previousPendingLists) {
+    if (!list || !Array.isArray(list.sections)) continue;
+
+    for (const section of list.sections) {
+      for (const estimate of section.estimates) {
+        const state = toFavoriteState(estimate.mover.id === moverId ? estimate.mover : undefined);
+
+        if (state) {
+          return state;
+        }
+      }
+    }
+  }
+
+  return undefined;
+}
+
+/** 최신 단건 찜 mutation 실패 시 해당 mover의 낙관적 변경만 복구합니다. */
 export function rollbackFavoriteOptimisticUpdate(
   queryClient: QueryClient,
   authScope: AuthQueryScope,
   moverId: string,
   context: FavoriteMutationContext,
 ): void {
-  queryClient.setQueryData(QUERY_KEYS.ESTIMATES.RECEIVED, context.previousReceived);
+  const previousState = findPreviousFavoriteState(context, moverId);
 
-  context.previousDetails.forEach(([queryKey, data]) => {
-    queryClient.setQueryData(queryKey, data);
-  });
+  if (previousState) {
+    queryClient.setQueryData<ReceivedEstimatePanel[]>(QUERY_KEYS.ESTIMATES.RECEIVED, (panels) => {
+      if (!panels) {
+        return panels;
+      }
 
-  context.previousPendingLists.forEach(([queryKey, data]) => {
-    queryClient.setQueryData(queryKey, data);
-  });
+      return panels.map((panel) => ({
+        ...panel,
+        estimates: panel.estimates.map((estimate) => ({
+          ...estimate,
+          mover: restoreMoverFavorite(estimate.mover, moverId, previousState),
+        })),
+      }));
+    });
 
-  context.previousMoverLists.forEach(([queryKey, data]) => {
-    queryClient.setQueryData(queryKey, data);
-  });
+    queryClient.setQueriesData<EstimateDetail>(
+      { queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT },
+      (detail) => {
+        if (!detail?.mover) {
+          return detail;
+        }
 
-  context.previousFavoriteMovers.forEach(([queryKey, data]) => {
-    queryClient.setQueryData(queryKey, data);
+        return {
+          ...detail,
+          mover: restoreMoverFavorite(detail.mover, moverId, previousState),
+        };
+      },
+    );
+
+    queryClient.setQueriesData<PendingEstimateSectionListResult>(
+      { queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT },
+      (list) => {
+        if (!list || !Array.isArray(list.sections)) {
+          return list;
+        }
+
+        return {
+          ...list,
+          sections: list.sections.map((section) => ({
+            ...section,
+            estimates: section.estimates.map((estimate) => ({
+              ...estimate,
+              mover: restoreMoverFavorite(estimate.mover, moverId, previousState),
+            })),
+          })),
+        };
+      },
+    );
+
+    queryClient.setQueriesData<InfiniteData<MoversListResult>>(
+      { queryKey: getMoverListScopeQueryKey(authScope) },
+      (list) => {
+        if (!list) {
+          return list;
+        }
+
+        return {
+          ...list,
+          pages: list.pages.map((page) => ({
+            ...page,
+            data: page.data.map((mover) => restoreMoverFavorite(mover, moverId, previousState)),
+          })),
+        };
+      },
+    );
+  }
+
+  context.previousFavoriteMovers.forEach(([queryKey, previousData]) => {
+    const previousMover = findMoverInFavoriteMoversCache(previousData, moverId);
+
+    queryClient.setQueryData<FavoriteMoversCacheData>(queryKey, (currentData) => {
+      const currentMover = findMoverInFavoriteMoversCache(currentData, moverId);
+
+      if (previousMover) {
+        return addMoverToFavoriteMoversCache(currentData, previousMover);
+      }
+
+      if (!currentMover) {
+        return currentData;
+      }
+
+      return removeIdsFromFavoriteMoversCache(currentData, new Set([moverId]), 1);
+    });
   });
 
   queryClient.setQueryData(getMoverDetailQueryKey(authScope, moverId), context.previousMoverDetail);
