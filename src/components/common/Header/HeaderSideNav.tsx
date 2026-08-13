@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 
 import { isNavLinkActive } from "@/components/common/Header/isNavLinkActive";
 import { Text } from "@/components/common/Text";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { CloseIcon } from "@/icons";
 import { MEDIA_QUERY } from "@/lib/constants/breakpoints";
@@ -68,19 +69,7 @@ const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideN
     };
   }, [isOpen, onClose]);
 
-  // 모바일 화면에서 주요 메뉴 열림 시 body overflow 조정
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isOpen]);
+  useBodyScrollLock(isOpen);
 
   const handlePanelTransitionEnd = (event: TransitionEvent<HTMLElement>) => {
     if (event.target !== event.currentTarget) return;

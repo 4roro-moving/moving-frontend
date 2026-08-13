@@ -1,10 +1,20 @@
 import { getCustomerProfileStatus, getMoverProfileStatus } from "@/lib/api/profile";
 import { saveProfileCompleted } from "@/lib/auth/profileCompleted";
-import type { AuthRole } from "@/lib/auth/role";
+import type { AuthRole, LoginRole } from "@/lib/auth/role";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
+import { ApiError } from "@/types/api";
 
 export type AuthAudience = "customer" | "mover" | "admin";
+
+/** 로그인 입구 audience → 요청 role. ADMIN 입구는 일반/소셜 로그인에 사용하지 않는다. */
+export const audienceToLoginRole = (audience: AuthAudience): LoginRole => {
+  if (audience === "admin") {
+    throw new ApiError("관리자는 이 로그인 경로를 사용할 수 없습니다.");
+  }
+
+  return audience === "mover" ? "MOVER" : "CUSTOMER";
+};
 
 const AUTH_PATH_PREFIXES = [
   APP_ROUTES.LOGIN,

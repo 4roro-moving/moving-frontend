@@ -117,7 +117,7 @@ const OAuthCallbackContent = () => {
 
         const resultAudience = getAuthAudienceFromRole(result.user.role);
 
-        // LoginForm과 동일: audience 불일치 시 세션 롤백
+        // OAuth는 BE가 기존 계정의 role을 강제하지 않으므로 FE에서 세션 롤백이 필요
         if (resultAudience !== pageAudience) {
           await logout();
           failOAuthCallback(getAudienceMismatchMessage(pageAudience, resultAudience), setError);
