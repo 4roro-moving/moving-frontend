@@ -142,12 +142,14 @@ function RegionField({
           value={detailValue}
           onChange={(event) => onDetailChange(event.target.value)}
           maxLength={DETAIL_ADDRESS_MAX_LENGTH}
-          placeholder="상세주소를 입력해 주세요"
+          placeholder={value ? "상세주소를 입력해 주세요" : "주소를 먼저 선택해 주세요"}
+          disabled={!value}
           className={cn(
             "rounded-12 border-border-brand text-text-brand placeholder:text-text-weak",
             "flex h-[54px] w-full min-w-0 items-center border bg-transparent px-24 py-16",
             "text-[length:var(--font-size-16)] leading-[var(--line-height-26)] font-medium",
             "focus-visible:ring-border-brand focus-visible:ring-1 focus-visible:outline-none",
+            "disabled:cursor-not-allowed disabled:opacity-50",
           )}
         />
 
@@ -269,12 +271,17 @@ export default function EstimateRequestForm() {
 
   function handleAddressConfirm(address: AddressItem) {
     if (addressModalKind === "출발지") {
+      // 기존 주소를 다른 주소로 바꿀 때만 상세주소를 초기화한다
+      if (fromAddress != null) {
+        setFromDetailAddress("");
+      }
       setFromAddress(address);
-      setFromDetailAddress("");
     }
     if (addressModalKind === "도착지") {
+      if (toAddress != null) {
+        setToDetailAddress("");
+      }
       setToAddress(address);
-      setToDetailAddress("");
     }
     setAddressModalKind(null);
   }
