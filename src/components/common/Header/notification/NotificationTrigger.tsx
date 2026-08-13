@@ -3,6 +3,7 @@
 import { useCallback, useId, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
+import { useNotificationSse } from "@/hooks/notifications/useNotificationSse";
 import { useCloseOnPathnameChange } from "@/hooks/useCloseOnPathnameChange";
 import { useUnreadNotificationCount } from "@/hooks/notifications/useUnreadNotificationCount";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
@@ -25,6 +26,9 @@ export default function NotificationTrigger() {
   );
   const { data } = useUnreadNotificationCount();
   const unreadCount = data?.unreadCount ?? 0;
+
+  // 로그인 상태에서 SSE로 미읽음 뱃지·목록 캐시를 실시간 갱신
+  useNotificationSse();
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   /** Escape / 닫기 버튼 / 알림 이동 — 트리거로 포커스 복귀 */
@@ -43,7 +47,7 @@ export default function NotificationTrigger() {
   const ref = useClickOutside<HTMLDivElement>(closeQuiet);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="static md:relative">
       <button
         ref={triggerRef}
         type="button"

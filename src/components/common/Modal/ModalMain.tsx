@@ -46,6 +46,8 @@ export interface ModalMainProps {
   size?: "sm" | "md" | "lg";
   className?: string;
   overlayClassName?: string;
+  /** Escape 키 또는 오버레이 클릭으로 모달을 닫을지 여부 */
+  dismissible?: boolean;
   /** Modal.Title 없이 접근성 라벨이 필요할 때 사용 */
   "aria-label"?: string;
 }
@@ -59,6 +61,7 @@ const ModalMain = ({
   size,
   className,
   overlayClassName,
+  dismissible = true,
   "aria-label": ariaLabel,
 }: ModalMainProps) => {
   const isClient = useIsClient();
@@ -114,13 +117,13 @@ const ModalMain = ({
   useFocusTrap({
     containerRef: panelRef,
     enabled: isClient && isRendered && isVisible,
-    onEscape: isVisible ? onClose : undefined,
+    onEscape: isVisible && dismissible ? onClose : undefined,
   });
 
   if (!isClient || !isRendered) return null;
 
   const handleOverlayClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (!isVisible) return;
+    if (!isVisible || !dismissible) return;
     if (event.target === event.currentTarget) {
       onClose?.();
     }

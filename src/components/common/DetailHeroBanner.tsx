@@ -8,6 +8,8 @@ interface DetailHeroBannerProps {
   showProfile?: boolean;
   imageUrl?: string | null;
   name?: string;
+  /** 첫 화면 LCP 프로필 이미지를 preload할지 여부 */
+  preloadProfileImage?: boolean;
 }
 
 /**
@@ -18,12 +20,13 @@ export default function DetailHeroBanner({
   showProfile = true,
   imageUrl = null,
   name = "",
+  preloadProfileImage = false,
 }: DetailHeroBannerProps) {
   if (!showProfile) {
     return (
       <div className="bg-background-brand relative h-30.5 w-full shrink-0 overflow-hidden md:h-42.5 xl:h-56.25">
-        <HeroDecorationRightIcon className="text-icon-brand-tertiary pointer-events-none absolute bottom-0 left-[calc(50%_+_152px)] hidden h-37 w-81.25 xl:block" />
-        <HeroDecorationLeftIcon className="text-icon-brand-tertiary pointer-events-none absolute top-[79.39px] left-[calc(50%_-_750px)] hidden h-28.75 w-42.5 xl:block" />
+        <HeroDecorationRightIcon className="text-icon-brand-tertiary pointer-events-none absolute bottom-0 left-[calc(50%+152px)] hidden h-37 w-81.25 xl:block" />
+        <HeroDecorationLeftIcon className="text-icon-brand-tertiary pointer-events-none absolute top-[79.39px] left-[calc(50%-750px)] hidden h-28.75 w-42.5 xl:block" />
       </div>
     );
   }
@@ -36,15 +39,15 @@ export default function DetailHeroBanner({
         {/* 2026.07.25 정슬기 - [수정] Figma hero-decoration SVG(캡슐 벡터)로 원형 CSS 대체 */}
         {/* 우측: AABB x=1112(50%+152), 주황 배너 하단에 맞춤 */}
         {/* 2026.07.26 정슬기 - [수정] Tailwind arbitrary calc 연산자 공백을 _로 표기 */}
-        <HeroDecorationRightIcon className="text-icon-brand-tertiary pointer-events-none absolute bottom-0 left-[calc(50%_+_152px)] hidden h-37 w-81.25 xl:block" />
-        <HeroDecorationLeftIcon className="text-icon-brand-tertiary pointer-events-none absolute top-[79.39px] left-[calc(50%_-_750px)] hidden h-28.75 w-42.5 xl:block" />
+        <HeroDecorationRightIcon className="text-icon-brand-tertiary pointer-events-none absolute bottom-0 left-[calc(50%+152px)] hidden h-37 w-81.25 xl:block" />
+        <HeroDecorationLeftIcon className="text-icon-brand-tertiary pointer-events-none absolute top-[79.39px] left-[calc(50%-750px)] hidden h-28.75 w-42.5 xl:block" />
       </div>
 
       {/* 2026.07.24 정슬기 - [수정] margin 토큰 유틸(left-margin-*) 사용 */}
       {/* 2026.07.25 정슬기 - [수정] Desktop 아바타 x=359 (Figma 8091:47378), 129×137, r20, top=122 */}
       {/* 2026.07.26 정슬기 - [수정] Tablet 프로필 Figma 100×100·r12 (1:9171 / 1:11975) — size-25 */}
       {/* 프로필은 Figma처럼 둥근 네모(원형 X). 기본 아이콘도 사각 배경으로 맞춤 */}
-      <div className="bg-background-avatar rounded-16 md:rounded-12 left-margin-mobile md:left-margin-tablet xl:rounded-20 absolute bottom-0 size-21.5 overflow-hidden md:size-25 xl:top-30.5 xl:bottom-auto xl:left-[max(1rem,calc(50%_-_601px))] xl:h-34.25 xl:w-32.25">
+      <div className="bg-background-avatar rounded-16 md:rounded-12 left-margin-mobile md:left-margin-tablet xl:rounded-20 absolute bottom-0 size-21.5 overflow-hidden md:size-25 xl:top-30.5 xl:bottom-auto xl:left-[max(1rem,calc(50%-601px))] xl:h-34.25 xl:w-32.25">
         <div className="relative size-full">
           {imageUrl ? (
             <Image
@@ -52,6 +55,7 @@ export default function DetailHeroBanner({
               alt={`${name} 기사님 프로필`}
               fill
               sizes="(max-width: 768px) 86px, (max-width: 1024px) 100px, 129px"
+              preload={preloadProfileImage}
               className="object-cover"
             />
           ) : (

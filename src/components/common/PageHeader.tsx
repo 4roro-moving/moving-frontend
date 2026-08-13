@@ -17,12 +17,12 @@ export function PageHeader({ title, backFallbackHref, actions }: PageHeaderProps
   const hasAdditionalContent = Boolean(backFallbackHref || actions);
 
   return (
-    <header className="bg-background-default shadow-page-header px-margin-mobile md:px-margin-tablet xl:px-page-header-padding-x-desktop flex w-full max-w-full items-center justify-center overflow-x-hidden">
+    <header className="bg-background-default shadow-page-header flex w-full max-w-full items-center justify-center overflow-x-hidden">
       <div
         className={
           hasAdditionalContent
-            ? "max-w-container-desktop flex w-full min-w-0 flex-1 flex-col items-start gap-8 py-12 md:py-14 xl:py-16"
-            : "h-page-header-height-mobile md:h-page-header-height-tablet xl:h-page-header-height-desktop max-w-container-desktop flex w-full min-w-0 flex-1 items-center"
+            ? "px-margin-mobile md:px-margin-tablet max-w-container-desktop mx-auto flex w-full min-w-0 flex-1 flex-col items-start gap-8 py-12 md:py-14 xl:px-0 xl:py-16"
+            : "px-margin-mobile md:px-margin-tablet h-page-header-height-mobile md:h-page-header-height-tablet xl:h-page-header-height-desktop max-w-container-desktop mx-auto flex w-full min-w-0 flex-1 items-center xl:px-0"
         }
       >
         {backFallbackHref ? <DetailBackButton fallbackHref={backFallbackHref} /> : null}

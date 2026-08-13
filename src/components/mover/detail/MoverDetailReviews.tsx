@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
@@ -21,6 +21,9 @@ interface MoverDetailReviewsProps {
   reviewCount: number;
   ratingDistribution: MoverDetail["ratingDistribution"];
 }
+
+/** 현재 리뷰 목록이 표시된 뒤 다음 페이지를 미리 요청하기까지의 대기 시간 */
+const NEXT_REVIEW_PAGE_PREFETCH_DELAY_MS = 300;
 
 /**
  * 기사님 상세 — 리뷰 요약·분포·목록
@@ -63,6 +66,18 @@ export default function MoverDetailReviews({
     },
     [moverId, queryClient],
   );
+
+  useEffect(() => {
+    if (!data?.pagination.hasNext || data.pagination.page !== currentPage) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      prefetchReviewPage(currentPage + 1);
+    }, NEXT_REVIEW_PAGE_PREFETCH_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [currentPage, data?.pagination.hasNext, data?.pagination.page, prefetchReviewPage]);
 
   return (
     <section className="flex w-full flex-col gap-24 md:gap-32" aria-labelledby="mover-reviews">

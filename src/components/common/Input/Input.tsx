@@ -1,7 +1,13 @@
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
-import { forwardRef, type ChangeEvent, type ComponentPropsWithoutRef, type ReactNode } from "react";
+import {
+  forwardRef,
+  useId,
+  type ChangeEvent,
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+} from "react";
 
 import { Text, getTextVariantClass, type TextVariantProp } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
@@ -58,11 +64,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     className,
     onChange,
     type = "text",
+    "aria-describedby": ariaDescribedBy,
     ...props
   },
   ref,
 ) {
   const resolvedSize = size ?? "sm";
+  const errorId = useId();
+  const describedBy =
+    [ariaDescribedBy, error ? errorId : undefined].filter(Boolean).join(" ") || undefined;
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (numericOnly) {
@@ -102,6 +112,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           ref={ref}
           type={type}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
           className={cn(
             getTextVariantClass(INPUT_TEXT_VARIANT[resolvedSize]),
             "text-text-primary placeholder:text-text-placeholder disabled:text-text-disabled w-full bg-transparent focus:outline-none",
@@ -112,7 +123,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         {rightSlot}
       </div>
       {error && (
-        <Text variant={INPUT_ERROR_TEXT_VARIANT[resolvedSize]} className="text-text-error">
+        <Text
+          id={errorId}
+          variant={INPUT_ERROR_TEXT_VARIANT[resolvedSize]}
+          className="text-text-error"
+        >
           {error}
         </Text>
       )}

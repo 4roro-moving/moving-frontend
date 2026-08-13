@@ -13,6 +13,7 @@ import {
 import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
 import { mapMoverDetailItemToMoverDetail } from "@/lib/utils/mapMover";
 import { ApiError } from "@/types/api";
+import type { MoverDetail } from "@/types/moverDetail";
 
 interface MoverDetailPageProps {
   params: Promise<{ moverId: string }>;
@@ -54,7 +55,7 @@ export default async function MoverDetailPage({ params }: MoverDetailPageProps) 
       },
     },
   });
-
+  let initialDetail: MoverDetail | null = null;
   try {
     await queryClient.prefetchQuery({
       queryKey: getMoverDetailQueryKey(AUTH_QUERY_GUEST_SCOPE, moverId),
@@ -63,13 +64,17 @@ export default async function MoverDetailPage({ params }: MoverDetailPageProps) 
         return mapMoverDetailItemToMoverDetail(item);
       },
     });
+    initialDetail =
+      queryClient.getQueryData<MoverDetail>(
+        getMoverDetailQueryKey(AUTH_QUERY_GUEST_SCOPE, moverId),
+      ) ?? null;
   } catch {
     // prefetch 실패해도 페이지는 렌더 — MoverDetailView가 클라이언트에서 재요청
   }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <MoverDetailView key={moverId} moverId={moverId} />
+      <MoverDetailView key={moverId} moverId={moverId} initialDetail={initialDetail} />
     </HydrationBoundary>
   );
 }

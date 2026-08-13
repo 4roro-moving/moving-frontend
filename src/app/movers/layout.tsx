@@ -3,8 +3,8 @@ import { cookies } from "next/headers";
 
 import BlockMoverFromMoversBrowse from "@/components/auth/BlockMoverFromMoversBrowse";
 import { LoginRequiredModalProvider } from "@/components/auth/LoginRequiredModalProvider";
+import { safeDecodeCookieValue } from "@/lib/auth/clientStorageHint";
 import { ROLE_STORAGE_KEY, parseAuthRole } from "@/lib/auth/role";
-import { safeDecodeCookieValue } from "@/lib/auth/nickname";
 
 interface MoversLayoutProps {
   children: ReactNode;

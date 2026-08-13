@@ -11,7 +11,13 @@ export const metadata: Metadata = {
 
 export default function ReceivedEstimatesPage() {
   return (
-    <CustomerAuthGate loadingFallback={<ReceivedEstimatesLoadingSkeleton />}>
+    <CustomerAuthGate
+      loadingFallback={
+        <div className="bg-background-default md:bg-background-subtle flex w-full flex-col items-center py-38 md:py-32 xl:py-64">
+          <ReceivedEstimatesLoadingSkeleton />
+        </div>
+      }
+    >
       <ReceivedEstimatesPageClient />
     </CustomerAuthGate>
   );

@@ -66,7 +66,7 @@ export function EstimateRequestListSkeleton({
       aria-label="보낸 견적 요청을 불러오는 중"
     >
       {showFilter ? (
-        <div className="flex w-full justify-end" aria-hidden="true">
+        <div className="flex w-full justify-start" aria-hidden="true">
           <Skeleton className="rounded-12 h-54 w-128 md:w-160" />
         </div>
       ) : null}

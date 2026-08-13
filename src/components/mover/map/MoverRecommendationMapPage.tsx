@@ -21,7 +21,6 @@ import { DriverBadgeIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { getRegionIdBySido } from "@/lib/constants/region";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
-import { cn } from "@/lib/utils/cn";
 import type { MoveType } from "@/types/move";
 
 type AddressModalKind = "출발지" | "도착지"; // 모달 종류
@@ -34,25 +33,10 @@ const MATCH_LABEL: Record<MoverRecommendationMatchType, string> = {
 }; // 서버에서 받아오는 값 아니고 useMoverRecommendations에서 API 비교 후 생성
 
 //기사 표시 카드
-function RecommendationCard({
-  mover,
-  selected,
-  onSelect,
-}: {
-  mover: MoverRecommendation;
-  selected: boolean;
-  onSelect: () => void;
-}) {
+function RecommendationCard({ mover }: { mover: MoverRecommendation }) {
   return (
-    <article
-      className={cn(
-        "rounded-16 bg-background-surface border p-16 transition-all",
-        selected
-          ? "border-border-brand shadow-input"
-          : "border-border-subtle shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.2),2px_2px_10px_0_rgba(220,220,220,0.2)]",
-      )}
-    >
-      <button type="button" aria-pressed={selected} onClick={onSelect} className="w-full text-left">
+    <article className="rounded-16 bg-background-surface border-border-subtle border p-16 shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.2),2px_2px_10px_0_rgba(220,220,220,0.2)]">
+      <div>
         <div className="mb-12 flex items-center justify-between gap-8">
           {/* 실제 서비스 유형 */}
           <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
@@ -95,7 +79,7 @@ function RecommendationCard({
             </div>
           </div>
         </div>
-      </button>
+      </div>
 
       <Link
         href={APP_ROUTES.MOVERS.DETAIL(mover.id)}
@@ -132,7 +116,6 @@ export function MoverRecommendationMapPage() {
 
   const [addressModalKind, setAddressModalKind] = useState<AddressModalKind | null>(null);
   //선택된 기사 처리
-  const [selectedMoverIdOverride, setSelectedMoverIdOverride] = useState<string | null>(null);
   const departureRegionId = searchedDeparture ? getRegionIdBySido(searchedDeparture.sido) : null;
 
   //주소 지역 ID로 변환 (시/도 데이터가 문자열로 들어오기 때문)
@@ -150,12 +133,6 @@ export function MoverRecommendationMapPage() {
     ...(searchedMoveType !== "ALL" ? { moveType: searchedMoveType } : {}),
   });
 
-  //사용자가 선택한 기사가 결과에 있으면 해당 기사 유지, 없으면 첫번째 기사 선택
-  const selectedMoverId =
-    selectedMoverIdOverride && movers.some((mover) => mover.id === selectedMoverIdOverride)
-      ? selectedMoverIdOverride
-      : (movers[0]?.id ?? null);
-
   //검색 버튼 클릭 시 현재 입력값을 검색 조건으로 확정
   function handleSearch() {
     if (!departure || !destination) return;
@@ -163,7 +140,6 @@ export function MoverRecommendationMapPage() {
     setSearchedDeparture(departure);
     setSearchedDestination(destination);
     setSearchedMoveType(moveType);
-    setSelectedMoverIdOverride(null);
   }
 
   //주소 선택 시 현재 모달 종류에 따라 출발지 또는 도착지에 저장
@@ -306,12 +282,7 @@ export function MoverRecommendationMapPage() {
             ) : movers.length > 0 ? (
               <div className="flex flex-col gap-12">
                 {movers.map((mover) => (
-                  <RecommendationCard
-                    key={mover.id}
-                    mover={mover}
-                    selected={selectedMoverId === mover.id}
-                    onSelect={() => setSelectedMoverIdOverride(mover.id)}
-                  />
+                  <RecommendationCard key={mover.id} mover={mover} />
                 ))}
               </div>
             ) : (

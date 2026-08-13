@@ -70,9 +70,9 @@ export function loadKakaoMaps(): Promise<KakaoMapsNamespace> {
       return;
     }
 
-    const javascriptKey = getKakaoJavascriptKey();
+    const javascriptKey = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY?.trim() || getKakaoJavascriptKey();
     if (!javascriptKey) {
-      reject(new Error("NEXT_PUBLIC_KAKAO_JS_KEY가 필요합니다."));
+      reject(new Error("NEXT_PUBLIC_KAKAO_MAP_KEY 또는 NEXT_PUBLIC_KAKAO_JS_KEY가 필요합니다."));
       return;
     }
 
@@ -80,18 +80,15 @@ export function loadKakaoMaps(): Promise<KakaoMapsNamespace> {
       KAKAO_MAPS_SCRIPT_ID,
     ) as HTMLScriptElement | null;
     if (existingScript) {
-      if (existingScript.dataset.loadStatus === "loaded") {
-        reject(new Error(KAKAO_MAPS_LOAD_ERROR));
-        return;
-      }
-      if (existingScript.dataset.loadStatus === "error") {
+      if (
+        existingScript.dataset.loadStatus === "loaded" ||
+        existingScript.dataset.loadStatus === "error"
+      ) {
         existingScript.remove();
-        reject(new Error(KAKAO_MAPS_LOAD_ERROR));
+      } else {
+        waitForScript(existingScript, resolve, reject);
         return;
       }
-
-      waitForScript(existingScript, resolve, reject);
-      return;
     }
 
     const script = document.createElement("script");
