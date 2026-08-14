@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
@@ -40,6 +40,7 @@ const CustomerProfileEditForm = ({
     register,
     control,
     handleSubmit,
+    getValues,
     setError,
     setFocus,
     reset,
@@ -61,13 +62,9 @@ const CustomerProfileEditForm = ({
     },
   });
 
-  const formValues = useWatch({
-    control,
-  }) as CustomerProfileEditFormValues;
-
   const { submitError, toastMessage, isPending, setToastMessage, submit } =
     useCustomerProfileEditForm({
-      formValues,
+      getValues,
       dirtyFields,
       hasPassword,
       reset,

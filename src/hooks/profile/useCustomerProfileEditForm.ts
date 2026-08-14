@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type {
+  UseFormGetValues,
   UseFormReset,
   UseFormResetField,
   UseFormSetError,
@@ -29,7 +30,7 @@ import { hasPasswordChangePayload } from "@/lib/schemas/passwordChangeFields";
 import { ApiError } from "@/types/api";
 
 interface UseCustomerProfileEditFormParams {
-  formValues: CustomerProfileEditFormValues;
+  getValues: UseFormGetValues<CustomerProfileEditFormValues>;
   dirtyFields: Partial<Record<keyof CustomerProfileEditFormValues, unknown>>;
   hasPassword: boolean;
   reset: UseFormReset<CustomerProfileEditFormValues>;
@@ -54,7 +55,7 @@ function isUnauthorizedError(error: unknown): error is ApiError {
 }
 
 export function useCustomerProfileEditForm({
-  formValues,
+  getValues,
   dirtyFields,
   hasPassword,
   reset,
@@ -81,6 +82,7 @@ export function useCustomerProfileEditForm({
     setIsSubmitting(true);
 
     try {
+      const formValues = getValues();
       const imageKey = await uploadProfileImage(formValues.imageFile);
 
       const { basic, profile } = buildCustomerProfileEditPayloads({
@@ -102,8 +104,6 @@ export function useCustomerProfileEditForm({
         await updateCustomerBasicInfo.mutateAsync(basic);
         didBasicSucceed = true;
 
-        // basic 저장 성공 시 해당 필드만 현재 값을 default로 승격합니다.
-        // profile 저장 실패 후 재시도할 수 있도록 profile dirty 상태는 유지합니다.
         resetField("name", { defaultValue: formValues.name });
         resetField("phone", { defaultValue: formValues.phone });
         resetField("currentPassword", { defaultValue: "" });
@@ -138,6 +138,7 @@ export function useCustomerProfileEditForm({
 
       reset({
         ...formValues,
+        imageFile: null,
         currentPassword: "",
         newPassword: "",
         newPasswordConfirm: "",
