@@ -52,6 +52,54 @@ function isFavoriteMoversListResult(
   );
 }
 
+function getFavoriteMoversTotalCount(
+  data: FavoriteMoversCacheData | undefined,
+): number | undefined {
+  if (isFavoriteMoversInfiniteData(data)) {
+    return data.pages[0]?.pagination.totalCount;
+  }
+
+  if (isFavoriteMoversListResult(data)) {
+    return data.pagination.totalCount;
+  }
+
+  return undefined;
+}
+
+function restoreFavoriteMoversTotalCount(
+  data: FavoriteMoversCacheData | undefined,
+  totalCount: number | undefined,
+): FavoriteMoversCacheData | undefined {
+  if (totalCount === undefined) {
+    return data;
+  }
+
+  if (isFavoriteMoversInfiniteData(data)) {
+    return {
+      ...data,
+      pages: data.pages.map((page) => ({
+        ...page,
+        pagination: {
+          ...page.pagination,
+          totalCount,
+        },
+      })),
+    };
+  }
+
+  if (isFavoriteMoversListResult(data)) {
+    return {
+      ...data,
+      pagination: {
+        ...data.pagination,
+        totalCount,
+      },
+    };
+  }
+
+  return data;
+}
+
 function removeIdsFromFavoriteMoversPage(
   page: FavoriteMoversListResult,
   idSet: Set<string>,
@@ -674,19 +722,20 @@ export function rollbackFavoriteOptimisticUpdate(
 
   context.previousFavoriteMovers.forEach(([queryKey, previousData]) => {
     const previousMover = findMoverInFavoriteMoversCache(previousData, moverId);
+    const previousTotalCount = getFavoriteMoversTotalCount(previousData);
 
     queryClient.setQueryData<FavoriteMoversCacheData>(queryKey, (currentData) => {
       const currentMover = findMoverInFavoriteMoversCache(currentData, moverId);
 
+      let nextData = currentData;
+
       if (previousMover) {
-        return addMoverToFavoriteMoversCache(currentData, previousMover);
+        nextData = addMoverToFavoriteMoversCache(currentData, previousMover);
+      } else if (currentMover) {
+        nextData = removeIdsFromFavoriteMoversCache(currentData, new Set([moverId]), 1);
       }
 
-      if (!currentMover) {
-        return currentData;
-      }
-
-      return removeIdsFromFavoriteMoversCache(currentData, new Set([moverId]), 1);
+      return restoreFavoriteMoversTotalCount(nextData, previousTotalCount);
     });
   });
 
