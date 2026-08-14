@@ -1,5 +1,5 @@
 /**
- * Soft UX 힌트용 cookie + localStorage 공통 유틸.
+ * Soft UX 힌트용 cookie 유틸.
  * (refreshToken 등 HttpOnly 세션 쿠키와 별개)
  */
 
@@ -27,12 +27,6 @@ export const safeDecodeCookieValue = (raw: string): string | null => {
 export const setClientStorageHint = (key: ClientStorageHintKey, value: string): void => {
   if (typeof window === "undefined") return;
 
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    // QuotaExceeded / SecurityError 등 — cookie 힌트는 계속 반영
-  }
-
   const secureFlag = window.location.protocol === "https:" ? "; Secure" : "";
   document.cookie = `${key}=${encodeURIComponent(value)}; Path=/; SameSite=Lax; Max-Age=${ONE_YEAR_SECONDS}${secureFlag}`;
 };
@@ -40,17 +34,21 @@ export const setClientStorageHint = (key: ClientStorageHintKey, value: string): 
 export const getClientStorageHint = (key: ClientStorageHintKey): string | null => {
   if (typeof window === "undefined") return null;
 
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    // SecurityError 등 — 힌트 없음으로 처리
-    return null;
+  const prefix = `${key}=`;
+  const parts = document.cookie.split("; ");
+
+  for (const part of parts) {
+    if (!part.startsWith(prefix)) continue;
+    return safeDecodeCookieValue(part.slice(prefix.length));
   }
+
+  return null;
 };
 
 export const clearClientStorageHint = (key: ClientStorageHintKey): void => {
   if (typeof window === "undefined") return;
 
+  // 이전 localStorage 이중 저장분 정리 (마이그레이션)
   try {
     localStorage.removeItem(key);
   } catch {

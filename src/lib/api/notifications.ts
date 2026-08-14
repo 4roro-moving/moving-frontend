@@ -3,6 +3,7 @@ import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import type {
   NotificationListParams,
   NotificationListResponse,
+  ReadAllNotificationsResponse,
   ReadNotificationResponse,
   UnreadNotificationCountResponse,
 } from "@/types/notification";
@@ -37,4 +38,9 @@ export async function readNotification(notificationId: number): Promise<ReadNoti
   return fetchInstance.patch<ReadNotificationResponse>(
     API_ROUTES.NOTIFICATIONS.READ(notificationId),
   );
+}
+
+/** PATCH /notifications/read-all */
+export async function readAllNotifications(): Promise<ReadAllNotificationsResponse> {
+  return fetchInstance.patch<ReadAllNotificationsResponse>(API_ROUTES.NOTIFICATIONS.READ_ALL);
 }

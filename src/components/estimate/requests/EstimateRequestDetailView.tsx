@@ -43,12 +43,15 @@ interface EstimateRequestDetailViewProps {
  * 지정 요청 대상 기사님은 EstimateRequestDesignatedMovers에서 별도 표시
  */
 function toRequestInfoRows(request: MyEstimateRequestItem) {
+  const formatAddress = (address: string, detailAddress: string | null) =>
+    [address, detailAddress].filter(Boolean).join(" ");
+
   return [
     { label: "견적 요청일", value: formatDetailDateLabel(request.createdAt) },
     { label: "서비스", value: getMoveTypeLabel(request.moveType) },
     { label: "이용일", value: formatMoveDateLabel(request.moveDate) },
-    { label: "출발지", value: request.fromAddress },
-    { label: "도착지", value: request.toAddress },
+    { label: "출발지", value: formatAddress(request.fromAddress, request.fromDetailAddress) },
+    { label: "도착지", value: formatAddress(request.toAddress, request.toDetailAddress) },
   ];
 }
 

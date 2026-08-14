@@ -4,7 +4,9 @@ import { useCallback, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import { useNotifications } from "@/hooks/notifications/useNotifications";
+import { useReadAllNotifications } from "@/hooks/notifications/useReadAllNotifications";
 import { useReadNotification } from "@/hooks/notifications/useReadNotification";
+import { useUnreadNotificationCount } from "@/hooks/notifications/useUnreadNotificationCount";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { CloseIcon } from "@/icons";
 import { NOTIFICATION_PAGE_SIZE } from "@/lib/api/notifications";
@@ -40,6 +42,8 @@ export default function NotificationPanel({
   });
 
   const { mutateAsync: markAsRead } = useReadNotification();
+  const { mutateAsync: markAllAsRead, isPending: isMarkAllPending } = useReadAllNotifications();
+  const { data: unreadCountData } = useUnreadNotificationCount({ enabled: isVisible });
 
   useFocusTrap({
     containerRef: panelRef,
@@ -48,6 +52,8 @@ export default function NotificationPanel({
   });
 
   const notifications = data?.notifications ?? [];
+  const unreadCount = unreadCountData?.unreadCount ?? 0;
+  const canMarkAllAsRead = unreadCount > 0 && !isMarkAllPending;
   const totalPagesFromData = data?.pagination.totalPages;
   const pageCount = Math.max(1, totalPagesFromData ?? knownPageCount ?? 1);
 
@@ -91,6 +97,18 @@ export default function NotificationPanel({
     [markAsRead, pendingReadIds],
   );
 
+  const handleMarkAllAsRead = useCallback(async () => {
+    if (!canMarkAllAsRead) {
+      return;
+    }
+
+    try {
+      await markAllAsRead();
+    } catch {
+      // onError에서 캐시 롤백 처리 — 호출부 unhandled rejection만 막는다
+    }
+  }, [canMarkAllAsRead, markAllAsRead]);
+
   return (
     <div
       ref={panelRef}
@@ -107,36 +125,51 @@ export default function NotificationPanel({
         className,
       )}
     >
-      <div className="flex items-center justify-between py-14 pr-12 pl-16 md:pl-24">
+      <div className="flex items-center justify-between gap-8 py-14 pr-12 md:pl-24">
         <Text id="notification-panel-title" as="h2" variant={{ base: "2lg-bold", md: "lg-bold" }}>
           알림
         </Text>
 
-        <button
-          type="button"
-          aria-label="알림 닫기"
-          onClick={onClose}
-          disabled={!isVisible}
-          className="flex size-24 items-center justify-center"
-        >
-          <CloseIcon className="text-icon-default size-24" />
-        </button>
+        <div className="flex shrink-0 items-center gap-8">
+          <button
+            type="button"
+            onClick={() => {
+              void handleMarkAllAsRead();
+            }}
+            disabled={!isVisible || !canMarkAllAsRead}
+            className="text-text-brand disabled:text-text-weak focus-visible:ring-border-brand rounded-4 px-2 py-2 focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed"
+          >
+            <Text as="span" variant={{ base: "lg-regular", md: "md-regular" }}>
+              모두 읽음처리
+            </Text>
+          </button>
+
+          <button
+            type="button"
+            aria-label="알림 닫기"
+            onClick={onClose}
+            disabled={!isVisible}
+            className="flex size-24 items-center justify-center"
+          >
+            <CloseIcon className="text-icon-default size-24" />
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
-        <div className="flex h-55 w-full items-center justify-center px-24">
+        <div className="flex h-55 w-full items-center justify-center md:px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
             알림을 불러오는 중이에요
           </Text>
         </div>
       ) : isError ? (
-        <div className="flex h-55 w-full items-center justify-center px-24">
+        <div className="flex h-55 w-full items-center justify-center md:px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
             알림을 불러오지 못했어요
           </Text>
         </div>
       ) : isEmpty ? (
-        <div className="flex h-55 w-full items-center justify-center px-24">
+        <div className="flex h-55 w-full items-center justify-center md:px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
             새로운 알림이 없습니다
           </Text>

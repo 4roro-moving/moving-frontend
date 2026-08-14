@@ -13,12 +13,18 @@ import ProfileFormActions from "@/components/profile/ProfileFormActions";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
 import { useUpdateMoverBasicInfo } from "@/hooks/profile/useUpdateMoverBasicInfo";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { reauthAfterPasswordChange } from "@/lib/auth/reauthAfterPasswordChange";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import {
   moverBasicInfoEditSchema,
   type MoverBasicInfoEditFormValues,
 } from "@/lib/schemas/moverBasicInfoEditSchema";
-import { toPasswordChangePayload } from "@/lib/schemas/passwordChangeFields";
+import {
+  hasPasswordChangePayload,
+  toPasswordChangePayload,
+} from "@/lib/schemas/passwordChangeFields";
 import { cn } from "@/lib/utils/cn";
+import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
 import { ApiError } from "@/types/api";
 
 interface MoverBasicInfoEditFormProps {
@@ -41,8 +47,8 @@ const MoverBasicInfoEditForm = ({
     handleSubmit,
     setError,
     setFocus,
-    setValue,
-    formState: { errors, isValid, isSubmitting },
+    reset,
+    formState: { errors, isValid, isSubmitting, isDirty },
   } = useForm<MoverBasicInfoEditFormValues>({
     resolver: zodResolver(moverBasicInfoEditSchema),
     mode: "onChange",
@@ -62,14 +68,26 @@ const MoverBasicInfoEditForm = ({
     setSubmitError(null);
 
     try {
+      const passwordPayload = hasPassword ? toPasswordChangePayload(formValues) : {};
+      const didChangePassword = hasPasswordChangePayload(passwordPayload);
+
       await updateMoverBasicInfo.mutateAsync({
         name: formValues.name,
         phone: formValues.phone,
-        ...(hasPassword ? toPasswordChangePayload(formValues) : {}),
+        ...passwordPayload,
       });
-      setValue("currentPassword", "", { shouldValidate: true });
-      setValue("newPassword", "", { shouldValidate: true });
-      setValue("newPasswordConfirm", "", { shouldValidate: true });
+
+      if (didChangePassword) {
+        await reauthAfterPasswordChange(APP_ROUTES.MOVER_LOGIN);
+        return;
+      }
+
+      reset({
+        ...formValues,
+        currentPassword: "",
+        newPassword: "",
+        newPasswordConfirm: "",
+      });
       setToastMessage("기본정보가 수정되었습니다.");
     } catch (error) {
       if (
@@ -106,6 +124,7 @@ const MoverBasicInfoEditForm = ({
     <form
       className="px-margin-mobile mx-auto flex w-full max-w-[1120px] flex-col gap-40 py-32 md:gap-48 md:px-72 md:py-40 lg:px-0 lg:pt-56 lg:pb-70"
       onSubmit={onSubmit}
+      onKeyDown={preventEnterSubmitOnInput}
       noValidate
       autoComplete="off"
     >
@@ -132,6 +151,7 @@ const MoverBasicInfoEditForm = ({
               placeholder="성함을 입력해 주세요"
               error={errors.name?.message}
               maxLength={50}
+              disabled={isPending}
               {...register("name")}
             />
           </FormField>
@@ -154,6 +174,7 @@ const MoverBasicInfoEditForm = ({
                 autoComplete="current-password"
                 placeholder="현재 비밀번호를 입력해 주세요"
                 error={errors.currentPassword?.message}
+                disabled={isPending}
                 {...register("currentPassword")}
               />
             </FormField>
@@ -165,6 +186,7 @@ const MoverBasicInfoEditForm = ({
                 autoComplete="new-password"
                 placeholder="새 비밀번호를 입력해 주세요"
                 error={errors.newPassword?.message}
+                disabled={isPending}
                 {...register("newPassword")}
               />
             </FormField>
@@ -176,6 +198,7 @@ const MoverBasicInfoEditForm = ({
                 autoComplete="new-password"
                 placeholder="새 비밀번호를 다시 입력해 주세요"
                 error={errors.newPasswordConfirm?.message}
+                disabled={isPending}
                 {...register("newPasswordConfirm")}
               />
             </FormField>
@@ -190,7 +213,7 @@ const MoverBasicInfoEditForm = ({
       ) : null}
 
       <ProfileFormActions
-        isSubmitDisabled={!isValid || isPending}
+        isSubmitDisabled={!isValid || isPending || !isDirty}
         className={hasPassword ? undefined : "md:justify-center"}
       />
 

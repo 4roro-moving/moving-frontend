@@ -12,6 +12,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { useCloseOnPathnameChange } from "@/hooks/useCloseOnPathnameChange";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useIsClient } from "@/hooks/useIsClient";
@@ -96,23 +97,8 @@ const ModalMain = ({
 
   useCloseOnPathnameChange(isVisible ? onClose : undefined);
 
-  useEffect(() => {
-    if (!isRendered) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    const previousPaddingRight = document.body.style.paddingRight;
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = "hidden";
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    }
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.body.style.paddingRight = previousPaddingRight;
-    };
-  }, [isRendered]);
+  // exit 애니메이션 동안(isRendered)에도 스크롤 잠금 유지
+  useBodyScrollLock(isRendered);
 
   useFocusTrap({
     containerRef: panelRef,

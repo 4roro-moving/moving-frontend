@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import AuthHeader from "@/components/auth/AuthHeader";
@@ -12,12 +12,14 @@ import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
+import Toast from "@/components/common/Toast/Toast";
 import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
-import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { resolveAuthUserImage } from "@/lib/api/profile";
+import { getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
+import { consumePasswordChangedToast } from "@/lib/auth/passwordChangedToast";
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
 import {
-  getAudienceMismatchMessage,
-  getAuthAudienceFromRole,
+  audienceToLoginRole,
   getLoginRedirectParam,
   getPostAuthRedirectPath,
   getRoleHomePath,
@@ -27,7 +29,6 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/loginSchema";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { resolveAuthUserImage } from "@/lib/api/profile";
 
 interface LoginFormProps {
   audience?: AuthAudience;
@@ -37,8 +38,8 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const { mutateAsync: login, isPending } = useLoginMutation();
   const establishSession = useAuthStore((state) => state.establishSession);
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
-  const logout = useAuthStore((state) => state.logout);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -53,27 +54,30 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
     },
   });
 
+  useEffect(() => {
+    // setState는 effect 본문 동기 호출이 아니라 콜백으로 미룸 (react-hooks/set-state-in-effect)
+    const timerId = window.setTimeout(() => {
+      setToastMessage(consumePasswordChangedToast());
+    }, 0);
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, []);
+
   const signUpHref = audience === "mover" ? APP_ROUTES.MOVER_SIGN_UP : APP_ROUTES.SIGN_UP;
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
 
     try {
-      const result = await login(values);
-      const resultAudience = getAuthAudienceFromRole(result.user.role);
-
-      // audience 불일치: establishSession 전에 롤백 (GuestOnly 홈 이동 방지)
-      if (resultAudience !== audience) {
-        await logout();
-        setSubmitError(getAudienceMismatchMessage(audience, resultAudience));
-        return;
-      }
+      const role = audienceToLoginRole(audience);
+      const result = await login({ ...values, role });
 
       // 이전 계정 Soft UX 힌트 제거 후 status로 다시 저장
       clearProfileCompleted();
 
       const nextPath = await getPostAuthRedirectPath({
-        audience: resultAudience,
+        audience,
         returnPath: getLoginRedirectParam(),
         fallbackPath: getRoleHomePath(result.user.role),
       });
@@ -81,12 +85,13 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       setPostAuthRedirectPath(nextPath);
       establishSession(await resolveAuthUserImage(result.user));
     } catch (error) {
-      setSubmitError(getApiErrorMessage(error));
+      setSubmitError(getLoginErrorMessage(error, audience));
     }
   });
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
       <AuthHeader audience={audience} />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">

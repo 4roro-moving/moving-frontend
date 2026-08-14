@@ -4,10 +4,10 @@ import { cookies } from "next/headers";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { safeDecodeCookieValue } from "@/lib/auth/clientStorageHint";
-import { NICKNAME_STORAGE_KEY } from "@/lib/auth/nickname";
+import { NICKNAME_STORAGE_KEY, sanitizeSoftUxNickname } from "@/lib/auth/nickname";
 import { PROFILE_COMPLETED_STORAGE_KEY, parseProfileCompleted } from "@/lib/auth/profileCompleted";
-import { PROFILE_IMAGE_STORAGE_KEY } from "@/lib/auth/profileImage";
-import { ROLE_STORAGE_KEY, parseAuthRole } from "@/lib/auth/role";
+import { PROFILE_IMAGE_STORAGE_KEY, sanitizeSoftUxProfileImageUrl } from "@/lib/auth/profileImage";
+import { ROLE_STORAGE_KEY, parseSoftUxAuthRole } from "@/lib/auth/role";
 import { REFRESH_TOKEN_COOKIE_NAME } from "@/lib/auth/token";
 
 import "./globals.css";
@@ -29,12 +29,16 @@ const RootLayout = async ({ children }: RootLayoutProps) => {
   /** SSR 시점 HttpOnly refreshToken 쿠키 존재 여부 (로그인 Soft UX·선제 refresh 힌트) */
   const hasRefreshCookie = Boolean(cookieStore.get(REFRESH_TOKEN_COOKIE_NAME));
   const rawProfileImage = cookieStore.get(PROFILE_IMAGE_STORAGE_KEY)?.value;
-  const initialProfileImage = rawProfileImage ? safeDecodeCookieValue(rawProfileImage) : null;
+  const initialProfileImage = sanitizeSoftUxProfileImageUrl(
+    rawProfileImage ? safeDecodeCookieValue(rawProfileImage) : null,
+  );
   const rawNickname = cookieStore.get(NICKNAME_STORAGE_KEY)?.value;
-  const initialNickname = rawNickname ? safeDecodeCookieValue(rawNickname) : null;
+  const initialNickname = sanitizeSoftUxNickname(
+    rawNickname ? safeDecodeCookieValue(rawNickname) : null,
+  );
   const rawRole = cookieStore.get(ROLE_STORAGE_KEY)?.value;
   const decodedRole = rawRole ? safeDecodeCookieValue(rawRole) : null;
-  const initialRole = parseAuthRole(decodedRole);
+  const initialRole = parseSoftUxAuthRole(decodedRole);
   const initialProfileCompleted = parseProfileCompleted(
     cookieStore.get(PROFILE_COMPLETED_STORAGE_KEY)?.value,
   );

@@ -1,10 +1,20 @@
 import { getCustomerProfileStatus, getMoverProfileStatus } from "@/lib/api/profile";
 import { saveProfileCompleted } from "@/lib/auth/profileCompleted";
-import type { AuthRole } from "@/lib/auth/role";
+import type { AuthRole, LoginRole } from "@/lib/auth/role";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { isMoverDetailId } from "@/lib/utils/isMoverDetailId";
+import { ApiError } from "@/types/api";
 
 export type AuthAudience = "customer" | "mover" | "admin";
+
+/** 로그인 입구 audience → 요청 role. ADMIN 입구는 일반/소셜 로그인에 사용하지 않는다. */
+export const audienceToLoginRole = (audience: AuthAudience): LoginRole => {
+  if (audience === "admin") {
+    throw new ApiError("관리자는 이 로그인 경로를 사용할 수 없습니다.");
+  }
+
+  return audience === "mover" ? "MOVER" : "CUSTOMER";
+};
 
 const AUTH_PATH_PREFIXES = [
   APP_ROUTES.LOGIN,
@@ -42,32 +52,13 @@ export const getAuthAudienceFromRole = (role: AuthRole | null | undefined): Auth
   }
 };
 
-/** 로그인/OAuth 입구 audience와 계정 role이 다를 때 안내 문구 */
-export const getAudienceMismatchMessage = (
-  pageAudience: AuthAudience,
-  accountAudience: AuthAudience,
-): string => {
-  if (pageAudience === accountAudience) {
-    return "올바르지 않은 계정입니다. 다시 로그인해 주세요.";
+/** 로그인/OAuth 입구에서 AUTH_ROLE_MISMATCH일 때 안내 문구 */
+export const getAudienceMismatchMessage = (pageAudience: AuthAudience): string => {
+  if (pageAudience === "mover") {
+    return "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
   }
 
-  // 관리자 계정이 고객/기사 로그인을 할 경우
-  if (accountAudience === "admin") {
-    return "관리자 계정입니다. 관리자 전용 로그인을 이용해 주세요.";
-  }
-
-  // 관리자 로그인 페이지에 고객/기사가 들어온 경우
-  if (pageAudience === "admin") {
-    return accountAudience === "mover"
-      ? "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요."
-      : "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
-  }
-
-  // 고객 로그인 페이지에 기사가 들어온 경우
-  if (pageAudience === "customer") {
-    return "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요.";
-  }
-  return "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
+  return "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요.";
 };
 
 /** 역할별 홈 — 잘못된 role 접근·auth 재진입 */

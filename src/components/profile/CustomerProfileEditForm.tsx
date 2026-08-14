@@ -16,6 +16,8 @@ import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
 import { useUpdateCustomerBasicInfo } from "@/hooks/profile/useUpdateCustomerBasicInfo";
 import { useUpdateCustomerProfile } from "@/hooks/profile/useUpdateCustomerProfile";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { reauthAfterPasswordChange } from "@/lib/auth/reauthAfterPasswordChange";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
 import { buildCustomerProfileEditPayloads } from "@/lib/profile/buildCustomerProfileEditPayloads";
@@ -24,6 +26,8 @@ import {
   customerProfileEditSchema,
   type CustomerProfileEditFormValues,
 } from "@/lib/schemas/customerProfileEditSchema";
+import { hasPasswordChangePayload } from "@/lib/schemas/passwordChangeFields";
+import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
 import { ApiError } from "@/types/api";
 import type { MoveType } from "@/types/move";
 
@@ -54,10 +58,9 @@ const CustomerProfileEditForm = ({
     handleSubmit,
     setError,
     setFocus,
-    getValues,
     reset,
     resetField,
-    formState: { errors, isValid, isSubmitting, dirtyFields },
+    formState: { errors, isValid, isSubmitting, dirtyFields, isDirty },
   } = useForm<CustomerProfileEditFormValues>({
     resolver: zodResolver(customerProfileEditSchema),
     mode: "onChange",
@@ -99,6 +102,7 @@ const CustomerProfileEditForm = ({
         return;
       }
 
+      const didChangePassword = hasPasswordChangePayload(basic);
       let didBasicSucceed = false;
 
       if (basic) {
@@ -107,9 +111,8 @@ const CustomerProfileEditForm = ({
 
         // basic/비밀번호만 default 승격. profile 필드 dirty는 유지
         // (profile PATCH 실패 후 재시도 시 payload가 비지 않도록)
-        const current = getValues();
-        resetField("name", { defaultValue: current.name });
-        resetField("phone", { defaultValue: current.phone });
+        resetField("name", { defaultValue: formValues.name });
+        resetField("phone", { defaultValue: formValues.phone });
         resetField("currentPassword", { defaultValue: "" });
         resetField("newPassword", { defaultValue: "" });
         resetField("newPasswordConfirm", { defaultValue: "" });
@@ -119,6 +122,12 @@ const CustomerProfileEditForm = ({
         try {
           await updateCustomerProfile.mutateAsync(profile);
         } catch (profileError) {
+          if (didBasicSucceed && didChangePassword) {
+            // refresh token 이미 폐기됨 → 머무르면 F5 시 강제 로그아웃만 발생
+            await reauthAfterPasswordChange(APP_ROUTES.LOGIN, { profileFailed: true });
+            return;
+          }
+
           if (didBasicSucceed) {
             setSubmitError(PROFILE_PARTIAL_SAVE_ERROR);
             return;
@@ -128,9 +137,13 @@ const CustomerProfileEditForm = ({
         }
       }
 
-      const current = getValues();
+      if (didChangePassword) {
+        await reauthAfterPasswordChange(APP_ROUTES.LOGIN);
+        return;
+      }
+
       reset({
-        ...current,
+        ...formValues,
         currentPassword: "",
         newPassword: "",
         newPasswordConfirm: "",
@@ -171,6 +184,7 @@ const CustomerProfileEditForm = ({
     <form
       className="px-margin-mobile mx-auto flex w-full max-w-[1120px] flex-col gap-40 py-32 md:gap-48 md:px-72 md:py-40 lg:px-0 lg:pt-56 lg:pb-70"
       onSubmit={onSubmit}
+      onKeyDown={preventEnterSubmitOnInput}
       noValidate
       autoComplete="off"
     >
@@ -185,6 +199,7 @@ const CustomerProfileEditForm = ({
               placeholder="성함을 입력해 주세요"
               error={errors.name?.message}
               maxLength={50}
+              disabled={isPending}
               {...register("name")}
             />
           </FormField>
@@ -213,6 +228,7 @@ const CustomerProfileEditForm = ({
                   autoComplete="current-password"
                   placeholder="현재 비밀번호를 입력해 주세요"
                   error={errors.currentPassword?.message}
+                  disabled={isPending}
                   {...register("currentPassword")}
                 />
               </FormField>
@@ -224,6 +240,7 @@ const CustomerProfileEditForm = ({
                   autoComplete="new-password"
                   placeholder="새 비밀번호를 입력해 주세요"
                   error={errors.newPassword?.message}
+                  disabled={isPending}
                   {...register("newPassword")}
                 />
               </FormField>
@@ -235,6 +252,7 @@ const CustomerProfileEditForm = ({
                   autoComplete="new-password"
                   placeholder="새 비밀번호를 다시 입력해 주세요"
                   error={errors.newPasswordConfirm?.message}
+                  disabled={isPending}
                   {...register("newPasswordConfirm")}
                 />
               </FormField>
@@ -254,6 +272,7 @@ const CustomerProfileEditForm = ({
                   initialPreviewUrl={initialImageUrl}
                   onChange={field.onChange}
                   error={errors.imageFile?.message}
+                  disabled={isPending}
                 />
               )}
             />
@@ -275,6 +294,7 @@ const CustomerProfileEditForm = ({
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.serviceTypes?.message}
+                  disabled={isPending}
                 />
               )}
             />
@@ -297,6 +317,7 @@ const CustomerProfileEditForm = ({
                   onChange={field.onChange}
                   error={errors.regionId?.message}
                   className="max-w-[277px] gap-x-8 gap-y-12 md:max-w-none"
+                  disabled={isPending}
                 />
               )}
             />
@@ -310,7 +331,7 @@ const CustomerProfileEditForm = ({
         </Text>
       ) : null}
 
-      <ProfileFormActions isSubmitDisabled={!isValid || isPending} />
+      <ProfileFormActions isSubmitDisabled={!isValid || isPending || !isDirty} />
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </form>

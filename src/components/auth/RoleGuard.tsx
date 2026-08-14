@@ -15,7 +15,7 @@ import { getAccessToken } from "@/lib/auth/token";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 interface RoleGuardProps {
-  allowedRole: Extract<AuthRole, "CUSTOMER" | "MOVER" | "ADMIN">;
+  allowedRole: AuthRole;
   children: ReactNode;
   loadingFallback?: ReactNode;
 }
