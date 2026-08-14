@@ -30,6 +30,8 @@ export const APP_ROUTES = {
   // 2026.07.27 정슬기 - [추가] 기사님 찾기·상세 페이지 경로
   MOVERS: {
     ROOT: "/movers",
+    // 2026.08.13 윤소정 - [추가] 고객용 캘린더 (기사 일정 확인)
+    CALENDAR: "/movers/calendar",
     // 2026.08.03 윤소정 - [추가] 지도기반 기사님 추천
     MAP: "/movers/map",
     DETAIL: (moverId: string) => `/movers/${moverId}`,
@@ -57,6 +59,8 @@ export const APP_ROUTES = {
   MOVER_ESTIMATES: {
     /** 기존 헤더 호환용 기본 진입 경로 */
     ROOT: "/estimate/received-requests",
+    // 2026.08.13 윤소정 - [추가] 기사 캘린더
+    CALENDAR: "/estimate/calendar",
     RECEIVED_REQUESTS: "/estimate/received-requests",
     SENT: "/estimate/sent",
     SENT_DETAIL: (estimateId: number) => `/estimate/sent/${estimateId}`,

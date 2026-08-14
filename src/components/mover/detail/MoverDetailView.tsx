@@ -93,6 +93,7 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
   };
 
   const actionsProps = {
+    moverId: detail.id,
     moverName: detail.name,
     isFavorite: detail.isFavorite,
     onToggleFavorite: toggleFavorite,
