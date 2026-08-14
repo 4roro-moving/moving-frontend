@@ -6,6 +6,7 @@ import Button from "@/components/common/Button/Button";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { Text } from "@/components/common/Text";
 import { LikeOutlineButton } from "@/components/mover/detail/LikeOutlineButton";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
 interface MoverDetailActionsProps {
   moverId: string;
@@ -29,7 +30,7 @@ export default function MoverDetailActions({
   requestDisabled = false,
   requestButtonLabel = "지정 견적 요청하기",
 }: MoverDetailActionsProps) {
-  const calendarHref = `/movers/calendar?moverId=${encodeURIComponent(moverId)}&moverName=${encodeURIComponent(moverName)}`;
+  const calendarHref = `${APP_ROUTES.MOVERS.CALENDAR}?moverId=${encodeURIComponent(moverId)}&moverName=${encodeURIComponent(moverName)}`;
 
   if (layout === "sticky") {
     return (
