@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { UseFormSetError, UseFormSetFocus } from "react-hook-form";
 
 import { useCreateMoverProfile } from "@/hooks/profile/useCreateMoverProfile";
@@ -23,6 +23,8 @@ interface UseMoverProfileCreateFormParams {
   setFocus: UseFormSetFocus<MoverProfileFormValues>;
 }
 
+type FocusField = "phone" | "nickname";
+
 function isConflictError(error: unknown): error is ApiError {
   return (
     error instanceof ApiError &&
@@ -42,15 +44,21 @@ export function useMoverProfileCreateForm({
   const router = useRouter();
   const createMoverProfile = useCreateMoverProfile();
 
+  const submissionInFlightRef = useRef(false);
+  const pendingFocusFieldRef = useRef<FocusField | null>(null);
+
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isPending = isSubmitting || createMoverProfile.isPending;
 
   const submit = async (formValues: MoverProfileFormValues) => {
-    if (isPending) {
+    if (submissionInFlightRef.current || isPending) {
       return;
     }
+
+    submissionInFlightRef.current = true;
+    pendingFocusFieldRef.current = null;
 
     setSubmitError(null);
     setIsSubmitting(true);
@@ -77,7 +85,7 @@ export function useMoverProfileCreateForm({
             type: "server",
             message: error.message,
           });
-          setFocus("phone");
+          pendingFocusFieldRef.current = "phone";
           return;
         }
 
@@ -86,14 +94,25 @@ export function useMoverProfileCreateForm({
             type: "server",
             message: error.message,
           });
-          setFocus("nickname");
+          pendingFocusFieldRef.current = "nickname";
           return;
         }
       }
 
       setSubmitError(getApiErrorMessage(error, MOVER_PROFILE_CREATE_ERROR_MESSAGE));
     } finally {
+      submissionInFlightRef.current = false;
       setIsSubmitting(false);
+
+      const focusField = pendingFocusFieldRef.current;
+
+      if (focusField) {
+        pendingFocusFieldRef.current = null;
+
+        setTimeout(() => {
+          setFocus(focusField);
+        }, 0);
+      }
     }
   };
 

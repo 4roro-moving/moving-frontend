@@ -44,7 +44,7 @@ const MoverProfileForm = ({
     handleSubmit,
     setError,
     setFocus,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isValid },
   } = useForm<MoverProfileFormValues>({
     resolver: zodResolver(createMoverProfileSchema({ requiresPhone })),
     mode: "onChange",
@@ -61,17 +61,11 @@ const MoverProfileForm = ({
     },
   });
 
-  const {
-    submitError,
-    isPending: isSubmitPending,
-    submit,
-  } = useMoverProfileCreateForm({
+  const { submitError, isPending, submit } = useMoverProfileCreateForm({
     requiresPhone,
     setError,
     setFocus,
   });
-
-  const isPending = isSubmitting || isSubmitPending;
 
   const onSubmit = handleSubmit((formValues) => submit(formValues));
 
