@@ -1,8 +1,10 @@
 import { z } from "zod";
 
+import { CUSTOMER_PROFILE_NAME_MAX_LENGTH } from "@/lib/constants/profileValidation";
 import { passwordChangeFieldsSchema } from "@/lib/schemas/passwordChangeFields";
 
 const moveTypeSchema = z.enum(["SMALL", "HOME", "OFFICE"]);
+
 const regionIdSchema = z.union([
   z.literal(1),
   z.literal(2),
@@ -33,7 +35,10 @@ export const customerProfileEditSchema = z
       .string()
       .trim()
       .min(1, "성함을 입력해 주세요")
-      .max(50, "이름은 50자 이하로 입력해 주세요"),
+      .max(
+        CUSTOMER_PROFILE_NAME_MAX_LENGTH,
+        `이름은 ${CUSTOMER_PROFILE_NAME_MAX_LENGTH}자 이하로 입력해 주세요`,
+      ),
     phone: z.string(),
     imageFile: z.custom<File | null>().nullable().optional(),
     serviceTypes: z.array(moveTypeSchema).min(1, "이용 서비스를 선택해 주세요"),
