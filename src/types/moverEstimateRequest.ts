@@ -37,11 +37,13 @@ export type MoverEstimateRequestResult = {
   };
 };
 
-// 기사 견적 전송 요청 Body
-export type SendEstimateRequest = {
+export type SendEstimateInput = {
   price: number;
   comment: string;
 };
+
+// 기사 견적 전송 요청 Body
+export type SendEstimateRequest = SendEstimateInput;
 
 export type RejectEstimateRequest = {
   reason: string;
@@ -67,7 +69,7 @@ export type RejectedEstimate = {
   createdAt: string;
 };
 
-//기사 견적 반려 조회
+// 기사 견적 반려 조회
 export type RejectedEstimateRequestItem = {
   id: number;
   reason: string;

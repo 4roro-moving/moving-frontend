@@ -26,6 +26,8 @@ interface SubmitEstimateRequestParams {
   moveDate: Date;
   from: AddressSearchItem;
   to: AddressSearchItem;
+  fromDetailAddress?: string;
+  toDetailAddress?: string;
 }
 
 function getCreateEstimateErrorMessage(error: unknown): string {
