@@ -1,37 +1,31 @@
 "use client";
 
-import { useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
-import { addFavoriteMover, removeFavoriteMover } from "@/lib/api/favorites";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getLoginRedirectPath, hasAuthSession } from "@/lib/auth/session";
 import {
-  getFavoriteMoversScopeQueryKey,
-  getMoverDetailQueryKey,
-  getMoverListScopeQueryKey,
-  QUERY_KEYS,
-} from "@/lib/constants/queryKeys";
-import {
-  addMoverToFavoriteMoversCache,
-  findMoverListItemSnapshot,
+  applyFavoriteOptimisticUpdate,
   invalidateFavoriteRelatedQueries,
-  patchMoverFavorite,
-  removeIdsFromFavoriteMoversCache,
-  type FavoriteMoversCacheData,
+  rollbackFavoriteOptimisticUpdate,
+  type FavoriteMutationContext,
 } from "@/lib/utils/favoriteMoverCache";
+import {
+  clearLatestFavoriteRequestId,
+  createFavoriteRequestId,
+  enqueueFavoriteRequest,
+  isLatestFavoriteRequest,
+  runFavoriteOptimisticQueue,
+  setLatestFavoriteRequestId,
+  StaleFavoriteRequestError,
+} from "@/lib/utils/favoriteMoverQueue";
 import { ApiError } from "@/types/api";
-import type {
-  EstimateDetail,
-  PendingEstimateSectionListResult,
-  ReceivedEstimatePanel,
-} from "@/types/estimate";
-import type { MoversListResult } from "@/types/mover";
-import type { MoverDetail } from "@/types/moverDetail";
+import { ERROR_CODES } from "@/lib/constants/errorCodes";
 
 export { useBulkRemoveFavoriteMovers } from "@/hooks/useBulkRemoveFavoriteMovers";
 
@@ -39,17 +33,12 @@ const LOGIN_REQUIRED_MESSAGE = "로그인이 필요한 서비스입니다.";
 const CUSTOMER_REQUIRED_MESSAGE = "고객만 이용할 수 있는 서비스입니다.";
 const FAVORITE_SYNC_ERROR_MESSAGE = "찜 상태를 확인하지 못했습니다. 잠시 후 다시 확인해주세요.";
 
-/** 세션(authScope)이 바뀐 뒤 뒤늦게 실행되려는 요청을 조용히 폐기하기 위한 sentinel 에러 */
-class StaleFavoriteRequestError extends Error {
-  constructor() {
-    super("찜 요청이 실행되기 전에 세션이 변경되어 폐기되었습니다.");
-    this.name = "StaleFavoriteRequestError";
-  }
-}
-
 function isUnauthorizedError(error: unknown): boolean {
   if (error instanceof ApiError) {
-    return error.status === 401 || error.code === "UNAUTHORIZED";
+    return (
+      error.status === ERROR_CODES.UNAUTHORIZED.status ||
+      error.code === ERROR_CODES.UNAUTHORIZED.code
+    );
   }
 
   return false;
@@ -73,72 +62,6 @@ interface FavoriteMoverRequest extends FavoriteMoverVariables {
   authScope: AuthScope;
   /** 실행 직전 현재 세션 스코프를 조회. ref 기반이라 큐 대기 중 값이 바뀌어도 최신값을 봄 */
   getCurrentAuthScope: () => AuthScope;
-}
-
-interface FavoriteMutationContext {
-  previousReceived: ReceivedEstimatePanel[] | undefined;
-  previousDetails: [readonly unknown[], EstimateDetail | undefined][];
-  previousPendingLists: [readonly unknown[], PendingEstimateSectionListResult | undefined][];
-  previousMoverLists: [readonly unknown[], InfiniteData<MoversListResult> | undefined][];
-  previousFavoriteMovers: [readonly unknown[], FavoriteMoversCacheData | undefined][];
-  previousMoverDetail: MoverDetail | undefined;
-}
-
-const favoriteRequestQueues = new Map<string, Promise<unknown>>();
-const favoriteOptimisticQueues = new Map<string, Promise<unknown>>();
-const latestFavoriteRequestIds = new Map<string, number>();
-let favoriteRequestId = 0;
-
-/** moverId만으로는 계정 전환 시 큐가 세션을 넘나들며 공유되므로 authScope까지 키에 포함 */
-function getFavoriteQueueKey(authScope: AuthScope, moverId: string) {
-  return `${authScope}:${moverId}`;
-}
-
-/**
- * 주어진 key에 대해 task들을 등록된 순서대로 순차 실행합니다.
- * task 자체는 동기 시점(호출 즉시)에 큐에 등록되므로, 실제 완료 순서가 뒤바뀌어도 시작 순서는 항상 호출 순서를 따릅니다.
- */
-function runSerialized<T>(
-  queues: Map<string, Promise<unknown>>,
-  key: string,
-  task: () => Promise<T>,
-): Promise<T> {
-  const previous = queues.get(key) ?? Promise.resolve();
-  const run = previous.catch(() => undefined).then(task);
-  const tail = run.then(
-    () => undefined,
-    () => undefined,
-  );
-
-  queues.set(key, tail);
-  void tail.finally(() => {
-    if (queues.get(key) === tail) {
-      queues.delete(key);
-    }
-  });
-
-  return run;
-}
-
-/**
- * 같은 기사님의 연속 찜 요청은 클릭 순서대로 서버에 전달합니다.
- * 큐 대기 중 로그아웃/계정 전환이 일어나면, 실행 직전 세션이 달라졌는지 확인해 다른 계정의 토큰으로 이전 계정의 요청이 실행되지 않도록 폐기합니다.
- */
-function enqueueFavoriteRequest({
-  moverId,
-  nextIsFavorite,
-  authScope,
-  getCurrentAuthScope,
-}: FavoriteMoverRequest) {
-  const queueKey = getFavoriteQueueKey(authScope, moverId);
-
-  return runSerialized(favoriteRequestQueues, queueKey, async () => {
-    if (getCurrentAuthScope() !== authScope) {
-      throw new StaleFavoriteRequestError();
-    }
-
-    return nextIsFavorite ? addFavoriteMover(moverId) : removeFavoriteMover(moverId);
-  });
 }
 
 /** 기사님 단건 찜 추가/해제 + 관련 목록·상세 낙관적 업데이트 */
@@ -186,169 +109,28 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   };
 
   const mutation = useMutation({
-    mutationFn: enqueueFavoriteRequest,
+    mutationFn: (variables: FavoriteMoverRequest) => enqueueFavoriteRequest(variables),
     onMutate: async (variables): Promise<FavoriteMutationContext> => {
       const { moverId, nextIsFavorite, authScope: requestAuthScope } = variables;
-      const queueKey = getFavoriteQueueKey(requestAuthScope, moverId);
 
-      // cancelQueries~setQueryData(낙관적 업데이트) 구간을 클릭 순서대로 강제
-      // 큐에 등록하는 시점은 항상 동기적으로 클릭 순서를 따르므로, 실제 cancelQueries 완료 순서가 뒤바뀌어도 마지막 클릭 상태가 최종적으로 반영됨
-      return runSerialized(favoriteOptimisticQueues, queueKey, async () => {
-        const moverListScopeQueryKey = getMoverListScopeQueryKey(requestAuthScope);
-        const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(requestAuthScope);
-        const moverDetailQueryKey = getMoverDetailQueryKey(requestAuthScope, moverId);
-
-        // 찜 추가일 때만: 검색/목록 캐시에서 이 mover의 스냅샷을 미리 찾아둠
-        // (cancelQueries 전에 읽어야 취소 중 데이터가 아니라 현재 화면에 보이는 데이터를 그대로 씀)
-        const moverSnapshot = nextIsFavorite
-          ? findMoverListItemSnapshot(queryClient, moverListScopeQueryKey, moverId)
-          : undefined;
-
-        await Promise.all([
-          queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
-          queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
-          queryClient.cancelQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
-          queryClient.cancelQueries({ queryKey: moverListScopeQueryKey }),
-          queryClient.cancelQueries({ queryKey: moverDetailQueryKey }),
-          queryClient.cancelQueries({ queryKey: favoriteMoversScopeQueryKey }),
-        ]);
-
-        const previousReceived = queryClient.getQueryData<ReceivedEstimatePanel[]>(
-          QUERY_KEYS.ESTIMATES.RECEIVED,
-        );
-        const previousDetails = queryClient.getQueriesData<EstimateDetail>({
-          queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT,
-        });
-        const previousPendingLists = queryClient.getQueriesData<PendingEstimateSectionListResult>({
-          queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
-        });
-        const previousMoverLists = queryClient.getQueriesData<InfiniteData<MoversListResult>>({
-          queryKey: moverListScopeQueryKey,
-        });
-        const previousFavoriteMovers = queryClient.getQueriesData<FavoriteMoversCacheData>({
-          queryKey: favoriteMoversScopeQueryKey,
-        });
-        const previousMoverDetail = queryClient.getQueryData<MoverDetail>(moverDetailQueryKey);
-
-        queryClient.setQueryData<ReceivedEstimatePanel[]>(
-          QUERY_KEYS.ESTIMATES.RECEIVED,
-          (panels) => {
-            if (!panels) {
-              return panels;
-            }
-
-            return panels.map((panel) => ({
-              ...panel,
-              estimates: panel.estimates.map((estimate) => ({
-                ...estimate,
-                mover: patchMoverFavorite(estimate.mover, moverId, nextIsFavorite),
-              })),
-            }));
-          },
-        );
-
-        queryClient.setQueriesData<EstimateDetail>(
-          { queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT },
-          (detail) => {
-            if (!detail?.mover) {
-              return detail;
-            }
-
-            return {
-              ...detail,
-              mover: patchMoverFavorite(detail.mover, moverId, nextIsFavorite),
-            };
-          },
-        );
-
-        queryClient.setQueriesData<PendingEstimateSectionListResult>(
-          { queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT },
-          (list) => {
-            if (!list || !Array.isArray(list.sections)) {
-              return list;
-            }
-
-            return {
-              ...list,
-              sections: list.sections.map((section) => ({
-                ...section,
-                estimates: section.estimates.map((estimate) => ({
-                  ...estimate,
-                  mover: patchMoverFavorite(estimate.mover, moverId, nextIsFavorite),
-                })),
-              })),
-            };
-          },
-        );
-
-        queryClient.setQueriesData<InfiniteData<MoversListResult>>(
-          { queryKey: moverListScopeQueryKey },
-          (list) => {
-            if (!list) {
-              return list;
-            }
-
-            return {
-              ...list,
-              pages: list.pages.map((page) => ({
-                ...page,
-                data: page.data.map((mover) => patchMoverFavorite(mover, moverId, nextIsFavorite)),
-              })),
-            };
-          },
-        );
-
-        if (!nextIsFavorite) {
-          queryClient.setQueriesData<FavoriteMoversCacheData>(
-            { queryKey: favoriteMoversScopeQueryKey },
-            (list) => removeIdsFromFavoriteMoversCache(list, new Set([moverId]), 1),
-          );
-        } else if (moverSnapshot) {
-          queryClient.setQueriesData<FavoriteMoversCacheData>(
-            { queryKey: favoriteMoversScopeQueryKey },
-            (list) => addMoverToFavoriteMoversCache(list, moverSnapshot),
-          );
-        }
-
-        queryClient.setQueryData<MoverDetail>(moverDetailQueryKey, (detail) => {
-          if (!detail) {
-            return detail;
-          }
-
-          return patchMoverFavorite(detail, moverId, nextIsFavorite);
-        });
-
-        return {
-          previousReceived,
-          previousDetails,
-          previousPendingLists,
-          previousMoverLists,
-          previousFavoriteMovers,
-          previousMoverDetail,
-        };
-      });
+      // 같은 기사님의 연속 낙관적 업데이트는 클릭 순서대로 처리합니다.
+      return runFavoriteOptimisticQueue(requestAuthScope, moverId, () =>
+        applyFavoriteOptimisticUpdate(queryClient, requestAuthScope, moverId, nextIsFavorite),
+      );
     },
     onError: (error, variables, context) => {
-      const requestKey = getFavoriteQueueKey(variables.authScope, variables.moverId);
-      const isLatestRequest = latestFavoriteRequestIds.get(requestKey) === variables.requestId;
+      const isLatestRequest = isLatestFavoriteRequest(
+        variables.authScope,
+        variables.moverId,
+        variables.requestId,
+      );
 
       if (context && isLatestRequest) {
-        queryClient.setQueryData(QUERY_KEYS.ESTIMATES.RECEIVED, context.previousReceived);
-        context.previousDetails.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-        context.previousPendingLists.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-        context.previousMoverLists.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-        context.previousFavoriteMovers.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-        queryClient.setQueryData(
-          getMoverDetailQueryKey(variables.authScope, variables.moverId),
-          context.previousMoverDetail,
+        rollbackFavoriteOptimisticUpdate(
+          queryClient,
+          variables.authScope,
+          variables.moverId,
+          context,
         );
       }
 
@@ -369,13 +151,11 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       }
     },
     onSettled: (_data, error, variables) => {
-      const requestKey = getFavoriteQueueKey(variables.authScope, variables.moverId);
-
-      if (latestFavoriteRequestIds.get(requestKey) !== variables.requestId) {
+      if (!isLatestFavoriteRequest(variables.authScope, variables.moverId, variables.requestId)) {
         return;
       }
 
-      latestFavoriteRequestIds.delete(requestKey);
+      clearLatestFavoriteRequestId(variables.authScope, variables.moverId);
 
       // 세션 변경으로 폐기됐거나 인증이 만료된 요청은 재동기화하지 않음
       if (error instanceof StaleFavoriteRequestError || isUnauthorizedError(error)) {
@@ -403,9 +183,8 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       return;
     }
 
-    const requestId = ++favoriteRequestId;
-    const requestKey = getFavoriteQueueKey(authScope, variables.moverId);
-    latestFavoriteRequestIds.set(requestKey, requestId);
+    const requestId = createFavoriteRequestId();
+    setLatestFavoriteRequestId(authScope, variables.moverId, requestId);
     mutation.mutate(
       {
         ...variables,
@@ -434,9 +213,8 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
       return Promise.reject(new Error(CUSTOMER_REQUIRED_MESSAGE));
     }
 
-    const requestId = ++favoriteRequestId;
-    const requestKey = getFavoriteQueueKey(authScope, variables.moverId);
-    latestFavoriteRequestIds.set(requestKey, requestId);
+    const requestId = createFavoriteRequestId();
+    setLatestFavoriteRequestId(authScope, variables.moverId, requestId);
     return mutation.mutateAsync(
       {
         ...variables,
