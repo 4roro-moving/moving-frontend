@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { UseFormReset, UseFormSetError, UseFormSetFocus } from "react-hook-form";
 
 import { useUpdateMoverProfile } from "@/hooks/profile/useUpdateMoverProfile";
@@ -41,6 +41,7 @@ export function useMoverProfileEditForm({
 
   const submissionInFlightRef = useRef(false);
   const shouldFocusNicknameRef = useRef(false);
+  const nicknameFocusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -48,7 +49,20 @@ export function useMoverProfileEditForm({
 
   const isPending = isSubmitting || updateMoverProfile.isPending;
 
+  useEffect(() => {
+    return () => {
+      if (nicknameFocusTimeoutRef.current !== null) {
+        clearTimeout(nicknameFocusTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const submit = async (formValues: MoverProfileFormValues) => {
+    if (nicknameFocusTimeoutRef.current !== null) {
+      clearTimeout(nicknameFocusTimeoutRef.current);
+      nicknameFocusTimeoutRef.current = null;
+    }
+
     if (submissionInFlightRef.current || isPending) {
       return;
     }
@@ -96,7 +110,8 @@ export function useMoverProfileEditForm({
       if (shouldFocusNicknameRef.current) {
         shouldFocusNicknameRef.current = false;
 
-        setTimeout(() => {
+        nicknameFocusTimeoutRef.current = setTimeout(() => {
+          nicknameFocusTimeoutRef.current = null;
           setFocus("nickname");
         }, 0);
       }

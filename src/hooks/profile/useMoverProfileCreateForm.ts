@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { UseFormSetError, UseFormSetFocus } from "react-hook-form";
 
 import { useCreateMoverProfile } from "@/hooks/profile/useCreateMoverProfile";
@@ -46,13 +46,27 @@ export function useMoverProfileCreateForm({
 
   const submissionInFlightRef = useRef(false);
   const pendingFocusFieldRef = useRef<FocusField | null>(null);
+  const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isPending = isSubmitting || createMoverProfile.isPending;
 
+  useEffect(() => {
+    return () => {
+      if (focusTimeoutRef.current !== null) {
+        clearTimeout(focusTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const submit = async (formValues: MoverProfileFormValues) => {
+    if (focusTimeoutRef.current !== null) {
+      clearTimeout(focusTimeoutRef.current);
+      focusTimeoutRef.current = null;
+    }
+
     if (submissionInFlightRef.current || isPending) {
       return;
     }
@@ -109,7 +123,8 @@ export function useMoverProfileCreateForm({
       if (focusField) {
         pendingFocusFieldRef.current = null;
 
-        setTimeout(() => {
+        focusTimeoutRef.current = setTimeout(() => {
+          focusTimeoutRef.current = null;
           setFocus(focusField);
         }, 0);
       }
