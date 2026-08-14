@@ -4,8 +4,9 @@ import { keepPreviousData } from "@tanstack/react-query";
 
 import { useApiQuery } from "@/hooks/queries/useApiQuery";
 import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
-import { fetchMyReviews, MY_REVIEW_PAGE_LIMIT } from "@/lib/api/reviews";
+import { fetchMyReviews } from "@/lib/api/reviews";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { REVIEW_PAGE_LIMIT } from "@/lib/constants/reviewConstants";
 import type { MyReviewListQuery } from "@/types/review";
 
 /**
@@ -15,7 +16,7 @@ import type { MyReviewListQuery } from "@/types/review";
  */
 export function useMyReviews(query: MyReviewListQuery = {}) {
   const page = query.page ?? 1;
-  const limit = query.limit ?? MY_REVIEW_PAGE_LIMIT;
+  const limit = query.limit ?? REVIEW_PAGE_LIMIT;
   const { canFetch } = useCustomerAuthReady();
 
   return useApiQuery({
