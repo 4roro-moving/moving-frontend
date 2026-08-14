@@ -109,7 +109,7 @@ export function useReviewWriteForm({
   return {
     rating,
     content,
-    contentLength: trimmedContent.length,
+    contentLength: content.length,
     submitError,
     isSubmitting,
     isSubmitDisabled,
