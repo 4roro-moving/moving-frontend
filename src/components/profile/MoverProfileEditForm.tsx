@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import FormField from "@/components/common/FormField/FormField";
@@ -13,14 +12,16 @@ import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
 import ProfileFormActions from "@/components/profile/ProfileFormActions";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
-import { useUpdateMoverProfile } from "@/hooks/profile/useUpdateMoverProfile";
-import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { useMoverProfileEditForm } from "@/hooks/profile/useMoverProfileEditForm";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
+import {
+  MOVER_PROFILE_DESCRIPTION_MAX_LENGTH,
+  MOVER_PROFILE_NICKNAME_MAX_LENGTH,
+  MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH,
+} from "@/lib/constants/profileValidation";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
-import { uploadProfileImage } from "@/lib/profile/uploadProfileImage";
 import { moverProfileSchema, type MoverProfileFormValues } from "@/lib/schemas/moverProfileSchema";
 import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
-import { ApiError } from "@/types/api";
 import type { MoveType } from "@/types/move";
 
 interface MoverProfileEditFormProps {
@@ -32,10 +33,6 @@ const MoverProfileEditForm = ({
   defaultValues,
   initialImageUrl = null,
 }: MoverProfileEditFormProps) => {
-  const updateMoverProfile = useUpdateMoverProfile();
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
   const {
     register,
     control,
@@ -43,7 +40,7 @@ const MoverProfileEditForm = ({
     setError,
     setFocus,
     reset,
-    formState: { errors, isValid, isSubmitting, isDirty },
+    formState: { errors, isValid, isDirty },
   } = useForm<MoverProfileFormValues>({
     resolver: zodResolver(moverProfileSchema),
     mode: "onChange",
@@ -59,46 +56,15 @@ const MoverProfileEditForm = ({
     },
   });
 
-  const isPending = isSubmitting || updateMoverProfile.isPending;
+  const { submitError, toastMessage, isPending, setToastMessage, submit } = useMoverProfileEditForm(
+    {
+      reset,
+      setError,
+      setFocus,
+    },
+  );
 
-  const onSubmit = handleSubmit(async (formValues) => {
-    setSubmitError(null);
-
-    try {
-      const imageKey = await uploadProfileImage(formValues.imageFile);
-
-      await updateMoverProfile.mutateAsync({
-        nickname: formValues.nickname,
-        career: Number(formValues.career),
-        shortIntro: formValues.shortIntro,
-        description: formValues.description,
-        regionIds: formValues.regionIds,
-        serviceTypes: formValues.serviceTypes,
-        ...(imageKey ? { imageUrl: imageKey } : {}),
-      });
-
-      reset({
-        ...formValues,
-        imageFile: null,
-      });
-      setToastMessage("프로필이 수정되었습니다.");
-    } catch (error) {
-      if (
-        error instanceof ApiError &&
-        (error.status === 409 || error.code === "CONFLICT") &&
-        (error.message.includes("닉네임") || error.message.includes("별명"))
-      ) {
-        setError("nickname", {
-          type: "server",
-          message: error.message,
-        });
-        setFocus("nickname");
-        return;
-      }
-
-      setSubmitError(getApiErrorMessage(error, "프로필 수정에 실패했습니다."));
-    }
-  });
+  const onSubmit = handleSubmit((formValues) => submit(formValues));
 
   return (
     <form
@@ -134,7 +100,7 @@ const MoverProfileEditForm = ({
               size="md"
               placeholder="사이트에 노출될 별명을 입력해 주세요"
               error={errors.nickname?.message}
-              maxLength={20}
+              maxLength={MOVER_PROFILE_NICKNAME_MAX_LENGTH}
               disabled={isPending}
               {...register("nickname")}
             />
@@ -159,7 +125,7 @@ const MoverProfileEditForm = ({
               size="md"
               placeholder="한 줄 소개를 입력해 주세요"
               error={errors.shortIntro?.message}
-              maxLength={100}
+              maxLength={MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH}
               disabled={isPending}
               {...register("shortIntro")}
             />
@@ -172,7 +138,7 @@ const MoverProfileEditForm = ({
               id="mover-edit-description"
               placeholder="상세 내용을 입력해 주세요"
               error={errors.description?.message}
-              maxLength={1000}
+              maxLength={MOVER_PROFILE_DESCRIPTION_MAX_LENGTH}
               disabled={isPending}
               {...register("description")}
             />
