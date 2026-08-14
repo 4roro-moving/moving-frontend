@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type {
-  UseFormGetValues,
+  FieldNamesMarkedBoolean,
   UseFormReset,
   UseFormResetField,
   UseFormSetError,
@@ -30,14 +30,16 @@ import { hasPasswordChangePayload } from "@/lib/schemas/passwordChangeFields";
 import { ApiError } from "@/types/api";
 
 interface UseCustomerProfileEditFormParams {
-  getValues: UseFormGetValues<CustomerProfileEditFormValues>;
-  dirtyFields: Partial<Record<keyof CustomerProfileEditFormValues, unknown>>;
   hasPassword: boolean;
   reset: UseFormReset<CustomerProfileEditFormValues>;
   resetField: UseFormResetField<CustomerProfileEditFormValues>;
   setError: UseFormSetError<CustomerProfileEditFormValues>;
   setFocus: UseFormSetFocus<CustomerProfileEditFormValues>;
 }
+
+type CustomerProfileDirtyFields = Partial<
+  Readonly<FieldNamesMarkedBoolean<CustomerProfileEditFormValues>>
+>;
 
 function isConflictError(error: unknown): error is ApiError {
   return (
@@ -55,8 +57,6 @@ function isUnauthorizedError(error: unknown): error is ApiError {
 }
 
 export function useCustomerProfileEditForm({
-  getValues,
-  dirtyFields,
   hasPassword,
   reset,
   resetField,
@@ -73,7 +73,10 @@ export function useCustomerProfileEditForm({
   const isPending =
     isSubmitting || updateCustomerBasicInfo.isPending || updateCustomerProfile.isPending;
 
-  const submit = async () => {
+  const submit = async (
+    formValues: CustomerProfileEditFormValues,
+    dirtyFields: CustomerProfileDirtyFields,
+  ) => {
     if (isPending) {
       return;
     }
@@ -82,7 +85,6 @@ export function useCustomerProfileEditForm({
     setIsSubmitting(true);
 
     try {
-      const formValues = getValues();
       const imageKey = await uploadProfileImage(formValues.imageFile);
 
       const { basic, profile } = buildCustomerProfileEditPayloads({

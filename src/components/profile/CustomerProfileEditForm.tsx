@@ -40,7 +40,6 @@ const CustomerProfileEditForm = ({
     register,
     control,
     handleSubmit,
-    getValues,
     setError,
     setFocus,
     reset,
@@ -64,8 +63,6 @@ const CustomerProfileEditForm = ({
 
   const { submitError, toastMessage, isPending, setToastMessage, submit } =
     useCustomerProfileEditForm({
-      getValues,
-      dirtyFields,
       hasPassword,
       reset,
       resetField,
@@ -73,7 +70,7 @@ const CustomerProfileEditForm = ({
       setFocus,
     });
 
-  const onSubmit = handleSubmit(() => submit());
+  const onSubmit = handleSubmit((formValues) => submit(formValues, dirtyFields));
 
   return (
     <form
