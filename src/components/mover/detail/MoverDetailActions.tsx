@@ -1,11 +1,15 @@
 "use client";
 
+import Link from "next/link";
+
 import Button from "@/components/common/Button/Button";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { Text } from "@/components/common/Text";
 import { LikeOutlineButton } from "@/components/mover/detail/LikeOutlineButton";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
 interface MoverDetailActionsProps {
+  moverId: string;
   moverName: string;
   isFavorite: boolean;
   onToggleFavorite: () => void;
@@ -17,6 +21,7 @@ interface MoverDetailActionsProps {
 }
 
 export default function MoverDetailActions({
+  moverId,
   moverName,
   isFavorite,
   onToggleFavorite,
@@ -25,6 +30,8 @@ export default function MoverDetailActions({
   requestDisabled = false,
   requestButtonLabel = "지정 견적 요청하기",
 }: MoverDetailActionsProps) {
+  const calendarHref = `${APP_ROUTES.MOVERS.CALENDAR}?moverId=${encodeURIComponent(moverId)}&moverName=${encodeURIComponent(moverName)}`;
+
   if (layout === "sticky") {
     return (
       <div className="border-border-subtle bg-background-default px-margin-mobile md:px-margin-tablet fixed inset-x-0 bottom-0 z-20 border-t py-28 xl:hidden">
@@ -47,6 +54,12 @@ export default function MoverDetailActions({
           >
             {requestButtonLabel}
           </Button>
+          <Link
+            href={calendarHref}
+            className="border-border-brand text-text-brand rounded-16 flex h-54 min-w-0 flex-1 items-center justify-center border text-[16px] font-semibold"
+          >
+            일정 확인
+          </Link>
         </div>
       </div>
     );
@@ -69,6 +82,13 @@ export default function MoverDetailActions({
       >
         {requestButtonLabel}
       </Button>
+
+      <Link
+        href={calendarHref}
+        className="border-border-brand text-text-brand rounded-16 hover:bg-background-brand-muted flex h-54 w-full items-center justify-center border text-[16px] font-semibold transition-colors"
+      >
+        기사님 일정 확인하기
+      </Link>
 
       <LikeOutlineButton
         size="lg"

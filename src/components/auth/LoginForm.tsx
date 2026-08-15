@@ -14,8 +14,8 @@ import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
-import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { resolveAuthUserImage } from "@/lib/api/profile";
+import { getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
 import { consumePasswordChangedToast } from "@/lib/auth/passwordChangedToast";
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
 import {
@@ -85,7 +85,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       setPostAuthRedirectPath(nextPath);
       establishSession(await resolveAuthUserImage(result.user));
     } catch (error) {
-      setSubmitError(getApiErrorMessage(error));
+      setSubmitError(getLoginErrorMessage(error, audience));
     }
   });
 

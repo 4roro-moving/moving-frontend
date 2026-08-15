@@ -9,14 +9,9 @@ import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/commo
 import { Text } from "@/components/common/Text";
 import EstimateRequestSummaryContent from "@/components/estimate/EstimateRequestSummaryContent";
 import { MAX_TEXT_CONTENT_LENGTH, MIN_TEXT_CONTENT_LENGTH } from "@/lib/constants/validation";
-import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
+import type { MoverEstimateRequest, SendEstimateInput } from "@/types/moverEstimateRequest";
 
 const MAX_PRICE = 100_000_000;
-
-export interface SendEstimateInput {
-  price: number;
-  comment: string;
-}
 
 interface SendEstimateModalProps {
   open: boolean;
@@ -44,6 +39,7 @@ export default function SendEstimateModal({
 
   const handleClose = () => {
     if (isSubmitting) return;
+
     setPrice("");
     setComment("");
     setIsCommentTouched(false);
@@ -65,6 +61,7 @@ export default function SendEstimateModal({
     price.length > 0 && !isPriceValid
       ? "견적가는 1원 이상 1억 원 이하로 입력해 주세요."
       : undefined;
+
   const commentError =
     isCommentTouched && !isCommentValid
       ? `코멘트는 ${MIN_TEXT_CONTENT_LENGTH}자 이상 ${MAX_TEXT_CONTENT_LENGTH}자 이하로 입력해 주세요.`
@@ -148,6 +145,7 @@ export default function SendEstimateModal({
               }}
               className="h-160 resize-none"
             />
+
             <Text as="span" variant="xs-regular" className="text-text-muted self-end">
               {trimmedComment.length}/{MAX_TEXT_CONTENT_LENGTH}
             </Text>

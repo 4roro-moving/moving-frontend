@@ -1,8 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import Button from "@/components/common/Button/Button";
@@ -13,18 +11,19 @@ import { Text } from "@/components/common/Text";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
-import { useCreateMoverProfile } from "@/hooks/profile/useCreateMoverProfile";
-import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { getRoleHomePath } from "@/lib/auth/redirect";
+import { useMoverProfileCreateForm } from "@/hooks/profile/useMoverProfileCreateForm";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
+import {
+  MOVER_PROFILE_DESCRIPTION_MAX_LENGTH,
+  MOVER_PROFILE_NICKNAME_MAX_LENGTH,
+  MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH,
+} from "@/lib/constants/profileValidation";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
-import { uploadProfileImage } from "@/lib/profile/uploadProfileImage";
 import {
   createMoverProfileSchema,
   type MoverProfileFormValues,
 } from "@/lib/schemas/moverProfileSchema";
 import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
-import { ApiError } from "@/types/api";
 import type { MoveType } from "@/types/move";
 
 interface MoverProfileFormProps {
@@ -39,17 +38,13 @@ const MoverProfileForm = ({
   defaultValues,
   initialImageUrl = null,
 }: MoverProfileFormProps) => {
-  const router = useRouter();
-  const createMoverProfile = useCreateMoverProfile();
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
   const {
     register,
     control,
     handleSubmit,
     setError,
     setFocus,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isValid },
   } = useForm<MoverProfileFormValues>({
     resolver: zodResolver(createMoverProfileSchema({ requiresPhone })),
     mode: "onChange",
@@ -66,49 +61,13 @@ const MoverProfileForm = ({
     },
   });
 
-  const isPending = isSubmitting || createMoverProfile.isPending;
-
-  const onSubmit = handleSubmit(async (formValues) => {
-    setSubmitError(null);
-
-    try {
-      const imageKey = await uploadProfileImage(formValues.imageFile);
-
-      await createMoverProfile.mutateAsync({
-        ...(requiresPhone && formValues.phone ? { phone: formValues.phone } : {}),
-        nickname: formValues.nickname,
-        career: Number(formValues.career),
-        shortIntro: formValues.shortIntro,
-        description: formValues.description,
-        regionIds: formValues.regionIds,
-        serviceTypes: formValues.serviceTypes,
-        ...(imageKey ? { imageUrl: imageKey } : {}),
-      });
-      router.replace(getRoleHomePath("MOVER"));
-    } catch (error) {
-      if (error instanceof ApiError && (error.status === 409 || error.code === "CONFLICT")) {
-        if (error.message.includes("전화번호")) {
-          setError("phone", {
-            type: "server",
-            message: error.message,
-          });
-          setFocus("phone");
-          return;
-        }
-
-        if (error.message.includes("닉네임") || error.message.includes("별명")) {
-          setError("nickname", {
-            type: "server",
-            message: error.message,
-          });
-          setFocus("nickname");
-          return;
-        }
-      }
-
-      setSubmitError(getApiErrorMessage(error, "프로필 저장에 실패했습니다."));
-    }
+  const { submitError, isPending, submit } = useMoverProfileCreateForm({
+    requiresPhone,
+    setError,
+    setFocus,
   });
+
+  const onSubmit = handleSubmit((formValues) => submit(formValues));
 
   return (
     <form
@@ -135,6 +94,7 @@ const MoverProfileForm = ({
                 stripLeadingZeros={false}
                 placeholder="전화번호를 입력해 주세요"
                 error={errors.phone?.message}
+                disabled={isPending}
                 {...register("phone")}
               />
             </FormField>
@@ -151,6 +111,7 @@ const MoverProfileForm = ({
                   initialPreviewUrl={initialImageUrl}
                   onChange={field.onChange}
                   error={errors.imageFile?.message}
+                  disabled={isPending}
                 />
               )}
             />
@@ -162,7 +123,8 @@ const MoverProfileForm = ({
               size="md"
               placeholder="사이트에 노출될 별명을 입력해 주세요"
               error={errors.nickname?.message}
-              maxLength={20}
+              maxLength={MOVER_PROFILE_NICKNAME_MAX_LENGTH}
+              disabled={isPending}
               {...register("nickname")}
             />
           </FormField>
@@ -175,6 +137,7 @@ const MoverProfileForm = ({
               numericOnly
               placeholder="기사님의 경력을 입력해 주세요"
               error={errors.career?.message}
+              disabled={isPending}
               {...register("career")}
             />
           </FormField>
@@ -185,7 +148,8 @@ const MoverProfileForm = ({
               size="md"
               placeholder="한 줄 소개를 입력해 주세요"
               error={errors.shortIntro?.message}
-              maxLength={100}
+              maxLength={MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH}
+              disabled={isPending}
               {...register("shortIntro")}
             />
           </FormField>
@@ -197,7 +161,8 @@ const MoverProfileForm = ({
               id="description"
               placeholder="상세 내용을 입력해 주세요"
               error={errors.description?.message}
-              maxLength={1000}
+              maxLength={MOVER_PROFILE_DESCRIPTION_MAX_LENGTH}
+              disabled={isPending}
               {...register("description")}
             />
           </FormField>
@@ -214,6 +179,7 @@ const MoverProfileForm = ({
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.serviceTypes?.message}
+                  disabled={isPending}
                 />
               )}
             />
@@ -232,6 +198,7 @@ const MoverProfileForm = ({
                   onChange={field.onChange}
                   error={errors.regionIds?.message}
                   className="max-w-[277px] gap-x-8 gap-y-12 md:max-w-none"
+                  disabled={isPending}
                 />
               )}
             />

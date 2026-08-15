@@ -1,8 +1,17 @@
 import { z } from "zod";
 
+import {
+  MOVER_PROFILE_CAREER_MAX,
+  MOVER_PROFILE_CAREER_MIN,
+  MOVER_PROFILE_DESCRIPTION_MAX_LENGTH,
+  MOVER_PROFILE_NICKNAME_MAX_LENGTH,
+  MOVER_PROFILE_NICKNAME_MIN_LENGTH,
+  MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH,
+} from "@/lib/constants/profileValidation";
 import { phoneSchema } from "@/lib/schemas/phoneSchema";
 
 const moveTypeSchema = z.enum(["SMALL", "HOME", "OFFICE"]);
+
 const regionIdSchema = z.union([
   z.literal(1),
   z.literal(2),
@@ -30,8 +39,14 @@ export const createMoverProfileSchema = (options: { requiresPhone: boolean }) =>
     nickname: z
       .string()
       .trim()
-      .min(2, "별명은 2자 이상 입력해 주세요")
-      .max(20, "별명은 20자 이하로 입력해 주세요"),
+      .min(
+        MOVER_PROFILE_NICKNAME_MIN_LENGTH,
+        `별명은 ${MOVER_PROFILE_NICKNAME_MIN_LENGTH}자 이상 입력해 주세요`,
+      )
+      .max(
+        MOVER_PROFILE_NICKNAME_MAX_LENGTH,
+        `별명은 ${MOVER_PROFILE_NICKNAME_MAX_LENGTH}자 이하로 입력해 주세요`,
+      ),
     career: z
       .string()
       .trim()
@@ -39,18 +54,29 @@ export const createMoverProfileSchema = (options: { requiresPhone: boolean }) =>
       .regex(/^\d+$/, "경력은 숫자만 입력해 주세요")
       .refine((value) => {
         const career = Number(value);
-        return Number.isInteger(career) && career >= 0 && career <= 100;
-      }, "경력은 0 이상 100 이하의 정수여야 합니다"),
+
+        return (
+          Number.isInteger(career) &&
+          career >= MOVER_PROFILE_CAREER_MIN &&
+          career <= MOVER_PROFILE_CAREER_MAX
+        );
+      }, `경력은 ${MOVER_PROFILE_CAREER_MIN} 이상 ${MOVER_PROFILE_CAREER_MAX} 이하의 정수여야 합니다`),
     shortIntro: z
       .string()
       .trim()
       .min(1, "한 줄 소개를 입력해 주세요")
-      .max(100, "한 줄 소개는 100자 이하로 입력해 주세요"),
+      .max(
+        MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH,
+        `한 줄 소개는 ${MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH}자 이하로 입력해 주세요`,
+      ),
     description: z
       .string()
       .trim()
       .min(1, "상세 설명을 입력해 주세요")
-      .max(1000, "상세 설명은 1000자 이하로 입력해 주세요"),
+      .max(
+        MOVER_PROFILE_DESCRIPTION_MAX_LENGTH,
+        `상세 설명은 ${MOVER_PROFILE_DESCRIPTION_MAX_LENGTH}자 이하로 입력해 주세요`,
+      ),
     serviceTypes: z.array(moveTypeSchema).min(1, "제공 서비스를 선택해 주세요"),
     regionIds: z.array(regionIdSchema).min(1, "서비스 가능 지역을 선택해 주세요"),
   });
@@ -58,4 +84,6 @@ export const createMoverProfileSchema = (options: { requiresPhone: boolean }) =>
 export type MoverProfileFormValues = z.infer<ReturnType<typeof createMoverProfileSchema>>;
 
 /** @deprecated createMoverProfileSchema 사용 */
-export const moverProfileSchema = createMoverProfileSchema({ requiresPhone: false });
+export const moverProfileSchema = createMoverProfileSchema({
+  requiresPhone: false,
+});
