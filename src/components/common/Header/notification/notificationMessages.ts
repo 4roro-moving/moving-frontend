@@ -49,7 +49,7 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
     //메세지 도착 알림 post 아직 없음
     CHAT_MESSAGE_RECEIVED: {
       prefix: "",
-      suffix: " 새 메시지가 도착했어요",
+      suffix: "님으로부터 메시지가 도착했습니다.",
     },
     //공지사항 추가 알림 문구
     NOTICE_RECEIVED: {

@@ -51,6 +51,10 @@ export interface JoinChatRoomPayload {
   lastMessageId?: number | null;
 }
 
+export interface LeaveChatRoomPayload {
+  roomId: number;
+}
+
 export interface ChatSocketError {
   code: string;
   message: string;
@@ -69,6 +73,15 @@ export interface ChatRoomJoinedPayload {
 
 export type JoinChatRoomAck =
   | ({ ok: true } & ChatRoomJoinedPayload)
+  | {
+      ok: false;
+      error: ChatSocketError;
+    };
+
+export type LeaveChatRoomAck =
+  | {
+      ok: true;
+    }
   | {
       ok: false;
       error: ChatSocketError;

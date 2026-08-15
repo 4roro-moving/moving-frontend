@@ -8,6 +8,7 @@ import type {
   ChatMessage,
   JoinChatRoomAck,
   JoinChatRoomPayload,
+  LeaveChatRoomPayload,
   SendChatMessageAck,
   SendChatMessagePayload,
 } from "@/types/chat";
@@ -86,6 +87,12 @@ export function useChatRoomSocket({
         onJoinErrorRef.current?.(response.error);
       }
     });
+
+    return () => {
+      const leavePayload: LeaveChatRoomPayload = { roomId };
+
+      socket.emit("chat:room:leave", leavePayload);
+    };
   }, [canConnect, isConnected, roomId, socket]);
 
   const sendMessage = useCallback(

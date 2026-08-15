@@ -15,7 +15,7 @@ import type { ChatActionItem, ChatParticipantRole } from "@/components/chat/Chat
 import type { ChatEstimateEditConfig } from "@/components/chat/ChatRoomModal";
 import type { ChatMessage, ChatRoom } from "@/types/chat";
 
-interface ChatRoomModalContainerProps {
+export interface ChatRoomModalContainerProps {
   open: boolean;
   estimateId: number;
   participantRole: ChatParticipantRole;
@@ -26,7 +26,10 @@ interface ChatRoomModalContainerProps {
   estimateEdit?: ChatEstimateEditConfig;
 }
 
-interface ConnectedChatRoomModalProps extends Omit<ChatRoomModalContainerProps, "estimateId"> {
+export interface ConnectedChatRoomModalProps extends Omit<
+  ChatRoomModalContainerProps,
+  "estimateId"
+> {
   room: ChatRoom;
 }
 
@@ -184,7 +187,7 @@ function ChatMessageList({
   );
 }
 
-function ConnectedChatRoomModal({
+export function ConnectedChatRoomModal({
   open,
   room,
   participantRole,
