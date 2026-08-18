@@ -1,5 +1,13 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { forwardRef, ReactNode, type ButtonHTMLAttributes } from "react";
+import Link, { type LinkProps } from "next/link";
+import {
+  forwardRef,
+  type AnchorHTMLAttributes,
+  type ButtonHTMLAttributes,
+  type ForwardedRef,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 
 import { Text, type TextVariantProp } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
@@ -57,11 +65,24 @@ const buttonTextVariant = {
 
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  href?: LinkProps["href"];
   rightIcon?: ReactNode;
 }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant, size, fullWidth, type = "button", className, rightIcon, children, ...props },
+const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(function Button(
+  {
+    variant,
+    size,
+    fullWidth,
+    type = "button",
+    href,
+    className,
+    rightIcon,
+    children,
+    disabled,
+    onClick,
+    ...props
+  },
   ref,
 ) {
   // 2026.07.26 정슬기 - [수정] null이면 cva defaultVariants를 타지 않으므로 resolved*로 통일
@@ -69,24 +90,60 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   const resolvedSize = size ?? "md";
   const resolvedFullWidth = fullWidth ?? false;
 
-  return (
-    <button
-      ref={ref}
-      type={type}
-      className={cn(
-        buttonVariants({
-          variant: resolvedVariant,
-          size: resolvedSize,
-          fullWidth: resolvedFullWidth,
-        }),
-        className,
-      )}
-      {...props}
-    >
+  const classNames = cn(
+    buttonVariants({
+      variant: resolvedVariant,
+      size: resolvedSize,
+      fullWidth: resolvedFullWidth,
+    }),
+    className,
+  );
+
+  const content = (
+    <>
       <Text as="span" variant={buttonTextVariant[resolvedSize]}>
         {children}
       </Text>
       {rightIcon}
+    </>
+  );
+
+  if (href) {
+    const linkProps = props as AnchorHTMLAttributes<HTMLAnchorElement>;
+    const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+      if (disabled) {
+        event.preventDefault();
+        return;
+      }
+
+      onClick?.(event as unknown as MouseEvent<HTMLButtonElement>);
+    };
+
+    return (
+      <Link
+        ref={ref as ForwardedRef<HTMLAnchorElement>}
+        href={href}
+        {...linkProps}
+        className={classNames}
+        aria-disabled={disabled || undefined}
+        tabIndex={disabled ? -1 : undefined}
+        onClick={handleClick}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      ref={ref as ForwardedRef<HTMLButtonElement>}
+      type={type}
+      className={classNames}
+      disabled={disabled}
+      onClick={onClick}
+      {...props}
+    >
+      {content}
     </button>
   );
 });
