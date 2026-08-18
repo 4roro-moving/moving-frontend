@@ -17,6 +17,8 @@ import type { ChatActionItem, ChatParticipantRole } from "@/components/chat/Chat
 import type { ChatEstimateEditConfig } from "@/components/chat/ChatRoomModal";
 import type { ChatMessage, ChatRoom } from "@/types/chat";
 
+const IS_CHAT_IMAGE_UPLOAD_ENABLED = process.env.NEXT_PUBLIC_CHAT_IMAGE_UPLOAD_ENABLED === "true";
+
 export interface ChatRoomModalContainerProps {
   open: boolean;
   estimateId: number;
@@ -24,7 +26,9 @@ export interface ChatRoomModalContainerProps {
   participantName: string;
   estimateSummary: string;
   onClose: () => void;
-  actions?: Partial<Record<ChatActionItem["id"], Pick<ChatActionItem, "onSelect" | "disabled">>>;
+  actions?: Partial<
+    Record<ChatActionItem["id"], Pick<ChatActionItem, "onSelect" | "disabled" | "hidden">>
+  >;
   estimateEdit?: ChatEstimateEditConfig;
 }
 
@@ -218,6 +222,7 @@ export function ConnectedChatRoomModal({
     ...actions,
     "attach-photo": {
       ...actions?.["attach-photo"],
+      hidden: actions?.["attach-photo"]?.hidden || !IS_CHAT_IMAGE_UPLOAD_ENABLED,
       disabled: actions?.["attach-photo"]?.disabled || chat.isImageSending || !chat.isConnected,
       onSelect: () => {
         actions?.["attach-photo"]?.onSelect?.();
@@ -297,6 +302,7 @@ export function ConnectedChatRoomModal({
 /**
  * 채팅방 생성/조회, 메시지 목록, 소켓 연결을 묶는 채팅 모달 컨테이너
  * // 2026.08.07 김성현 - [추가] 견적 상세 채팅 모달 BE 연동
+ * // 2026.08.18 김성현 - [수정] 채팅 이미지 첨부 액션 feature flag 적용
  */
 export default function ChatRoomModalContainer({
   open,
