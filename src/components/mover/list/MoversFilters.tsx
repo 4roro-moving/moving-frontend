@@ -82,7 +82,7 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
             onClear={clearSearch}
-            placeholder="텍스트를 입력해 주세요."
+            placeholder="찾고 싶은 닉네임을 입력해보세요"
             aria-label="기사님 검색"
             className="w-full"
           />
