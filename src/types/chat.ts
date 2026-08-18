@@ -1,6 +1,7 @@
 export type ChatMessageType = "TEXT" | "IMAGE" | "SYSTEM" | "ESTIMATE_REVISION";
 
 export const CHAT_IMAGE_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const CHAT_IMAGE_MAX_SIZE = 25 * 1024 * 1024; // 25MB
 
 export type ChatImageContentType = (typeof CHAT_IMAGE_CONTENT_TYPES)[number];
 
@@ -58,6 +59,7 @@ export interface SendChatImageMessagePayload {
 
 export interface ChatImageUploadUrlRequest {
   contentType: ChatImageContentType;
+  size: number;
 }
 
 export interface ChatImageUploadUrlResult {

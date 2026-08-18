@@ -10,6 +10,7 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { uploadFileToPresignedUrl } from "@/lib/api/profileImage";
 import {
   CHAT_IMAGE_CONTENT_TYPES,
+  CHAT_IMAGE_MAX_SIZE,
   type ChatImageContentType,
   type ChatMessage,
   type ChatRoom,
@@ -53,6 +54,10 @@ function isChatImageContentType(value: string): value is ChatImageContentType {
 function validateChatImageFile(file: File): string | null {
   if (!isChatImageContentType(file.type)) {
     return "jpg, png, webp 형식의 이미지만 첨부할 수 있습니다.";
+  }
+
+  if (file.size > CHAT_IMAGE_MAX_SIZE) {
+    return "채팅 이미지는 25MB 이하만 첨부할 수 있습니다.";
   }
 
   return null;
@@ -224,6 +229,7 @@ export function useConnectedChatRoomModalController({
     try {
       const uploadResult = await getChatImageUploadUrl(room.id, {
         contentType,
+        size: file.size,
       });
 
       await uploadFileToPresignedUrl(uploadResult.uploadUrl, file);
