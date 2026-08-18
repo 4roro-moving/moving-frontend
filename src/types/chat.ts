@@ -1,5 +1,9 @@
 export type ChatMessageType = "TEXT" | "IMAGE" | "SYSTEM" | "ESTIMATE_REVISION";
 
+export const CHAT_IMAGE_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+
+export type ChatImageContentType = (typeof CHAT_IMAGE_CONTENT_TYPES)[number];
+
 export interface ChatParticipant {
   id: string;
   name: string;
@@ -44,6 +48,22 @@ export interface SendChatMessagePayload {
   roomId: number;
   content: string;
   clientMessageId?: string;
+}
+
+export interface SendChatImageMessagePayload {
+  roomId: number;
+  imageKey: string;
+  clientMessageId?: string;
+}
+
+export interface ChatImageUploadUrlRequest {
+  contentType: ChatImageContentType;
+}
+
+export interface ChatImageUploadUrlResult {
+  uploadUrl: string;
+  key: string;
+  expiresIn: number;
 }
 
 export interface JoinChatRoomPayload {
@@ -98,3 +118,5 @@ export type SendChatMessageAck =
       error: ChatSocketError;
       clientMessageId?: string;
     };
+
+export type SendChatImageMessageAck = SendChatMessageAck;

@@ -2,6 +2,8 @@ import fetchInstance from "@/lib/api/fetchInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import type { CursorPagination } from "@/types/pagination";
 import type {
+  ChatImageUploadUrlRequest,
+  ChatImageUploadUrlResult,
   ChatMessage,
   ChatMessageListParams,
   ChatRoom,
@@ -38,4 +40,15 @@ export async function getChatMessages(
   params: ChatMessageListParams,
 ): Promise<{ data: ChatMessage[]; pagination: CursorPagination }> {
   return fetchInstance.getPaginated<ChatMessage[], CursorPagination>(buildMessageListQuery(params));
+}
+
+// 2026.08.18 김성현 - [추가] 채팅 이미지 S3 직접 업로드를 위한 Presigned URL 발급
+export async function getChatImageUploadUrl(
+  roomId: number,
+  body: ChatImageUploadUrlRequest,
+): Promise<ChatImageUploadUrlResult> {
+  return fetchInstance.post<ChatImageUploadUrlResult, ChatImageUploadUrlRequest>(
+    API_ROUTES.CHATS.IMAGE_UPLOAD_URL(roomId),
+    body,
+  );
 }

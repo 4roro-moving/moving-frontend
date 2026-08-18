@@ -9,6 +9,8 @@ import type {
   JoinChatRoomAck,
   JoinChatRoomPayload,
   LeaveChatRoomPayload,
+  SendChatImageMessageAck,
+  SendChatImageMessagePayload,
   SendChatMessageAck,
   SendChatMessagePayload,
 } from "@/types/chat";
@@ -147,10 +149,63 @@ export function useChatRoomSocket({
     [isConnected, socket],
   );
 
+  const sendImageMessage = useCallback(
+    (payload: SendChatImageMessagePayload) =>
+      new Promise<SendChatImageMessageAck>((resolve) => {
+        if (!socket || !isConnected) {
+          resolve({
+            ok: false,
+            error: {
+              code: "SOCKET_DISCONNECTED",
+              message: "채팅 서버에 연결되어 있지 않습니다.",
+            },
+            clientMessageId: payload.clientMessageId,
+          });
+          return;
+        }
+
+        socket
+          .timeout(SOCKET_ACK_TIMEOUT_MS)
+          .emit(
+            "chat:image:send",
+            payload,
+            (error: Error | null, response?: SendChatImageMessageAck) => {
+              if (error) {
+                resolve({
+                  ok: false,
+                  error: {
+                    code: "SOCKET_TIMEOUT",
+                    message: "채팅 서버 응답 시간이 초과되었습니다.",
+                  },
+                  clientMessageId: payload.clientMessageId,
+                });
+                return;
+              }
+
+              if (!response) {
+                resolve({
+                  ok: false,
+                  error: {
+                    code: "SOCKET_EMPTY_ACK",
+                    message: "채팅 서버 응답이 올바르지 않습니다.",
+                  },
+                  clientMessageId: payload.clientMessageId,
+                });
+                return;
+              }
+
+              resolve(response);
+            },
+          );
+      }),
+    [isConnected, socket],
+  );
+
   return {
     socket,
     isConnected,
     canConnect,
     sendMessage,
+    sendImageMessage,
   };
 }

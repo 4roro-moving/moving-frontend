@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import Image from "next/image";
+import { useEffect, useRef, type ChangeEvent } from "react";
 
 import ChatRoomCreateError from "@/components/chat/ChatRoomCreateError";
 import ChatRoomModal from "@/components/chat/ChatRoomModal";
@@ -11,6 +12,7 @@ import {
   useConnectedChatRoomModalController,
 } from "@/hooks/useChatRoomModalController";
 import { cn } from "@/lib/utils/cn";
+import { CHAT_IMAGE_CONTENT_TYPES } from "@/types/chat";
 import type { ChatActionItem, ChatParticipantRole } from "@/components/chat/ChatActionSheet";
 import type { ChatEstimateEditConfig } from "@/components/chat/ChatRoomModal";
 import type { ChatMessage, ChatRoom } from "@/types/chat";
@@ -156,22 +158,33 @@ function ChatMessageList({
                 ) : null}
                 <div
                   className={cn(
-                    "rounded-16 max-w-[78%] px-14 py-10",
+                    "rounded-16 max-w-[78%] overflow-hidden",
                     isMine
                       ? "bg-background-brand text-text-inverse rounded-br-4"
                       : "bg-background-subtle text-text-primary rounded-bl-4",
                   )}
                 >
-                  <Text
-                    as="p"
-                    variant="md-medium"
-                    className={cn(
-                      "wrap-break-word whitespace-pre-wrap",
-                      isMine ? "text-text-inverse" : "text-text-primary",
-                    )}
-                  >
-                    {message.content}
-                  </Text>
+                  {message.type === "IMAGE" && message.imageUrl ? (
+                    <Image
+                      src={message.imageUrl}
+                      alt="첨부 이미지"
+                      width={240}
+                      height={240}
+                      sizes="240px"
+                      className="max-h-240 w-full min-w-160 object-cover"
+                    />
+                  ) : (
+                    <Text
+                      as="p"
+                      variant="md-medium"
+                      className={cn(
+                        "px-14 py-10 wrap-break-word whitespace-pre-wrap",
+                        isMine ? "text-text-inverse" : "text-text-primary",
+                      )}
+                    >
+                      {message.content}
+                    </Text>
+                  )}
                 </div>
                 <Text variant="xs-medium" className="text-text-muted">
                   {formatMessageTime(message.createdAt)}
@@ -198,9 +211,44 @@ export function ConnectedChatRoomModal({
   estimateEdit,
 }: ConnectedChatRoomModalProps) {
   const chat = useConnectedChatRoomModalController({ open, room });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatImageAccept = CHAT_IMAGE_CONTENT_TYPES.join(",");
+
+  const mergedActions: ConnectedChatRoomModalProps["actions"] = {
+    ...actions,
+    "attach-photo": {
+      ...actions?.["attach-photo"],
+      disabled: actions?.["attach-photo"]?.disabled || chat.isImageSending || !chat.isConnected,
+      onSelect: () => {
+        actions?.["attach-photo"]?.onSelect?.();
+        fileInputRef.current?.click();
+      },
+    },
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    void chat.handleSendImageMessage(file);
+  };
 
   return (
     <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={chatImageAccept}
+        className="sr-only"
+        tabIndex={-1}
+        aria-label="채팅 이미지 첨부"
+        onChange={handleFileChange}
+      />
+
       <ChatRoomModal
         open={open}
         participantRole={participantRole}
@@ -211,7 +259,7 @@ export function ConnectedChatRoomModal({
         onMessageChange={chat.setMessageValue}
         onSendMessage={() => void chat.handleSendMessage()}
         onClose={onClose}
-        actions={actions}
+        actions={mergedActions}
         estimateEdit={estimateEdit}
       >
         {chat.isMessagesError ? (
