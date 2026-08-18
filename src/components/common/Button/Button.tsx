@@ -16,14 +16,14 @@ import { cn } from "@/lib/utils/cn";
 // 2026.07.25 정슬기 - [수정] size별 height/radius를 분리하고 Figma Button/*/CTA(h54,r12)용 cta 추가
 // 2026.07.29 - [수정] solid/outline 비활성 스타일 분리
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-4 transition-colors disabled:cursor-not-allowed",
+  "inline-flex items-center justify-center gap-4 transition-colors disabled:cursor-not-allowed aria-disabled:cursor-not-allowed",
   {
     variants: {
       variant: {
         solid:
-          "bg-background-brand text-text-inverse hover:bg-background-brand-hover disabled:bg-background-disabled disabled:text-text-inverse disabled:hover:bg-background-disabled",
+          "bg-background-brand text-text-inverse hover:bg-background-brand-hover disabled:bg-background-disabled disabled:text-text-inverse disabled:hover:bg-background-disabled aria-disabled:bg-background-disabled aria-disabled:text-text-inverse aria-disabled:hover:bg-background-disabled",
         outline:
-          "border border-1 border-border-brand bg-background-surface text-text-brand hover:bg-background-brand-muted disabled:border-border-disabled disabled:text-text-disabled disabled:hover:bg-background-surface",
+          "border border-1 border-border-brand bg-background-surface text-text-brand hover:bg-background-brand-muted disabled:border-border-disabled disabled:text-text-disabled disabled:hover:bg-background-surface aria-disabled:border-border-disabled aria-disabled:text-text-disabled aria-disabled:hover:bg-background-surface",
       },
       size: {
         sm: "h-57 min-w-[300px] rounded-16 p-16",
