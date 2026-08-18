@@ -6,6 +6,7 @@ import {
   type ButtonHTMLAttributes,
   type ForwardedRef,
   type MouseEvent,
+  type MouseEventHandler,
   type ReactNode,
 } from "react";
 
@@ -64,8 +65,11 @@ const buttonTextVariant = {
 } as const satisfies Record<string, TextVariantProp>;
 
 export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  extends
+    Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick">,
+    VariantProps<typeof buttonVariants> {
   href?: LinkProps["href"];
+  onClick?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
   rightIcon?: ReactNode;
 }
 
@@ -116,7 +120,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(fu
         return;
       }
 
-      onClick?.(event as unknown as MouseEvent<HTMLButtonElement>);
+      onClick?.(event);
     };
 
     return (

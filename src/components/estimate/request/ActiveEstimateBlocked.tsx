@@ -9,7 +9,7 @@ interface ActiveEstimateBlockedProps {
   description?: ReactNode;
   buttonLabel?: string;
   href?: string;
-  onButtonClick?: MouseEventHandler<HTMLAnchorElement>;
+  onButtonClick?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
 }
 
 const DEFAULT_DESCRIPTION = (
