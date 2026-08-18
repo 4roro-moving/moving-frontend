@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import Toast from "@/components/common/Toast/Toast";
 import { Text } from "@/components/common/Text";
+import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
+import { useMoverMonthlyCalendar, useUpdateMyCalendarDay } from "@/hooks/useMoverCalendar";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
+import { useAuthStore } from "@/stores/useAuthStore";
+import type { MoverCalendarDayStatus } from "@/types/moverCalendar";
 
+/**고객과 기사 화면에서 공통으로 사용하는 예약 캘린더 컴포넌트 */
 type CalendarRole = "customer" | "mover";
 type Availability = "available" | "full" | "off";
 
@@ -22,30 +28,30 @@ const AVAILABILITY_LABEL: Record<Availability, string> = {
   off: "휴무",
 };
 
-const INITIAL_AVAILABILITY: Record<string, Availability> = {
-  "2026-08-03": "off",
-  "2026-08-05": "full",
-  "2026-08-08": "full",
-  "2026-08-10": "off",
-  "2026-08-12": "full",
-  "2026-08-14": "available",
-  "2026-08-17": "off",
-  "2026-08-20": "full",
-  "2026-08-22": "full",
-  "2026-08-24": "off",
-  "2026-08-27": "available",
-  "2026-08-29": "full",
-  "2026-08-31": "off",
-};
-
+//API가 사용하는 YYYY-MM-DD 형식으로 변환함
 const dateKey = (year: number, month: number, day: number) =>
   `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
+//오늘 날짜를 YYYY-MM-DD 형식으로 반환함
+//컴포넌트 진입 시 오늘 날짜를 기본으로 선택하거나, 선택한 날짜가 과거인지 판단하는 곳에서 사용됨
+const getTodayKey = () => {
+  const today = new Date();
+  return dateKey(today.getFullYear(), today.getMonth(), today.getDate());
+};
+
+const toAvailability = (status: MoverCalendarDayStatus): Availability =>
+  status.toLowerCase() as Availability;
+
+//표시할 총 42개의 날짜 데이터 생성
 const getCalendarDays = (year: number, month: number): CalendarDay[] => {
+  //해당 월 1일의 요일
   const firstDay = new Date(year, month, 1).getDay();
+  //현재 월의 마지막 날짜
   const lastDate = new Date(year, month + 1, 0).getDate();
+  //이전 달의 마지막 날짜
   const previousLastDate = new Date(year, month, 0).getDate();
 
+  //42개 칸 생성
   return Array.from({ length: 42 }, (_, index) => {
     const value = index - firstDay + 1;
     if (value < 1) return { day: previousLastDate + value, monthOffset: -1 };
@@ -54,10 +60,7 @@ const getCalendarDays = (year: number, month: number): CalendarDay[] => {
   });
 };
 
-const getDefaultAvailability = (key: string, day: number): Availability => {
-  return INITIAL_AVAILABILITY[key] ?? (day % 7 === 0 ? "full" : "available");
-};
-
+//날짜 상태를 작은 배지 형태로 표시 available, full, off
 const AvailabilityPill = ({ status }: { status: Availability }) => (
   <span
     className={cn(
@@ -87,32 +90,80 @@ interface ReservationCalendarPageProps {
 
 export default function ReservationCalendarPage({
   role,
-  moverId = "mock-mover",
-  moverName = "김무빙 기사님",
+  moverId,
+  moverName = "기사님",
 }: ReservationCalendarPageProps) {
   const isMover = role === "mover";
-  const [viewDate, setViewDate] = useState(new Date(2026, 7, 1));
-  const [selectedDate, setSelectedDate] = useState("2026-08-14");
-  const [availability, setAvailability] =
-    useState<Record<string, Availability>>(INITIAL_AVAILABILITY);
+  const authenticatedMoverId = useAuthStore((state) => state.user?.id);
+  //기사 ID 결정
+  const resolvedMoverId = isMover ? authenticatedMoverId : moverId;
+  //현재 달력에서 보고 있는 연도와 월 관리
+  const [viewDate, setViewDate] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
+  //사용자가 선택한 날짜 ( 초기값은 오늘 날짜 )
+  const [selectedDate, setSelectedDate] = useState(getTodayKey);
+  //휴무 등록 또는 해제 결과를 보여주는 토스트 메세지 관리
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  //현재 보고 있는 달력의 연도와 월 추출
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
+  //현재 연도와 월에 맞는 42개의 달력 날짜 생성
   const days = useMemo(() => getCalendarDays(year, month), [year, month]);
+  //기사의 월별 캘린더 조회
+  const calendarQuery = useMoverMonthlyCalendar(resolvedMoverId, year, month + 1);
+  //기사 본인의 휴무를 등록하거나 해제하는 mutation
+  const updateDayMutation = useUpdateMyCalendarDay(resolvedMoverId ?? "", year, month + 1);
+  //API에서 받은 날짜 배열을 날짜별 상태 Map으로 변환
+  const availability = useMemo(
+    () =>
+      new Map(
+        (calendarQuery.data?.days ?? []).map((day) => [day.date, toAvailability(day.status)]),
+      ),
+    [calendarQuery.data?.days],
+  );
+  //선택한 날짜 문자열에서 일자만 추출
   const selectedDay = Number(selectedDate.slice(-2));
-  const selectedStatus =
-    availability[selectedDate] ?? getDefaultAvailability(selectedDate, selectedDay);
+  //현재 선택한 날짜의 상태 "available" | "full" | "off" | undefined
+  const selectedStatus = availability.get(selectedDate);
+  //선택한 날짜의 확정 예약 상세 정보 찾기
+  const selectedReservation = calendarQuery.data?.days.find(
+    (day) => day.date === selectedDate,
+  )?.reservation;
+  //선택한 날짜가 과거인지 확인
+  const isPastSelectedDate = selectedDate < getTodayKey();
 
+  //이전달 또는 다음 달로 이동
   const moveMonth = (amount: number) => {
     const next = new Date(year, month + amount, 1);
     setViewDate(next);
     setSelectedDate(dateKey(next.getFullYear(), next.getMonth(), 1));
   };
 
-  const updateSelectedStatus = (status: Availability) => {
-    setAvailability((current) => ({ ...current, [selectedDate]: status }));
+  //선택한 날짜를 예약 가능 또는 휴무 상태로 변경
+  const updateSelectedStatus = (status: "available" | "off") => {
+    if (!resolvedMoverId || isPastSelectedDate || updateDayMutation.isPending) return;
+
+    updateDayMutation.mutate(
+      { date: selectedDate, status: status === "off" ? "OFF" : "AVAILABLE" },
+      {
+        onSuccess: () =>
+          setToastMessage(status === "off" ? "휴무로 변경했습니다." : "휴무를 해제했습니다."),
+        onError: (error) => setToastMessage(error.message || "일정 변경에 실패했습니다."),
+      },
+    );
   };
 
-  const estimateRequestHref = `${APP_ROUTES.ESTIMATE_REQUEST}?moverId=${encodeURIComponent(moverId)}&date=${selectedDate}`;
+  if (!resolvedMoverId) {
+    return <EstimatesQueryStatus message="기사 정보를 확인할 수 없습니다." />;
+  }
+
+  //선택한 날짜 상태가 없으면 기본 값으로 availale 사용
+  const selectedStatusForDisplay = selectedStatus ?? "available";
+  //고객이 선택한 기사와 날짜를 가지고 견적 요청 페이지로 이동할 주소 생성
+  const estimateRequestHref = `${APP_ROUTES.ESTIMATE_REQUEST}?moverId=${encodeURIComponent(resolvedMoverId)}&date=${selectedDate}`;
 
   return (
     <div className="bg-background-subtle flex min-h-[calc(100vh-var(--gnb-height-desktop))] flex-col">
@@ -128,7 +179,7 @@ export default function ReservationCalendarPage({
             </Text>
             <Text as="p" variant="lg-regular" className="text-text-muted mt-6">
               {isMover
-                ? "날짜를 선택해 예약 가능 여부와 휴무일을 관리해 보세요."
+                ? "날짜를 선택해 휴무일을 관리해 보세요. 예약 마감은 확정 일정에 따라 자동 반영됩니다."
                 : "기사님의 일정을 확인하고 예약 가능한 날에 견적을 요청해 보세요."}
             </Text>
           </div>
@@ -184,11 +235,11 @@ export default function ReservationCalendarPage({
             ))}
           </div>
 
-          <div className="grid min-h-[330px] flex-1 grid-cols-7 grid-rows-6 md:min-h-[360px]">
+          <div className="relative grid min-h-[330px] flex-1 grid-cols-7 grid-rows-6 md:min-h-[360px]">
             {days.map(({ day, monthOffset }, index) => {
               const cellDate = new Date(year, month + monthOffset, day);
               const key = dateKey(cellDate.getFullYear(), cellDate.getMonth(), day);
-              const status = availability[key] ?? getDefaultAvailability(key, day);
+              const status = availability.get(key) ?? "available";
               const isSelected = selectedDate === key;
               const isCurrentMonth = monthOffset === 0;
 
@@ -200,9 +251,8 @@ export default function ReservationCalendarPage({
                   aria-pressed={isSelected}
                   onClick={() => {
                     setSelectedDate(key);
-                    if (monthOffset) {
+                    if (monthOffset)
                       setViewDate(new Date(cellDate.getFullYear(), cellDate.getMonth(), 1));
-                    }
                   }}
                   className={cn(
                     "border-border-subtle relative flex min-h-55 flex-col items-center gap-2 border-r border-b p-3 text-left transition-colors md:min-h-60 md:flex-row md:items-center md:justify-between md:p-6",
@@ -222,6 +272,22 @@ export default function ReservationCalendarPage({
                 </button>
               );
             })}
+
+            {calendarQuery.isPending ? (
+              <div className="bg-background-surface/80 absolute inset-0 flex items-center justify-center">
+                <Text as="p" variant="md-medium" className="text-text-muted">
+                  일정을 불러오는 중입니다.
+                </Text>
+              </div>
+            ) : calendarQuery.isError ? (
+              <div className="bg-background-surface/90 absolute inset-0 flex items-center justify-center">
+                <EstimatesQueryStatus
+                  message="일정을 불러오지 못했습니다."
+                  actionLabel="다시 시도"
+                  onAction={() => void calendarQuery.refetch()}
+                />
+              </div>
+            ) : null}
           </div>
         </section>
 
@@ -236,31 +302,42 @@ export default function ReservationCalendarPage({
                 <Text as="h3" variant="lg-bold" className="text-text-primary">
                   선택한 날짜
                 </Text>
-                <AvailabilityPill status={selectedStatus} />
+                <AvailabilityPill status={selectedStatusForDisplay} />
               </div>
               <Text as="p" variant="sm-medium" className="text-text-muted mt-3">
-                {isMover
-                  ? "아래 버튼으로 고객에게 표시할 상태를 변경할 수 있어요."
-                  : selectedStatus === "available"
-                    ? "견적 요청이 가능한 날짜예요."
-                    : selectedStatus === "full"
-                      ? "예약이 마감된 날짜예요. 다른 날짜를 선택해 주세요."
-                      : "기사님이 휴무로 지정한 날짜예요."}
+                {selectedReservation
+                  ? `${selectedReservation.customerName} 고객님의 확정 일정이 있습니다.`
+                  : isMover
+                    ? isPastSelectedDate
+                      ? "과거 날짜의 일정은 변경할 수 없습니다."
+                      : "예약 가능 또는 휴무 상태로 변경할 수 있습니다."
+                    : selectedStatusForDisplay === "available"
+                      ? "견적 요청이 가능한 날짜예요."
+                      : selectedStatusForDisplay === "full"
+                        ? "예약이 마감된 날짜예요. 다른 날짜를 선택해 주세요."
+                        : "기사님이 휴무로 지정한 날짜예요."}
               </Text>
             </div>
           </div>
 
           {isMover ? (
-            <div className="grid grid-cols-3 gap-8 md:flex">
-              {(["available", "full", "off"] as const).map((status) => (
+            <div className="grid grid-cols-2 gap-8 md:flex">
+              {(["available", "off"] as const).map((status) => (
                 <button
                   key={status}
                   type="button"
-                  aria-pressed={selectedStatus === status}
+                  aria-pressed={selectedStatusForDisplay === status}
+                  disabled={
+                    !calendarQuery.isSuccess ||
+                    selectedStatus === undefined ||
+                    selectedStatusForDisplay === "full" ||
+                    isPastSelectedDate ||
+                    updateDayMutation.isPending
+                  }
                   onClick={() => updateSelectedStatus(status)}
                   className={cn(
-                    "rounded-8 border px-14 py-10 text-[14px] font-semibold transition-colors md:min-w-100",
-                    selectedStatus === status
+                    "rounded-8 border px-14 py-10 text-[14px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 md:min-w-100",
+                    selectedStatusForDisplay === status
                       ? "border-border-brand bg-background-brand text-text-inverse"
                       : "border-border-default text-text-secondary hover:bg-background-subtle",
                   )}
@@ -269,7 +346,10 @@ export default function ReservationCalendarPage({
                 </button>
               ))}
             </div>
-          ) : selectedStatus === "available" ? (
+          ) : calendarQuery.isSuccess &&
+            selectedStatus === "available" &&
+            !isPastSelectedDate &&
+            !calendarQuery.isFetching ? (
             <Link
               href={estimateRequestHref}
               className="bg-background-brand hover:bg-background-brand-hover text-text-inverse rounded-8 flex h-48 w-full items-center justify-center px-24 text-[16px] font-semibold transition-colors md:w-auto"
@@ -287,6 +367,8 @@ export default function ReservationCalendarPage({
           )}
         </section>
       </main>
+
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </div>
   );
 }

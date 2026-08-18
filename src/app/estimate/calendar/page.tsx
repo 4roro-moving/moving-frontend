@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import MoverAuthGate from "@/components/auth/MoverAuthGate";
 import ReservationCalendarPage from "@/components/calendar/ReservationCalendarPage";
 
 export const metadata: Metadata = {
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function MoverReservationCalendarPage() {
-  return <ReservationCalendarPage role="mover" />;
+  return (
+    <MoverAuthGate loadingMessage="예약 일정을 불러오는 중입니다.">
+      <ReservationCalendarPage role="mover" />
+    </MoverAuthGate>
+  );
 }
