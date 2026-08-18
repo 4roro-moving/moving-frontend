@@ -16,7 +16,7 @@ export interface EmptyStateProps {
   buttonLabel?: string;
   /** CTA 클릭 시 이동 경로 */
   href?: string;
-  onButtonClick?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+  onButtonClick?: MouseEventHandler<HTMLAnchorElement>;
   imageAlt?: string;
   className?: string;
   /**
