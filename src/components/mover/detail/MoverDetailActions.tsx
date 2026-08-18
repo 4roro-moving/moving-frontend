@@ -83,9 +83,10 @@ export default function MoverDetailActions({
         {requestButtonLabel}
       </Button>
 
+      {/* href={calendarHref} */}
       <Link
         href={calendarHref}
-        className="border-border-brand text-text-brand rounded-16 hover:bg-background-brand-muted flex h-54 w-full items-center justify-center border text-[16px] font-semibold transition-colors"
+        className="border-border-brand bg-background-surface text-text-brand hover:bg-background-brand-muted rounded-16 inline-flex h-64 w-full items-center justify-center border p-16 text-[18px] font-semibold transition-colors"
       >
         기사님 일정 확인하기
       </Link>
@@ -120,6 +121,7 @@ export function MoverDetailActionsSkeleton({
         <div className="mx-auto flex w-full max-w-[600px] items-center gap-8">
           <Skeleton className="rounded-16 size-54 shrink-0" />
           <Skeleton className="rounded-16 h-54 min-w-0 flex-1" />
+          <Skeleton className="rounded-16 h-54 min-w-0 flex-1" />
         </div>
       </div>
     );
@@ -135,8 +137,9 @@ export function MoverDetailActionsSkeleton({
         {moverName} 기사님에게
         <br /> 지정 견적을 요청해보세요!
       </Text>
-      <Skeleton className="rounded-16 h-54 w-full" />
-      <Skeleton className="rounded-16 h-54 w-full" />
+      <Skeleton className="rounded-16 h-64 w-full" />
+      <Skeleton className="rounded-16 h-64 w-full" />
+      <Skeleton className="rounded-16 h-64 w-full" />
     </section>
   );
 }
