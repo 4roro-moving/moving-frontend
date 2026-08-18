@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils/cn";
 /**
  * Figma: button/like/outlined
  * - sm: 54×54 아이콘만
- * - lg: 아이콘 + 라벨 (찜하기 / 찜 해제)
+ * - lg: 64px 높이, 아이콘 + 라벨 (찜하기 / 찜 해제)
  */
 const likeOutlineButtonVariants = cva(
   [
@@ -20,7 +20,7 @@ const likeOutlineButtonVariants = cva(
     variants: {
       size: {
         sm: "size-54 gap-10 p-10",
-        lg: "h-54 w-full gap-4 px-16",
+        lg: "h-64 w-full gap-4 px-16",
       },
     },
     defaultVariants: {
