@@ -292,8 +292,9 @@ export function MoverRecommendationMapPage() {
         {searchedDeparture && searchedDestination ? (
           <KakaoMap
             key={`${searchedDeparture.id}-${searchedDestination.id}`}
-            departure={searchedDeparture}
-            destination={searchedDestination}
+            departure={searchedDeparture} //출발지
+            destination={searchedDestination} //도착지
+            movers={movers} //기사 마커
           />
         ) : (
           <KakaoMap />

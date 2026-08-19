@@ -6,10 +6,12 @@ import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { loadKakaoMaps } from "@/lib/kakao/loadKakaoMaps";
+import type { Mover } from "@/types/mover";
 
 interface KakaoMapProps {
   departure?: AddressSearchItem;
   destination?: AddressSearchItem;
+  movers?: Mover[];
 }
 
 const SEOUL_CITY_HALL = {
@@ -17,7 +19,7 @@ const SEOUL_CITY_HALL = {
   longitude: 126.978,
 };
 
-export default function KakaoMap({ departure, destination }: KakaoMapProps) {
+export default function KakaoMap({ departure, destination, movers = [] }: KakaoMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [retryCount, setRetryCount] = useState(0);
@@ -48,6 +50,18 @@ export default function KakaoMap({ departure, destination }: KakaoMapProps) {
           const bounds = new maps.LatLngBounds();
           bounds.extend(departurePosition);
           bounds.extend(destinationPosition);
+          for (const mover of movers) {
+            if (!mover.activityBase) continue;
+
+            const moverPosition = new maps.LatLng(
+              mover.activityBase.latitude,
+              mover.activityBase.longitude,
+            );
+            markers.push(
+              new maps.Marker({ map, position: moverPosition, title: `${mover.name} 기사님` }),
+            );
+            bounds.extend(moverPosition);
+          }
           map.setBounds(bounds, 80, 80, 80, 80);
         }
 
@@ -65,7 +79,7 @@ export default function KakaoMap({ departure, destination }: KakaoMapProps) {
       disposed = true;
       markers.forEach((marker) => marker.setMap(null));
     };
-  }, [departure, destination, retryCount]);
+  }, [departure, destination, movers, retryCount]);
 
   return (
     <section

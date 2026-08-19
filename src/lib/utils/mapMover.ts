@@ -48,6 +48,7 @@ export function mapMoverListItemToMover(item: MoverListItem): Mover {
     favoriteCount: item.favoriteCount,
     isFavorite: item.isFavorite,
     profileImageSrc: resolveMoverProfileImageSrc(item.profileImageUrl),
+    activityBase: item.activityBase, //기사 활동 거점
   };
 }
 

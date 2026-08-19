@@ -79,6 +79,15 @@ export function useMoverProfileCreateForm({
 
     try {
       const imageKey = await uploadProfileImage(formValues.imageFile);
+      const activityBaseAddress = formValues.activityBaseAddress;
+
+      if (!activityBaseAddress) {
+        setError("activityBaseAddress", {
+          type: "required",
+          message: "활동 거점을 선택해 주세요",
+        });
+        return;
+      }
 
       await createMoverProfile.mutateAsync({
         ...(requiresPhone && formValues.phone ? { phone: formValues.phone } : {}),
@@ -86,6 +95,15 @@ export function useMoverProfileCreateForm({
         career: Number(formValues.career),
         shortIntro: formValues.shortIntro,
         description: formValues.description,
+        activityBase: {
+          address: activityBaseAddress.roadAddress,
+          ...(formValues.activityBaseDetailAddress
+            ? { detailAddress: formValues.activityBaseDetailAddress }
+            : {}),
+          zipCode: activityBaseAddress.zipCode,
+          latitude: activityBaseAddress.latitude,
+          longitude: activityBaseAddress.longitude,
+        },
         regionIds: formValues.regionIds,
         serviceTypes: formValues.serviceTypes,
         ...(imageKey ? { imageUrl: imageKey } : {}),

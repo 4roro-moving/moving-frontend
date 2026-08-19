@@ -9,6 +9,7 @@ import Input from "@/components/common/Input/Input";
 import Textarea from "@/components/common/Input/Textarea";
 import { Text } from "@/components/common/Text";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
+import MoverActivityBaseFields from "@/components/profile/MoverActivityBaseFields";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
 import { useMoverProfileCreateForm } from "@/hooks/profile/useMoverProfileCreateForm";
@@ -22,6 +23,7 @@ import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
 import {
   createMoverProfileSchema,
   type MoverProfileFormValues,
+  type ValidatedMoverProfileFormValues,
 } from "@/lib/schemas/moverProfileSchema";
 import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
 import type { MoveType } from "@/types/move";
@@ -45,7 +47,7 @@ const MoverProfileForm = ({
     setError,
     setFocus,
     formState: { errors, isValid },
-  } = useForm<MoverProfileFormValues>({
+  } = useForm<MoverProfileFormValues, unknown, ValidatedMoverProfileFormValues>({
     resolver: zodResolver(createMoverProfileSchema({ requiresPhone })),
     mode: "onChange",
     defaultValues: {
@@ -55,6 +57,8 @@ const MoverProfileForm = ({
       career: "",
       shortIntro: "",
       description: "",
+      activityBaseAddress: null,
+      activityBaseDetailAddress: "",
       serviceTypes: [],
       regionIds: [],
       ...defaultValues,
@@ -166,6 +170,9 @@ const MoverProfileForm = ({
               {...register("description")}
             />
           </FormField>
+
+          {/*기사 활동 거점*/}
+          <MoverActivityBaseFields control={control} disabled={isPending} idPrefix="mover-create" />
 
           <FormField label="제공 서비스" labelId="mover-create-service-types-label" required>
             <Controller
