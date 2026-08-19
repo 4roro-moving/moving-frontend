@@ -26,17 +26,19 @@ export function useUpdateMyCalendarDay(moverId: string, year: number, month: num
     { date: string; status: UpdateMoverCalendarDayInput["status"] }
   >({
     mutationFn: ({ date, status }) => updateMyCalendarDay(date, { status }),
-    onSuccess: ({ date, status }) => {
-      queryClient.setQueryData<MoverMonthlyCalendar>(
-        calendarQueryKey(moverId, year, month),
-        (current) =>
-          current
-            ? {
-                ...current,
-                days: current.days.map((day) => (day.date === date ? { ...day, status } : day)),
-              }
-            : current,
+    onSuccess: async ({ date, status }) => {
+      const queryKey = calendarQueryKey(moverId, year, month);
+
+      queryClient.setQueryData<MoverMonthlyCalendar>(queryKey, (current) =>
+        current
+          ? {
+              ...current,
+              days: current.days.map((day) => (day.date === date ? { ...day, status } : day)),
+            }
+          : current,
       );
+
+      await queryClient.invalidateQueries({ queryKey, exact: true });
     },
   });
 }

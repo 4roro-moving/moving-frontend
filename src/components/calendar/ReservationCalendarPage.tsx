@@ -15,6 +15,7 @@ import type { MoverCalendarDayStatus } from "@/types/moverCalendar";
 /**고객과 기사 화면에서 공통으로 사용하는 예약 캘린더 컴포넌트 */
 type CalendarRole = "customer" | "mover";
 type Availability = "available" | "full" | "off";
+type AvailabilityDisplay = Availability | "unknown";
 
 interface CalendarDay {
   day: number;
@@ -22,11 +23,14 @@ interface CalendarDay {
 }
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
-const AVAILABILITY_LABEL: Record<Availability, string> = {
+const AVAILABILITY_LABEL: Record<AvailabilityDisplay, string> = {
   available: "예약 가능",
   full: "마감",
   off: "휴무",
+  unknown: "조회 전",
 };
+
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
 //API가 사용하는 YYYY-MM-DD 형식으로 변환함
 const dateKey = (year: number, month: number, day: number) =>
@@ -35,8 +39,8 @@ const dateKey = (year: number, month: number, day: number) =>
 //오늘 날짜를 YYYY-MM-DD 형식으로 반환함
 //컴포넌트 진입 시 오늘 날짜를 기본으로 선택하거나, 선택한 날짜가 과거인지 판단하는 곳에서 사용됨
 const getTodayKey = () => {
-  const today = new Date();
-  return dateKey(today.getFullYear(), today.getMonth(), today.getDate());
+  const kstToday = new Date(Date.now() + KST_OFFSET_MS);
+  return dateKey(kstToday.getUTCFullYear(), kstToday.getUTCMonth(), kstToday.getUTCDate());
 };
 
 const toAvailability = (status: MoverCalendarDayStatus): Availability =>
@@ -61,13 +65,14 @@ const getCalendarDays = (year: number, month: number): CalendarDay[] => {
 };
 
 //날짜 상태를 작은 배지 형태로 표시 available, full, off
-const AvailabilityPill = ({ status }: { status: Availability }) => (
+const AvailabilityPill = ({ status }: { status: AvailabilityDisplay }) => (
   <span
     className={cn(
       "rounded-100 inline-flex items-center gap-5 px-8 py-3 text-[11px] leading-18 font-semibold md:px-10 md:text-[13px]",
       status === "available" && "bg-background-brand-muted text-text-brand",
       status === "full" && "bg-background-hover text-text-muted",
       status === "off" && "bg-[#eef0f3] text-[#74777d]",
+      status === "unknown" && "bg-background-disabled text-text-disabled",
     )}
   >
     <span
@@ -76,6 +81,7 @@ const AvailabilityPill = ({ status }: { status: Availability }) => (
         status === "available" && "bg-background-brand",
         status === "full" && "bg-gray-400",
         status === "off" && "bg-black-100",
+        status === "unknown" && "bg-gray-300",
       )}
     />
     {AVAILABILITY_LABEL[status]}
@@ -160,8 +166,8 @@ export default function ReservationCalendarPage({
     return <EstimatesQueryStatus message="기사 정보를 확인할 수 없습니다." />;
   }
 
-  //선택한 날짜 상태가 없으면 기본 값으로 availale 사용
-  const selectedStatusForDisplay = selectedStatus ?? "available";
+  // 아직 조회되지 않은 날짜는 예약 가능으로 추정하지 않고 조회 전 상태로 표시
+  const selectedStatusForDisplay = selectedStatus ?? "unknown";
   //고객이 선택한 기사와 날짜를 가지고 견적 요청 페이지로 이동할 주소 생성
   const estimateRequestHref = `${APP_ROUTES.ESTIMATE_REQUEST}?moverId=${encodeURIComponent(resolvedMoverId)}&date=${selectedDate}`;
 
@@ -239,7 +245,7 @@ export default function ReservationCalendarPage({
             {days.map(({ day, monthOffset }, index) => {
               const cellDate = new Date(year, month + monthOffset, day);
               const key = dateKey(cellDate.getFullYear(), cellDate.getMonth(), day);
-              const status = availability.get(key) ?? "available";
+              const status = availability.get(key) ?? "unknown";
               const isSelected = selectedDate === key;
               const isCurrentMonth = monthOffset === 0;
 
@@ -315,7 +321,9 @@ export default function ReservationCalendarPage({
                       ? "견적 요청이 가능한 날짜예요."
                       : selectedStatusForDisplay === "full"
                         ? "예약이 마감된 날짜예요. 다른 날짜를 선택해 주세요."
-                        : "기사님이 휴무로 지정한 날짜예요."}
+                        : selectedStatusForDisplay === "off"
+                          ? "기사님이 휴무로 지정한 날짜예요."
+                          : "일정 상태를 확인하는 중입니다."}
               </Text>
             </div>
           </div>
