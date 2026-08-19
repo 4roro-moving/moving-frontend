@@ -30,6 +30,9 @@ export const API_ROUTES = {
     ROOT: "/movers",
     DETAIL: (moverId: string) => `/movers/${moverId}`,
     REVIEWS: (moverId: string) => `/movers/${moverId}/reviews`,
+    // 2026.08.18 윤소정 - [추가] 캘린더 조회
+    CALENDAR: (moverId: string) => `/movers/${moverId}/calendar`,
+    MY_CALENDAR_DAY: (date: string) => `/movers/me/calendar/${date}`,
   },
   ESTIMATE_REQUESTS: {
     ROOT: "/estimate-requests",

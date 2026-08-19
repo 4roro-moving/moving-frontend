@@ -194,6 +194,17 @@ const fetchInstance = {
       body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
     }),
 
+  put: <TResponse, TBody = unknown>(
+    endpoint: string,
+    body?: TBody,
+    options?: FetchRequestOptions,
+  ) =>
+    request<TResponse>(endpoint, {
+      ...options,
+      method: "PUT",
+      body: body instanceof FormData ? body : body === undefined ? undefined : JSON.stringify(body),
+    }),
+
   patch: <TResponse, TBody = unknown>(
     endpoint: string,
     body?: TBody,
