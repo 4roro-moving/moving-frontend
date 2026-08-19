@@ -61,6 +61,7 @@ export interface ChatActionSheetProps {
  * // 2026.08.07 김성현 - [수정] 전역 Modal 대신 채팅 모달 내부 시트로 분리
  * // 2026.08.07 김성현 - [수정] 입력바 아래 인라인 패널로 변경 (채팅바와 함께 상승)
  * // 2026.08.18 김성현 - [수정] 미배포 기능 액션 숨김 옵션 추가
+ * // 2026.08.19 김성현 - [수정] 시트 닫힘 중 포커스가 aria-hidden 영역에 남지 않도록 처리
  */
 export default function ChatActionSheet({
   open,
@@ -82,15 +83,19 @@ export default function ChatActionSheet({
   const handleSelect = (item: ChatActionItem) => {
     if (item.disabled) return;
 
-    item.onSelect?.();
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     onClose();
+    item.onSelect?.();
   };
 
   return (
     <div
       role="region"
       aria-label="채팅 메뉴"
-      aria-hidden={!isVisible}
+      inert={!isVisible ? true : undefined}
       className={cn(
         "border-border-subtle bg-background-surface shrink-0 border-t px-40 pt-16 pb-20",
         "motion-reduce:animate-none",
