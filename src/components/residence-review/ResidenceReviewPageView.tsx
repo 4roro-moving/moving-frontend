@@ -1,0 +1,111 @@
+"use client";
+
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+
+import Toast from "@/components/common/Toast/Toast";
+import { Text } from "@/components/common/Text";
+import ResidenceReviewDeleteConfirmModal from "@/components/residence-review/ResidenceReviewDeleteConfirmModal";
+import ResidenceReviewDetailModal from "@/components/residence-review/ResidenceReviewDetailModal";
+import ResidenceReviewFilters from "@/components/residence-review/ResidenceReviewFilters";
+import ResidenceReviewList from "@/components/residence-review/ResidenceReviewList";
+import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
+import { useDeleteResidenceReview } from "@/hooks/useDeleteResidenceReview";
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { ERROR_CODES } from "@/lib/constants/errorCodes";
+import { getResidenceReviewDetailQueryOptions } from "@/lib/queryOptions/residenceReviews";
+import type { ResidenceReviewSearchParamsState } from "@/lib/utils/residenceReviewSearchParams";
+import { useAuthStore } from "@/stores/useAuthStore";
+import type { PublicResidenceReview } from "@/types/residenceReview";
+
+interface ResidenceReviewPageViewProps {
+  filters: ResidenceReviewSearchParamsState;
+  initialReviews: PublicResidenceReview[];
+}
+
+const ResidenceReviewPageView = ({ filters, initialReviews }: ResidenceReviewPageViewProps) => {
+  const queryClient = useQueryClient();
+  const { authScope, isAuthQueryReady } = useAuthQueryScope();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const deleteMutation = useDeleteResidenceReview();
+  const [selectedReview, setSelectedReview] = useState<PublicResidenceReview | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState<PublicResidenceReview | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const prefetchDetail = useCallback(
+    (review: PublicResidenceReview) => {
+      if (!isAuthQueryReady) return;
+
+      void queryClient.prefetchQuery(getResidenceReviewDetailQueryOptions(authScope, review.id));
+    },
+    [authScope, isAuthQueryReady, queryClient],
+  );
+
+  const handleSelect = useCallback(
+    (review: PublicResidenceReview) => {
+      setSelectedReview(review);
+      setIsDetailOpen(true);
+      prefetchDetail(review);
+    },
+    [prefetchDetail],
+  );
+
+  const handleCloseDetail = useCallback(() => {
+    setIsDetailOpen(false);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (!reviewToDelete) return;
+
+    deleteMutation.mutate(reviewToDelete.id, {
+      onSuccess: () => {
+        setReviewToDelete(null);
+        setIsDetailOpen(false);
+        setSelectedReview(null);
+        setToastMessage("거주 후기를 삭제했습니다.");
+      },
+      onError: (error) => {
+        setToastMessage(getApiErrorMessage(error, ERROR_CODES.RESIDENCE_REVIEW_NOT_FOUND.message));
+      },
+    });
+  }, [deleteMutation, reviewToDelete]);
+
+  return (
+    <div className="bg-background-default flex w-full flex-col items-center">
+      <Text as="h1" variant="2xl-bold" className="sr-only">
+        거주 후기
+      </Text>
+
+      <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop mx-auto flex w-full flex-col gap-24 pt-24 pb-80 xl:px-0 xl:pt-32 xl:pb-120">
+        <ResidenceReviewFilters filters={filters} />
+        <ResidenceReviewList
+          filters={filters}
+          initialReviews={initialReviews}
+          onSelect={handleSelect}
+          onPrefetch={prefetchDetail}
+        />
+      </div>
+
+      <ResidenceReviewDetailModal
+        open={isDetailOpen}
+        review={selectedReview}
+        isAuthenticated={isAuthenticated}
+        onClose={handleCloseDetail}
+        onExitComplete={() => setSelectedReview(null)}
+        onDelete={setReviewToDelete}
+      />
+
+      <ResidenceReviewDeleteConfirmModal
+        open={reviewToDelete !== null}
+        isPending={deleteMutation.isPending}
+        onClose={() => setReviewToDelete(null)}
+        onConfirm={handleConfirmDelete}
+      />
+
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
+    </div>
+  );
+};
+
+export default ResidenceReviewPageView;

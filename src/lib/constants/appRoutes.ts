@@ -44,6 +44,12 @@ export const APP_ROUTES = {
     WRITABLE: "/reviews/writable",
     ME: "/reviews/me",
   },
+  // 2026.08.20 김나연 - [추가] 콘텐츠(거주후기·나눔) 공개 페이지 경로
+  CONTENTS: {
+    ROOT: "/contents",
+    RESIDENCE_REVIEWS: "/contents/residence-reviews",
+    GIVEAWAY: "/contents/giveaway",
+  },
   // 2026.07.30 정슬기 - [추가] 내 견적 관리 페이지 경로
   /** 내 견적 관리 */
   ESTIMATES: {

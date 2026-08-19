@@ -78,6 +78,13 @@ export const API_ROUTES = {
     ME: "/reviews/me",
     REVIEWABLE: "/reviews/reviewable",
   },
+  // 2026.08.20 김나연 - [추가] 거주후기 API 경로
+  RESIDENCE_REVIEWS: {
+    ROOT: "/residence-reviews",
+    ME: "/residence-reviews/me",
+    DETAIL: (residenceReviewId: number) => `/residence-reviews/${residenceReviewId}`,
+    STATISTICS: (regionId: number) => `/residence-reviews/statistics/${regionId}`,
+  },
   NOTIFICATIONS: {
     ROOT: "/notifications",
     UNREAD_COUNT: "/notifications/unread-count",
