@@ -132,7 +132,7 @@ const ResidenceReviewDetailModal = ({
               >
                 {formatResidenceReviewAuthorName(currentReview.author.name)}
               </Text>
-              <div className="bg-background-avatar relative size-48 shrink-0 overflow-hidden rounded-full xl:size-64">
+              <div className="bg-background-avatar rounded-12 relative size-48 shrink-0 overflow-hidden xl:size-64">
                 {authorImageSrc ? (
                   <Image src={authorImageSrc} alt="" fill sizes="64px" className="object-cover" />
                 ) : (
