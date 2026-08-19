@@ -262,6 +262,7 @@ export function ConnectedChatRoomModal({
         messageValue={chat.messageValue}
         selectedImagePreviewUrl={chat.selectedImagePreviewUrl}
         selectedImageName={chat.selectedImageName}
+        isImageSending={chat.isImageSending}
         sendDisabled={chat.sendDisabled}
         onMessageChange={chat.setMessageValue}
         onClearSelectedImage={chat.clearSelectedImage}

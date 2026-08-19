@@ -31,6 +31,7 @@ export interface ChatRoomModalProps {
   messagePlaceholder?: string;
   selectedImagePreviewUrl?: string | null;
   selectedImageName?: string;
+  isImageSending?: boolean;
   sendDisabled?: boolean;
   composerDisabled?: boolean;
   onMessageChange?: (value: string) => void;
@@ -63,6 +64,7 @@ function ChatRoomModalContent({
   messagePlaceholder = "메시지를 입력하세요",
   selectedImagePreviewUrl,
   selectedImageName,
+  isImageSending = false,
   sendDisabled = false,
   composerDisabled = false,
   onMessageChange,
@@ -217,9 +219,11 @@ function ChatRoomModalContent({
                 type="button"
                 className={cn(
                   "text-icon-default hover:bg-background-hover flex size-32 shrink-0 items-center justify-center rounded-full",
+                  "disabled:text-text-disabled disabled:cursor-not-allowed disabled:hover:bg-transparent",
                   "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
                 )}
                 aria-label="첨부 이미지 제거"
+                disabled={isImageSending}
                 onClick={onClearSelectedImage}
               >
                 <CloseIcon className="size-18" aria-hidden="true" />
