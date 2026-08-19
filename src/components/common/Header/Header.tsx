@@ -39,7 +39,7 @@ const PROFILE_LOGOUT_MENU_ITEM: ProfileMenuItem = {
 
 const CONTENT_NAV_LINK = {
   label: "콘텐츠",
-  href: APP_ROUTES.CONTENTS.ROOT,
+  href: APP_ROUTES.CONTENTS.RESIDENCE_REVIEWS,
 } as const;
 
 const LOGGED_OUT_LINKS = [

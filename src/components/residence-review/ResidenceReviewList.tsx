@@ -10,12 +10,12 @@ import ResidenceReviewCardSkeletonList from "@/components/residence-review/Resid
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { useResidenceReviews } from "@/hooks/useResidenceReviews";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { cn } from "@/lib/utils/cn";
 import type { ResidenceReviewSearchParamsState } from "@/lib/utils/residenceReviewSearchParams";
 import type { PublicResidenceReview } from "@/types/residenceReview";
 
 interface ResidenceReviewListProps {
   filters: ResidenceReviewSearchParamsState;
-  initialReviews: PublicResidenceReview[];
   onSelect: (review: PublicResidenceReview) => void;
   onPrefetch: (review: PublicResidenceReview) => void;
 }
@@ -28,19 +28,12 @@ const EMPTY_DESCRIPTION = (
   </>
 );
 
-const ResidenceReviewList = ({
-  filters,
-  initialReviews,
-  onSelect,
-  onPrefetch,
-}: ResidenceReviewListProps) => {
-  const { reviews, isInitialLoading, query } = useResidenceReviews(filters);
+const ResidenceReviewList = ({ filters, onSelect, onPrefetch }: ResidenceReviewListProps) => {
+  const { reviews, isInitialLoading, isFilterFetching, query } = useResidenceReviews(filters);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
-  const isShowingInitialReviews = isInitialLoading && initialReviews.length > 0;
-  const displayedReviews = isShowingInitialReviews ? initialReviews : reviews;
 
   const sentinelRef = useMoversInfiniteScroll({
-    enabled: !isInitialLoading && !query.isError && displayedReviews.length > 0,
+    enabled: !isInitialLoading && !isFilterFetching && !query.isError && reviews.length > 0,
     hasNextPage,
     isFetchingNextPage,
     isFetchNextPageError,
@@ -49,9 +42,9 @@ const ResidenceReviewList = ({
 
   let content: ReactNode;
 
-  if (isInitialLoading && !isShowingInitialReviews) {
+  if (isInitialLoading) {
     content = <ResidenceReviewCardSkeletonList />;
-  } else if (query.isError && !isShowingInitialReviews) {
+  } else if (query.isError && reviews.length === 0) {
     content = (
       <EstimatesQueryStatus
         message={getApiErrorMessage(
@@ -65,7 +58,7 @@ const ResidenceReviewList = ({
         actionBusy={query.isFetching}
       />
     );
-  } else if (displayedReviews.length === 0) {
+  } else if (reviews.length === 0) {
     content = (
       <EmptyState
         size="sm"
@@ -75,9 +68,17 @@ const ResidenceReviewList = ({
     );
   } else {
     content = (
-      <div className="flex flex-col gap-20">
+      <div
+        className={cn("flex flex-col gap-20", isFilterFetching && "opacity-60")}
+        aria-busy={isFilterFetching}
+      >
+        {isFilterFetching ? (
+          <span className="sr-only" role="status">
+            후기 목록을 불러오는 중이에요
+          </span>
+        ) : null}
         <ul className="flex flex-col gap-20">
-          {displayedReviews.map((review) => (
+          {reviews.map((review) => (
             <li key={review.id}>
               <ResidenceReviewCard review={review} onSelect={onSelect} onPrefetch={onPrefetch} />
             </li>

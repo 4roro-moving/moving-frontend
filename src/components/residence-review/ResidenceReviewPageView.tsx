@@ -25,10 +25,9 @@ import type { PublicResidenceReview } from "@/types/residenceReview";
 
 interface ResidenceReviewPageViewProps {
   filters: ResidenceReviewSearchParamsState;
-  initialReviews: PublicResidenceReview[];
 }
 
-const ResidenceReviewPageView = ({ filters, initialReviews }: ResidenceReviewPageViewProps) => {
+const ResidenceReviewPageView = ({ filters }: ResidenceReviewPageViewProps) => {
   const queryClient = useQueryClient();
   const { authScope, isAuthQueryReady } = useAuthQueryScope();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -96,7 +95,6 @@ const ResidenceReviewPageView = ({ filters, initialReviews }: ResidenceReviewPag
         {canShowCreateButton ? <ResidenceReviewCreateButton onClick={openCreate} /> : null}
         <ResidenceReviewList
           filters={filters}
-          initialReviews={initialReviews}
           onSelect={handleSelect}
           onPrefetch={prefetchDetail}
         />
