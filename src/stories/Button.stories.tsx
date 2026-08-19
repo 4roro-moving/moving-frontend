@@ -21,6 +21,11 @@ const BUTTON_DESCRIPTION = `서비스 전반의 주요 액션에 사용하는 �
 | \`detail\` | 64px / full width | 데스크톱 상세 화면의 주요 CTA |
 | \`auth\` | Mobile 54px, Tablet+ 60px / full width | 로그인·회원가입 CTA |
 
+### Link
+
+- \`href\`를 전달하면 동일한 디자인을 유지한 채 Next.js \`Link\`로 렌더링합니다.
+- 링크에도 \`disabled\`를 사용할 수 있으며, 이 경우 이동과 키보드 포커스가 차단됩니다.
+
 `;
 
 const PLAYGROUND_SOURCE = `<Button variant="solid" size="cta" onClick={handleClick}>
@@ -46,6 +51,10 @@ const ICON_SOURCE = `<Button
 
 const AUTH_SOURCE = `<Button type="submit" size="auth" fullWidth disabled={isPending}>
   {isPending ? "로그인 중..." : "로그인"}
+</Button>`;
+
+const LINK_SOURCE = `<Button href="/movers" variant="outline" size="detail" fullWidth>
+  기사님 목록 보기
 </Button>`;
 
 const meta = {
@@ -83,6 +92,11 @@ const meta = {
       control: "boolean",
       description: "부모 영역의 전체 너비를 사용할지 여부",
       table: { type: { summary: "boolean" }, defaultValue: { summary: "false" } },
+    },
+    href: {
+      control: "text",
+      description: "전달하면 Next.js Link로 렌더링할 이동 경로",
+      table: { type: { summary: "LinkProps['href']" } },
     },
     rightIcon: {
       control: false,
@@ -188,6 +202,29 @@ export const WithRightIcon: Story = {
     children: "견적 보내기",
     rightIcon: <WriteIcon className="size-24" />,
   },
+};
+
+export const WithLink: Story = {
+  args: {
+    href: "/movers",
+    variant: "outline",
+    size: "detail",
+    fullWidth: true,
+    children: "기사님 목록 보기",
+  },
+  parameters: {
+    docs: {
+      description: { story: "href를 전달하면 버튼 디자인의 링크로 사용할 수 있습니다." },
+      source: { code: LINK_SOURCE, language: "tsx" },
+    },
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-[min(600px,calc(100vw-48px))]">
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export const ResponsiveAuth: Story = {

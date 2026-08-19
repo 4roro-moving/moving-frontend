@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import type { MouseEventHandler, ReactNode } from "react";
 
+import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
@@ -108,43 +108,9 @@ export default function EmptyState({
         ) : null}
 
         {showButton && (
-          <Link
-            href={href!}
-            onClick={onButtonClick}
-            className={cn(
-              "bg-background-brand hover:bg-background-brand-hover flex items-center justify-center px-16 transition-colors",
-              isSm
-                ? "rounded-12 h-[54px]"
-                : isLg
-                  ? "rounded-16 h-64"
-                  : "rounded-12 md:rounded-16 h-[54px] md:h-64",
-            )}
-          >
-            {isSm ? (
-              <Text as="span" variant="lg-semibold" className="text-text-inverse">
-                {buttonLabel}
-              </Text>
-            ) : null}
-            {isLg ? (
-              <Text as="span" variant="2lg-semibold" className="text-text-inverse">
-                {buttonLabel}
-              </Text>
-            ) : null}
-            {!size ? (
-              <>
-                <Text as="span" variant="lg-semibold" className="text-text-inverse md:hidden">
-                  {buttonLabel}
-                </Text>
-                <Text
-                  as="span"
-                  variant="2lg-semibold"
-                  className="text-text-inverse hidden md:inline"
-                >
-                  {buttonLabel}
-                </Text>
-              </>
-            ) : null}
-          </Link>
+          <Button href={href!} onClick={onButtonClick} size="cta" className="w-auto">
+            {buttonLabel}
+          </Button>
         )}
       </div>
     </div>

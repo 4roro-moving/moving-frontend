@@ -48,14 +48,9 @@ function FavoriteMoversSidebarStatus({
       </div>
 
       {action?.type === "link" ? (
-        <Link
-          href={action.href}
-          className="bg-background-brand hover:bg-background-brand-hover rounded-12 flex h-54 w-full items-center justify-center px-16 transition-colors"
-        >
-          <Text as="span" variant="lg-semibold" className="text-text-inverse">
-            {action.label}
-          </Text>
-        </Link>
+        <Button href={action.href} size="cta" fullWidth>
+          {action.label}
+        </Button>
       ) : null}
 
       {action?.type === "button" ? (

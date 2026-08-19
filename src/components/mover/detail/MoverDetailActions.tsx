@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 import Button from "@/components/common/Button/Button";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { Text } from "@/components/common/Text";
@@ -54,12 +52,15 @@ export default function MoverDetailActions({
           >
             {requestButtonLabel}
           </Button>
-          <Link
+          <Button
             href={calendarHref}
-            className="border-border-brand text-text-brand rounded-16 flex h-54 min-w-0 flex-1 items-center justify-center border text-[16px] font-semibold"
+            variant="outline"
+            size="cta"
+            fullWidth
+            className="rounded-16 min-w-0 flex-1 shadow-none"
           >
             일정 확인
-          </Link>
+          </Button>
         </div>
       </div>
     );
@@ -83,13 +84,9 @@ export default function MoverDetailActions({
         {requestButtonLabel}
       </Button>
 
-      {/* href={calendarHref} */}
-      <Link
-        href={calendarHref}
-        className="border-border-brand bg-background-surface text-text-brand hover:bg-background-brand-muted rounded-16 inline-flex h-64 w-full items-center justify-center border p-16 text-[18px] font-semibold transition-colors"
-      >
+      <Button href={calendarHref} variant="outline" size="detail" fullWidth>
         기사님 일정 확인하기
-      </Link>
+      </Button>
 
       <LikeOutlineButton
         size="lg"
