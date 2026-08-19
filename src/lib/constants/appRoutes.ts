@@ -21,6 +21,8 @@ export const APP_ROUTES = {
   MOVER_PROFILE: "/mover/profile",
   /** 견적 요청 */
   ESTIMATE_REQUEST: "/estimate-request",
+  // 2026.08.20 김나연 - [추가] 고객 마이페이지
+  MY_PAGE: "/my-page",
   /** 고객 프로필 수정 */
   PROFILE_EDIT: "/profile/edit",
   /** 기사님 프로필 수정 */

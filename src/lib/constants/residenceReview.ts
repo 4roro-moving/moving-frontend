@@ -3,6 +3,12 @@ import type { ResidenceReviewListSort, ResidenceReviewRating } from "@/types/res
 
 export const RESIDENCE_REVIEW_PAGE_LIMIT = 10;
 
+export const RESIDENCE_REVIEW_TITLE_MAX_LENGTH = 100;
+
+export const RESIDENCE_REVIEW_CONTENT_MIN_LENGTH = 10;
+
+export const RESIDENCE_REVIEW_CONTENT_MAX_LENGTH = 2000;
+
 export const RESIDENCE_REVIEW_LIST_STALE_TIME_MS = 60 * 1000;
 
 export const RESIDENCE_REVIEW_SORT_OPTIONS: {

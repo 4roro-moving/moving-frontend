@@ -36,6 +36,15 @@ export const getResidenceReviewDetailQueryKey = (
   residenceReviewId: number,
 ) => [...QUERY_KEYS.RESIDENCE_REVIEWS.DETAIL_ROOT, authScope, residenceReviewId] as const;
 
+export const getResidenceReviewMyListScopeQueryKey = (authScope: AuthQueryScope) =>
+  [...QUERY_KEYS.RESIDENCE_REVIEWS.ME, authScope] as const;
+
+export const getResidenceReviewMyListQueryKey = (
+  authScope: AuthQueryScope,
+  page: number,
+  limit: number,
+) => [...getResidenceReviewMyListScopeQueryKey(authScope), { page, limit }] as const;
+
 /**
  * 현재 사용자의 모든 기사님 목록 쿼리를 대상으로 하는 prefix.
  * 찜 mutation의 cancel·snapshot·낙관적 업데이트 범위를 제한할 때 사용합니다.
@@ -162,6 +171,7 @@ export const QUERY_KEYS = {
   RESIDENCE_REVIEWS: {
     ALL: ["residenceReviews"] as const,
     LIST: ["residenceReviews", "list"] as const,
+    ME: ["residenceReviews", "me"] as const,
     DETAIL_ROOT: ["residenceReviews", "detail"] as const,
   },
 

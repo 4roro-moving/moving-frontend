@@ -6,8 +6,10 @@ import Button from "@/components/common/Button/Button";
 import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
+import ResidenceReviewInfoItem from "@/components/residence-review/ResidenceReviewInfoItem";
+import ResidenceReviewRatingText from "@/components/residence-review/ResidenceReviewRatingText";
 import { useResidenceReviewDetail } from "@/hooks/useResidenceReviewDetail";
-import { ProfileDefaultIcon, StarIcon } from "@/icons";
+import { ProfileDefaultIcon } from "@/icons";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
 import { cn } from "@/lib/utils/cn";
@@ -29,28 +31,6 @@ interface ResidenceReviewDetailModalProps {
   onDelete: (review: PublicResidenceReview) => void;
   onExitComplete?: () => void;
 }
-
-interface InfoItemProps {
-  label: string;
-  value: string;
-}
-
-const InfoItem = ({ label, value }: InfoItemProps) => {
-  return (
-    <div className="flex min-w-0 flex-1 flex-col items-start gap-4">
-      <Text as="dt" variant={{ base: "xs-regular", xl: "md-regular" }} className="text-text-muted">
-        {label}
-      </Text>
-      <Text
-        as="dd"
-        variant={{ base: "sm-medium", xl: "lg-semibold" }}
-        className="text-text-secondary m-0"
-      >
-        {value}
-      </Text>
-    </div>
-  );
-};
 
 const ResidenceReviewDetailModal = ({
   open,
@@ -110,19 +90,12 @@ const ResidenceReviewDetailModal = ({
       ) : (
         <>
           <div className="flex min-h-0 w-full flex-1 flex-col gap-24 overflow-y-auto">
-            <div className="flex items-center gap-4">
-              <StarIcon
-                className="text-rating-fill size-24 shrink-0 xl:size-32"
-                aria-hidden="true"
-              />
-              <Text
-                as="p"
-                variant={{ base: "lg-bold", xl: "2xl-bold" }}
-                className="text-text-primary"
-              >
-                {formatResidenceReviewRating(currentReview.rating)}
-              </Text>
-            </div>
+            <ResidenceReviewRatingText
+              rating={currentReview.rating}
+              starClassName="size-24 xl:size-32"
+              textVariant={{ base: "lg-bold", xl: "2xl-bold" }}
+              textClassName="text-text-primary"
+            />
 
             <div className="flex items-center justify-between gap-16">
               <Text
@@ -143,12 +116,27 @@ const ResidenceReviewDetailModal = ({
 
             <div className="border-border-subtle border-y py-16">
               <dl className="flex w-full items-start gap-16">
-                <InfoItem label="후기 지역" value={currentReview.region.name} />
-                <InfoItem
+                <ResidenceReviewInfoItem
+                  label="후기 지역"
+                  value={currentReview.region.name}
+                  labelVariant={{ base: "xs-regular", xl: "md-regular" }}
+                  valueVariant={{ base: "sm-medium", xl: "lg-semibold" }}
+                  className="flex-1"
+                />
+                <ResidenceReviewInfoItem
                   label="지역 평점"
                   value={formatResidenceReviewRating(currentReview.region.averageRating)}
+                  labelVariant={{ base: "xs-regular", xl: "md-regular" }}
+                  valueVariant={{ base: "sm-medium", xl: "lg-semibold" }}
+                  className="flex-1"
                 />
-                <InfoItem label="작성일" value={writtenDate} />
+                <ResidenceReviewInfoItem
+                  label="작성일"
+                  value={writtenDate}
+                  labelVariant={{ base: "xs-regular", xl: "md-regular" }}
+                  valueVariant={{ base: "sm-medium", xl: "lg-semibold" }}
+                  className="flex-1"
+                />
               </dl>
             </div>
 

@@ -4,28 +4,33 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
-import { deleteResidenceReview } from "@/lib/api/residenceReviews";
+import { updateResidenceReview } from "@/lib/api/residenceReviews";
 import {
   getResidenceReviewDetailQueryKey,
   getResidenceReviewListScopeQueryKey,
   getResidenceReviewMyListScopeQueryKey,
 } from "@/lib/constants/queryKeys";
+import type { PublicResidenceReview, UpdateResidenceReviewInput } from "@/types/residenceReview";
 
-export const useDeleteResidenceReview = () => {
+interface UpdateResidenceReviewVariables {
+  residenceReviewId: number;
+  body: UpdateResidenceReviewInput;
+}
+
+export const useUpdateResidenceReview = () => {
   const queryClient = useQueryClient();
   const { authScope } = useAuthQueryScope();
 
   return useApiMutation({
-    mutationFn: deleteResidenceReview,
-    onSuccess: (_data, residenceReviewId) => {
+    mutationFn: ({ residenceReviewId, body }: UpdateResidenceReviewVariables) =>
+      updateResidenceReview(residenceReviewId, body),
+    onSuccess: (review: PublicResidenceReview) => {
+      queryClient.setQueryData(getResidenceReviewDetailQueryKey(authScope, review.id), review);
       void queryClient.invalidateQueries({
         queryKey: getResidenceReviewListScopeQueryKey(authScope),
       });
       void queryClient.invalidateQueries({
         queryKey: getResidenceReviewMyListScopeQueryKey(authScope),
-      });
-      void queryClient.removeQueries({
-        queryKey: getResidenceReviewDetailQueryKey(authScope, residenceReviewId),
       });
     },
   });

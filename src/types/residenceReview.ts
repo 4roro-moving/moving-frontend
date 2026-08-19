@@ -1,4 +1,4 @@
-import type { CursorPagination } from "@/types/pagination";
+import type { CursorPagination, Pagination } from "@/types/pagination";
 
 export const RESIDENCE_REVIEW_LIST_SORT = {
   CREATED_AT: "createdAt",
@@ -52,4 +52,20 @@ export interface ResidenceReviewListQuery {
 export interface ResidenceReviewListResult {
   data: PublicResidenceReview[];
   pagination: CursorPagination;
+}
+
+export interface ResidenceReviewMyListQuery {
+  page: number;
+  limit: number;
+}
+
+export interface ResidenceReviewMyListResult {
+  reviews: PublicResidenceReview[];
+  pagination: Pagination;
+}
+
+export interface UpdateResidenceReviewInput {
+  title?: string;
+  content?: string;
+  rating?: number;
 }

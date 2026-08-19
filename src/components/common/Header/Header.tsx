@@ -93,6 +93,11 @@ const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     label: "이사 리뷰",
     href: APP_ROUTES.REVIEWS.WRITABLE,
   },
+  {
+    type: "link",
+    label: "마이페이지",
+    href: APP_ROUTES.MY_PAGE,
+  },
   PROFILE_LOGOUT_MENU_ITEM,
 ];
 

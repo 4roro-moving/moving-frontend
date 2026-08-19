@@ -3,11 +3,11 @@
 import Image from "next/image";
 
 import { Text } from "@/components/common/Text";
-import { ProfileDefaultIcon, StarIcon } from "@/icons";
+import ResidenceReviewRatingText from "@/components/residence-review/ResidenceReviewRatingText";
+import { ProfileDefaultIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import {
   formatResidenceReviewAuthorName,
-  formatResidenceReviewRating,
   formatResidenceReviewRegionLabel,
   formatResidenceReviewWrittenDate,
   getResidenceReviewAuthorImageSrc,
@@ -24,7 +24,6 @@ const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCa
   const authorImageSrc = getResidenceReviewAuthorImageSrc(review.author.imageUrl);
   const authorName = formatResidenceReviewAuthorName(review.author.name);
   const regionLabel = formatResidenceReviewRegionLabel(review.region);
-  const ratingLabel = formatResidenceReviewRating(review.rating);
   const writtenDate = formatResidenceReviewWrittenDate(review.createdAt);
   const titleId = `residence-review-${String(review.id)}-title`;
 
@@ -54,12 +53,7 @@ const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCa
           <div className="flex items-start justify-between gap-12 md:contents">
             <div className="flex min-w-0 flex-col gap-8">
               <div className="flex items-center gap-20 md:order-2">
-                <div className="flex items-center gap-2">
-                  <StarIcon className="text-rating-fill size-20 shrink-0" aria-hidden="true" />
-                  <Text as="span" variant="sm-medium" className="text-text-secondary">
-                    {ratingLabel}
-                  </Text>
-                </div>
+                <ResidenceReviewRatingText rating={review.rating} />
                 <span className="bg-border-subtle hidden h-30 w-px md:block" aria-hidden="true" />
                 <Text as="span" variant="md-medium" className="text-text-secondary truncate">
                   {regionLabel}

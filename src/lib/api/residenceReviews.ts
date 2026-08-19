@@ -1,10 +1,13 @@
 import fetchInstance from "@/lib/api/fetchInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
-import type { CursorPagination } from "@/types/pagination";
+import type { CursorPagination, Pagination } from "@/types/pagination";
 import type {
   PublicResidenceReview,
   ResidenceReviewListQuery,
   ResidenceReviewListResult,
+  ResidenceReviewMyListQuery,
+  ResidenceReviewMyListResult,
+  UpdateResidenceReviewInput,
 } from "@/types/residenceReview";
 
 export const fetchResidenceReviews = async (
@@ -34,6 +37,33 @@ export const fetchResidenceReviews = async (
 
 export const fetchResidenceReviewDetail = (residenceReviewId: number) =>
   fetchInstance.get<PublicResidenceReview>(API_ROUTES.RESIDENCE_REVIEWS.DETAIL(residenceReviewId));
+
+export const fetchMyResidenceReviews = async (
+  query: ResidenceReviewMyListQuery,
+): Promise<ResidenceReviewMyListResult> => {
+  const params = new URLSearchParams({
+    page: String(query.page),
+    limit: String(query.limit),
+  });
+
+  const result = await fetchInstance.getPaginated<PublicResidenceReview[], Pagination>(
+    `${API_ROUTES.RESIDENCE_REVIEWS.ME}?${params.toString()}`,
+  );
+
+  return {
+    reviews: result.data,
+    pagination: result.pagination,
+  };
+};
+
+export const updateResidenceReview = (
+  residenceReviewId: number,
+  body: UpdateResidenceReviewInput,
+) =>
+  fetchInstance.patch<PublicResidenceReview, UpdateResidenceReviewInput>(
+    API_ROUTES.RESIDENCE_REVIEWS.DETAIL(residenceReviewId),
+    body,
+  );
 
 export const deleteResidenceReview = (residenceReviewId: number) =>
   fetchInstance.delete<{ id: number }>(API_ROUTES.RESIDENCE_REVIEWS.DETAIL(residenceReviewId));
