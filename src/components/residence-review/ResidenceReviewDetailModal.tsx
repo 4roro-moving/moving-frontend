@@ -28,6 +28,7 @@ interface ResidenceReviewDetailModalProps {
   review: PublicResidenceReview | null;
   isAuthenticated: boolean;
   onClose: () => void;
+  onEdit: (review: PublicResidenceReview) => void;
   onDelete: (review: PublicResidenceReview) => void;
   onExitComplete?: () => void;
 }
@@ -37,6 +38,7 @@ const ResidenceReviewDetailModal = ({
   review,
   isAuthenticated,
   onClose,
+  onEdit,
   onDelete,
   onExitComplete,
 }: ResidenceReviewDetailModalProps) => {
@@ -160,7 +162,13 @@ const ResidenceReviewDetailModal = ({
 
           {isOwner ? (
             <div className="flex w-full gap-8">
-              <Button type="button" variant="solid" size="cta" fullWidth>
+              <Button
+                type="button"
+                variant="solid"
+                size="cta"
+                fullWidth
+                onClick={() => onEdit(currentReview)}
+              >
                 수정
               </Button>
               <Button
@@ -176,7 +184,14 @@ const ResidenceReviewDetailModal = ({
           ) : null}
 
           {showReport ? (
-            <Button type="button" variant="outline" size="cta" fullWidth>
+            <Button
+              type="button"
+              variant="outline"
+              size="cta"
+              fullWidth
+              disabled
+              aria-label="신고하기. 아직 사용할 수 없습니다."
+            >
               신고하기
             </Button>
           ) : null}

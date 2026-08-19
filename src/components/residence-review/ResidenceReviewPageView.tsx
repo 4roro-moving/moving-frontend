@@ -10,6 +10,7 @@ import ResidenceReviewCreateButton from "@/components/residence-review/Residence
 import ResidenceReviewCreateModal from "@/components/residence-review/ResidenceReviewCreateModal";
 import ResidenceReviewDeleteConfirmModal from "@/components/residence-review/ResidenceReviewDeleteConfirmModal";
 import ResidenceReviewDetailModal from "@/components/residence-review/ResidenceReviewDetailModal";
+import ResidenceReviewEditModal from "@/components/residence-review/ResidenceReviewEditModal";
 import ResidenceReviewFilters from "@/components/residence-review/ResidenceReviewFilters";
 import ResidenceReviewList from "@/components/residence-review/ResidenceReviewList";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
@@ -43,6 +44,7 @@ const ResidenceReviewPageView = ({ filters }: ResidenceReviewPageViewProps) => {
   } = useResidenceReviewCreateAction();
   const [selectedReview, setSelectedReview] = useState<PublicResidenceReview | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [reviewToEdit, setReviewToEdit] = useState<PublicResidenceReview | null>(null);
   const [reviewToDelete, setReviewToDelete] = useState<PublicResidenceReview | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -119,7 +121,15 @@ const ResidenceReviewPageView = ({ filters }: ResidenceReviewPageViewProps) => {
         isAuthenticated={isAuthenticated}
         onClose={handleCloseDetail}
         onExitComplete={() => setSelectedReview(null)}
+        onEdit={setReviewToEdit}
         onDelete={setReviewToDelete}
+      />
+
+      <ResidenceReviewEditModal
+        open={reviewToEdit !== null}
+        review={reviewToEdit}
+        onClose={() => setReviewToEdit(null)}
+        onSuccess={() => setToastMessage("거주 후기를 수정했습니다.")}
       />
 
       <ResidenceReviewDeleteConfirmModal

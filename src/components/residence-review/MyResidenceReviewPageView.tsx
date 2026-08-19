@@ -35,7 +35,6 @@ const EMPTY_DESCRIPTION = (
 
 const MyResidenceReviewPageView = () => {
   const { page, currentPage, setPage, handlePageChange } = useReviewPagination({
-    totalPages: Number.MAX_SAFE_INTEGER,
     canCorrectPage: false,
   });
   const { data, isLoading, isError, error, refetch, isFetching, isPlaceholderData } =

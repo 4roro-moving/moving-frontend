@@ -71,7 +71,7 @@ const ResidenceReviewEditModalContent = ({
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-24 overflow-y-auto xl:gap-32">
-        <FormField label="지역을 선택해주세요." variant="compact" labelId="residence-review-region">
+        <FormField label="후기 지역" variant="compact" labelId="residence-review-region">
           <div role="group" aria-labelledby="residence-review-region">
             <SelectableChip selected size="responsive">
               {review.region.name}
