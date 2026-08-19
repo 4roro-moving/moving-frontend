@@ -8,9 +8,14 @@ import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import { loadKakaoMaps } from "@/lib/kakao/loadKakaoMaps";
 
 interface KakaoMapProps {
-  departure: AddressSearchItem;
-  destination: AddressSearchItem;
+  departure?: AddressSearchItem;
+  destination?: AddressSearchItem;
 }
+
+const SEOUL_CITY_HALL = {
+  latitude: 37.5665,
+  longitude: 126.978,
+};
 
 export default function KakaoMap({ departure, destination }: KakaoMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,22 +30,26 @@ export default function KakaoMap({ departure, destination }: KakaoMapProps) {
       .then((maps) => {
         if (disposed || !containerRef.current) return;
 
-        const departurePosition = new maps.LatLng(departure.latitude, departure.longitude);
-        const destinationPosition = new maps.LatLng(destination.latitude, destination.longitude);
+        const center = new maps.LatLng(SEOUL_CITY_HALL.latitude, SEOUL_CITY_HALL.longitude);
         const map = new maps.Map(containerRef.current, {
-          center: departurePosition,
+          center,
           level: 7,
         });
 
-        markers.push(
-          new maps.Marker({ map, position: departurePosition, title: "출발지" }),
-          new maps.Marker({ map, position: destinationPosition, title: "도착지" }),
-        );
+        if (departure && destination) {
+          const departurePosition = new maps.LatLng(departure.latitude, departure.longitude);
+          const destinationPosition = new maps.LatLng(destination.latitude, destination.longitude);
 
-        const bounds = new maps.LatLngBounds();
-        bounds.extend(departurePosition);
-        bounds.extend(destinationPosition);
-        map.setBounds(bounds, 80, 80, 80, 80);
+          markers.push(
+            new maps.Marker({ map, position: departurePosition, title: "출발지" }),
+            new maps.Marker({ map, position: destinationPosition, title: "도착지" }),
+          );
+
+          const bounds = new maps.LatLngBounds();
+          bounds.extend(departurePosition);
+          bounds.extend(destinationPosition);
+          map.setBounds(bounds, 80, 80, 80, 80);
+        }
 
         setStatus("ready");
       })
@@ -60,7 +69,7 @@ export default function KakaoMap({ departure, destination }: KakaoMapProps) {
 
   return (
     <section
-      aria-label="출발지와 도착지 지도"
+      aria-label={departure && destination ? "출발지와 도착지 지도" : "서울시청 중심 지도"}
       className="bg-background-subtle relative min-h-[520px] flex-1 lg:min-h-0"
     >
       <div ref={containerRef} className="absolute inset-0" />

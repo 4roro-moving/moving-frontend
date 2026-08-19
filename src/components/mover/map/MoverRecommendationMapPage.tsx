@@ -91,20 +91,6 @@ function RecommendationCard({ mover }: { mover: MoverRecommendation }) {
   );
 }
 
-// 검색 전 안내 화면
-function MapSearchPrompt() {
-  return (
-    <section
-      aria-label="지도 검색 안내"
-      className="bg-background-subtle flex min-h-[520px] flex-1 items-center justify-center px-24 text-center lg:min-h-0"
-    >
-      <Text as="p" variant="lg-medium" className="text-text-muted">
-        출발지와 도착지를 선택하고 기사님을 검색하면 지도가 표시됩니다.
-      </Text>
-    </section>
-  );
-}
-
 export function MoverRecommendationMapPage() {
   const [departure, setDeparture] = useState<AddressSearchItem | null>(null);
   const [destination, setDestination] = useState<AddressSearchItem | null>(null);
@@ -301,7 +287,7 @@ export function MoverRecommendationMapPage() {
             destination={searchedDestination}
           />
         ) : (
-          <MapSearchPrompt />
+          <KakaoMap />
         )}
       </div>
 
