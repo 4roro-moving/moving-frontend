@@ -90,7 +90,7 @@ const StateMessage = ({ children }: { children: string }) => (
 );
 
 const TermsPageClient = () => {
-  const [activeTab, setActiveTab] = useState<TabValue>("ALL");
+  const [selectedTab, setSelectedTab] = useState<TabValue>("ALL");
   const { data, isPending, isError, refetch } = usePublishedTerms();
 
   const termsList = useMemo(() => data ?? [], [data]);
@@ -100,6 +100,13 @@ const TermsPageClient = () => {
     const publishedTypes = new Set(termsList.map((terms) => terms.type));
     return ["ALL", ...TERMS_TYPE_ORDER.filter((type) => publishedTypes.has(type))];
   }, [termsList]);
+
+  /**
+   * 게시 상태가 바뀌어 선택한 탭이 목록에서 사라지면 전체로 되돌립니다.
+   * useEffect 로 동기화하면 되돌리기 전 한 프레임 동안 빈 화면이 보이므로
+   * 렌더 중에 파생 값으로 계산합니다.
+   */
+  const activeTab = availableTabs.includes(selectedTab) ? selectedTab : "ALL";
 
   /** 전체 탭 목록. 유형 순서로 정렬합니다. */
   const orderedTerms = useMemo(
@@ -114,7 +121,7 @@ const TermsPageClient = () => {
   }, [termsList, activeTab]);
 
   const handleSelectTab = (tab: TabValue) => {
-    setActiveTab(tab);
+    setSelectedTab(tab);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
