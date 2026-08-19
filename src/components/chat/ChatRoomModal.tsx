@@ -31,7 +31,9 @@ export interface ChatRoomModalProps {
   composerDisabled?: boolean;
   onMessageChange?: (value: string) => void;
   onSendMessage?: () => void;
-  actions?: Partial<Record<ChatActionItem["id"], Pick<ChatActionItem, "onSelect" | "disabled">>>;
+  actions?: Partial<
+    Record<ChatActionItem["id"], Pick<ChatActionItem, "onSelect" | "disabled" | "hidden">>
+  >;
   /** 기사 견적 수정 시트에 표시할 값·핸들러 */
   estimateEdit?: ChatEstimateEditConfig;
 }
