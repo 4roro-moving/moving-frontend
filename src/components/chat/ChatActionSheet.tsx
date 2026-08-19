@@ -16,6 +16,7 @@ export interface ChatActionItem {
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   onSelect?: () => void;
   disabled?: boolean;
+  hidden?: boolean;
 }
 
 const CHAT_ACTIONS_BY_ROLE: Record<ChatParticipantRole, ChatActionItem[]> = {
@@ -49,7 +50,9 @@ export interface ChatActionSheetProps {
   open: boolean;
   participantRole: ChatParticipantRole;
   onClose: () => void;
-  actions?: Partial<Record<ChatActionItem["id"], Pick<ChatActionItem, "onSelect" | "disabled">>>;
+  actions?: Partial<
+    Record<ChatActionItem["id"], Pick<ChatActionItem, "onSelect" | "disabled" | "hidden">>
+  >;
 }
 
 /**
@@ -57,6 +60,7 @@ export interface ChatActionSheetProps {
  * // 2026.08.07 김성현 - [추가] 역할별 채팅 액션 메뉴 공통화
  * // 2026.08.07 김성현 - [수정] 전역 Modal 대신 채팅 모달 내부 시트로 분리
  * // 2026.08.07 김성현 - [수정] 입력바 아래 인라인 패널로 변경 (채팅바와 함께 상승)
+ * // 2026.08.18 김성현 - [수정] 미배포 기능 액션 숨김 옵션 추가
  */
 export default function ChatActionSheet({
   open,
@@ -68,10 +72,12 @@ export default function ChatActionSheet({
 
   if (!isRendered) return null;
 
-  const actionItems = CHAT_ACTIONS_BY_ROLE[participantRole].map((item) => ({
-    ...item,
-    ...actions?.[item.id],
-  }));
+  const actionItems = CHAT_ACTIONS_BY_ROLE[participantRole]
+    .map((item) => ({
+      ...item,
+      ...actions?.[item.id],
+    }))
+    .filter((item) => !item.hidden);
 
   const handleSelect = (item: ChatActionItem) => {
     if (item.disabled) return;

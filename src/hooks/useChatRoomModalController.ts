@@ -5,8 +5,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useChatRoomSocket } from "@/hooks/useChatRoomSocket";
 import { useGetOrCreateChatRoom } from "@/hooks/useChatRoom";
+import { getChatImageUploadUrl } from "@/lib/api/chat";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import type { ChatMessage, ChatRoom, ChatSocketError } from "@/types/chat";
+import { uploadFileToPresignedUrl } from "@/lib/api/profileImage";
+import {
+  CHAT_IMAGE_CONTENT_TYPES,
+  CHAT_IMAGE_MAX_SIZE,
+  type ChatImageContentType,
+  type ChatMessage,
+  type ChatRoom,
+  type ChatSocketError,
+} from "@/types/chat";
 
 interface UseChatRoomModalControllerOptions {
   open: boolean;
@@ -36,6 +45,22 @@ function sortMessages(messages: ChatMessage[]): ChatMessage[] {
 
 function mergeMessages(messages: ChatMessage[]): ChatMessage[] {
   return sortMessages([...new Map(messages.map((message) => [message.id, message])).values()]);
+}
+
+function isChatImageContentType(value: string): value is ChatImageContentType {
+  return (CHAT_IMAGE_CONTENT_TYPES as readonly string[]).includes(value);
+}
+
+function validateChatImageFile(file: File): string | null {
+  if (!isChatImageContentType(file.type)) {
+    return "jpg, png, webp 형식의 이미지만 첨부할 수 있습니다.";
+  }
+
+  if (file.size > CHAT_IMAGE_MAX_SIZE) {
+    return "채팅 이미지는 25MB 이하만 첨부할 수 있습니다.";
+  }
+
+  return null;
 }
 
 /**
@@ -100,15 +125,21 @@ export function useChatRoomModalController({
 /**
  * 준비된 채팅방의 메시지 조회, 소켓 수신, 전송 상태를 관리하는 훅
  * // 2026.08.07 김성현 - [추가] 채팅 메시지/소켓 로직 분리
+ * // 2026.08.18 김성현 - [추가] 채팅 이미지 첨부 업로드/전송 흐름 추가
+ * // 2026.08.19 김성현 - [수정] 이미지 선택 후 전송 버튼에서 업로드/전송하도록 변경
  */
 export function useConnectedChatRoomModalController({
   open,
   room,
 }: UseConnectedChatRoomModalControllerOptions) {
   const [messageValue, setMessageValue] = useState("");
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [selectedImagePreviewUrl, setSelectedImagePreviewUrl] = useState<string | null>(null);
   const [liveMessages, setLiveMessages] = useState<ChatMessage[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [isImageSending, setIsImageSending] = useState(false);
+  const selectedImagePreviewUrlRef = useRef<string | null>(null);
 
   const messagesQuery = useChatMessages({
     roomId: room.id,
@@ -135,7 +166,7 @@ export function useConnectedChatRoomModalController({
     setToastMessage(error.message);
   }, []);
 
-  const { isConnected, sendMessage } = useChatRoomSocket({
+  const { isConnected, sendImageMessage, sendMessage } = useChatRoomSocket({
     roomId: room.id,
     lastMessageId,
     onJoined: (response) => {
@@ -151,7 +182,92 @@ export function useConnectedChatRoomModalController({
     onMessage: (message) => appendMessages([message]),
   });
 
+  const revokeSelectedImagePreview = useCallback(() => {
+    if (!selectedImagePreviewUrlRef.current) {
+      return;
+    }
+
+    URL.revokeObjectURL(selectedImagePreviewUrlRef.current);
+    selectedImagePreviewUrlRef.current = null;
+  }, []);
+
+  const clearSelectedImage = useCallback(() => {
+    revokeSelectedImagePreview();
+    setSelectedImageFile(null);
+    setSelectedImagePreviewUrl(null);
+  }, [revokeSelectedImagePreview]);
+
+  const selectImageFile = useCallback(
+    (file: File) => {
+      const validationMessage = validateChatImageFile(file);
+
+      if (validationMessage) {
+        setToastMessage(validationMessage);
+        return;
+      }
+
+      revokeSelectedImagePreview();
+
+      const previewUrl = URL.createObjectURL(file);
+      selectedImagePreviewUrlRef.current = previewUrl;
+      setSelectedImageFile(file);
+      setSelectedImagePreviewUrl(previewUrl);
+      setMessageValue("");
+      setToastMessage(null);
+    },
+    [revokeSelectedImagePreview],
+  );
+
+  useEffect(() => () => revokeSelectedImagePreview(), [revokeSelectedImagePreview]);
+
+  const sendSelectedImageMessage = async (file: File) => {
+    if (isSending || isImageSending) {
+      return;
+    }
+
+    const contentType = file.type;
+
+    if (!isChatImageContentType(contentType)) {
+      setToastMessage("jpg, png, webp 형식의 이미지만 첨부할 수 있습니다.");
+      return;
+    }
+
+    setToastMessage(null);
+    setIsImageSending(true);
+
+    try {
+      const uploadResult = await getChatImageUploadUrl(room.id, {
+        contentType,
+        size: file.size,
+      });
+
+      await uploadFileToPresignedUrl(uploadResult.uploadUrl, file);
+
+      const response = await sendImageMessage({
+        roomId: room.id,
+        imageKey: uploadResult.key,
+        clientMessageId: createClientMessageId(),
+      });
+
+      if (!response.ok) {
+        setToastMessage(response.error.message);
+        return;
+      }
+
+      clearSelectedImage();
+    } catch (error) {
+      setToastMessage(getApiErrorMessage(error, "이미지를 첨부하지 못했습니다."));
+    } finally {
+      setIsImageSending(false);
+    }
+  };
+
   const handleSendMessage = async () => {
+    if (selectedImageFile) {
+      await sendSelectedImageMessage(selectedImageFile);
+      return;
+    }
+
     const content = messageValue.trim();
 
     if (!content || isSending) {
@@ -186,6 +302,8 @@ export function useConnectedChatRoomModalController({
   return {
     messageValue,
     setMessageValue,
+    selectedImageName: selectedImageFile?.name ?? "",
+    selectedImagePreviewUrl,
     messages,
     messagesErrorMessage,
     isMessagesPending: messagesQuery.isPending,
@@ -195,8 +313,11 @@ export function useConnectedChatRoomModalController({
     fetchNextPage: messagesQuery.fetchNextPage,
     refetchMessages: messagesQuery.refetch,
     isSending,
+    isImageSending,
     isConnected,
-    sendDisabled: isSending || !isConnected,
+    sendDisabled: isSending || isImageSending || !isConnected,
+    selectImageFile,
+    clearSelectedImage,
     handleSendMessage,
     toastMessage,
     clearToastMessage: () => setToastMessage(null),

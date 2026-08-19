@@ -69,6 +69,8 @@ export const API_ROUTES = {
     ROOMS: "/chats/rooms",
     ROOM: (roomId: number) => `/chats/rooms/${roomId}`,
     MESSAGES: (roomId: number) => `/chats/rooms/${roomId}/messages`,
+    // 2026.08.18 김성현 - [추가] 채팅 이미지 Presigned URL 발급 경로
+    IMAGE_UPLOAD_URL: (roomId: number) => `/chats/rooms/${roomId}/images/upload-url`,
   },
   // 2026.07.25 정슬기 - [추가] 리뷰 API 경로
   REVIEWS: {
