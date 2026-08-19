@@ -52,8 +52,9 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
     (patch: Partial<ResidenceReviewSearchParamsState>) => {
       if (!isAuthQueryReady) return;
 
-      const nextFilters = { ...filters, ...patch };
+      const nextFilters = { ...filters, keyword: keyword.trim(), ...patch };
       if (
+        nextFilters.keyword === filters.keyword &&
         nextFilters.regionId === filters.regionId &&
         nextFilters.rating === filters.rating &&
         nextFilters.sort === filters.sort
@@ -65,7 +66,7 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
         getResidenceReviewsInfiniteQueryOptions(authScope, toResidenceReviewListQuery(nextFilters)),
       );
     },
-    [authScope, filters, isAuthQueryReady, queryClient],
+    [authScope, filters, isAuthQueryReady, keyword, queryClient],
   );
 
   return (

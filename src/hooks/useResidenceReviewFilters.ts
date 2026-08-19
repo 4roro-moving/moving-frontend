@@ -75,9 +75,16 @@ export const useResidenceReviewFilters = (filters: ResidenceReviewSearchParamsSt
 
   const replaceFilters = useCallback(
     (patch: Partial<ResidenceReviewSearchParamsState>) => {
-      replaceUrl({ ...latestFiltersRef.current, ...patch });
+      const normalizedKeyword = keyword.trim();
+      isKeywordDirtyRef.current = false;
+      setKeyword(normalizedKeyword);
+      replaceUrl({
+        ...latestFiltersRef.current,
+        keyword: normalizedKeyword,
+        ...patch,
+      });
     },
-    [replaceUrl],
+    [keyword, replaceUrl],
   );
 
   const resetFilters = useCallback(() => {
