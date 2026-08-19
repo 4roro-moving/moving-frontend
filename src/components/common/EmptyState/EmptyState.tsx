@@ -17,6 +17,8 @@ export interface EmptyStateProps {
   /** CTA 클릭 시 이동 경로 */
   href?: string;
   onButtonClick?: MouseEventHandler<HTMLAnchorElement>;
+  /** href 없이 버튼만 표시할 때 사용 */
+  onActionClick?: () => void;
   imageAlt?: string;
   className?: string;
   /**
@@ -34,11 +36,13 @@ export default function EmptyState({
   buttonLabel,
   href,
   onButtonClick,
+  onActionClick,
   imageAlt = "",
   className,
   size,
 }: EmptyStateProps) {
-  const showButton = Boolean(buttonLabel && href);
+  const showLinkButton = Boolean(buttonLabel && href);
+  const showActionButton = Boolean(buttonLabel && !href && onActionClick);
   const isSm = size === "sm";
   const isLg = size === "lg";
 
@@ -107,11 +111,17 @@ export default function EmptyState({
           </>
         ) : null}
 
-        {showButton && (
+        {showLinkButton ? (
           <Button href={href!} onClick={onButtonClick} size="cta" className="w-auto">
             {buttonLabel}
           </Button>
-        )}
+        ) : null}
+
+        {showActionButton ? (
+          <Button type="button" onClick={onActionClick} size="cta" className="w-auto">
+            {buttonLabel}
+          </Button>
+        ) : null}
       </div>
     </div>
   );

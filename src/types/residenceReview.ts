@@ -64,6 +64,13 @@ export interface ResidenceReviewMyListResult {
   pagination: Pagination;
 }
 
+export interface CreateResidenceReviewInput {
+  regionId: number;
+  title: string;
+  content: string;
+  rating: number;
+}
+
 export interface UpdateResidenceReviewInput {
   title?: string;
   content?: string;

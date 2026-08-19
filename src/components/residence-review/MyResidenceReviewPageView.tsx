@@ -9,14 +9,20 @@ import { Text } from "@/components/common/Text";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import MyResidenceReviewCard from "@/components/residence-review/MyResidenceReviewCard";
 import MyResidenceReviewCardSkeletonList from "@/components/residence-review/MyResidenceReviewCardSkeletonList";
+import ResidenceReviewCreateButton from "@/components/residence-review/ResidenceReviewCreateButton";
+import ResidenceReviewCreateModal from "@/components/residence-review/ResidenceReviewCreateModal";
 import ResidenceReviewDeleteConfirmModal from "@/components/residence-review/ResidenceReviewDeleteConfirmModal";
 import ResidenceReviewEditModal from "@/components/residence-review/ResidenceReviewEditModal";
 import { useDeleteResidenceReview } from "@/hooks/useDeleteResidenceReview";
 import { useMyResidenceReviews } from "@/hooks/useMyResidenceReviews";
+import { useResidenceReviewCreateAction } from "@/hooks/useResidenceReviewCreateAction";
 import { useReviewPagination } from "@/hooks/useReviewPagination";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
-import { RESIDENCE_REVIEW_PAGE_LIMIT } from "@/lib/constants/residenceReview";
+import {
+  RESIDENCE_REVIEW_PAGE_LIMIT,
+  RESIDENCE_REVIEW_WRITE_BUTTON_LABEL,
+} from "@/lib/constants/residenceReview";
 import type { PublicResidenceReview } from "@/types/residenceReview";
 
 const EMPTY_DESCRIPTION = (
@@ -38,6 +44,8 @@ const MyResidenceReviewPageView = () => {
       limit: RESIDENCE_REVIEW_PAGE_LIMIT,
     });
   const deleteMutation = useDeleteResidenceReview();
+  const { canShowCreateButton, defaultRegionId, isCreateOpen, openCreate, closeCreate } =
+    useResidenceReviewCreateAction();
   const [reviewToEdit, setReviewToEdit] = useState<PublicResidenceReview | null>(null);
   const [reviewToDelete, setReviewToDelete] = useState<PublicResidenceReview | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -97,22 +105,27 @@ const MyResidenceReviewPageView = () => {
             size="sm"
             imageSrc="/images/empty/character.png"
             description={EMPTY_DESCRIPTION}
+            buttonLabel={canShowCreateButton ? RESIDENCE_REVIEW_WRITE_BUTTON_LABEL : undefined}
+            onActionClick={canShowCreateButton ? openCreate : undefined}
           />
         ) : null}
 
         {hasList && pagination ? (
           <div className="flex w-full flex-col gap-40" aria-busy={isFetching}>
-            <ul className="flex w-full flex-col gap-20">
-              {reviews.map((review) => (
-                <li key={review.id}>
-                  <MyResidenceReviewCard
-                    review={review}
-                    onEdit={setReviewToEdit}
-                    onDelete={setReviewToDelete}
-                  />
-                </li>
-              ))}
-            </ul>
+            <div className="flex w-full flex-col gap-20">
+              {canShowCreateButton ? <ResidenceReviewCreateButton onClick={openCreate} /> : null}
+              <ul className="flex w-full flex-col gap-20">
+                {reviews.map((review) => (
+                  <li key={review.id}>
+                    <MyResidenceReviewCard
+                      review={review}
+                      onEdit={setReviewToEdit}
+                      onDelete={setReviewToDelete}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             {totalPages > 1 ? (
               <Pagination
@@ -124,6 +137,16 @@ const MyResidenceReviewPageView = () => {
           </div>
         ) : null}
       </div>
+
+      <ResidenceReviewCreateModal
+        open={isCreateOpen}
+        defaultRegionId={defaultRegionId}
+        onClose={closeCreate}
+        onSuccess={() => {
+          setPage(1);
+          setToastMessage("거주 후기를 작성했습니다.");
+        }}
+      />
 
       <ResidenceReviewEditModal
         open={reviewToEdit !== null}

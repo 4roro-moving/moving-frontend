@@ -5,10 +5,9 @@ import { useState } from "react";
 import { useUpdateResidenceReview } from "@/hooks/useUpdateResidenceReview";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
-  RESIDENCE_REVIEW_CONTENT_MAX_LENGTH,
-  RESIDENCE_REVIEW_CONTENT_MIN_LENGTH,
-  RESIDENCE_REVIEW_TITLE_MAX_LENGTH,
-} from "@/lib/constants/residenceReview";
+  getResidenceReviewContentError,
+  getResidenceReviewTitleError,
+} from "@/lib/utils/residenceReviewValidation";
 import { RESIDENCE_REVIEW_RATING } from "@/types/residenceReview";
 import type { PublicResidenceReview, UpdateResidenceReviewInput } from "@/types/residenceReview";
 
@@ -18,28 +17,6 @@ interface UseResidenceReviewEditFormParams {
   onSuccess?: () => void;
   onError?: (message: string) => void;
 }
-
-const getTitleError = (title: string) => {
-  const trimmed = title.trim();
-  if (!trimmed) {
-    return "제목을 입력해 주세요.";
-  }
-  if (trimmed.length > RESIDENCE_REVIEW_TITLE_MAX_LENGTH) {
-    return `제목은 ${String(RESIDENCE_REVIEW_TITLE_MAX_LENGTH)}자 이하여야 합니다.`;
-  }
-  return undefined;
-};
-
-const getContentError = (content: string) => {
-  const trimmed = content.trim();
-  if (trimmed.length < RESIDENCE_REVIEW_CONTENT_MIN_LENGTH) {
-    return `내용은 ${String(RESIDENCE_REVIEW_CONTENT_MIN_LENGTH)}자 이상 입력해 주세요.`;
-  }
-  if (trimmed.length > RESIDENCE_REVIEW_CONTENT_MAX_LENGTH) {
-    return `내용은 ${String(RESIDENCE_REVIEW_CONTENT_MAX_LENGTH)}자 이하여야 합니다.`;
-  }
-  return undefined;
-};
 
 export const useResidenceReviewEditForm = ({
   review,
@@ -67,11 +44,14 @@ export const useResidenceReviewEditForm = ({
 
   const trimmedTitle = title.trim();
   const trimmedContent = content.trim();
-  const titleError = isTitleTouched ? getTitleError(title) : undefined;
-  const contentError = isContentTouched ? getContentError(content) : undefined;
+  const titleError = isTitleTouched ? getResidenceReviewTitleError(title) : undefined;
+  const contentError = isContentTouched ? getResidenceReviewContentError(content) : undefined;
   const isRatingValid =
     rating >= RESIDENCE_REVIEW_RATING.MIN && rating <= RESIDENCE_REVIEW_RATING.MAX;
-  const isValid = !getTitleError(title) && !getContentError(content) && isRatingValid;
+  const isValid =
+    !getResidenceReviewTitleError(title) &&
+    !getResidenceReviewContentError(content) &&
+    isRatingValid;
   const hasChanges =
     trimmedTitle !== review.title.trim() ||
     trimmedContent !== review.content.trim() ||

@@ -2,6 +2,7 @@ import fetchInstance from "@/lib/api/fetchInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import type { CursorPagination, Pagination } from "@/types/pagination";
 import type {
+  CreateResidenceReviewInput,
   PublicResidenceReview,
   ResidenceReviewListQuery,
   ResidenceReviewListResult,
@@ -55,6 +56,12 @@ export const fetchMyResidenceReviews = async (
     pagination: result.pagination,
   };
 };
+
+export const createResidenceReview = (body: CreateResidenceReviewInput) =>
+  fetchInstance.post<PublicResidenceReview, CreateResidenceReviewInput>(
+    API_ROUTES.RESIDENCE_REVIEWS.ROOT,
+    body,
+  );
 
 export const updateResidenceReview = (
   residenceReviewId: number,

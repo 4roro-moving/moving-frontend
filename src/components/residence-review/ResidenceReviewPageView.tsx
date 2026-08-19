@@ -3,16 +3,21 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 
+import { LoginRequiredModal } from "@/components/auth/LoginRequiredModal";
 import Toast from "@/components/common/Toast/Toast";
 import { Text } from "@/components/common/Text";
+import ResidenceReviewCreateButton from "@/components/residence-review/ResidenceReviewCreateButton";
+import ResidenceReviewCreateModal from "@/components/residence-review/ResidenceReviewCreateModal";
 import ResidenceReviewDeleteConfirmModal from "@/components/residence-review/ResidenceReviewDeleteConfirmModal";
 import ResidenceReviewDetailModal from "@/components/residence-review/ResidenceReviewDetailModal";
 import ResidenceReviewFilters from "@/components/residence-review/ResidenceReviewFilters";
 import ResidenceReviewList from "@/components/residence-review/ResidenceReviewList";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { useDeleteResidenceReview } from "@/hooks/useDeleteResidenceReview";
+import { useResidenceReviewCreateAction } from "@/hooks/useResidenceReviewCreateAction";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
+import { RESIDENCE_REVIEW_WRITE_LOGIN_DESCRIPTION } from "@/lib/constants/residenceReview";
 import { getResidenceReviewDetailQueryOptions } from "@/lib/queryOptions/residenceReviews";
 import type { ResidenceReviewSearchParamsState } from "@/lib/utils/residenceReviewSearchParams";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -28,6 +33,15 @@ const ResidenceReviewPageView = ({ filters, initialReviews }: ResidenceReviewPag
   const { authScope, isAuthQueryReady } = useAuthQueryScope();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const deleteMutation = useDeleteResidenceReview();
+  const {
+    canShowCreateButton,
+    defaultRegionId,
+    isCreateOpen,
+    isLoginRequiredOpen,
+    openCreate,
+    closeCreate,
+    closeLoginRequired,
+  } = useResidenceReviewCreateAction();
   const [selectedReview, setSelectedReview] = useState<PublicResidenceReview | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState<PublicResidenceReview | null>(null);
@@ -79,6 +93,7 @@ const ResidenceReviewPageView = ({ filters, initialReviews }: ResidenceReviewPag
 
       <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop mx-auto flex w-full flex-col gap-24 pt-24 pb-80 xl:px-0 xl:pt-32 xl:pb-120">
         <ResidenceReviewFilters filters={filters} />
+        {canShowCreateButton ? <ResidenceReviewCreateButton onClick={openCreate} /> : null}
         <ResidenceReviewList
           filters={filters}
           initialReviews={initialReviews}
@@ -86,6 +101,19 @@ const ResidenceReviewPageView = ({ filters, initialReviews }: ResidenceReviewPag
           onPrefetch={prefetchDetail}
         />
       </div>
+
+      <ResidenceReviewCreateModal
+        open={isCreateOpen}
+        defaultRegionId={defaultRegionId}
+        onClose={closeCreate}
+        onSuccess={() => setToastMessage("거주 후기를 작성했습니다.")}
+      />
+
+      <LoginRequiredModal
+        open={isLoginRequiredOpen}
+        onClose={closeLoginRequired}
+        description={RESIDENCE_REVIEW_WRITE_LOGIN_DESCRIPTION}
+      />
 
       <ResidenceReviewDetailModal
         open={isDetailOpen}

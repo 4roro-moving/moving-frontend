@@ -2,55 +2,58 @@
 
 import { useState } from "react";
 
-import SelectableChip from "@/components/common/Chip/SelectableChip";
 import FormField from "@/components/common/FormField/FormField";
 import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
+import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import ResidenceReviewFormFields from "@/components/residence-review/ResidenceReviewFormFields";
-import { useResidenceReviewEditForm } from "@/hooks/useResidenceReviewEditForm";
-import type { PublicResidenceReview } from "@/types/residenceReview";
+import { useResidenceReviewCreateForm } from "@/hooks/useResidenceReviewCreateForm";
+import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
 
-interface ResidenceReviewEditModalProps {
+interface ResidenceReviewCreateModalProps {
   open: boolean;
-  review: PublicResidenceReview | null;
+  defaultRegionId: RegionId | null;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-interface ResidenceReviewEditModalContentProps {
+interface ResidenceReviewCreateModalContentProps {
   open: boolean;
-  review: PublicResidenceReview;
+  defaultRegionId: RegionId | null;
   onClose: () => void;
   onExitComplete?: () => void;
   onSuccess?: () => void;
 }
 
-const ResidenceReviewEditModalContent = ({
+const ResidenceReviewCreateModalContent = ({
   open,
-  review,
+  defaultRegionId,
   onClose,
   onExitComplete,
   onSuccess,
-}: ResidenceReviewEditModalContentProps) => {
+}: ResidenceReviewCreateModalContentProps) => {
   const {
+    regionId,
     title,
     content,
     rating,
     titleError,
     contentError,
+    regionError,
     submitError,
     contentLength,
     isSubmitting,
     isSubmitDisabled,
     handleClose,
     handleSubmit,
+    handleRegionChange,
     handleTitleChange,
     handleTitleBlur,
     handleContentChange,
     handleContentBlur,
     handleRatingChange,
-  } = useResidenceReviewEditForm({
-    review,
+  } = useResidenceReviewCreateForm({
+    defaultRegionId,
     onClose,
     onSuccess,
   });
@@ -66,19 +69,35 @@ const ResidenceReviewEditModalContent = ({
       dismissible={false}
     >
       <div className="flex w-full items-start justify-between gap-12">
-        <Modal.Title>후기 수정</Modal.Title>
+        <Modal.Title>후기 작성</Modal.Title>
         <Modal.Close onClose={handleClose} disabled={isSubmitting} />
       </div>
 
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-24 overflow-y-auto xl:gap-32">
-        <FormField label="지역을 선택해주세요." variant="compact" labelId="residence-review-region">
-          <div role="group" aria-labelledby="residence-review-region">
-            <SelectableChip selected size="responsive">
-              {review.region.name}
-            </SelectableChip>
-          </div>
-        </FormField>
+      <FormField
+        label="지역을 선택해주세요."
+        variant="compact"
+        labelId="residence-review-create-region"
+      >
+        <Select
+          label="지역"
+          desc="지역"
+          size="lg"
+          columns={2}
+          className="w-full"
+          defaultValue={regionId !== null ? String(regionId) : undefined}
+          error={regionError}
+          disabled={isSubmitting}
+          onChange={handleRegionChange}
+        >
+          {REGION_OPTIONS.map((region) => (
+            <Select.Option key={region.value} value={String(region.value)}>
+              {region.label}
+            </Select.Option>
+          ))}
+        </Select>
+      </FormField>
 
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-24 overflow-y-auto xl:gap-32">
         <ResidenceReviewFormFields
           title={title}
           content={content}
@@ -102,38 +121,30 @@ const ResidenceReviewEditModalContent = ({
       ) : null}
 
       <Modal.Button fullWidth size="cta" disabled={isSubmitDisabled} onClick={handleSubmit}>
-        {isSubmitting ? "수정 중..." : "수정하기"}
+        {isSubmitting ? "작성 중..." : "작성하기"}
       </Modal.Button>
     </Modal>
   );
 };
 
-const ResidenceReviewEditModal = ({
+const ResidenceReviewCreateModal = ({
   open,
-  review,
+  defaultRegionId,
   onClose,
   onSuccess,
-}: ResidenceReviewEditModalProps) => {
-  const [cachedReview, setCachedReview] = useState<PublicResidenceReview | null>(review);
-
-  if (review != null && review !== cachedReview) {
-    setCachedReview(review);
-  }
-
-  if (!cachedReview) {
-    return null;
-  }
+}: ResidenceReviewCreateModalProps) => {
+  const [formKey, setFormKey] = useState(0);
 
   return (
-    <ResidenceReviewEditModalContent
-      key={cachedReview.id}
+    <ResidenceReviewCreateModalContent
+      key={formKey}
       open={open}
-      review={cachedReview}
+      defaultRegionId={defaultRegionId}
       onClose={onClose}
-      onExitComplete={() => setCachedReview(null)}
+      onExitComplete={() => setFormKey((current) => current + 1)}
       onSuccess={onSuccess}
     />
   );
 };
 
-export default ResidenceReviewEditModal;
+export default ResidenceReviewCreateModal;
