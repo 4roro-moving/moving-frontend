@@ -70,4 +70,7 @@ export const APP_ROUTES = {
   CHATS: {
     ROOM: (roomId: number) => `/chats/${roomId}`,
   },
+
+  // 2026.08.16 심현수 - [추가] 약관 공개 페이지 경로
+  TERMS: "/terms",
 } as const;

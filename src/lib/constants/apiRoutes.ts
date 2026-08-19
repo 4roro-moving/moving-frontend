@@ -84,4 +84,10 @@ export const API_ROUTES = {
     /** GET text/event-stream — Authorization Bearer 필요 */
     SSE_SUBSCRIBE: "/notifications/sse/subscribe",
   },
+
+  // 2026.08.16 심현수 - [추가] 약관 API 경로
+  TERMS: {
+    ROOT: "/terms",
+    BY_TYPE: (type: string) => `/terms/${type}`,
+  },
 } as const;
