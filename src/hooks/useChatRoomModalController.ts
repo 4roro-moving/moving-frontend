@@ -126,16 +126,20 @@ export function useChatRoomModalController({
  * 준비된 채팅방의 메시지 조회, 소켓 수신, 전송 상태를 관리하는 훅
  * // 2026.08.07 김성현 - [추가] 채팅 메시지/소켓 로직 분리
  * // 2026.08.18 김성현 - [추가] 채팅 이미지 첨부 업로드/전송 흐름 추가
+ * // 2026.08.19 김성현 - [수정] 이미지 선택 후 전송 버튼에서 업로드/전송하도록 변경
  */
 export function useConnectedChatRoomModalController({
   open,
   room,
 }: UseConnectedChatRoomModalControllerOptions) {
   const [messageValue, setMessageValue] = useState("");
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [selectedImagePreviewUrl, setSelectedImagePreviewUrl] = useState<string | null>(null);
   const [liveMessages, setLiveMessages] = useState<ChatMessage[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [isImageSending, setIsImageSending] = useState(false);
+  const selectedImagePreviewUrlRef = useRef<string | null>(null);
 
   const messagesQuery = useChatMessages({
     roomId: room.id,
@@ -178,7 +182,92 @@ export function useConnectedChatRoomModalController({
     onMessage: (message) => appendMessages([message]),
   });
 
+  const revokeSelectedImagePreview = useCallback(() => {
+    if (!selectedImagePreviewUrlRef.current) {
+      return;
+    }
+
+    URL.revokeObjectURL(selectedImagePreviewUrlRef.current);
+    selectedImagePreviewUrlRef.current = null;
+  }, []);
+
+  const clearSelectedImage = useCallback(() => {
+    revokeSelectedImagePreview();
+    setSelectedImageFile(null);
+    setSelectedImagePreviewUrl(null);
+  }, [revokeSelectedImagePreview]);
+
+  const selectImageFile = useCallback(
+    (file: File) => {
+      const validationMessage = validateChatImageFile(file);
+
+      if (validationMessage) {
+        setToastMessage(validationMessage);
+        return;
+      }
+
+      revokeSelectedImagePreview();
+
+      const previewUrl = URL.createObjectURL(file);
+      selectedImagePreviewUrlRef.current = previewUrl;
+      setSelectedImageFile(file);
+      setSelectedImagePreviewUrl(previewUrl);
+      setMessageValue("");
+      setToastMessage(null);
+    },
+    [revokeSelectedImagePreview],
+  );
+
+  useEffect(() => () => revokeSelectedImagePreview(), [revokeSelectedImagePreview]);
+
+  const sendSelectedImageMessage = async (file: File) => {
+    if (isSending || isImageSending) {
+      return;
+    }
+
+    const contentType = file.type;
+
+    if (!isChatImageContentType(contentType)) {
+      setToastMessage("jpg, png, webp 형식의 이미지만 첨부할 수 있습니다.");
+      return;
+    }
+
+    setToastMessage(null);
+    setIsImageSending(true);
+
+    try {
+      const uploadResult = await getChatImageUploadUrl(room.id, {
+        contentType,
+        size: file.size,
+      });
+
+      await uploadFileToPresignedUrl(uploadResult.uploadUrl, file);
+
+      const response = await sendImageMessage({
+        roomId: room.id,
+        imageKey: uploadResult.key,
+        clientMessageId: createClientMessageId(),
+      });
+
+      if (!response.ok) {
+        setToastMessage(response.error.message);
+        return;
+      }
+
+      clearSelectedImage();
+    } catch (error) {
+      setToastMessage(getApiErrorMessage(error, "이미지를 첨부하지 못했습니다."));
+    } finally {
+      setIsImageSending(false);
+    }
+  };
+
   const handleSendMessage = async () => {
+    if (selectedImageFile) {
+      await sendSelectedImageMessage(selectedImageFile);
+      return;
+    }
+
     const content = messageValue.trim();
 
     if (!content || isSending) {
@@ -206,50 +295,6 @@ export function useConnectedChatRoomModalController({
     }
   };
 
-  const handleSendImageMessage = async (file: File) => {
-    if (isSending || isImageSending) {
-      return;
-    }
-
-    const contentType = file.type;
-    const validationMessage = validateChatImageFile(file);
-
-    if (validationMessage) {
-      setToastMessage(validationMessage);
-      return;
-    }
-
-    if (!isChatImageContentType(contentType)) {
-      return;
-    }
-
-    setToastMessage(null);
-    setIsImageSending(true);
-
-    try {
-      const uploadResult = await getChatImageUploadUrl(room.id, {
-        contentType,
-        size: file.size,
-      });
-
-      await uploadFileToPresignedUrl(uploadResult.uploadUrl, file);
-
-      const response = await sendImageMessage({
-        roomId: room.id,
-        imageKey: uploadResult.key,
-        clientMessageId: createClientMessageId(),
-      });
-
-      if (!response.ok) {
-        setToastMessage(response.error.message);
-      }
-    } catch (error) {
-      setToastMessage(getApiErrorMessage(error, "이미지를 첨부하지 못했습니다."));
-    } finally {
-      setIsImageSending(false);
-    }
-  };
-
   const messagesErrorMessage = messagesQuery.isError
     ? getApiErrorMessage(messagesQuery.error, "대화 내역을 불러오지 못했습니다.")
     : null;
@@ -257,6 +302,8 @@ export function useConnectedChatRoomModalController({
   return {
     messageValue,
     setMessageValue,
+    selectedImageName: selectedImageFile?.name ?? "",
+    selectedImagePreviewUrl,
     messages,
     messagesErrorMessage,
     isMessagesPending: messagesQuery.isPending,
@@ -269,8 +316,9 @@ export function useConnectedChatRoomModalController({
     isImageSending,
     isConnected,
     sendDisabled: isSending || isImageSending || !isConnected,
+    selectImageFile,
+    clearSelectedImage,
     handleSendMessage,
-    handleSendImageMessage,
     toastMessage,
     clearToastMessage: () => setToastMessage(null),
   };

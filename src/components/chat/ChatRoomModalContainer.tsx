@@ -239,7 +239,7 @@ export function ConnectedChatRoomModal({
       return;
     }
 
-    void chat.handleSendImageMessage(file);
+    chat.selectImageFile(file);
   };
 
   return (
@@ -260,8 +260,11 @@ export function ConnectedChatRoomModal({
         participantName={participantName}
         estimateSummary={estimateSummary}
         messageValue={chat.messageValue}
+        selectedImagePreviewUrl={chat.selectedImagePreviewUrl}
+        selectedImageName={chat.selectedImageName}
         sendDisabled={chat.sendDisabled}
         onMessageChange={chat.setMessageValue}
+        onClearSelectedImage={chat.clearSelectedImage}
         onSendMessage={() => void chat.handleSendMessage()}
         onClose={onClose}
         actions={mergedActions}
