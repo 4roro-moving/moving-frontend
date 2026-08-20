@@ -8,6 +8,7 @@ import { ProfileDefaultIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import {
   formatResidenceReviewAuthorName,
+  formatResidenceReviewRating,
   formatResidenceReviewRegionLabel,
   formatResidenceReviewWrittenDate,
   getResidenceReviewAuthorImageSrc,
@@ -26,11 +27,13 @@ const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCa
   const regionLabel = formatResidenceReviewRegionLabel(review.region);
   const writtenDate = formatResidenceReviewWrittenDate(review.createdAt);
   const titleId = `residence-review-${String(review.id)}-title`;
+  const descriptionId = `residence-review-${String(review.id)}-description`;
 
   return (
     <button
       type="button"
       aria-labelledby={titleId}
+      aria-describedby={descriptionId}
       className={cn(
         "bg-background-default border-border-subtle shadow-estimate-card rounded-16 md:rounded-20 flex w-full flex-col border-[0.5px] text-left",
         "gap-16 px-16 py-16 md:gap-20 md:p-24 xl:p-40",
@@ -40,6 +43,9 @@ const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCa
       onMouseEnter={() => onPrefetch?.(review)}
       onFocus={() => onPrefetch?.(review)}
     >
+      <span id={descriptionId} className="sr-only">
+        {`${authorName}, 평점 ${formatResidenceReviewRating(review.rating)}, ${regionLabel}`}
+      </span>
       <div className="flex w-full items-center gap-16 md:gap-20">
         <div className="bg-background-avatar rounded-12 relative hidden size-64 shrink-0 overflow-hidden md:block md:size-80">
           {authorImageSrc ? (
