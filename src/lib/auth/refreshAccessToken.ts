@@ -6,6 +6,7 @@ import { ApiError, type ApiSuccessResponse, type ApiErrorResponse } from "@/type
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const REFRESH_LOCK_NAME = "moving:auth-refresh";
+const REFRESH_UNAUTHORIZED_RETRY_DELAY_MS = 200;
 
 interface RefreshTokenResponse {
   tokens: {
@@ -26,6 +27,16 @@ interface RefreshFailureMeta {
 
 const isRefreshRejectedStatus = (status: number | undefined): boolean => {
   return status === 401 || status === 404;
+};
+
+const isRetryableRefreshUnauthorized = (error: unknown): boolean => {
+  return error instanceof ApiError && error.status === 401;
+};
+
+const wait = (ms: number): Promise<void> => {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
 };
 
 const withRefreshFailureMeta = (error: unknown, meta: RefreshFailureMeta): unknown => {
@@ -90,17 +101,35 @@ const requestRefreshAccessToken = async (): Promise<string> => {
 };
 
 /**
- * 여러 탭·연타 F5가 같은 refreshToken으로 동시에 갱신하는 것을 막습니다.
+ * refresh 401은 다른 탭이 심은 새 쿠키가 jar에 붙기 전일 수 있어
+ * 짧게 기다린 뒤 1회만 재요청합니다. 404·네트워크 오류는 재시도하지 않습니다.
+ */
+const requestRefreshAccessTokenWithRetry = async (): Promise<string> => {
+  try {
+    return await requestRefreshAccessToken();
+  } catch (error) {
+    if (!isRetryableRefreshUnauthorized(error)) {
+      throw error;
+    }
+
+    await wait(REFRESH_UNAUTHORIZED_RETRY_DELAY_MS);
+    return requestRefreshAccessToken();
+  }
+};
+
+/**
+ * 여러 탭의 동시 refresh를 직렬화합니다.
  * 잠금 후 다음 요청은 이 브라우저 쿠키 jar의 최신 refresh를 사용합니다.
+ * F5 연타(문서 unload)는 Lock으로 막지 못하며 백엔드 rotation grace가 담당합니다.
  */
 const refreshAccessTokenOnce = async (): Promise<string> => {
   const locks = typeof navigator !== "undefined" ? navigator.locks : undefined;
 
   if (!locks?.request) {
-    return requestRefreshAccessToken();
+    return requestRefreshAccessTokenWithRetry();
   }
 
-  return locks.request(REFRESH_LOCK_NAME, () => requestRefreshAccessToken());
+  return locks.request(REFRESH_LOCK_NAME, () => requestRefreshAccessTokenWithRetry());
 };
 
 /**
