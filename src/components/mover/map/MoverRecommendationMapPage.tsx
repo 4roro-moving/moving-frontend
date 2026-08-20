@@ -147,7 +147,7 @@ export function MoverRecommendationMapPage() {
   }
 
   return (
-    <main className="bg-background-surface flex min-h-[calc(100dvh-var(--gnb-height-mobile))] flex-col lg:h-[calc(100dvh-var(--gnb-height-tablet))] lg:min-h-0 lg:overflow-hidden xl:h-[calc(100dvh-var(--gnb-height-desktop))]">
+    <main className="bg-background-surface flex min-h-[calc(100dvh-var(--gnb-height-mobile)-var(--tab-height-mobile))] flex-col lg:h-[calc(100dvh-var(--gnb-height-tablet)-var(--tab-height-tablet))] lg:min-h-0 lg:overflow-hidden xl:h-[calc(100dvh-var(--gnb-height-desktop)-var(--tab-height-desktop))]">
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row lg:overflow-hidden">
         <aside className="border-border-subtle z-10 flex w-full shrink-0 flex-col border-b bg-white lg:h-full lg:w-[430px] lg:overflow-hidden lg:border-r lg:border-b-0">
           <div className="border-border-subtle shrink-0 border-b p-24 lg:p-28">
