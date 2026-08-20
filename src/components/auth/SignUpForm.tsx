@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import AuthHeader from "@/components/auth/AuthHeader";
@@ -13,18 +13,12 @@ import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
-import Toast from "@/components/common/Toast/Toast";
 import { useSignUpMoverMutation } from "@/hooks/auth/useSignUpMoverMutation";
 import { useSignUpMutation } from "@/hooks/auth/useSignUpMutation";
-import { usePublishedTerms } from "@/hooks/terms/usePublishedTerms";
+import { useSignUpTerms } from "@/hooks/auth/useSignUpTerms";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { consumeOAuthNeedSignUpToast } from "@/lib/auth/oauthNeedSignUpToast";
-import { getProfilePath, type AuthAudience } from "@/lib/auth/redirect";
-import {
-  filterSignUpTerms,
-  hasRequiredTermsAgreed,
-  toTermsAgreements,
-} from "@/lib/auth/termsAgreement";
+import { getProfilePath, getSocialSignUpPath, type AuthAudience } from "@/lib/auth/redirect";
+import { hasRequiredTermsAgreed } from "@/lib/auth/termsAgreement";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { signUpSchema, type SignUpFormValues } from "@/lib/schemas/signUpSchema";
 import { cn } from "@/lib/utils/cn";
@@ -40,13 +34,14 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
   const { mutateAsync: signUp, isPending } = audience === "mover" ? moverSignUp : customerSignUp;
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [agreementsById, setAgreementsById] = useState<Record<string, boolean>>({});
   const {
-    data: publishedTerms,
-    isPending: isTermsLoading,
-    isError: isTermsError,
-  } = usePublishedTerms();
+    signUpTerms,
+    agreementsById,
+    agreements,
+    canAgree,
+    isTermsError,
+    handleTermsCheckedChange,
+  } = useSignUpTerms(audience);
 
   const {
     register,
@@ -65,22 +60,6 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
   });
 
   const loginHref = audience === "mover" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
-  const signUpTerms = filterSignUpTerms(publishedTerms ?? [], audience);
-  const canAgree =
-    !isTermsLoading && !isTermsError && hasRequiredTermsAgreed(signUpTerms, agreementsById);
-
-  const handleTermsCheckedChange = (termsId: number, checked: boolean) => {
-    setAgreementsById((previous) => ({ ...previous, [String(termsId)]: checked }));
-  };
-
-  useEffect(() => {
-    const timerId = window.setTimeout(() => {
-      setToastMessage(consumeOAuthNeedSignUpToast());
-    }, 0);
-    return () => {
-      window.clearTimeout(timerId);
-    };
-  }, []);
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
@@ -98,7 +77,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
         password: values.password,
         name: values.name,
         phone: values.phone,
-        agreements: toTermsAgreements(signUpTerms, agreementsById),
+        agreements,
       });
     } catch (error) {
       useAuthStore.getState().consumePostAuthRedirectPath();
@@ -108,7 +87,6 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
-      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
       <AuthHeader audience={audience} />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
@@ -236,10 +214,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
         </Text>
         <SocialLoginButtons
           audience={audience}
-          intent="signup"
-          disabled={!canAgree}
-          agreements={toTermsAgreements(signUpTerms, agreementsById)}
-          onError={setSubmitError}
+          hrefForProvider={() => getSocialSignUpPath(audience)}
         />
       </div>
     </div>

@@ -30,7 +30,7 @@ import {
   getAuthAudienceFromRole,
   getPostAuthRedirectPath,
   getRoleHomePath,
-  getSignUpPath,
+  getSocialSignUpPath,
   type AuthAudience,
 } from "@/lib/auth/redirect";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
@@ -197,7 +197,7 @@ const OAuthCallbackContent = () => {
         if (getApiError(err).code === ERROR_CODES.OAUTH_ACCOUNT_NOT_FOUND.code) {
           markOAuthNeedSignUpToast();
           clearOAuthPendingSession();
-          router.replace(getSignUpPath(pageAudience));
+          router.replace(getSocialSignUpPath(pageAudience));
           return;
         }
 
