@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useChatRoomSocket } from "@/hooks/useChatRoomSocket";
@@ -8,6 +9,7 @@ import { useGetOrCreateChatRoom } from "@/hooks/useChatRoom";
 import { getChatImageUploadUrl } from "@/lib/api/chat";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { uploadFileToPresignedUrl } from "@/lib/api/profileImage";
+import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import {
   CHAT_IMAGE_CONTENT_TYPES,
   CHAT_IMAGE_MAX_SIZE,
@@ -25,6 +27,12 @@ interface UseChatRoomModalControllerOptions {
 interface UseConnectedChatRoomModalControllerOptions {
   open: boolean;
   room: ChatRoom;
+}
+
+export interface RequestEstimateRevisionInput {
+  requestedMoveDate: string;
+  requestedPrice: number;
+  requestedComment: string;
 }
 
 function createClientMessageId(): string {
@@ -132,6 +140,7 @@ export function useConnectedChatRoomModalController({
   open,
   room,
 }: UseConnectedChatRoomModalControllerOptions) {
+  const queryClient = useQueryClient();
   const [messageValue, setMessageValue] = useState("");
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [selectedImagePreviewUrl, setSelectedImagePreviewUrl] = useState<string | null>(null);
@@ -166,7 +175,13 @@ export function useConnectedChatRoomModalController({
     setToastMessage(error.message);
   }, []);
 
-  const { isConnected, sendImageMessage, sendMessage } = useChatRoomSocket({
+  const {
+    isConnected,
+    requestEstimateRevision,
+    respondEstimateRevision,
+    sendImageMessage,
+    sendMessage,
+  } = useChatRoomSocket({
     roomId: room.id,
     lastMessageId,
     onJoined: (response) => {
@@ -295,6 +310,72 @@ export function useConnectedChatRoomModalController({
     }
   };
 
+  const handleRequestEstimateRevision = async (input: RequestEstimateRevisionInput) => {
+    if (isSending || isImageSending) {
+      return false;
+    }
+
+    setToastMessage(null);
+    setIsSending(true);
+
+    try {
+      const response = await requestEstimateRevision({
+        roomId: room.id,
+        requestedMoveDate: input.requestedMoveDate,
+        requestedPrice: input.requestedPrice,
+        requestedComment: input.requestedComment,
+        clientMessageId: createClientMessageId(),
+      });
+
+      if (!response.ok) {
+        setToastMessage(response.error.message);
+        return false;
+      }
+
+      return true;
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleRespondEstimateRevision = async (
+    revisionId: number,
+    responseType: "APPROVED" | "REJECTED",
+  ) => {
+    if (isSending || isImageSending) {
+      return;
+    }
+
+    setToastMessage(null);
+    setIsSending(true);
+
+    try {
+      const response = await respondEstimateRevision({
+        roomId: room.id,
+        revisionId,
+        response: responseType,
+        clientMessageId: createClientMessageId(),
+      });
+
+      if (!response.ok) {
+        setToastMessage(response.error.message);
+        return;
+      }
+
+      if (responseType === "APPROVED") {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT }),
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT }),
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.RECEIVED }),
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.SENT_DETAIL_ROOT }),
+          queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ESTIMATES.SENT_LIST_ROOT }),
+        ]);
+      }
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const messagesErrorMessage = messagesQuery.isError
     ? getApiErrorMessage(messagesQuery.error, "대화 내역을 불러오지 못했습니다.")
     : null;
@@ -316,6 +397,8 @@ export function useConnectedChatRoomModalController({
     isImageSending,
     isConnected,
     sendDisabled: isSending || isImageSending || !isConnected,
+    requestEstimateRevision: handleRequestEstimateRevision,
+    respondEstimateRevision: handleRespondEstimateRevision,
     selectImageFile,
     clearSelectedImage,
     handleSendMessage,
