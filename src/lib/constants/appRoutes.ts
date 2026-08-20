@@ -29,6 +29,8 @@ export const APP_ROUTES = {
   MOVER_PROFILE_EDIT: "/mover/profile/edit",
   /** 기사님 기본정보 수정 */
   MOVER_BASIC_EDIT: "/mover/basic/edit",
+  /** 기사님 마이페이지 */
+  MOVER_MYPAGE: "/mover/mypage",
   // 2026.07.27 정슬기 - [추가] 기사님 찾기·상세 페이지 경로
   MOVERS: {
     ROOT: "/movers",
