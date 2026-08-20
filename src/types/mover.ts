@@ -21,6 +21,13 @@ export interface Mover {
   favoriteCount: number;
   isFavorite: boolean;
   profileImageSrc: string;
+  activityBase: MoverPublicActivityBase | null;
+}
+
+/**기사 활동 거점 좌표 */
+export interface MoverPublicActivityBase {
+  latitude: number;
+  longitude: number;
 }
 
 /** GET /movers 목록 아이템 */
@@ -38,6 +45,7 @@ export interface MoverListItem {
   favoriteCount: number;
   moveTypes: MoveType[];
   isFavorite: boolean;
+  activityBase: MoverPublicActivityBase | null;
 }
 
 /** GET /movers/:moverId 상세 — 목록 필드 + 서비스 가능 지역 */

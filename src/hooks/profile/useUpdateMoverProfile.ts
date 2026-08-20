@@ -32,6 +32,8 @@ export const useUpdateMoverProfile = () => {
 
       establishSession(toAuthUserFromMoverProfile(profile));
       queryClient.setQueryData([...QUERY_KEYS.PROFILES.MOVER_ME, profile.userId] as const, profile);
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.MOVER_ME });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MOVERS.ALL });
     },
   });
 };

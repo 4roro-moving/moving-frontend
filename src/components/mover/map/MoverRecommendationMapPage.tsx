@@ -17,9 +17,9 @@ import {
   type MoverRecommendationMatchType,
   useMoverRecommendations,
 } from "@/hooks/useMoverRecommendations";
+import { useRecommendationRegionIds } from "@/hooks/useRecommendationRegionIds";
 import { DriverBadgeIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { getRegionIdBySido } from "@/lib/constants/region";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import type { MoveType } from "@/types/move";
 
@@ -91,20 +91,6 @@ function RecommendationCard({ mover }: { mover: MoverRecommendation }) {
   );
 }
 
-// 검색 전 안내 화면
-function MapSearchPrompt() {
-  return (
-    <section
-      aria-label="지도 검색 안내"
-      className="bg-background-subtle flex min-h-[520px] flex-1 items-center justify-center px-24 text-center lg:min-h-0"
-    >
-      <Text as="p" variant="lg-medium" className="text-text-muted">
-        출발지와 도착지를 선택하고 기사님을 검색하면 지도가 표시됩니다.
-      </Text>
-    </section>
-  );
-}
-
 export function MoverRecommendationMapPage() {
   const [departure, setDeparture] = useState<AddressSearchItem | null>(null);
   const [destination, setDestination] = useState<AddressSearchItem | null>(null);
@@ -115,23 +101,30 @@ export function MoverRecommendationMapPage() {
   const [searchedMoveType, setSearchedMoveType] = useState<MoveTypeFilter>("ALL");
 
   const [addressModalKind, setAddressModalKind] = useState<AddressModalKind | null>(null);
-  //선택된 기사 처리
-  const departureRegionId = searchedDeparture ? getRegionIdBySido(searchedDeparture.sido) : null;
-
-  //주소 지역 ID로 변환 (시/도 데이터가 문자열로 들어오기 때문)
-  const destinationRegionId = searchedDestination
-    ? getRegionIdBySido(searchedDestination.sido)
-    : null;
-
   //검색 여부
   const hasSearched = searchedDeparture !== null && searchedDestination !== null;
 
+  const {
+    departureRegionId,
+    destinationRegionId,
+    isLoading: isRegionLoading,
+    isError: isRegionError,
+    refetch: refetchRegions,
+  } = useRecommendationRegionIds(searchedDeparture, searchedDestination);
+
   //실제 기사 조회
-  const { movers, isLoading, isError, refetch } = useMoverRecommendations({
+  const {
+    movers,
+    isLoading: isMoverLoading,
+    isError: isMoverError,
+    refetch,
+  } = useMoverRecommendations({
     departureRegionId,
     destinationRegionId,
     ...(searchedMoveType !== "ALL" ? { moveType: searchedMoveType } : {}),
   });
+  const isLoading = isRegionLoading || isMoverLoading;
+  const isError = isRegionError || isMoverError;
 
   //검색 버튼 클릭 시 현재 입력값을 검색 조건으로 확정
   function handleSearch() {
@@ -249,10 +242,6 @@ export function MoverRecommendationMapPage() {
               <div className="text-text-muted rounded-16 border-border-subtle flex min-h-160 items-center justify-center border px-20 text-center text-[14px]">
                 출발지와 도착지를 입력하고 기사님을 검색해 주세요.
               </div>
-            ) : departureRegionId === null || destinationRegionId === null ? (
-              <div className="text-text-error rounded-16 border-border-subtle flex min-h-160 items-center justify-center border px-20 text-center text-[14px]">
-                선택한 주소의 지역 정보를 확인할 수 없습니다.
-              </div>
             ) : isLoading ? (
               <div
                 role="status"
@@ -269,15 +258,21 @@ export function MoverRecommendationMapPage() {
                 className="rounded-16 border-border-subtle flex min-h-160 flex-col items-center justify-center gap-12 border px-20 text-center"
               >
                 <Text as="p" variant="sm-medium" className="text-text-error">
-                  추천 기사님을 불러오지 못했습니다.
+                  {isRegionError
+                    ? "선택한 주소의 지역 정보를 확인하지 못했습니다."
+                    : "추천 기사님을 불러오지 못했습니다."}
                 </Text>
                 <button
                   type="button"
                   className="text-text-brand text-[14px] font-semibold"
-                  onClick={() => void refetch()}
+                  onClick={() => void (isRegionError ? refetchRegions() : refetch())}
                 >
                   다시 시도
                 </button>
+              </div>
+            ) : departureRegionId === null || destinationRegionId === null ? (
+              <div className="text-text-error rounded-16 border-border-subtle flex min-h-160 items-center justify-center border px-20 text-center text-[14px]">
+                선택한 주소의 지역 정보를 확인할 수 없습니다.
               </div>
             ) : movers.length > 0 ? (
               <div className="flex flex-col gap-12">
@@ -297,11 +292,12 @@ export function MoverRecommendationMapPage() {
         {searchedDeparture && searchedDestination ? (
           <KakaoMap
             key={`${searchedDeparture.id}-${searchedDestination.id}`}
-            departure={searchedDeparture}
-            destination={searchedDestination}
+            departure={searchedDeparture} //출발지
+            destination={searchedDestination} //도착지
+            movers={movers} //기사 마커
           />
         ) : (
-          <MapSearchPrompt />
+          <KakaoMap />
         )}
       </div>
 

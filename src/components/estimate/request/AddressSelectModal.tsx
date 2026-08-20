@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils/cn";
 
 export type AddressItem = AddressSearchItem;
 
-type RegionKind = "출발지" | "도착지";
+type RegionKind = "출발지" | "도착지" | "활동 거점";
 
 interface AddressSelectModalProps {
   open: boolean;

@@ -9,6 +9,7 @@ import Textarea from "@/components/common/Input/Textarea";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
+import MoverActivityBaseFields from "@/components/profile/MoverActivityBaseFields";
 import ProfileFormActions from "@/components/profile/ProfileFormActions";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
@@ -20,7 +21,11 @@ import {
   MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH,
 } from "@/lib/constants/profileValidation";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
-import { moverProfileSchema, type MoverProfileFormValues } from "@/lib/schemas/moverProfileSchema";
+import {
+  moverProfileSchema,
+  type MoverProfileFormValues,
+  type ValidatedMoverProfileFormValues,
+} from "@/lib/schemas/moverProfileSchema";
 import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
 import type { MoveType } from "@/types/move";
 
@@ -41,7 +46,7 @@ const MoverProfileEditForm = ({
     setFocus,
     reset,
     formState: { errors, isValid, isDirty },
-  } = useForm<MoverProfileFormValues>({
+  } = useForm<MoverProfileFormValues, unknown, ValidatedMoverProfileFormValues>({
     resolver: zodResolver(moverProfileSchema),
     mode: "onChange",
     defaultValues: {
@@ -50,6 +55,8 @@ const MoverProfileEditForm = ({
       career: "",
       shortIntro: "",
       description: "",
+      activityBaseAddress: null,
+      activityBaseDetailAddress: "",
       serviceTypes: [],
       regionIds: [],
       ...defaultValues,
@@ -143,6 +150,9 @@ const MoverProfileEditForm = ({
               {...register("description")}
             />
           </FormField>
+
+          {/* 기사 활동 거점 추가 */}
+          <MoverActivityBaseFields control={control} disabled={isPending} idPrefix="mover-edit" />
 
           <FormField label="제공 서비스" labelId="mover-edit-service-types-label" required>
             <Controller

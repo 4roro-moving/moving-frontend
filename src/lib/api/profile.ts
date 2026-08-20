@@ -114,6 +114,7 @@ export const mapMoverProfileMeResponse = (profile: MoverProfileMeResponse): Move
     career: profile.career,
     shortIntro: profile.shortIntro,
     description: profile.description,
+    activityBase: profile.activityBase ?? null,
     confirmedCount: profile.confirmedCount,
     averageRating: profile.averageRating,
     reviewCount: profile.reviewCount,
