@@ -35,7 +35,7 @@ export const formatResidenceReviewRegionLabel = (region: ResidenceReviewRegion) 
 };
 
 export const formatResidenceReviewRating = (rating: number | null | undefined) => {
-  if (!isFiniteRating(rating)) {
+  if (!isFiniteRating(rating) || rating <= 0) {
     return EMPTY_RATING_LABEL;
   }
 
