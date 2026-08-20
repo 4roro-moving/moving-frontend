@@ -18,7 +18,6 @@ import { useDeleteResidenceReview } from "@/hooks/residence-review/useDeleteResi
 import { useResidenceReviewCreateAction } from "@/hooks/residence-review/useResidenceReviewCreateAction";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import type { AuthRole } from "@/lib/auth/role";
-import { ERROR_CODES } from "@/lib/constants/errorCodes";
 import { RESIDENCE_REVIEW_WRITE_LOGIN_DESCRIPTION } from "@/lib/constants/residenceReview";
 import { getResidenceReviewDetailQueryOptions } from "@/lib/queryOptions/residenceReviews";
 import type { ResidenceReviewSearchParamsState } from "@/lib/utils/residenceReviewSearchParams";
@@ -28,12 +27,21 @@ import type { PublicResidenceReview } from "@/types/residenceReview";
 interface ResidenceReviewPageViewProps {
   filters: ResidenceReviewSearchParamsState;
   initialRole?: AuthRole | null;
+  initialIsLogin?: boolean;
 }
 
-const ResidenceReviewPageView = ({ filters, initialRole = null }: ResidenceReviewPageViewProps) => {
+const ResidenceReviewPageView = ({
+  filters,
+  initialRole = null,
+  initialIsLogin = false,
+}: ResidenceReviewPageViewProps) => {
   const queryClient = useQueryClient();
   const { authScope, isAuthQueryReady } = useAuthQueryScope();
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isAuthPending = !hasHydrated || isCheckingAuth;
+  const canSelectReview = isAuthPending ? Boolean(initialIsLogin || initialRole) : isAuthenticated;
   const deleteMutation = useDeleteResidenceReview();
   const {
     canShowCreateButton,
@@ -43,7 +51,7 @@ const ResidenceReviewPageView = ({ filters, initialRole = null }: ResidenceRevie
     openCreate,
     closeCreate,
     closeLoginRequired,
-  } = useResidenceReviewCreateAction(initialRole);
+  } = useResidenceReviewCreateAction(initialRole, initialIsLogin);
   const [selectedReview, setSelectedReview] = useState<PublicResidenceReview | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [reviewToEdit, setReviewToEdit] = useState<PublicResidenceReview | null>(null);
@@ -62,13 +70,13 @@ const ResidenceReviewPageView = ({ filters, initialRole = null }: ResidenceRevie
 
   const handleSelect = useCallback(
     (review: PublicResidenceReview) => {
-      if (!isAuthenticated) return;
+      if (!canSelectReview) return;
 
       setSelectedReview(review);
       setIsDetailOpen(true);
       prefetchDetail(review);
     },
-    [isAuthenticated, prefetchDetail],
+    [canSelectReview, prefetchDetail],
   );
 
   const handleCloseDetail = useCallback(() => {
@@ -133,8 +141,8 @@ const ResidenceReviewPageView = ({ filters, initialRole = null }: ResidenceRevie
         {canShowCreateButton ? <ResidenceReviewCreateButton onClick={openCreate} /> : null}
         <ResidenceReviewList
           filters={filters}
-          onSelect={isAuthenticated ? handleSelect : undefined}
-          onPrefetch={isAuthenticated ? prefetchDetail : undefined}
+          onSelect={canSelectReview ? handleSelect : undefined}
+          onPrefetch={canSelectReview ? prefetchDetail : undefined}
         />
       </div>
 

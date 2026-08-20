@@ -208,12 +208,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   markUnauthenticated: () => {
-    const shouldClearCache = get().isAuthenticated;
     set({ ...UNAUTHENTICATED_STATE });
-    // 손님 첫 진입(이미 비로그인)은 공개 목록 캐시를 유지합니다.
-    if (shouldClearCache) {
-      clearAppQueryCache();
-    }
+    clearAppQueryCache();
   },
 
   setPostAuthRedirectPath: (path) => {
