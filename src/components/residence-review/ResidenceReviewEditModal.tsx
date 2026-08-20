@@ -7,7 +7,7 @@ import FormField from "@/components/common/FormField/FormField";
 import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
 import ResidenceReviewFormFields from "@/components/residence-review/ResidenceReviewFormFields";
-import { useResidenceReviewEditForm } from "@/hooks/useResidenceReviewEditForm";
+import { useResidenceReviewEditForm } from "@/hooks/residence-review/useResidenceReviewEditForm";
 import type { PublicResidenceReview } from "@/types/residenceReview";
 
 interface ResidenceReviewEditModalProps {
@@ -15,6 +15,7 @@ interface ResidenceReviewEditModalProps {
   review: PublicResidenceReview | null;
   onClose: () => void;
   onSuccess?: () => void;
+  onExitComplete?: () => void;
 }
 
 interface ResidenceReviewEditModalContentProps {
@@ -113,6 +114,7 @@ const ResidenceReviewEditModal = ({
   review,
   onClose,
   onSuccess,
+  onExitComplete,
 }: ResidenceReviewEditModalProps) => {
   const [cachedReview, setCachedReview] = useState<PublicResidenceReview | null>(review);
 
@@ -130,7 +132,10 @@ const ResidenceReviewEditModal = ({
       open={open}
       review={cachedReview}
       onClose={onClose}
-      onExitComplete={() => setCachedReview(null)}
+      onExitComplete={() => {
+        setCachedReview(null);
+        onExitComplete?.();
+      }}
       onSuccess={onSuccess}
     />
   );

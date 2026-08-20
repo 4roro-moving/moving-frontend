@@ -8,7 +8,7 @@ import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import ResidenceReviewCard from "@/components/residence-review/ResidenceReviewCard";
 import ResidenceReviewCardSkeletonList from "@/components/residence-review/ResidenceReviewCardSkeletonList";
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
-import { useResidenceReviews } from "@/hooks/useResidenceReviews";
+import { useResidenceReviews } from "@/hooks/residence-review/useResidenceReviews";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { cn } from "@/lib/utils/cn";
 import type { ResidenceReviewSearchParamsState } from "@/lib/utils/residenceReviewSearchParams";

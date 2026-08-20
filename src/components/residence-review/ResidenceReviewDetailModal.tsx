@@ -8,7 +8,7 @@ import { Text } from "@/components/common/Text";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import ResidenceReviewInfoItem from "@/components/residence-review/ResidenceReviewInfoItem";
 import ResidenceReviewRatingText from "@/components/residence-review/ResidenceReviewRatingText";
-import { useResidenceReviewDetail } from "@/hooks/useResidenceReviewDetail";
+import { useResidenceReviewDetail } from "@/hooks/residence-review/useResidenceReviewDetail";
 import { ProfileDefaultIcon } from "@/icons";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { LoginRequiredModal } from "@/components/auth/LoginRequiredModal";
 import Toast from "@/components/common/Toast/Toast";
@@ -14,8 +14,8 @@ import ResidenceReviewEditModal from "@/components/residence-review/ResidenceRev
 import ResidenceReviewFilters from "@/components/residence-review/ResidenceReviewFilters";
 import ResidenceReviewList from "@/components/residence-review/ResidenceReviewList";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
-import { useDeleteResidenceReview } from "@/hooks/useDeleteResidenceReview";
-import { useResidenceReviewCreateAction } from "@/hooks/useResidenceReviewCreateAction";
+import { useDeleteResidenceReview } from "@/hooks/residence-review/useDeleteResidenceReview";
+import { useResidenceReviewCreateAction } from "@/hooks/residence-review/useResidenceReviewCreateAction";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
 import { RESIDENCE_REVIEW_WRITE_LOGIN_DESCRIPTION } from "@/lib/constants/residenceReview";
@@ -47,6 +47,7 @@ const ResidenceReviewPageView = ({ filters }: ResidenceReviewPageViewProps) => {
   const [reviewToEdit, setReviewToEdit] = useState<PublicResidenceReview | null>(null);
   const [reviewToDelete, setReviewToDelete] = useState<PublicResidenceReview | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const shouldRestoreDetailRef = useRef(false);
 
   const prefetchDetail = useCallback(
     (review: PublicResidenceReview) => {
@@ -69,6 +70,35 @@ const ResidenceReviewPageView = ({ filters }: ResidenceReviewPageViewProps) => {
   const handleCloseDetail = useCallback(() => {
     setIsDetailOpen(false);
   }, []);
+
+  const handleDetailExitComplete = useCallback(() => {
+    if (shouldRestoreDetailRef.current) return;
+    setSelectedReview(null);
+  }, []);
+
+  const handleEdit = useCallback((review: PublicResidenceReview) => {
+    shouldRestoreDetailRef.current = true;
+    setReviewToEdit(review);
+    setIsDetailOpen(false);
+  }, []);
+
+  const handleCloseEdit = useCallback(() => {
+    setReviewToEdit(null);
+  }, []);
+
+  const handleEditSuccess = useCallback(() => {
+    setToastMessage("거주 후기를 수정했습니다.");
+  }, []);
+
+  const handleEditExitComplete = useCallback(() => {
+    if (shouldRestoreDetailRef.current && selectedReview !== null) {
+      shouldRestoreDetailRef.current = false;
+      setIsDetailOpen(true);
+      return;
+    }
+
+    shouldRestoreDetailRef.current = false;
+  }, [selectedReview]);
 
   const handleConfirmDelete = useCallback(() => {
     if (!reviewToDelete) return;
@@ -122,16 +152,17 @@ const ResidenceReviewPageView = ({ filters }: ResidenceReviewPageViewProps) => {
         review={selectedReview}
         isAuthenticated={isAuthenticated}
         onClose={handleCloseDetail}
-        onExitComplete={() => setSelectedReview(null)}
-        onEdit={setReviewToEdit}
+        onExitComplete={handleDetailExitComplete}
+        onEdit={handleEdit}
         onDelete={setReviewToDelete}
       />
 
       <ResidenceReviewEditModal
         open={reviewToEdit !== null}
         review={reviewToEdit}
-        onClose={() => setReviewToEdit(null)}
-        onSuccess={() => setToastMessage("거주 후기를 수정했습니다.")}
+        onClose={handleCloseEdit}
+        onExitComplete={handleEditExitComplete}
+        onSuccess={handleEditSuccess}
       />
 
       <ResidenceReviewDeleteConfirmModal

@@ -13,9 +13,9 @@ import ResidenceReviewCreateButton from "@/components/residence-review/Residence
 import ResidenceReviewCreateModal from "@/components/residence-review/ResidenceReviewCreateModal";
 import ResidenceReviewDeleteConfirmModal from "@/components/residence-review/ResidenceReviewDeleteConfirmModal";
 import ResidenceReviewEditModal from "@/components/residence-review/ResidenceReviewEditModal";
-import { useDeleteResidenceReview } from "@/hooks/useDeleteResidenceReview";
-import { useMyResidenceReviews } from "@/hooks/useMyResidenceReviews";
-import { useResidenceReviewCreateAction } from "@/hooks/useResidenceReviewCreateAction";
+import { useDeleteResidenceReview } from "@/hooks/residence-review/useDeleteResidenceReview";
+import { useMyResidenceReviews } from "@/hooks/residence-review/useMyResidenceReviews";
+import { useResidenceReviewCreateAction } from "@/hooks/residence-review/useResidenceReviewCreateAction";
 import { useReviewPagination } from "@/hooks/useReviewPagination";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";

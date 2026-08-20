@@ -7,7 +7,7 @@ import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/commo
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import ResidenceReviewFormFields from "@/components/residence-review/ResidenceReviewFormFields";
-import { useResidenceReviewCreateForm } from "@/hooks/useResidenceReviewCreateForm";
+import { useResidenceReviewCreateForm } from "@/hooks/residence-review/useResidenceReviewCreateForm";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
 
 interface ResidenceReviewCreateModalProps {

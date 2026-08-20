@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { useUpdateResidenceReview } from "@/hooks/useUpdateResidenceReview";
+import { useUpdateResidenceReview } from "@/hooks/residence-review/useUpdateResidenceReview";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
   getResidenceReviewContentError,

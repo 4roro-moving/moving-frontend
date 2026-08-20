@@ -7,7 +7,7 @@ import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
-import { useResidenceReviewFilters } from "@/hooks/useResidenceReviewFilters";
+import { useResidenceReviewFilters } from "@/hooks/residence-review/useResidenceReviewFilters";
 import { REGION_OPTIONS } from "@/lib/constants/region";
 import {
   RESIDENCE_REVIEW_RATING_OPTIONS,

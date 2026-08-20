@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { useCreateResidenceReview } from "@/hooks/useCreateResidenceReview";
+import { useCreateResidenceReview } from "@/hooks/residence-review/useCreateResidenceReview";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { isRegionId, type RegionId } from "@/lib/constants/region";
 import {
