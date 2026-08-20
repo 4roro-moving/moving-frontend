@@ -39,6 +39,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
     agreementsById,
     agreements,
     canAgree,
+    isTermsLoading,
     isTermsError,
     handleTermsCheckedChange,
   } = useSignUpTerms(audience);
@@ -158,6 +159,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
               terms={signUpTerms}
               checkedById={agreementsById}
               onCheckedChange={handleTermsCheckedChange}
+              isLoading={isTermsLoading}
             />
           </div>
 

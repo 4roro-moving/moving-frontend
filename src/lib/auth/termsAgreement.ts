@@ -1,10 +1,23 @@
 import type { AuthAudience } from "@/lib/auth/redirect";
-import type { PublishedTerms, TermsAgreementInput } from "@/types/terms";
+import type { PublishedTerms, TermsAgreementInput, TermsAudience } from "@/types/terms";
 
 const toTermsIdKey = (termsId: number): string => String(termsId);
 
 const isTermsAgreed = (checkedById: Record<string, boolean>, termsId: number): boolean =>
   checkedById[toTermsIdKey(termsId)] === true;
+
+const toTermsAudienceRole = (audience: AuthAudience): Exclude<TermsAudience, "ALL"> => {
+  return audience === "mover" ? "MOVER" : "CUSTOMER";
+};
+
+const resolveTermsAudience = (item: PublishedTerms): TermsAudience => {
+  if (item.audience === "ALL" || item.audience === "CUSTOMER" || item.audience === "MOVER") {
+    return item.audience;
+  }
+
+  // 공개 GET /terms 는 audience를 내려주지 않음. Prisma 기본값은 ALL, 기사 정책만 MOVER.
+  return item.type === "MOVER_POLICY" ? "MOVER" : "ALL";
+};
 
 export const filterSignUpTerms = (
   terms: PublishedTerms[],
@@ -14,16 +27,11 @@ export const filterSignUpTerms = (
     return [];
   }
 
+  const role = toTermsAudienceRole(audience);
+
   return terms.filter((item) => {
-    if (item.audience === "MOVER" || item.type === "MOVER_POLICY") {
-      return audience === "mover";
-    }
-
-    if (item.audience === "CUSTOMER") {
-      return audience === "customer";
-    }
-
-    return true;
+    const itemAudience = resolveTermsAudience(item);
+    return itemAudience === "ALL" || itemAudience === role;
   });
 };
 

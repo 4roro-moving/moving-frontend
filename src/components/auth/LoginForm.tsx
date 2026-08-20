@@ -164,7 +164,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
           variant={{ base: "xs-regular", md: "xl-regular" }}
           className="text-text-description"
         >
-          SNS 계정으로 간편 가입하기
+          SNS로 로그인
         </Text>
         <SocialLoginButtons audience={audience} intent="login" onError={setSubmitError} />
       </div>

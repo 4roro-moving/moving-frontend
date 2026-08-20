@@ -35,35 +35,42 @@ const isNavigateSocialLoginButtons = (
   return "hrefForProvider" in props;
 };
 
+const SOCIAL_PROVIDER_NAME: Record<OAuthProvider, string> = {
+  google: "Google",
+  kakao: "카카오",
+  naver: "네이버",
+};
+
 const SOCIAL_PROVIDERS: {
   provider: OAuthProvider;
-  label: string;
   className: string;
   icon: typeof GoogleIcon;
   iconClassName: string;
 }[] = [
   {
     provider: "google",
-    label: "Google로 로그인",
     className: "bg-social-google-background",
     icon: GoogleIcon,
     iconClassName: "size-20 md:size-24",
   },
   {
     provider: "kakao",
-    label: "카카오로 로그인",
     className: "bg-social-kakao-background",
     icon: KakaoLoginIcon,
     iconClassName: "size-22 md:size-28",
   },
   {
     provider: "naver",
-    label: "네이버로 로그인",
     className: "bg-social-naver-background",
     icon: NaverLoginIcon,
     iconClassName: "size-20 md:size-24",
   },
 ];
+
+const getSocialButtonAriaLabel = (provider: OAuthProvider, isSignUp: boolean): string => {
+  const providerName = SOCIAL_PROVIDER_NAME[provider];
+  return isSignUp ? `${providerName}로 회원가입하기` : `${providerName}로 로그인`;
+};
 
 /**
  * SNS 간편 로그인 버튼 그룹.
@@ -91,22 +98,25 @@ const SocialLoginButtons = (props: SocialLoginButtonsProps) => {
     }
   };
 
+  const isSignUpAction = isNavigateSocialLoginButtons(props) || props.intent === "signup";
+
   return (
     <div className={cn("flex items-center gap-24 md:gap-32", className)}>
       {SOCIAL_PROVIDERS.map(
-        ({ provider, label, className: buttonClassName, icon: Icon, iconClassName }) => {
+        ({ provider, className: buttonClassName, icon: Icon, iconClassName }) => {
           const itemClassName = cn(
             "flex size-54 shrink-0 items-center justify-center rounded-full md:size-72",
             "disabled:cursor-not-allowed disabled:opacity-60",
             buttonClassName,
           );
+          const ariaLabel = getSocialButtonAriaLabel(provider, isSignUpAction);
 
           if (isNavigateSocialLoginButtons(props)) {
             return (
               <Link
                 key={provider}
                 href={props.hrefForProvider(provider)}
-                aria-label={label}
+                aria-label={ariaLabel}
                 className={itemClassName}
               >
                 <Icon className={iconClassName} aria-hidden="true" />
@@ -118,7 +128,7 @@ const SocialLoginButtons = (props: SocialLoginButtonsProps) => {
             <button
               key={provider}
               type="button"
-              aria-label={label}
+              aria-label={ariaLabel}
               disabled={disabled || isPending}
               onClick={() => {
                 void handleSocialLogin(provider);

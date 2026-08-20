@@ -15,7 +15,10 @@ import {
   loadOAuthPendingSession,
   type OAuthProvider,
 } from "@/lib/auth/oauth";
-import { markOAuthNeedSignUpToast } from "@/lib/auth/oauthNeedSignUpToast";
+import {
+  markOAuthNeedSignUpToast,
+  markOAuthTermsRequiredToast,
+} from "@/lib/auth/oauthNeedSignUpToast";
 import {
   clearOAuthExchangeFinished,
   exchangeOAuthCodeOnce,
@@ -194,10 +197,30 @@ const OAuthCallbackContent = () => {
           router,
         });
       } catch (err) {
-        if (getApiError(err).code === ERROR_CODES.OAUTH_ACCOUNT_NOT_FOUND.code) {
+        const apiError = getApiError(err);
+
+        if (
+          apiError.code === ERROR_CODES.OAUTH_ACCOUNT_NOT_FOUND.code &&
+          pending.intent === "login"
+        ) {
           markOAuthNeedSignUpToast();
           clearOAuthPendingSession();
           router.replace(getSocialSignUpPath(pageAudience));
+          return;
+        }
+
+        if (apiError.code === ERROR_CODES.TERMS_AGREEMENT_REQUIRED.code) {
+          markOAuthTermsRequiredToast();
+          clearOAuthPendingSession();
+          router.replace(getSocialSignUpPath(pageAudience));
+          return;
+        }
+
+        if (apiError.code === ERROR_CODES.OAUTH_EMAIL_ALREADY_EXISTS.code) {
+          failOAuthCallback(
+            apiError.message ?? ERROR_CODES.OAUTH_EMAIL_ALREADY_EXISTS.message,
+            setError,
+          );
           return;
         }
 

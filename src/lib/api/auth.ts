@@ -1,4 +1,5 @@
 import fetchInstance from "@/lib/api/fetchInstance";
+import type { OAuthIntent, OAuthProvider } from "@/lib/auth/oauth";
 import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
 import type { EnsureAccessTokenOptions } from "@/lib/auth/refreshAccessToken";
 import type { AuthRole, LoginRole } from "@/lib/auth/role";
@@ -7,7 +8,6 @@ import { AUTH_BFF_BASE } from "@/lib/constants/authBff";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { ApiError } from "@/types/api";
 import type { TermsAgreementInput } from "@/types/terms";
-import { OAuthProvider, type OAuthIntent } from "../auth/oauth";
 
 export interface LoginInput {
   email: string;

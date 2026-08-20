@@ -24,6 +24,7 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
     agreementsById,
     agreements,
     canAgree,
+    isTermsLoading,
     isTermsError,
     handleTermsCheckedChange,
   } = useSignUpTerms(audience);
@@ -53,6 +54,7 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
             terms={signUpTerms}
             checkedById={agreementsById}
             onCheckedChange={handleTermsCheckedChange}
+            isLoading={isTermsLoading}
           />
 
           {isTermsError ? (
