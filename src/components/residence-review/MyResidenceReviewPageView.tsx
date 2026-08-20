@@ -14,15 +14,10 @@ import ResidenceReviewCreateModal from "@/components/residence-review/ResidenceR
 import ResidenceReviewDeleteConfirmModal from "@/components/residence-review/ResidenceReviewDeleteConfirmModal";
 import ResidenceReviewEditModal from "@/components/residence-review/ResidenceReviewEditModal";
 import { useDeleteResidenceReview } from "@/hooks/residence-review/useDeleteResidenceReview";
-import { useMyResidenceReviews } from "@/hooks/residence-review/useMyResidenceReviews";
+import { useMyResidenceReviewList } from "@/hooks/residence-review/useMyResidenceReviewList";
 import { useResidenceReviewCreateAction } from "@/hooks/residence-review/useResidenceReviewCreateAction";
-import { useReviewPagination } from "@/hooks/useReviewPagination";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { ERROR_CODES } from "@/lib/constants/errorCodes";
-import {
-  RESIDENCE_REVIEW_PAGE_LIMIT,
-  RESIDENCE_REVIEW_WRITE_BUTTON_LABEL,
-} from "@/lib/constants/residenceReview";
+import { RESIDENCE_REVIEW_WRITE_BUTTON_LABEL } from "@/lib/constants/residenceReview";
 import type { PublicResidenceReview } from "@/types/residenceReview";
 
 const EMPTY_DESCRIPTION = (
@@ -34,14 +29,20 @@ const EMPTY_DESCRIPTION = (
 );
 
 const MyResidenceReviewPageView = () => {
-  const { page, currentPage, setPage, handlePageChange } = useReviewPagination({
-    canCorrectPage: false,
-  });
-  const { data, isLoading, isError, error, refetch, isFetching, isPlaceholderData } =
-    useMyResidenceReviews({
-      page,
-      limit: RESIDENCE_REVIEW_PAGE_LIMIT,
-    });
+  const {
+    reviews,
+    pagination,
+    totalCount,
+    totalPages,
+    currentPage,
+    handlePageChange,
+    setPage,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useMyResidenceReviewList();
   const deleteMutation = useDeleteResidenceReview();
   const { canShowCreateButton, defaultRegionId, isCreateOpen, openCreate, closeCreate } =
     useResidenceReviewCreateAction();
@@ -49,16 +50,6 @@ const MyResidenceReviewPageView = () => {
   const [reviewToDelete, setReviewToDelete] = useState<PublicResidenceReview | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const reviews = data?.reviews ?? [];
-  const pagination = data?.pagination;
-  const totalCount = pagination?.totalCount ?? 0;
-  const totalPages = Math.max(1, pagination?.totalPages ?? 1);
-
-  if (!isPlaceholderData && pagination && totalCount > 0 && page > totalPages) {
-    setPage(totalPages);
-  }
-
-  const renderedCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
   const isEmpty = !isLoading && !isError && Boolean(pagination) && totalCount === 0;
   const hasList = !isLoading && !isError && reviews.length > 0;
 
@@ -130,7 +121,7 @@ const MyResidenceReviewPageView = () => {
 
             {totalPages > 1 ? (
               <Pagination
-                currentPage={renderedCurrentPage}
+                currentPage={currentPage}
                 pageCount={totalPages}
                 onPageChange={handlePageChange}
               />
