@@ -81,7 +81,9 @@ const ResidenceReviewPageView = ({ filters }: ResidenceReviewPageViewProps) => {
         setToastMessage("거주 후기를 삭제했습니다.");
       },
       onError: (error) => {
-        setToastMessage(getApiErrorMessage(error, ERROR_CODES.RESIDENCE_REVIEW_NOT_FOUND.message));
+        setToastMessage(
+          getApiErrorMessage(error, "거주 후기를 삭제하지 못했습니다. 잠시 후 다시 시도해주세요."),
+        );
       },
     });
   }, [deleteMutation, reviewToDelete]);

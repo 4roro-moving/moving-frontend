@@ -37,9 +37,11 @@ export const useResidenceReviewCreateForm = ({
 
   const createMutation = useCreateResidenceReview();
 
-  if (defaultRegionId !== appliedDefaultRegionId && regionId === appliedDefaultRegionId) {
+  if (defaultRegionId !== appliedDefaultRegionId) {
     setAppliedDefaultRegionId(defaultRegionId);
-    setRegionId(defaultRegionId);
+    if (regionId === appliedDefaultRegionId) {
+      setRegionId(defaultRegionId);
+    }
   }
 
   const resetForm = () => {

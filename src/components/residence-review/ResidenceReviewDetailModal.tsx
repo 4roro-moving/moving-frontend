@@ -79,7 +79,7 @@ const ResidenceReviewDetailModal = ({
         <Modal.Close onClose={onClose} />
       </div>
 
-      {isError && !currentReview.title ? (
+      {isError ? (
         <EstimatesQueryStatus
           className="py-40"
           message={getApiErrorMessage(error, ERROR_CODES.RESIDENCE_REVIEW_NOT_FOUND.message)}
