@@ -45,7 +45,7 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
-      <AuthHeader audience={audience} />
+      <AuthHeader audience={audience} mode="social-signup" />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
         <div className="flex w-full flex-col gap-32 md:gap-56">

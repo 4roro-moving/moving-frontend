@@ -87,7 +87,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
-      <AuthHeader audience={audience} />
+      <AuthHeader audience={audience} mode="signup" />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
         <form className="flex w-full flex-col gap-32 md:gap-56" onSubmit={onSubmit} noValidate>
