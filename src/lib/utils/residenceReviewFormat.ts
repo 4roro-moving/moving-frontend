@@ -22,14 +22,25 @@ export const formatResidenceReviewAuthorName = (name: string) => {
   return trimmed || "고객";
 };
 
+const EMPTY_RATING_LABEL = "-";
+
+const isFiniteRating = (rating: number | null | undefined): rating is number =>
+  typeof rating === "number" && Number.isFinite(rating);
+
 export const formatResidenceReviewRegionLabel = (region: ResidenceReviewRegion) => {
-  if (region.averageRating > 0) {
-    return `${region.name} (평균 ${region.averageRating.toFixed(1)})`;
+  if (isFiniteRating(region.averageRating) && region.averageRating > 0) {
+    return `${region.name} (평균 ${formatResidenceReviewRating(region.averageRating)})`;
   }
   return `${region.name} 거주`;
 };
 
-export const formatResidenceReviewRating = (rating: number) => rating.toFixed(1);
+export const formatResidenceReviewRating = (rating: number | null | undefined) => {
+  if (!isFiniteRating(rating)) {
+    return EMPTY_RATING_LABEL;
+  }
+
+  return rating.toFixed(1);
+};
 
 export const formatResidenceReviewWrittenDate = (iso: string) => {
   const parsed = new Date(iso);

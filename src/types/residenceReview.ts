@@ -25,7 +25,7 @@ export interface ResidenceReviewAuthor {
 export interface ResidenceReviewRegion {
   id: number;
   name: string;
-  averageRating: number;
+  averageRating?: number | null;
 }
 
 export interface PublicResidenceReview {

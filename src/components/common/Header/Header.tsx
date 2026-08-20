@@ -37,9 +37,9 @@ const PROFILE_LOGOUT_MENU_ITEM: ProfileMenuItem = {
   action: "logout",
 };
 
-const CONTENT_NAV_LINK = {
-  label: "콘텐츠",
-  href: APP_ROUTES.CONTENTS.RESIDENCE_REVIEWS,
+const COMMUNITY_NAV_LINK = {
+  label: "커뮤니티",
+  href: APP_ROUTES.COMMUNITY.RESIDENCE_REVIEWS,
 } as const;
 
 const LOGGED_OUT_LINKS = [
@@ -47,7 +47,7 @@ const LOGGED_OUT_LINKS = [
     label: "기사님 찾기",
     href: APP_ROUTES.MOVERS.ROOT,
   },
-  CONTENT_NAV_LINK,
+  COMMUNITY_NAV_LINK,
 ];
 
 const CUSTOMER_LOGGED_IN_LINKS = [
@@ -63,7 +63,7 @@ const CUSTOMER_LOGGED_IN_LINKS = [
     label: "내 견적 관리",
     href: APP_ROUTES.ESTIMATES.ROOT,
   },
-  CONTENT_NAV_LINK,
+  COMMUNITY_NAV_LINK,
 ];
 
 const MOVER_LOGGED_IN_LINKS = [
@@ -95,8 +95,8 @@ const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   },
   {
     type: "link",
-    label: "마이페이지",
-    href: APP_ROUTES.MY_PAGE,
+    label: "내 활동 내역",
+    href: APP_ROUTES.MY_ACTIVITY,
   },
   PROFILE_LOGOUT_MENU_ITEM,
 ];
