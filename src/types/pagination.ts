@@ -12,7 +12,8 @@ export interface Pagination {
 
 export interface CursorPagination {
   limit: number;
-  totalCount: number;
+  /** 첫 cursor 응답에만 포함되고, 이후 페이지는 null입니다. */
+  totalCount: number | null;
   hasNext: boolean;
   nextCursor: string | null;
 }

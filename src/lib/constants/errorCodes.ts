@@ -97,6 +97,12 @@ export const ERROR_CODES = {
     message: "존재하지 않는 기사님입니다.",
   },
 
+  RESIDENCE_REVIEW_NOT_FOUND: {
+    status: 404,
+    code: "RESIDENCE_REVIEW_NOT_FOUND",
+    message: "거주후기를 찾을 수 없습니다.",
+  },
+
   ALREADY_DESIGNATED: {
     status: 409,
     code: "ALREADY_DESIGNATED",
