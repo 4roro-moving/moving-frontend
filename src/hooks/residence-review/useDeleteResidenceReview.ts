@@ -19,7 +19,7 @@ export const useDeleteResidenceReview = () => {
     mutationFn: deleteResidenceReview,
     onSuccess: (_data, residenceReviewId) => {
       void queryClient.invalidateQueries({
-        queryKey: getResidenceReviewListScopeQueryKey(authScope),
+        queryKey: getResidenceReviewListScopeQueryKey(),
       });
       void queryClient.invalidateQueries({
         queryKey: getResidenceReviewMyListScopeQueryKey(authScope),

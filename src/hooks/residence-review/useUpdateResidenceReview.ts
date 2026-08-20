@@ -27,7 +27,7 @@ export const useUpdateResidenceReview = () => {
     onSuccess: (review: PublicResidenceReview) => {
       queryClient.setQueryData(getResidenceReviewDetailQueryKey(authScope, review.id), review);
       void queryClient.invalidateQueries({
-        queryKey: getResidenceReviewListScopeQueryKey(authScope),
+        queryKey: getResidenceReviewListScopeQueryKey(),
       });
       void queryClient.invalidateQueries({
         queryKey: getResidenceReviewMyListScopeQueryKey(authScope),

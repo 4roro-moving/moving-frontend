@@ -19,7 +19,7 @@ export const useCreateResidenceReview = () => {
     mutationFn: (body: CreateResidenceReviewInput) => createResidenceReview(body),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: getResidenceReviewListScopeQueryKey(authScope),
+        queryKey: getResidenceReviewListScopeQueryKey(),
       });
       void queryClient.invalidateQueries({
         queryKey: getResidenceReviewMyListScopeQueryKey(authScope),

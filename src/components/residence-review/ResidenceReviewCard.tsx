@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
 import ResidenceReviewRatingText from "@/components/residence-review/ResidenceReviewRatingText";
@@ -17,7 +18,7 @@ import type { PublicResidenceReview } from "@/types/residenceReview";
 
 interface ResidenceReviewCardProps {
   review: PublicResidenceReview;
-  onSelect: (review: PublicResidenceReview) => void;
+  onSelect?: (review: PublicResidenceReview) => void;
   onPrefetch?: (review: PublicResidenceReview) => void;
 }
 
@@ -29,20 +30,8 @@ const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCa
   const titleId = `residence-review-${String(review.id)}-title`;
   const descriptionId = `residence-review-${String(review.id)}-description`;
 
-  return (
-    <button
-      type="button"
-      aria-labelledby={titleId}
-      aria-describedby={descriptionId}
-      className={cn(
-        "bg-background-default border-border-subtle shadow-estimate-card rounded-16 md:rounded-20 flex w-full flex-col border-[0.5px] text-left",
-        "gap-16 px-16 py-16 md:gap-20 md:p-24 xl:p-40",
-        "hover:bg-background-hover focus-visible:ring-border-brand transition-colors focus-visible:ring-2 focus-visible:outline-none",
-      )}
-      onClick={() => onSelect(review)}
-      onMouseEnter={() => onPrefetch?.(review)}
-      onFocus={() => onPrefetch?.(review)}
-    >
+  const content: ReactNode = (
+    <>
       <span id={descriptionId} className="sr-only">
         {`${authorName}, 평점 ${formatResidenceReviewRating(review.rating)}, ${regionLabel}`}
       </span>
@@ -110,6 +99,36 @@ const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCa
           작성일 {writtenDate}
         </Text>
       ) : null}
+    </>
+  );
+
+  const className = cn(
+    "bg-background-default border-border-subtle shadow-estimate-card rounded-16 md:rounded-20 flex w-full flex-col border-[0.5px] text-left",
+    "gap-16 px-16 py-16 md:gap-20 md:p-24 xl:p-40",
+    onSelect
+      ? "hover:bg-background-hover focus-visible:ring-border-brand cursor-pointer transition-colors focus-visible:ring-2 focus-visible:outline-none"
+      : "cursor-default",
+  );
+
+  if (!onSelect) {
+    return (
+      <article aria-labelledby={titleId} aria-describedby={descriptionId} className={className}>
+        {content}
+      </article>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
+      className={className}
+      onClick={() => onSelect(review)}
+      onMouseEnter={() => onPrefetch?.(review)}
+      onFocus={() => onPrefetch?.(review)}
+    >
+      {content}
     </button>
   );
 };

@@ -17,6 +17,7 @@ import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { useDeleteResidenceReview } from "@/hooks/residence-review/useDeleteResidenceReview";
 import { useResidenceReviewCreateAction } from "@/hooks/residence-review/useResidenceReviewCreateAction";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import type { AuthRole } from "@/lib/auth/role";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
 import { RESIDENCE_REVIEW_WRITE_LOGIN_DESCRIPTION } from "@/lib/constants/residenceReview";
 import { getResidenceReviewDetailQueryOptions } from "@/lib/queryOptions/residenceReviews";
@@ -26,9 +27,10 @@ import type { PublicResidenceReview } from "@/types/residenceReview";
 
 interface ResidenceReviewPageViewProps {
   filters: ResidenceReviewSearchParamsState;
+  initialRole?: AuthRole | null;
 }
 
-const ResidenceReviewPageView = ({ filters }: ResidenceReviewPageViewProps) => {
+const ResidenceReviewPageView = ({ filters, initialRole = null }: ResidenceReviewPageViewProps) => {
   const queryClient = useQueryClient();
   const { authScope, isAuthQueryReady } = useAuthQueryScope();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -41,7 +43,7 @@ const ResidenceReviewPageView = ({ filters }: ResidenceReviewPageViewProps) => {
     openCreate,
     closeCreate,
     closeLoginRequired,
-  } = useResidenceReviewCreateAction();
+  } = useResidenceReviewCreateAction(initialRole);
   const [selectedReview, setSelectedReview] = useState<PublicResidenceReview | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [reviewToEdit, setReviewToEdit] = useState<PublicResidenceReview | null>(null);
@@ -51,20 +53,22 @@ const ResidenceReviewPageView = ({ filters }: ResidenceReviewPageViewProps) => {
 
   const prefetchDetail = useCallback(
     (review: PublicResidenceReview) => {
-      if (!isAuthQueryReady) return;
+      if (!isAuthenticated || !isAuthQueryReady) return;
 
       void queryClient.prefetchQuery(getResidenceReviewDetailQueryOptions(authScope, review.id));
     },
-    [authScope, isAuthQueryReady, queryClient],
+    [authScope, isAuthQueryReady, isAuthenticated, queryClient],
   );
 
   const handleSelect = useCallback(
     (review: PublicResidenceReview) => {
+      if (!isAuthenticated) return;
+
       setSelectedReview(review);
       setIsDetailOpen(true);
       prefetchDetail(review);
     },
-    [prefetchDetail],
+    [isAuthenticated, prefetchDetail],
   );
 
   const handleCloseDetail = useCallback(() => {
@@ -129,8 +133,8 @@ const ResidenceReviewPageView = ({ filters }: ResidenceReviewPageViewProps) => {
         {canShowCreateButton ? <ResidenceReviewCreateButton onClick={openCreate} /> : null}
         <ResidenceReviewList
           filters={filters}
-          onSelect={handleSelect}
-          onPrefetch={prefetchDetail}
+          onSelect={isAuthenticated ? handleSelect : undefined}
+          onPrefetch={isAuthenticated ? prefetchDetail : undefined}
         />
       </div>
 

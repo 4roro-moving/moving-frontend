@@ -15,11 +15,10 @@ import { RESIDENCE_REVIEW_LIST_STALE_TIME_MS } from "@/lib/constants/residenceRe
 import type { ResidenceReviewListQuery } from "@/types/residenceReview";
 
 export const getResidenceReviewsInfiniteQueryOptions = (
-  authScope: AuthQueryScope,
   listQuery: Omit<ResidenceReviewListQuery, "cursor">,
 ) => {
   return infiniteQueryOptions({
-    queryKey: getResidenceReviewListQueryKey(authScope, listQuery),
+    queryKey: getResidenceReviewListQueryKey(listQuery),
     queryFn: ({ pageParam }) => fetchResidenceReviews({ ...listQuery, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>

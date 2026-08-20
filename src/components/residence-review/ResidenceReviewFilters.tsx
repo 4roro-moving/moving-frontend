@@ -6,7 +6,6 @@ import { useCallback } from "react";
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
-import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { useResidenceReviewFilters } from "@/hooks/residence-review/useResidenceReviewFilters";
 import { REGION_OPTIONS } from "@/lib/constants/region";
 import {
@@ -37,7 +36,6 @@ interface ResidenceReviewFiltersProps {
 
 const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
   const queryClient = useQueryClient();
-  const { authScope, isAuthQueryReady } = useAuthQueryScope();
   const {
     clearSearch,
     filterKey,
@@ -50,8 +48,6 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
 
   const prefetchList = useCallback(
     (patch: Partial<ResidenceReviewSearchParamsState>) => {
-      if (!isAuthQueryReady) return;
-
       const nextFilters = { ...filters, keyword: keyword.trim(), ...patch };
       if (
         nextFilters.keyword === filters.keyword &&
@@ -63,10 +59,10 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
       }
 
       void queryClient.prefetchInfiniteQuery(
-        getResidenceReviewsInfiniteQueryOptions(authScope, toResidenceReviewListQuery(nextFilters)),
+        getResidenceReviewsInfiniteQueryOptions(toResidenceReviewListQuery(nextFilters)),
       );
     },
-    [authScope, filters, isAuthQueryReady, keyword, queryClient],
+    [filters, keyword, queryClient],
   );
 
   return (

@@ -16,8 +16,8 @@ import type { PublicResidenceReview } from "@/types/residenceReview";
 
 interface ResidenceReviewListProps {
   filters: ResidenceReviewSearchParamsState;
-  onSelect: (review: PublicResidenceReview) => void;
-  onPrefetch: (review: PublicResidenceReview) => void;
+  onSelect?: (review: PublicResidenceReview) => void;
+  onPrefetch?: (review: PublicResidenceReview) => void;
 }
 
 const EMPTY_DESCRIPTION = (

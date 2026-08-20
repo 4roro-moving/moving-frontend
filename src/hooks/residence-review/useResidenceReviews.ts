@@ -4,18 +4,15 @@ import { keepPreviousData } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { useApiInfiniteQuery } from "@/hooks/queries/useApiInfiniteQuery";
-import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { getResidenceReviewsInfiniteQueryOptions } from "@/lib/queryOptions/residenceReviews";
 import { toResidenceReviewListQuery } from "@/lib/utils/residenceReviewSearchParams";
 import type { ResidenceReviewSearchParamsState } from "@/lib/utils/residenceReviewSearchParams";
 
 export const useResidenceReviews = (filters: ResidenceReviewSearchParamsState) => {
   const listQuery = toResidenceReviewListQuery(filters);
-  const { authScope, isAuthQueryReady } = useAuthQueryScope();
 
   const query = useApiInfiniteQuery({
-    ...getResidenceReviewsInfiniteQueryOptions(authScope, listQuery),
-    enabled: isAuthQueryReady,
+    ...getResidenceReviewsInfiniteQueryOptions(listQuery),
     placeholderData: keepPreviousData,
   });
 

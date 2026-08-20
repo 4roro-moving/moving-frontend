@@ -23,13 +23,12 @@ export const getAuthQueryScope = (isAuthenticated: boolean, userId?: string | nu
 
 export type AuthQueryScope = ReturnType<typeof getAuthQueryScope>;
 
-export const getResidenceReviewListScopeQueryKey = (authScope: AuthQueryScope) =>
-  [...QUERY_KEYS.RESIDENCE_REVIEWS.LIST, authScope] as const;
+/** 공개 목록은 사용자별 필드가 없어 authScope를 넣지 않습니다. */
+export const getResidenceReviewListScopeQueryKey = () =>
+  [...QUERY_KEYS.RESIDENCE_REVIEWS.LIST] as const;
 
-export const getResidenceReviewListQueryKey = (
-  authScope: AuthQueryScope,
-  query: Omit<ResidenceReviewListQuery, "cursor">,
-) => [...getResidenceReviewListScopeQueryKey(authScope), query] as const;
+export const getResidenceReviewListQueryKey = (query: Omit<ResidenceReviewListQuery, "cursor">) =>
+  [...getResidenceReviewListScopeQueryKey(), query] as const;
 
 export const getResidenceReviewDetailQueryKey = (
   authScope: AuthQueryScope,
