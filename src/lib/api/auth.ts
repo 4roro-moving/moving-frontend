@@ -6,7 +6,8 @@ import { setAccessToken } from "@/lib/auth/token";
 import { AUTH_BFF_BASE } from "@/lib/constants/authBff";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { ApiError } from "@/types/api";
-import { OAuthProvider } from "../auth/oauth";
+import type { TermsAgreementInput } from "@/types/terms";
+import { OAuthProvider, type OAuthIntent } from "../auth/oauth";
 
 export interface LoginInput {
   email: string;
@@ -19,6 +20,7 @@ export interface SignUpCustomerInput {
   password: string;
   name: string;
   phone: string;
+  agreements: TermsAgreementInput[];
 }
 
 export type SignUpMoverInput = SignUpCustomerInput;
@@ -101,7 +103,9 @@ export const logout = async (): Promise<void> => {
 export interface OAuthLoginInput {
   code: string;
   role: LoginRole;
+  intent: OAuthIntent;
   state?: string;
+  agreements?: TermsAgreementInput[];
 }
 
 export interface NaverOAuthStateResult {

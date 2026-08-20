@@ -2,16 +2,20 @@
 
 import { useState } from "react";
 
+import { GoogleIcon, KakaoLoginIcon, NaverLoginIcon } from "@/icons";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import type { OAuthProvider } from "@/lib/auth/oauth";
+import type { OAuthIntent, OAuthProvider } from "@/lib/auth/oauth";
 import type { AuthAudience } from "@/lib/auth/redirect";
 import { startOAuthLogin } from "@/lib/auth/startOAuthLogin";
-import { GoogleIcon, KakaoLoginIcon, NaverLoginIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
+import type { TermsAgreementInput } from "@/types/terms";
 
 interface SocialLoginButtonsProps {
   className?: string;
   audience?: AuthAudience;
+  intent: OAuthIntent;
+  agreements?: TermsAgreementInput[];
+  disabled?: boolean;
   onError?: (message: string) => void;
 }
 
@@ -52,18 +56,24 @@ const SOCIAL_PROVIDERS: {
 const SocialLoginButtons = ({
   className,
   audience = "customer",
+  intent,
+  agreements,
+  disabled = false,
   onError,
 }: SocialLoginButtonsProps) => {
   const [isPending, setIsPending] = useState(false);
 
   const handleSocialLogin = async (provider: OAuthProvider) => {
-    if (isPending) return;
+    if (isPending || disabled) return;
 
     onError?.("");
     setIsPending(true);
 
     try {
-      await startOAuthLogin(provider, audience);
+      await startOAuthLogin(provider, audience, {
+        intent,
+        ...(agreements ? { agreements } : {}),
+      });
     } catch (err) {
       onError?.(getApiErrorMessage(err));
       setIsPending(false);
@@ -78,7 +88,7 @@ const SocialLoginButtons = ({
             key={provider}
             type="button"
             aria-label={label}
-            disabled={isPending}
+            disabled={disabled || isPending}
             onClick={() => {
               void handleSocialLogin(provider);
             }}

@@ -2,20 +2,29 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import AuthHeader from "@/components/auth/AuthHeader";
+import SignUpTermsField from "@/components/auth/SignUpTermsField";
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import Button from "@/components/common/Button/Button";
 import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
-import { useSignUpMutation } from "@/hooks/auth/useSignUpMutation";
+import Toast from "@/components/common/Toast/Toast";
 import { useSignUpMoverMutation } from "@/hooks/auth/useSignUpMoverMutation";
+import { useSignUpMutation } from "@/hooks/auth/useSignUpMutation";
+import { usePublishedTerms } from "@/hooks/terms/usePublishedTerms";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { consumeOAuthNeedSignUpToast } from "@/lib/auth/oauthNeedSignUpToast";
 import { getProfilePath, type AuthAudience } from "@/lib/auth/redirect";
+import {
+  filterSignUpTerms,
+  hasRequiredTermsAgreed,
+  toTermsAgreements,
+} from "@/lib/auth/termsAgreement";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { signUpSchema, type SignUpFormValues } from "@/lib/schemas/signUpSchema";
 import { cn } from "@/lib/utils/cn";
@@ -31,6 +40,13 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
   const { mutateAsync: signUp, isPending } = audience === "mover" ? moverSignUp : customerSignUp;
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [agreementsById, setAgreementsById] = useState<Record<string, boolean>>({});
+  const {
+    data: publishedTerms,
+    isPending: isTermsLoading,
+    isError: isTermsError,
+  } = usePublishedTerms();
 
   const {
     register,
@@ -49,9 +65,30 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
   });
 
   const loginHref = audience === "mover" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
+  const signUpTerms = filterSignUpTerms(publishedTerms ?? [], audience);
+  const canAgree =
+    !isTermsLoading && !isTermsError && hasRequiredTermsAgreed(signUpTerms, agreementsById);
+
+  const handleTermsCheckedChange = (termsId: number, checked: boolean) => {
+    setAgreementsById((previous) => ({ ...previous, [String(termsId)]: checked }));
+  };
+
+  useEffect(() => {
+    const timerId = window.setTimeout(() => {
+      setToastMessage(consumeOAuthNeedSignUpToast());
+    }, 0);
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, []);
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
+
+    if (!hasRequiredTermsAgreed(signUpTerms, agreementsById)) {
+      setSubmitError("필수 약관에 동의해 주세요.");
+      return;
+    }
 
     try {
       // establishSession(onSuccess) 전에 목적지 예약 — GuestOnly가 profile로 이동
@@ -61,6 +98,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
         password: values.password,
         name: values.name,
         phone: values.phone,
+        agreements: toTermsAgreements(signUpTerms, agreementsById),
       });
     } catch (error) {
       useAuthStore.getState().consumePostAuthRedirectPath();
@@ -70,6 +108,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
+      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
       <AuthHeader audience={audience} />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
@@ -136,7 +175,19 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
                 {...register("passwordConfirm")}
               />
             </FormField>
+
+            <SignUpTermsField
+              terms={signUpTerms}
+              checkedById={agreementsById}
+              onCheckedChange={handleTermsCheckedChange}
+            />
           </div>
+
+          {isTermsError ? (
+            <Text as="p" variant="md-medium" className="text-text-error" role="alert">
+              약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+            </Text>
+          ) : null}
 
           {submitError ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
@@ -149,7 +200,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
             variant="solid"
             size="auth"
             fullWidth
-            disabled={!isValid || isSubmitting || isPending}
+            disabled={!isValid || !canAgree || isSubmitting || isPending}
           >
             시작하기
           </Button>
@@ -183,7 +234,13 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
         >
           SNS 계정으로 간편 가입하기
         </Text>
-        <SocialLoginButtons audience={audience} onError={setSubmitError} />
+        <SocialLoginButtons
+          audience={audience}
+          intent="signup"
+          disabled={!canAgree}
+          agreements={toTermsAgreements(signUpTerms, agreementsById)}
+          onError={setSubmitError}
+        />
       </div>
     </div>
   );

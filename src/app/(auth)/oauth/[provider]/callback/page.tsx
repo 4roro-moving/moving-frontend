@@ -5,6 +5,7 @@ import { Suspense, useEffect, useState } from "react";
 
 import OAuthLayout from "@/components/auth/OAuthLayout";
 import type { AuthUser, LoginResult } from "@/lib/api/auth";
+import { getApiError } from "@/lib/api/getApiError";
 import { resolveAuthUserImage } from "@/lib/api/profile";
 import { getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
 import {
@@ -14,6 +15,7 @@ import {
   loadOAuthPendingSession,
   type OAuthProvider,
 } from "@/lib/auth/oauth";
+import { markOAuthNeedSignUpToast } from "@/lib/auth/oauthNeedSignUpToast";
 import {
   clearOAuthExchangeFinished,
   exchangeOAuthCodeOnce,
@@ -28,8 +30,10 @@ import {
   getAuthAudienceFromRole,
   getPostAuthRedirectPath,
   getRoleHomePath,
+  getSignUpPath,
   type AuthAudience,
 } from "@/lib/auth/redirect";
+import { ERROR_CODES } from "@/lib/constants/errorCodes";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const failOAuthCallback = (message: string, setError: (value: string) => void): void => {
@@ -153,6 +157,11 @@ const OAuthCallbackContent = () => {
         return;
       }
 
+      if (pending.intent !== "login" && pending.intent !== "signup") {
+        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
+        return;
+      }
+
       // 검증 직후 await 전에 동기 소비 — 동일 state 재사용 차단
       if (!consumeOAuthClientState(state)) {
         if (isOAuthExchangeFinished(routeProvider, code)) {
@@ -171,6 +180,8 @@ const OAuthCallbackContent = () => {
         const result = await exchangeOAuthCodeOnce(pending.provider, {
           code,
           role: pending.role,
+          intent: pending.intent,
+          ...(pending.agreements ? { agreements: pending.agreements } : {}),
           ...(pending.provider === "naver" && state ? { state } : {}),
         });
 
@@ -183,6 +194,13 @@ const OAuthCallbackContent = () => {
           router,
         });
       } catch (err) {
+        if (getApiError(err).code === ERROR_CODES.OAUTH_ACCOUNT_NOT_FOUND.code) {
+          markOAuthNeedSignUpToast();
+          clearOAuthPendingSession();
+          router.replace(getSignUpPath(pageAudience));
+          return;
+        }
+
         failOAuthCallback(getLoginErrorMessage(err, pageAudience), setError);
       }
     };

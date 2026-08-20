@@ -18,6 +18,12 @@ export const ERROR_CODES = {
     message: "선택한 회원 유형과 계정의 회원 유형이 일치하지 않습니다.",
   },
 
+  OAUTH_ACCOUNT_NOT_FOUND: {
+    status: 404,
+    code: "OAUTH_ACCOUNT_NOT_FOUND",
+    message: "가입된 소셜 계정이 없습니다. 회원가입을 진행해 주세요.",
+  },
+
   FORBIDDEN: {
     status: 403,
     code: "FORBIDDEN",
