@@ -15,6 +15,9 @@ interface SocialLoginButtonsBaseProps {
   className?: string;
   audience?: AuthAudience;
   disabled?: boolean;
+  /** 비활성 클릭 시 `onError`로 전달할 안내. 없으면 클릭을 무시합니다. */
+  disabledMessage?: string;
+  describedBy?: string;
   onError?: (message: string) => void;
 }
 
@@ -78,11 +81,19 @@ const getSocialButtonAriaLabel = (provider: OAuthProvider, isSignUp: boolean): s
  * 이동 모드에서는 소셜 회원가입 페이지 등 내부 경로로 연결합니다.
  */
 const SocialLoginButtons = (props: SocialLoginButtonsProps) => {
-  const { className, audience = "customer", disabled = false, onError } = props;
+  const {
+    className,
+    audience = "customer",
+    disabled = false,
+    disabledMessage,
+    describedBy,
+    onError,
+  } = props;
   const [isPending, setIsPending] = useState(false);
+  const isDisabled = disabled || isPending;
 
   const handleSocialLogin = async (provider: OAuthProvider) => {
-    if (isPending || disabled || isNavigateSocialLoginButtons(props)) return;
+    if (isDisabled || isNavigateSocialLoginButtons(props)) return;
 
     onError?.("");
     setIsPending(true);
@@ -106,7 +117,7 @@ const SocialLoginButtons = (props: SocialLoginButtonsProps) => {
         ({ provider, className: buttonClassName, icon: Icon, iconClassName }) => {
           const itemClassName = cn(
             "flex size-54 shrink-0 items-center justify-center rounded-full md:size-72",
-            "disabled:cursor-not-allowed disabled:opacity-60",
+            isDisabled && "cursor-not-allowed opacity-60",
             buttonClassName,
           );
           const ariaLabel = getSocialButtonAriaLabel(provider, isSignUpAction);
@@ -129,8 +140,14 @@ const SocialLoginButtons = (props: SocialLoginButtonsProps) => {
               key={provider}
               type="button"
               aria-label={ariaLabel}
-              disabled={disabled || isPending}
+              aria-disabled={isDisabled || undefined}
+              aria-describedby={isDisabled ? describedBy : undefined}
               onClick={() => {
+                if (isPending) return;
+                if (disabled) {
+                  if (disabledMessage) onError?.(disabledMessage);
+                  return;
+                }
                 void handleSocialLogin(provider);
               }}
               className={itemClassName}

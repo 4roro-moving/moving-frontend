@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import AuthHeader from "@/components/auth/AuthHeader";
 import SignUpTermsField from "@/components/auth/SignUpTermsField";
@@ -18,18 +18,27 @@ interface SocialSignUpFormProps {
   audience?: AuthAudience;
 }
 
+const REQUIRED_TERMS_AGREE_MESSAGE = "필수 약관에 동의해 주세요.";
+
 const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
   const {
     signUpTerms,
     agreementsById,
     agreements,
     canAgree,
+    hasRequiredTerms,
     isTermsLoading,
     isTermsError,
     handleTermsCheckedChange,
   } = useSignUpTerms(audience);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const termsHintId = useId();
+  const termsHint = isTermsError
+    ? "약관을 불러오지 못해 소셜 가입을 진행할 수 없습니다."
+    : !isTermsLoading && !canAgree
+      ? "필수 약관에 동의한 뒤 가입할 수 있습니다."
+      : null;
 
   const loginHref = audience === "mover" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
   const localSignUpHref = audience === "mover" ? APP_ROUTES.MOVER_SIGN_UP : APP_ROUTES.SIGN_UP;
@@ -42,6 +51,9 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
       window.clearTimeout(timerId);
     };
   }, []);
+
+  const visibleSubmitError =
+    canAgree && submitError === REQUIRED_TERMS_AGREE_MESSAGE ? null : submitError;
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
@@ -63,9 +75,15 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
             </Text>
           ) : null}
 
-          {submitError ? (
+          {!isTermsLoading && !isTermsError && !hasRequiredTerms ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
-              {submitError}
+              가입에 필요한 약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+            </Text>
+          ) : null}
+
+          {visibleSubmitError ? (
+            <Text as="p" variant="md-medium" className="text-text-error" role="alert">
+              {visibleSubmitError}
             </Text>
           ) : null}
         </div>
@@ -118,10 +136,17 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
         >
           SNS 계정으로 간편 가입하기
         </Text>
+        {termsHint ? (
+          <p id={termsHintId} className="sr-only">
+            {termsHint}
+          </p>
+        ) : null}
         <SocialLoginButtons
           audience={audience}
           intent="signup"
           disabled={!canAgree}
+          disabledMessage={!canAgree && hasRequiredTerms ? REQUIRED_TERMS_AGREE_MESSAGE : undefined}
+          describedBy={termsHint ? termsHintId : undefined}
           agreements={agreements}
           onError={setSubmitError}
         />

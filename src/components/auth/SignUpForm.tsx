@@ -39,6 +39,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
     agreementsById,
     agreements,
     canAgree,
+    hasRequiredTerms,
     isTermsLoading,
     isTermsError,
     handleTermsCheckedChange,
@@ -64,6 +65,11 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
+
+    if (!hasRequiredTerms) {
+      setSubmitError("가입에 필요한 약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
 
     if (!hasRequiredTermsAgreed(signUpTerms, agreementsById)) {
       setSubmitError("필수 약관에 동의해 주세요.");
@@ -166,6 +172,12 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
           {isTermsError ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
               약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+            </Text>
+          ) : null}
+
+          {!isTermsLoading && !isTermsError && !hasRequiredTerms ? (
+            <Text as="p" variant="md-medium" className="text-text-error" role="alert">
+              가입에 필요한 약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
             </Text>
           ) : null}
 

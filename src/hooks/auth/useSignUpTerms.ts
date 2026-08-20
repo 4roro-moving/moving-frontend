@@ -6,6 +6,7 @@ import { usePublishedTerms } from "@/hooks/terms/usePublishedTerms";
 import type { AuthAudience } from "@/lib/auth/redirect";
 import {
   filterSignUpTerms,
+  hasRequiredSignUpTerms,
   hasRequiredTermsAgreed,
   toTermsAgreements,
 } from "@/lib/auth/termsAgreement";
@@ -19,6 +20,7 @@ export const useSignUpTerms = (audience: AuthAudience) => {
   } = usePublishedTerms();
 
   const signUpTerms = filterSignUpTerms(publishedTerms ?? [], audience);
+  const hasRequiredTerms = hasRequiredSignUpTerms(signUpTerms);
   const canAgree =
     !isTermsLoading && !isTermsError && hasRequiredTermsAgreed(signUpTerms, agreementsById);
 
@@ -31,6 +33,7 @@ export const useSignUpTerms = (audience: AuthAudience) => {
     agreementsById,
     agreements: toTermsAgreements(signUpTerms, agreementsById),
     canAgree,
+    hasRequiredTerms,
     isTermsLoading,
     isTermsError,
     handleTermsCheckedChange,
