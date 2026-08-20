@@ -21,6 +21,8 @@ export const APP_ROUTES = {
   MOVER_PROFILE: "/mover/profile",
   /** 견적 요청 */
   ESTIMATE_REQUEST: "/estimate-request",
+  // 2026.08.20 김나연 - [수정] 고객 내 활동 내역
+  MY_ACTIVITY: "/my-activity",
   /** 고객 프로필 수정 */
   PROFILE_EDIT: "/profile/edit",
   /** 기사님 프로필 수정 */
@@ -43,6 +45,12 @@ export const APP_ROUTES = {
     ROOT: "/reviews",
     WRITABLE: "/reviews/writable",
     ME: "/reviews/me",
+  },
+  // 2026.08.20 김나연 - [수정] 커뮤니티(거주후기·나눔) 공개 페이지 경로
+  COMMUNITY: {
+    ROOT: "/community",
+    RESIDENCE_REVIEWS: "/community/residence-reviews",
+    GIVEAWAY: "/community/giveaway",
   },
   // 2026.07.30 정슬기 - [추가] 내 견적 관리 페이지 경로
   /** 내 견적 관리 */

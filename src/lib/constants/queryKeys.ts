@@ -1,4 +1,5 @@
 import type { MoversListQuery } from "@/types/mover";
+import type { ResidenceReviewListQuery } from "@/types/residenceReview";
 
 /**
  * 사용자별 응답(`isFavorite`)이 React Query 캐시에서 섞이지 않도록 사용하는 인증 scope
@@ -21,6 +22,27 @@ export const getAuthQueryScope = (isAuthenticated: boolean, userId?: string | nu
 };
 
 export type AuthQueryScope = ReturnType<typeof getAuthQueryScope>;
+
+/** 공개 목록은 사용자별 필드가 없어 authScope를 넣지 않습니다. */
+export const getResidenceReviewListScopeQueryKey = () =>
+  [...QUERY_KEYS.RESIDENCE_REVIEWS.LIST] as const;
+
+export const getResidenceReviewListQueryKey = (query: Omit<ResidenceReviewListQuery, "cursor">) =>
+  [...getResidenceReviewListScopeQueryKey(), query] as const;
+
+export const getResidenceReviewDetailQueryKey = (
+  authScope: AuthQueryScope,
+  residenceReviewId: number,
+) => [...QUERY_KEYS.RESIDENCE_REVIEWS.DETAIL_ROOT, authScope, residenceReviewId] as const;
+
+export const getResidenceReviewMyListScopeQueryKey = (authScope: AuthQueryScope) =>
+  [...QUERY_KEYS.RESIDENCE_REVIEWS.ME, authScope] as const;
+
+export const getResidenceReviewMyListQueryKey = (
+  authScope: AuthQueryScope,
+  page: number,
+  limit: number,
+) => [...getResidenceReviewMyListScopeQueryKey(authScope), { page, limit }] as const;
 
 /**
  * 현재 사용자의 모든 기사님 목록 쿼리를 대상으로 하는 prefix.
@@ -142,6 +164,14 @@ export const QUERY_KEYS = {
     BY_MOVER_ROOT: (moverId: string) => ["reviews", "mover", moverId] as const,
     BY_MOVER: (moverId: string, page: number, limit: number) =>
       ["reviews", "mover", moverId, { page, limit }] as const,
+  },
+
+  // 2026.08.20 김나연 - [추가] 거주후기 쿼리 키
+  RESIDENCE_REVIEWS: {
+    ALL: ["residenceReviews"] as const,
+    LIST: ["residenceReviews", "list"] as const,
+    ME: ["residenceReviews", "me"] as const,
+    DETAIL_ROOT: ["residenceReviews", "detail"] as const,
   },
 
   NOTIFICATIONS: {

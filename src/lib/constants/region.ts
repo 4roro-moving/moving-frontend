@@ -46,6 +46,10 @@ export const REGION_OPTIONS = REGION_DISPLAY_ORDER.map((value) => ({
   label: REGION_LABEL[value],
 }));
 
+const REGION_ID_SET: ReadonlySet<number> = new Set(REGION_DISPLAY_ORDER);
+
+export const isRegionId = (value: number): value is RegionId => REGION_ID_SET.has(value);
+
 // 카카오 주소 검색 결과의 sido 값을 내부 지역 ID로 변환하기 위함
 const REGION_ID_BY_SIDO: Record<string, RegionId> = {
   서울: 1,

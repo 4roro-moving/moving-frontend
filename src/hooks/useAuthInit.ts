@@ -39,7 +39,7 @@ export const useAuthInit = (options?: UseAuthInitOptions) => {
       markUnauthenticated();
 
       const { pathname, search } = window.location;
-      // 인증·공개 페이지(랜딩, 기사님 찾기/상세)에서는 현재 화면 유지
+      // 인증·공개 페이지(랜딩, 기사님 찾기/상세, 커뮤니티)에서는 현재 화면 유지
       if (isAuthPagePath(pathname) || isPublicPath(pathname)) {
         return;
       }

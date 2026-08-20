@@ -13,6 +13,8 @@ export interface NavigationTabItem {
   label: string;
   /** exact는 경로가 완전히 같을 때만, prefix는 하위 경로에서도 활성화 */
   match?: "exact" | "prefix";
+  /** true면 이동하지 않는 비활성 탭 */
+  disabled?: boolean;
 }
 
 export interface NavigationTabsProps {
@@ -38,6 +40,24 @@ export default function NavigationTabs({ ariaLabel, items, className }: Navigati
       <div className="px-margin-mobile md:px-margin-tablet mx-auto h-full w-full max-w-(--container-desktop) xl:px-0">
         <div className="flex h-full items-center gap-24 md:gap-32 xl:gap-40">
           {items.map((item) => {
+            if (item.disabled) {
+              return (
+                <span
+                  key={item.href}
+                  aria-disabled="true"
+                  className="relative flex h-full shrink-0 cursor-not-allowed items-center whitespace-nowrap xl:h-64"
+                >
+                  <Text
+                    as="span"
+                    variant={{ base: "md-semibold", xl: "xl-semibold" }}
+                    className="text-nav-text-default"
+                  >
+                    {item.label}
+                  </Text>
+                </span>
+              );
+            }
+
             const isActive =
               item.match === "exact"
                 ? pathname === item.href
@@ -56,11 +76,12 @@ export default function NavigationTabs({ ariaLabel, items, className }: Navigati
               >
                 <Text
                   as="span"
-                  variant={isActive ? "md-bold" : "md-semibold"}
-                  className={cn(
-                    "xl:text-(length:--font-size-20) xl:leading-[var(--line-height-32)] xl:font-semibold",
-                    isActive ? "text-nav-text-active" : "text-nav-text-default",
-                  )}
+                  variant={
+                    isActive
+                      ? { base: "md-bold", xl: "xl-semibold" }
+                      : { base: "md-semibold", xl: "xl-semibold" }
+                  }
+                  className={isActive ? "text-nav-text-active" : "text-nav-text-default"}
                 >
                   {item.label}
                 </Text>
