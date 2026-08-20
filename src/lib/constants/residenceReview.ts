@@ -16,26 +16,26 @@ export const RESIDENCE_REVIEW_WRITE_LOGIN_DESCRIPTION =
 
 export const RESIDENCE_REVIEW_LIST_STALE_TIME_MS = 60 * 1000;
 
-export const RESIDENCE_REVIEW_SORT_OPTIONS: {
-  value: ResidenceReviewListSort;
-  label: string;
-}[] = [
+export const RESIDENCE_REVIEW_SORT_OPTIONS = [
   { value: RESIDENCE_REVIEW_LIST_SORT.CREATED_AT, label: "최신 순" },
   { value: RESIDENCE_REVIEW_LIST_SORT.CREATED_AT_ASC, label: "오래된 순" },
-];
+] as const satisfies readonly {
+  value: ResidenceReviewListSort;
+  label: string;
+}[];
 
-export const RESIDENCE_REVIEW_RATING_VALUES: ResidenceReviewRating[] = [
+export const RESIDENCE_REVIEW_RATING_VALUES = [
   RESIDENCE_REVIEW_RATING.MAX,
   4,
   3,
   2,
   RESIDENCE_REVIEW_RATING.MIN,
-];
+] as const satisfies readonly ResidenceReviewRating[];
 
-export const RESIDENCE_REVIEW_RATING_OPTIONS: { value: string; label: string }[] = [
+export const RESIDENCE_REVIEW_RATING_OPTIONS = [
   { value: "all", label: "전체" },
   ...RESIDENCE_REVIEW_RATING_VALUES.map((rating) => ({
     value: String(rating),
     label: `${String(rating)}점`,
   })),
-];
+] as const satisfies readonly { value: string; label: string }[];
