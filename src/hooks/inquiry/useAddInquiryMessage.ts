@@ -7,19 +7,14 @@ import { addInquiryMessage } from "@/lib/api/inquiries";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import type { CreateInquiryMessageInput } from "@/types/inquiry";
 
-interface AddInquiryMessageVariables {
-  inquiryId: number;
-  body: CreateInquiryMessageInput;
-}
-
-export function useAddInquiryMessage() {
+export function useAddInquiryMessage(inquiryId: number) {
   const queryClient = useQueryClient();
 
   return useApiMutation({
-    mutationFn: ({ inquiryId, body }: AddInquiryMessageVariables) =>
-      addInquiryMessage(inquiryId, body),
-    onSuccess: async (inquiry, variables) => {
-      queryClient.setQueryData(QUERY_KEYS.INQUIRIES.DETAIL(variables.inquiryId), inquiry);
+    mutationFn: (input: CreateInquiryMessageInput) => addInquiryMessage(inquiryId, input),
+
+    onSuccess: async (inquiry) => {
+      queryClient.setQueryData(QUERY_KEYS.INQUIRIES.DETAIL(inquiryId), inquiry);
 
       await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.INQUIRIES.LIST_ROOT,

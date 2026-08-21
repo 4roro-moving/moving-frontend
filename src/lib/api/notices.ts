@@ -13,6 +13,10 @@ export const fetchNotices = async (query: NoticeListQuery): Promise<NoticeListRe
     params.set("keyword", query.keyword);
   }
 
+  if (query.category) {
+    params.set("category", query.category);
+  }
+
   const result = await fetchInstance.getPaginated<NoticeItem[], Pagination>(
     `${API_ROUTES.NOTICES.ROOT}?${params.toString()}`,
   );
