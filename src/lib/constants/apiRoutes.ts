@@ -83,6 +83,7 @@ export const API_ROUTES = {
     ROOT: "/giveaways",
     ME: "/giveaways/me",
     DETAIL: (giveawayId: number) => `/giveaways/${giveawayId}`,
+    IMAGE_UPLOAD_URL: "/giveaways/image/upload-url",
   },
   // 2026.08.20 김나연 - [추가] 거주후기 API 경로
   RESIDENCE_REVIEWS: {

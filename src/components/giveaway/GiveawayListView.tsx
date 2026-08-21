@@ -10,7 +10,6 @@ import GiveawayCard from "@/components/giveaway/GiveawayCard";
 import GiveawayCardSkeletonList from "@/components/giveaway/GiveawayCardSkeletonList";
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import {
   GIVEAWAY_ABOVE_THE_FOLD_THUMBNAIL_COUNT,
   GIVEAWAY_EMPTY_DESCRIPTION_LINES,
@@ -25,6 +24,7 @@ interface GiveawayListViewProps {
   isInitialLoading: boolean;
   isFilterFetching: boolean;
   query: UseInfiniteQueryResult<InfiniteData<GiveawayListResult>, ApiError>;
+  onWriteClick: () => void;
 }
 
 const EMPTY_DESCRIPTION = (
@@ -40,6 +40,7 @@ const GiveawayListView = ({
   isInitialLoading,
   isFilterFetching,
   query,
+  onWriteClick,
 }: GiveawayListViewProps) => {
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
 
@@ -76,7 +77,7 @@ const GiveawayListView = ({
         imageSrc="/images/empty/character.png"
         description={EMPTY_DESCRIPTION}
         buttonLabel={GIVEAWAY_WRITE_BUTTON_LABEL}
-        href={APP_ROUTES.COMMUNITY.GIVEAWAY_WRITE}
+        onActionClick={onWriteClick}
       />
     );
   } else {

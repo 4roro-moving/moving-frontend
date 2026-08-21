@@ -59,7 +59,6 @@ export const APP_ROUTES = {
     RESIDENCE_REVIEWS: "/community/residence-reviews",
     GIVEAWAY: "/community/giveaway",
     GIVEAWAY_DETAIL: (giveawayId: number) => `/community/giveaway/${giveawayId}`,
-    GIVEAWAY_WRITE: "/community/giveaway/write",
   },
   // 2026.07.30 정슬기 - [추가] 내 견적 관리 페이지 경로
   /** 내 견적 관리 */

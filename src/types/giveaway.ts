@@ -57,3 +57,59 @@ export interface GiveawayListResult {
   data: GiveawayListItem[];
   pagination: CursorPagination;
 }
+
+export const GIVEAWAY_IMAGE_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+
+export type GiveawayImageContentType = (typeof GIVEAWAY_IMAGE_CONTENT_TYPES)[number];
+
+export const isGiveawayImageContentType = (value: string): value is GiveawayImageContentType => {
+  return (GIVEAWAY_IMAGE_CONTENT_TYPES as readonly string[]).includes(value);
+};
+
+export interface GiveawayImageUploadUrlRequest {
+  contentType: GiveawayImageContentType;
+  size: number;
+}
+
+export interface GiveawayImageUploadUrlResult {
+  uploadUrl: string;
+  key: string;
+  expiresIn: number;
+}
+
+export interface CreateGiveawayInput {
+  title: string;
+  description: string;
+  regionId?: number;
+  imageKeys: string[];
+}
+
+export interface GiveawayImage {
+  id: number;
+  imageUrl: string;
+  sortOrder: number;
+}
+
+export interface GiveawayMyRequest {
+  id: number;
+  status: string;
+  message: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GiveawayDetail {
+  id: number;
+  title: string;
+  description: string;
+  status: GiveawayStatus;
+  createdAt: string;
+  updatedAt: string;
+  author: GiveawayAuthor;
+  region: GiveawayRegion | null;
+  images: GiveawayImage[];
+  activeRequestCount: number;
+  receiver: GiveawayAuthor | null;
+  canRequest: boolean;
+  myRequest: GiveawayMyRequest | null;
+}
