@@ -219,13 +219,22 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
       </div>
 
       <div className="flex flex-col items-center gap-24 md:gap-32">
-        <Text
-          as="p"
-          variant={{ base: "xs-regular", md: "xl-regular" }}
-          className="text-text-description"
-        >
-          SNS 계정으로 간편 가입하기
-        </Text>
+        <div className="flex flex-col items-center gap-8">
+          <Text
+            as="p"
+            variant={{ base: "xs-regular", md: "xl-regular" }}
+            className="text-text-description"
+          >
+            SNS 계정으로 간편 가입하기
+          </Text>
+          <Text
+            as="p"
+            variant={{ base: "xs-regular", md: "md-regular" }}
+            className="text-text-description text-center"
+          >
+            SNS 회원가입 시 약관 동의 페이지로 이동합니다.
+          </Text>
+        </div>
         <SocialLoginButtons
           audience={audience}
           hrefForProvider={() => getSocialSignUpPath(audience)}
