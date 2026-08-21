@@ -6,10 +6,9 @@ import type { GiveawaySearchParamsState } from "@/lib/utils/giveawaySearchParams
 
 interface GiveawayListProps {
   filters: GiveawaySearchParamsState;
-  onWriteClick: () => void;
 }
 
-const GiveawayList = ({ filters, onWriteClick }: GiveawayListProps) => {
+const GiveawayList = ({ filters }: GiveawayListProps) => {
   const { giveaways, isInitialLoading, isFilterFetching, query } = useGiveaways(filters);
 
   return (
@@ -18,7 +17,6 @@ const GiveawayList = ({ filters, onWriteClick }: GiveawayListProps) => {
       isInitialLoading={isInitialLoading}
       isFilterFetching={isFilterFetching}
       query={query}
-      onWriteClick={onWriteClick}
     />
   );
 };

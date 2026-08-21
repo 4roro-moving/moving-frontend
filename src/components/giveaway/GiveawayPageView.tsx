@@ -18,7 +18,7 @@ const GiveawayPageView = ({ filters }: GiveawayPageViewProps) => {
     <>
       <GiveawayPageLayout filters={filters}>
         <GiveawayCreateButton onClick={openCreate} />
-        <GiveawayList filters={filters} onWriteClick={openCreate} />
+        <GiveawayList filters={filters} />
       </GiveawayPageLayout>
 
       <GiveawayCreateModal open={isCreateOpen} onClose={closeCreate} />

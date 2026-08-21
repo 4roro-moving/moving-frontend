@@ -25,7 +25,6 @@ const MyGiveawayPageView = ({ filters }: MyGiveawayPageViewProps) => {
           isInitialLoading={isInitialLoading}
           isFilterFetching={isFilterFetching}
           query={query}
-          onWriteClick={openCreate}
         />
       </GiveawayPageLayout>
 
