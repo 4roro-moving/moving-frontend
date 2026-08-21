@@ -1,8 +1,10 @@
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import type { LoginRole } from "@/lib/auth/role";
 import { ApiError } from "@/types/api";
+import type { TermsAgreementInput } from "@/types/terms";
 
 export type OAuthProvider = "google" | "kakao" | "naver";
+export type OAuthIntent = "login" | "signup";
 
 const OAUTH_PENDING_KEY = "moving_oauth_pending";
 const OAUTH_STATE_KEY = "moving_oauth_state";
@@ -10,7 +12,9 @@ const OAUTH_STATE_KEY = "moving_oauth_state";
 export interface OAuthPendingSession {
   provider: OAuthProvider;
   role: LoginRole;
+  intent: OAuthIntent;
   returnPath?: string | null;
+  agreements?: TermsAgreementInput[];
 }
 
 interface OAuthAuthorizeConfig {
