@@ -3,7 +3,7 @@
 import { useRef, type FormEvent, type RefObject } from "react";
 
 import { Text } from "@/components/common/Text";
-import { formatDateToISODate } from "@/lib/utils/date";
+import { formatDateToKstISODate } from "@/lib/utils/date";
 import { usePresence } from "@/hooks/usePresence";
 import { cn } from "@/lib/utils/cn";
 import { SHEET_EXIT_DURATION_MS } from "@/lib/utils/uiMotion";
@@ -43,7 +43,7 @@ export default function ChatEstimateEditSheet({
 }: ChatEstimateEditSheetProps) {
   const { isRendered, isVisible } = usePresence(open, SHEET_EXIT_DURATION_MS);
   const formRef = useRef<HTMLFormElement>(null);
-  const minMoveDate = formatDateToISODate(new Date());
+  const minMoveDate = formatDateToKstISODate(new Date());
 
   if (!isRendered) return null;
 

@@ -66,6 +66,14 @@ function formatMessageTime(createdAt: string): string {
   }).format(date);
 }
 
+function formatRevisionMoveDate(moveDate: string): string {
+  try {
+    return formatKoreanDateTime(moveDate);
+  } catch {
+    return "-";
+  }
+}
+
 function getRevisionStatusLabel(status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELED") {
   switch (status) {
     case "PENDING":
@@ -207,8 +215,8 @@ function ChatMessageList({
                           variant="sm-medium"
                           className={isMine ? "text-text-inverse" : "text-text-secondary"}
                         >
-                          이사일 {formatKoreanDateTime(revision.previousMoveDate)} →{" "}
-                          {formatKoreanDateTime(revision.requestedMoveDate)}
+                          이사일 {formatRevisionMoveDate(revision.previousMoveDate)} →{" "}
+                          {formatRevisionMoveDate(revision.requestedMoveDate)}
                         </Text>
                         <Text
                           variant="sm-medium"
@@ -396,7 +404,7 @@ export function ConnectedChatRoomModal({
             isFetchingNextPage={chat.isFetchingNextPage}
             hasNextPage={chat.hasNextPage}
             onFetchNextPage={() => void chat.fetchNextPage()}
-            isActionPending={chat.isSending}
+            isActionPending={chat.isSending || chat.isImageSending}
             onRespondEstimateRevision={(revisionId, response) =>
               void chat.respondEstimateRevision(revisionId, response)
             }

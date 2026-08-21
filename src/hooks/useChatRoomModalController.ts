@@ -332,6 +332,7 @@ export function useConnectedChatRoomModalController({
         return false;
       }
 
+      appendMessages([response.message]);
       return true;
     } finally {
       setIsSending(false);
@@ -361,6 +362,8 @@ export function useConnectedChatRoomModalController({
         setToastMessage(response.error.message);
         return;
       }
+
+      appendMessages([response.message]);
 
       if (responseType === "APPROVED") {
         await Promise.all([
