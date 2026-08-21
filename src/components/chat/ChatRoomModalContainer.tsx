@@ -448,7 +448,7 @@ export function ConnectedChatRoomModal({
             isFetchingNextPage={chat.isFetchingNextPage}
             hasNextPage={chat.hasNextPage}
             onFetchNextPage={() => void chat.fetchNextPage()}
-            isActionPending={chat.isSending || chat.isImageSending}
+            isActionPending={chat.isComposerDisabled || chat.isSending || chat.isImageSending}
             onRespondEstimateRevision={(revisionId, response) =>
               void chat.respondEstimateRevision(revisionId, response)
             }
