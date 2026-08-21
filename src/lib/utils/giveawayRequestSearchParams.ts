@@ -11,6 +11,13 @@ import type {
   GiveawayRequestMyListQuery,
   GiveawayRequestStatus,
 } from "@/types/giveaway";
+import {
+  getSearchParam,
+  parseAllowedValue,
+  parseFilterValue,
+  parseKeywordParam,
+  type SearchParamsInput,
+} from "@/lib/utils/searchParams";
 
 export interface GiveawayRequestFilterState {
   keyword: string;
@@ -24,8 +31,6 @@ export const GIVEAWAY_REQUEST_FILTER_DEFAULTS = {
   sort: GIVEAWAY_LIST_SORT.LATEST,
 } as const satisfies GiveawayRequestFilterState;
 
-type SearchParamsInput = Record<string, string | string[] | undefined>;
-
 const SORT_VALUES = new Set(GIVEAWAY_SORT_OPTIONS.map((option) => option.value));
 const STATUS_VALUES = new Set(
   GIVEAWAY_REQUEST_STATUS_FILTER_OPTIONS.filter(
@@ -33,34 +38,8 @@ const STATUS_VALUES = new Set(
   ).map((option) => option.value),
 );
 
-const getParam = (searchParams: SearchParamsInput, key: string): string | undefined => {
-  const value = searchParams[key];
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-  return value;
-};
-
 const parseSort = (value: string | undefined): GiveawayListSort => {
-  if (value && SORT_VALUES.has(value as GiveawayListSort)) {
-    return value as GiveawayListSort;
-  }
-  return GIVEAWAY_REQUEST_FILTER_DEFAULTS.sort;
-};
-
-const parseFilterValue = (value: string | undefined, allowed: Set<string>): string => {
-  if (!value || value === GIVEAWAY_ALL_VALUE) {
-    return GIVEAWAY_ALL_VALUE;
-  }
-  if (allowed.has(value)) {
-    return value;
-  }
-  return GIVEAWAY_ALL_VALUE;
-};
-
-const parseKeyword = (value: string | undefined): string => {
-  const keyword = value?.trim() ?? GIVEAWAY_REQUEST_FILTER_DEFAULTS.keyword;
-  return keyword.slice(0, GIVEAWAY_KEYWORD_MAX_LENGTH);
+  return parseAllowedValue(value, SORT_VALUES, GIVEAWAY_REQUEST_FILTER_DEFAULTS.sort);
 };
 
 const isGiveawayRequestStatus = (value: string): value is GiveawayRequestStatus =>
@@ -73,9 +52,16 @@ export const parseGiveawayRequestSearchParams = (
   searchParams: SearchParamsInput,
 ): GiveawayRequestFilterState => {
   return {
-    keyword: parseKeyword(getParam(searchParams, "keyword")),
-    status: parseFilterValue(getParam(searchParams, "status")?.trim(), STATUS_VALUES),
-    sort: parseSort(getParam(searchParams, "sort")?.trim()),
+    keyword: parseKeywordParam(getSearchParam(searchParams, "keyword"), {
+      fallback: GIVEAWAY_REQUEST_FILTER_DEFAULTS.keyword,
+      maxLength: GIVEAWAY_KEYWORD_MAX_LENGTH,
+    }),
+    status: parseFilterValue(
+      getSearchParam(searchParams, "status")?.trim(),
+      STATUS_VALUES,
+      GIVEAWAY_ALL_VALUE,
+    ),
+    sort: parseSort(getSearchParam(searchParams, "sort")?.trim()),
   };
 };
 

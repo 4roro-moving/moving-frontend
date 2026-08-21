@@ -13,6 +13,13 @@ import type {
   GiveawayMyListQuery,
   GiveawayStatus,
 } from "@/types/giveaway";
+import {
+  getSearchParam,
+  parseAllowedValue,
+  parseFilterValue,
+  parseKeywordParam,
+  type SearchParamsInput,
+} from "@/lib/utils/searchParams";
 
 export const GIVEAWAY_SEARCH_DEFAULTS = {
   keyword: "",
@@ -38,8 +45,6 @@ export const GIVEAWAY_MY_FILTER_DEFAULTS = {
   sort: GIVEAWAY_SEARCH_DEFAULTS.sort,
 } as const satisfies GiveawayMyFilterState;
 
-type SearchParamsInput = Record<string, string | string[] | undefined>;
-
 const REGION_ID_VALUES = new Set(REGION_OPTIONS.map((region) => String(region.value)));
 const SORT_VALUES = new Set(GIVEAWAY_SORT_OPTIONS.map((option) => option.value));
 const STATUS_VALUES = new Set(
@@ -48,44 +53,33 @@ const STATUS_VALUES = new Set(
   ),
 );
 
-const getParam = (searchParams: SearchParamsInput, key: string): string | undefined => {
-  const value = searchParams[key];
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-  return value;
-};
-
 const parseSort = (value: string | undefined): GiveawayListSort => {
-  if (value && SORT_VALUES.has(value as GiveawayListSort)) {
-    return value as GiveawayListSort;
-  }
-  return GIVEAWAY_SEARCH_DEFAULTS.sort;
+  return parseAllowedValue(value, SORT_VALUES, GIVEAWAY_SEARCH_DEFAULTS.sort);
 };
 
-const parseFilterValue = (value: string | undefined, allowed: Set<string>): string => {
-  if (!value || value === GIVEAWAY_ALL_VALUE) {
-    return GIVEAWAY_ALL_VALUE;
-  }
-  if (allowed.has(value)) {
-    return value;
-  }
-  return GIVEAWAY_ALL_VALUE;
+const parseGiveawayFilterValue = (value: string | undefined): string => {
+  return parseFilterValue(value, STATUS_VALUES, GIVEAWAY_ALL_VALUE);
 };
 
 const parseKeyword = (value: string | undefined): string => {
-  const keyword = value?.trim() ?? GIVEAWAY_SEARCH_DEFAULTS.keyword;
-  return keyword.slice(0, GIVEAWAY_KEYWORD_MAX_LENGTH);
+  return parseKeywordParam(value, {
+    fallback: GIVEAWAY_SEARCH_DEFAULTS.keyword,
+    maxLength: GIVEAWAY_KEYWORD_MAX_LENGTH,
+  });
 };
 
 export const parseGiveawaySearchParams = (
   searchParams: SearchParamsInput,
 ): GiveawaySearchParamsState => {
   return {
-    keyword: parseKeyword(getParam(searchParams, "keyword")),
-    regionId: parseFilterValue(getParam(searchParams, "regionId")?.trim(), REGION_ID_VALUES),
-    status: parseFilterValue(getParam(searchParams, "status")?.trim(), STATUS_VALUES),
-    sort: parseSort(getParam(searchParams, "sort")?.trim()),
+    keyword: parseKeyword(getSearchParam(searchParams, "keyword")),
+    regionId: parseFilterValue(
+      getSearchParam(searchParams, "regionId")?.trim(),
+      REGION_ID_VALUES,
+      GIVEAWAY_ALL_VALUE,
+    ),
+    status: parseGiveawayFilterValue(getSearchParam(searchParams, "status")?.trim()),
+    sort: parseSort(getSearchParam(searchParams, "sort")?.trim()),
   };
 };
 
@@ -115,8 +109,8 @@ export const parseMyGiveawaySearchParams = (
   searchParams: SearchParamsInput,
 ): GiveawayMyFilterState => {
   return {
-    status: parseFilterValue(getParam(searchParams, "status")?.trim(), STATUS_VALUES),
-    sort: parseSort(getParam(searchParams, "sort")?.trim()),
+    status: parseGiveawayFilterValue(getSearchParam(searchParams, "status")?.trim()),
+    sort: parseSort(getSearchParam(searchParams, "sort")?.trim()),
   };
 };
 
