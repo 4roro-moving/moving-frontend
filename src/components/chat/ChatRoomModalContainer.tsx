@@ -174,6 +174,20 @@ function ChatMessageList({
 
         <div className="mt-auto flex flex-col gap-12">
           {messages.map((message) => {
+            if (message.type === "SYSTEM") {
+              return (
+                <div key={message.id} className="flex w-full justify-center py-4">
+                  <Text
+                    as="p"
+                    variant="sm-medium"
+                    className="bg-background-subtle text-text-muted rounded-12 px-12 py-8 text-center"
+                  >
+                    {message.content}
+                  </Text>
+                </div>
+              );
+            }
+
             const sender = message.sender;
             const isMine = sender?.role === participantRole;
             const revision = message.revision;
