@@ -11,8 +11,12 @@ export const APP_ROUTES = {
   MOVER_LOGIN: "/mover/login",
   /** 고객 이메일 회원가입 */
   SIGN_UP: "/signup",
+  /** 고객 소셜 회원가입 */
+  SOCIAL_SIGN_UP: "/signup/social",
   /** 기사님 이메일 회원가입 */
   MOVER_SIGN_UP: "/mover/signup",
+  /** 기사님 소셜 회원가입 */
+  MOVER_SOCIAL_SIGN_UP: "/mover/signup/social",
   /** OAuth 인가 code callback — `/oauth/{provider}/callback` */
   OAUTH_CALLBACK: (provider: "google" | "kakao" | "naver") => `/oauth/${provider}/callback`,
   /** 고객 프로필 등록 */

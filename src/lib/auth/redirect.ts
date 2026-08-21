@@ -81,6 +81,14 @@ export const getProfilePath = (audience: AuthAudience): string => {
   return audience === "mover" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.PROFILE;
 };
 
+export const getSignUpPath = (audience: AuthAudience): string => {
+  return audience === "mover" ? APP_ROUTES.MOVER_SIGN_UP : APP_ROUTES.SIGN_UP;
+};
+
+export const getSocialSignUpPath = (audience: AuthAudience): string => {
+  return audience === "mover" ? APP_ROUTES.MOVER_SOCIAL_SIGN_UP : APP_ROUTES.SOCIAL_SIGN_UP;
+};
+
 /** 역할별 프로필 생성(등록) 경로인지 */
 export const isProfileCreatePath = (pathname: string, audience: AuthAudience): boolean => {
   return pathname === getProfilePath(audience);
