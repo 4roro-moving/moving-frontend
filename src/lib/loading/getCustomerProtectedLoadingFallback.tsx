@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import CommunityShell from "@/components/community/CommunityShell";
 import GiveawayAuthLoadingFallback from "@/components/giveaway/GiveawayAuthLoadingFallback";
 import GiveawayCardSkeletonList from "@/components/giveaway/GiveawayCardSkeletonList";
+import GiveawayCreateButton from "@/components/giveaway/GiveawayCreateButton";
 import GiveawayPageLayout from "@/components/giveaway/GiveawayPageLayout";
 import MyGiveawayRequestCardSkeletonList from "@/components/giveaway/MyGiveawayRequestCardSkeletonList";
 import MyGiveawayRequestFilters from "@/components/giveaway/MyGiveawayRequestFilters";
@@ -41,6 +42,7 @@ const GiveawayLoadingChrome = () => {
   return (
     <CommunityShell showGiveawayTab>
       <GiveawayPageLayout filters={GIVEAWAY_SEARCH_DEFAULTS}>
+        <GiveawayCreateButton disabled />
         <GiveawayCardSkeletonList />
       </GiveawayPageLayout>
     </CommunityShell>
@@ -52,6 +54,7 @@ const MyGiveawayLoadingChrome = () => {
     <>
       <MyActivityTabs />
       <GiveawayPageLayout variant="my" filters={GIVEAWAY_MY_FILTER_DEFAULTS}>
+        <GiveawayCreateButton disabled />
         <GiveawayCardSkeletonList />
       </GiveawayPageLayout>
     </>

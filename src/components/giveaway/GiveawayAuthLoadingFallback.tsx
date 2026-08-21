@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 
 import CommunityShell from "@/components/community/CommunityShell";
 import GiveawayCardSkeletonList from "@/components/giveaway/GiveawayCardSkeletonList";
+import GiveawayCreateButton from "@/components/giveaway/GiveawayCreateButton";
 import GiveawayPageLayout from "@/components/giveaway/GiveawayPageLayout";
 import { parseGiveawaySearchParams } from "@/lib/utils/giveawaySearchParams";
 
@@ -14,6 +15,7 @@ const GiveawayAuthLoadingFallback = () => {
   return (
     <CommunityShell showGiveawayTab>
       <GiveawayPageLayout filters={filters}>
+        <GiveawayCreateButton disabled />
         <GiveawayCardSkeletonList />
       </GiveawayPageLayout>
     </CommunityShell>
