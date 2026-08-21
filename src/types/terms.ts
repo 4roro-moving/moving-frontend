@@ -23,7 +23,7 @@ export interface PublishedTerms {
   title: string;
   content: string;
   isRequired: boolean;
-  audience?: TermsAudience;
+  audience: TermsAudience;
   effectiveAt: string | null;
   publishedAt: string | null;
 }

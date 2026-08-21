@@ -10,15 +10,6 @@ const toTermsAudienceRole = (audience: AuthAudience): Exclude<TermsAudience, "AL
   return audience === "mover" ? "MOVER" : "CUSTOMER";
 };
 
-const resolveTermsAudience = (item: PublishedTerms): TermsAudience => {
-  if (item.audience === "ALL" || item.audience === "CUSTOMER" || item.audience === "MOVER") {
-    return item.audience;
-  }
-
-  // 공개 GET /terms 는 audience를 내려주지 않음. Prisma 기본값은 ALL, 기사 정책만 MOVER.
-  return item.type === "MOVER_POLICY" ? "MOVER" : "ALL";
-};
-
 export const filterSignUpTerms = (
   terms: PublishedTerms[],
   audience: AuthAudience,
@@ -29,10 +20,7 @@ export const filterSignUpTerms = (
 
   const role = toTermsAudienceRole(audience);
 
-  return terms.filter((item) => {
-    const itemAudience = resolveTermsAudience(item);
-    return itemAudience === "ALL" || itemAudience === role;
-  });
+  return terms.filter((item) => item.audience === "ALL" || item.audience === role);
 };
 
 export const toTermsAgreements = (
