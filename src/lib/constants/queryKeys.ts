@@ -1,3 +1,4 @@
+import type { GiveawayListQuery } from "@/types/giveaway";
 import type { MoversListQuery } from "@/types/mover";
 import type { ResidenceReviewListQuery } from "@/types/residenceReview";
 
@@ -43,6 +44,14 @@ export const getResidenceReviewMyListQueryKey = (
   page: number,
   limit: number,
 ) => [...getResidenceReviewMyListScopeQueryKey(authScope), { page, limit }] as const;
+
+export const getGiveawayListScopeQueryKey = (authScope: AuthQueryScope) =>
+  [...QUERY_KEYS.GIVEAWAYS.LIST, authScope] as const;
+
+export const getGiveawayListQueryKey = (
+  authScope: AuthQueryScope,
+  query: Omit<GiveawayListQuery, "cursor">,
+) => [...getGiveawayListScopeQueryKey(authScope), query] as const;
 
 /**
  * 현재 사용자의 모든 기사님 목록 쿼리를 대상으로 하는 prefix.
@@ -172,6 +181,12 @@ export const QUERY_KEYS = {
     LIST: ["residenceReviews", "list"] as const,
     ME: ["residenceReviews", "me"] as const,
     DETAIL_ROOT: ["residenceReviews", "detail"] as const,
+  },
+
+  // 2026.08.22 김나연 - [추가] 나눔 쿼리 키
+  GIVEAWAYS: {
+    ALL: ["giveaways"] as const,
+    LIST: ["giveaways", "list"] as const,
   },
 
   NOTIFICATIONS: {

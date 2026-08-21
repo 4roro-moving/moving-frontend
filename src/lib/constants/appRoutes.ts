@@ -50,11 +50,13 @@ export const APP_ROUTES = {
     WRITABLE: "/reviews/writable",
     ME: "/reviews/me",
   },
-  // 2026.08.20 김나연 - [수정] 커뮤니티(거주후기·나눔) 공개 페이지 경로
+  // 2026.08.20 김나연 - [수정] 커뮤니티 경로
+  // 거주후기는 공개, 나눔은 (customer)/(protected)에서 RoleGuard로 보호합니다.
   COMMUNITY: {
     ROOT: "/community",
     RESIDENCE_REVIEWS: "/community/residence-reviews",
     GIVEAWAY: "/community/giveaway",
+    GIVEAWAY_DETAIL: (giveawayId: number) => `/community/giveaway/${giveawayId}`,
   },
   // 2026.07.30 정슬기 - [추가] 내 견적 관리 페이지 경로
   /** 내 견적 관리 */
