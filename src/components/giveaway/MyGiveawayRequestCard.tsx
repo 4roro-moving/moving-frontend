@@ -137,8 +137,7 @@ const MyGiveawayRequestCard = ({ request, onEdit, onCancel }: MyGiveawayRequestC
               fullWidth
               onClick={() => onCancel(request)}
             >
-              <span className="xl:hidden">삭제하기</span>
-              <span className="hidden xl:inline">취소하기</span>
+              취소하기
             </Button>
           ) : null}
         </div>
