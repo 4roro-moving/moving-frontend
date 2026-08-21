@@ -159,6 +159,21 @@ export function formatDateToISODate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+/** Date → KST 기준 "YYYY-MM-DD" (백엔드 moveDate 형식) */
+export function formatDateToKstISODate(date: Date): string {
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Seoul",
+  }).formatToParts(date);
+
+  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+
+  return `${getPart("year")}-${getPart("month")}-${getPart("day")}`;
+}
+
 /** 두 날짜가 같은 '일'인지 (연/월/일 비교) */
 export function isSameDay(a: Date, b: Date): boolean {
   return (
