@@ -12,6 +12,7 @@ import {
   useConnectedChatRoomModalController,
 } from "@/hooks/useChatRoomModalController";
 import { cn } from "@/lib/utils/cn";
+import { formatKoreanDateTime } from "@/lib/utils/date";
 import { CHAT_IMAGE_CONTENT_TYPES } from "@/types/chat";
 import type { ChatActionItem, ChatParticipantRole } from "@/components/chat/ChatActionSheet";
 import type { ChatEstimateEditConfig } from "@/components/chat/ChatRoomModal";
@@ -46,6 +47,8 @@ interface ChatMessageListProps {
   isFetchingNextPage: boolean;
   hasNextPage: boolean;
   onFetchNextPage: () => void;
+  isActionPending: boolean;
+  onRespondEstimateRevision: (revisionId: number, response: "APPROVED" | "REJECTED") => void;
 }
 
 function formatMessageTime(createdAt: string): string {
@@ -63,6 +66,27 @@ function formatMessageTime(createdAt: string): string {
   }).format(date);
 }
 
+function formatRevisionMoveDate(moveDate: string): string {
+  try {
+    return formatKoreanDateTime(moveDate);
+  } catch {
+    return "-";
+  }
+}
+
+function getRevisionStatusLabel(status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELED") {
+  switch (status) {
+    case "PENDING":
+      return "응답 대기 중";
+    case "APPROVED":
+      return "승인됨";
+    case "REJECTED":
+      return "거절됨";
+    case "CANCELED":
+      return "취소됨";
+  }
+}
+
 function ChatMessageList({
   messages,
   participantRole,
@@ -70,6 +94,8 @@ function ChatMessageList({
   isFetchingNextPage,
   hasNextPage,
   onFetchNextPage,
+  isActionPending,
+  onRespondEstimateRevision,
 }: ChatMessageListProps) {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -148,7 +174,14 @@ function ChatMessageList({
 
         <div className="mt-auto flex flex-col gap-12">
           {messages.map((message) => {
-            const isMine = message.sender.role === participantRole;
+            const sender = message.sender;
+            const isMine = sender?.role === participantRole;
+            const revision = message.revision;
+            const canRespondRevision =
+              participantRole === "CUSTOMER" &&
+              message.type === "ESTIMATE_REVISION" &&
+              revision?.status === "PENDING" &&
+              !isMine;
 
             return (
               <div
@@ -157,18 +190,90 @@ function ChatMessageList({
               >
                 {!isMine ? (
                   <Text variant="sm-medium" className="text-text-muted">
-                    {message.sender.name}
+                    {sender?.name ?? "무빙"}
                   </Text>
                 ) : null}
                 <div
                   className={cn(
-                    "rounded-16 max-w-[78%] overflow-hidden",
+                    "rounded-16 max-w-[86%] overflow-hidden",
                     isMine
                       ? "bg-background-brand text-text-inverse rounded-br-4"
                       : "bg-background-subtle text-text-primary rounded-bl-4",
                   )}
                 >
-                  {message.type === "IMAGE" && message.imageUrl ? (
+                  {message.type === "ESTIMATE_REVISION" && revision ? (
+                    <div className="flex min-w-240 flex-col gap-12 px-14 py-12">
+                      <Text
+                        as="p"
+                        variant="md-semibold"
+                        className={isMine ? "text-text-inverse" : "text-text-primary"}
+                      >
+                        견적 수정 요청
+                      </Text>
+                      <div className="flex flex-col gap-6">
+                        <Text
+                          variant="sm-medium"
+                          className={isMine ? "text-text-inverse" : "text-text-secondary"}
+                        >
+                          이사일 {formatRevisionMoveDate(revision.previousMoveDate)} →{" "}
+                          {formatRevisionMoveDate(revision.requestedMoveDate)}
+                        </Text>
+                        <Text
+                          variant="sm-medium"
+                          className={isMine ? "text-text-inverse" : "text-text-secondary"}
+                        >
+                          견적가 {revision.previousPrice.toLocaleString("ko-KR")}원 →{" "}
+                          {revision.requestedPrice.toLocaleString("ko-KR")}원
+                        </Text>
+                        <Text
+                          as="p"
+                          variant="sm-medium"
+                          className={cn(
+                            "wrap-break-word whitespace-pre-wrap",
+                            isMine ? "text-text-inverse" : "text-text-primary",
+                          )}
+                        >
+                          {revision.requestedComment}
+                        </Text>
+                      </div>
+
+                      {canRespondRevision ? (
+                        <div className="flex gap-8">
+                          <button
+                            type="button"
+                            className={cn(
+                              "bg-background-surface text-text-brand border-border-brand rounded-10 flex h-36 flex-1 items-center justify-center border",
+                              "disabled:bg-background-disabled disabled:text-text-disabled disabled:border-border-disabled disabled:cursor-not-allowed",
+                              "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+                            )}
+                            disabled={isActionPending}
+                            onClick={() => onRespondEstimateRevision(revision.id, "REJECTED")}
+                          >
+                            <Text variant="sm-semibold">거절</Text>
+                          </button>
+                          <button
+                            type="button"
+                            className={cn(
+                              "bg-background-brand text-text-inverse rounded-10 flex h-36 flex-1 items-center justify-center",
+                              "disabled:bg-background-disabled disabled:text-text-disabled disabled:cursor-not-allowed",
+                              "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+                            )}
+                            disabled={isActionPending}
+                            onClick={() => onRespondEstimateRevision(revision.id, "APPROVED")}
+                          >
+                            <Text variant="sm-semibold">승인</Text>
+                          </button>
+                        </div>
+                      ) : (
+                        <Text
+                          variant="xs-medium"
+                          className={isMine ? "text-text-inverse" : "text-text-muted"}
+                        >
+                          {getRevisionStatusLabel(revision.status)}
+                        </Text>
+                      )}
+                    </div>
+                  ) : message.type === "IMAGE" && message.imageUrl ? (
                     <Image
                       src={message.imageUrl}
                       alt="첨부 이미지"
@@ -217,6 +322,13 @@ export function ConnectedChatRoomModal({
   const chat = useConnectedChatRoomModalController({ open, room });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatImageAccept = CHAT_IMAGE_CONTENT_TYPES.join(",");
+  const connectedEstimateEdit = estimateEdit
+    ? {
+        ...estimateEdit,
+        isSubmitting: estimateEdit.isSubmitting || chat.isSending,
+        onSubmit: chat.requestEstimateRevision,
+      }
+    : undefined;
 
   const mergedActions: ConnectedChatRoomModalProps["actions"] = {
     ...actions,
@@ -269,7 +381,7 @@ export function ConnectedChatRoomModal({
         onSendMessage={() => void chat.handleSendMessage()}
         onClose={onClose}
         actions={mergedActions}
-        estimateEdit={estimateEdit}
+        estimateEdit={connectedEstimateEdit}
       >
         {chat.isMessagesError ? (
           <div className="flex h-full flex-col items-center justify-center gap-12">
@@ -292,6 +404,10 @@ export function ConnectedChatRoomModal({
             isFetchingNextPage={chat.isFetchingNextPage}
             hasNextPage={chat.hasNextPage}
             onFetchNextPage={() => void chat.fetchNextPage()}
+            isActionPending={chat.isSending || chat.isImageSending}
+            onRespondEstimateRevision={(revisionId, response) =>
+              void chat.respondEstimateRevision(revisionId, response)
+            }
           />
         )}
       </ChatRoomModal>
