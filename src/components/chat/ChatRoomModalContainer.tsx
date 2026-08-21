@@ -349,7 +349,11 @@ export function ConnectedChatRoomModal({
     "attach-photo": {
       ...actions?.["attach-photo"],
       hidden: actions?.["attach-photo"]?.hidden || !IS_CHAT_IMAGE_UPLOAD_ENABLED,
-      disabled: actions?.["attach-photo"]?.disabled || chat.isImageSending || !chat.isConnected,
+      disabled:
+        actions?.["attach-photo"]?.disabled ||
+        chat.isComposerDisabled ||
+        chat.isImageSending ||
+        !chat.isConnected,
       onSelect: () => {
         actions?.["attach-photo"]?.onSelect?.();
         fileInputRef.current?.click();
@@ -389,6 +393,8 @@ export function ConnectedChatRoomModal({
         selectedImagePreviewUrl={chat.selectedImagePreviewUrl}
         selectedImageName={chat.selectedImageName}
         isImageSending={chat.isImageSending}
+        composerDisabled={chat.isComposerDisabled}
+        composerDisabledMessage={chat.messageDisabledReason}
         sendDisabled={chat.sendDisabled}
         onMessageChange={chat.setMessageValue}
         onClearSelectedImage={chat.clearSelectedImage}

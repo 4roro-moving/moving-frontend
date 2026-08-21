@@ -149,6 +149,7 @@ export function useConnectedChatRoomModalController({
   const [isSending, setIsSending] = useState(false);
   const [isImageSending, setIsImageSending] = useState(false);
   const selectedImagePreviewUrlRef = useRef<string | null>(null);
+  const isComposerDisabled = !room.canSendMessage;
 
   const messagesQuery = useChatMessages({
     roomId: room.id,
@@ -214,6 +215,11 @@ export function useConnectedChatRoomModalController({
 
   const selectImageFile = useCallback(
     (file: File) => {
+      if (isComposerDisabled) {
+        setToastMessage(room.messageDisabledReason ?? "메시지를 보낼 수 없는 채팅방입니다.");
+        return;
+      }
+
       const validationMessage = validateChatImageFile(file);
 
       if (validationMessage) {
@@ -230,13 +236,13 @@ export function useConnectedChatRoomModalController({
       setMessageValue("");
       setToastMessage(null);
     },
-    [revokeSelectedImagePreview],
+    [isComposerDisabled, revokeSelectedImagePreview, room.messageDisabledReason],
   );
 
   useEffect(() => () => revokeSelectedImagePreview(), [revokeSelectedImagePreview]);
 
   const sendSelectedImageMessage = async (file: File) => {
-    if (isSending || isImageSending) {
+    if (isComposerDisabled || isSending || isImageSending) {
       return;
     }
 
@@ -278,6 +284,10 @@ export function useConnectedChatRoomModalController({
   };
 
   const handleSendMessage = async () => {
+    if (isComposerDisabled) {
+      return;
+    }
+
     if (selectedImageFile) {
       await sendSelectedImageMessage(selectedImageFile);
       return;
@@ -311,7 +321,7 @@ export function useConnectedChatRoomModalController({
   };
 
   const handleRequestEstimateRevision = async (input: RequestEstimateRevisionInput) => {
-    if (isSending || isImageSending) {
+    if (isComposerDisabled || isSending || isImageSending) {
       return false;
     }
 
@@ -343,7 +353,7 @@ export function useConnectedChatRoomModalController({
     revisionId: number,
     responseType: "APPROVED" | "REJECTED",
   ) => {
-    if (isSending || isImageSending) {
+    if (isComposerDisabled || isSending || isImageSending) {
       return;
     }
 
@@ -399,7 +409,9 @@ export function useConnectedChatRoomModalController({
     isSending,
     isImageSending,
     isConnected,
-    sendDisabled: isSending || isImageSending || !isConnected,
+    isComposerDisabled,
+    messageDisabledReason: room.messageDisabledReason,
+    sendDisabled: isComposerDisabled || isSending || isImageSending || !isConnected,
     requestEstimateRevision: handleRequestEstimateRevision,
     respondEstimateRevision: handleRespondEstimateRevision,
     selectImageFile,
