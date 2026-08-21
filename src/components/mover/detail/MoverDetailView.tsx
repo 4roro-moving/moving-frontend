@@ -35,14 +35,14 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const { detail: queryDetail, isInitialLoading, isNotFound, query } = useMoverDetail(moverId);
+  // SSR guest 상세가 로그인 사용자 정보보다 먼저 노출되지 않도록 세션 확인 완료까지 대기합니다.
+  const displayedDetail = isInitialLoading && initialDetail ? initialDetail : queryDetail;
   const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
   const designation = useMoverDesignation({
     moverId,
+    moverServiceTypes: displayedDetail?.serviceTypes ?? [],
     onError: setToastMessage,
   });
-
-  // SSR guest 상세가 로그인 사용자 정보보다 먼저 노출되지 않도록 세션 확인 완료까지 대기합니다.
-  const displayedDetail = isInitialLoading && initialDetail ? initialDetail : queryDetail;
 
   if (isInitialLoading && !displayedDetail) {
     return (
