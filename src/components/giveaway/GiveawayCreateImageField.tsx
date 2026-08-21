@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, type ChangeEvent } from "react";
+import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
 
 import { Text } from "@/components/common/Text";
 import { CloseIcon, GalleryIcon } from "@/icons";
@@ -27,15 +27,21 @@ const GiveawayCreateImageField = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const errorId = `${generatedId}-error`;
   const isMaxCount = images.length >= GIVEAWAY_IMAGE_MAX_COUNT;
-  const previewUrls = useMemo(() => images.map((file) => URL.createObjectURL(file)), [images]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   useEffect(() => {
+    const nextUrls = images.map((file) => URL.createObjectURL(file));
+    const frameId = requestAnimationFrame(() => {
+      setPreviewUrls(nextUrls);
+    });
+
     return () => {
-      previewUrls.forEach((url) => {
+      cancelAnimationFrame(frameId);
+      nextUrls.forEach((url) => {
         URL.revokeObjectURL(url);
       });
     };
-  }, [previewUrls]);
+  }, [images]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onAdd(event.target.files);

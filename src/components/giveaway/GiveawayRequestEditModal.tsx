@@ -101,16 +101,21 @@ const GiveawayRequestEditModal = ({
   onSuccess,
 }: GiveawayRequestEditModalProps) => {
   const [formKey, setFormKey] = useState(0);
+  const [cachedRequest, setCachedRequest] = useState(request);
 
-  if (!request) {
+  if (request !== null && request !== cachedRequest) {
+    setCachedRequest(request);
+  }
+
+  if (!cachedRequest) {
     return null;
   }
 
   return (
     <GiveawayRequestEditModalContent
-      key={`${String(request.id)}-${String(formKey)}`}
+      key={`${String(cachedRequest.id)}-${String(formKey)}`}
       open={open}
-      request={request}
+      request={cachedRequest}
       onClose={onClose}
       onSuccess={onSuccess}
       onExitComplete={() => setFormKey((current) => current + 1)}
