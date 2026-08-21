@@ -9,12 +9,9 @@ import {
 } from "@/lib/constants/queryKeys";
 import type { GiveawayListQuery, GiveawayMyListQuery } from "@/types/giveaway";
 
-export const getGiveawaysInfiniteQueryOptions = (
-  authScope: AuthQueryScope,
-  listQuery: Omit<GiveawayListQuery, "cursor">,
-) => {
+export const getGiveawaysInfiniteQueryOptions = (listQuery: Omit<GiveawayListQuery, "cursor">) => {
   return infiniteQueryOptions({
-    queryKey: getGiveawayListQueryKey(authScope, listQuery),
+    queryKey: getGiveawayListQueryKey(listQuery),
     queryFn: ({ pageParam }) => fetchGiveaways({ ...listQuery, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>

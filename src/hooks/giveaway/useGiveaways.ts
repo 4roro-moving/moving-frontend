@@ -1,13 +1,13 @@
 "use client";
 
 import { useCursorListQuery } from "@/hooks/queries/useCursorListQuery";
-import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { getGiveawaysInfiniteQueryOptions } from "@/lib/queryOptions/giveaways";
-import { toGiveawayListQuery } from "@/lib/utils/giveawaySearchParams";
-import type { GiveawaySearchParamsState } from "@/lib/utils/giveawaySearchParams";
+import {
+  toGiveawayListQuery,
+  type GiveawaySearchParamsState,
+} from "@/lib/utils/giveawaySearchParams";
 
 export const useGiveaways = (filters: GiveawaySearchParamsState) => {
-  const { authScope, isAuthQueryReady } = useAuthQueryScope();
   const listQuery = toGiveawayListQuery(filters);
 
   const {
@@ -16,8 +16,7 @@ export const useGiveaways = (filters: GiveawaySearchParamsState) => {
     isFilterFetching,
     query,
   } = useCursorListQuery({
-    ...getGiveawaysInfiniteQueryOptions(authScope, listQuery),
-    enabled: isAuthQueryReady,
+    ...getGiveawaysInfiniteQueryOptions(listQuery),
   });
 
   return { giveaways, isInitialLoading, isFilterFetching, query };

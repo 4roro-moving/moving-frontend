@@ -7,7 +7,6 @@ import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import { useGiveawayFilters } from "@/hooks/giveaway/useGiveawayFilters";
-import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import {
   GIVEAWAY_ALL_VALUE,
   GIVEAWAY_KEYWORD_MAX_LENGTH,
@@ -38,7 +37,6 @@ interface GiveawayFiltersProps {
 
 const GiveawayFilters = ({ filters }: GiveawayFiltersProps) => {
   const queryClient = useQueryClient();
-  const { authScope } = useAuthQueryScope();
   const {
     clearSearch,
     filterKey,
@@ -62,10 +60,10 @@ const GiveawayFilters = ({ filters }: GiveawayFiltersProps) => {
       }
 
       void queryClient.prefetchInfiniteQuery(
-        getGiveawaysInfiniteQueryOptions(authScope, toGiveawayListQuery(nextFilters)),
+        getGiveawaysInfiniteQueryOptions(toGiveawayListQuery(nextFilters)),
       );
     },
-    [authScope, filters, keyword, queryClient],
+    [filters, keyword, queryClient],
   );
 
   return (

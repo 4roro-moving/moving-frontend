@@ -49,13 +49,11 @@ export const getResidenceReviewMyListQueryKey = (
   limit: number,
 ) => [...getResidenceReviewMyListScopeQueryKey(authScope), { page, limit }] as const;
 
-export const getGiveawayListScopeQueryKey = (authScope: AuthQueryScope) =>
-  [...QUERY_KEYS.GIVEAWAYS.LIST, authScope] as const;
+/** 공개 목록은 사용자별 필드가 없어 authScope를 넣지 않습니다. */
+export const getGiveawayListScopeQueryKey = () => [...QUERY_KEYS.GIVEAWAYS.LIST] as const;
 
-export const getGiveawayListQueryKey = (
-  authScope: AuthQueryScope,
-  query: Omit<GiveawayListQuery, "cursor">,
-) => [...getGiveawayListScopeQueryKey(authScope), query] as const;
+export const getGiveawayListQueryKey = (query: Omit<GiveawayListQuery, "cursor">) =>
+  [...getGiveawayListScopeQueryKey(), query] as const;
 
 export const getGiveawayMyListScopeQueryKey = (authScope: AuthQueryScope) =>
   [...QUERY_KEYS.GIVEAWAYS.ME, authScope] as const;
