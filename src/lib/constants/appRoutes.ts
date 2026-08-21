@@ -27,6 +27,8 @@ export const APP_ROUTES = {
   ESTIMATE_REQUEST: "/estimate-request",
   // 2026.08.20 김나연 - [수정] 고객 내 활동 내역
   MY_ACTIVITY: "/my-activity",
+  // 2026.08.22 김나연 - [추가] 내가 작성한 나눔글
+  MY_ACTIVITY_GIVEAWAY: "/my-activity/giveaway",
   /** 고객 프로필 수정 */
   PROFILE_EDIT: "/profile/edit",
   /** 기사님 프로필 수정 */
@@ -57,6 +59,7 @@ export const APP_ROUTES = {
     RESIDENCE_REVIEWS: "/community/residence-reviews",
     GIVEAWAY: "/community/giveaway",
     GIVEAWAY_DETAIL: (giveawayId: number) => `/community/giveaway/${giveawayId}`,
+    GIVEAWAY_WRITE: "/community/giveaway/write",
   },
   // 2026.07.30 정슬기 - [추가] 내 견적 관리 페이지 경로
   /** 내 견적 관리 */

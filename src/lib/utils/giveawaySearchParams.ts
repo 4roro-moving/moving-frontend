@@ -7,7 +7,12 @@ import {
   GIVEAWAY_STATUS_FILTER_OPTIONS,
 } from "@/lib/constants/giveaway";
 import { GIVEAWAY_LIST_SORT, GIVEAWAY_STATUS } from "@/types/giveaway";
-import type { GiveawayListQuery, GiveawayListSort, GiveawayStatus } from "@/types/giveaway";
+import type {
+  GiveawayListQuery,
+  GiveawayListSort,
+  GiveawayMyListQuery,
+  GiveawayStatus,
+} from "@/types/giveaway";
 
 export const GIVEAWAY_SEARCH_DEFAULTS = {
   keyword: "",
@@ -22,6 +27,16 @@ export interface GiveawaySearchParamsState {
   status: string;
   sort: GiveawayListSort;
 }
+
+export interface GiveawayMyFilterState {
+  status: string;
+  sort: GiveawayListSort;
+}
+
+export const GIVEAWAY_MY_FILTER_DEFAULTS = {
+  status: GIVEAWAY_SEARCH_DEFAULTS.status,
+  sort: GIVEAWAY_SEARCH_DEFAULTS.sort,
+} as const satisfies GiveawayMyFilterState;
 
 type SearchParamsInput = Record<string, string | string[] | undefined>;
 
@@ -74,14 +89,15 @@ export const parseGiveawaySearchParams = (
   };
 };
 
+const isGiveawayStatus = (value: string): value is GiveawayStatus =>
+  value === GIVEAWAY_STATUS.AVAILABLE ||
+  value === GIVEAWAY_STATUS.IN_PROGRESS ||
+  value === GIVEAWAY_STATUS.COMPLETED;
+
 export const toGiveawayListQuery = (
   filters: GiveawaySearchParamsState,
 ): Omit<GiveawayListQuery, "cursor"> => {
   const regionIdNumber = Number(filters.regionId);
-  const isStatus = (value: string): value is GiveawayStatus =>
-    value === GIVEAWAY_STATUS.AVAILABLE ||
-    value === GIVEAWAY_STATUS.IN_PROGRESS ||
-    value === GIVEAWAY_STATUS.COMPLETED;
 
   return {
     keyword: filters.keyword.trim() || undefined,
@@ -89,10 +105,42 @@ export const toGiveawayListQuery = (
       filters.regionId !== GIVEAWAY_ALL_VALUE && Number.isInteger(regionIdNumber)
         ? regionIdNumber
         : undefined,
-    status: isStatus(filters.status) ? filters.status : undefined,
+    status: isGiveawayStatus(filters.status) ? filters.status : undefined,
     sort: filters.sort,
     limit: GIVEAWAY_PAGE_LIMIT,
   };
+};
+
+export const parseMyGiveawaySearchParams = (
+  searchParams: SearchParamsInput,
+): GiveawayMyFilterState => {
+  return {
+    status: parseFilterValue(getParam(searchParams, "status")?.trim(), STATUS_VALUES),
+    sort: parseSort(getParam(searchParams, "sort")?.trim()),
+  };
+};
+
+export const toMyGiveawayListQuery = (
+  filters: GiveawayMyFilterState,
+): Omit<GiveawayMyListQuery, "cursor"> => {
+  return {
+    status: isGiveawayStatus(filters.status) ? filters.status : undefined,
+    sort: filters.sort,
+    limit: GIVEAWAY_PAGE_LIMIT,
+  };
+};
+
+export const buildMyGiveawayQueryString = (filters: GiveawayMyFilterState): string => {
+  const params = new URLSearchParams();
+
+  if (filters.status !== GIVEAWAY_MY_FILTER_DEFAULTS.status) {
+    params.set("status", filters.status);
+  }
+  if (filters.sort !== GIVEAWAY_MY_FILTER_DEFAULTS.sort) {
+    params.set("sort", filters.sort);
+  }
+
+  return params.toString();
 };
 
 export const buildGiveawayQueryString = (filters: GiveawaySearchParamsState): string => {

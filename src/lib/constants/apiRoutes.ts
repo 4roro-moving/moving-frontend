@@ -81,6 +81,7 @@ export const API_ROUTES = {
   // 2026.08.22 김나연 - [추가] 나눔 API 경로
   GIVEAWAYS: {
     ROOT: "/giveaways",
+    ME: "/giveaways/me",
     DETAIL: (giveawayId: number) => `/giveaways/${giveawayId}`,
   },
   // 2026.08.20 김나연 - [추가] 거주후기 API 경로

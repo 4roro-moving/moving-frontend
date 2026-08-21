@@ -1,4 +1,4 @@
-import type { GiveawayListQuery } from "@/types/giveaway";
+import type { GiveawayListQuery, GiveawayMyListQuery } from "@/types/giveaway";
 import type { MoversListQuery } from "@/types/mover";
 import type { ResidenceReviewListQuery } from "@/types/residenceReview";
 
@@ -52,6 +52,14 @@ export const getGiveawayListQueryKey = (
   authScope: AuthQueryScope,
   query: Omit<GiveawayListQuery, "cursor">,
 ) => [...getGiveawayListScopeQueryKey(authScope), query] as const;
+
+export const getGiveawayMyListScopeQueryKey = (authScope: AuthQueryScope) =>
+  [...QUERY_KEYS.GIVEAWAYS.ME, authScope] as const;
+
+export const getGiveawayMyListQueryKey = (
+  authScope: AuthQueryScope,
+  query: Omit<GiveawayMyListQuery, "cursor">,
+) => [...getGiveawayMyListScopeQueryKey(authScope), query] as const;
 
 /**
  * 현재 사용자의 모든 기사님 목록 쿼리를 대상으로 하는 prefix.
@@ -187,6 +195,7 @@ export const QUERY_KEYS = {
   GIVEAWAYS: {
     ALL: ["giveaways"] as const,
     LIST: ["giveaways", "list"] as const,
+    ME: ["giveaways", "me"] as const,
   },
 
   NOTIFICATIONS: {

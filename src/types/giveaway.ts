@@ -46,6 +46,13 @@ export interface GiveawayListQuery {
   limit: number;
 }
 
+export interface GiveawayMyListQuery {
+  status?: GiveawayStatus;
+  sort: GiveawayListSort;
+  cursor?: string;
+  limit: number;
+}
+
 export interface GiveawayListResult {
   data: GiveawayListItem[];
   pagination: CursorPagination;

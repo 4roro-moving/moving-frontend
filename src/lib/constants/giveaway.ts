@@ -12,6 +12,13 @@ export const GIVEAWAY_LIST_STALE_TIME_MS = 60 * 1000;
 
 export const GIVEAWAY_ALL_VALUE = "all" as const;
 
+export const GIVEAWAY_WRITE_BUTTON_LABEL = "나눔 글 작성";
+
+export const GIVEAWAY_EMPTY_DESCRIPTION_LINES = [
+  "아직 나눔 글이 없어요.",
+  "첫 나눔 글을 작성해 보세요.",
+] as const;
+
 export const GIVEAWAY_SORT_OPTIONS = [
   { value: GIVEAWAY_LIST_SORT.LATEST, label: "최신 순" },
   { value: GIVEAWAY_LIST_SORT.OLDEST, label: "오래된 순" },
