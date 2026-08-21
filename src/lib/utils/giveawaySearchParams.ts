@@ -137,6 +137,18 @@ export const buildMyGiveawayQueryString = (filters: GiveawayMyFilterState): stri
   return params.toString();
 };
 
+export const hasActiveGiveawaySearchFilters = (filters: GiveawaySearchParamsState): boolean => {
+  return (
+    filters.keyword.trim() !== GIVEAWAY_SEARCH_DEFAULTS.keyword ||
+    filters.regionId !== GIVEAWAY_SEARCH_DEFAULTS.regionId ||
+    filters.status !== GIVEAWAY_SEARCH_DEFAULTS.status
+  );
+};
+
+export const hasActiveMyGiveawayFilters = (filters: GiveawayMyFilterState): boolean => {
+  return filters.status !== GIVEAWAY_MY_FILTER_DEFAULTS.status;
+};
+
 export const buildGiveawayQueryString = (filters: GiveawaySearchParamsState): string => {
   const params = new URLSearchParams();
 

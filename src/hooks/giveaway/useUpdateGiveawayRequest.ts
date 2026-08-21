@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { updateGiveawayRequest } from "@/lib/api/giveawayRequests";
-import { invalidateGiveawayRelatedQueries } from "@/lib/queryOptions/invalidateGiveawayQueries";
+import { invalidateGiveawayRequestLists } from "@/lib/queryOptions/invalidateGiveawayQueries";
 import type { UpdateGiveawayRequestInput } from "@/types/giveaway";
 
 interface UpdateGiveawayRequestVariables {
@@ -21,7 +21,7 @@ export const useUpdateGiveawayRequest = () => {
     mutationFn: ({ requestId, body }: UpdateGiveawayRequestVariables) =>
       updateGiveawayRequest(requestId, body),
     onSuccess: () => {
-      invalidateGiveawayRelatedQueries(queryClient, authScope);
+      invalidateGiveawayRequestLists(queryClient, authScope);
     },
   });
 };

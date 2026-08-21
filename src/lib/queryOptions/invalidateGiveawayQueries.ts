@@ -9,12 +9,19 @@ export const invalidateGiveawayLists = (queryClient: QueryClient) => {
   });
 };
 
-export const invalidateGiveawayRelatedQueries = (
+export const invalidateGiveawayRequestLists = (
   queryClient: QueryClient,
   authScope: AuthQueryScope,
 ) => {
   void queryClient.invalidateQueries({
     queryKey: getGiveawayRequestMyListScopeQueryKey(authScope),
   });
+};
+
+export const invalidateGiveawayRelatedQueries = (
+  queryClient: QueryClient,
+  authScope: AuthQueryScope,
+) => {
+  invalidateGiveawayRequestLists(queryClient, authScope);
   invalidateGiveawayLists(queryClient);
 };

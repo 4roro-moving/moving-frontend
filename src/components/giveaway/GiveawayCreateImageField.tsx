@@ -64,7 +64,7 @@ const GiveawayCreateImageField = ({
       />
 
       <div className="flex w-full items-start gap-8">
-        <div className="flex shrink-0 flex-col items-center gap-2 pt-8">
+        <div className="flex shrink-0 flex-col items-center gap-2 pt-20">
           <button
             type="button"
             aria-label="나눔 이미지 추가"
@@ -85,7 +85,7 @@ const GiveawayCreateImageField = ({
           </Text>
         </div>
 
-        <div className="min-w-0 flex-1 overflow-x-auto pt-8 pr-8">
+        <div className="min-w-0 flex-1 overflow-x-auto pt-20 pr-20">
           <div className="flex w-max items-start gap-8">
             {previewUrls.map((previewUrl, index) => (
               <div
@@ -114,12 +114,14 @@ const GiveawayCreateImageField = ({
                   disabled={disabled}
                   onClick={() => onRemove(index)}
                   className={cn(
-                    "bg-text-tertiary absolute -top-7 -right-7 flex size-18 items-center justify-center rounded-full",
+                    "absolute -top-20 -right-20 flex size-44 items-center justify-center",
                     "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
                     "disabled:cursor-not-allowed disabled:opacity-50",
                   )}
                 >
-                  <CloseIcon className="text-text-inverse size-8" aria-hidden="true" />
+                  <span className="bg-text-tertiary flex size-18 items-center justify-center rounded-full">
+                    <CloseIcon className="text-text-inverse size-8" aria-hidden="true" />
+                  </span>
                 </button>
               </div>
             ))}

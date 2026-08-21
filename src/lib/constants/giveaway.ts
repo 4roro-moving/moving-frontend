@@ -39,6 +39,11 @@ export const GIVEAWAY_EMPTY_DESCRIPTION_LINES = [
   "첫 나눔 글을 작성해 보세요.",
 ] as const;
 
+export const GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES = [
+  "검색 결과가 없어요.",
+  "다른 검색어나 필터로 다시 찾아보세요.",
+] as const;
+
 export const GIVEAWAY_SORT_OPTIONS = [
   { value: GIVEAWAY_LIST_SORT.LATEST, label: "최신 순" },
   { value: GIVEAWAY_LIST_SORT.OLDEST, label: "오래된 순" },

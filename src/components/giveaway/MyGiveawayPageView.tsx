@@ -6,7 +6,10 @@ import GiveawayListView from "@/components/giveaway/GiveawayListView";
 import GiveawayPageLayout from "@/components/giveaway/GiveawayPageLayout";
 import { useGiveawayCreateAction } from "@/hooks/giveaway/useGiveawayCreateAction";
 import { useMyGiveaways } from "@/hooks/giveaway/useMyGiveaways";
-import type { GiveawayMyFilterState } from "@/lib/utils/giveawaySearchParams";
+import {
+  hasActiveMyGiveawayFilters,
+  type GiveawayMyFilterState,
+} from "@/lib/utils/giveawaySearchParams";
 
 interface MyGiveawayPageViewProps {
   filters: GiveawayMyFilterState;
@@ -24,6 +27,7 @@ const MyGiveawayPageView = ({ filters }: MyGiveawayPageViewProps) => {
           giveaways={giveaways}
           isInitialLoading={isInitialLoading}
           isFilterFetching={isFilterFetching}
+          hasActiveFilters={hasActiveMyGiveawayFilters(filters)}
           query={query}
         />
       </GiveawayPageLayout>

@@ -106,11 +106,19 @@ const MyGiveawayRequestCard = ({ request, onEdit, onCancel }: MyGiveawayRequestC
           <ResidenceReviewInfoItem label="신청일" value={appliedDate} />
         </dl>
 
-        <div className="hidden min-w-0 flex-col md:flex">
-          <Text as="p" variant="2lg-bold" className="text-text-secondary">
+        <div className="flex min-w-0 flex-col">
+          <Text
+            as="p"
+            variant={{ base: "lg-semibold", md: "2lg-bold" }}
+            className="text-text-secondary"
+          >
             신청 내용
           </Text>
-          <Text as="p" variant="md-regular" className="text-text-secondary line-clamp-1">
+          <Text
+            as="p"
+            variant={{ base: "xs-regular", md: "md-regular" }}
+            className="text-text-secondary line-clamp-1"
+          >
             {message}
           </Text>
         </div>

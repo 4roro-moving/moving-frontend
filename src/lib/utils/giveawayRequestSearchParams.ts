@@ -76,6 +76,13 @@ export const toGiveawayRequestMyListQuery = (
   };
 };
 
+export const hasActiveGiveawayRequestFilters = (filters: GiveawayRequestFilterState): boolean => {
+  return (
+    filters.keyword.trim() !== GIVEAWAY_REQUEST_FILTER_DEFAULTS.keyword ||
+    filters.status !== GIVEAWAY_REQUEST_FILTER_DEFAULTS.status
+  );
+};
+
 export const buildGiveawayRequestQueryString = (filters: GiveawayRequestFilterState): string => {
   const params = new URLSearchParams();
 

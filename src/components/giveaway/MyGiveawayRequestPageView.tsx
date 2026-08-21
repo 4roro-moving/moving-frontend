@@ -11,7 +11,10 @@ import MyGiveawayRequestListView from "@/components/giveaway/MyGiveawayRequestLi
 import { useCancelGiveawayRequest } from "@/hooks/giveaway/useCancelGiveawayRequest";
 import { useMyGiveawayRequests } from "@/hooks/giveaway/useMyGiveawayRequests";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import type { GiveawayRequestFilterState } from "@/lib/utils/giveawayRequestSearchParams";
+import {
+  hasActiveGiveawayRequestFilters,
+  type GiveawayRequestFilterState,
+} from "@/lib/utils/giveawayRequestSearchParams";
 import type { MyGiveawayRequestItem } from "@/types/giveaway";
 
 interface MyGiveawayRequestPageViewProps {
@@ -55,6 +58,7 @@ const MyGiveawayRequestPageView = ({ filters }: MyGiveawayRequestPageViewProps) 
           requests={requests}
           isInitialLoading={isInitialLoading}
           isFilterFetching={isFilterFetching}
+          hasActiveFilters={hasActiveGiveawayRequestFilters(filters)}
           query={query}
           onEdit={setRequestToEdit}
           onCancel={setRequestToCancel}

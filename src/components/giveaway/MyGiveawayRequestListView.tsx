@@ -8,6 +8,7 @@ import MyGiveawayRequestCard from "@/components/giveaway/MyGiveawayRequestCard";
 import MyGiveawayRequestCardSkeletonList from "@/components/giveaway/MyGiveawayRequestCardSkeletonList";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import {
+  GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES,
   GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL,
   GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES,
 } from "@/lib/constants/giveaway";
@@ -18,16 +19,17 @@ interface MyGiveawayRequestListViewProps {
   requests: MyGiveawayRequestItem[];
   isInitialLoading: boolean;
   isFilterFetching: boolean;
+  hasActiveFilters: boolean;
   query: UseInfiniteQueryResult<InfiniteData<GiveawayRequestMyListResult>, ApiError>;
   onEdit: (request: MyGiveawayRequestItem) => void;
   onCancel: (request: MyGiveawayRequestItem) => void;
 }
 
-const EMPTY_DESCRIPTION = (
+const toEmptyDescription = (lines: readonly [string, string]) => (
   <>
-    {GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES[0]}
+    {lines[0]}
     <br />
-    {GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES[1]}
+    {lines[1]}
   </>
 );
 
@@ -35,10 +37,17 @@ const MyGiveawayRequestListView = ({
   requests,
   isInitialLoading,
   isFilterFetching,
+  hasActiveFilters,
   query,
   onEdit,
   onCancel,
 }: MyGiveawayRequestListViewProps) => {
+  const emptyDescription = toEmptyDescription(
+    hasActiveFilters
+      ? GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES
+      : GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES,
+  );
+
   return (
     <GiveawayInfiniteListChrome
       itemCount={requests.length}
@@ -50,9 +59,9 @@ const MyGiveawayRequestListView = ({
         <EmptyState
           size="sm"
           imageSrc="/images/empty/character.png"
-          description={EMPTY_DESCRIPTION}
-          buttonLabel={GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL}
-          href={APP_ROUTES.COMMUNITY.GIVEAWAY}
+          description={emptyDescription}
+          buttonLabel={hasActiveFilters ? undefined : GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL}
+          href={hasActiveFilters ? undefined : APP_ROUTES.COMMUNITY.GIVEAWAY}
         />
       }
       initialErrorFallback="내가 작성한 나눔 신청글을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."

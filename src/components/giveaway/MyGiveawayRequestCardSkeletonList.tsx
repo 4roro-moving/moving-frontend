@@ -25,7 +25,7 @@ const MyGiveawayRequestCardSkeletonList = ({
                   <Skeleton className="h-48 w-64" />
                   <Skeleton className="h-48 w-120" />
                 </div>
-                <Skeleton className="hidden h-50 w-full md:block" />
+                <Skeleton className="h-50 w-full" />
               </div>
               <div className="flex w-full flex-col gap-8 md:flex-row xl:w-160 xl:flex-col">
                 <Skeleton className="rounded-12 h-54 w-full" />
