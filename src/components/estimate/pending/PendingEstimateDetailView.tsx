@@ -63,6 +63,13 @@ function PendingEstimateDetailContent({
     onError: setConfirmToastMessage,
   });
 
+  const handleConfirmEstimate = () => {
+    setConfirmToastMessage(null);
+    confirmMutation.mutate(undefined, {
+      onSuccess: handleCloseChatModal,
+    });
+  };
+
   const cancelFlow = useEstimateRequestCancelFlow(estimateRequestId);
   const toastMessage = confirmToastMessage ?? cancelFlow.toastMessage;
 
@@ -124,6 +131,13 @@ function PendingEstimateDetailContent({
         participantRole="CUSTOMER"
         participantName={displayName}
         estimateSummary={`견적가 - ${data.price.toLocaleString("ko-KR")}원`}
+        actions={{
+          // 2026.08.21 김성현 - [추가] 고객 채팅 메뉴에서 견적 확정 API 호출
+          "confirm-estimate": {
+            disabled: !data.canConfirm || confirmMutation.isPending,
+            onSelect: handleConfirmEstimate,
+          },
+        }}
         onClose={handleCloseChatModal}
       />
 
