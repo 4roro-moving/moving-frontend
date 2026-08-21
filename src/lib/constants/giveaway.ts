@@ -1,5 +1,12 @@
-import { GIVEAWAY_LIST_SORT, GIVEAWAY_STATUS } from "@/types/giveaway";
-import type { GiveawayListSort, GiveawayStatus } from "@/types/giveaway";
+import {
+  GIVEAWAY_LIST_SORT,
+  GIVEAWAY_REQUEST_STATUS,
+  GIVEAWAY_STATUS,
+  type GiveawayListSort,
+  type GiveawayRequestStatus,
+  type GiveawayStatus,
+  type MyGiveawayRequestItem,
+} from "@/types/giveaway";
 
 export const GIVEAWAY_PAGE_LIMIT = 10;
 
@@ -62,4 +69,54 @@ export const getGiveawayThumbnailOverlayLabel = (status: GiveawayStatus): string
   }
 
   return null;
+};
+
+export const GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH = 1000;
+
+export const GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL = "나눔 글 보러가기";
+
+export const GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES = [
+  "아직 신청한 나눔이 없어요.",
+  "나눔 글을 둘러보고 신청해 보세요.",
+] as const;
+
+export const GIVEAWAY_REQUEST_STATUS_LABEL = {
+  [GIVEAWAY_REQUEST_STATUS.PENDING]: "신청 완료",
+  [GIVEAWAY_REQUEST_STATUS.SELECTED]: "선정됨",
+  [GIVEAWAY_REQUEST_STATUS.REJECTED]: "거절됨",
+  [GIVEAWAY_REQUEST_STATUS.CANCELLED]: "취소됨",
+} as const satisfies Record<GiveawayRequestStatus, string>;
+
+export const GIVEAWAY_REQUEST_STATUS_FILTER_OPTIONS = [
+  { value: GIVEAWAY_ALL_VALUE, label: "전체" },
+  { value: GIVEAWAY_REQUEST_STATUS.PENDING, label: GIVEAWAY_REQUEST_STATUS_LABEL.PENDING },
+  { value: GIVEAWAY_REQUEST_STATUS.SELECTED, label: GIVEAWAY_REQUEST_STATUS_LABEL.SELECTED },
+  { value: GIVEAWAY_REQUEST_STATUS.REJECTED, label: GIVEAWAY_REQUEST_STATUS_LABEL.REJECTED },
+  { value: GIVEAWAY_REQUEST_STATUS.CANCELLED, label: GIVEAWAY_REQUEST_STATUS_LABEL.CANCELLED },
+] as const satisfies readonly { value: string; label: string }[];
+
+export const getGiveawayRequestStatusLabel = (status: GiveawayRequestStatus): string => {
+  return GIVEAWAY_REQUEST_STATUS_LABEL[status];
+};
+
+export const canEditGiveawayRequest = (request: MyGiveawayRequestItem): boolean => {
+  return (
+    request.status === GIVEAWAY_REQUEST_STATUS.PENDING &&
+    request.giveaway.status !== GIVEAWAY_STATUS.COMPLETED
+  );
+};
+
+export const canCancelGiveawayRequest = (request: MyGiveawayRequestItem): boolean => {
+  if (request.giveaway.status === GIVEAWAY_STATUS.COMPLETED) {
+    return false;
+  }
+
+  if (request.status === GIVEAWAY_REQUEST_STATUS.PENDING) {
+    return true;
+  }
+
+  return (
+    request.status === GIVEAWAY_REQUEST_STATUS.SELECTED &&
+    request.giveaway.status === GIVEAWAY_STATUS.IN_PROGRESS
+  );
 };

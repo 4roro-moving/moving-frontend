@@ -5,7 +5,8 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
 const TABS: readonly NavigationTabItem[] = [
   { href: APP_ROUTES.MY_ACTIVITY, label: "내가 작성한 거주후기", match: "exact" },
-  { href: APP_ROUTES.MY_ACTIVITY_GIVEAWAY, label: "내가 작성한 나눔글" },
+  { href: APP_ROUTES.MY_ACTIVITY_GIVEAWAY, label: "내가 작성한 나눔글", match: "exact" },
+  { href: APP_ROUTES.MY_ACTIVITY_GIVEAWAY_REQUESTS, label: "내가 작성한 나눔 신청글" },
 ];
 
 const MyActivityTabs = () => {

@@ -98,6 +98,61 @@ export interface GiveawayMyRequest {
   updatedAt: string;
 }
 
+export const GIVEAWAY_REQUEST_STATUS = {
+  PENDING: "PENDING",
+  SELECTED: "SELECTED",
+  REJECTED: "REJECTED",
+  CANCELLED: "CANCELLED",
+} as const;
+
+export type GiveawayRequestStatus =
+  (typeof GIVEAWAY_REQUEST_STATUS)[keyof typeof GIVEAWAY_REQUEST_STATUS];
+
+export interface GiveawayRequestGiveawaySummary {
+  id: number;
+  title: string;
+  status: GiveawayStatus;
+  author: GiveawayAuthor;
+  region: GiveawayRegion | null;
+  thumbnailUrl: string | null;
+}
+
+export interface MyGiveawayRequestItem {
+  id: number;
+  status: GiveawayRequestStatus;
+  message: string | null;
+  createdAt: string;
+  updatedAt: string;
+  giveaway: GiveawayRequestGiveawaySummary;
+}
+
+export interface GiveawayRequestMyListQuery {
+  keyword?: string;
+  status?: GiveawayRequestStatus;
+  sort: GiveawayListSort;
+  cursor?: string;
+  limit: number;
+}
+
+export interface GiveawayRequestMyListResult {
+  data: MyGiveawayRequestItem[];
+  pagination: CursorPagination;
+}
+
+export interface UpdateGiveawayRequestInput {
+  message: string | null;
+}
+
+export interface GiveawayRequestItem {
+  id: number;
+  giveawayId: number;
+  status: GiveawayRequestStatus;
+  message: string | null;
+  createdAt: string;
+  updatedAt: string;
+  requester: GiveawayAuthor;
+}
+
 export interface GiveawayDetail {
   id: number;
   title: string;
