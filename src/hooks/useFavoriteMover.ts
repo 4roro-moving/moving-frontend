@@ -58,13 +58,14 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   const router = useRouter();
   const loginRequiredModal = useLoginRequiredModal();
   const auth = useCustomerAuthReady();
-  const { authScope } = useAuthQueryScope();
+  const { authScope, isAuthQueryReady } = useAuthQueryScope();
   const authScopeRef = useRef(authScope);
   const onErrorRef = useRef(options?.onError);
   const statesRef = useRef(new Map<string, FavoriteSyncState>());
   const cacheUpdateChainRef = useRef(Promise.resolve());
   const isCustomer = auth.user?.role === "CUSTOMER";
-  const canToggleFavorite = !auth.isPending && (!auth.isAuthenticated || isCustomer);
+  const canToggleFavorite =
+    isAuthQueryReady && !auth.isPending && (!auth.isAuthenticated || isCustomer);
 
   useEffect(() => {
     authScopeRef.current = authScope;
@@ -158,7 +159,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   };
 
   const mutate = ({ moverId, nextIsFavorite }: FavoriteMoverVariables) => {
-    if (auth.isPending) return;
+    if (auth.isPending || !isAuthQueryReady) return;
     if (!auth.isAuthenticated || !hasAuthSession()) {
       requireLogin();
       return;
@@ -179,7 +180,9 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
   };
 
   const mutateAsync = (variables: FavoriteMoverVariables) => {
-    if (auth.isPending) return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
+    if (auth.isPending || !isAuthQueryReady) {
+      return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
+    }
     if (!auth.isAuthenticated || !hasAuthSession()) {
       requireLogin();
       return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));

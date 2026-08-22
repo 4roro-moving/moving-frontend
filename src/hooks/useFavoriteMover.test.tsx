@@ -6,6 +6,8 @@ import { addFavoriteMover, removeFavoriteMover } from "@/lib/api/favorites";
 import { createQueryClientWrapper, createTestQueryClient } from "@/test/createQueryClientWrapper";
 import { createDeferred } from "@/test/createDeferred";
 
+const authQueryScopeMock = vi.hoisted(() => ({ isAuthQueryReady: true }));
+
 vi.mock("@/lib/api/favorites", () => ({
   addFavoriteMover: vi.fn(),
   removeFavoriteMover: vi.fn(),
@@ -19,7 +21,10 @@ vi.mock("@/hooks/useCustomerAuthReady", () => ({
   }),
 }));
 vi.mock("@/hooks/useAuthQueryScope", () => ({
-  useAuthQueryScope: () => ({ authScope: "user:user-1", isAuthQueryReady: true }),
+  useAuthQueryScope: () => ({
+    authScope: authQueryScopeMock.isAuthQueryReady ? "user:user-1" : "authenticated-unresolved",
+    isAuthQueryReady: authQueryScopeMock.isAuthQueryReady,
+  }),
 }));
 vi.mock("@/lib/auth/session", () => ({
   getLoginRedirectPath: () => "/login",
@@ -31,7 +36,24 @@ vi.mock("@/components/auth/LoginRequiredModalProvider", () => ({
 }));
 
 describe("useFavoriteMover", () => {
-  afterEach(() => vi.clearAllMocks());
+  afterEach(() => {
+    authQueryScopeMock.isAuthQueryReady = true;
+    vi.clearAllMocks();
+  });
+
+  it("인증 query scope가 준비되기 전에는 토글과 요청을 차단한다", async () => {
+    authQueryScopeMock.isAuthQueryReady = false;
+    const { result } = renderHook(() => useFavoriteMover(), {
+      wrapper: createQueryClientWrapper(createTestQueryClient()),
+    });
+
+    expect(result.current.canToggleFavorite).toBe(false);
+    act(() => result.current.mutate({ moverId: "mover-1", nextIsFavorite: true }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(addFavoriteMover).not.toHaveBeenCalled();
+    expect(removeFavoriteMover).not.toHaveBeenCalled();
+  });
 
   it("요청 시작 전 ON → OFF가 끝나면 서버 요청을 보내지 않는다", async () => {
     const { result } = renderHook(() => useFavoriteMover(), {
