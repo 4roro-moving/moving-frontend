@@ -77,6 +77,8 @@ export function useMoverProfileCreateForm({
     setSubmitError(null);
     setIsSubmitting(true);
 
+    let shouldKeepPending = false;
+
     try {
       const imageKey = await uploadProfileImage(formValues.imageFile);
       const activityBaseAddress = formValues.activityBaseAddress;
@@ -110,6 +112,7 @@ export function useMoverProfileCreateForm({
       });
 
       router.replace(getRoleHomePath("MOVER"));
+      shouldKeepPending = true;
     } catch (error) {
       if (isConflictError(error)) {
         if (error.message.includes(MOVER_PROFILE_PHONE_ERROR_KEYWORD)) {
@@ -133,8 +136,10 @@ export function useMoverProfileCreateForm({
 
       setSubmitError(getApiErrorMessage(error, MOVER_PROFILE_CREATE_ERROR_MESSAGE));
     } finally {
-      submissionInFlightRef.current = false;
-      setIsSubmitting(false);
+      if (!shouldKeepPending) {
+        submissionInFlightRef.current = false;
+        setIsSubmitting(false);
+      }
 
       const focusField = pendingFocusFieldRef.current;
 

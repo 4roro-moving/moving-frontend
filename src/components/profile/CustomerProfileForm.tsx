@@ -41,6 +41,7 @@ const CustomerProfileForm = ({
   const router = useRouter();
   const createCustomerProfile = useCreateCustomerProfile();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const {
     register,
@@ -60,7 +61,7 @@ const CustomerProfileForm = ({
     },
   });
 
-  const isPending = isSubmitting || createCustomerProfile.isPending;
+  const isPending = isSubmitting || createCustomerProfile.isPending || isRedirecting;
 
   const onSubmit = handleSubmit(async (formValues) => {
     setSubmitError(null);
@@ -79,6 +80,7 @@ const CustomerProfileForm = ({
         regionIds: [formValues.regionId],
         serviceTypes: formValues.serviceTypes,
       });
+      setIsRedirecting(true);
       router.replace(getRoleHomePath("CUSTOMER"));
     } catch (error) {
       if (

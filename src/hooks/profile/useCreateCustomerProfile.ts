@@ -17,14 +17,14 @@ export const useCreateCustomerProfile = () => {
 
   return useApiMutation({
     mutationFn: (input: CreateCustomerProfileInput) => createCustomerProfile(input),
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       const profile = mapCustomerProfileMeResponse(data);
       saveProfileCompleted(true);
       establishSession(toAuthUserFromCustomerProfile(profile));
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.CUSTOMER_ME }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.CUSTOMER_STATUS }),
-      ]);
+      queryClient.setQueryData(
+        [...QUERY_KEYS.PROFILES.CUSTOMER_ME, profile.userId] as const,
+        profile,
+      );
     },
   });
 };

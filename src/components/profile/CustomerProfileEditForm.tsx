@@ -170,10 +170,7 @@ const CustomerProfileEditForm = ({
                     field.onChange(file);
                   }}
                   onClear={() => {
-                    if (field.value) {
-                      field.onChange(null);
-                      return;
-                    }
+                    field.onChange(null);
                     setValue("shouldRemoveImage", true, { shouldDirty: true });
                   }}
                   error={errors.imageFile?.message}

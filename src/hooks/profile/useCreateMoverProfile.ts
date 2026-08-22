@@ -17,14 +17,11 @@ export const useCreateMoverProfile = () => {
 
   return useApiMutation({
     mutationFn: (input: CreateMoverProfileInput) => createMoverProfile(input),
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       const profile = mapMoverProfileMeResponse(data);
       saveProfileCompleted(true);
       establishSession(toAuthUserFromMoverProfile(profile));
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.MOVER_ME }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILES.MOVER_STATUS }),
-      ]);
+      queryClient.setQueryData([...QUERY_KEYS.PROFILES.MOVER_ME, profile.userId] as const, profile);
     },
   });
 };
