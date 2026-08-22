@@ -278,14 +278,18 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
                     : "bg-background-disabled text-text-disabled cursor-not-allowed",
                 )}
               >
-                {addMessageMutation.isError && (
-                  <Text as="p" variant="xs-regular" className="text-text-error" role="alert">
-                    추가 문의 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.
-                  </Text>
-                )}
+                <Text as="span" variant="md-semibold">
+                  {addMessageMutation.isPending ? "등록 중..." : "추가 문의 등록"}
+                </Text>
               </button>
             </div>
           </div>
+
+          {addMessageMutation.isError && (
+            <Text as="p" variant="xs-regular" className="text-text-error" role="alert">
+              추가 문의 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.
+            </Text>
+          )}
         </form>
       )}
 

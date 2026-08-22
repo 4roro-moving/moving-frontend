@@ -18,14 +18,9 @@ interface RoleGuardProps {
   allowedRole: AuthRole | AuthRole[];
   children: ReactNode;
   loadingFallback?: ReactNode;
+  unauthenticatedFallback?: ReactNode;
 }
 
-/**
- * early direct role 이 있으면 바로 return
- *
- * token 이 없으면 null return
- * token 이 있으면 token 에서 role 을 추출하여 return
- */
 const resolveKnownRole = (storeRole: AuthRole | null | undefined): AuthRole | null => {
   if (storeRole) {
     return storeRole;
@@ -46,13 +41,12 @@ const normalizeAllowedRoles = (allowedRole: AuthRole | AuthRole[]): AuthRole[] =
 const isRoleAllowed = (role: AuthRole | null | undefined, allowedRoles: AuthRole[]): boolean =>
   Boolean(role && allowedRoles.includes(role));
 
-/**
- * 역할 전용 페이지 가드 — (protected) layout에서 사용
- *
- * 단일 역할 또는 여러 역할을 허용할 수 있습니다.
- * known role이 허용 역할에 포함되지 않으면 checkAuth 대기 없이 역할 홈으로 이동합니다.
- */
-const RoleGuard = ({ allowedRole, children, loadingFallback = null }: RoleGuardProps) => {
+const RoleGuard = ({
+  allowedRole,
+  children,
+  loadingFallback = null,
+  unauthenticatedFallback,
+}: RoleGuardProps) => {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -66,6 +60,8 @@ const RoleGuard = ({ allowedRole, children, loadingFallback = null }: RoleGuardP
   const knownRole = resolveKnownRole(storeRole);
 
   const isWrongRole = Boolean(knownRole && !isRoleAllowed(knownRole, allowedRoles));
+
+  const isMultiRole = allowedRoles.length > 1;
 
   useEffect(() => {
     if (!hasHydrated) {
@@ -82,15 +78,20 @@ const RoleGuard = ({ allowedRole, children, loadingFallback = null }: RoleGuardP
     }
 
     if (!isAuthenticated) {
-      const loginAudienceRole = allowedRoles[0];
-
-      if (!loginAudienceRole) {
+      if (isMultiRole && unauthenticatedFallback) {
         return;
       }
 
-      const audience: AuthAudience = getAuthAudienceFromRole(loginAudienceRole);
+      const singleAllowedRole = allowedRoles[0];
+
+      if (!singleAllowedRole) {
+        return;
+      }
+
+      const audience: AuthAudience = getAuthAudienceFromRole(singleAllowedRole);
 
       router.replace(buildLoginPath(`${pathname}${window.location.search}`, audience));
+
       return;
     }
 
@@ -105,6 +106,8 @@ const RoleGuard = ({ allowedRole, children, loadingFallback = null }: RoleGuardP
     knownRole,
     storeRole,
     allowedRoles,
+    isMultiRole,
+    unauthenticatedFallback,
     pathname,
     router,
   ]);
@@ -121,7 +124,11 @@ const RoleGuard = ({ allowedRole, children, loadingFallback = null }: RoleGuardP
     return loadingFallback;
   }
 
-  if (!isAuthenticated || !isRoleAllowed(storeRole, allowedRoles)) {
+  if (!isAuthenticated) {
+    return unauthenticatedFallback ?? null;
+  }
+
+  if (!isRoleAllowed(storeRole, allowedRoles)) {
     return null;
   }
 
