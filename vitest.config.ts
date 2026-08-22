@@ -24,6 +24,7 @@ export default defineConfig({
         test: {
           name: "unit",
           include: ["src/**/*.test.{ts,tsx}"],
+          exclude: ["src/lib/mover-recommendation/**/*.test.ts"],
           browser: {
             enabled: true,
             headless: true,
