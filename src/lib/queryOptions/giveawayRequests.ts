@@ -1,7 +1,7 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 
 import { fetchGiveawayRequests, fetchMyGiveawayRequests } from "@/lib/api/giveawayRequests";
-import { GIVEAWAY_LIST_STALE_TIME_MS } from "@/lib/constants/giveaway";
+import { GIVEAWAY_STATUS_STALE_TIME_MS } from "@/lib/constants/giveaway";
 import {
   getGiveawayRequestMyListQueryKey,
   getGiveawayRequestsQueryKey,
@@ -16,7 +16,7 @@ export const getGiveawayRequestsQueryOptions = (
   return queryOptions({
     queryKey: getGiveawayRequestsQueryKey(giveawayId, listQuery),
     queryFn: () => fetchGiveawayRequests(giveawayId, listQuery),
-    staleTime: GIVEAWAY_LIST_STALE_TIME_MS,
+    staleTime: GIVEAWAY_STATUS_STALE_TIME_MS,
   });
 };
 
@@ -30,6 +30,6 @@ export const getMyGiveawayRequestsInfiniteQueryOptions = (
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
       lastPage.pagination.hasNext ? (lastPage.pagination.nextCursor ?? undefined) : undefined,
-    staleTime: GIVEAWAY_LIST_STALE_TIME_MS,
+    staleTime: GIVEAWAY_STATUS_STALE_TIME_MS,
   });
 };

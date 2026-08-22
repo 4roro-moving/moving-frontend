@@ -5,6 +5,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { cancelGiveawayRequest } from "@/lib/api/giveawayRequests";
+import {
+  applyGiveawayRequestItemToCaches,
+  patchGiveawayDetailQueryData,
+  toGiveawayMyRequest,
+} from "@/lib/queryOptions/giveawayCache";
 import { invalidateGiveawayRelatedQueries } from "@/lib/queryOptions/invalidateGiveawayQueries";
 
 export const useCancelGiveawayRequest = () => {
@@ -13,8 +18,15 @@ export const useCancelGiveawayRequest = () => {
 
   return useApiMutation({
     mutationFn: cancelGiveawayRequest,
-    onSuccess: () => {
-      invalidateGiveawayRelatedQueries(queryClient, authScope);
+    onSuccess: (request) => {
+      applyGiveawayRequestItemToCaches(queryClient, authScope, request);
+      patchGiveawayDetailQueryData(queryClient, request.giveawayId, (current) => ({
+        ...current,
+        canRequest: true,
+        activeRequestCount: Math.max(0, current.activeRequestCount - 1),
+        myRequest: toGiveawayMyRequest(request),
+      }));
+      invalidateGiveawayRelatedQueries(queryClient, authScope, request.giveawayId);
     },
   });
 };

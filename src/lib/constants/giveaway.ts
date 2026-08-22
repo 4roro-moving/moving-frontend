@@ -16,6 +16,7 @@ export const GIVEAWAY_ABOVE_THE_FOLD_THUMBNAIL_COUNT = 4;
 export const GIVEAWAY_KEYWORD_MAX_LENGTH = 100;
 
 export const GIVEAWAY_LIST_STALE_TIME_MS = 60 * 1000;
+export const GIVEAWAY_STATUS_STALE_TIME_MS = 0;
 
 export const GIVEAWAY_ALL_VALUE = "all" as const;
 

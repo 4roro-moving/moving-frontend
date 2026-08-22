@@ -5,6 +5,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { updateGiveawayRequest } from "@/lib/api/giveawayRequests";
+import {
+  applyGiveawayRequestItemToCaches,
+  patchGiveawayDetailQueryData,
+  toGiveawayMyRequest,
+} from "@/lib/queryOptions/giveawayCache";
 import { invalidateGiveawayRelatedQueries } from "@/lib/queryOptions/invalidateGiveawayQueries";
 import type { UpdateGiveawayRequestInput } from "@/types/giveaway";
 
@@ -21,7 +26,22 @@ export const useUpdateGiveawayRequest = () => {
   return useApiMutation({
     mutationFn: ({ requestId, body }: UpdateGiveawayRequestVariables) =>
       updateGiveawayRequest(requestId, body),
-    onSuccess: (_data, { giveawayId }) => {
+    onSuccess: (request, { giveawayId }) => {
+      applyGiveawayRequestItemToCaches(queryClient, authScope, request);
+
+      if (giveawayId !== undefined) {
+        patchGiveawayDetailQueryData(queryClient, giveawayId, (current) => {
+          if (current.myRequest?.id !== request.id) {
+            return current;
+          }
+
+          return {
+            ...current,
+            myRequest: toGiveawayMyRequest(request),
+          };
+        });
+      }
+
       invalidateGiveawayRelatedQueries(queryClient, authScope, giveawayId);
     },
   });

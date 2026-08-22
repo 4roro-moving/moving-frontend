@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { completeGiveaway } from "@/lib/api/giveaways";
+import { setGiveawayDetailQueryData } from "@/lib/queryOptions/giveawayCache";
 import { invalidateGiveawayRelatedQueries } from "@/lib/queryOptions/invalidateGiveawayQueries";
 
 export const useCompleteGiveaway = () => {
@@ -13,7 +14,8 @@ export const useCompleteGiveaway = () => {
 
   return useApiMutation({
     mutationFn: completeGiveaway,
-    onSuccess: (_data, giveawayId) => {
+    onSuccess: (detail, giveawayId) => {
+      setGiveawayDetailQueryData(queryClient, giveawayId, detail);
       invalidateGiveawayRelatedQueries(queryClient, authScope, giveawayId);
     },
   });
