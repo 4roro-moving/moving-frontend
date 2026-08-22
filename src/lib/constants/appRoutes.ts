@@ -114,6 +114,10 @@ export const APP_ROUTES = {
     DETAIL: (inquiryId: number) => `/inquiries/${inquiryId}`,
   },
 
+  REPORTS: {
+    ME: "/my-reports",
+  },
+
   /** AI 예상 견적 */
   PRICE_PREDICTION: "/price-prediction",
 } as const;
