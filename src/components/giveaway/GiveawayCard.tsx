@@ -22,11 +22,12 @@ const GiveawayCard = ({ giveaway, preloadThumbnail = false }: GiveawayCardProps)
   const overlayLabel = getGiveawayThumbnailOverlayLabel(giveaway.status);
   const writtenAt = formatRelativeTime(giveaway.createdAt);
   const titleId = `giveaway-${String(giveaway.id)}-title`;
+  const statusId = `giveaway-${String(giveaway.id)}-status`;
 
   return (
     <Link
       href={detailHref}
-      aria-labelledby={titleId}
+      aria-labelledby={overlayLabel ? `${titleId} ${statusId}` : titleId}
       className={cn(
         "bg-background-default border-border-subtle shadow-estimate-card rounded-20 flex w-full flex-col border-[0.5px] text-left",
         "gap-20 p-40",
@@ -51,7 +52,7 @@ const GiveawayCard = ({ giveaway, preloadThumbnail = false }: GiveawayCardProps)
         )}
         {overlayLabel ? (
           <div className="bg-overlay-card-disabled pointer-events-none absolute inset-0 flex items-center justify-center">
-            <Text as="span" variant="2lg-semibold" className="text-text-inverse">
+            <Text as="span" id={statusId} variant="2lg-semibold" className="text-text-inverse">
               {overlayLabel}
             </Text>
           </div>

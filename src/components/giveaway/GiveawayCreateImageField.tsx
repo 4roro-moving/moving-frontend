@@ -57,7 +57,9 @@ const GiveawayCreateImageField = ({
         accept={GIVEAWAY_IMAGE_CONTENT_TYPES.join(",")}
         multiple
         className="sr-only"
+        tabIndex={-1}
         disabled={disabled || isMaxCount}
+        aria-label="나눔 이미지 추가"
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
         onChange={handleChange}
