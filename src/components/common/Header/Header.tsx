@@ -42,18 +42,12 @@ const COMMUNITY_NAV_LINK = {
   href: APP_ROUTES.COMMUNITY.RESIDENCE_REVIEWS,
 } as const;
 
-const SUPPORT_NAV_LINK = {
-  label: "고객지원",
-  href: APP_ROUTES.NOTICES.ROOT,
-} as const;
-
 const LOGGED_OUT_LINKS = [
   {
     label: "기사님 찾기",
     href: APP_ROUTES.MOVERS.ROOT,
   },
   COMMUNITY_NAV_LINK,
-  SUPPORT_NAV_LINK,
 ];
 
 const CUSTOMER_LOGGED_IN_LINKS = [
@@ -70,7 +64,6 @@ const CUSTOMER_LOGGED_IN_LINKS = [
     href: APP_ROUTES.ESTIMATES.ROOT,
   },
   COMMUNITY_NAV_LINK,
-  SUPPORT_NAV_LINK,
 ];
 
 const MOVER_LOGGED_IN_LINKS = [
@@ -82,7 +75,6 @@ const MOVER_LOGGED_IN_LINKS = [
     label: "내 견적 관리",
     href: APP_ROUTES.MOVER_ESTIMATES.SENT,
   },
-  SUPPORT_NAV_LINK,
 ];
 
 const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
