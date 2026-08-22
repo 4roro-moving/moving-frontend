@@ -1,4 +1,5 @@
 import type { EstimateRequestStatus, MyEstimateRequestItem } from "@/types/estimate";
+import type { MoveType } from "@/types/move";
 
 /** 백엔드 MAX_DESIGNATED_MOVERS 와 동일 */
 export const MAX_DESIGNATED_MOVERS = 3;
@@ -13,6 +14,7 @@ export type DesignateCtaStatus =
   | "notEditable"
   | "expired"
   | "limitExceeded"
+  | "serviceTypeMismatch"
   | "available";
 
 /** 클릭해도 지정 요청으로 이어지지 않아 버튼을 비활성하는 상태 */
@@ -21,6 +23,7 @@ export const DESIGNATE_CTA_DISABLED_STATUSES: readonly DesignateCtaStatus[] = [
   "notEditable",
   "expired",
   "limitExceeded",
+  "serviceTypeMismatch",
 ];
 
 const DESIGNATE_CTA_BUTTON_LABEL = {
@@ -29,6 +32,7 @@ const DESIGNATE_CTA_BUTTON_LABEL = {
   notEditable: "지정 견적 요청 불가",
   expired: "만료된 견적 요청",
   limitExceeded: "지정 한도 초과",
+  serviceTypeMismatch: "서비스 유형 불일치",
 } as const satisfies Record<
   Exclude<DesignateCtaStatus, "needEstimateRequest" | "available">,
   string
@@ -49,7 +53,7 @@ export interface DesignateCtaState {
  *
  * 서버에 designate API를 호출하기 전에 클라이언트에서 먼저 차단합니다. 이후 서버가 최종 검증하므로 이중 방어 구조입니다.
  *
- * 판정 순서: 요청 없음 → 상태/만료(현재 지정 가능 여부) → 이미 지정 → 한도 → 가능
+ * 판정 순서: 요청 없음 → 상태/만료(현재 지정 가능 여부) → 이미 지정 → 한도 → 서비스 유형 → 가능
  *
  * - needEstimateRequest: 활성 견적 요청 없음 → 호출부에서 안내 모달 표시
  * - confirmed:          확정 견적 요청 존재 → 진행 중인 견적 상세로 이동
@@ -57,6 +61,7 @@ export interface DesignateCtaState {
  * - expired:            만료 → 버튼 비활성
  * - alreadyDesignated:  해당 기사가 이미 지정됨 → 버튼 비활성
  * - limitExceeded:      지정 기사 3명 도달 → 버튼 비활성
+ * - serviceTypeMismatch: 현재 견적 요청과 기사 제공 서비스가 불일치 → 버튼 비활성
  * - available:          모든 조건 통과 → designate API 호출
  *
  * 로그인 여부·로딩 상태는 호출부(MoverDetailView)에서 처리합니다.
@@ -64,6 +69,7 @@ export interface DesignateCtaState {
 export function getDesignateCtaState(
   activeRequest: MyEstimateRequestItem | null,
   moverId: string,
+  moverServiceTypes: MoveType[],
 ): DesignateCtaState {
   // null = 활성 요청 없음. 미요청과 확정/만료 후(active 종료)를 구분하지 못함 → 안내 모달
   if (!activeRequest) {
@@ -127,6 +133,16 @@ export function getDesignateCtaState(
       estimateRequestId,
       message: null,
       buttonLabel: DESIGNATE_CTA_BUTTON_LABEL.limitExceeded,
+    };
+  }
+
+  if (!moverServiceTypes.includes(activeRequest.moveType)) {
+    return {
+      status: "serviceTypeMismatch",
+      canSubmit: false,
+      estimateRequestId,
+      message: null,
+      buttonLabel: DESIGNATE_CTA_BUTTON_LABEL.serviceTypeMismatch,
     };
   }
 

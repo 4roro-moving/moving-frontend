@@ -132,6 +132,12 @@ export const ERROR_CODES = {
     code: "DESIGNATION_LIMIT_EXCEEDED",
     message: "지정 견적은 최대 3명까지 요청할 수 있습니다.",
   },
+
+  DESIGNATION_SERVICE_TYPE_MISMATCH: {
+    status: 409,
+    code: "DESIGNATION_SERVICE_TYPE_MISMATCH",
+    message: "기사님이 제공하지 않는 이사 유형입니다.",
+  },
 } as const;
 
 // ErrorCode의 key 타입
