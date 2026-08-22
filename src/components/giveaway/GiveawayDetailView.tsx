@@ -6,8 +6,8 @@ import { useState } from "react";
 
 import { PageHeader } from "@/components/common/PageHeader";
 import { Text } from "@/components/common/Text";
+import GiveawayConfirmModal from "@/components/giveaway/GiveawayConfirmModal";
 import GiveawayCreateModal from "@/components/giveaway/GiveawayCreateModal";
-import GiveawayDeleteConfirmModal from "@/components/giveaway/GiveawayDeleteConfirmModal";
 import GiveawayDetailActions from "@/components/giveaway/GiveawayDetailActions";
 import GiveawayDetailImageSlider from "@/components/giveaway/GiveawayDetailImageSlider";
 import GiveawayPendingRequestList from "@/components/giveaway/GiveawayPendingRequestList";
@@ -20,6 +20,7 @@ import { DocumentIcon } from "@/icons";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import {
+  GIVEAWAY_COMPLETE_BUTTON_LABEL,
   GIVEAWAY_DETAIL_TITLE,
   GIVEAWAY_PREFERRED_REGION_LABEL,
   canApplyGiveaway,
@@ -57,9 +58,10 @@ const GiveawayDetailView = ({
   const completeMutation = useCompleteGiveaway();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isCompleteOpen, setIsCompleteOpen] = useState(false);
   const [isApplyOpen, setIsApplyOpen] = useState(false);
-  const [actionError, setActionError] = useState<string | undefined>();
   const [deleteError, setDeleteError] = useState<string | undefined>();
+  const [completeError, setCompleteError] = useState<string | undefined>();
   const writtenAt = formatRelativeTime(giveaway.createdAt);
   const showReceivedRequests = isAuthor;
 
@@ -70,6 +72,15 @@ const GiveawayDetailView = ({
 
     setDeleteError(undefined);
     setIsDeleteOpen(false);
+  };
+
+  const handleCloseComplete = () => {
+    if (completeMutation.isPending) {
+      return;
+    }
+
+    setCompleteError(undefined);
+    setIsCompleteOpen(false);
   };
 
   const handleDelete = async () => {
@@ -84,10 +95,11 @@ const GiveawayDetailView = ({
 
   const handleComplete = async () => {
     try {
-      setActionError(undefined);
+      setCompleteError(undefined);
       await completeMutation.mutateAsync(giveaway.id);
+      setIsCompleteOpen(false);
     } catch (error) {
-      setActionError(getApiErrorMessage(error, "나눔을 완료하지 못했습니다."));
+      setCompleteError(getApiErrorMessage(error, "나눔을 완료하지 못했습니다."));
     }
   };
 
@@ -150,12 +162,6 @@ const GiveawayDetailView = ({
               <DetailDivider />
             </div>
 
-            {actionError ? (
-              <Text as="p" variant="sm-medium" className="text-text-error" role="alert">
-                {actionError}
-              </Text>
-            ) : null}
-
             <GiveawayDetailActions
               status={giveaway.status}
               isAuthor={isAuthor}
@@ -167,7 +173,10 @@ const GiveawayDetailView = ({
                 setDeleteError(undefined);
                 setIsDeleteOpen(true);
               }}
-              onComplete={() => void handleComplete()}
+              onComplete={() => {
+                setCompleteError(undefined);
+                setIsCompleteOpen(true);
+              }}
               onApply={() => setIsApplyOpen(true)}
             />
 
@@ -218,12 +227,27 @@ const GiveawayDetailView = ({
         giveaway={giveaway}
         onClose={() => setIsEditOpen(false)}
       />
-      <GiveawayDeleteConfirmModal
+      <GiveawayConfirmModal
         open={isDeleteOpen}
+        title="나눔 글 삭제"
+        description="작성한 나눔 글을 삭제할까요? 삭제하면 되돌릴 수 없습니다."
+        confirmLabel="삭제"
+        pendingLabel="삭제 중..."
         isPending={deleteMutation.isPending}
         error={deleteError}
         onClose={handleCloseDelete}
         onConfirm={() => void handleDelete()}
+      />
+      <GiveawayConfirmModal
+        open={isCompleteOpen}
+        title="나눔 완료"
+        description="나눔을 완료할까요? 완료하면 되돌릴 수 없습니다."
+        confirmLabel={GIVEAWAY_COMPLETE_BUTTON_LABEL}
+        pendingLabel="완료 중..."
+        isPending={completeMutation.isPending}
+        error={completeError}
+        onClose={handleCloseComplete}
+        onConfirm={() => void handleComplete()}
       />
       <GiveawayRequestFormModal
         open={isApplyOpen}
