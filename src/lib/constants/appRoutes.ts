@@ -44,6 +44,11 @@ export const APP_ROUTES = {
     WRITABLE: "/reviews/writable",
     ME: "/reviews/me",
   },
+  /** 콘텐츠 숨김/복구 알림 상세 (카드 + 사유) */
+  MY_CONTENTS: {
+    DETAIL: (contentType: string, contentId: number) =>
+      `/my-contents/${contentType}/${String(contentId)}`,
+  },
   // 2026.07.30 정슬기 - [추가] 내 견적 관리 페이지 경로
   /** 내 견적 관리 */
   ESTIMATES: {

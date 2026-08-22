@@ -155,6 +155,11 @@ export const QUERY_KEYS = {
       ["notifications", "unread-count", authScope] as const,
   },
 
+  MY_CONTENTS: {
+    DETAIL: (authScope: AuthQueryScope, contentType: string, contentId: number) =>
+      ["my-contents", "detail", authScope, contentType, contentId] as const,
+  },
+
   //  2026.08.16 심현수 - [추가] 약관 쿼리 키
   TERMS: {
     PUBLISHED_LIST: ["terms", "published"] as const,

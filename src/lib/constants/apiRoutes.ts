@@ -78,6 +78,11 @@ export const API_ROUTES = {
     ME: "/reviews/me",
     REVIEWABLE: "/reviews/reviewable",
   },
+  /** 내가 작성한 콘텐츠 검수(숨김) 상세 — 알림 linkUrl과 동일 */
+  MY_CONTENTS: {
+    DETAIL: (contentType: string, contentId: number) =>
+      `/my-contents/${contentType}/${String(contentId)}`,
+  },
   NOTIFICATIONS: {
     ROOT: "/notifications",
     UNREAD_COUNT: "/notifications/unread-count",
