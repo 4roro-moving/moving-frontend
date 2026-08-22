@@ -123,7 +123,9 @@ export const canApplyGiveaway = (giveaway: {
   return giveaway.status === GIVEAWAY_STATUS.AVAILABLE && giveaway.canRequest;
 };
 
-export const hasActiveGiveawayRequest = (requestStatus: string | null | undefined): boolean => {
+export const hasActiveGiveawayRequest = (
+  requestStatus: GiveawayRequestStatus | null | undefined,
+): boolean => {
   return (
     requestStatus === GIVEAWAY_REQUEST_STATUS.PENDING ||
     requestStatus === GIVEAWAY_REQUEST_STATUS.SELECTED

@@ -12,11 +12,7 @@ import {
   GIVEAWAY_APPLY_SUBMIT_LABEL,
   GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH,
 } from "@/lib/constants/giveaway";
-
-interface GiveawayRequestFormValues {
-  id: number;
-  message: string | null;
-}
+import type { GiveawayRequestFormValues } from "@/types/giveaway";
 
 interface GiveawayRequestFormModalProps {
   open: boolean;

@@ -125,14 +125,6 @@ export interface GiveawayRequestListResult {
   pagination: CursorPagination;
 }
 
-export interface GiveawayMyRequest {
-  id: number;
-  status: string;
-  message: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export const GIVEAWAY_REQUEST_STATUS = {
   PENDING: "PENDING",
   SELECTED: "SELECTED",
@@ -142,6 +134,14 @@ export const GIVEAWAY_REQUEST_STATUS = {
 
 export type GiveawayRequestStatus =
   (typeof GIVEAWAY_REQUEST_STATUS)[keyof typeof GIVEAWAY_REQUEST_STATUS];
+
+export interface GiveawayMyRequest {
+  id: number;
+  status: GiveawayRequestStatus;
+  message: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface GiveawayRequestGiveawaySummary {
   id: number;
@@ -172,6 +172,11 @@ export interface GiveawayRequestMyListQuery {
 export interface GiveawayRequestMyListResult {
   data: MyGiveawayRequestItem[];
   pagination: CursorPagination;
+}
+
+export interface GiveawayRequestFormValues {
+  id: number;
+  message: string | null;
 }
 
 export interface CreateGiveawayRequestInput {

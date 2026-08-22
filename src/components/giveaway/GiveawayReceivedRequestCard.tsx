@@ -18,7 +18,7 @@ import {
 import { formatKoreanDateTime } from "@/lib/utils/date";
 import type { GiveawayRequestItem, GiveawayStatus } from "@/types/giveaway";
 
-interface GiveawayPendingRequestCardProps {
+interface GiveawayReceivedRequestCardProps {
   request: GiveawayRequestItem;
   giveawayStatus: GiveawayStatus;
   isActionPending?: boolean;
@@ -40,13 +40,13 @@ const formatRequestDate = (value: string): string => {
   }
 };
 
-const GiveawayPendingRequestCard = ({
+const GiveawayReceivedRequestCard = ({
   request,
   giveawayStatus,
   isActionPending = false,
   onSelect,
   onReject,
-}: GiveawayPendingRequestCardProps) => {
+}: GiveawayReceivedRequestCardProps) => {
   const canSelect = canSelectGiveawayRequest(giveawayStatus, request.status);
   const canReject = canRejectGiveawayRequest(giveawayStatus, request.status);
   const message = request.message?.trim() || GIVEAWAY_REQUEST_EMPTY_MESSAGE;
@@ -154,4 +154,4 @@ const GiveawayPendingRequestCard = ({
   );
 };
 
-export default GiveawayPendingRequestCard;
+export default GiveawayReceivedRequestCard;

@@ -6,21 +6,20 @@ import { GIVEAWAY_PAGE_LIMIT } from "@/lib/constants/giveaway";
 import { getGiveawayRequestsInfiniteQueryOptions } from "@/lib/queryOptions/giveawayRequests";
 import { GIVEAWAY_LIST_SORT } from "@/types/giveaway";
 
-interface UseGiveawayPendingRequestsParams {
+interface UseGiveawayReceivedRequestsParams {
   giveawayId: number;
   enabled: boolean;
 }
 
-export const useGiveawayPendingRequests = ({
+export const useGiveawayReceivedRequests = ({
   giveawayId,
   enabled,
-}: UseGiveawayPendingRequestsParams) => {
+}: UseGiveawayReceivedRequestsParams) => {
   const { canFetch } = useCustomerAuthReady();
 
   const {
     items: requests,
     isInitialLoading,
-    isFilterFetching,
     query,
   } = useCursorListQuery({
     ...getGiveawayRequestsInfiniteQueryOptions(giveawayId, {
@@ -30,5 +29,5 @@ export const useGiveawayPendingRequests = ({
     enabled: enabled && canFetch && Number.isInteger(giveawayId) && giveawayId > 0,
   });
 
-  return { requests, isInitialLoading, isFilterFetching, query };
+  return { requests, isInitialLoading, query };
 };

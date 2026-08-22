@@ -9,8 +9,9 @@ import { Text } from "@/components/common/Text";
 import GiveawayConfirmModal from "@/components/giveaway/GiveawayConfirmModal";
 import GiveawayCreateModal from "@/components/giveaway/GiveawayCreateModal";
 import GiveawayDetailActions from "@/components/giveaway/GiveawayDetailActions";
+import GiveawayDetailDivider from "@/components/giveaway/GiveawayDetailDivider";
 import GiveawayDetailImageSlider from "@/components/giveaway/GiveawayDetailImageSlider";
-import GiveawayPendingRequestList from "@/components/giveaway/GiveawayPendingRequestList";
+import GiveawayReceivedRequestList from "@/components/giveaway/GiveawayReceivedRequestList";
 import GiveawayProfileAvatar from "@/components/giveaway/GiveawayProfileAvatar";
 import GiveawayReportButton from "@/components/giveaway/GiveawayReportButton";
 import GiveawayRequestFormModal from "@/components/giveaway/GiveawayRequestFormModal";
@@ -41,10 +42,6 @@ interface GiveawayDetailViewProps {
   isRequestsPending?: boolean;
   requestsQuery: UseInfiniteQueryResult<InfiniteData<GiveawayRequestListResult>, ApiError>;
 }
-
-const DetailDivider = () => {
-  return <div className="bg-border-subtle h-px w-full" aria-hidden="true" />;
-};
 
 const GiveawayDetailView = ({
   giveaway,
@@ -149,7 +146,7 @@ const GiveawayDetailView = ({
                 </div>
               </div>
 
-              <DetailDivider />
+              <GiveawayDetailDivider />
 
               <Text
                 as="p"
@@ -159,7 +156,7 @@ const GiveawayDetailView = ({
                 {giveaway.description}
               </Text>
 
-              <DetailDivider />
+              <GiveawayDetailDivider />
             </div>
 
             <GiveawayDetailActions
@@ -210,8 +207,8 @@ const GiveawayDetailView = ({
 
         {showReceivedRequests ? (
           <>
-            <DetailDivider />
-            <GiveawayPendingRequestList
+            <GiveawayDetailDivider />
+            <GiveawayReceivedRequestList
               giveawayId={giveaway.id}
               giveawayStatus={giveaway.status}
               requests={requests}

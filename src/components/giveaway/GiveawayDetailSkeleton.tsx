@@ -1,11 +1,8 @@
 import { PageHeader } from "@/components/common/PageHeader";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
+import GiveawayDetailDivider from "@/components/giveaway/GiveawayDetailDivider";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { GIVEAWAY_DETAIL_TITLE } from "@/lib/constants/giveaway";
-
-const DetailDivider = () => {
-  return <div className="bg-border-subtle h-px w-full" aria-hidden="true" />;
-};
 
 const GiveawayDetailSkeleton = () => {
   return (
@@ -32,9 +29,9 @@ const GiveawayDetailSkeleton = () => {
                 </div>
               </div>
 
-              <DetailDivider />
+              <GiveawayDetailDivider />
               <Skeleton className="min-h-200 w-full" />
-              <DetailDivider />
+              <GiveawayDetailDivider />
             </div>
 
             <div className="flex w-full gap-10">

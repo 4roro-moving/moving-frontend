@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import GiveawayDetailSkeleton from "@/components/giveaway/GiveawayDetailSkeleton";
 import GiveawayDetailView from "@/components/giveaway/GiveawayDetailView";
 import { useGiveawayDetail } from "@/hooks/giveaway/useGiveawayDetail";
-import { useGiveawayPendingRequests } from "@/hooks/giveaway/useGiveawayPendingRequests";
+import { useGiveawayReceivedRequests } from "@/hooks/giveaway/useGiveawayReceivedRequests";
 import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { GIVEAWAY_DETAIL_TITLE } from "@/lib/constants/giveaway";
@@ -18,7 +18,7 @@ const GiveawayDetailClient = ({ giveawayId }: GiveawayDetailClientProps) => {
   const { user } = useCustomerAuthReady();
   const detailQuery = useGiveawayDetail(giveawayId);
   const isAuthor = detailQuery.data !== undefined && user?.id === detailQuery.data.author.id;
-  const requestsQuery = useGiveawayPendingRequests({
+  const requestsQuery = useGiveawayReceivedRequests({
     giveawayId,
     enabled: isAuthor,
   });

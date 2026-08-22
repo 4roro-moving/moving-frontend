@@ -6,11 +6,7 @@ import { useCreateGiveawayRequest } from "@/hooks/giveaway/useCreateGiveawayRequ
 import { useUpdateGiveawayRequest } from "@/hooks/giveaway/useUpdateGiveawayRequest";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH } from "@/lib/constants/giveaway";
-
-interface GiveawayRequestFormValues {
-  id: number;
-  message: string | null;
-}
+import type { GiveawayRequestFormValues } from "@/types/giveaway";
 
 interface UseGiveawayRequestFormParams {
   mode: "create" | "edit";
