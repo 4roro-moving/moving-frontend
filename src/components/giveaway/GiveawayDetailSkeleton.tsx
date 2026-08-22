@@ -12,7 +12,6 @@ const GiveawayDetailSkeleton = () => {
       <div
         className="px-margin-mobile md:px-margin-tablet max-w-container-desktop xl:pb-37-5 mx-auto flex w-full flex-col gap-60 pt-35 pb-48 md:pt-44 md:pb-38 xl:px-0 xl:pt-42"
         aria-busy="true"
-        aria-label="나눔 글을 불러오는 중"
       >
         <div className="flex w-full flex-col items-center gap-30 md:flex-row md:items-start md:justify-between md:gap-60">
           <div className="w-full md:w-268 md:shrink-0 xl:w-[500px]">
@@ -45,6 +44,9 @@ const GiveawayDetailSkeleton = () => {
             </div>
           </div>
         </div>
+        <p className="sr-only" role="status">
+          나눔 글을 불러오는 중
+        </p>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import { ChevronLeftIcon, ChevronRightIcon, GalleryIcon } from "@/icons";
@@ -27,29 +27,38 @@ const getGiveawaySlideLabel = (index: number, total: number) => {
 };
 
 const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSliderProps) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const previousImageCountRef = useRef(images.length);
+  const imageIdsKey = images.map((image) => String(image.id)).join(",");
+  const [slide, setSlide] = useState({ imageIdsKey, currentIndex: 0 });
+
+  if (slide.imageIdsKey !== imageIdsKey) {
+    setSlide({ imageIdsKey, currentIndex: 0 });
+  }
+
+  const currentIndex = slide.imageIdsKey === imageIdsKey ? slide.currentIndex : 0;
   const overlayLabel = getGiveawayThumbnailOverlayLabel(status);
   const hasMultiple = images.length > 1;
   const safeIndex = Math.min(currentIndex, Math.max(images.length - 1, 0));
   const translateClass = SLIDE_TRANSLATE_CLASS[safeIndex] ?? "translate-x-0";
   const slideStatus = images.length > 0 ? getGiveawaySlideLabel(safeIndex, images.length) : "";
 
-  useEffect(() => {
-    const previousImageCount = previousImageCountRef.current;
-    previousImageCountRef.current = images.length;
-
-    if (images.length < previousImageCount) {
-      setCurrentIndex(0);
-    }
-  }, [images.length]);
-
   const goToPrevious = () => {
-    setCurrentIndex((current) => (current === 0 ? images.length - 1 : current - 1));
+    setSlide((current) => {
+      const index = current.imageIdsKey === imageIdsKey ? current.currentIndex : 0;
+      return {
+        imageIdsKey,
+        currentIndex: index === 0 ? images.length - 1 : index - 1,
+      };
+    });
   };
 
   const goToNext = () => {
-    setCurrentIndex((current) => (current === images.length - 1 ? 0 : current + 1));
+    setSlide((current) => {
+      const index = current.imageIdsKey === imageIdsKey ? current.currentIndex : 0;
+      return {
+        imageIdsKey,
+        currentIndex: index === images.length - 1 ? 0 : index + 1,
+      };
+    });
   };
 
   return (

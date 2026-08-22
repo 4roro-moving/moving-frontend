@@ -67,7 +67,7 @@ const MyGiveawayRequestLoadingChrome = () => {
   return (
     <>
       <MyActivityTabs />
-      <div className="bg-background-subtle flex w-full flex-col items-center">
+      <div className="bg-background-default flex w-full flex-col items-center">
         <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto flex w-full flex-col gap-24 pt-40 pb-60 md:pb-52 xl:px-0 xl:pt-54 xl:pb-200">
           <MyGiveawayRequestFilters filters={GIVEAWAY_REQUEST_FILTER_DEFAULTS} />
           <MyGiveawayRequestCardSkeletonList />
