@@ -27,6 +27,10 @@ export const APP_ROUTES = {
   ESTIMATE_REQUEST: "/estimate-request",
   // 2026.08.20 김나연 - [수정] 고객 내 활동 내역
   MY_ACTIVITY: "/my-activity",
+  // 2026.08.22 김나연 - [추가] 내가 작성한 나눔글
+  MY_ACTIVITY_GIVEAWAY: "/my-activity/giveaway",
+  // 2026.08.22 김나연 - [추가] 내가 작성한 나눔 신청글
+  MY_ACTIVITY_GIVEAWAY_REQUESTS: "/my-activity/giveaway-requests",
   /** 고객 프로필 수정 */
   PROFILE_EDIT: "/profile/edit",
   /** 기사님 프로필 수정 */
@@ -52,11 +56,13 @@ export const APP_ROUTES = {
     WRITABLE: "/reviews/writable",
     ME: "/reviews/me",
   },
-  // 2026.08.20 김나연 - [수정] 커뮤니티(거주후기·나눔) 공개 페이지 경로
+  // 2026.08.20 김나연 - [수정] 커뮤니티 경로
+  // 거주후기는 공개, 나눔은 (customer)/(protected)에서 RoleGuard로 보호합니다.
   COMMUNITY: {
     ROOT: "/community",
     RESIDENCE_REVIEWS: "/community/residence-reviews",
     GIVEAWAY: "/community/giveaway",
+    GIVEAWAY_DETAIL: (giveawayId: number) => `/community/giveaway/${giveawayId}`,
   },
   // 2026.07.30 정슬기 - [추가] 내 견적 관리 페이지 경로
   /** 내 견적 관리 */
