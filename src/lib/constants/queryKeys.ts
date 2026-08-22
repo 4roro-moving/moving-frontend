@@ -5,6 +5,8 @@ import type {
 } from "@/types/giveaway";
 import type { MoversListQuery } from "@/types/mover";
 import type { ResidenceReviewListQuery } from "@/types/residenceReview";
+import type { NoticeListQuery } from "@/types/notice";
+import type { InquiryListQuery } from "@/types/inquiry";
 
 /**
  * 사용자별 응답(`isFavorite`)이 React Query 캐시에서 섞이지 않도록 사용하는 인증 scope
@@ -200,6 +202,13 @@ export const QUERY_KEYS = {
     ME: ["residenceReviews", "me"] as const,
     DETAIL_ROOT: ["residenceReviews", "detail"] as const,
   },
+  NOTICES: {
+    ALL: ["notices"] as const,
+    LIST_ROOT: ["notices", "list"] as const,
+    LIST: (query: NoticeListQuery) => ["notices", "list", query] as const,
+    DETAIL_ROOT: ["notices", "detail"] as const,
+    DETAIL: (noticeId: number) => ["notices", "detail", noticeId] as const,
+  },
 
   // 2026.08.22 김나연 - [추가] 나눔 쿼리 키
   GIVEAWAYS: {
@@ -228,5 +237,18 @@ export const QUERY_KEYS = {
   //  2026.08.16 심현수 - [추가] 약관 쿼리 키
   TERMS: {
     PUBLISHED_LIST: ["terms", "published"] as const,
+  },
+
+  FAQS: {
+    ALL: ["faqs"] as const,
+    LIST: ["faqs", "list"] as const,
+  },
+
+  INQUIRIES: {
+    ALL: ["inquiries"] as const,
+    LIST_ROOT: ["inquiries", "list"] as const,
+    LIST: (query: InquiryListQuery) => ["inquiries", "list", query] as const,
+    DETAIL_ROOT: ["inquiries", "detail"] as const,
+    DETAIL: (inquiryId: number) => ["inquiries", "detail", inquiryId] as const,
   },
 } as const;

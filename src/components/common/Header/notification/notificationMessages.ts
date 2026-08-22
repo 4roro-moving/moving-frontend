@@ -29,7 +29,7 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
     //고객이 견적을 확정한 경우 알림 문구
     ESTIMATE_CONFIRMED: {
       prefix: "",
-      suffix: "견적이 확정 되었어요",
+      suffix: " 견적이 확정 되었어요",
     },
     //기사가 견적 요청을 반려했을 때 알림 문구
     ESTIMATE_REQUEST_REJECTED: {
@@ -70,6 +70,21 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
     CONTENT_RESTORED: {
       prefix: "",
       suffix: "에 대한 리뷰가 복구되었습니다.",
+    },
+    // 관리자가 확정 견적 거래를 취소한 경우 고객/기사에게 알림 문구
+    ESTIMATE_CANCELED_BY_ADMIN: {
+      prefix: "관리자 조치로 ",
+      suffix: "가 취소되었습니다.",
+    },
+    // 기사의 정지로 고객의 견적 요청이 취소된 경우, 고객에게 알림 문구
+    ESTIMATE_CANCELED_BY_ACCOUNT_SUSPENSION: {
+      prefix: "기사의 이용 제한으로 ",
+      suffix: "이 취소되었습니다.",
+    },
+    // 고객의 정지로 견적 요청이 취소된 경우, 견적을 보낸 기사와 지정 견적 대상 기사에게 알림 문구
+    ESTIMATE_REQUEST_CANCELED_BY_ACCOUNT_SUSPENSION: {
+      prefix: "고객의 이용 제한으로 ",
+      suffix: "이 취소되었습니다.",
     },
   };
 

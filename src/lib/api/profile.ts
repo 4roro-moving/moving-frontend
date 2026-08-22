@@ -116,6 +116,7 @@ export const mapMoverProfileMeResponse = (profile: MoverProfileMeResponse): Move
     description: profile.description,
     activityBase: profile.activityBase ?? null,
     confirmedCount: profile.confirmedCount,
+    completedCount: profile.completedCount,
     averageRating: profile.averageRating,
     reviewCount: profile.reviewCount,
     regions: profile.regions ?? [],

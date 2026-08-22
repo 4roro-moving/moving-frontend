@@ -37,6 +37,8 @@ export const APP_ROUTES = {
   MOVER_PROFILE_EDIT: "/mover/profile/edit",
   /** 기사님 기본정보 수정 */
   MOVER_BASIC_EDIT: "/mover/basic/edit",
+  /** 기사님 마이페이지 */
+  MOVER_MYPAGE: "/mover/mypage",
   // 2026.07.27 정슬기 - [추가] 기사님 찾기·상세 페이지 경로
   MOVERS: {
     ROOT: "/movers",
@@ -91,4 +93,19 @@ export const APP_ROUTES = {
 
   // 2026.08.16 심현수 - [추가] 약관 공개 페이지 경로
   TERMS: "/terms",
+
+  // 2026.08.22 정슬기 - [추가] 고객지원 관련 페이지 경로
+  NOTICES: {
+    ROOT: "/notices",
+    DETAIL: (noticeId: number) => `/notices/${noticeId}`,
+  },
+
+  FAQS: {
+    ROOT: "/faqs",
+  },
+
+  INQUIRIES: {
+    ROOT: "/inquiries",
+    DETAIL: (inquiryId: number) => `/inquiries/${inquiryId}`,
+  },
 } as const;

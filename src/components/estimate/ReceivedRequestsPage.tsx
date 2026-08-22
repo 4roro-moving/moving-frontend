@@ -99,27 +99,32 @@ export default function ReceivedRequestsPage() {
             />
           </form>
 
-          <div className="hidden flex-wrap gap-12 xl:flex">
-            {MOVE_TYPE_OPTIONS.map((moveType) => {
-              const isSelected = moveTypes.includes(moveType.value);
+          <div className="hidden flex-col gap-8 xl:flex">
+            <div className="flex flex-wrap gap-12">
+              {MOVE_TYPE_OPTIONS.map((moveType) => {
+                const isSelected = moveTypes.includes(moveType.value);
 
-              return (
-                <SelectableChip
-                  key={moveType.value}
-                  size="md"
-                  selected={isSelected}
-                  onClick={() => toggleMoveType(moveType.value)}
-                  onPrefetch={() => {
-                    const nextMoveTypes = getNextMoveTypes(moveType.value);
-                    prefetchRequests({
-                      moveType: nextMoveTypes.length ? nextMoveTypes : undefined,
-                    });
-                  }}
-                >
-                  {moveType.label}
-                </SelectableChip>
-              );
-            })}
+                return (
+                  <SelectableChip
+                    key={moveType.value}
+                    size="md"
+                    selected={isSelected}
+                    onClick={() => toggleMoveType(moveType.value)}
+                    onPrefetch={() => {
+                      const nextMoveTypes = getNextMoveTypes(moveType.value);
+                      prefetchRequests({
+                        moveType: nextMoveTypes.length ? nextMoveTypes : undefined,
+                      });
+                    }}
+                  >
+                    {moveType.label}
+                  </SelectableChip>
+                );
+              })}
+            </div>
+            <Text as="p" variant="md-regular" className="text-text-muted mt-4">
+              기사님이 제공하는 서비스 유형의 견적 요청만 확인할 수 있어요.
+            </Text>
           </div>
         </section>
 
@@ -291,6 +296,9 @@ export default function ReceivedRequestsPage() {
                 );
               })}
             </div>
+            <Text as="p" variant="xs-regular" className="text-text-muted mt-4">
+              기사님이 제공하는 서비스 유형의 견적 요청만 확인할 수 있어요.
+            </Text>
           </section>
 
           <section className="flex flex-col gap-8">

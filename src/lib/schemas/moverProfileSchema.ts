@@ -37,6 +37,7 @@ export const createMoverProfileSchema = (options: { requiresPhone: boolean }) =>
   z.object({
     phone: options.requiresPhone ? phoneSchema : z.string().optional(),
     imageFile: z.custom<File | null>().nullable().optional(),
+    shouldRemoveImage: z.boolean().optional(),
     nickname: z
       .string()
       .trim()

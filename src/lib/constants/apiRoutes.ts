@@ -111,4 +111,20 @@ export const API_ROUTES = {
     ROOT: "/terms",
     BY_TYPE: (type: string) => `/terms/${type}`,
   },
+
+  NOTICES: {
+    ROOT: "/notices",
+    DETAIL: (noticeId: number) => `/notices/${noticeId}`,
+  },
+
+  FAQS: {
+    ROOT: "/faqs",
+  },
+
+  INQUIRIES: {
+    ROOT: "/inquiries",
+    DETAIL: (inquiryId: number) => `/inquiries/${inquiryId}`,
+    MESSAGES: (inquiryId: number) => `/inquiries/${inquiryId}/messages`,
+    CLOSE: (inquiryId: number) => `/inquiries/${inquiryId}/close`,
+  },
 } as const;
