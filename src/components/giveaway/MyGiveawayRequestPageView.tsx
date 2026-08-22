@@ -47,7 +47,7 @@ const MyGiveawayRequestPageView = ({ filters }: MyGiveawayRequestPageViewProps) 
   }, [cancelMutation, requestToCancel]);
 
   return (
-    <div className="bg-background-subtle flex w-full flex-col items-center">
+    <div className="bg-background-default flex w-full flex-col items-center">
       <Text as="h1" variant="2xl-bold" className="sr-only">
         내가 작성한 나눔 신청글
       </Text>
