@@ -179,6 +179,7 @@ export default function EstimateOfferCard({
               isFavorite={mover.isFavorite}
               favoriteCount={mover.favoriteCount}
               showCount
+              interactive={favoriteMutation.canToggleFavorite}
               className="min-h-44 min-w-44 justify-center gap-2 px-4 py-2"
               onToggle={(nextIsFavorite) => {
                 favoriteMutation.mutate({ moverId: mover.id, nextIsFavorite });

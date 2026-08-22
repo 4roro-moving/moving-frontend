@@ -151,6 +151,7 @@ export default function PendingEstimateCard({
                     isFavorite={mover.isFavorite}
                     favoriteCount={mover.favoriteCount}
                     showCount
+                    interactive={favoriteMutation.canToggleFavorite}
                     className="gap-2"
                     onToggle={(nextIsFavorite) => {
                       favoriteMutation.mutate({ moverId: mover.id, nextIsFavorite });
