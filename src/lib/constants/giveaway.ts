@@ -85,6 +85,10 @@ export const GIVEAWAY_EDIT_BUTTON_LABEL = "수정하기";
 export const GIVEAWAY_DELETE_BUTTON_LABEL = "삭제하기";
 export const GIVEAWAY_COMPLETE_BUTTON_LABEL = "나눔 완료";
 export const GIVEAWAY_REPORT_BUTTON_LABEL = "신고하기";
+export const GIVEAWAY_APPLY_BUTTON_LABEL = "나눔 신청하기";
+export const GIVEAWAY_APPLY_SUBMIT_LABEL = "신청하기";
+export const GIVEAWAY_APPLY_MODAL_TITLE = "나눔 신청";
+export const GIVEAWAY_APPLIED_BUTTON_LABEL = "신청 완료";
 export const GIVEAWAY_REQUEST_CONTENT_LABEL = "신청 내용";
 export const GIVEAWAY_REQUEST_DATE_LABEL = "신청일";
 export const GIVEAWAY_REQUEST_EMPTY_MESSAGE = "없음";
@@ -101,6 +105,20 @@ export const canDeleteGiveaway = (status: GiveawayStatus): boolean => {
 
 export const canCompleteGiveaway = (status: GiveawayStatus): boolean => {
   return status === GIVEAWAY_STATUS.IN_PROGRESS;
+};
+
+export const canApplyGiveaway = (giveaway: {
+  status: GiveawayStatus;
+  canRequest: boolean;
+}): boolean => {
+  return giveaway.status === GIVEAWAY_STATUS.AVAILABLE && giveaway.canRequest;
+};
+
+export const hasActiveGiveawayRequest = (requestStatus: string | null | undefined): boolean => {
+  return (
+    requestStatus === GIVEAWAY_REQUEST_STATUS.PENDING ||
+    requestStatus === GIVEAWAY_REQUEST_STATUS.SELECTED
+  );
 };
 
 export const canSelectGiveawayRequest = (

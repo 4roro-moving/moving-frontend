@@ -174,6 +174,10 @@ export interface GiveawayRequestMyListResult {
   pagination: CursorPagination;
 }
 
+export interface CreateGiveawayRequestInput {
+  message?: string;
+}
+
 export interface UpdateGiveawayRequestInput {
   message: string | null;
 }

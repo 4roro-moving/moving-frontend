@@ -1,5 +1,7 @@
 import Button from "@/components/common/Button/Button";
 import {
+  GIVEAWAY_APPLIED_BUTTON_LABEL,
+  GIVEAWAY_APPLY_BUTTON_LABEL,
   GIVEAWAY_COMPLETE_BUTTON_LABEL,
   GIVEAWAY_DELETE_BUTTON_LABEL,
   GIVEAWAY_EDIT_BUTTON_LABEL,
@@ -13,19 +15,25 @@ import { GIVEAWAY_STATUS, type GiveawayStatus } from "@/types/giveaway";
 interface GiveawayDetailActionsProps {
   status: GiveawayStatus;
   isAuthor: boolean;
+  canRequest: boolean;
+  hasApplied: boolean;
   isCompletePending?: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onComplete: () => void;
+  onApply: () => void;
 }
 
 const GiveawayDetailActions = ({
   status,
   isAuthor,
+  canRequest,
+  hasApplied,
   isCompletePending = false,
   onEdit,
   onDelete,
   onComplete,
+  onApply,
 }: GiveawayDetailActionsProps) => {
   if (isAuthor) {
     if (canEditGiveaway(status) && canDeleteGiveaway(status)) {
@@ -79,6 +87,22 @@ const GiveawayDetailActions = ({
     return (
       <Button type="button" variant="solid" size="cta" fullWidth disabled>
         {GIVEAWAY_THUMBNAIL_OVERLAY_LABEL.COMPLETED}
+      </Button>
+    );
+  }
+
+  if (canRequest) {
+    return (
+      <Button type="button" variant="solid" size="cta" fullWidth onClick={onApply}>
+        {GIVEAWAY_APPLY_BUTTON_LABEL}
+      </Button>
+    );
+  }
+
+  if (hasApplied) {
+    return (
+      <Button type="button" variant="solid" size="cta" fullWidth disabled>
+        {GIVEAWAY_APPLIED_BUTTON_LABEL}
       </Button>
     );
   }

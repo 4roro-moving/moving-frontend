@@ -2,6 +2,7 @@ import fetchInstance from "@/lib/api/fetchInstance";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import type { CursorPagination } from "@/types/pagination";
 import type {
+  CreateGiveawayRequestInput,
   GiveawayDetail,
   GiveawayRequestItem,
   GiveawayRequestListQuery,
@@ -31,6 +32,12 @@ export const fetchGiveawayRequests = async (
     `${API_ROUTES.GIVEAWAYS.REQUESTS(giveawayId)}?${params.toString()}`,
   );
 };
+
+export const createGiveawayRequest = (giveawayId: number, body: CreateGiveawayRequestInput) =>
+  fetchInstance.post<GiveawayRequestItem, CreateGiveawayRequestInput>(
+    API_ROUTES.GIVEAWAYS.REQUESTS(giveawayId),
+    body,
+  );
 
 export const selectGiveawayRequest = (giveawayId: number, requestId: number) =>
   fetchInstance.post<GiveawayDetail>(API_ROUTES.GIVEAWAYS.SELECT_REQUEST(giveawayId, requestId));
