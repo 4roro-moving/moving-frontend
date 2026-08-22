@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { addFavoriteMover, removeFavoriteMover } from "@/lib/api/favorites";
+import { resetFavoriteMoverCoordinatorForTests } from "@/lib/utils/favoriteMoverCoordinator";
 import { createQueryClientWrapper, createTestQueryClient } from "@/test/createQueryClientWrapper";
 import { createDeferred } from "@/test/createDeferred";
 
@@ -38,6 +39,7 @@ vi.mock("@/components/auth/LoginRequiredModalProvider", () => ({
 describe("useFavoriteMover", () => {
   afterEach(() => {
     authQueryScopeMock.isAuthQueryReady = true;
+    resetFavoriteMoverCoordinatorForTests();
     vi.clearAllMocks();
   });
 
@@ -121,5 +123,27 @@ describe("useFavoriteMover", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(invalidateSpy).not.toHaveBeenCalled();
+  });
+
+  it("서로 다른 Hook 인스턴스의 동일 기사님 요청을 직렬화한다", async () => {
+    const addRequest = createDeferred<{ moverId: string; isFavorite: boolean }>();
+    const removeRequest = createDeferred<{ moverId: string; isFavorite: boolean }>();
+    vi.mocked(addFavoriteMover).mockReturnValueOnce(addRequest.promise);
+    vi.mocked(removeFavoriteMover).mockReturnValueOnce(removeRequest.promise);
+
+    const { result } = renderHook(
+      () => ({ first: useFavoriteMover(), second: useFavoriteMover() }),
+      { wrapper: createQueryClientWrapper(createTestQueryClient()) },
+    );
+
+    act(() => result.current.first.mutate({ moverId: "mover-1", nextIsFavorite: true }));
+    await waitFor(() => expect(addFavoriteMover).toHaveBeenCalledTimes(1));
+
+    act(() => result.current.second.mutate({ moverId: "mover-1", nextIsFavorite: false }));
+    expect(removeFavoriteMover).not.toHaveBeenCalled();
+
+    await act(async () => addRequest.resolve({ moverId: "mover-1", isFavorite: true }));
+    await waitFor(() => expect(removeFavoriteMover).toHaveBeenCalledTimes(1));
+    await act(async () => removeRequest.resolve({ moverId: "mover-1", isFavorite: false }));
   });
 });
