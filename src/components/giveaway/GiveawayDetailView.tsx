@@ -124,7 +124,11 @@ const GiveawayDetailView = ({
                 <div className="flex w-full items-center gap-12">
                   <div className="text-text-muted flex min-w-0 flex-1 items-center gap-8">
                     {writtenAt ? (
-                      <Text as="time" variant={{ base: "sm-medium", xl: "md-medium" }}>
+                      <Text
+                        as="time"
+                        dateTime={giveaway.createdAt}
+                        variant={{ base: "sm-medium", xl: "md-medium" }}
+                      >
                         {writtenAt}
                       </Text>
                     ) : null}

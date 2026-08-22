@@ -70,7 +70,12 @@ const GiveawayCard = ({ giveaway, preloadThumbnail = false }: GiveawayCardProps)
         </Text>
         <div className="flex w-full items-center justify-between">
           {writtenAt ? (
-            <Text as="span" variant="md-medium" className="text-text-muted">
+            <Text
+              as="time"
+              dateTime={giveaway.createdAt}
+              variant="md-medium"
+              className="text-text-muted"
+            >
               {writtenAt}
             </Text>
           ) : (

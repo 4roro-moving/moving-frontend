@@ -75,6 +75,13 @@ const GiveawayReceivedRequestCard = ({
                 variant={{ base: "lg-bold", md: "2lg-bold" }}
                 className="text-text-secondary"
               >
+                {request.requester.name}
+              </Text>
+              <Text
+                as="p"
+                variant={{ base: "xs-medium", md: "xs-medium" }}
+                className="text-text-muted"
+              >
                 {GIVEAWAY_REQUEST_CONTENT_LABEL}
               </Text>
               <Text
@@ -83,13 +90,6 @@ const GiveawayReceivedRequestCard = ({
                 className="text-text-secondary line-clamp-2"
               >
                 {message}
-              </Text>
-              <Text
-                as="p"
-                variant={{ base: "xs-medium", md: "xs-medium" }}
-                className="text-text-muted"
-              >
-                {request.requester.name}
               </Text>
             </div>
           </div>

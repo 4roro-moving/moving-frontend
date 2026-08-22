@@ -22,6 +22,10 @@ interface GiveawayDetailImageSliderProps {
   status: GiveawayStatus;
 }
 
+const getGiveawaySlideLabel = (index: number, total: number) => {
+  return `나눔 이미지 ${String(index + 1)}/${String(total)}`;
+};
+
 const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSliderProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const previousImageCountRef = useRef(images.length);
@@ -29,6 +33,7 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
   const hasMultiple = images.length > 1;
   const safeIndex = Math.min(currentIndex, Math.max(images.length - 1, 0));
   const translateClass = SLIDE_TRANSLATE_CLASS[safeIndex] ?? "translate-x-0";
+  const slideStatus = images.length > 0 ? getGiveawaySlideLabel(safeIndex, images.length) : "";
 
   useEffect(() => {
     const previousImageCount = previousImageCountRef.current;
@@ -61,10 +66,14 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
       ) : (
         <div className={cn("flex size-full transition-transform duration-300", translateClass)}>
           {images.map((image, index) => (
-            <div key={image.id} className="relative size-full shrink-0">
+            <div
+              key={image.id}
+              className="relative size-full shrink-0"
+              aria-hidden={index !== safeIndex}
+            >
               <Image
                 src={image.imageUrl}
-                alt=""
+                alt={getGiveawaySlideLabel(index, images.length)}
                 fill
                 sizes="(min-width: 1280px) 500px, (min-width: 768px) 268px, 90vw"
                 className="object-cover"
@@ -74,6 +83,12 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
           ))}
         </div>
       )}
+
+      {slideStatus ? (
+        <p className="sr-only" aria-live="polite" aria-atomic="true">
+          {slideStatus}
+        </p>
+      ) : null}
 
       {overlayLabel ? (
         <div className="bg-overlay-card-disabled pointer-events-none absolute inset-0 flex items-center justify-center">
