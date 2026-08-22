@@ -1,6 +1,7 @@
 import type {
   GiveawayListQuery,
   GiveawayMyListQuery,
+  GiveawayRequestListQuery,
   GiveawayRequestMyListQuery,
 } from "@/types/giveaway";
 import type { MoversListQuery } from "@/types/mover";
@@ -64,6 +65,17 @@ export const getGiveawayMyListQueryKey = (
   authScope: AuthQueryScope,
   query: Omit<GiveawayMyListQuery, "cursor">,
 ) => [...getGiveawayMyListScopeQueryKey(authScope), query] as const;
+
+export const getGiveawayDetailQueryKey = (giveawayId: number) =>
+  [...QUERY_KEYS.GIVEAWAYS.DETAIL_ROOT, giveawayId] as const;
+
+export const getGiveawayRequestsScopeQueryKey = (giveawayId: number) =>
+  [...QUERY_KEYS.GIVEAWAYS.REQUESTS_ROOT, giveawayId] as const;
+
+export const getGiveawayRequestsQueryKey = (
+  giveawayId: number,
+  query: Omit<GiveawayRequestListQuery, "cursor">,
+) => [...getGiveawayRequestsScopeQueryKey(giveawayId), query] as const;
 
 export const getGiveawayRequestMyListScopeQueryKey = (authScope: AuthQueryScope) =>
   [...QUERY_KEYS.GIVEAWAY_REQUESTS.ME, authScope] as const;
@@ -215,6 +227,8 @@ export const QUERY_KEYS = {
     ALL: ["giveaways"] as const,
     LIST: ["giveaways", "list"] as const,
     ME: ["giveaways", "me"] as const,
+    DETAIL_ROOT: ["giveaways", "detail"] as const,
+    REQUESTS_ROOT: ["giveaways", "requests"] as const,
   },
 
   // 2026.08.22 김나연 - [추가] 나눔 신청 쿼리 키

@@ -84,6 +84,12 @@ export const API_ROUTES = {
     ME: "/giveaways/me",
     DETAIL: (giveawayId: number) => `/giveaways/${giveawayId}`,
     IMAGE_UPLOAD_URL: "/giveaways/image/upload-url",
+    REQUESTS: (giveawayId: number) => `/giveaways/${giveawayId}/requests`,
+    SELECT_REQUEST: (giveawayId: number, requestId: number) =>
+      `/giveaways/${giveawayId}/requests/${requestId}/select`,
+    REJECT_REQUEST: (giveawayId: number, requestId: number) =>
+      `/giveaways/${giveawayId}/requests/${requestId}/reject`,
+    COMPLETE: (giveawayId: number) => `/giveaways/${giveawayId}/complete`,
   },
   GIVEAWAY_REQUESTS: {
     ME: "/giveaway-requests/me",

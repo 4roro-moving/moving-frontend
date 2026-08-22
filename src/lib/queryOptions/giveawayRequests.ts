@@ -1,9 +1,24 @@
-import { infiniteQueryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 
-import { fetchMyGiveawayRequests } from "@/lib/api/giveawayRequests";
+import { fetchGiveawayRequests, fetchMyGiveawayRequests } from "@/lib/api/giveawayRequests";
 import { GIVEAWAY_LIST_STALE_TIME_MS } from "@/lib/constants/giveaway";
-import { getGiveawayRequestMyListQueryKey, type AuthQueryScope } from "@/lib/constants/queryKeys";
-import type { GiveawayRequestMyListQuery } from "@/types/giveaway";
+import {
+  getGiveawayRequestMyListQueryKey,
+  getGiveawayRequestsQueryKey,
+  type AuthQueryScope,
+} from "@/lib/constants/queryKeys";
+import type { GiveawayRequestListQuery, GiveawayRequestMyListQuery } from "@/types/giveaway";
+
+export const getGiveawayRequestsQueryOptions = (
+  giveawayId: number,
+  listQuery: Omit<GiveawayRequestListQuery, "cursor">,
+) => {
+  return queryOptions({
+    queryKey: getGiveawayRequestsQueryKey(giveawayId, listQuery),
+    queryFn: () => fetchGiveawayRequests(giveawayId, listQuery),
+    staleTime: GIVEAWAY_LIST_STALE_TIME_MS,
+  });
+};
 
 export const getMyGiveawayRequestsInfiniteQueryOptions = (
   authScope: AuthQueryScope,

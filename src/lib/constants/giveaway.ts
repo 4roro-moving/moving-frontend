@@ -76,6 +76,81 @@ export const getGiveawayThumbnailOverlayLabel = (status: GiveawayStatus): string
   return null;
 };
 
+export const GIVEAWAY_DETAIL_TITLE = "나눔글 상세";
+export const GIVEAWAY_PENDING_REQUESTS_TITLE = "대기 중인 신청 내역";
+export const GIVEAWAY_PENDING_REQUESTS_EMPTY = "아직 대기 중인 신청이 없어요.";
+export const GIVEAWAY_SHARE_BUTTON_LABEL = "나눔하기";
+export const GIVEAWAY_REJECT_BUTTON_LABEL = "거절하기";
+export const GIVEAWAY_EDIT_BUTTON_LABEL = "수정하기";
+export const GIVEAWAY_DELETE_BUTTON_LABEL = "삭제하기";
+export const GIVEAWAY_COMPLETE_BUTTON_LABEL = "나눔 완료";
+export const GIVEAWAY_REPORT_BUTTON_LABEL = "신고하기";
+export const GIVEAWAY_REQUEST_CONTENT_LABEL = "신청 내용";
+export const GIVEAWAY_REQUEST_DATE_LABEL = "신청일";
+export const GIVEAWAY_REQUEST_EMPTY_MESSAGE = "없음";
+
+export const GIVEAWAY_DETAIL_REQUEST_LIMIT = 50;
+
+export const canEditGiveaway = (status: GiveawayStatus): boolean => {
+  return status === GIVEAWAY_STATUS.AVAILABLE;
+};
+
+export const canDeleteGiveaway = (status: GiveawayStatus): boolean => {
+  return status === GIVEAWAY_STATUS.AVAILABLE;
+};
+
+export const canCompleteGiveaway = (status: GiveawayStatus): boolean => {
+  return status === GIVEAWAY_STATUS.IN_PROGRESS;
+};
+
+export const canSelectGiveawayRequest = (
+  giveawayStatus: GiveawayStatus,
+  requestStatus: GiveawayRequestStatus,
+): boolean => {
+  return (
+    giveawayStatus === GIVEAWAY_STATUS.AVAILABLE &&
+    requestStatus === GIVEAWAY_REQUEST_STATUS.PENDING
+  );
+};
+
+export const canRejectGiveawayRequest = (
+  giveawayStatus: GiveawayStatus,
+  requestStatus: GiveawayRequestStatus,
+): boolean => {
+  if (giveawayStatus === GIVEAWAY_STATUS.COMPLETED) {
+    return false;
+  }
+
+  if (requestStatus === GIVEAWAY_REQUEST_STATUS.PENDING) {
+    return true;
+  }
+
+  return (
+    requestStatus === GIVEAWAY_REQUEST_STATUS.SELECTED &&
+    giveawayStatus === GIVEAWAY_STATUS.IN_PROGRESS
+  );
+};
+
+export const GIVEAWAY_FINAL_IMAGE_KEY_PATTERN =
+  /^giveaways\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp)$/i;
+
+export const isReusableGiveawayImageKey = (value: string): boolean => {
+  return GIVEAWAY_FINAL_IMAGE_KEY_PATTERN.test(value);
+};
+
+export const toGiveawayExistingFormImage = (image: {
+  id: number;
+  imageUrl: string;
+  imageKey: string;
+}) => {
+  return {
+    kind: "existing" as const,
+    id: image.id,
+    imageUrl: image.imageUrl,
+    imageKey: image.imageKey,
+  };
+};
+
 export const GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH = 1000;
 
 export const GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL = "나눔 글 보러가기";

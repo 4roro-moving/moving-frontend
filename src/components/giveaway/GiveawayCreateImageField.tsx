@@ -6,15 +6,23 @@ import { Text } from "@/components/common/Text";
 import { CloseIcon, GalleryIcon } from "@/icons";
 import { GIVEAWAY_CREATE_COVER_LABEL, GIVEAWAY_IMAGE_MAX_COUNT } from "@/lib/constants/giveaway";
 import { cn } from "@/lib/utils/cn";
-import { GIVEAWAY_IMAGE_CONTENT_TYPES } from "@/types/giveaway";
+import { GIVEAWAY_IMAGE_CONTENT_TYPES, type GiveawayFormImage } from "@/types/giveaway";
 
 interface GiveawayCreateImageFieldProps {
-  images: File[];
+  images: GiveawayFormImage[];
   error?: string;
   disabled?: boolean;
   onAdd: (fileList: FileList | null) => void;
   onRemove: (index: number) => void;
 }
+
+const getImageKey = (image: GiveawayFormImage, index: number) => {
+  if (image.kind === "existing") {
+    return `existing-${String(image.id)}`;
+  }
+
+  return `new-${image.file.name}-${String(image.file.lastModified)}-${String(index)}`;
+};
 
 const GiveawayCreateImageField = ({
   images,
@@ -30,14 +38,21 @@ const GiveawayCreateImageField = ({
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   useEffect(() => {
-    const nextUrls = images.map((file) => URL.createObjectURL(file));
+    const nextUrls = images.map((image) => {
+      if (image.kind === "existing") {
+        return image.imageUrl;
+      }
+
+      return URL.createObjectURL(image.file);
+    });
+    const createdObjectUrls = nextUrls.filter((_, index) => images[index]?.kind === "new");
     const frameId = requestAnimationFrame(() => {
       setPreviewUrls(nextUrls);
     });
 
     return () => {
       cancelAnimationFrame(frameId);
-      nextUrls.forEach((url) => {
+      createdObjectUrls.forEach((url) => {
         URL.revokeObjectURL(url);
       });
     };
@@ -89,44 +104,51 @@ const GiveawayCreateImageField = ({
 
         <div className="min-w-0 flex-1 overflow-x-auto pt-20 pr-20">
           <div className="flex w-max items-start gap-8">
-            {previewUrls.map((previewUrl, index) => (
-              <div
-                key={`${images[index]?.name ?? "image"}-${String(images[index]?.lastModified ?? index)}`}
-                className="relative size-64 shrink-0 md:size-100"
-              >
-                {/* blob URL — Next Image 도메인 제한 회피 */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={previewUrl}
-                  alt=""
-                  className="bg-background-avatar rounded-12 size-full object-cover"
-                />
+            {previewUrls.map((previewUrl, index) => {
+              const image = images[index];
+              if (!image) {
+                return null;
+              }
 
-                {index === 0 ? (
-                  <div className="bg-background-avatar rounded-b-12 pointer-events-none absolute inset-x-0 bottom-0 flex h-1/4 items-center justify-center">
-                    <Text as="span" variant="xs-regular" className="text-text-inverse">
-                      {GIVEAWAY_CREATE_COVER_LABEL}
-                    </Text>
-                  </div>
-                ) : null}
-
-                <button
-                  type="button"
-                  aria-label={`${String(index + 1)}번째 이미지 삭제`}
-                  disabled={disabled}
-                  onClick={() => onRemove(index)}
-                  className={cn(
-                    "absolute -top-20 -right-20 flex size-44 items-center justify-center",
-                    "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
-                    "disabled:cursor-not-allowed disabled:opacity-50",
-                  )}
+              return (
+                <div
+                  key={getImageKey(image, index)}
+                  className="relative size-64 shrink-0 md:size-100"
                 >
-                  <span className="bg-text-tertiary flex size-18 items-center justify-center rounded-full">
-                    <CloseIcon className="text-text-inverse size-8" aria-hidden="true" />
-                  </span>
-                </button>
-              </div>
-            ))}
+                  {/* blob URL — Next Image 도메인 제한 회피 */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={previewUrl}
+                    alt=""
+                    className="bg-background-avatar rounded-12 size-full object-cover"
+                  />
+
+                  {index === 0 ? (
+                    <div className="bg-background-avatar rounded-b-12 pointer-events-none absolute inset-x-0 bottom-0 flex h-1/4 items-center justify-center">
+                      <Text as="span" variant="xs-regular" className="text-text-inverse">
+                        {GIVEAWAY_CREATE_COVER_LABEL}
+                      </Text>
+                    </div>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    aria-label={`${String(index + 1)}번째 이미지 삭제`}
+                    disabled={disabled}
+                    onClick={() => onRemove(index)}
+                    className={cn(
+                      "absolute -top-20 -right-20 flex size-44 items-center justify-center",
+                      "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+                      "disabled:cursor-not-allowed disabled:opacity-50",
+                    )}
+                  >
+                    <span className="bg-text-tertiary flex size-18 items-center justify-center rounded-full">
+                      <CloseIcon className="text-text-inverse size-8" aria-hidden="true" />
+                    </span>
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

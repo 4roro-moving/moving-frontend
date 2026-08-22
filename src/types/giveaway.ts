@@ -18,6 +18,7 @@ export type GiveawayListSort = (typeof GIVEAWAY_LIST_SORT)[keyof typeof GIVEAWAY
 export interface GiveawayAuthor {
   id: string;
   name: string;
+  profileImageUrl: string | null;
 }
 
 export interface GiveawayRegion {
@@ -86,8 +87,42 @@ export interface CreateGiveawayInput {
 
 export interface GiveawayImage {
   id: number;
+  imageKey: string;
   imageUrl: string;
   sortOrder: number;
+}
+
+export interface UpdateGiveawayInput {
+  title?: string;
+  description?: string;
+  regionId?: number | null;
+  imageKeys?: string[];
+}
+
+export type GiveawayExistingFormImage = {
+  kind: "existing";
+  id: number;
+  imageUrl: string;
+  imageKey: string;
+};
+
+export type GiveawayNewFormImage = {
+  kind: "new";
+  file: File;
+};
+
+export type GiveawayFormImage = GiveawayExistingFormImage | GiveawayNewFormImage;
+
+export interface GiveawayRequestListQuery {
+  status?: GiveawayRequestStatus;
+  sort: GiveawayListSort;
+  cursor?: string;
+  limit: number;
+}
+
+export interface GiveawayRequestListResult {
+  data: GiveawayRequestItem[];
+  pagination: CursorPagination;
 }
 
 export interface GiveawayMyRequest {
