@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { useCreateGiveaway } from "@/hooks/giveaway/useCreateGiveaway";
@@ -48,11 +49,13 @@ export const useGiveawayCreateForm = ({ onClose, onSuccess }: UseGiveawayCreateF
     defaultValues: DEFAULT_VALUES,
   });
 
+  const [imageWarning, setImageWarning] = useState<string | undefined>();
   const isPending = isSubmitting || createMutation.isPending;
   const submitError = errors.root?.message;
   const isSubmitDisabled = isPending || !isValid;
 
   const resetForm = () => {
+    setImageWarning(undefined);
     reset(DEFAULT_VALUES);
   };
 
@@ -95,9 +98,7 @@ export const useGiveawayCreateForm = ({ onClose, onSuccess }: UseGiveawayCreateF
     }
 
     if (acceptedFiles.length === 0) {
-      if (rejectionMessage) {
-        setError("images", { message: rejectionMessage });
-      }
+      setImageWarning(rejectionMessage);
       return;
     }
 
@@ -105,17 +106,14 @@ export const useGiveawayCreateForm = ({ onClose, onSuccess }: UseGiveawayCreateF
     const totalSize = nextImages.reduce((total, file) => total + file.size, 0);
 
     if (totalSize > GIVEAWAY_IMAGE_MAX_TOTAL_SIZE_BYTES) {
-      setError("images", {
-        message: `이미지 총 용량은 ${String(GIVEAWAY_IMAGE_MAX_TOTAL_SIZE_MB)}MB 이하여야 합니다.`,
-      });
+      setImageWarning(
+        `이미지 총 용량은 ${String(GIVEAWAY_IMAGE_MAX_TOTAL_SIZE_MB)}MB 이하여야 합니다.`,
+      );
       return;
     }
 
+    setImageWarning(rejectionMessage);
     setValue("images", nextImages, { shouldDirty: true, shouldValidate: true });
-
-    if (rejectionMessage) {
-      setError("images", { message: rejectionMessage });
-    }
   };
 
   const handleRemoveImage = (index: number) => {
@@ -123,6 +121,7 @@ export const useGiveawayCreateForm = ({ onClose, onSuccess }: UseGiveawayCreateF
       return;
     }
 
+    setImageWarning(undefined);
     setValue(
       "images",
       getValues("images").filter((_, imageIndex) => imageIndex !== index),
@@ -161,6 +160,7 @@ export const useGiveawayCreateForm = ({ onClose, onSuccess }: UseGiveawayCreateF
     regionError: errors.regionId?.message,
     titleError: errors.title?.message,
     descriptionError: errors.description?.message,
+    imageWarning,
     submitError,
     isPending,
     isSubmitDisabled,

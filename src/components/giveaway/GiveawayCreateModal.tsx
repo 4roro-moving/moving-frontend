@@ -42,6 +42,7 @@ const GiveawayCreateModalContent = ({
     regionError,
     titleError,
     descriptionError,
+    imageWarning,
     submitError,
     isPending,
     isSubmitDisabled,
@@ -107,7 +108,7 @@ const GiveawayCreateModalContent = ({
           render={({ field, fieldState }) => (
             <GiveawayCreateImageField
               images={field.value}
-              error={fieldState.error?.message}
+              error={fieldState.error?.message ?? imageWarning}
               disabled={isPending}
               onAdd={handleAddImages}
               onRemove={handleRemoveImage}
