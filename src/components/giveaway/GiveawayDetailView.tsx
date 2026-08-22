@@ -25,7 +25,7 @@ import {
   hasActiveGiveawayRequest,
 } from "@/lib/constants/giveaway";
 import { formatRelativeTime } from "@/lib/utils/date";
-import { GIVEAWAY_STATUS, type GiveawayDetail, type GiveawayRequestItem } from "@/types/giveaway";
+import type { GiveawayDetail, GiveawayRequestItem } from "@/types/giveaway";
 
 interface GiveawayDetailViewProps {
   giveaway: GiveawayDetail;
@@ -52,7 +52,7 @@ const GiveawayDetailView = ({
   const [isApplyOpen, setIsApplyOpen] = useState(false);
   const [actionError, setActionError] = useState<string | undefined>();
   const writtenAt = formatRelativeTime(giveaway.createdAt);
-  const showPendingRequests = isAuthor && giveaway.status !== GIVEAWAY_STATUS.COMPLETED;
+  const showReceivedRequests = isAuthor;
 
   const handleDelete = async () => {
     try {
@@ -178,7 +178,7 @@ const GiveawayDetailView = ({
           </div>
         </article>
 
-        {showPendingRequests ? (
+        {showReceivedRequests ? (
           <>
             <DetailDivider />
             <GiveawayPendingRequestList

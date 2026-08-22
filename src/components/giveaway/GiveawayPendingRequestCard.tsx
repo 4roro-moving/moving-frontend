@@ -8,9 +8,12 @@ import {
   GIVEAWAY_REQUEST_CONTENT_LABEL,
   GIVEAWAY_REQUEST_DATE_LABEL,
   GIVEAWAY_REQUEST_EMPTY_MESSAGE,
+  GIVEAWAY_REQUEST_STATUS_FIELD_LABEL,
+  GIVEAWAY_REQUEST_STATUS_FIELD_LABEL_COMPACT,
   GIVEAWAY_SHARE_BUTTON_LABEL,
   canRejectGiveawayRequest,
   canSelectGiveawayRequest,
+  getGiveawayRequestStatusLabel,
 } from "@/lib/constants/giveaway";
 import { formatKoreanDateTime } from "@/lib/utils/date";
 import type { GiveawayRequestItem, GiveawayStatus } from "@/types/giveaway";
@@ -22,6 +25,12 @@ interface GiveawayPendingRequestCardProps {
   onSelect: (request: GiveawayRequestItem) => void;
   onReject: (request: GiveawayRequestItem) => void;
 }
+
+const InfoDivider = () => {
+  return (
+    <span className="bg-border-subtle hidden h-50 w-px shrink-0 md:block" aria-hidden="true" />
+  );
+};
 
 const formatRequestDate = (value: string): string => {
   try {
@@ -41,6 +50,7 @@ const GiveawayPendingRequestCard = ({
   const canSelect = canSelectGiveawayRequest(giveawayStatus, request.status);
   const canReject = canRejectGiveawayRequest(giveawayStatus, request.status);
   const message = request.message?.trim() || GIVEAWAY_REQUEST_EMPTY_MESSAGE;
+  const statusLabel = getGiveawayRequestStatusLabel(request.status);
   const appliedDate = formatRequestDate(request.createdAt);
   const titleId = `giveaway-request-${String(request.id)}-title`;
 
@@ -84,14 +94,29 @@ const GiveawayPendingRequestCard = ({
             </div>
           </div>
 
-          {appliedDate ? (
+          <dl className="flex w-full flex-col gap-16 md:flex-row md:items-center md:gap-20">
+            <ResidenceReviewInfoItem
+              label={GIVEAWAY_REQUEST_STATUS_FIELD_LABEL_COMPACT}
+              value={statusLabel}
+              className="md:hidden"
+              labelVariant={{ base: "xs-regular", md: "md-regular" }}
+              valueVariant={{ base: "sm-medium", md: "lg-regular" }}
+            />
+            <ResidenceReviewInfoItem
+              label={GIVEAWAY_REQUEST_STATUS_FIELD_LABEL}
+              value={statusLabel}
+              className="hidden md:flex"
+              labelVariant={{ base: "xs-regular", md: "md-regular" }}
+              valueVariant={{ base: "sm-medium", md: "lg-regular" }}
+            />
+            <InfoDivider />
             <ResidenceReviewInfoItem
               label={GIVEAWAY_REQUEST_DATE_LABEL}
               value={appliedDate}
               labelVariant={{ base: "xs-regular", md: "md-regular" }}
               valueVariant={{ base: "sm-medium", md: "lg-regular" }}
             />
-          ) : null}
+          </dl>
 
           <GiveawayReportButton className="w-fit" />
         </div>

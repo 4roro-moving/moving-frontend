@@ -11,8 +11,9 @@ import { useRejectGiveawayRequest } from "@/hooks/giveaway/useRejectGiveawayRequ
 import { useSelectGiveawayRequest } from "@/hooks/giveaway/useSelectGiveawayRequest";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
-  GIVEAWAY_PENDING_REQUESTS_EMPTY,
-  GIVEAWAY_PENDING_REQUESTS_TITLE,
+  GIVEAWAY_RECEIVED_REQUESTS_EMPTY,
+  GIVEAWAY_RECEIVED_REQUESTS_LOADING,
+  GIVEAWAY_RECEIVED_REQUESTS_TITLE,
   GIVEAWAY_REJECT_BUTTON_LABEL,
   GIVEAWAY_SHARE_BUTTON_LABEL,
 } from "@/lib/constants/giveaway";
@@ -44,7 +45,11 @@ const GiveawayPendingRequestSkeletonList = () => {
                     <Skeleton className="h-18 w-64" />
                   </div>
                 </div>
-                <Skeleton className="h-48 w-160" />
+                <div className="flex w-full flex-col gap-16 md:flex-row md:items-center md:gap-20">
+                  <Skeleton className="h-48 w-64" />
+                  <Skeleton className="h-48 w-160" />
+                </div>
+                <Skeleton className="h-22 w-64" />
               </div>
               <div className="flex w-full flex-col gap-8 xl:w-160 xl:shrink-0">
                 <Skeleton className="rounded-12 h-54 w-full" />
@@ -115,7 +120,7 @@ const GiveawayPendingRequestList = ({
         variant={{ base: "xl-bold", md: "2xl-bold" }}
         className="text-text-primary"
       >
-        {GIVEAWAY_PENDING_REQUESTS_TITLE}
+        {GIVEAWAY_RECEIVED_REQUESTS_TITLE}
       </Text>
 
       {actionError ? (
@@ -128,12 +133,12 @@ const GiveawayPendingRequestList = ({
         <>
           <GiveawayPendingRequestSkeletonList />
           <p className="sr-only" role="status">
-            대기 중인 신청 내역을 불러오는 중
+            {GIVEAWAY_RECEIVED_REQUESTS_LOADING}
           </p>
         </>
       ) : requests.length === 0 ? (
         <Text as="p" variant="md-medium" className="text-text-muted">
-          {GIVEAWAY_PENDING_REQUESTS_EMPTY}
+          {GIVEAWAY_RECEIVED_REQUESTS_EMPTY}
         </Text>
       ) : (
         <ul className="flex w-full flex-col gap-20">

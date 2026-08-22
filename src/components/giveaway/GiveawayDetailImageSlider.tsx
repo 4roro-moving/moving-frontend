@@ -79,7 +79,7 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
             type="button"
             aria-label="이전 이미지"
             onClick={goToPrevious}
-            className="bg-background-default/80 hover:bg-background-default focus-visible:ring-border-brand absolute top-1/2 left-12 flex size-36 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:outline-none"
+            className="bg-background-default/80 hover:bg-background-muted focus-visible:ring-border-brand absolute top-1/2 left-12 flex size-36 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:outline-none"
           >
             <ChevronLeftIcon className="text-icon-subtle size-20" aria-hidden="true" />
           </button>
@@ -87,7 +87,7 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
             type="button"
             aria-label="다음 이미지"
             onClick={goToNext}
-            className="bg-background-default/80 hover:bg-background-default focus-visible:ring-border-brand absolute top-1/2 right-12 flex size-36 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:outline-none"
+            className="bg-background-default/80 hover:bg-background-muted focus-visible:ring-border-brand absolute top-1/2 right-12 flex size-36 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:outline-none"
           >
             <ChevronRightIcon className="text-icon-subtle size-20" aria-hidden="true" />
           </button>

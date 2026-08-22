@@ -20,7 +20,6 @@ const GiveawayDetailClient = ({ giveawayId }: GiveawayDetailClientProps) => {
   const isAuthor = detailQuery.data !== undefined && user?.id === detailQuery.data.author.id;
   const requestsQuery = useGiveawayPendingRequests({
     giveawayId,
-    giveawayStatus: detailQuery.data?.status,
     enabled: isAuthor,
   });
 
