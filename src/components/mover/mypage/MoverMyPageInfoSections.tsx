@@ -8,7 +8,19 @@ import {
 import { formatRating } from "@/lib/utils/estimateFormat";
 import type { MoverProfileMe } from "@/types/profile";
 
-export function MoverMyPageActivity({ profile }: { profile: MoverProfileMe }) {
+interface MoverMyPageActivityProps {
+  profile: MoverProfileMe;
+}
+
+interface MoverMyPageServicesProps {
+  profile: MoverProfileMe;
+}
+
+interface MoverMyPageRegionsProps {
+  profile: MoverProfileMe;
+}
+
+export function MoverMyPageActivity({ profile }: MoverMyPageActivityProps) {
   const stats = [
     { label: "진행", value: `${profile.completedCount}건` },
     { label: "리뷰", value: formatRating(profile.averageRating ?? 0) },
@@ -48,7 +60,7 @@ export function MoverMyPageActivity({ profile }: { profile: MoverProfileMe }) {
   );
 }
 
-export function MoverMyPageServices({ profile }: { profile: MoverProfileMe }) {
+export function MoverMyPageServices({ profile }: MoverMyPageServicesProps) {
   return (
     <section className="flex flex-col gap-8 md:gap-16" aria-labelledby="mover-service-types">
       <Text
@@ -64,7 +76,7 @@ export function MoverMyPageServices({ profile }: { profile: MoverProfileMe }) {
   );
 }
 
-export function MoverMyPageRegions({ profile }: { profile: MoverProfileMe }) {
+export function MoverMyPageRegions({ profile }: MoverMyPageRegionsProps) {
   return (
     <section className="flex flex-col gap-8 md:gap-16" aria-labelledby="mover-service-regions">
       <Text

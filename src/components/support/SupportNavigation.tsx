@@ -35,6 +35,7 @@ const SupportNavigation = () => {
             <Link
               key={href}
               href={href}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "border-b-2 px-16 py-16 transition-colors",
                 isActive

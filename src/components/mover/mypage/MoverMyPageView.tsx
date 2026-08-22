@@ -18,7 +18,11 @@ import {
 import MoverMyPageProfileSummary from "./MoverMyPageProfileSummary";
 import MoverMyPageReviews, { MoverMyPageReviewsSkeleton } from "./MoverMyPageReviews";
 
-function MoverMyPageContent({ profile }: { profile: MoverProfileMe }) {
+interface MoverMyPageContentProps {
+  profile: MoverProfileMe;
+}
+
+function MoverMyPageContent({ profile }: MoverMyPageContentProps) {
   const { detail, isInitialLoading, query } = useMoverDetail(profile.userId);
 
   return (

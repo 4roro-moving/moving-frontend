@@ -7,7 +7,11 @@ import { useFaqs } from "@/hooks/faq/useFaqs";
 import { ChevronDownIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 
-const StateMessage = ({ children }: { children: string }) => (
+interface StateMessageProps {
+  children: string;
+}
+
+const StateMessage = ({ children }: StateMessageProps) => (
   <div className="flex min-h-240 w-full items-center justify-center">
     <Text as="p" variant="md-medium" className="text-text-muted">
       {children}
@@ -120,6 +124,7 @@ const FaqPageClient = () => {
                 id={panelId}
                 role="region"
                 aria-labelledby={buttonId}
+                aria-hidden={!isOpen}
                 className={cn(
                   "grid transition-[grid-template-rows] duration-200 ease-out",
                   isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",

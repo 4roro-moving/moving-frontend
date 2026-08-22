@@ -9,6 +9,7 @@ import { useCloseInquiry } from "@/hooks/inquiry/useCloseInquiry";
 import { useInquiryDetail } from "@/hooks/inquiry/useInquiryDetail";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
+import { formatKoreanDateTimeWithTime } from "@/lib/utils/date";
 import type { InquiryCategory, InquiryStatus } from "@/types/inquiry";
 
 interface InquiryDetailClientProps {
@@ -26,18 +27,6 @@ const STATUS_LABEL: Record<InquiryStatus, string> = {
   OPEN: "답변 대기",
   ANSWERED: "답변 완료",
   CLOSED: "종료",
-};
-
-const formatDateTime = (value: string) => {
-  const date = new Date(value);
-
-  return new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
 };
 
 const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
@@ -188,7 +177,7 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
         </Text>
 
         <Text as="time" variant="xs-regular" className="text-text-muted">
-          문의일 {formatDateTime(data.createdAt)}
+          문의일 {formatKoreanDateTimeWithTime(data.createdAt)}
         </Text>
       </header>
 
@@ -229,7 +218,7 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
                 </div>
 
                 <Text as="time" variant="xs-regular" className="text-text-muted shrink-0">
-                  {formatDateTime(message.createdAt)}
+                  {formatKoreanDateTimeWithTime(message.createdAt)}
                 </Text>
               </header>
 
@@ -289,9 +278,11 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
                     : "bg-background-disabled text-text-disabled cursor-not-allowed",
                 )}
               >
-                <Text as="span" variant="md-semibold">
-                  {addMessageMutation.isPending ? "등록 중..." : "추가 문의 등록"}
-                </Text>
+                {addMessageMutation.isError && (
+                  <Text as="p" variant="xs-regular" className="text-text-error" role="alert">
+                    추가 문의 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.
+                  </Text>
+                )}
               </button>
             </div>
           </div>
@@ -299,27 +290,34 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
       )}
 
       {/* 하단 액션 */}
-      <footer className="border-border-default flex items-center justify-between gap-12 border-t pt-24">
-        <Link
-          href={APP_ROUTES.INQUIRIES.ROOT}
-          className="border-border-default text-text-secondary rounded-8 border px-20 py-10"
-        >
-          <Text as="span" variant="md-semibold">
-            목록으로
-          </Text>
-        </Link>
-
-        {!isClosed && (
-          <button
-            type="button"
-            onClick={handleClose}
-            disabled={closeMutation.isPending}
-            className="border-border-default text-text-secondary rounded-8 border px-20 py-10 disabled:cursor-not-allowed disabled:opacity-50"
+      <footer className="border-border-default flex flex-col gap-8 border-t pt-24">
+        <div className="flex items-center justify-between gap-12">
+          <Link
+            href={APP_ROUTES.INQUIRIES.ROOT}
+            className="border-border-default text-text-secondary rounded-8 border px-20 py-10"
           >
             <Text as="span" variant="md-semibold">
-              {closeMutation.isPending ? "종료 중..." : "문의 종료"}
+              목록으로
             </Text>
-          </button>
+          </Link>
+
+          {!isClosed && (
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={closeMutation.isPending}
+              className="border-border-default text-text-secondary rounded-8 border px-20 py-10 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Text as="span" variant="md-semibold">
+                {closeMutation.isPending ? "종료 중..." : "문의 종료"}
+              </Text>
+            </button>
+          )}
+        </div>
+        {closeMutation.isError && (
+          <Text as="p" variant="xs-regular" className="text-text-error text-right" role="alert">
+            문의 종료에 실패했습니다. 잠시 후 다시 시도해 주세요.
+          </Text>
         )}
       </footer>
     </main>

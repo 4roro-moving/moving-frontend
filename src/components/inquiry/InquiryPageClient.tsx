@@ -114,7 +114,7 @@ const InquiryPageClient = () => {
                     <button
                       type="button"
                       onClick={() => handleStatusChange(filter.value)}
-                      aria-current={isActive ? "page" : undefined}
+                      aria-pressed={isActive}
                       className={cn(
                         "border-b-2 px-16 py-12 transition-colors",
                         isActive
