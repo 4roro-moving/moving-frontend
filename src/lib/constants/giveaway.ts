@@ -152,13 +152,6 @@ export const canRejectGiveawayRequest = (
   );
 };
 
-export const GIVEAWAY_FINAL_IMAGE_KEY_PATTERN =
-  /^giveaways\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp)$/i;
-
-export const isReusableGiveawayImageKey = (value: string): boolean => {
-  return GIVEAWAY_FINAL_IMAGE_KEY_PATTERN.test(value);
-};
-
 export const toGiveawayExistingFormImage = (image: {
   id: number;
   imageUrl: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import { ChevronLeftIcon, ChevronRightIcon, GalleryIcon } from "@/icons";
@@ -24,10 +24,20 @@ interface GiveawayDetailImageSliderProps {
 
 const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSliderProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const previousImageCountRef = useRef(images.length);
   const overlayLabel = getGiveawayThumbnailOverlayLabel(status);
   const hasMultiple = images.length > 1;
   const safeIndex = Math.min(currentIndex, Math.max(images.length - 1, 0));
   const translateClass = SLIDE_TRANSLATE_CLASS[safeIndex] ?? "translate-x-0";
+
+  useEffect(() => {
+    const previousImageCount = previousImageCountRef.current;
+    previousImageCountRef.current = images.length;
+
+    if (images.length < previousImageCount) {
+      setCurrentIndex(0);
+    }
+  }, [images.length]);
 
   const goToPrevious = () => {
     setCurrentIndex((current) => (current === 0 ? images.length - 1 : current - 1));

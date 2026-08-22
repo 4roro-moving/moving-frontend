@@ -14,7 +14,6 @@ import {
   GIVEAWAY_IMAGE_MAX_SIZE_MB,
   GIVEAWAY_IMAGE_MAX_TOTAL_SIZE_BYTES,
   GIVEAWAY_IMAGE_MAX_TOTAL_SIZE_MB,
-  isReusableGiveawayImageKey,
   toGiveawayExistingFormImage,
 } from "@/lib/constants/giveaway";
 import { isRegionId } from "@/lib/constants/region";
@@ -70,9 +69,7 @@ const toOrderedImageKeys = async (images: GiveawayFormImage[]) => {
 
   for (const image of images) {
     if (image.kind === "existing") {
-      if (isReusableGiveawayImageKey(image.imageKey)) {
-        imageKeys.push(image.imageKey);
-      }
+      imageKeys.push(image.imageKey);
       continue;
     }
 
