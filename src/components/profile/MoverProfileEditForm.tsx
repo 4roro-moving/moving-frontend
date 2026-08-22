@@ -99,6 +99,9 @@ const MoverProfileEditForm = ({
                   initialPreviewUrl={shouldRemoveImage ? null : initialImageUrl}
                   onChange={(file) => {
                     field.onChange(file);
+                    if (file) {
+                      setValue("shouldRemoveImage", false, { shouldDirty: true });
+                    }
                   }}
                   onClear={() => {
                     field.onChange(null);

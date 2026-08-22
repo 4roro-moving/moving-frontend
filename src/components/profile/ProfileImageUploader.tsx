@@ -112,7 +112,7 @@ const ProfileImageUploader = ({
             disabled={disabled}
             onClick={handleClear}
             className={cn(
-              "absolute top-4 right-4 z-10 flex size-24 items-center justify-center rounded-full",
+              "absolute top-0 right-0 z-10 flex min-h-44 min-w-44 items-center justify-center rounded-full",
               "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
               "disabled:cursor-not-allowed disabled:opacity-50",
             )}
