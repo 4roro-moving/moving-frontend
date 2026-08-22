@@ -47,6 +47,8 @@ export const buildCustomerProfileEditPayloads = ({
 
   if (uploadedImageUrl) {
     profile.imageUrl = uploadedImageUrl;
+  } else if (formValues.shouldRemoveImage) {
+    profile.imageUrl = null;
   }
 
   const hasBasicUpdate = Object.keys(basic).length > 0;

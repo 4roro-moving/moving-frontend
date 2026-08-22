@@ -101,12 +101,17 @@ export function useMoverProfileEditForm({
         },
         regionIds: formValues.regionIds,
         serviceTypes: formValues.serviceTypes,
-        ...(imageKey ? { imageUrl: imageKey } : {}),
+        ...(imageKey
+          ? { imageUrl: imageKey }
+          : formValues.shouldRemoveImage
+            ? { imageUrl: null }
+            : {}),
       });
 
       reset({
         ...formValues,
         imageFile: null,
+        shouldRemoveImage: false,
       });
 
       setToastMessage(MOVER_PROFILE_EDIT_SUCCESS_MESSAGE);

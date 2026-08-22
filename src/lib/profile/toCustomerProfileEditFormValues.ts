@@ -11,6 +11,7 @@ export const toCustomerProfileEditFormValues = (
     newPassword: "",
     newPasswordConfirm: "",
     imageFile: null,
+    shouldRemoveImage: false,
     serviceTypes: customerProfile.serviceTypes,
     regionId: customerProfile.regions[0]?.id ?? null,
   };

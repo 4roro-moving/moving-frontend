@@ -21,6 +21,7 @@ export const toMoverProfileFormValues = (
 
   return {
     imageFile: null,
+    shouldRemoveImage: false,
     nickname: moverProfile.nickname,
     career: String(moverProfile.career),
     shortIntro: moverProfile.shortIntro,

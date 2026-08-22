@@ -41,6 +41,7 @@ export const customerProfileEditSchema = z
       ),
     phone: z.string(),
     imageFile: z.custom<File | null>().nullable().optional(),
+    shouldRemoveImage: z.boolean().optional(),
     serviceTypes: z.array(moveTypeSchema).min(1, "이용 서비스를 선택해 주세요"),
     regionId: regionIdSchema.nullable(),
   })

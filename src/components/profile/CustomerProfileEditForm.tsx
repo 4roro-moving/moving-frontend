@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
@@ -44,6 +44,7 @@ const CustomerProfileEditForm = ({
     setFocus,
     reset,
     resetField,
+    setValue,
     formState: { errors, isValid, dirtyFields, isDirty },
   } = useForm<CustomerProfileEditFormValues>({
     resolver: zodResolver(customerProfileEditSchema),
@@ -55,11 +56,14 @@ const CustomerProfileEditForm = ({
       newPassword: "",
       newPasswordConfirm: "",
       imageFile: null,
+      shouldRemoveImage: false,
       serviceTypes: [],
       regionId: null,
       ...defaultValues,
     },
   });
+
+  const shouldRemoveImage = useWatch({ control, name: "shouldRemoveImage" }) ?? false;
 
   const { submitError, toastMessage, isPending, setToastMessage, submit } =
     useCustomerProfileEditForm({
@@ -161,8 +165,17 @@ const CustomerProfileEditForm = ({
                 <ProfileImageUploader
                   id="customer-edit-profile-image"
                   value={field.value ?? null}
-                  initialPreviewUrl={initialImageUrl}
-                  onChange={field.onChange}
+                  initialPreviewUrl={shouldRemoveImage ? null : initialImageUrl}
+                  onChange={(file) => {
+                    field.onChange(file);
+                  }}
+                  onClear={() => {
+                    if (field.value) {
+                      field.onChange(null);
+                      return;
+                    }
+                    setValue("shouldRemoveImage", true, { shouldDirty: true });
+                  }}
                   error={errors.imageFile?.message}
                   disabled={isPending}
                 />
