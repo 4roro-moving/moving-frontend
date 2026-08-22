@@ -152,7 +152,7 @@ const GiveawayDetailView = ({
 
             <div className="flex items-center gap-12">
               <GiveawayProfileAvatar
-                imageUrl={giveaway.author.profileImageUrl}
+                imageUrl={giveaway.author.imageUrl}
                 className="rounded-12 size-64"
                 sizes="64px"
               />

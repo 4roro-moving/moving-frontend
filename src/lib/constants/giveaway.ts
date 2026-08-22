@@ -143,14 +143,7 @@ export const canRejectGiveawayRequest = (
     return false;
   }
 
-  if (requestStatus === GIVEAWAY_REQUEST_STATUS.PENDING) {
-    return true;
-  }
-
-  return (
-    requestStatus === GIVEAWAY_REQUEST_STATUS.SELECTED &&
-    giveawayStatus === GIVEAWAY_STATUS.IN_PROGRESS
-  );
+  return requestStatus === GIVEAWAY_REQUEST_STATUS.PENDING;
 };
 
 export const GIVEAWAY_FINAL_IMAGE_KEY_PATTERN =

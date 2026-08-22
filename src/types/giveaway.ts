@@ -18,7 +18,7 @@ export type GiveawayListSort = (typeof GIVEAWAY_LIST_SORT)[keyof typeof GIVEAWAY
 export interface GiveawayAuthor {
   id: string;
   name: string;
-  profileImageUrl: string | null;
+  imageUrl: string | null;
 }
 
 export interface GiveawayRegion {

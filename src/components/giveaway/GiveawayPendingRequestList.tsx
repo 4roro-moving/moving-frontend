@@ -17,7 +17,6 @@ import {
   GIVEAWAY_REJECT_BUTTON_LABEL,
   GIVEAWAY_SHARE_BUTTON_LABEL,
 } from "@/lib/constants/giveaway";
-import { GIVEAWAY_REQUEST_STATUS } from "@/types/giveaway";
 import type { GiveawayRequestItem, GiveawayStatus } from "@/types/giveaway";
 
 interface GiveawayPendingRequestListProps {
@@ -103,11 +102,6 @@ const GiveawayPendingRequestList = ({
       setActionError(getApiErrorMessage(error, "나눔 신청을 거절하지 못했습니다."));
     }
   };
-
-  const rejectDescription =
-    rejectedRequest?.status === GIVEAWAY_REQUEST_STATUS.SELECTED
-      ? "선정된 신청을 거절할까요? 나눔이 다시 신청 가능 상태로 돌아갑니다."
-      : "이 신청을 거절할까요?";
 
   return (
     <section
@@ -197,7 +191,7 @@ const GiveawayPendingRequestList = ({
         closeDisabled={isActionPending}
         size="sm"
         title="신청 거절"
-        description={rejectDescription}
+        description="이 신청을 거절할까요?"
         actions={
           <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
             <Modal.Button

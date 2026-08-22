@@ -63,7 +63,7 @@ const GiveawayPendingRequestCard = ({
         <div className="flex min-w-0 flex-1 flex-col gap-8">
           <div className="flex items-center gap-12 md:gap-20">
             <GiveawayProfileAvatar
-              imageUrl={request.requester.profileImageUrl}
+              imageUrl={request.requester.imageUrl}
               className="rounded-12 size-64 md:size-80"
               sizes="80px"
             />
