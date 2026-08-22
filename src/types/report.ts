@@ -2,7 +2,7 @@ import type { Pagination } from "@/types/pagination";
 
 export type ReportTargetType = "CUSTOMER" | "MOVER" | "REVIEW" | "RESIDENCE_REVIEW" | "GIVEAWAY";
 
-export type ReportReason = "SPAM" | "ABUSE" | "FALSE_INFO" | "FRAUD" | "INAPPROPRIATE" | "OTHER";
+export type ReportReason = "SPAM" | "ABUSE" | "FALSE_INFO" | "INAPPROPRIATE" | "PRIVACY" | "OTHER";
 
 export type ReportStatus = "PENDING" | "RESOLVED" | "REJECTED";
 

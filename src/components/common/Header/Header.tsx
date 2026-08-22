@@ -111,6 +111,11 @@ const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     label: "마이페이지",
     href: APP_ROUTES.MOVER_MYPAGE,
   },
+  {
+    type: "link",
+    label: "내 신고내역",
+    href: APP_ROUTES.REPORTS.ME,
+  },
   PROFILE_LOGOUT_MENU_ITEM,
 ];
 
