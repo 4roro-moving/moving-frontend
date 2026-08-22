@@ -37,7 +37,10 @@ export interface ConnectedChatRoomModalProps extends Omit<
   ChatRoomModalContainerProps,
   "estimateId"
 > {
-  room: ChatRoom;
+  room: ChatRoom | null;
+  roomErrorMessage?: string | null;
+  isRoomLoading?: boolean;
+  onRetryRoom?: () => void;
 }
 
 interface ChatMessageListProps {
@@ -326,6 +329,9 @@ function ChatMessageList({
 export function ConnectedChatRoomModal({
   open,
   room,
+  roomErrorMessage,
+  isRoomLoading = false,
+  onRetryRoom,
   participantRole,
   participantName,
   estimateSummary,
@@ -336,6 +342,7 @@ export function ConnectedChatRoomModal({
   const chat = useConnectedChatRoomModalController({ open, room });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatImageAccept = CHAT_IMAGE_CONTENT_TYPES.join(",");
+  const isChatContentReady = room !== null && !chat.isMessagesPending;
   const connectedEstimateEdit = estimateEdit
     ? {
         ...estimateEdit,
@@ -349,7 +356,11 @@ export function ConnectedChatRoomModal({
     "attach-photo": {
       ...actions?.["attach-photo"],
       hidden: actions?.["attach-photo"]?.hidden || !IS_CHAT_IMAGE_UPLOAD_ENABLED,
-      disabled: actions?.["attach-photo"]?.disabled || chat.isImageSending || !chat.isConnected,
+      disabled:
+        actions?.["attach-photo"]?.disabled ||
+        chat.isComposerDisabled ||
+        chat.isImageSending ||
+        !chat.isConnected,
       onSelect: () => {
         actions?.["attach-photo"]?.onSelect?.();
         fileInputRef.current?.click();
@@ -389,6 +400,11 @@ export function ConnectedChatRoomModal({
         selectedImagePreviewUrl={chat.selectedImagePreviewUrl}
         selectedImageName={chat.selectedImageName}
         isImageSending={chat.isImageSending}
+        composerDisabled={!isChatContentReady || chat.isComposerDisabled}
+        composerDisabledMessage={isChatContentReady ? chat.messageDisabledReason : null}
+        messagePlaceholder={
+          isChatContentReady && chat.isComposerDisabled ? "메시지를 보낼 수 없습니다." : undefined
+        }
         sendDisabled={chat.sendDisabled}
         onMessageChange={chat.setMessageValue}
         onClearSelectedImage={chat.clearSelectedImage}
@@ -397,7 +413,21 @@ export function ConnectedChatRoomModal({
         actions={mergedActions}
         estimateEdit={connectedEstimateEdit}
       >
-        {chat.isMessagesError ? (
+        {room === null ? (
+          roomErrorMessage ? (
+            <ChatRoomCreateError
+              message={roomErrorMessage}
+              isRetrying={isRoomLoading}
+              onRetry={onRetryRoom ?? (() => undefined)}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <Text variant="lg-medium" className="text-text-muted">
+                대화 내역을 불러오는 중입니다.
+              </Text>
+            </div>
+          )
+        ) : chat.isMessagesError ? (
           <div className="flex h-full flex-col items-center justify-center gap-12">
             <Text variant="lg-medium" className="text-text-muted">
               {chat.messagesErrorMessage}
@@ -418,7 +448,7 @@ export function ConnectedChatRoomModal({
             isFetchingNextPage={chat.isFetchingNextPage}
             hasNextPage={chat.hasNextPage}
             onFetchNextPage={() => void chat.fetchNextPage()}
-            isActionPending={chat.isSending || chat.isImageSending}
+            isActionPending={chat.isComposerDisabled || chat.isSending || chat.isImageSending}
             onRespondEstimateRevision={(revisionId, response) =>
               void chat.respondEstimateRevision(revisionId, response)
             }
@@ -455,40 +485,13 @@ export default function ChatRoomModalContainer({
     return null;
   }
 
-  if (!activeRoom) {
-    return (
-      <ChatRoomModal
-        open={open}
-        participantRole={participantRole}
-        participantName={participantName}
-        estimateSummary={estimateSummary}
-        sendDisabled
-        composerDisabled
-        onClose={onClose}
-        actions={actions}
-        estimateEdit={estimateEdit}
-      >
-        {chatRoom.createErrorMessage ? (
-          <ChatRoomCreateError
-            message={chatRoom.createErrorMessage}
-            isRetrying={chatRoom.isChatRoomPending}
-            onRetry={chatRoom.retryCreateChatRoom}
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <Text variant="lg-medium" className="text-text-muted">
-              채팅방을 준비하는 중입니다.
-            </Text>
-          </div>
-        )}
-      </ChatRoomModal>
-    );
-  }
-
   return (
     <ConnectedChatRoomModal
       open={open}
       room={activeRoom}
+      roomErrorMessage={chatRoom.createErrorMessage}
+      isRoomLoading={chatRoom.isChatRoomPending}
+      onRetryRoom={chatRoom.retryCreateChatRoom}
       participantRole={participantRole}
       participantName={participantName}
       estimateSummary={estimateSummary}

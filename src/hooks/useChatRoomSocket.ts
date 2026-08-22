@@ -23,6 +23,7 @@ const SOCKET_ACK_TIMEOUT_MS = 5000;
 
 interface UseChatRoomSocketOptions {
   roomId: number;
+  enabled?: boolean;
   lastMessageId?: number | null;
   onJoined?: (response: ChatRoomJoinedPayload) => void;
   onJoinError?: (error: Extract<JoinChatRoomAck, { ok: false }>["error"]) => void;
@@ -31,6 +32,7 @@ interface UseChatRoomSocketOptions {
 
 export function useChatRoomSocket({
   roomId,
+  enabled = true,
   lastMessageId,
   onJoined,
   onJoinError,
@@ -53,7 +55,7 @@ export function useChatRoomSocket({
   }, [onJoined, onJoinError, onMessage]);
 
   useEffect(() => {
-    if (!socket || !canConnect) {
+    if (!enabled || !socket || !canConnect) {
       return;
     }
 
@@ -76,10 +78,10 @@ export function useChatRoomSocket({
       socket.off("chat:room:joined", handleJoined);
       socket.off("chat:message:new", handleMessage);
     };
-  }, [canConnect, roomId, socket]);
+  }, [canConnect, enabled, roomId, socket]);
 
   useEffect(() => {
-    if (!socket || !isConnected || !canConnect) {
+    if (!enabled || !socket || !isConnected || !canConnect) {
       return;
     }
 
@@ -99,7 +101,7 @@ export function useChatRoomSocket({
 
       socket.emit("chat:room:leave", leavePayload);
     };
-  }, [canConnect, isConnected, roomId, socket]);
+  }, [canConnect, enabled, isConnected, roomId, socket]);
 
   const sendMessage = useCallback(
     (payload: SendChatMessagePayload) =>

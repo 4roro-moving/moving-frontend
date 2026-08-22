@@ -33,6 +33,7 @@ export interface ChatRoomModalProps {
   isImageSending?: boolean;
   sendDisabled?: boolean;
   composerDisabled?: boolean;
+  composerDisabledMessage?: string | null;
   onMessageChange?: (value: string) => void;
   onClearSelectedImage?: () => void;
   onSendMessage?: () => void;
@@ -66,6 +67,7 @@ function ChatRoomModalContent({
   isImageSending = false,
   sendDisabled = false,
   composerDisabled = false,
+  composerDisabledMessage,
   onMessageChange,
   onClearSelectedImage,
   onSendMessage,
@@ -199,6 +201,17 @@ function ChatRoomModalContent({
         />
       ) : (
         <div className="border-border-subtle shrink-0 border-t">
+          {composerDisabled && composerDisabledMessage ? (
+            <div
+              role="status"
+              className="bg-background-subtle border-border-subtle border-b px-16 py-12 md:px-20"
+            >
+              <Text variant="sm-medium" className="text-text-muted">
+                {composerDisabledMessage}
+              </Text>
+            </div>
+          ) : null}
+
           {selectedImagePreviewUrl ? (
             <div className="border-border-subtle flex items-center gap-10 border-b px-16 py-12 md:px-20">
               <div className="bg-background-subtle rounded-8 relative size-56 shrink-0 overflow-hidden">
