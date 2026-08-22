@@ -15,7 +15,7 @@ import type { MoveType } from "@/types/move";
 
 interface UseMoverDesignationOptions {
   moverId: string;
-  moverServiceTypes: MoveType[];
+  moverServiceTypes: MoveType[] | null;
   onError: (message: string) => void;
 }
 
@@ -62,8 +62,10 @@ export function useMoverDesignation({
     onError,
   });
 
+  const isServiceTypesLoading = moverServiceTypes === null;
+
   const ctaState =
-    isCustomerLoggedIn && !isActiveLoading && !isActiveError
+    isCustomerLoggedIn && !isActiveLoading && !isActiveError && moverServiceTypes !== null
       ? getDesignateCtaState(activeRequest ?? null, moverId, moverServiceTypes)
       : null;
 
@@ -80,8 +82,8 @@ export function useMoverDesignation({
       ? "요청 중..."
       : "지정 견적 요청하기");
 
-  // 고객은 활성 견적 요청까지 확인해야 버튼의 활성·비활성 상태가 확정됩니다.
-  const isActionsLoading = isAuthPending || (isCustomerLoggedIn && isActiveLoading);
+  const isActionsLoading =
+    isAuthPending || (isCustomerLoggedIn && isActiveLoading) || isServiceTypesLoading;
 
   const requestEstimate = async () => {
     if (isAuthPending) {
@@ -111,6 +113,10 @@ export function useMoverDesignation({
         return;
       }
       request = result.data ?? null;
+    }
+
+    if (moverServiceTypes === null) {
+      return;
     }
 
     const nextCtaState = getDesignateCtaState(request, moverId, moverServiceTypes);

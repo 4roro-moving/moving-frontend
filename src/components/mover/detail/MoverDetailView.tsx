@@ -40,7 +40,7 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
   const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
   const designation = useMoverDesignation({
     moverId,
-    moverServiceTypes: displayedDetail?.serviceTypes ?? [],
+    moverServiceTypes: displayedDetail?.serviceTypes ?? null,
     onError: setToastMessage,
   });
 
