@@ -77,6 +77,7 @@ export const getGiveawayThumbnailOverlayLabel = (status: GiveawayStatus): string
 };
 
 export const GIVEAWAY_DETAIL_TITLE = "나눔글 상세";
+export const GIVEAWAY_PREFERRED_REGION_LABEL = "거래 희망 지역";
 export const GIVEAWAY_PENDING_REQUESTS_TITLE = "대기 중인 신청 내역";
 export const GIVEAWAY_PENDING_REQUESTS_EMPTY = "아직 대기 중인 신청이 없어요.";
 export const GIVEAWAY_SHARE_BUTTON_LABEL = "나눔하기";

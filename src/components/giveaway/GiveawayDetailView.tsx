@@ -20,6 +20,7 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import {
   GIVEAWAY_DETAIL_TITLE,
+  GIVEAWAY_PREFERRED_REGION_LABEL,
   canApplyGiveaway,
   hasActiveGiveawayRequest,
 } from "@/lib/constants/giveaway";
@@ -155,13 +156,24 @@ const GiveawayDetailView = ({
                 className="rounded-12 size-64"
                 sizes="64px"
               />
-              <Text
-                as="p"
-                variant={{ base: "lg-semibold", xl: "2lg-semibold" }}
-                className="text-text-secondary"
-              >
-                {giveaway.author.name}
-              </Text>
+              <div className="flex min-w-0 flex-col">
+                <Text
+                  as="p"
+                  variant={{ base: "lg-semibold", xl: "2lg-semibold" }}
+                  className="text-text-secondary"
+                >
+                  {giveaway.author.name}
+                </Text>
+                {giveaway.region ? (
+                  <Text
+                    as="p"
+                    variant={{ base: "sm-medium", xl: "md-medium" }}
+                    className="text-text-muted"
+                  >
+                    {`${GIVEAWAY_PREFERRED_REGION_LABEL} - ${giveaway.region.name}`}
+                  </Text>
+                ) : null}
+              </div>
             </div>
           </div>
         </article>
