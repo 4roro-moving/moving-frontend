@@ -141,6 +141,7 @@ export function useCustomerProfileEditForm({
       reset({
         ...formValues,
         imageFile: null,
+        shouldRemoveImage: false,
         currentPassword: "",
         newPassword: "",
         newPasswordConfirm: "",
