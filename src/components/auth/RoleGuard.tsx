@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { getAccessTokenRole } from "@/lib/auth/accessTokenPayload";
@@ -15,7 +15,7 @@ import { getAccessToken } from "@/lib/auth/token";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 interface RoleGuardProps {
-  allowedRole: AuthRole | AuthRole[];
+  allowedRole: AuthRole | readonly AuthRole[];
   children: ReactNode;
   loadingFallback?: ReactNode;
   unauthenticatedFallback?: ReactNode;
@@ -38,8 +38,10 @@ const resolveKnownRole = (storeRole: AuthRole | null | undefined): AuthRole | nu
 const normalizeAllowedRoles = (allowedRole: AuthRole | AuthRole[]): AuthRole[] =>
   Array.isArray(allowedRole) ? allowedRole : [allowedRole];
 
-const isRoleAllowed = (role: AuthRole | null | undefined, allowedRoles: AuthRole[]): boolean =>
-  Boolean(role && allowedRoles.includes(role));
+const isRoleAllowed = (
+  role: AuthRole | null | undefined,
+  allowedRoles: readonly AuthRole[],
+): boolean => Boolean(role && allowedRoles.includes(role));
 
 const RoleGuard = ({
   allowedRole,
@@ -55,7 +57,10 @@ const RoleGuard = ({
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const storeRole = useAuthStore((state) => state.user?.role);
 
-  const allowedRoles = normalizeAllowedRoles(allowedRole);
+  const allowedRoles = useMemo(
+    () => normalizeAllowedRoles(allowedRole as AuthRole[]),
+    [allowedRole],
+  );
 
   const knownRole = resolveKnownRole(storeRole);
 
