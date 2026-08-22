@@ -52,16 +52,19 @@ export const patchGiveawayRequestsQueryData = (
   giveawayId: number,
   updater: (request: GiveawayRequestItem) => GiveawayRequestItem,
 ) => {
-  queryClient.setQueriesData<GiveawayRequestListResult>(
+  queryClient.setQueriesData<InfiniteData<GiveawayRequestListResult>>(
     { queryKey: getGiveawayRequestsScopeQueryKey(giveawayId) },
     (current) => {
-      if (current === undefined) {
+      if (current === undefined || !Array.isArray(current.pages)) {
         return current;
       }
 
       return {
         ...current,
-        data: current.data.map(updater),
+        pages: current.pages.map((page) => ({
+          ...page,
+          data: page.data.map(updater),
+        })),
       };
     },
   );

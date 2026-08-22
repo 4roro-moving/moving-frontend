@@ -1,5 +1,6 @@
 "use client";
 
+import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -25,13 +26,19 @@ import {
   hasActiveGiveawayRequest,
 } from "@/lib/constants/giveaway";
 import { formatRelativeTime } from "@/lib/utils/date";
-import type { GiveawayDetail, GiveawayRequestItem } from "@/types/giveaway";
+import type { ApiError } from "@/types/api";
+import type {
+  GiveawayDetail,
+  GiveawayRequestItem,
+  GiveawayRequestListResult,
+} from "@/types/giveaway";
 
 interface GiveawayDetailViewProps {
   giveaway: GiveawayDetail;
   isAuthor: boolean;
   requests: GiveawayRequestItem[];
   isRequestsPending?: boolean;
+  requestsQuery: UseInfiniteQueryResult<InfiniteData<GiveawayRequestListResult>, ApiError>;
 }
 
 const DetailDivider = () => {
@@ -43,6 +50,7 @@ const GiveawayDetailView = ({
   isAuthor,
   requests,
   isRequestsPending = false,
+  requestsQuery,
 }: GiveawayDetailViewProps) => {
   const router = useRouter();
   const deleteMutation = useDeleteGiveaway();
@@ -51,16 +59,26 @@ const GiveawayDetailView = ({
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isApplyOpen, setIsApplyOpen] = useState(false);
   const [actionError, setActionError] = useState<string | undefined>();
+  const [deleteError, setDeleteError] = useState<string | undefined>();
   const writtenAt = formatRelativeTime(giveaway.createdAt);
   const showReceivedRequests = isAuthor;
 
+  const handleCloseDelete = () => {
+    if (deleteMutation.isPending) {
+      return;
+    }
+
+    setDeleteError(undefined);
+    setIsDeleteOpen(false);
+  };
+
   const handleDelete = async () => {
     try {
-      setActionError(undefined);
+      setDeleteError(undefined);
       await deleteMutation.mutateAsync(giveaway.id);
       router.push(APP_ROUTES.COMMUNITY.GIVEAWAY);
     } catch (error) {
-      setActionError(getApiErrorMessage(error, "나눔 글을 삭제하지 못했습니다."));
+      setDeleteError(getApiErrorMessage(error, "나눔 글을 삭제하지 못했습니다."));
     }
   };
 
@@ -145,7 +163,10 @@ const GiveawayDetailView = ({
               hasApplied={hasActiveGiveawayRequest(giveaway.myRequest?.status)}
               isCompletePending={completeMutation.isPending}
               onEdit={() => setIsEditOpen(true)}
-              onDelete={() => setIsDeleteOpen(true)}
+              onDelete={() => {
+                setDeleteError(undefined);
+                setIsDeleteOpen(true);
+              }}
               onComplete={() => void handleComplete()}
               onApply={() => setIsApplyOpen(true)}
             />
@@ -186,6 +207,7 @@ const GiveawayDetailView = ({
               giveawayStatus={giveaway.status}
               requests={requests}
               isPending={isRequestsPending}
+              query={requestsQuery}
             />
           </>
         ) : null}
@@ -199,7 +221,8 @@ const GiveawayDetailView = ({
       <GiveawayDeleteConfirmModal
         open={isDeleteOpen}
         isPending={deleteMutation.isPending}
-        onClose={() => setIsDeleteOpen(false)}
+        error={deleteError}
+        onClose={handleCloseDelete}
         onConfirm={() => void handleDelete()}
       />
       <GiveawayRequestFormModal

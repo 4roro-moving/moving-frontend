@@ -1,29 +1,40 @@
 "use client";
 
+import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { useState } from "react";
 
 import AlertModal from "@/components/common/Modal/AlertModal";
 import Modal from "@/components/common/Modal/Modal";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { Text } from "@/components/common/Text";
+import GiveawayInfiniteListChrome from "@/components/giveaway/GiveawayInfiniteListChrome";
 import GiveawayPendingRequestCard from "@/components/giveaway/GiveawayPendingRequestCard";
 import { useRejectGiveawayRequest } from "@/hooks/giveaway/useRejectGiveawayRequest";
 import { useSelectGiveawayRequest } from "@/hooks/giveaway/useSelectGiveawayRequest";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
   GIVEAWAY_RECEIVED_REQUESTS_EMPTY,
+  GIVEAWAY_RECEIVED_REQUESTS_ERROR,
   GIVEAWAY_RECEIVED_REQUESTS_LOADING,
+  GIVEAWAY_RECEIVED_REQUESTS_NEXT_PAGE_ERROR,
+  GIVEAWAY_RECEIVED_REQUESTS_NEXT_PAGE_LOADING,
   GIVEAWAY_RECEIVED_REQUESTS_TITLE,
   GIVEAWAY_REJECT_BUTTON_LABEL,
   GIVEAWAY_SHARE_BUTTON_LABEL,
 } from "@/lib/constants/giveaway";
-import type { GiveawayRequestItem, GiveawayStatus } from "@/types/giveaway";
+import type { ApiError } from "@/types/api";
+import type {
+  GiveawayRequestItem,
+  GiveawayRequestListResult,
+  GiveawayStatus,
+} from "@/types/giveaway";
 
 interface GiveawayPendingRequestListProps {
   giveawayId: number;
   giveawayStatus: GiveawayStatus;
   requests: GiveawayRequestItem[];
   isPending?: boolean;
+  query: UseInfiniteQueryResult<InfiniteData<GiveawayRequestListResult>, ApiError>;
 }
 
 const PENDING_REQUEST_SKELETON_COUNT = 2;
@@ -67,6 +78,7 @@ const GiveawayPendingRequestList = ({
   giveawayStatus,
   requests,
   isPending = false,
+  query,
 }: GiveawayPendingRequestListProps) => {
   const selectMutation = useSelectGiveawayRequest();
   const rejectMutation = useRejectGiveawayRequest();
@@ -123,18 +135,29 @@ const GiveawayPendingRequestList = ({
         </Text>
       ) : null}
 
-      {isPending ? (
-        <>
-          <GiveawayPendingRequestSkeletonList />
-          <p className="sr-only" role="status">
-            {GIVEAWAY_RECEIVED_REQUESTS_LOADING}
-          </p>
-        </>
-      ) : requests.length === 0 ? (
-        <Text as="p" variant="md-medium" className="text-text-muted">
-          {GIVEAWAY_RECEIVED_REQUESTS_EMPTY}
-        </Text>
-      ) : (
+      <GiveawayInfiniteListChrome
+        itemCount={requests.length}
+        isInitialLoading={isPending}
+        isFilterFetching={false}
+        query={query}
+        loadingFallback={
+          <>
+            <GiveawayPendingRequestSkeletonList />
+            <p className="sr-only" role="status">
+              {GIVEAWAY_RECEIVED_REQUESTS_LOADING}
+            </p>
+          </>
+        }
+        emptyFallback={
+          <Text as="p" variant="md-medium" className="text-text-muted">
+            {GIVEAWAY_RECEIVED_REQUESTS_EMPTY}
+          </Text>
+        }
+        initialErrorFallback={GIVEAWAY_RECEIVED_REQUESTS_ERROR}
+        fetchingStatusLabel={GIVEAWAY_RECEIVED_REQUESTS_LOADING}
+        nextPageLoadingLabel={GIVEAWAY_RECEIVED_REQUESTS_NEXT_PAGE_LOADING}
+        nextPageErrorMessage={GIVEAWAY_RECEIVED_REQUESTS_NEXT_PAGE_ERROR}
+      >
         <ul className="flex w-full flex-col gap-20">
           {requests.map((request) => (
             <li key={request.id}>
@@ -148,7 +171,7 @@ const GiveawayPendingRequestList = ({
             </li>
           ))}
         </ul>
-      )}
+      </GiveawayInfiniteListChrome>
 
       <AlertModal
         open={selectedRequest !== null}

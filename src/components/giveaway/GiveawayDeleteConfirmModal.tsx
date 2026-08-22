@@ -1,9 +1,11 @@
 import AlertModal from "@/components/common/Modal/AlertModal";
 import Modal from "@/components/common/Modal/Modal";
+import { Text } from "@/components/common/Text";
 
 interface GiveawayDeleteConfirmModalProps {
   open: boolean;
   isPending?: boolean;
+  error?: string;
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -11,6 +13,7 @@ interface GiveawayDeleteConfirmModalProps {
 const GiveawayDeleteConfirmModal = ({
   open,
   isPending = false,
+  error,
   onClose,
   onConfirm,
 }: GiveawayDeleteConfirmModalProps) => {
@@ -21,7 +24,21 @@ const GiveawayDeleteConfirmModal = ({
       closeDisabled={isPending}
       size="sm"
       title="나눔 글 삭제"
-      description="작성한 나눔 글을 삭제할까요? 삭제하면 되돌릴 수 없습니다."
+      description={
+        <>
+          작성한 나눔 글을 삭제할까요? 삭제하면 되돌릴 수 없습니다.
+          {error ? (
+            <Text
+              as="span"
+              variant="sm-medium"
+              className="text-text-error mt-12 block"
+              role="alert"
+            >
+              {error}
+            </Text>
+          ) : null}
+        </>
+      }
       actions={
         <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
           <Modal.Button

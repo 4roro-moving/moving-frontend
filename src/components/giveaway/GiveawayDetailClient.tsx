@@ -51,8 +51,9 @@ const GiveawayDetailClient = ({ giveawayId }: GiveawayDetailClientProps) => {
     <GiveawayDetailView
       giveaway={detailQuery.data}
       isAuthor={isAuthor}
-      requests={requestsQuery.data?.data ?? []}
-      isRequestsPending={isAuthor && requestsQuery.isPending}
+      requests={requestsQuery.requests}
+      isRequestsPending={isAuthor && requestsQuery.isInitialLoading}
+      requestsQuery={requestsQuery.query}
     />
   );
 };
