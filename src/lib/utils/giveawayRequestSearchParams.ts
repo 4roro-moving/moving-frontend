@@ -86,8 +86,9 @@ export const hasActiveGiveawayRequestFilters = (filters: GiveawayRequestFilterSt
 export const buildGiveawayRequestQueryString = (filters: GiveawayRequestFilterState): string => {
   const params = new URLSearchParams();
 
-  if (filters.keyword.trim()) {
-    params.set("keyword", filters.keyword.trim());
+  const keyword = filters.keyword.trim().slice(0, GIVEAWAY_KEYWORD_MAX_LENGTH);
+  if (keyword) {
+    params.set("keyword", keyword);
   }
   if (filters.status !== GIVEAWAY_REQUEST_FILTER_DEFAULTS.status) {
     params.set("status", filters.status);

@@ -152,8 +152,9 @@ export const hasActiveMyGiveawayFilters = (filters: GiveawayMyFilterState): bool
 export const buildGiveawayQueryString = (filters: GiveawaySearchParamsState): string => {
   const params = new URLSearchParams();
 
-  if (filters.keyword.trim()) {
-    params.set("keyword", filters.keyword.trim());
+  const keyword = filters.keyword.trim().slice(0, GIVEAWAY_KEYWORD_MAX_LENGTH);
+  if (keyword) {
+    params.set("keyword", keyword);
   }
   if (filters.regionId !== GIVEAWAY_SEARCH_DEFAULTS.regionId) {
     params.set("regionId", filters.regionId);
