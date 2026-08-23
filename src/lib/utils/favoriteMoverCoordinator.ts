@@ -2,13 +2,13 @@ import type { QueryClient } from "@tanstack/react-query";
 
 import { addFavoriteMover, removeFavoriteMover } from "@/lib/api/favorites";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { ERROR_CODES } from "@/lib/constants/errorCodes";
+import type { AuthQueryScope } from "@/lib/constants/queryKeys";
 import {
   applyFavoriteOptimisticUpdate,
   invalidateFavoriteRelatedQueries,
 } from "@/lib/utils/favoriteMoverCache";
-import type { AuthQueryScope } from "@/lib/constants/queryKeys";
 import { ApiError } from "@/types/api";
-import { ERROR_CODES } from "@/lib/constants/errorCodes";
 
 const FAVORITE_SYNC_ERROR_MESSAGE = "찜 상태를 확인하지 못했습니다. 잠시 후 다시 확인해주세요.";
 
@@ -25,6 +25,7 @@ interface FavoriteSyncState {
   confirmedState: boolean;
   desiredState: boolean;
   isRequestInFlight: boolean;
+  pendingCacheUpdates: number;
   handlers: FavoriteCoordinatorHandlers;
 }
 
@@ -50,15 +51,29 @@ function isUnauthorizedError(error: unknown): boolean {
   );
 }
 
+function isCurrentState(state: FavoriteSyncState): boolean {
+  return syncStates.get(getStateKey(state.authScope, state.moverId)) === state;
+}
+
+function removeState(state: FavoriteSyncState): void {
+  if (!isCurrentState(state)) return;
+  syncStates.delete(getStateKey(state.authScope, state.moverId));
+}
+
 function enqueueCacheUpdate(state: FavoriteSyncState, isFavorite: boolean): Promise<void> {
-  const next = cacheUpdateChain
+  state.pendingCacheUpdates += 1;
+  const update = cacheUpdateChain
     .catch(() => undefined)
     .then(() =>
       applyFavoriteOptimisticUpdate(state.queryClient, state.authScope, state.moverId, isFavorite),
     )
     .then(() => undefined);
-  cacheUpdateChain = next;
-  return next;
+  cacheUpdateChain = update.catch(() => undefined);
+
+  return update.finally(() => {
+    state.pendingCacheUpdates -= 1;
+    flushDesiredState(state);
+  });
 }
 
 async function reconcile(state: FavoriteSyncState): Promise<void> {
@@ -71,20 +86,16 @@ async function reconcile(state: FavoriteSyncState): Promise<void> {
   }
 }
 
-function removeState(state: FavoriteSyncState): void {
-  const key = getStateKey(state.authScope, state.moverId);
-  if (syncStates.get(key) === state) {
-    syncStates.delete(key);
-  }
-}
-
 function flushDesiredState(state: FavoriteSyncState): void {
-  if (
-    state.isRequestInFlight ||
-    state.confirmedState === state.desiredState ||
-    !state.handlers.isAuthScopeCurrent()
-  ) {
-    if (!state.isRequestInFlight) removeState(state);
+  if (!isCurrentState(state) || state.isRequestInFlight) return;
+
+  if (!state.handlers.isAuthScopeCurrent()) {
+    removeState(state);
+    return;
+  }
+
+  if (state.confirmedState === state.desiredState) {
+    if (state.pendingCacheUpdates === 0) removeState(state);
     return;
   }
 
@@ -92,25 +103,23 @@ function flushDesiredState(state: FavoriteSyncState): void {
   const requestedState = state.desiredState;
 
   void (async () => {
+    let requestError: unknown;
     let shouldReconcile = false;
 
     try {
       const result = requestedState
         ? await addFavoriteMover(state.moverId)
         : await removeFavoriteMover(state.moverId);
-
       state.confirmedState = result.isFavorite;
       shouldReconcile = result.isFavorite !== requestedState;
     } catch (error) {
+      requestError = error;
       state.desiredState = state.confirmedState;
       await enqueueCacheUpdate(state, state.confirmedState);
 
-      if (isUnauthorizedError(error)) {
-        state.handlers.onUnauthorized();
-      } else {
-        state.handlers.onError?.(getApiErrorMessage(error));
-        shouldReconcile = true;
-      }
+      if (isUnauthorizedError(error)) state.handlers.onUnauthorized();
+      else state.handlers.onError?.(getApiErrorMessage(error));
+      shouldReconcile = !isUnauthorizedError(error);
     } finally {
       state.isRequestInFlight = false;
 
@@ -119,16 +128,14 @@ function flushDesiredState(state: FavoriteSyncState): void {
         return;
       }
 
-      if (shouldReconcile) {
-        await reconcile(state);
-      }
+      if (shouldReconcile) await reconcile(state);
 
-      if (state.confirmedState !== state.desiredState) {
-        flushDesiredState(state);
+      if (requestError) {
+        removeState(state);
         return;
       }
 
-      removeState(state);
+      flushDesiredState(state);
     }
   })();
 }
@@ -137,22 +144,26 @@ function flushDesiredState(state: FavoriteSyncState): void {
 export function syncFavoriteMover(options: SyncFavoriteMoverOptions): void {
   const { authScope, moverId, nextIsFavorite, queryClient, ...handlers } = options;
   const key = getStateKey(authScope, moverId);
-  const state = syncStates.get(key) ?? {
-    authScope,
-    moverId,
-    queryClient,
-    confirmedState: !nextIsFavorite,
-    desiredState: nextIsFavorite,
-    isRequestInFlight: false,
-    handlers,
-  };
+  let state = syncStates.get(key);
+
+  if (!state) {
+    state = {
+      authScope,
+      moverId,
+      queryClient,
+      confirmedState: !nextIsFavorite,
+      desiredState: nextIsFavorite,
+      isRequestInFlight: false,
+      pendingCacheUpdates: 0,
+      handlers,
+    };
+    syncStates.set(key, state);
+  }
 
   state.queryClient = queryClient;
   state.handlers = handlers;
   state.desiredState = nextIsFavorite;
-  syncStates.set(key, state);
-
-  void enqueueCacheUpdate(state, nextIsFavorite).then(() => flushDesiredState(state));
+  void enqueueCacheUpdate(state, nextIsFavorite).catch(() => removeState(state));
 }
 
 export function resetFavoriteMoverCoordinatorForTests(): void {

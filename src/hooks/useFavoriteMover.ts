@@ -12,9 +12,6 @@ import { syncFavoriteMover } from "@/lib/utils/favoriteMoverCoordinator";
 
 export { useBulkRemoveFavoriteMovers } from "@/hooks/useBulkRemoveFavoriteMovers";
 
-const LOGIN_REQUIRED_MESSAGE = "로그인이 필요한 서비스입니다.";
-const CUSTOMER_REQUIRED_MESSAGE = "고객만 이용할 수 있는 서비스입니다.";
-
 interface FavoriteMoverVariables {
   moverId: string;
   nextIsFavorite: boolean;
@@ -52,14 +49,7 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
     router.push(getLoginRedirectPath());
   };
 
-  const mutate = ({ moverId, nextIsFavorite }: FavoriteMoverVariables) => {
-    if (auth.isPending || !isAuthQueryReady) return;
-    if (!auth.isAuthenticated || !hasAuthSession()) {
-      requireLogin();
-      return;
-    }
-    if (!isCustomer) return;
-
+  const startSync = ({ moverId, nextIsFavorite }: FavoriteMoverVariables) =>
     syncFavoriteMover({
       authScope,
       moverId,
@@ -71,20 +61,17 @@ export function useFavoriteMover(options?: UseFavoriteMoverOptions) {
         onErrorRef.current?.(message);
       },
     });
-  };
 
-  const mutateAsync = (variables: FavoriteMoverVariables) => {
-    if (auth.isPending || !isAuthQueryReady) {
-      return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
-    }
+  const mutate = (variables: FavoriteMoverVariables) => {
+    if (auth.isPending || !isAuthQueryReady) return;
     if (!auth.isAuthenticated || !hasAuthSession()) {
       requireLogin();
-      return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
+      return;
     }
-    if (!isCustomer) return Promise.reject(new Error(CUSTOMER_REQUIRED_MESSAGE));
-    mutate(variables);
-    return Promise.resolve();
+    if (!isCustomer) return;
+
+    startSync(variables);
   };
 
-  return { canToggleFavorite, mutate, mutateAsync };
+  return { canToggleFavorite, mutate };
 }

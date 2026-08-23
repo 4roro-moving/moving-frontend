@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
+import { logout as logoutApi } from "@/lib/api/auth";
 import { subscribeNotificationSse } from "@/lib/api/notificationSse";
 import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
 import { getAccessToken } from "@/lib/auth/token";
@@ -91,6 +92,15 @@ export function useNotificationSse() {
       if (eventName === "notification-refresh") {
         void queryClient.invalidateQueries({ queryKey: unreadCountQueryKey });
         void queryClient.invalidateQueries({ queryKey: listScopeQueryKey });
+        return;
+      }
+
+      if (eventName === "account-suspended") {
+        // Refresh Token은 서버에서 이미 폐기됐다. 현재 탭의 Access Token·인증 상태를
+        // 즉시 정리한다. BFF logout은
+        // HttpOnly refresh 쿠키도 제거하지만, 실패해도 서버의 폐기 상태는 유지된다.
+        void logoutApi().catch(() => undefined);
+        useAuthStore.getState().clearSession();
       }
     };
 
