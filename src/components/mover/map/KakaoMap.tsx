@@ -71,10 +71,10 @@ const DESTINATION_MARKER_SVG = `
 
 const DEPARTURE_MARKER_URL = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(DEPARTURE_MARKER_SVG)}`;
 const DESTINATION_MARKER_URL = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(DESTINATION_MARKER_SVG)}`;
+const EMPTY_MOVERS: Mover[] = [];
 
 function createMoverSummary(mover: Mover): HTMLElement {
   const card = document.createElement("article");
-  card.setAttribute("role", "dialog");
   card.setAttribute("aria-label", `${mover.name} 기사님 요약`);
   card.style.cssText = MOVER_SUMMARY_STYLES.card;
 
@@ -117,7 +117,7 @@ function createMoverSummary(mover: Mover): HTMLElement {
   return card;
 }
 
-export default function KakaoMap({ departure, destination, movers = [] }: KakaoMapProps) {
+export default function KakaoMap({ departure, destination, movers = EMPTY_MOVERS }: KakaoMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [retryCount, setRetryCount] = useState(0);
