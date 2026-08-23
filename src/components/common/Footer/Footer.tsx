@@ -8,14 +8,26 @@ import { Text } from "@/components/common/Text";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
 const FOOTER_LINKS = [
-  { label: "자주 묻는 질문", href: "/" },
-  { label: "문의하기", href: "/" },
+  {
+    label: "공지사항",
+    href: APP_ROUTES.NOTICES.ROOT,
+  },
+  {
+    label: "자주 묻는 질문",
+    href: APP_ROUTES.FAQS.ROOT,
+  },
+  {
+    label: "문의하기",
+    href: APP_ROUTES.INQUIRIES.ROOT,
+  },
 ];
 
 const Footer = () => {
   const pathname = usePathname();
 
-  // 2026.08.08 윤소정 - [추가] /movers/map 경로인 경우 footer 제거 (지도에서 스크롤 생기지 않게 하기 위함)
+  // 2026.08.08 윤소정 - [추가]
+  // /movers/map 경로인 경우 footer 제거
+  // 지도에서 스크롤 생기지 않게 하기 위함
   if (pathname === APP_ROUTES.MOVERS.MAP) {
     return null;
   }
@@ -25,7 +37,7 @@ const Footer = () => {
       <div className="px-margin-mobile max-w-container-desktop mx-auto flex w-full flex-col items-center gap-16 py-40 md:px-40">
         <Image src="/icons/logo_full.svg" alt="4roro-moving" width={100} height={37} />
 
-        <nav aria-label="footer" className="flex items-center gap-24">
+        <nav aria-label="고객지원" className="flex items-center gap-24">
           {FOOTER_LINKS.map((link) => (
             <Link
               key={link.label}

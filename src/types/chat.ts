@@ -15,6 +15,10 @@ export interface ChatRoom {
   id: number;
   estimateId: number;
   estimateRequestId: number;
+  /** 현재 견적 상태에서 채팅 메시지를 보낼 수 있는지 여부 */
+  canSendMessage: boolean;
+  /** 메시지 전송이 불가할 때 입력창에 안내할 사유 */
+  messageDisabledReason: string | null;
   customer: ChatParticipant;
   mover: ChatParticipant;
   lastMessageAt: string | null;

@@ -58,6 +58,7 @@ export interface MoverProfileMeResponse {
   description: string;
   activityBase: MoverActivityBase | null;
   confirmedCount?: number;
+  completedCount: number;
   averageRating?: number;
   reviewCount?: number;
   regions: ProfileRegion[];

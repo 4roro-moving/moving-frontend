@@ -114,6 +114,7 @@ const MoverProfileForm = ({
                   value={field.value ?? null}
                   initialPreviewUrl={initialImageUrl}
                   onChange={field.onChange}
+                  onClear={() => field.onChange(null)}
                   error={errors.imageFile?.message}
                   disabled={isPending}
                 />

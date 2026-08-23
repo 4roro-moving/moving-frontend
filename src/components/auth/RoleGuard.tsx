@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { getAccessTokenRole } from "@/lib/auth/accessTokenPayload";
@@ -15,17 +15,12 @@ import { getAccessToken } from "@/lib/auth/token";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 interface RoleGuardProps {
-  allowedRole: AuthRole;
+  allowedRole: AuthRole | readonly AuthRole[];
   children: ReactNode;
   loadingFallback?: ReactNode;
+  unauthenticatedFallback?: ReactNode;
 }
 
-/**
- * early direct role 이 있으면 바로 return
- *
- * token 이 없으면 null return
- * token 이 있으면 token 에서 role 을 추출하여 return
- */
 const resolveKnownRole = (storeRole: AuthRole | null | undefined): AuthRole | null => {
   if (storeRole) {
     return storeRole;
@@ -40,39 +35,72 @@ const resolveKnownRole = (storeRole: AuthRole | null | undefined): AuthRole | nu
   return getAccessTokenRole(token);
 };
 
-/**
- * 역할 전용 페이지 가드 — (protected) layout에서 사용
- * known role이 불일치하면 checkAuth 대기 없이 역할 홈으로 이동
- */
-const RoleGuard = ({ allowedRole, children, loadingFallback = null }: RoleGuardProps) => {
+const normalizeAllowedRoles = (allowedRole: AuthRole | AuthRole[]): AuthRole[] =>
+  Array.isArray(allowedRole) ? allowedRole : [allowedRole];
+
+const isRoleAllowed = (
+  role: AuthRole | null | undefined,
+  allowedRoles: readonly AuthRole[],
+): boolean => Boolean(role && allowedRoles.includes(role));
+
+const RoleGuard = ({
+  allowedRole,
+  children,
+  loadingFallback = null,
+  unauthenticatedFallback,
+}: RoleGuardProps) => {
   const router = useRouter();
   const pathname = usePathname();
+
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const storeRole = useAuthStore((state) => state.user?.role);
 
+  const allowedRoles = useMemo(
+    () => normalizeAllowedRoles(allowedRole as AuthRole[]),
+    [allowedRole],
+  );
+
   const knownRole = resolveKnownRole(storeRole);
-  const isWrongRole = Boolean(knownRole && knownRole !== allowedRole);
+
+  const isWrongRole = Boolean(knownRole && !isRoleAllowed(knownRole, allowedRoles));
+
+  const isMultiRole = allowedRoles.length > 1;
 
   useEffect(() => {
-    if (!hasHydrated) return;
+    if (!hasHydrated) {
+      return;
+    }
 
     if (isWrongRole && knownRole) {
       router.replace(getRoleHomePath(knownRole));
       return;
     }
 
-    if (isCheckingAuth) return;
-
-    const audience: AuthAudience = getAuthAudienceFromRole(allowedRole);
-
-    if (!isAuthenticated) {
-      router.replace(buildLoginPath(`${pathname}${window.location.search}`, audience));
+    if (isCheckingAuth) {
       return;
     }
 
-    if (storeRole && storeRole !== allowedRole) {
+    if (!isAuthenticated) {
+      if (isMultiRole && unauthenticatedFallback) {
+        return;
+      }
+
+      const singleAllowedRole = allowedRoles[0];
+
+      if (!singleAllowedRole) {
+        return;
+      }
+
+      const audience: AuthAudience = getAuthAudienceFromRole(singleAllowedRole);
+
+      router.replace(buildLoginPath(`${pathname}${window.location.search}`, audience));
+
+      return;
+    }
+
+    if (storeRole && !isRoleAllowed(storeRole, allowedRoles)) {
       router.replace(getRoleHomePath(storeRole));
     }
   }, [
@@ -82,7 +110,9 @@ const RoleGuard = ({ allowedRole, children, loadingFallback = null }: RoleGuardP
     isWrongRole,
     knownRole,
     storeRole,
-    allowedRole,
+    allowedRoles,
+    isMultiRole,
+    unauthenticatedFallback,
     pathname,
     router,
   ]);
@@ -99,7 +129,11 @@ const RoleGuard = ({ allowedRole, children, loadingFallback = null }: RoleGuardP
     return loadingFallback;
   }
 
-  if (!isAuthenticated || storeRole !== allowedRole) {
+  if (!isAuthenticated) {
+    return unauthenticatedFallback ?? null;
+  }
+
+  if (!isRoleAllowed(storeRole, allowedRoles)) {
     return null;
   }
 

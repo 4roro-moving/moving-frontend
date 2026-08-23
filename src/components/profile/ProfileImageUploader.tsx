@@ -4,7 +4,7 @@ import { useEffect, useId, useMemo, useRef, type ChangeEvent } from "react";
 
 import { PROFILE_IMAGE_CONTENT_TYPES } from "@/types/profile";
 import { Text } from "@/components/common/Text";
-import { GalleryIcon } from "@/icons";
+import { ClearIcon, GalleryIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 
 interface ProfileImageUploaderProps {
@@ -14,6 +14,8 @@ interface ProfileImageUploaderProps {
   /** 수정 모드 등 기존 이미지 URL */
   initialPreviewUrl?: string | null;
   onChange: (file: File | null) => void;
+  /** 미리보기 X. 새 파일 취소 또는 기존 이미지 제거 */
+  onClear?: () => void;
   error?: string;
   disabled?: boolean;
   className?: string;
@@ -25,6 +27,7 @@ const ProfileImageUploader = ({
   value,
   initialPreviewUrl = null,
   onChange,
+  onClear,
   error,
   disabled = false,
   className,
@@ -52,10 +55,18 @@ const ProfileImageUploader = ({
   const PROFILE_IMAGE_ACCEPT = PROFILE_IMAGE_CONTENT_TYPES.join(",");
 
   const previewUrl = objectUrl ?? initialPreviewUrl;
+  const canClear = Boolean(previewUrl) && Boolean(onClear) && !disabled;
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
     onChange(file);
+  };
+
+  const handleClear = () => {
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+    onClear?.();
   };
 
   return (
@@ -71,29 +82,45 @@ const ProfileImageUploader = ({
         aria-describedby={error ? errorId : undefined}
         onChange={handleChange}
       />
-      <button
-        type="button"
-        aria-label={"프로필 이미지 선택"}
-        aria-describedby={error ? errorId : undefined}
-        disabled={disabled}
-        onClick={() => {
-          inputRef.current?.click();
-        }}
-        className={cn(
-          "bg-background-muted rounded-6 relative flex items-center justify-center overflow-hidden",
-          "size-100 md:size-160",
-          "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-        )}
-      >
-        {previewUrl ? (
-          // blob/원격 URL 모두 대응 — Next Image 도메인 제한 회피
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={previewUrl} alt="" className="absolute inset-0 size-full object-cover" />
-        ) : (
-          <GalleryIcon className="text-icon-subtle size-24 md:size-40" aria-hidden="true" />
-        )}
-      </button>
+      <div className="relative size-100 md:size-160">
+        <button
+          type="button"
+          aria-label="프로필 이미지 선택"
+          aria-describedby={error ? errorId : undefined}
+          disabled={disabled}
+          onClick={() => {
+            inputRef.current?.click();
+          }}
+          className={cn(
+            "bg-background-muted rounded-6 relative flex size-full items-center justify-center overflow-hidden",
+            "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+          )}
+        >
+          {previewUrl ? (
+            // blob/원격 URL 모두 대응 — Next Image 도메인 제한 회피
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={previewUrl} alt="" className="absolute inset-0 size-full object-cover" />
+          ) : (
+            <GalleryIcon className="text-icon-subtle size-24 md:size-40" aria-hidden="true" />
+          )}
+        </button>
+        {canClear ? (
+          <button
+            type="button"
+            aria-label="프로필 이미지 초기화"
+            disabled={disabled}
+            onClick={handleClear}
+            className={cn(
+              "absolute top-0 right-0 z-10 flex min-h-44 min-w-44 items-center justify-center rounded-full",
+              "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+            )}
+          >
+            <ClearIcon className="size-24" aria-hidden="true" />
+          </button>
+        ) : null}
+      </div>
       {error ? (
         <Text as="p" id={errorId} role="alert" variant="xs-regular" className="text-text-error">
           {error}
