@@ -115,28 +115,28 @@ function flushDesiredState(state: FavoriteSyncState): void {
     } catch (error) {
       requestError = error;
       state.desiredState = state.confirmedState;
-      await enqueueCacheUpdate(state, state.confirmedState);
+      await enqueueCacheUpdate(state, state.confirmedState).catch(() => undefined);
 
       if (isUnauthorizedError(error)) state.handlers.onUnauthorized();
       else state.handlers.onError?.(getApiErrorMessage(error));
       shouldReconcile = !isUnauthorizedError(error);
-    } finally {
-      state.isRequestInFlight = false;
-
-      if (!state.handlers.isAuthScopeCurrent()) {
-        removeState(state);
-        return;
-      }
-
-      if (shouldReconcile) await reconcile(state);
-
-      if (requestError) {
-        removeState(state);
-        return;
-      }
-
-      flushDesiredState(state);
     }
+
+    state.isRequestInFlight = false;
+
+    if (!state.handlers.isAuthScopeCurrent()) {
+      removeState(state);
+      return;
+    }
+
+    if (shouldReconcile) await reconcile(state);
+
+    if (requestError) {
+      removeState(state);
+      return;
+    }
+
+    flushDesiredState(state);
   })();
 }
 
