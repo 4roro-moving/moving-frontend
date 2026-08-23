@@ -6,6 +6,10 @@ const KAKAO_MAPS_LOAD_TIMEOUT_MS = 15_000;
 
 let kakaoMapsPromise: Promise<KakaoMapsNamespace> | null = null;
 
+function hasMarkerClusterer(maps: KakaoMapsNamespace): boolean {
+  return typeof maps.MarkerClusterer === "function";
+}
+
 function resolveLoadedMaps(
   resolve: (maps: KakaoMapsNamespace) => void,
   reject: (error: Error) => void,
@@ -17,7 +21,14 @@ function resolveLoadedMaps(
     return;
   }
 
-  maps.load(() => resolve(maps));
+  maps.load(() => {
+    if (!hasMarkerClusterer(maps)) {
+      reject(new Error("Kakao Maps MarkerClusterer를 불러오지 못했습니다."));
+      return;
+    }
+
+    resolve(maps);
+  });
 }
 
 function waitForScript(
@@ -65,9 +76,14 @@ export function loadKakaoMaps(): Promise<KakaoMapsNamespace> {
   }
 
   const promise = new Promise<KakaoMapsNamespace>((resolve, reject) => {
-    if (window.kakao?.maps) {
+    if (window.kakao?.maps && hasMarkerClusterer(window.kakao.maps)) {
       resolveLoadedMaps(resolve, reject);
       return;
+    }
+
+    if (window.kakao?.maps) {
+      document.getElementById(KAKAO_MAPS_SCRIPT_ID)?.remove();
+      delete window.kakao;
     }
 
     const javascriptKey = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY?.trim() || getKakaoJavascriptKey();
@@ -95,7 +111,7 @@ export function loadKakaoMaps(): Promise<KakaoMapsNamespace> {
     script.id = KAKAO_MAPS_SCRIPT_ID;
     script.async = true;
     script.dataset.loadStatus = "loading";
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(javascriptKey)}&autoload=false`;
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(javascriptKey)}&autoload=false&libraries=clusterer`;
     waitForScript(script, resolve, reject);
     document.head.appendChild(script);
   }).catch((error: unknown) => {
