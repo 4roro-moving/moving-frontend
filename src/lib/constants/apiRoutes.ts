@@ -127,4 +127,15 @@ export const API_ROUTES = {
     MESSAGES: (inquiryId: number) => `/inquiries/${inquiryId}/messages`,
     CLOSE: (inquiryId: number) => `/inquiries/${inquiryId}/close`,
   },
+
+  REPORTS: {
+    ROOT: "/reports",
+    ME: "/reports/me",
+    IMAGE_UPLOAD_URL: "/reports/images/upload-url",
+  },
+
+  PRICE_PREDICTIONS: {
+    ROOT: "/price-predictions",
+    DISTANCE: "/price-predictions/distance",
+  },
 } as const;

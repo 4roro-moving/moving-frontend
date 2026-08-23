@@ -60,6 +60,10 @@ const CUSTOMER_LOGGED_IN_LINKS = [
     href: APP_ROUTES.MOVERS.ROOT,
   },
   {
+    label: "예상 견적",
+    href: APP_ROUTES.PRICE_PREDICTION,
+  },
+  {
     label: "내 견적 관리",
     href: APP_ROUTES.ESTIMATES.ROOT,
   },

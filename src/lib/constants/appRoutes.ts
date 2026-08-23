@@ -108,4 +108,7 @@ export const APP_ROUTES = {
     ROOT: "/inquiries",
     DETAIL: (inquiryId: number) => `/inquiries/${inquiryId}`,
   },
+
+  /** AI 예상 견적 */
+  PRICE_PREDICTION: "/price-prediction",
 } as const;
