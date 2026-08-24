@@ -106,13 +106,7 @@ const MyResidenceReviewPageView = () => {
         ) : null}
 
         {hasList && pagination ? (
-          <div
-            className={cn(
-              "flex w-full flex-col gap-40",
-              isPreviousDataLoading && PREVIOUS_DATA_LOADING_CLASS_NAME,
-            )}
-            aria-busy={isFetching}
-          >
+          <div className="flex w-full flex-col gap-40">
             {isPreviousDataLoading ? (
               <span className="sr-only" role="status">
                 내가 작성한 거주 후기 목록을 불러오는 중이에요
@@ -120,7 +114,13 @@ const MyResidenceReviewPageView = () => {
             ) : null}
             <div className="flex w-full flex-col gap-20">
               {canShowCreateButton ? <ResidenceReviewCreateButton onClick={openCreate} /> : null}
-              <ul className="flex w-full flex-col gap-20">
+              <ul
+                className={cn(
+                  "flex w-full flex-col gap-20",
+                  isPreviousDataLoading && PREVIOUS_DATA_LOADING_CLASS_NAME,
+                )}
+                aria-busy={isPreviousDataLoading}
+              >
                 {reviews.map((review) => (
                   <li key={review.id}>
                     <MyResidenceReviewCard
