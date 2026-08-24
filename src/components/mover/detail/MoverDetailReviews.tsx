@@ -21,6 +21,8 @@ interface MoverDetailReviewsProps {
   rating: number;
   reviewCount: number;
   ratingDistribution: MoverDetail["ratingDistribution"];
+  canReport: boolean;
+  currentUserId?: string;
 }
 
 /** 현재 리뷰 목록이 표시된 뒤 다음 페이지를 미리 요청하기까지의 대기 시간 */
@@ -35,8 +37,11 @@ export default function MoverDetailReviews({
   rating,
   reviewCount,
   ratingDistribution,
+  canReport,
+  currentUserId,
 }: MoverDetailReviewsProps) {
   const [currentPage, setCurrentPage] = useState(1);
+
   const queryClient = useQueryClient();
   const query = useMoverReviews(moverId, { page: currentPage });
   const { data, isLoading, isError, error, isFetching, refetch } = query;
@@ -48,21 +53,30 @@ export default function MoverDetailReviews({
 
   // 초기 조회 시에만 스켈레톤 노출 (페이지 전환 중에는 keepPreviousData로 이전 페이지 데이터가 보임)
   const isInitialLoading = isLoading && data === undefined;
+
   const shouldShowError = isError && !hasReviews;
+
   const shouldShowReviews = hasReviews;
+
   const shouldShowPagination = pageCount > 1 && hasReviews;
 
   // 목록 응답 기준으로만 empty 판정 (상세 reviewCount와 목록 캐시 시점 불일치 가능)
   // 2026.07.30 정슬기 - [수정] reviewCount OR 조건 제거 → pagination.totalCount만 사용
   const isEmpty = !isLoading && !isError && data !== undefined && data.pagination.totalCount === 0;
+
   // 헤더 개수도 목록 totalCount와 맞춤 (없을 때만 상세 reviewCount fallback)
   // 2026.07.30 정슬기 - [수정]
   const displayedReviewCount = data?.pagination.totalCount ?? reviewCount;
+
   const prefetchReviewPage = useCallback(
     (page: number) => {
       void queryClient.prefetchQuery({
         queryKey: QUERY_KEYS.REVIEWS.BY_MOVER(moverId, page, MOVER_REVIEW_PAGE_LIMIT),
-        queryFn: () => getMoverReviews(moverId, { page, limit: MOVER_REVIEW_PAGE_LIMIT }),
+        queryFn: () =>
+          getMoverReviews(moverId, {
+            page,
+            limit: MOVER_REVIEW_PAGE_LIMIT,
+          }),
       });
     },
     [moverId, queryClient],
@@ -85,7 +99,10 @@ export default function MoverDetailReviews({
       <Text
         as="h2"
         id="mover-reviews"
-        variant={{ base: "lg-semibold", md: "xl-semibold" }}
+        variant={{
+          base: "lg-semibold",
+          md: "xl-semibold",
+        }}
         className="text-text-primary"
       >
         리뷰
@@ -96,6 +113,7 @@ export default function MoverDetailReviews({
           <Text as="p" variant="lg-semibold" className="text-text-primary">
             아직 등록된 리뷰가 없어요!
           </Text>
+
           <Text as="p" variant="md-regular" className="text-text-subtle">
             가장 먼저 리뷰를 등록해보세요
           </Text>
@@ -127,6 +145,8 @@ export default function MoverDetailReviews({
               reviews={reviews}
               isFetching={isFetching}
               isPreviousDataLoading={isPreviousDataLoading}
+              canReport={canReport}
+              currentUserId={currentUserId}
             />
           ) : null}
 

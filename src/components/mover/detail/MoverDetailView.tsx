@@ -2,16 +2,11 @@
 
 import { useState } from "react";
 
-import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { useMoverDesignation } from "@/hooks/useMoverDesignation";
-import { useMoverDetail } from "@/hooks/useMoverDetail";
-
-import Toast from "@/components/common/Toast/Toast";
 import DetailHeroBanner from "@/components/common/DetailHeroBanner";
 import { PageHeader } from "@/components/common/PageHeader";
+import Toast from "@/components/common/Toast/Toast";
 import DesignateSuccessModal from "@/components/estimate/DesignateSuccessModal";
 import EstimateRequestRequiredModal from "@/components/estimate/EstimateRequestRequiredModal";
-
 import MoverDetailActions, {
   MoverDetailActionsSkeleton,
 } from "@/components/mover/detail/MoverDetailActions";
@@ -22,6 +17,11 @@ import MoverDetailReviews from "@/components/mover/detail/MoverDetailReviews";
 import MoverDetailServices from "@/components/mover/detail/MoverDetailServices";
 import MoverDetailShare from "@/components/mover/detail/MoverDetailShare";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
+import ReportModal from "@/components/report/ReportModal";
+import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
+import { useFavoriteMover } from "@/hooks/useFavoriteMover";
+import { useMoverDesignation } from "@/hooks/useMoverDesignation";
+import { useMoverDetail } from "@/hooks/useMoverDetail";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import type { MoverDetail } from "@/types/moverDetail";
 
@@ -33,11 +33,26 @@ interface MoverDetailViewProps {
 
 export default function MoverDetailView({ moverId, initialDetail }: MoverDetailViewProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
+  const { isPending: isAuthPending, isAuthenticated, user } = useCustomerAuthReady();
+
+  // 기사 프로필 자체는 로그인한 고객만 신고 가능
+  const canReportMover = !isAuthPending && isAuthenticated && user?.role === "CUSTOMER";
+
+  // 리뷰는 로그인한 고객/기사 모두 신고 가능
+  const canReportReviews =
+    !isAuthPending && isAuthenticated && (user?.role === "CUSTOMER" || user?.role === "MOVER");
 
   const { detail: queryDetail, isInitialLoading, isNotFound, query } = useMoverDetail(moverId);
+
   // SSR guest 상세가 로그인 사용자 정보보다 먼저 노출되지 않도록 세션 확인 완료까지 대기합니다.
   const displayedDetail = isInitialLoading && initialDetail ? initialDetail : queryDetail;
-  const favoriteMutation = useFavoriteMover({ onError: setToastMessage });
+
+  const favoriteMutation = useFavoriteMover({
+    onError: setToastMessage,
+  });
+
   const designation = useMoverDesignation({
     moverId,
     moverServiceTypes: displayedDetail?.serviceTypes ?? null,
@@ -66,6 +81,7 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
     return (
       <div className="bg-background-default flex w-full flex-1 flex-col overflow-x-hidden">
         <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+
         <div className="flex w-full flex-1 flex-col items-center justify-center">
           <MoversErrorPanel
             title="불러오지 못했어요"
@@ -82,6 +98,7 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
   }
 
   const detail = displayedDetail;
+
   // 찜 상태는 사용자별 상세 Query, 지정 가능 여부는 활성 견적 요청 조회가 끝난 뒤에 확정됩니다.
   const isActionsLoading = isInitialLoading || designation.isActionsLoading;
 
@@ -112,6 +129,7 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] xl:pb-0">
       <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+
       <DetailHeroBanner imageUrl={detail.profileImageSrc} name={detail.name} preloadProfileImage />
 
       <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 xl:px-0 xl:pb-[150px]">
@@ -125,7 +143,10 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
                 designation.showCustomerActions &&
                 favoriteMutation.canToggleFavorite
               }
+              onReport={() => setIsReportModalOpen(true)}
+              showReportAction={canReportMover}
             />
+
             <MoverDetailServices detail={detail} />
 
             <div className="border-border-subtle w-full border-t xl:hidden" aria-hidden="true" />
@@ -141,6 +162,8 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
               rating={detail.rating}
               reviewCount={detail.reviewCount}
               ratingDistribution={detail.ratingDistribution}
+              canReport={canReportReviews}
+              currentUserId={user?.id}
             />
           </div>
 
@@ -150,6 +173,7 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
             ) : designation.showCustomerActions ? (
               <MoverDetailActions layout="sidebar" {...actionsProps} />
             ) : null}
+
             <MoverDetailShare {...shareProps} onToastMessage={setToastMessage} />
           </aside>
         </div>
@@ -171,6 +195,16 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
         estimateRequestId={designation.designatedEstimateRequestId}
         onClose={designation.closeDesignateSuccessModal}
       />
+
+      {canReportMover ? (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          targetType="MOVER"
+          targetId={detail.id}
+          targetName={`${detail.name} 기사님`}
+        />
+      ) : null}
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </div>
