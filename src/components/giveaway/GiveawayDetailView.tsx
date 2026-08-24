@@ -20,7 +20,7 @@ import GiveawayRequestFormModal from "@/components/giveaway/GiveawayRequestFormM
 import { useCompleteGiveaway } from "@/hooks/giveaway/useCompleteGiveaway";
 import { useDeleteGiveaway } from "@/hooks/giveaway/useDeleteGiveaway";
 import { useMyGiveawayRequestActions } from "@/hooks/giveaway/useMyGiveawayRequestActions";
-import { DocumentIcon } from "@/icons";
+import { UserIcon } from "@/icons";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import {
@@ -142,7 +142,7 @@ const GiveawayDetailView = ({
                       className="flex items-center gap-2"
                       aria-label={`신청 ${String(giveaway.activeRequestCount)}건`}
                     >
-                      <DocumentIcon className="size-16" aria-hidden="true" />
+                      <UserIcon className="size-16" aria-hidden="true" />
                       <Text
                         as="span"
                         variant={{ base: "sm-medium", xl: "md-medium" }}

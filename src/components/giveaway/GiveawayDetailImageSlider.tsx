@@ -115,7 +115,7 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
             onClick={goToPrevious}
             className="bg-background-default/80 hover:bg-background-muted focus-visible:ring-border-brand absolute top-1/2 left-12 flex size-36 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:outline-none"
           >
-            <ChevronLeftIcon className="text-icon-tartiary size-20" aria-hidden="true" />
+            <ChevronLeftIcon className="text-icon-default size-20" aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -123,7 +123,7 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
             onClick={goToNext}
             className="bg-background-default/80 hover:bg-background-muted focus-visible:ring-border-brand absolute top-1/2 right-12 flex size-36 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:outline-none"
           >
-            <ChevronRightIcon className="text-icon-tartiary size-20" aria-hidden="true" />
+            <ChevronRightIcon className="text-icon-default size-20" aria-hidden="true" />
           </button>
         </>
       ) : null}

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
-import { DocumentIcon, GalleryIcon } from "@/icons";
+import { UserIcon, GalleryIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { getGiveawayThumbnailOverlayLabel } from "@/lib/constants/giveaway";
 import { cn } from "@/lib/utils/cn";
@@ -85,7 +85,7 @@ const GiveawayCard = ({ giveaway, preloadThumbnail = false }: GiveawayCardProps)
             className="flex items-center gap-2"
             aria-label={`신청 ${String(giveaway.activeRequestCount)}건`}
           >
-            <DocumentIcon className="text-icon-muted size-16" aria-hidden="true" />
+            <UserIcon className="size-16" aria-hidden="true" />
             <Text as="span" variant="md-medium" className="text-text-muted">
               {giveaway.activeRequestCount}
             </Text>
