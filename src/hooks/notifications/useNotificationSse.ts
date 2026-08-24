@@ -10,6 +10,7 @@ import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
 import { getAccessToken } from "@/lib/auth/token";
 import {
   getGiveawayDetailQueryKey,
+  getGiveawayRequestMyListScopeQueryKey,
   getGiveawayRequestsScopeQueryKey,
   QUERY_KEYS,
 } from "@/lib/constants/queryKeys";
@@ -97,25 +98,15 @@ export function useNotificationSse() {
     const unreadCountQueryKey = QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT(authScope);
     const listScopeQueryKey = QUERY_KEYS.NOTIFICATIONS.LIST_SCOPE(authScope);
 
-    const refetchActiveGiveawayQueries = () => {
-      void queryClient.refetchQueries({
-        queryKey: QUERY_KEYS.GIVEAWAYS.ALL,
-        type: "active",
-      });
-      void queryClient.refetchQueries({
-        queryKey: QUERY_KEYS.GIVEAWAY_REQUESTS.ALL,
-        type: "active",
-      });
-    };
-
     const syncGiveawayQueriesFromNotification = (
       type: string | undefined,
       linkUrl: string | null | undefined,
     ) => {
-      const giveawayId = parseGiveawayIdFromNotificationLinkUrl(linkUrl);
-      if (!isGiveawayNotificationType(type) && giveawayId === null) {
+      if (!isGiveawayNotificationType(type)) {
         return;
       }
+
+      const giveawayId = parseGiveawayIdFromNotificationLinkUrl(linkUrl);
 
       if (giveawayId !== null) {
         applyGiveawayNotificationToCaches(queryClient, authScope, type, giveawayId);
@@ -127,42 +118,46 @@ export function useNotificationSse() {
         });
       }
 
-      refetchActiveGiveawayQueries();
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.GIVEAWAYS.LIST,
+        refetchType: "active",
+      });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.GIVEAWAYS.ME,
+        refetchType: "active",
+      });
+      void queryClient.invalidateQueries({
+        queryKey: getGiveawayRequestMyListScopeQueryKey(authScope),
+        refetchType: "active",
+      });
     };
 
     const handleSseEvent = (eventName: string, data: string) => {
-      if (eventName === "notification" || eventName === "message") {
+      if (eventName === "notification") {
         const notification = parseNotificationSsePayload(data);
 
-        if (eventName === "notification") {
-          if (notification !== null) {
-            if (notification.isRead !== true) {
-              queryClient.setQueryData<UnreadNotificationCountResponse>(
-                unreadCountQueryKey,
-                (current) => ({
-                  unreadCount: (current?.unreadCount ?? 0) + 1,
-                }),
-              );
-            }
-
-            // 견적 요청 반려 알림일 경우 견적 요청 캐시 무효화
-            if (notification.type === "ESTIMATE_REQUEST_REJECTED") {
-              void queryClient.invalidateQueries({
-                queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ALL,
-              });
-            }
-
-            syncGiveawayQueriesFromNotification(notification.type, notification.linkUrl);
+        if (notification !== null) {
+          if (notification.isRead !== true) {
+            queryClient.setQueryData<UnreadNotificationCountResponse>(
+              unreadCountQueryKey,
+              (current) => ({
+                unreadCount: (current?.unreadCount ?? 0) + 1,
+              }),
+            );
           }
 
-          void queryClient.invalidateQueries({ queryKey: unreadCountQueryKey });
-          void queryClient.invalidateQueries({ queryKey: listScopeQueryKey });
-          return;
-        }
+          // 견적 요청 반려 알림일 경우 견적 요청 캐시 무효화
+          if (notification.type === "ESTIMATE_REQUEST_REJECTED") {
+            void queryClient.invalidateQueries({
+              queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ALL,
+            });
+          }
 
-        if (notification !== null) {
           syncGiveawayQueriesFromNotification(notification.type, notification.linkUrl);
         }
+
+        void queryClient.invalidateQueries({ queryKey: unreadCountQueryKey });
+        void queryClient.invalidateQueries({ queryKey: listScopeQueryKey });
         return;
       }
 
