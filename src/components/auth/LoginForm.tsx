@@ -175,9 +175,15 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
         <SocialLoginButtons
           audience={audience}
           intent="login"
-          onError={(message) => {
-            setSuspensionReason(null);
-            setSubmitError(message);
+          onError={(error) => {
+            if (typeof error === "string") {
+              setSuspensionReason(null);
+              setSubmitError(error);
+              return;
+            }
+
+            setSuspensionReason(getAccountSuspensionReason(error) ?? null);
+            setSubmitError(getLoginErrorMessage(error, audience));
           }}
         />
       </div>
