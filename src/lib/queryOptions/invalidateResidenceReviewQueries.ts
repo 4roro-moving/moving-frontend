@@ -1,4 +1,4 @@
-import type { QueryClient } from "@tanstack/react-query";
+import type { InvalidateQueryFilters, QueryFilters } from "@tanstack/react-query";
 
 import {
   getResidenceReviewDetailQueryKey,
@@ -6,30 +6,22 @@ import {
   type AuthQueryScope,
 } from "@/lib/constants/queryKeys";
 
-export const invalidateResidenceReviewLists = (queryClient: QueryClient) => {
-  void queryClient.invalidateQueries({
-    queryKey: QUERY_KEYS.RESIDENCE_REVIEWS.ALL,
-  });
-};
+export const getResidenceReviewListInvalidations = (): InvalidateQueryFilters[] => [
+  { queryKey: QUERY_KEYS.RESIDENCE_REVIEWS.LIST },
+  { queryKey: QUERY_KEYS.RESIDENCE_REVIEWS.ME },
+];
 
-export const invalidateResidenceReviewDetail = (
-  queryClient: QueryClient,
+export const getResidenceReviewDetailInvalidation = (
   authScope: AuthQueryScope,
   residenceReviewId: number,
-) => {
-  void queryClient.invalidateQueries({
-    queryKey: getResidenceReviewDetailQueryKey(authScope, residenceReviewId),
-  });
-};
+): InvalidateQueryFilters => ({
+  queryKey: getResidenceReviewDetailQueryKey(authScope, residenceReviewId),
+});
 
-export const invalidateResidenceReviewRelatedQueries = (
-  queryClient: QueryClient,
+export const getResidenceReviewDetailRemoval = (
   authScope: AuthQueryScope,
-  residenceReviewId?: number,
-) => {
-  invalidateResidenceReviewLists(queryClient);
-
-  if (residenceReviewId !== undefined) {
-    invalidateResidenceReviewDetail(queryClient, authScope, residenceReviewId);
-  }
-};
+  residenceReviewId: number,
+): QueryFilters => ({
+  queryKey: getResidenceReviewDetailQueryKey(authScope, residenceReviewId),
+  exact: true,
+});
