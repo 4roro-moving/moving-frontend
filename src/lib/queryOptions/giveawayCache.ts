@@ -27,24 +27,29 @@ export const toGiveawayMyRequest = (request: GiveawayRequestItem): GiveawayMyReq
 
 export const setGiveawayDetailQueryData = (
   queryClient: QueryClient,
+  authScope: AuthQueryScope,
   giveawayId: number,
   detail: GiveawayDetail,
 ) => {
-  queryClient.setQueryData(getGiveawayDetailQueryKey(giveawayId), detail);
+  queryClient.setQueryData(getGiveawayDetailQueryKey(authScope, giveawayId), detail);
 };
 
 export const patchGiveawayDetailQueryData = (
   queryClient: QueryClient,
+  authScope: AuthQueryScope,
   giveawayId: number,
   updater: (current: GiveawayDetail) => GiveawayDetail,
 ) => {
-  queryClient.setQueryData<GiveawayDetail>(getGiveawayDetailQueryKey(giveawayId), (current) => {
-    if (current === undefined) {
-      return current;
-    }
+  queryClient.setQueryData<GiveawayDetail>(
+    getGiveawayDetailQueryKey(authScope, giveawayId),
+    (current) => {
+      if (current === undefined) {
+        return current;
+      }
 
-    return updater(current);
-  });
+      return updater(current);
+    },
+  );
 };
 
 export const patchGiveawayRequestsQueryData = (

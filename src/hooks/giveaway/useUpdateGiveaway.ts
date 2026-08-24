@@ -21,7 +21,7 @@ export const useUpdateGiveaway = () => {
   return useApiMutation({
     mutationFn: ({ giveawayId, body }: UpdateGiveawayVariables) => updateGiveaway(giveawayId, body),
     onSuccess: (detail, { giveawayId }) => {
-      setGiveawayDetailQueryData(queryClient, giveawayId, detail);
+      setGiveawayDetailQueryData(queryClient, authScope, giveawayId, detail);
       invalidateGiveawayRelatedQueries(queryClient, authScope, giveawayId);
     },
   });

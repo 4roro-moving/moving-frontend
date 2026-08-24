@@ -25,7 +25,7 @@ export const useRejectGiveawayRequest = () => {
       rejectGiveawayRequest(giveawayId, requestId),
     onSuccess: (request, { giveawayId }) => {
       applyGiveawayRequestItemToCaches(queryClient, authScope, request);
-      patchGiveawayDetailQueryData(queryClient, giveawayId, (current) => ({
+      patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
         ...current,
         activeRequestCount: Math.max(0, current.activeRequestCount - 1),
       }));

@@ -20,7 +20,7 @@ export const useCancelGiveawayRequest = () => {
     mutationFn: cancelGiveawayRequest,
     onSuccess: (request) => {
       applyGiveawayRequestItemToCaches(queryClient, authScope, request);
-      patchGiveawayDetailQueryData(queryClient, request.giveawayId, (current) => ({
+      patchGiveawayDetailQueryData(queryClient, authScope, request.giveawayId, (current) => ({
         ...current,
         canRequest: true,
         activeRequestCount: Math.max(0, current.activeRequestCount - 1),

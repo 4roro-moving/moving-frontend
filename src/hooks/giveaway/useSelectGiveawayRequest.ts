@@ -26,7 +26,7 @@ export const useSelectGiveawayRequest = () => {
     mutationFn: ({ giveawayId, requestId }: SelectGiveawayRequestVariables) =>
       selectGiveawayRequest(giveawayId, requestId),
     onSuccess: (detail, { giveawayId, requestId }) => {
-      setGiveawayDetailQueryData(queryClient, giveawayId, detail);
+      setGiveawayDetailQueryData(queryClient, authScope, giveawayId, detail);
       patchGiveawayRequestsQueryData(queryClient, giveawayId, (item) =>
         item.id === requestId ? { ...item, status: GIVEAWAY_REQUEST_STATUS.SELECTED } : item,
       );

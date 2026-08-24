@@ -66,8 +66,9 @@ export const getGiveawayMyListQueryKey = (
   query: Omit<GiveawayMyListQuery, "cursor">,
 ) => [...getGiveawayMyListScopeQueryKey(authScope), query] as const;
 
-export const getGiveawayDetailQueryKey = (giveawayId: number) =>
-  [...QUERY_KEYS.GIVEAWAYS.DETAIL_ROOT, giveawayId] as const;
+/** 상세 응답의 canRequest, myRequest는 사용자별 값이므로 authScope를 포함합니다. */
+export const getGiveawayDetailQueryKey = (authScope: AuthQueryScope, giveawayId: number) =>
+  [...QUERY_KEYS.GIVEAWAYS.DETAIL_ROOT, authScope, giveawayId] as const;
 
 export const getGiveawayRequestsScopeQueryKey = (giveawayId: number) =>
   [...QUERY_KEYS.GIVEAWAYS.REQUESTS_ROOT, giveawayId] as const;

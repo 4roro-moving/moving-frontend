@@ -25,7 +25,7 @@ export const useCreateGiveawayRequest = () => {
     mutationFn: ({ giveawayId, body }: CreateGiveawayRequestVariables) =>
       createGiveawayRequest(giveawayId, body),
     onSuccess: (request, { giveawayId }) => {
-      patchGiveawayDetailQueryData(queryClient, giveawayId, (current) => ({
+      patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
         ...current,
         canRequest: false,
         activeRequestCount: current.activeRequestCount + 1,

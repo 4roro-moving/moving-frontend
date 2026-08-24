@@ -30,7 +30,7 @@ export const useUpdateGiveawayRequest = () => {
       applyGiveawayRequestItemToCaches(queryClient, authScope, request);
 
       if (giveawayId !== undefined) {
-        patchGiveawayDetailQueryData(queryClient, giveawayId, (current) => {
+        patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => {
           if (current.myRequest?.id !== request.id) {
             return current;
           }

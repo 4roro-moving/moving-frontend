@@ -15,7 +15,7 @@ export const useCompleteGiveaway = () => {
   return useApiMutation({
     mutationFn: completeGiveaway,
     onSuccess: (detail, giveawayId) => {
-      setGiveawayDetailQueryData(queryClient, giveawayId, detail);
+      setGiveawayDetailQueryData(queryClient, authScope, giveawayId, detail);
       invalidateGiveawayRelatedQueries(queryClient, authScope, giveawayId);
     },
   });

@@ -81,7 +81,7 @@ const GiveawayFilters = ({ filters }: GiveawayFiltersProps) => {
             onChange={(event) => setKeyword(event.target.value)}
             onClear={clearSearch}
             maxLength={GIVEAWAY_KEYWORD_MAX_LENGTH}
-            placeholder="텍스트를 입력해 주세요."
+            placeholder="제목 또는 내용으로 나눔 글을 검색해 보세요."
             aria-label="나눔 글 검색"
             className="w-full"
           />

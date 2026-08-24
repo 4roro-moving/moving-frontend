@@ -14,9 +14,13 @@ export const invalidateGiveawayLists = (queryClient: QueryClient) => {
   });
 };
 
-export const invalidateGiveawayDetail = (queryClient: QueryClient, giveawayId: number) => {
+export const invalidateGiveawayDetail = (
+  queryClient: QueryClient,
+  authScope: AuthQueryScope,
+  giveawayId: number,
+) => {
   void queryClient.invalidateQueries({
-    queryKey: getGiveawayDetailQueryKey(giveawayId),
+    queryKey: getGiveawayDetailQueryKey(authScope, giveawayId),
   });
 };
 
@@ -44,7 +48,7 @@ export const invalidateGiveawayRelatedQueries = (
   invalidateGiveawayLists(queryClient);
 
   if (giveawayId !== undefined) {
-    invalidateGiveawayDetail(queryClient, giveawayId);
+    invalidateGiveawayDetail(queryClient, authScope, giveawayId);
     invalidateGiveawayRequests(queryClient, giveawayId);
   }
 };
