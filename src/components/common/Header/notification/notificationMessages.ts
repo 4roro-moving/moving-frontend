@@ -61,15 +61,16 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
       prefix: "",
       suffix: " 문의에 답변이 등록되었어요",
     },
-    //관리자가 리뷰 숨김 처리한 경우 고객에게 알림 문구
+    //관리자가 콘텐츠(리뷰/거주후기/나눔) 숨김 처리한 경우 알림 문구
+    // content에 받침 유무가 달라 "가/이" 조사를 suffix에 두지 않음
     CONTENT_HIDDEN: {
       prefix: "",
-      suffix: "에 대한 리뷰가 숨김처리 되었습니다.",
+      suffix: " 숨김처리 되었습니다.",
     },
-    //관리자가 리뷰 복구 처리한 경우 고객에게 알림 문구
+    //관리자가 콘텐츠(리뷰/거주후기/나눔) 복구 처리한 경우 알림 문구
     CONTENT_RESTORED: {
       prefix: "",
-      suffix: "에 대한 리뷰가 복구되었습니다.",
+      suffix: " 복구처리 되었습니다.",
     },
     // 관리자가 확정 견적 거래를 취소한 경우 고객/기사에게 알림 문구
     ESTIMATE_CANCELED_BY_ADMIN: {

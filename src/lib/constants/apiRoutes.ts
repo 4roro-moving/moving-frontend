@@ -37,7 +37,7 @@ export const API_ROUTES = {
   ESTIMATE_REQUESTS: {
     ROOT: "/estimate-requests",
     DETAIL: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
-    // 2026.08.03 정슬기 - [추가] 견적 요청 soft cancel (DELETE)
+    // 2026.08.03 정슬기 - [추가] 견적 요청의 cancel (DELETE)
     DELETE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
     ACTIVE: "/estimate-requests/active",
     DESIGNATE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}/designate`,
@@ -77,6 +77,11 @@ export const API_ROUTES = {
     ROOT: "/reviews",
     ME: "/reviews/me",
     REVIEWABLE: "/reviews/reviewable",
+  },
+  /** 내가 작성한 콘텐츠 검수(숨김) 상세 — 알림 linkUrl과 동일 */
+  MY_CONTENTS: {
+    DETAIL: (contentType: string, contentId: number) =>
+      `/my-contents/${contentType}/${String(contentId)}`,
   },
   // 2026.08.22 김나연 - [추가] 나눔 API 경로
   GIVEAWAYS: {
