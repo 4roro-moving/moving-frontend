@@ -11,6 +11,7 @@ import type { InquiryCategory } from "@/types/inquiry";
 
 interface InquiryCreateModalProps {
   isOpen: boolean;
+  isSuspensionAppealAccess?: boolean;
   onClose: () => void;
 }
 
@@ -36,7 +37,11 @@ const CATEGORY_OPTIONS: {
   },
 ];
 
-const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
+const InquiryCreateModal = ({
+  isOpen,
+  isSuspensionAppealAccess = false,
+  onClose,
+}: InquiryCreateModalProps) => {
   const [category, setCategory] = useState<InquiryCategory | "">("");
 
   const [title, setTitle] = useState("");
@@ -62,7 +67,10 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
   const trimmedTitle = title.trim();
   const trimmedContent = content.trim();
 
-  const hasCategory = category !== "";
+  const effectiveCategory: InquiryCategory | "" = isSuspensionAppealAccess
+    ? "SUSPENSION_APPEAL"
+    : category;
+  const hasCategory = effectiveCategory !== "";
 
   const canSubmit =
     hasCategory &&
@@ -83,13 +91,13 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!category || !trimmedTitle || !trimmedContent || createMutation.isPending) {
+    if (!effectiveCategory || !trimmedTitle || !trimmedContent || createMutation.isPending) {
       return;
     }
 
     createMutation.mutate(
       {
-        category,
+        category: effectiveCategory,
         title: trimmedTitle,
         content: trimmedContent,
       },
@@ -125,37 +133,45 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
 
       <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
         <div className="flex flex-col gap-20 overflow-y-auto px-20 py-20 md:px-24 md:py-24">
-          <div className="flex flex-col gap-8">
-            <Text as="span" variant="xs-semibold" className="text-text-primary">
-              문의 유형
-            </Text>
+          {!isSuspensionAppealAccess ? (
+            <div className="flex flex-col gap-8">
+              <Text as="span" variant="xs-semibold" className="text-text-primary">
+                문의 유형
+              </Text>
 
-            <Select
-              desc="문의 유형을 선택해주세요"
-              label="문의 유형"
-              defaultValue={category}
-              onChange={handleCategoryChange}
-              disabled={createMutation.isPending}
-              className={cn(
-                "w-full",
-                "[&_button[role=combobox]]:h-48",
-                "[&_button[role=combobox]]:w-full",
-                "[&_button[role=combobox]]:rounded-8",
-                "[&_button[role=combobox]]:px-14",
-                "[&_button[role=combobox]]:py-0",
-                "xl:[&_button[role=combobox]]:h-48",
-                "xl:[&_button[role=combobox]]:rounded-8",
-                "xl:[&_button[role=combobox]]:px-14",
-                "xl:[&_button[role=combobox]]:py-0",
-              )}
-            >
-              {CATEGORY_OPTIONS.map((option) => (
-                <Select.Option key={option.value} value={option.value}>
-                  {option.label}
-                </Select.Option>
-              ))}
-            </Select>
-          </div>
+              <Select
+                desc="문의 유형을 선택해주세요"
+                label="문의 유형"
+                defaultValue={category}
+                onChange={handleCategoryChange}
+                disabled={createMutation.isPending}
+                className={cn(
+                  "w-full",
+                  "[&_button[role=combobox]]:h-48",
+                  "[&_button[role=combobox]]:w-full",
+                  "[&_button[role=combobox]]:rounded-8",
+                  "[&_button[role=combobox]]:px-14",
+                  "[&_button[role=combobox]]:py-0",
+                  "xl:[&_button[role=combobox]]:h-48",
+                  "xl:[&_button[role=combobox]]:rounded-8",
+                  "xl:[&_button[role=combobox]]:px-14",
+                  "xl:[&_button[role=combobox]]:py-0",
+                )}
+              >
+                {CATEGORY_OPTIONS.map((option) => (
+                  <Select.Option key={option.value} value={option.value}>
+                    {option.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
+          ) : (
+            <div className="bg-background-subtle rounded-8 px-14 py-12">
+              <Text as="p" variant="xs-regular" className="text-text-secondary">
+                정지 이의 제기 문의로 접수됩니다.
+              </Text>
+            </div>
+          )}
 
           <div className="flex flex-col gap-8">
             <label htmlFor="inquiry-title">

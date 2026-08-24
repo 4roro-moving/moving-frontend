@@ -7,6 +7,7 @@ import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
 import InquiryCreateModal from "@/components/inquiry/InquiryCreateModal";
 import { useInquiries } from "@/hooks/inquiry/useInquiries";
+import { hasSuspensionAppealSession } from "@/lib/auth/suspensionAppealSession";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import type { InquiryCategory, InquiryStatus } from "@/types/inquiry";
@@ -57,6 +58,7 @@ const InquiryPageClient = () => {
   const [status, setStatus] = useState<StatusFilter>("ALL");
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const isSuspensionAppealAccess = hasSuspensionAppealSession();
 
   const { data, isPending, isError, refetch } = useInquiries({
     page,
@@ -87,7 +89,9 @@ const InquiryPageClient = () => {
             </Text>
 
             <Text as="p" variant="lg-regular" className="text-text-secondary">
-              문의 내역과 답변 상태를 확인할 수 있습니다.
+              {isSuspensionAppealAccess
+                ? "기존 문의 내역과 답변을 확인하고 정지 이의를 제기할 수 있습니다."
+                : "문의 내역과 답변 상태를 확인할 수 있습니다."}
             </Text>
           </div>
 
@@ -249,7 +253,11 @@ const InquiryPageClient = () => {
         </section>
       </main>
 
-      <InquiryCreateModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      <InquiryCreateModal
+        isOpen={isCreateModalOpen}
+        isSuspensionAppealAccess={isSuspensionAppealAccess}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </>
   );
 };
