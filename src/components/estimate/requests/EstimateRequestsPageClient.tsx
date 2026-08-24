@@ -69,6 +69,7 @@ export default function EstimateRequestsPageClient() {
   // placeholder(이전 필터) 기준으로 Empty py를 바꾸지 않음
   const isEmpty =
     hasData && pagination != null && !isPlaceholderData && pagination.totalCount === 0;
+  const isAllFilterEmpty = isEmpty && statusFilter === "all";
 
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage);
@@ -84,7 +85,7 @@ export default function EstimateRequestsPageClient() {
     <div
       className={cn(
         "bg-background-default md:bg-background-subtle flex w-full flex-col items-center",
-        isEmpty ? "flex-1" : "py-38 md:py-32 xl:py-64",
+        isAllFilterEmpty ? "flex-1" : "py-38 md:py-32 xl:py-64",
       )}
     >
       {isLoading ? <EstimateRequestListSkeleton showFilter /> : null}
