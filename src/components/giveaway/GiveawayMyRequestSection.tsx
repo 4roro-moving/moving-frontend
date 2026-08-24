@@ -5,6 +5,7 @@ import {
   GIVEAWAY_EDIT_BUTTON_LABEL,
   GIVEAWAY_MY_REQUEST_SECTION_ID,
   GIVEAWAY_MY_REQUEST_TITLE,
+  GIVEAWAY_MY_REQUEST_TITLE_ID,
   GIVEAWAY_REQUEST_CONTENT_LABEL,
   GIVEAWAY_REQUEST_EMPTY_MESSAGE,
   canCancelGiveawayRequest,
@@ -64,13 +65,14 @@ const GiveawayMyRequestSection = ({
     <section
       id={GIVEAWAY_MY_REQUEST_SECTION_ID}
       className="flex w-full flex-col gap-20"
-      aria-labelledby="giveaway-my-request-title"
+      aria-labelledby={GIVEAWAY_MY_REQUEST_TITLE_ID}
     >
       <Text
         as="h2"
-        id="giveaway-my-request-title"
+        id={GIVEAWAY_MY_REQUEST_TITLE_ID}
+        tabIndex={-1}
         variant={{ base: "xl-bold", md: "2xl-bold" }}
-        className="text-text-primary"
+        className="text-text-primary focus-visible:ring-border-brand rounded-4 focus-visible:ring-2 focus-visible:outline-none"
       >
         {GIVEAWAY_MY_REQUEST_TITLE}
       </Text>

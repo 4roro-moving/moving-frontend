@@ -84,6 +84,7 @@ export const GIVEAWAY_PREFERRED_REGION_LABEL = "거래 희망 지역";
 export const GIVEAWAY_VIEW_MY_REQUEST_BUTTON_LABEL = "신청 글 확인하기";
 export const GIVEAWAY_MY_REQUEST_TITLE = "내 신청 글";
 export const GIVEAWAY_MY_REQUEST_SECTION_ID = "my-giveaway-request";
+export const GIVEAWAY_MY_REQUEST_TITLE_ID = "giveaway-my-request-title";
 export const GIVEAWAY_RECEIVED_REQUESTS_TITLE = "받은 신청 내역";
 export const GIVEAWAY_RECEIVED_REQUESTS_EMPTY = "아직 받은 신청이 없어요.";
 export const GIVEAWAY_RECEIVED_REQUESTS_LOADING = "받은 신청 내역을 불러오는 중";

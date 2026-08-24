@@ -26,7 +26,6 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import {
   GIVEAWAY_COMPLETE_BUTTON_LABEL,
   GIVEAWAY_DETAIL_TITLE,
-  GIVEAWAY_MY_REQUEST_SECTION_ID,
   GIVEAWAY_PREFERRED_REGION_LABEL,
   canApplyGiveaway,
   hasActiveGiveawayRequest,
@@ -95,13 +94,6 @@ const GiveawayDetailView = ({
     } catch (error) {
       setDeleteError(getApiErrorMessage(error, "나눔 글을 삭제하지 못했습니다."));
     }
-  };
-
-  const handleViewRequest = () => {
-    document.getElementById(GIVEAWAY_MY_REQUEST_SECTION_ID)?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
   };
 
   const handleComplete = async () => {
@@ -193,7 +185,6 @@ const GiveawayDetailView = ({
                 setIsCompleteOpen(true);
               }}
               onApply={() => setIsApplyOpen(true)}
-              onViewRequest={handleViewRequest}
             />
 
             <div className="flex items-center gap-12">
