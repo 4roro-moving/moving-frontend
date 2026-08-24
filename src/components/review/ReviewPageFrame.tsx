@@ -13,7 +13,7 @@ export default function ReviewPageFrame({ title, children, className }: ReviewPa
   return (
     <div
       className={cn(
-        "bg-background-default md:bg-background-subtle flex w-full flex-col items-center",
+        "bg-background-default md:bg-background-subtle flex w-full flex-1 flex-col items-center",
         className,
       )}
     >
