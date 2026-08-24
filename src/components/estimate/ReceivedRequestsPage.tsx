@@ -81,6 +81,10 @@ export default function ReceivedRequestsPage() {
   const items = query.data?.pages.flatMap((page) => page.items) ?? [];
   const totalCount = query.data?.pages[0]?.pagination.totalCount ?? 0;
   const { isInitialLoading, isPreviousDataLoading } = useListLoadingState(query);
+  const shouldShowEmpty =
+    !isInitialLoading && !isPreviousDataLoading && !query.isError && items.length === 0;
+  const shouldShowEmptyLoading =
+    !isInitialLoading && isPreviousDataLoading && !query.isError && items.length === 0;
 
   return (
     <>
@@ -216,7 +220,7 @@ export default function ReceivedRequestsPage() {
             </Text>
           )}
 
-          {!isInitialLoading && !query.isError && items.length === 0 && (
+          {shouldShowEmpty ? (
             <div className="py-page-header-height-desktop flex flex-col items-center gap-32">
               <Image
                 className="opacity-50"
@@ -229,7 +233,9 @@ export default function ReceivedRequestsPage() {
                 아직 받은 요청이 없어요!
               </Text>
             </div>
-          )}
+          ) : null}
+
+          {shouldShowEmptyLoading ? <ReceivedRequestsSkeleton /> : null}
 
           {items.length > 0 && (
             <>

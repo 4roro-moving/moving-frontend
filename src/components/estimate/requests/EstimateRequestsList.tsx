@@ -2,6 +2,7 @@ import Pagination from "@/components/common/Pagination/Pagination";
 import Select from "@/components/common/Select/Select";
 import EstimatesListEmptyState from "@/components/estimate/EstimatesListEmptyState";
 import EstimateRequestCard from "@/components/estimate/requests/EstimateRequestCard";
+import { EstimateRequestListSkeleton } from "@/components/estimate/requests/EstimateRequestLoadingSkeletons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { PREVIOUS_DATA_LOADING_CLASS_NAME } from "@/lib/constants/loading";
 import { cn } from "@/lib/utils/cn";
@@ -80,6 +81,18 @@ export default function EstimateRequestsList({
   );
 
   if (pagination.totalCount === 0) {
+    if (isPreviousDataLoading) {
+      return (
+        <div className="flex w-full flex-col gap-24 md:gap-32">
+          <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto w-full xl:px-0">
+            {filterSelect}
+          </div>
+
+          <EstimateRequestListSkeleton />
+        </div>
+      );
+    }
+
     return isAllFilter ? (
       <div className="-translate-y-26 md:-translate-y-26 xl:-translate-y-40">
         <EstimatesListEmptyState
