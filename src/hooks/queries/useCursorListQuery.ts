@@ -9,6 +9,7 @@ import {
 import { useMemo } from "react";
 
 import { useApiInfiniteQuery } from "@/hooks/queries/useApiInfiniteQuery";
+import { useListLoadingState } from "@/hooks/queries/useListLoadingState";
 import { ApiError } from "@/types/api";
 
 export const useCursorListQuery = <
@@ -32,8 +33,7 @@ export const useCursorListQuery = <
     () => (query.data?.pages.flatMap((page) => page.data) ?? []) as TPage["data"],
     [query.data],
   );
-  const isInitialLoading = query.isPending && query.data === undefined;
-  const isFilterFetching = query.isFetching && query.isPlaceholderData;
+  const { isInitialLoading, isPreviousDataLoading } = useListLoadingState(query);
 
-  return { items, isInitialLoading, isFilterFetching, query };
+  return { items, isInitialLoading, isFilterFetching: isPreviousDataLoading, query };
 };
