@@ -11,7 +11,10 @@ export type NotificationType =
   | "NOTICE_RECEIVED"
   | "INQUIRY_ANSWERED"
   | "CONTENT_HIDDEN"
-  | "CONTENT_RESTORED";
+  | "CONTENT_RESTORED"
+  | "ESTIMATE_CANCELED_BY_ADMIN"
+  | "ESTIMATE_CANCELED_BY_ACCOUNT_SUSPENSION"
+  | "ESTIMATE_REQUEST_CANCELED_BY_ACCOUNT_SUSPENSION";
 
 /** 백엔드 알림 목록·상세 공통 아이템 */
 export interface NotificationItem {

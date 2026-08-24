@@ -6,16 +6,19 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import AuthHeader from "@/components/auth/AuthHeader";
+import SignUpTermsField from "@/components/auth/SignUpTermsField";
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import Button from "@/components/common/Button/Button";
 import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
 import PasswordInput from "@/components/common/Input/PasswordInput";
 import { Text, getTextVariantClass } from "@/components/common/Text";
-import { useSignUpMutation } from "@/hooks/auth/useSignUpMutation";
 import { useSignUpMoverMutation } from "@/hooks/auth/useSignUpMoverMutation";
+import { useSignUpMutation } from "@/hooks/auth/useSignUpMutation";
+import { useSignUpTerms } from "@/hooks/auth/useSignUpTerms";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { getProfilePath, type AuthAudience } from "@/lib/auth/redirect";
+import { getProfilePath, getSocialSignUpPath, type AuthAudience } from "@/lib/auth/redirect";
+import { hasRequiredTermsAgreed } from "@/lib/auth/termsAgreement";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { signUpSchema, type SignUpFormValues } from "@/lib/schemas/signUpSchema";
 import { cn } from "@/lib/utils/cn";
@@ -31,6 +34,16 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
   const { mutateAsync: signUp, isPending } = audience === "mover" ? moverSignUp : customerSignUp;
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const {
+    signUpTerms,
+    agreementsById,
+    agreements,
+    canAgree,
+    hasRequiredTerms,
+    isTermsLoading,
+    isTermsError,
+    handleTermsCheckedChange,
+  } = useSignUpTerms(audience);
 
   const {
     register,
@@ -53,6 +66,16 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
 
+    if (!hasRequiredTerms) {
+      setSubmitError("가입에 필요한 약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+
+    if (!hasRequiredTermsAgreed(signUpTerms, agreementsById)) {
+      setSubmitError("필수 약관에 동의해 주세요.");
+      return;
+    }
+
     try {
       // establishSession(onSuccess) 전에 목적지 예약 — GuestOnly가 profile로 이동
       setPostAuthRedirectPath(getProfilePath(audience));
@@ -61,6 +84,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
         password: values.password,
         name: values.name,
         phone: values.phone,
+        agreements,
       });
     } catch (error) {
       useAuthStore.getState().consumePostAuthRedirectPath();
@@ -70,7 +94,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
-      <AuthHeader audience={audience} />
+      <AuthHeader audience={audience} mode="signup" />
 
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
         <form className="flex w-full flex-col gap-32 md:gap-56" onSubmit={onSubmit} noValidate>
@@ -136,7 +160,26 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
                 {...register("passwordConfirm")}
               />
             </FormField>
+
+            <SignUpTermsField
+              terms={signUpTerms}
+              checkedById={agreementsById}
+              onCheckedChange={handleTermsCheckedChange}
+              isLoading={isTermsLoading}
+            />
           </div>
+
+          {isTermsError ? (
+            <Text as="p" variant="md-medium" className="text-text-error" role="alert">
+              약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+            </Text>
+          ) : null}
+
+          {!isTermsLoading && !isTermsError && !hasRequiredTerms ? (
+            <Text as="p" variant="md-medium" className="text-text-error" role="alert">
+              가입에 필요한 약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+            </Text>
+          ) : null}
 
           {submitError ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
@@ -149,7 +192,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
             variant="solid"
             size="auth"
             fullWidth
-            disabled={!isValid || isSubmitting || isPending}
+            disabled={!isValid || !canAgree || isSubmitting || isPending}
           >
             시작하기
           </Button>
@@ -176,14 +219,26 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
       </div>
 
       <div className="flex flex-col items-center gap-24 md:gap-32">
-        <Text
-          as="p"
-          variant={{ base: "xs-regular", md: "xl-regular" }}
-          className="text-text-description"
-        >
-          SNS 계정으로 간편 가입하기
-        </Text>
-        <SocialLoginButtons audience={audience} onError={setSubmitError} />
+        <div className="flex flex-col items-center gap-8">
+          <Text
+            as="p"
+            variant={{ base: "xs-regular", md: "xl-regular" }}
+            className="text-text-description"
+          >
+            SNS 계정으로 간편 가입하기
+          </Text>
+          <Text
+            as="p"
+            variant={{ base: "xs-regular", md: "md-regular" }}
+            className="text-text-description text-center"
+          >
+            SNS 회원가입 시 약관 동의 페이지로 이동합니다.
+          </Text>
+        </div>
+        <SocialLoginButtons
+          audience={audience}
+          hrefForProvider={() => getSocialSignUpPath(audience)}
+        />
       </div>
     </div>
   );

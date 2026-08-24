@@ -70,6 +70,8 @@ export function useMoverRecommendations({
   });
 
   const movers = useMemo<MoverRecommendation[]>(() => {
+    if (!hasSearchRegions) return [];
+
     const merged = new Map<string, MoverRecommendation>();
 
     //출발지 API 결과 순회
@@ -100,7 +102,7 @@ export function useMoverRecommendations({
     return [...merged.values()].sort(
       (a, b) => matchPriority[a.matchType] - matchPriority[b.matchType] || b.rating - a.rating,
     );
-  }, [departureQuery.data, destinationQuery.data]);
+  }, [departureQuery.data, destinationQuery.data, hasSearchRegions]);
 
   return {
     movers,

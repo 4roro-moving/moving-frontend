@@ -81,6 +81,14 @@ export const getProfilePath = (audience: AuthAudience): string => {
   return audience === "mover" ? APP_ROUTES.MOVER_PROFILE : APP_ROUTES.PROFILE;
 };
 
+export const getSignUpPath = (audience: AuthAudience): string => {
+  return audience === "mover" ? APP_ROUTES.MOVER_SIGN_UP : APP_ROUTES.SIGN_UP;
+};
+
+export const getSocialSignUpPath = (audience: AuthAudience): string => {
+  return audience === "mover" ? APP_ROUTES.MOVER_SOCIAL_SIGN_UP : APP_ROUTES.SOCIAL_SIGN_UP;
+};
+
 /** 역할별 프로필 생성(등록) 경로인지 */
 export const isProfileCreatePath = (pathname: string, audience: AuthAudience): boolean => {
   return pathname === getProfilePath(audience);
@@ -192,7 +200,9 @@ export const getAudienceFromPathname = (pathname: string): AuthAudience => {
  * - 랜딩 `/`
  * - 기사님 찾기 `/movers`
  * - 기사님 상세 `/movers/:id` (유효한 id만)
+ * - 커뮤니티 `/community`, 거주후기 `/community/residence-reviews`
  * // 2026.08.02 정슬기 - [수정] HOME 포함·isPublicPath로 정리 (auth:expired 랜딩 강제 로그인 방지)
+ * // 2026.08.20 김나연 - [수정] 거주후기 공개 페이지 포함, 콘텐츠 → 커뮤니티 경로 변경
  */
 export const isPublicPath = (pathname: string): boolean => {
   if (pathname === APP_ROUTES.HOME) {
@@ -200,6 +210,14 @@ export const isPublicPath = (pathname: string): boolean => {
   }
 
   if (pathname === APP_ROUTES.MOVERS.ROOT) {
+    return true;
+  }
+
+  if (
+    pathname === APP_ROUTES.COMMUNITY.ROOT ||
+    pathname === APP_ROUTES.COMMUNITY.RESIDENCE_REVIEWS ||
+    pathname.startsWith(`${APP_ROUTES.COMMUNITY.RESIDENCE_REVIEWS}/`)
+  ) {
     return true;
   }
 

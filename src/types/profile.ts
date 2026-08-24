@@ -11,6 +11,15 @@ export interface ProfileStatus {
   hasPhone: boolean;
 }
 
+/**기사 활동 거점 */
+export interface MoverActivityBase {
+  address: string;
+  detailAddress?: string;
+  zipCode: string;
+  latitude: number;
+  longitude: number;
+}
+
 /**
  * GET /profiles/customer/me 원본(data)
  */
@@ -47,7 +56,9 @@ export interface MoverProfileMeResponse {
   career: number;
   shortIntro: string;
   description: string;
+  activityBase: MoverActivityBase | null;
   confirmedCount?: number;
+  completedCount: number;
   averageRating?: number;
   reviewCount?: number;
   regions: ProfileRegion[];
@@ -91,6 +102,7 @@ export interface CreateMoverProfileInput {
   career: number;
   shortIntro: string;
   description: string;
+  activityBase: MoverActivityBase;
   regionIds: number[];
   serviceTypes: MoveType[];
 }
@@ -101,6 +113,7 @@ export interface UpdateMoverProfileInput {
   career?: number;
   shortIntro?: string;
   description?: string;
+  activityBase?: MoverActivityBase;
   regionIds?: number[];
   serviceTypes?: MoveType[];
 }

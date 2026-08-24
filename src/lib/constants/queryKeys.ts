@@ -1,4 +1,13 @@
+import type {
+  GiveawayListQuery,
+  GiveawayMyListQuery,
+  GiveawayRequestListQuery,
+  GiveawayRequestMyListQuery,
+} from "@/types/giveaway";
 import type { MoversListQuery } from "@/types/mover";
+import type { ResidenceReviewListQuery } from "@/types/residenceReview";
+import type { NoticeListQuery } from "@/types/notice";
+import type { InquiryListQuery } from "@/types/inquiry";
 
 /**
  * 사용자별 응답(`isFavorite`)이 React Query 캐시에서 섞이지 않도록 사용하는 인증 scope
@@ -21,6 +30,61 @@ export const getAuthQueryScope = (isAuthenticated: boolean, userId?: string | nu
 };
 
 export type AuthQueryScope = ReturnType<typeof getAuthQueryScope>;
+
+/** 공개 목록은 사용자별 필드가 없어 authScope를 넣지 않습니다. */
+export const getResidenceReviewListScopeQueryKey = () =>
+  [...QUERY_KEYS.RESIDENCE_REVIEWS.LIST] as const;
+
+export const getResidenceReviewListQueryKey = (query: Omit<ResidenceReviewListQuery, "cursor">) =>
+  [...getResidenceReviewListScopeQueryKey(), query] as const;
+
+export const getResidenceReviewDetailQueryKey = (
+  authScope: AuthQueryScope,
+  residenceReviewId: number,
+) => [...QUERY_KEYS.RESIDENCE_REVIEWS.DETAIL_ROOT, authScope, residenceReviewId] as const;
+
+export const getResidenceReviewMyListScopeQueryKey = (authScope: AuthQueryScope) =>
+  [...QUERY_KEYS.RESIDENCE_REVIEWS.ME, authScope] as const;
+
+export const getResidenceReviewMyListQueryKey = (
+  authScope: AuthQueryScope,
+  page: number,
+  limit: number,
+) => [...getResidenceReviewMyListScopeQueryKey(authScope), { page, limit }] as const;
+
+/** 공개 목록은 사용자별 필드가 없어 authScope를 넣지 않습니다. */
+export const getGiveawayListScopeQueryKey = () => [...QUERY_KEYS.GIVEAWAYS.LIST] as const;
+
+export const getGiveawayListQueryKey = (query: Omit<GiveawayListQuery, "cursor">) =>
+  [...getGiveawayListScopeQueryKey(), query] as const;
+
+export const getGiveawayMyListScopeQueryKey = (authScope: AuthQueryScope) =>
+  [...QUERY_KEYS.GIVEAWAYS.ME, authScope] as const;
+
+export const getGiveawayMyListQueryKey = (
+  authScope: AuthQueryScope,
+  query: Omit<GiveawayMyListQuery, "cursor">,
+) => [...getGiveawayMyListScopeQueryKey(authScope), query] as const;
+
+/** 상세 응답의 canRequest, myRequest는 사용자별 값이므로 authScope를 포함합니다. */
+export const getGiveawayDetailQueryKey = (authScope: AuthQueryScope, giveawayId: number) =>
+  [...QUERY_KEYS.GIVEAWAYS.DETAIL_ROOT, authScope, giveawayId] as const;
+
+export const getGiveawayRequestsScopeQueryKey = (giveawayId: number) =>
+  [...QUERY_KEYS.GIVEAWAYS.REQUESTS_ROOT, giveawayId] as const;
+
+export const getGiveawayRequestsQueryKey = (
+  giveawayId: number,
+  query: Omit<GiveawayRequestListQuery, "cursor">,
+) => [...getGiveawayRequestsScopeQueryKey(giveawayId), query] as const;
+
+export const getGiveawayRequestMyListScopeQueryKey = (authScope: AuthQueryScope) =>
+  [...QUERY_KEYS.GIVEAWAY_REQUESTS.ME, authScope] as const;
+
+export const getGiveawayRequestMyListQueryKey = (
+  authScope: AuthQueryScope,
+  query: Omit<GiveawayRequestMyListQuery, "cursor">,
+) => [...getGiveawayRequestMyListScopeQueryKey(authScope), query] as const;
 
 /**
  * 현재 사용자의 모든 기사님 목록 쿼리를 대상으로 하는 prefix.
@@ -144,6 +208,36 @@ export const QUERY_KEYS = {
       ["reviews", "mover", moverId, { page, limit }] as const,
   },
 
+  // 2026.08.20 김나연 - [추가] 거주후기 쿼리 키
+  RESIDENCE_REVIEWS: {
+    ALL: ["residenceReviews"] as const,
+    LIST: ["residenceReviews", "list"] as const,
+    ME: ["residenceReviews", "me"] as const,
+    DETAIL_ROOT: ["residenceReviews", "detail"] as const,
+  },
+  NOTICES: {
+    ALL: ["notices"] as const,
+    LIST_ROOT: ["notices", "list"] as const,
+    LIST: (query: NoticeListQuery) => ["notices", "list", query] as const,
+    DETAIL_ROOT: ["notices", "detail"] as const,
+    DETAIL: (noticeId: number) => ["notices", "detail", noticeId] as const,
+  },
+
+  // 2026.08.22 김나연 - [추가] 나눔 쿼리 키
+  GIVEAWAYS: {
+    ALL: ["giveaways"] as const,
+    LIST: ["giveaways", "list"] as const,
+    ME: ["giveaways", "me"] as const,
+    DETAIL_ROOT: ["giveaways", "detail"] as const,
+    REQUESTS_ROOT: ["giveaways", "requests"] as const,
+  },
+
+  // 2026.08.22 김나연 - [추가] 나눔 신청 쿼리 키
+  GIVEAWAY_REQUESTS: {
+    ALL: ["giveawayRequests"] as const,
+    ME: ["giveawayRequests", "me"] as const,
+  },
+
   NOTIFICATIONS: {
     ALL: ["notifications"] as const,
     LIST_ROOT: ["notifications", "list"] as const,
@@ -163,5 +257,18 @@ export const QUERY_KEYS = {
   //  2026.08.16 심현수 - [추가] 약관 쿼리 키
   TERMS: {
     PUBLISHED_LIST: ["terms", "published"] as const,
+  },
+
+  FAQS: {
+    ALL: ["faqs"] as const,
+    LIST: ["faqs", "list"] as const,
+  },
+
+  INQUIRIES: {
+    ALL: ["inquiries"] as const,
+    LIST_ROOT: ["inquiries", "list"] as const,
+    LIST: (query: InquiryListQuery) => ["inquiries", "list", query] as const,
+    DETAIL_ROOT: ["inquiries", "detail"] as const,
+    DETAIL: (inquiryId: number) => ["inquiries", "detail", inquiryId] as const,
   },
 } as const;

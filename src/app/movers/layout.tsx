@@ -3,8 +3,9 @@ import { cookies } from "next/headers";
 
 import BlockMoverFromMoversBrowse from "@/components/auth/BlockMoverFromMoversBrowse";
 import { LoginRequiredModalProvider } from "@/components/auth/LoginRequiredModalProvider";
+import MoversShell from "@/components/mover/MoversShell";
 import { safeDecodeCookieValue } from "@/lib/auth/clientStorageHint";
-import { ROLE_STORAGE_KEY, parseSoftUxAuthRole } from "@/lib/auth/role";
+import { parseSoftUxAuthRole, ROLE_STORAGE_KEY } from "@/lib/auth/role";
 
 interface MoversLayoutProps {
   children: ReactNode;
@@ -18,7 +19,9 @@ const MoversLayout = async ({ children }: MoversLayoutProps) => {
 
   return (
     <LoginRequiredModalProvider>
-      <BlockMoverFromMoversBrowse initialRole={initialRole}>{children}</BlockMoverFromMoversBrowse>
+      <BlockMoverFromMoversBrowse initialRole={initialRole}>
+        <MoversShell>{children}</MoversShell>
+      </BlockMoverFromMoversBrowse>
     </LoginRequiredModalProvider>
   );
 };

@@ -11,9 +11,11 @@ import { useDesignateMover } from "@/hooks/useDesignateMover";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { markInternalDetailNavigation } from "@/lib/utils/detailNavigation";
 import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
+import type { MoveType } from "@/types/move";
 
 interface UseMoverDesignationOptions {
   moverId: string;
+  moverServiceTypes: MoveType[] | null;
   onError: (message: string) => void;
 }
 
@@ -25,7 +27,11 @@ interface UseMoverDesignationOptions {
  * - CONFIRMED 요청: 진행 중인 견적 상세로 이동
  * - PENDING·OPEN 요청: 지정 가능 여부 확인 후 지정 API 호출
  */
-export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOptions) {
+export function useMoverDesignation({
+  moverId,
+  moverServiceTypes,
+  onError,
+}: UseMoverDesignationOptions) {
   const router = useRouter();
 
   const [isEstimateRequestModalOpen, setIsEstimateRequestModalOpen] = useState(false);
@@ -56,9 +62,11 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
     onError,
   });
 
+  const isServiceTypesLoading = moverServiceTypes === null;
+
   const ctaState =
-    isCustomerLoggedIn && !isActiveLoading && !isActiveError
-      ? getDesignateCtaState(activeRequest ?? null, moverId)
+    isCustomerLoggedIn && !isActiveLoading && !isActiveError && moverServiceTypes !== null
+      ? getDesignateCtaState(activeRequest ?? null, moverId, moverServiceTypes)
       : null;
 
   // 이미 기사를 지정했거나 만료·한도 초과 등 상태에서는 CTA 버튼 비활성화
@@ -74,8 +82,8 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
       ? "요청 중..."
       : "지정 견적 요청하기");
 
-  // 고객은 활성 견적 요청까지 확인해야 버튼의 활성·비활성 상태가 확정됩니다.
-  const isActionsLoading = isAuthPending || (isCustomerLoggedIn && isActiveLoading);
+  const isActionsLoading =
+    isAuthPending || (isCustomerLoggedIn && isActiveLoading) || isServiceTypesLoading;
 
   const requestEstimate = async () => {
     if (isAuthPending) {
@@ -107,7 +115,11 @@ export function useMoverDesignation({ moverId, onError }: UseMoverDesignationOpt
       request = result.data ?? null;
     }
 
-    const nextCtaState = getDesignateCtaState(request, moverId);
+    if (moverServiceTypes === null) {
+      return;
+    }
+
+    const nextCtaState = getDesignateCtaState(request, moverId, moverServiceTypes);
 
     if (nextCtaState.status === "needEstimateRequest") {
       setIsEstimateRequestModalOpen(true);

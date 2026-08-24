@@ -345,16 +345,13 @@ export function addMoverToFavoriteMoversCache(
   return data;
 }
 
-/**
- * 단건 찜 mutation 전 관련 캐시를 스냅샷으로 저장하고
- * 원하는 찜 상태를 낙관적으로 반영합니다.
- */
+/** 단건 찜의 현재 최종 의도를 관련 캐시에 반영합니다. */
 export async function applyFavoriteOptimisticUpdate(
   queryClient: QueryClient,
   authScope: AuthQueryScope,
   moverId: string,
   nextIsFavorite: boolean,
-): Promise<FavoriteMutationContext> {
+): Promise<void> {
   const moverListScopeQueryKey = getMoverListScopeQueryKey(authScope);
   const favoriteMoversScopeQueryKey = getFavoriteMoversScopeQueryKey(authScope);
   const moverDetailQueryKey = getMoverDetailQueryKey(authScope, moverId);
@@ -384,28 +381,6 @@ export async function applyFavoriteOptimisticUpdate(
       queryKey: favoriteMoversScopeQueryKey,
     }),
   ]);
-
-  const previousReceived = queryClient.getQueryData<ReceivedEstimatePanel[]>(
-    QUERY_KEYS.ESTIMATES.RECEIVED,
-  );
-
-  const previousDetails = queryClient.getQueriesData<EstimateDetail>({
-    queryKey: QUERY_KEYS.ESTIMATES.DETAIL_ROOT,
-  });
-
-  const previousPendingLists = queryClient.getQueriesData<PendingEstimateSectionListResult>({
-    queryKey: QUERY_KEYS.ESTIMATES.PENDING_LIST_ROOT,
-  });
-
-  const previousMoverLists = queryClient.getQueriesData<InfiniteData<MoversListResult>>({
-    queryKey: moverListScopeQueryKey,
-  });
-
-  const previousFavoriteMovers = queryClient.getQueriesData<FavoriteMoversCacheData>({
-    queryKey: favoriteMoversScopeQueryKey,
-  });
-
-  const previousMoverDetail = queryClient.getQueryData<MoverDetail>(moverDetailQueryKey);
 
   queryClient.setQueryData<ReceivedEstimatePanel[]>(QUERY_KEYS.ESTIMATES.RECEIVED, (panels) => {
     if (!panels) {
@@ -501,15 +476,6 @@ export async function applyFavoriteOptimisticUpdate(
 
     return patchMoverFavorite(detail, moverId, nextIsFavorite);
   });
-
-  return {
-    previousReceived,
-    previousDetails,
-    previousPendingLists,
-    previousMoverLists,
-    previousFavoriteMovers,
-    previousMoverDetail,
-  };
 }
 
 interface FavoriteState {

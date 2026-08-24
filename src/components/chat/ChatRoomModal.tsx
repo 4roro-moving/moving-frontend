@@ -9,14 +9,13 @@ import { CloseIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 
 import ChatActionSheet, { type ChatActionItem, type ChatParticipantRole } from "./ChatActionSheet";
-import ChatEstimateEditSheet from "./ChatEstimateEditSheet";
+import ChatEstimateEditSheet, { type ChatEstimateEditSubmitInput } from "./ChatEstimateEditSheet";
 
 export interface ChatEstimateEditConfig {
-  moveDateLabel: string;
-  priceLabel: string;
-  onChangeDate?: () => void;
-  onEditPrice?: () => void;
-  onSubmit?: () => boolean | void | Promise<boolean | void>;
+  moveDateValue: string;
+  priceValue: number;
+  commentValue: string;
+  onSubmit?: (input: ChatEstimateEditSubmitInput) => boolean | void | Promise<boolean | void>;
   isSubmitting?: boolean;
 }
 
@@ -34,6 +33,7 @@ export interface ChatRoomModalProps {
   isImageSending?: boolean;
   sendDisabled?: boolean;
   composerDisabled?: boolean;
+  composerDisabledMessage?: string | null;
   onMessageChange?: (value: string) => void;
   onClearSelectedImage?: () => void;
   onSendMessage?: () => void;
@@ -67,6 +67,7 @@ function ChatRoomModalContent({
   isImageSending = false,
   sendDisabled = false,
   composerDisabled = false,
+  composerDisabledMessage,
   onMessageChange,
   onClearSelectedImage,
   onSendMessage,
@@ -127,8 +128,8 @@ function ChatRoomModalContent({
     focusMenuButton();
   };
 
-  const handleEstimateEditSubmit = async () => {
-    const shouldClose = await estimateEdit?.onSubmit?.();
+  const handleEstimateEditSubmit = async (input: ChatEstimateEditSubmitInput) => {
+    const shouldClose = await estimateEdit?.onSubmit?.(input);
 
     if (shouldClose === true) {
       setIsEstimateEditSheetOpen(false);
@@ -188,18 +189,29 @@ function ChatRoomModalContent({
 
       {isEstimateEditSheetVisible ? (
         <ChatEstimateEditSheet
+          key={`${estimateEdit?.moveDateValue ?? ""}-${estimateEdit?.priceValue ?? 0}-${estimateEdit?.commentValue ?? ""}`}
           focusRef={estimateEditSheetRef}
           open={isEstimateEditSheetVisible}
-          moveDateLabel={estimateEdit?.moveDateLabel ?? "-"}
-          priceLabel={estimateEdit?.priceLabel ?? "-"}
-          onChangeDate={estimateEdit?.onChangeDate}
-          onEditPrice={estimateEdit?.onEditPrice}
+          moveDateValue={estimateEdit?.moveDateValue ?? ""}
+          priceValue={estimateEdit?.priceValue ?? 0}
+          commentValue={estimateEdit?.commentValue ?? ""}
           isSubmitting={estimateEdit?.isSubmitting}
           onCancel={handleEstimateEditCancel}
-          onSubmit={() => void handleEstimateEditSubmit()}
+          onSubmit={(input) => void handleEstimateEditSubmit(input)}
         />
       ) : (
         <div className="border-border-subtle shrink-0 border-t">
+          {composerDisabled && composerDisabledMessage ? (
+            <div
+              role="status"
+              className="bg-background-subtle border-border-subtle border-b px-16 py-12 md:px-20"
+            >
+              <Text variant="sm-medium" className="text-text-muted">
+                {composerDisabledMessage}
+              </Text>
+            </div>
+          ) : null}
+
           {selectedImagePreviewUrl ? (
             <div className="border-border-subtle flex items-center gap-10 border-b px-16 py-12 md:px-20">
               <div className="bg-background-subtle rounded-8 relative size-56 shrink-0 overflow-hidden">

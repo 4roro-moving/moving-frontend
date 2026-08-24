@@ -18,6 +18,24 @@ export const ERROR_CODES = {
     message: "선택한 회원 유형과 계정의 회원 유형이 일치하지 않습니다.",
   },
 
+  OAUTH_ACCOUNT_NOT_FOUND: {
+    status: 404,
+    code: "OAUTH_ACCOUNT_NOT_FOUND",
+    message: "가입된 소셜 계정이 없습니다. 회원가입을 진행해 주세요.",
+  },
+
+  OAUTH_EMAIL_ALREADY_EXISTS: {
+    status: 409,
+    code: "OAUTH_EMAIL_ALREADY_EXISTS",
+    message: "이미 가입된 계정입니다. 로그인해 주세요.",
+  },
+
+  TERMS_AGREEMENT_REQUIRED: {
+    status: 400,
+    code: "TERMS_AGREEMENT_REQUIRED",
+    message: "필수 약관에 동의해야 가입할 수 있습니다.",
+  },
+
   FORBIDDEN: {
     status: 403,
     code: "FORBIDDEN",
@@ -97,6 +115,12 @@ export const ERROR_CODES = {
     message: "존재하지 않는 기사님입니다.",
   },
 
+  RESIDENCE_REVIEW_NOT_FOUND: {
+    status: 404,
+    code: "RESIDENCE_REVIEW_NOT_FOUND",
+    message: "거주후기를 찾을 수 없습니다.",
+  },
+
   ALREADY_DESIGNATED: {
     status: 409,
     code: "ALREADY_DESIGNATED",
@@ -107,6 +131,12 @@ export const ERROR_CODES = {
     status: 409,
     code: "DESIGNATION_LIMIT_EXCEEDED",
     message: "지정 견적은 최대 3명까지 요청할 수 있습니다.",
+  },
+
+  DESIGNATION_SERVICE_TYPE_MISMATCH: {
+    status: 409,
+    code: "DESIGNATION_SERVICE_TYPE_MISMATCH",
+    message: "기사님이 제공하지 않는 이사 유형입니다.",
   },
 } as const;
 

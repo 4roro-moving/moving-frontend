@@ -11,6 +11,7 @@ interface MoverDetailActionsProps {
   moverName: string;
   isFavorite: boolean;
   onToggleFavorite: () => void;
+  favoriteDisabled?: boolean;
   onRequestEstimate: () => void;
   /** Desktop 사이드바용 / Mobile·Tablet 하단 sticky용 */
   layout: "sidebar" | "sticky";
@@ -23,6 +24,7 @@ export default function MoverDetailActions({
   moverName,
   isFavorite,
   onToggleFavorite,
+  favoriteDisabled = false,
   onRequestEstimate,
   layout,
   requestDisabled = false,
@@ -38,6 +40,7 @@ export default function MoverDetailActions({
             size="sm"
             moverName={moverName}
             isFavorite={isFavorite}
+            disabled={favoriteDisabled}
             onClick={onToggleFavorite}
             className="shrink-0"
           />
@@ -92,6 +95,7 @@ export default function MoverDetailActions({
         size="lg"
         moverName={moverName}
         isFavorite={isFavorite}
+        disabled={favoriteDisabled}
         onClick={onToggleFavorite}
       />
     </section>

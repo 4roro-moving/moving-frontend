@@ -7,6 +7,14 @@ export type TermsType =
   | "MOVER_POLICY"
   | "OTHER";
 
+/** 회원가입·OAuth 가입 시 전달하는 약관 동의 항목 */
+export interface TermsAgreementInput {
+  termsId: number;
+  isAgreed: boolean;
+}
+
+export type TermsAudience = "ALL" | "CUSTOMER" | "MOVER";
+
 /** `GET /terms` 응답 항목. 게시(PUBLISHED)된 약관만 내려옵니다. */
 export interface PublishedTerms {
   id: number;
@@ -15,6 +23,7 @@ export interface PublishedTerms {
   title: string;
   content: string;
   isRequired: boolean;
+  audience: TermsAudience;
   effectiveAt: string | null;
   publishedAt: string | null;
 }

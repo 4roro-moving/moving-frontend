@@ -9,6 +9,7 @@ import {
   MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH,
 } from "@/lib/constants/profileValidation";
 import { phoneSchema } from "@/lib/schemas/phoneSchema";
+import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 
 const moveTypeSchema = z.enum(["SMALL", "HOME", "OFFICE"]);
 
@@ -36,6 +37,7 @@ export const createMoverProfileSchema = (options: { requiresPhone: boolean }) =>
   z.object({
     phone: options.requiresPhone ? phoneSchema : z.string().optional(),
     imageFile: z.custom<File | null>().nullable().optional(),
+    shouldRemoveImage: z.boolean().optional(),
     nickname: z
       .string()
       .trim()
@@ -77,11 +79,20 @@ export const createMoverProfileSchema = (options: { requiresPhone: boolean }) =>
         MOVER_PROFILE_DESCRIPTION_MAX_LENGTH,
         `상세 설명은 ${MOVER_PROFILE_DESCRIPTION_MAX_LENGTH}자 이하로 입력해 주세요`,
       ),
+    activityBaseAddress: z
+      .custom<AddressSearchItem | null>()
+      .refine((value) => value !== null, "활동 거점을 선택해 주세요"),
+    activityBaseDetailAddress: z
+      .string()
+      .trim()
+      .max(100, "상세 주소는 100자 이하로 입력해 주세요")
+      .optional(),
     serviceTypes: z.array(moveTypeSchema).min(1, "제공 서비스를 선택해 주세요"),
     regionIds: z.array(regionIdSchema).min(1, "서비스 가능 지역을 선택해 주세요"),
   });
 
-export type MoverProfileFormValues = z.infer<ReturnType<typeof createMoverProfileSchema>>;
+export type MoverProfileFormValues = z.input<ReturnType<typeof createMoverProfileSchema>>;
+export type ValidatedMoverProfileFormValues = z.output<ReturnType<typeof createMoverProfileSchema>>;
 
 /** @deprecated createMoverProfileSchema 사용 */
 export const moverProfileSchema = createMoverProfileSchema({

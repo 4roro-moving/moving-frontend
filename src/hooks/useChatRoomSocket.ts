@@ -9,6 +9,10 @@ import type {
   JoinChatRoomAck,
   JoinChatRoomPayload,
   LeaveChatRoomPayload,
+  RequestEstimateRevisionAck,
+  RequestEstimateRevisionPayload,
+  RespondEstimateRevisionAck,
+  RespondEstimateRevisionPayload,
   SendChatImageMessageAck,
   SendChatImageMessagePayload,
   SendChatMessageAck,
@@ -19,6 +23,7 @@ const SOCKET_ACK_TIMEOUT_MS = 5000;
 
 interface UseChatRoomSocketOptions {
   roomId: number;
+  enabled?: boolean;
   lastMessageId?: number | null;
   onJoined?: (response: ChatRoomJoinedPayload) => void;
   onJoinError?: (error: Extract<JoinChatRoomAck, { ok: false }>["error"]) => void;
@@ -27,6 +32,7 @@ interface UseChatRoomSocketOptions {
 
 export function useChatRoomSocket({
   roomId,
+  enabled = true,
   lastMessageId,
   onJoined,
   onJoinError,
@@ -49,7 +55,7 @@ export function useChatRoomSocket({
   }, [onJoined, onJoinError, onMessage]);
 
   useEffect(() => {
-    if (!socket || !canConnect) {
+    if (!enabled || !socket || !canConnect) {
       return;
     }
 
@@ -72,10 +78,10 @@ export function useChatRoomSocket({
       socket.off("chat:room:joined", handleJoined);
       socket.off("chat:message:new", handleMessage);
     };
-  }, [canConnect, roomId, socket]);
+  }, [canConnect, enabled, roomId, socket]);
 
   useEffect(() => {
-    if (!socket || !isConnected || !canConnect) {
+    if (!enabled || !socket || !isConnected || !canConnect) {
       return;
     }
 
@@ -95,7 +101,7 @@ export function useChatRoomSocket({
 
       socket.emit("chat:room:leave", leavePayload);
     };
-  }, [canConnect, isConnected, roomId, socket]);
+  }, [canConnect, enabled, isConnected, roomId, socket]);
 
   const sendMessage = useCallback(
     (payload: SendChatMessagePayload) =>
@@ -201,11 +207,117 @@ export function useChatRoomSocket({
     [isConnected, socket],
   );
 
+  const requestEstimateRevision = useCallback(
+    (payload: RequestEstimateRevisionPayload) =>
+      new Promise<RequestEstimateRevisionAck>((resolve) => {
+        if (!socket || !isConnected) {
+          resolve({
+            ok: false,
+            error: {
+              code: "SOCKET_DISCONNECTED",
+              message: "채팅 서버에 연결되어 있지 않습니다.",
+            },
+            clientMessageId: payload.clientMessageId,
+          });
+          return;
+        }
+
+        socket
+          .timeout(SOCKET_ACK_TIMEOUT_MS)
+          .emit(
+            "chat:estimate-revision:request",
+            payload,
+            (error: Error | null, response?: RequestEstimateRevisionAck) => {
+              if (error) {
+                resolve({
+                  ok: false,
+                  error: {
+                    code: "SOCKET_TIMEOUT",
+                    message: "채팅 서버 응답 시간이 초과되었습니다.",
+                  },
+                  clientMessageId: payload.clientMessageId,
+                });
+                return;
+              }
+
+              if (!response) {
+                resolve({
+                  ok: false,
+                  error: {
+                    code: "SOCKET_EMPTY_ACK",
+                    message: "채팅 서버 응답이 올바르지 않습니다.",
+                  },
+                  clientMessageId: payload.clientMessageId,
+                });
+                return;
+              }
+
+              resolve(response);
+            },
+          );
+      }),
+    [isConnected, socket],
+  );
+
+  const respondEstimateRevision = useCallback(
+    (payload: RespondEstimateRevisionPayload) =>
+      new Promise<RespondEstimateRevisionAck>((resolve) => {
+        if (!socket || !isConnected) {
+          resolve({
+            ok: false,
+            error: {
+              code: "SOCKET_DISCONNECTED",
+              message: "채팅 서버에 연결되어 있지 않습니다.",
+            },
+            clientMessageId: payload.clientMessageId,
+          });
+          return;
+        }
+
+        socket
+          .timeout(SOCKET_ACK_TIMEOUT_MS)
+          .emit(
+            "chat:estimate-revision:respond",
+            payload,
+            (error: Error | null, response?: RespondEstimateRevisionAck) => {
+              if (error) {
+                resolve({
+                  ok: false,
+                  error: {
+                    code: "SOCKET_TIMEOUT",
+                    message: "채팅 서버 응답 시간이 초과되었습니다.",
+                  },
+                  clientMessageId: payload.clientMessageId,
+                });
+                return;
+              }
+
+              if (!response) {
+                resolve({
+                  ok: false,
+                  error: {
+                    code: "SOCKET_EMPTY_ACK",
+                    message: "채팅 서버 응답이 올바르지 않습니다.",
+                  },
+                  clientMessageId: payload.clientMessageId,
+                });
+                return;
+              }
+
+              resolve(response);
+            },
+          );
+      }),
+    [isConnected, socket],
+  );
+
   return {
     socket,
     isConnected,
     canConnect,
     sendMessage,
     sendImageMessage,
+    requestEstimateRevision,
+    respondEstimateRevision,
   };
 }

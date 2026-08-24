@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
@@ -9,6 +9,7 @@ import Textarea from "@/components/common/Input/Textarea";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
+import MoverActivityBaseFields from "@/components/profile/MoverActivityBaseFields";
 import ProfileFormActions from "@/components/profile/ProfileFormActions";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
@@ -20,7 +21,11 @@ import {
   MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH,
 } from "@/lib/constants/profileValidation";
 import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
-import { moverProfileSchema, type MoverProfileFormValues } from "@/lib/schemas/moverProfileSchema";
+import {
+  moverProfileSchema,
+  type MoverProfileFormValues,
+  type ValidatedMoverProfileFormValues,
+} from "@/lib/schemas/moverProfileSchema";
 import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
 import type { MoveType } from "@/types/move";
 
@@ -40,21 +45,27 @@ const MoverProfileEditForm = ({
     setError,
     setFocus,
     reset,
+    setValue,
     formState: { errors, isValid, isDirty },
-  } = useForm<MoverProfileFormValues>({
+  } = useForm<MoverProfileFormValues, unknown, ValidatedMoverProfileFormValues>({
     resolver: zodResolver(moverProfileSchema),
     mode: "onChange",
     defaultValues: {
       imageFile: null,
+      shouldRemoveImage: false,
       nickname: "",
       career: "",
       shortIntro: "",
       description: "",
+      activityBaseAddress: null,
+      activityBaseDetailAddress: "",
       serviceTypes: [],
       regionIds: [],
       ...defaultValues,
     },
   });
+
+  const shouldRemoveImage = useWatch({ control, name: "shouldRemoveImage" }) ?? false;
 
   const { submitError, toastMessage, isPending, setToastMessage, submit } = useMoverProfileEditForm(
     {
@@ -85,8 +96,17 @@ const MoverProfileEditForm = ({
                 <ProfileImageUploader
                   id="mover-edit-profile-image"
                   value={field.value ?? null}
-                  initialPreviewUrl={initialImageUrl}
-                  onChange={field.onChange}
+                  initialPreviewUrl={shouldRemoveImage ? null : initialImageUrl}
+                  onChange={(file) => {
+                    field.onChange(file);
+                    if (file) {
+                      setValue("shouldRemoveImage", false, { shouldDirty: true });
+                    }
+                  }}
+                  onClear={() => {
+                    field.onChange(null);
+                    setValue("shouldRemoveImage", true, { shouldDirty: true });
+                  }}
                   error={errors.imageFile?.message}
                   disabled={isPending}
                 />
@@ -143,6 +163,9 @@ const MoverProfileEditForm = ({
               {...register("description")}
             />
           </FormField>
+
+          {/* 기사 활동 거점 추가 */}
+          <MoverActivityBaseFields control={control} disabled={isPending} idPrefix="mover-edit" />
 
           <FormField label="제공 서비스" labelId="mover-edit-service-types-label" required>
             <Controller

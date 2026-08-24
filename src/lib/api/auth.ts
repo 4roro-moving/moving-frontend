@@ -1,4 +1,5 @@
 import fetchInstance from "@/lib/api/fetchInstance";
+import type { OAuthIntent, OAuthProvider } from "@/lib/auth/oauth";
 import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
 import type { EnsureAccessTokenOptions } from "@/lib/auth/refreshAccessToken";
 import type { AuthRole, LoginRole } from "@/lib/auth/role";
@@ -6,7 +7,7 @@ import { setAccessToken } from "@/lib/auth/token";
 import { AUTH_BFF_BASE } from "@/lib/constants/authBff";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import { ApiError } from "@/types/api";
-import { OAuthProvider } from "../auth/oauth";
+import type { TermsAgreementInput } from "@/types/terms";
 
 export interface LoginInput {
   email: string;
@@ -19,6 +20,7 @@ export interface SignUpCustomerInput {
   password: string;
   name: string;
   phone: string;
+  agreements: TermsAgreementInput[];
 }
 
 export type SignUpMoverInput = SignUpCustomerInput;
@@ -101,7 +103,9 @@ export const logout = async (): Promise<void> => {
 export interface OAuthLoginInput {
   code: string;
   role: LoginRole;
+  intent: OAuthIntent;
   state?: string;
+  agreements?: TermsAgreementInput[];
 }
 
 export interface NaverOAuthStateResult {

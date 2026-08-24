@@ -37,7 +37,7 @@ export const API_ROUTES = {
   ESTIMATE_REQUESTS: {
     ROOT: "/estimate-requests",
     DETAIL: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
-    // 2026.08.03 정슬기 - [추가] 견적 요청 soft cancel (DELETE)
+    // 2026.08.03 정슬기 - [추가] 견적 요청의 cancel (DELETE)
     DELETE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
     ACTIVE: "/estimate-requests/active",
     DESIGNATE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}/designate`,
@@ -83,6 +83,31 @@ export const API_ROUTES = {
     DETAIL: (contentType: string, contentId: number) =>
       `/my-contents/${contentType}/${String(contentId)}`,
   },
+  // 2026.08.22 김나연 - [추가] 나눔 API 경로
+  GIVEAWAYS: {
+    ROOT: "/giveaways",
+    ME: "/giveaways/me",
+    DETAIL: (giveawayId: number) => `/giveaways/${giveawayId}`,
+    IMAGE_UPLOAD_URL: "/giveaways/image/upload-url",
+    REQUESTS: (giveawayId: number) => `/giveaways/${giveawayId}/requests`,
+    SELECT_REQUEST: (giveawayId: number, requestId: number) =>
+      `/giveaways/${giveawayId}/requests/${requestId}/select`,
+    REJECT_REQUEST: (giveawayId: number, requestId: number) =>
+      `/giveaways/${giveawayId}/requests/${requestId}/reject`,
+    COMPLETE: (giveawayId: number) => `/giveaways/${giveawayId}/complete`,
+  },
+  GIVEAWAY_REQUESTS: {
+    ME: "/giveaway-requests/me",
+    DETAIL: (requestId: number) => `/giveaway-requests/${requestId}`,
+    CANCEL: (requestId: number) => `/giveaway-requests/${requestId}/cancel`,
+  },
+  // 2026.08.20 김나연 - [추가] 거주후기 API 경로
+  RESIDENCE_REVIEWS: {
+    ROOT: "/residence-reviews",
+    ME: "/residence-reviews/me",
+    DETAIL: (residenceReviewId: number) => `/residence-reviews/${residenceReviewId}`,
+    STATISTICS: (regionId: number) => `/residence-reviews/statistics/${regionId}`,
+  },
   NOTIFICATIONS: {
     ROOT: "/notifications",
     UNREAD_COUNT: "/notifications/unread-count",
@@ -96,5 +121,21 @@ export const API_ROUTES = {
   TERMS: {
     ROOT: "/terms",
     BY_TYPE: (type: string) => `/terms/${type}`,
+  },
+
+  NOTICES: {
+    ROOT: "/notices",
+    DETAIL: (noticeId: number) => `/notices/${noticeId}`,
+  },
+
+  FAQS: {
+    ROOT: "/faqs",
+  },
+
+  INQUIRIES: {
+    ROOT: "/inquiries",
+    DETAIL: (inquiryId: number) => `/inquiries/${inquiryId}`,
+    MESSAGES: (inquiryId: number) => `/inquiries/${inquiryId}/messages`,
+    CLOSE: (inquiryId: number) => `/inquiries/${inquiryId}/close`,
   },
 } as const;

@@ -15,6 +15,10 @@ export interface ChatRoom {
   id: number;
   estimateId: number;
   estimateRequestId: number;
+  /** 현재 견적 상태에서 채팅 메시지를 보낼 수 있는지 여부 */
+  canSendMessage: boolean;
+  /** 메시지 전송이 불가할 때 입력창에 안내할 사유 */
+  messageDisabledReason: string | null;
   customer: ChatParticipant;
   mover: ChatParticipant;
   lastMessageAt: string | null;
@@ -25,14 +29,31 @@ export interface ChatRoom {
 export interface ChatMessage {
   id: number;
   roomId: number;
-  senderId: string;
+  senderId: string | null;
   type: ChatMessageType;
   content: string | null;
   imageUrl: string | null;
   isRead: boolean;
   readAt: string | null;
   createdAt: string;
-  sender: ChatParticipant;
+  sender: ChatParticipant | null;
+  revision: ChatEstimateRevision | null;
+}
+
+export interface ChatEstimateRevision {
+  id: number;
+  estimateId: number;
+  requesterId: string;
+  responderId: string | null;
+  previousPrice: number;
+  requestedPrice: number;
+  previousMoveDate: string;
+  requestedMoveDate: string;
+  previousComment: string;
+  requestedComment: string;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELED";
+  createdAt: string;
+  respondedAt: string | null;
 }
 
 export interface ChatMessageListParams {
@@ -54,6 +75,21 @@ export interface SendChatMessagePayload {
 export interface SendChatImageMessagePayload {
   roomId: number;
   imageKey: string;
+  clientMessageId?: string;
+}
+
+export interface RequestEstimateRevisionPayload {
+  roomId: number;
+  requestedMoveDate: string;
+  requestedPrice: number;
+  requestedComment: string;
+  clientMessageId?: string;
+}
+
+export interface RespondEstimateRevisionPayload {
+  roomId: number;
+  revisionId: number;
+  response: "APPROVED" | "REJECTED";
   clientMessageId?: string;
 }
 
@@ -122,3 +158,5 @@ export type SendChatMessageAck =
     };
 
 export type SendChatImageMessageAck = SendChatMessageAck;
+export type RequestEstimateRevisionAck = SendChatMessageAck;
+export type RespondEstimateRevisionAck = SendChatMessageAck;
