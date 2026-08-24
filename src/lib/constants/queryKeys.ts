@@ -8,6 +8,7 @@ import type { MoversListQuery } from "@/types/mover";
 import type { ResidenceReviewListQuery } from "@/types/residenceReview";
 import type { NoticeListQuery } from "@/types/notice";
 import type { InquiryListQuery } from "@/types/inquiry";
+import type { MyReportsQuery } from "@/types/report";
 
 /**
  * 사용자별 응답(`isFavorite`)이 React Query 캐시에서 섞이지 않도록 사용하는 인증 scope
@@ -270,5 +271,12 @@ export const QUERY_KEYS = {
     LIST: (query: InquiryListQuery) => ["inquiries", "list", query] as const,
     DETAIL_ROOT: ["inquiries", "detail"] as const,
     DETAIL: (inquiryId: number) => ["inquiries", "detail", inquiryId] as const,
+  },
+
+  REPORTS: {
+    ALL: ["reports"] as const,
+    ME_ROOT: (authScope: AuthQueryScope) => ["reports", "me", authScope] as const,
+    ME: (authScope: AuthQueryScope, query: MyReportsQuery) =>
+      ["reports", "me", authScope, query] as const,
   },
 } as const;

@@ -19,6 +19,8 @@ interface EstimateRequestSummaryContentProps {
   title: ReactNode;
   /** 우측 메타 (기사: N분 전) */
   headerMeta?: ReactNode;
+  /** 우측 메타 옆 액션 (기사: 신고 더보기) */
+  headerAction?: ReactNode;
   fromLabel: string;
   toLabel: string;
   moveDate: string;
@@ -38,6 +40,7 @@ export default function EstimateRequestSummaryContent({
   isDesignated,
   title,
   headerMeta,
+  headerAction,
   fromLabel,
   toLabel,
   moveDate,
@@ -45,9 +48,11 @@ export default function EstimateRequestSummaryContent({
   density = "card",
 }: EstimateRequestSummaryContentProps) {
   const isModal = density === "modal";
+
   const locationValueVariant = isModal
     ? ({ base: "md-medium", xl: "lg-medium" } as const)
     : "lg-semibold";
+
   const locationValueClass = isModal ? "text-text-secondary" : "text-text-primary";
 
   return (
@@ -57,12 +62,20 @@ export default function EstimateRequestSummaryContent({
       <div className="flex min-h-32 items-center justify-between gap-12">
         <div className="flex flex-wrap gap-8">
           <MoveTypeChip moveType={moveType} />
+
           {isDesignated ? <DesignatedChip /> : null}
         </div>
-        {headerMeta ? (
-          <Text as="span" variant="md-regular" className="text-text-muted shrink-0">
-            {headerMeta}
-          </Text>
+
+        {headerMeta || headerAction ? (
+          <div className="flex shrink-0 items-center gap-4">
+            {headerMeta ? (
+              <Text as="span" variant="md-regular" className="text-text-muted shrink-0">
+                {headerMeta}
+              </Text>
+            ) : null}
+
+            {headerAction}
+          </div>
         ) : null}
       </div>
 
@@ -70,6 +83,7 @@ export default function EstimateRequestSummaryContent({
         <Text as="h2" variant="xl-semibold" className="text-text-tertiary">
           {title}
         </Text>
+
         {!isModal ? <div className="bg-border-subtle h-px" /> : null}
       </div>
 
@@ -86,6 +100,7 @@ export default function EstimateRequestSummaryContent({
             <Text as="dt" variant="md-regular" className="text-text-muted">
               출발지
             </Text>
+
             <Text
               as="dd"
               variant={locationValueVariant}
@@ -94,11 +109,14 @@ export default function EstimateRequestSummaryContent({
               {fromLabel}
             </Text>
           </div>
+
           <ArrowRightIcon size={16} className={cn("shrink-0", isModal ? "mb-8 xl:mb-9" : "mb-9")} />
+
           <div className={cn(isModal && "flex items-center gap-8 xl:block")}>
             <Text as="dt" variant="md-regular" className="text-text-muted">
               도착지
             </Text>
+
             <Text
               as="dd"
               variant={locationValueVariant}
@@ -108,10 +126,12 @@ export default function EstimateRequestSummaryContent({
             </Text>
           </div>
         </div>
+
         <div className={cn(isModal && "flex items-center gap-8 xl:block")}>
           <Text as="dt" variant="md-regular" className="text-text-muted">
             이사일
           </Text>
+
           <Text
             as="dd"
             variant={locationValueVariant}
