@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
 import AddressSelectModal, {
@@ -8,6 +8,7 @@ import AddressSelectModal, {
 } from "@/components/estimate/request/AddressSelectModal";
 import { useRouteDistance } from "@/hooks/useRouteDistance";
 import { cn } from "@/lib/utils/cn";
+import { formatDateToKstISODate } from "@/lib/utils/date";
 import type {
   PricePredictionLoadAmount,
   PricePredictionMoveType,
@@ -57,8 +58,6 @@ const LOAD_AMOUNTS: {
   },
 ];
 
-const today = new Date().toISOString().slice(0, 10);
-
 const inputClassName = cn(
   "rounded-12 border-border-default text-text-primary",
   "h-[54px] w-full border bg-white px-20",
@@ -75,7 +74,19 @@ function FieldLabel({ children }: { children: ReactNode }) {
   );
 }
 
+function parseNumberInput(value: string): number | "" {
+  if (value === "") {
+    return "";
+  }
+
+  const numberValue = Number(value);
+
+  return Number.isFinite(numberValue) ? numberValue : "";
+}
+
 export default function PricePredictionForm({ isPending, onSubmit }: PricePredictionFormProps) {
+  const today = formatDateToKstISODate(new Date());
+
   const [moveType, setMoveType] = useState<PricePredictionMoveType>("HOME");
 
   const [moveDate, setMoveDate] = useState(today);
@@ -88,13 +99,13 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
 
   const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
 
-  const [houseSize, setHouseSize] = useState(24);
+  const [houseSize, setHouseSize] = useState<number | "">(24);
 
-  const [fromFloor, setFromFloor] = useState(8);
+  const [fromFloor, setFromFloor] = useState<number | "">(8);
 
   const [fromElevator, setFromElevator] = useState(true);
 
-  const [toFloor, setToFloor] = useState(5);
+  const [toFloor, setToFloor] = useState<number | "">(5);
 
   const [toElevator, setToElevator] = useState(true);
 
@@ -132,8 +143,11 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
     distanceKm !== null &&
     !isDistancePending &&
     !isDistanceError &&
+    typeof houseSize === "number" &&
     houseSize > 0 &&
+    typeof fromFloor === "number" &&
     fromFloor > 0 &&
+    typeof toFloor === "number" &&
     toFloor > 0 &&
     Boolean(moveDate);
 
@@ -164,7 +178,14 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!fromAddress || !toAddress || distanceKm === null) {
+    if (
+      !fromAddress ||
+      !toAddress ||
+      distanceKm === null ||
+      typeof houseSize !== "number" ||
+      typeof fromFloor !== "number" ||
+      typeof toFloor !== "number"
+    ) {
       return;
     }
 
@@ -335,7 +356,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
               min={1}
               max={300}
               value={houseSize}
-              onChange={(event) => setHouseSize(Number(event.target.value))}
+              onChange={(event) => setHouseSize(parseNumberInput(event.target.value))}
               disabled={isPending}
               required
               className={cn(inputClassName, "pr-48")}
@@ -448,6 +469,7 @@ function AddressField({ label, address, disabled, onClick, onReset }: AddressFie
             type="button"
             onClick={onClick}
             disabled={disabled}
+            aria-label={`${label} 변경`}
             className={cn(
               "rounded-12 border-border-brand flex min-h-54 w-full items-center border px-20 text-left",
               "hover:bg-background-brand-muted transition-colors",
@@ -463,6 +485,7 @@ function AddressField({ label, address, disabled, onClick, onReset }: AddressFie
             type="button"
             onClick={onReset}
             disabled={disabled}
+            aria-label={`${label} 다시 선택`}
             className="self-end disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Text
@@ -495,9 +518,9 @@ function AddressField({ label, address, disabled, onClick, onReset }: AddressFie
 }
 
 interface FloorInputProps {
-  value: number;
+  value: number | "";
   disabled: boolean;
-  onChange: (value: number) => void;
+  onChange: (value: number | "") => void;
 }
 
 function FloorInput({ value, disabled, onChange }: FloorInputProps) {
@@ -512,7 +535,7 @@ function FloorInput({ value, disabled, onChange }: FloorInputProps) {
           min={1}
           max={100}
           value={value}
-          onChange={(event) => onChange(Number(event.target.value))}
+          onChange={(event) => onChange(parseNumberInput(event.target.value))}
           disabled={disabled}
           required
           className={cn(inputClassName, "pr-48")}
@@ -547,11 +570,15 @@ function BooleanField({
   falseLabel = "없음",
   onChange,
 }: BooleanFieldProps) {
+  const groupLabelId = useId();
+
   return (
     <div className="flex flex-col gap-10">
-      <FieldLabel>{label}</FieldLabel>
+      <span id={groupLabelId}>
+        <FieldLabel>{label}</FieldLabel>
+      </span>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div role="radiogroup" aria-labelledby={groupLabelId} className="grid grid-cols-2 gap-8">
         <BooleanButton selected={!value} disabled={disabled} onClick={() => onChange(false)}>
           {falseLabel}
         </BooleanButton>
@@ -575,6 +602,8 @@ function BooleanButton({ selected, disabled, onClick, children }: BooleanButtonP
   return (
     <button
       type="button"
+      role="radio"
+      aria-checked={selected}
       onClick={onClick}
       disabled={disabled}
       className={cn(

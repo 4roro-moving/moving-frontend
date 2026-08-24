@@ -170,6 +170,8 @@ export default function PricePredictionResult({
 function ResultContainer({ children }: { children: React.ReactNode }) {
   return (
     <aside
+      role="status"
+      aria-live="polite"
       className={cn(
         "rounded-16 border-border-default w-full border bg-white p-24 md:p-32",
         "lg:sticky lg:top-32 lg:self-start",
