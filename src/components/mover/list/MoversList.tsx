@@ -6,10 +6,11 @@ import EmptyState from "@/components/common/EmptyState/EmptyState";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import MoverCard from "@/components/mover/MoverCard";
-import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { useMovers } from "@/hooks/useMovers";
+import { PREVIOUS_DATA_LOADING_CLASS_NAME } from "@/lib/constants/loading";
+import { cn } from "@/lib/utils/cn";
 import { type MoversSearchParamsState } from "@/lib/utils/moversSearchParams";
 import type { Mover } from "@/types/mover";
 
@@ -27,18 +28,15 @@ const MOVERS_EMPTY_DESCRIPTION = (
   </>
 );
 
-/** 초기 로딩 스켈레톤 카드 수 */
-const MOVERS_LIST_SKELETON_COUNT = 5;
-
 export function MoversList({ filters, initialMovers }: MoversListProps) {
-  const { movers, isInitialLoading, query } = useMovers(filters);
+  const { movers, isInitialLoading, isFilterFetching, query } = useMovers(filters);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const isShowingInitialMovers = isInitialLoading && initialMovers.length > 0;
   const displayedMovers = isShowingInitialMovers ? initialMovers : movers;
 
   const sentinelRef = useMoversInfiniteScroll({
-    enabled: !isInitialLoading && !query.isError && displayedMovers.length > 0,
+    enabled: !isInitialLoading && !isFilterFetching && !query.isError && displayedMovers.length > 0,
     hasNextPage,
     isFetchingNextPage,
     isFetchNextPageError,
@@ -47,15 +45,7 @@ export function MoversList({ filters, initialMovers }: MoversListProps) {
 
   let content: ReactNode;
 
-  if (isInitialLoading && !isShowingInitialMovers) {
-    content = (
-      <MoverCardSkeletonList
-        variant="full"
-        count={MOVERS_LIST_SKELETON_COUNT}
-        label="기사님 목록을 불러오는 중"
-      />
-    );
-  } else if (query.isError && !isShowingInitialMovers) {
+  if (query.isError && !isShowingInitialMovers) {
     content = (
       <MoversErrorPanel
         title="불러오지 못했어요"
@@ -77,7 +67,15 @@ export function MoversList({ filters, initialMovers }: MoversListProps) {
     );
   } else {
     content = (
-      <div className="flex flex-col gap-20">
+      <div
+        className={cn("flex flex-col gap-20", isFilterFetching && PREVIOUS_DATA_LOADING_CLASS_NAME)}
+        aria-busy={isFilterFetching}
+      >
+        {isFilterFetching ? (
+          <span className="sr-only" role="status">
+            기사님 목록을 불러오는 중이에요
+          </span>
+        ) : null}
         <ul className="flex flex-col gap-20">
           {displayedMovers.map((mover, index) => (
             <li key={mover.id}>

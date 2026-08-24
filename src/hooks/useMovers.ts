@@ -1,9 +1,11 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { useApiInfiniteQuery } from "@/hooks/queries/useApiInfiniteQuery";
+import { useListLoadingState } from "@/hooks/queries/useListLoadingState";
 import {
   MOVERS_LIST_STALE_TIME_MS,
   getMoversInfiniteQueryOptions,
@@ -23,6 +25,7 @@ export function useMovers(filters: MoversSearchParamsState) {
   const query = useApiInfiniteQuery({
     ...getMoversInfiniteQueryOptions(authScope, listQuery),
     enabled: isAuthReady && isAuthQueryReady,
+    placeholderData: keepPreviousData,
     // 로그인 응답의 isFavorite는 세션 복구 직후 항상 서버에서 다시 확인
     staleTime: isAuthenticated ? 0 : MOVERS_LIST_STALE_TIME_MS,
   });
@@ -31,7 +34,9 @@ export function useMovers(filters: MoversSearchParamsState) {
     () => query.data?.pages.flatMap((page) => page.data).map(mapMoverListItemToMover) ?? [],
     [query.data],
   );
-  const isInitialLoading = !isAuthReady || !isAuthQueryReady || query.isPending;
+  const { isInitialLoading: isQueryInitialLoading, isPreviousDataLoading } =
+    useListLoadingState(query);
+  const isInitialLoading = !isAuthReady || !isAuthQueryReady || isQueryInitialLoading;
 
-  return { movers, isInitialLoading, query };
+  return { movers, isInitialLoading, isFilterFetching: isPreviousDataLoading, query };
 }
