@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import ReportModal from "@/components/report/ReportModal";
+import ReportMoreMenu from "@/components/report/ReportMoreMenu";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { cn } from "@/lib/utils/cn";
 import { PREVIOUS_DATA_LOADING_CLASS_NAME } from "@/lib/constants/loading";
@@ -65,40 +65,13 @@ export default function MoverReviewList({
 }
 
 function MoverReviewListItem({ review, canReport, currentUserId }: MoverReviewListItemProps) {
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-
-  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   // 작성자가 현재 로그인한 고객이면 본인 리뷰이므로 신고 불가
   const isOwnReview = currentUserId === review.customer.id;
 
   // 로그인한 CUSTOMER/MOVER이면서 본인 리뷰가 아닐 때만 노출
   const showReport = canReport && !isOwnReview;
-
-  useEffect(() => {
-    if (!isMoreMenuOpen) {
-      return;
-    }
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
-        setIsMoreMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMoreMenuOpen]);
-
-  const handleReportClick = () => {
-    setIsMoreMenuOpen(false);
-    setIsReportModalOpen(true);
-  };
 
   return (
     <>
@@ -136,62 +109,10 @@ function MoverReviewListItem({ review, canReport, currentUserId }: MoverReviewLi
           </div>
 
           {showReport ? (
-            <div ref={moreMenuRef} className="relative shrink-0">
-              <button
-                type="button"
-                aria-label="리뷰 메뉴 더보기"
-                aria-haspopup="menu"
-                aria-expanded={isMoreMenuOpen}
-                onClick={() => setIsMoreMenuOpen((current) => !current)}
-                className={cn(
-                  "text-text-secondary",
-                  "flex size-32 items-center justify-center rounded-full",
-                  "transition-colors",
-                  "hover:bg-background-subtle hover:text-text-primary",
-                )}
-              >
-                <span aria-hidden="true" className="text-[22px] leading-none">
-                  ⋮
-                </span>
-              </button>
-
-              {isMoreMenuOpen ? (
-                <div
-                  role="menu"
-                  className={cn(
-                    "border-border-default bg-background-surface",
-                    "absolute top-[calc(100%+8px)] right-0 z-30",
-                    "rounded-8 min-w-[132px] border p-4",
-                    "shadow-md",
-                  )}
-                >
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={handleReportClick}
-                    className={cn(
-                      "text-text-secondary",
-                      "rounded-6 flex w-full items-center gap-8",
-                      "px-12 py-10",
-                      "text-left transition-colors",
-                      "hover:bg-background-subtle hover:text-text-primary",
-                    )}
-                  >
-                    <Image
-                      src="/icons/report.svg"
-                      alt=""
-                      width={18}
-                      height={18}
-                      aria-hidden="true"
-                    />
-
-                    <Text as="span" variant="sm-medium">
-                      신고하기
-                    </Text>
-                  </button>
-                </div>
-              ) : null}
-            </div>
+            <ReportMoreMenu
+              ariaLabel="리뷰 메뉴 더보기"
+              onReport={() => setIsReportModalOpen(true)}
+            />
           ) : null}
         </div>
 

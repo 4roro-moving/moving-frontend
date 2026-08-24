@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
+import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { createReport } from "@/lib/api/reports";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
 import { uploadReportImages } from "@/lib/report/uploadReportImages";
@@ -14,6 +15,7 @@ interface CreateReportMutationInput extends Omit<CreateReportInput, "imageKeys">
 
 export function useCreateReport() {
   const queryClient = useQueryClient();
+  const { authScope } = useAuthQueryScope();
 
   return useApiMutation({
     mutationFn: async ({ images, ...input }: CreateReportMutationInput) => {
@@ -27,7 +29,7 @@ export function useCreateReport() {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.REPORTS.ME_ROOT,
+        queryKey: QUERY_KEYS.REPORTS.ME_ROOT(authScope),
       });
     },
   });

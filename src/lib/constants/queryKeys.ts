@@ -275,7 +275,8 @@ export const QUERY_KEYS = {
 
   REPORTS: {
     ALL: ["reports"] as const,
-    ME_ROOT: ["reports", "me"] as const,
-    ME: (query: MyReportsQuery) => ["reports", "me", query] as const,
+    ME_ROOT: (authScope: AuthQueryScope) => ["reports", "me", authScope] as const,
+    ME: (authScope: AuthQueryScope, query: MyReportsQuery) =>
+      ["reports", "me", authScope, query] as const,
   },
 } as const;

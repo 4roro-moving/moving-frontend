@@ -1,14 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 import Button from "@/components/common/Button/Button";
 import EstimateRequestSummaryContent, {
   ESTIMATE_REQUEST_DETAIL_CARD_CLASSNAME,
 } from "@/components/estimate/EstimateRequestSummaryContent";
 import ReportModal from "@/components/report/ReportModal";
-import { cn } from "@/lib/utils/cn";
+import ReportMoreMenu from "@/components/report/ReportMoreMenu";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 function formatElapsedTime(date: string) {
@@ -69,86 +69,17 @@ export default function ReceivedRequestCard({
 }: ReceivedRequestCardProps) {
   const elapsedLabel = useElapsedLabel(request.createdAt);
 
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
-  const moreMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isMoreMenuOpen) {
-      return;
-    }
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
-        setIsMoreMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMoreMenuOpen]);
-
-  const handleReportClick = () => {
-    setIsMoreMenuOpen(false);
-    setIsReportModalOpen(true);
-  };
-
   const reportAction = (
-    <div ref={moreMenuRef} className="relative shrink-0">
-      <button
-        type="button"
-        aria-label="고객 메뉴 더보기"
-        aria-haspopup="menu"
-        aria-expanded={isMoreMenuOpen}
-        onClick={() => {
-          setIsMoreMenuOpen((current) => !current);
-        }}
-        className={cn(
-          "text-text-secondary",
-          "flex size-28 items-center justify-center rounded-full",
-          "transition-colors",
-          "hover:bg-background-subtle hover:text-text-primary",
-        )}
-      >
-        <span aria-hidden="true" className="text-[20px] leading-none">
-          ⋮
-        </span>
-      </button>
-
-      {isMoreMenuOpen ? (
-        <div
-          role="menu"
-          className={cn(
-            "border-border-default bg-background-surface",
-            "absolute top-[calc(100%+6px)] right-0 z-30",
-            "rounded-8 min-w-[132px] border p-4",
-            "shadow-md",
-          )}
-        >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={handleReportClick}
-            className={cn(
-              "text-text-secondary",
-              "rounded-6 flex w-full items-center gap-8",
-              "px-12 py-10",
-              "text-left transition-colors",
-              "hover:bg-background-subtle hover:text-text-primary",
-            )}
-          >
-            <Image src="/icons/report.svg" alt="" width={18} height={18} aria-hidden="true" />
-
-            <span className="text-sm font-medium">신고하기</span>
-          </button>
-        </div>
-      ) : null}
-    </div>
+    <ReportMoreMenu
+      ariaLabel="고객 메뉴 더보기"
+      onReport={() => setIsReportModalOpen(true)}
+      triggerSizeClassName="size-28"
+      triggerIconClassName="text-[20px] leading-none"
+      menuPositionClassName="top-[calc(100%+6px)]"
+      reportLabel={<span className="text-sm font-medium">신고하기</span>}
+    />
   );
 
   return (

@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import Button from "@/components/common/Button/Button";
 import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import ReportModal from "@/components/report/ReportModal";
+import ReportMoreMenu from "@/components/report/ReportMoreMenu";
 import ResidenceReviewInfoItem from "@/components/residence-review/ResidenceReviewInfoItem";
 import ResidenceReviewRatingText from "@/components/residence-review/ResidenceReviewRatingText";
 import { useResidenceReviewDetail } from "@/hooks/residence-review/useResidenceReviewDetail";
@@ -45,9 +46,6 @@ const ResidenceReviewDetailModal = ({
   onExitComplete,
 }: ResidenceReviewDetailModalProps) => {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-
-  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   const userId = useAuthStore((state) => state.user?.id);
 
@@ -58,24 +56,6 @@ const ResidenceReviewDetailModal = ({
   });
 
   const currentReview = data ?? review;
-
-  useEffect(() => {
-    if (!isMoreMenuOpen) {
-      return;
-    }
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
-        setIsMoreMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMoreMenuOpen]);
 
   if (!currentReview) {
     return null;
@@ -96,14 +76,8 @@ const ResidenceReviewDetailModal = ({
   }
 
   const handleDetailClose = () => {
-    setIsMoreMenuOpen(false);
     setIsReportModalOpen(false);
     onClose();
-  };
-
-  const handleReportClick = () => {
-    setIsMoreMenuOpen(false);
-    setIsReportModalOpen(true);
   };
 
   return (
@@ -173,62 +147,10 @@ const ResidenceReviewDetailModal = ({
                   </div>
 
                   {showReport ? (
-                    <div ref={moreMenuRef} className="relative shrink-0">
-                      <button
-                        type="button"
-                        aria-label="더보기"
-                        aria-haspopup="menu"
-                        aria-expanded={isMoreMenuOpen}
-                        onClick={() => setIsMoreMenuOpen((prev) => !prev)}
-                        className={cn(
-                          "text-text-secondary",
-                          "flex size-32 items-center justify-center rounded-full",
-                          "transition-colors",
-                          "hover:bg-background-subtle hover:text-text-primary",
-                        )}
-                      >
-                        <span aria-hidden="true" className="text-[22px] leading-none">
-                          ⋮
-                        </span>
-                      </button>
-
-                      {isMoreMenuOpen ? (
-                        <div
-                          role="menu"
-                          className={cn(
-                            "border-border-default bg-background-surface",
-                            "absolute top-[calc(100%+8px)] right-0 z-30",
-                            "rounded-8 min-w-[132px] border p-4",
-                            "shadow-md",
-                          )}
-                        >
-                          <button
-                            type="button"
-                            role="menuitem"
-                            onClick={handleReportClick}
-                            className={cn(
-                              "text-text-secondary",
-                              "rounded-6 flex w-full items-center gap-8",
-                              "px-12 py-10",
-                              "text-left transition-colors",
-                              "hover:bg-background-subtle hover:text-text-primary",
-                            )}
-                          >
-                            <Image
-                              src="/icons/report.svg"
-                              alt=""
-                              width={18}
-                              height={18}
-                              aria-hidden="true"
-                            />
-
-                            <Text as="span" variant="sm-medium">
-                              신고하기
-                            </Text>
-                          </button>
-                        </div>
-                      ) : null}
-                    </div>
+                    <ReportMoreMenu
+                      ariaLabel="더보기"
+                      onReport={() => setIsReportModalOpen(true)}
+                    />
                   ) : null}
                 </div>
               </div>

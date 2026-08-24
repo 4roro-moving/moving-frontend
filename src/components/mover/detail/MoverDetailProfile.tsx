@@ -1,12 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips";
+import ReportMoreMenu from "@/components/report/ReportMoreMenu";
 import { DriverBadgeIcon, StarIcon } from "@/icons";
 import { formatRating } from "@/lib/utils/estimateFormat";
 import { cn } from "@/lib/utils/cn";
@@ -27,33 +26,6 @@ export default function MoverDetailProfile({
   showFavoriteAction = true,
   showReportAction = false,
 }: MoverDetailProfileProps) {
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-
-  const moreMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isMoreMenuOpen) {
-      return;
-    }
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
-        setIsMoreMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMoreMenuOpen]);
-
-  const handleReportClick = () => {
-    setIsMoreMenuOpen(false);
-    onReport();
-  };
-
   return (
     <section className="flex w-full flex-col gap-36 md:gap-32" aria-label="기사님 소개">
       <div className="flex w-full flex-col gap-16 md:gap-20">
@@ -105,62 +77,12 @@ export default function MoverDetailProfile({
             />
 
             {showReportAction ? (
-              <div ref={moreMenuRef} className="relative shrink-0">
-                <button
-                  type="button"
-                  aria-label="기사님 메뉴 더보기"
-                  aria-haspopup="menu"
-                  aria-expanded={isMoreMenuOpen}
-                  onClick={() => setIsMoreMenuOpen((current) => !current)}
-                  className={cn(
-                    "text-text-secondary",
-                    "flex size-36 items-center justify-center rounded-full",
-                    "transition-colors",
-                    "hover:bg-background-subtle hover:text-text-primary",
-                  )}
-                >
-                  <span aria-hidden="true" className="text-[24px] leading-none">
-                    ⋮
-                  </span>
-                </button>
-
-                {isMoreMenuOpen ? (
-                  <div
-                    role="menu"
-                    className={cn(
-                      "border-border-default bg-background-surface",
-                      "absolute top-[calc(100%+8px)] right-0 z-30",
-                      "rounded-8 min-w-[132px] border p-4",
-                      "shadow-md",
-                    )}
-                  >
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={handleReportClick}
-                      className={cn(
-                        "text-text-secondary",
-                        "rounded-6 flex w-full items-center gap-8",
-                        "px-12 py-10",
-                        "text-left transition-colors",
-                        "hover:bg-background-subtle hover:text-text-primary",
-                      )}
-                    >
-                      <Image
-                        src="/icons/report.svg"
-                        alt=""
-                        width={18}
-                        height={18}
-                        aria-hidden="true"
-                      />
-
-                      <Text as="span" variant="sm-medium">
-                        신고하기
-                      </Text>
-                    </button>
-                  </div>
-                ) : null}
-              </div>
+              <ReportMoreMenu
+                ariaLabel="기사님 메뉴 더보기"
+                onReport={onReport}
+                triggerSizeClassName="size-36"
+                triggerIconClassName="text-[24px] leading-none"
+              />
             ) : null}
           </div>
         </div>
