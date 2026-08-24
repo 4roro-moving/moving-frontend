@@ -15,10 +15,13 @@ import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import { useMoverEstimateRequests } from "@/hooks/useMoverEstimateRequests";
 import { useReceivedRequestActions } from "@/hooks/useReceivedRequestActions";
+import { useListLoadingState } from "@/hooks/queries/useListLoadingState";
+import { PREVIOUS_DATA_LOADING_CLASS_NAME } from "@/lib/constants/loading";
 import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { getMoverEstimateRequestsInfiniteQueryOptions } from "@/lib/queryOptions/moverEstimateRequests";
 import type { MoveType } from "@/types/move";
 import type { RequestSort } from "@/types/moverEstimateRequest";
+import { cn } from "@/lib/utils/cn";
 
 import ReceivedRequestCard from "./ReceivedRequestCard";
 import ReceivedRequestsSkeleton from "./ReceivedRequestsSkeleton";
@@ -77,6 +80,7 @@ export default function ReceivedRequestsPage() {
 
   const items = query.data?.pages.flatMap((page) => page.items) ?? [];
   const totalCount = query.data?.pages[0]?.pagination.totalCount ?? 0;
+  const { isInitialLoading, isPreviousDataLoading } = useListLoadingState(query);
 
   return (
     <>
@@ -129,7 +133,7 @@ export default function ReceivedRequestsPage() {
         </section>
 
         <section className="flex flex-col gap-12 xl:gap-24">
-          {query.isPending ? (
+          {isInitialLoading ? (
             <Skeleton className="hidden h-26 w-72 xl:block" />
           ) : (
             <Text as="p" variant="2lg-semibold" className="text-text-secondary hidden xl:block">
@@ -138,7 +142,7 @@ export default function ReceivedRequestsPage() {
           )}
 
           <div className="flex min-h-40 flex-wrap items-center justify-between gap-12 px-10 xl:px-0">
-            {query.isPending ? (
+            {isInitialLoading ? (
               <Skeleton className="h-20 w-64 xl:hidden" />
             ) : (
               <Text as="p" variant="md-semibold" className="text-text-secondary xl:hidden">
@@ -204,7 +208,7 @@ export default function ReceivedRequestsPage() {
             </div>
           </div>
 
-          {query.isPending ? <ReceivedRequestsSkeleton /> : null}
+          {isInitialLoading ? <ReceivedRequestsSkeleton /> : null}
 
           {query.isError && (
             <Text as="p" variant="lg-regular" className="text-text-error py-80 text-center">
@@ -212,7 +216,7 @@ export default function ReceivedRequestsPage() {
             </Text>
           )}
 
-          {!query.isPending && !query.isError && items.length === 0 && (
+          {!isInitialLoading && !query.isError && items.length === 0 && (
             <div className="py-page-header-height-desktop flex flex-col items-center gap-32">
               <Image
                 className="opacity-50"
@@ -229,7 +233,18 @@ export default function ReceivedRequestsPage() {
 
           {items.length > 0 && (
             <>
-              <div className="grid w-full grid-cols-1 gap-24 md:max-w-147 xl:max-w-none xl:grid-cols-2">
+              <div
+                className={cn(
+                  "grid w-full grid-cols-1 gap-24 md:max-w-147 xl:max-w-none xl:grid-cols-2",
+                  isPreviousDataLoading && PREVIOUS_DATA_LOADING_CLASS_NAME,
+                )}
+                aria-busy={isPreviousDataLoading}
+              >
+                {isPreviousDataLoading ? (
+                  <span className="sr-only" role="status">
+                    받은 요청 목록을 불러오는 중이에요
+                  </span>
+                ) : null}
                 {items.map((request) => (
                   <ReceivedRequestCard
                     key={request.id}
