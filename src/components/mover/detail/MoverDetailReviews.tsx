@@ -10,6 +10,7 @@ import { MoverDetailReviewsSkeleton } from "@/components/mover/detail/MoverDetai
 import MoverRatingSummary from "@/components/mover/detail/MoverRatingSummary";
 import MoverReviewList from "@/components/mover/detail/MoverReviewList";
 import { useMoverReviews } from "@/hooks/useMoverReviews";
+import { useListLoadingState } from "@/hooks/queries/useListLoadingState";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getMoverReviews, MOVER_REVIEW_PAGE_LIMIT } from "@/lib/api/movers";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
@@ -37,9 +38,9 @@ export default function MoverDetailReviews({
 }: MoverDetailReviewsProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
-  const { data, isLoading, isError, error, isFetching, refetch } = useMoverReviews(moverId, {
-    page: currentPage,
-  });
+  const query = useMoverReviews(moverId, { page: currentPage });
+  const { data, isLoading, isError, error, isFetching, refetch } = query;
+  const { isPreviousDataLoading } = useListLoadingState(query);
 
   const reviews = data?.reviews ?? [];
   const pageCount = Math.max(1, data?.pagination.totalPages ?? 0);
@@ -121,7 +122,13 @@ export default function MoverDetailReviews({
             />
           ) : null}
 
-          {shouldShowReviews ? <MoverReviewList reviews={reviews} isFetching={isFetching} /> : null}
+          {shouldShowReviews ? (
+            <MoverReviewList
+              reviews={reviews}
+              isFetching={isFetching}
+              isPreviousDataLoading={isPreviousDataLoading}
+            />
+          ) : null}
 
           {shouldShowPagination ? (
             <Pagination
