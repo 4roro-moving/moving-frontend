@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useWatch } from "react-hook-form";
 
 import { useUpdateResidenceReview } from "@/hooks/residence-review/useUpdateResidenceReview";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
-  getResidenceReviewContentError,
-  getResidenceReviewTitleError,
-} from "@/lib/utils/residenceReviewValidation";
-import { RESIDENCE_REVIEW_RATING } from "@/types/residenceReview";
+  residenceReviewEditSchema,
+  type ResidenceReviewEditFormValues,
+} from "@/lib/schemas/residenceReviewSchema";
 import type { PublicResidenceReview, UpdateResidenceReviewInput } from "@/types/residenceReview";
 
 interface UseResidenceReviewEditFormParams {
@@ -18,112 +18,89 @@ interface UseResidenceReviewEditFormParams {
   onError?: (message: string) => void;
 }
 
+const toDefaultValues = (review: PublicResidenceReview): ResidenceReviewEditFormValues => ({
+  title: review.title,
+  content: review.content,
+  rating: review.rating,
+});
+
 export const useResidenceReviewEditForm = ({
   review,
   onClose,
   onSuccess,
   onError,
 }: UseResidenceReviewEditFormParams) => {
-  const [title, setTitle] = useState(review.title);
-  const [content, setContent] = useState(review.content);
-  const [rating, setRating] = useState(review.rating);
-  const [isTitleTouched, setIsTitleTouched] = useState(false);
-  const [isContentTouched, setIsContentTouched] = useState(false);
-  const [submitError, setSubmitError] = useState<string | undefined>();
-
+  const defaultValues = toDefaultValues(review);
   const updateMutation = useUpdateResidenceReview();
+  const {
+    register,
+    control,
+    setError,
+    reset,
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm<ResidenceReviewEditFormValues>({
+    resolver: zodResolver(residenceReviewEditSchema),
+    mode: "onChange",
+    defaultValues,
+  });
+
+  const title = useWatch({ control, name: "title" });
+  const content = useWatch({ control, name: "content" });
+  const rating = useWatch({ control, name: "rating" });
+  const hasChanges =
+    title.trim() !== review.title.trim() ||
+    content.trim() !== review.content.trim() ||
+    rating !== review.rating;
+  const isPending = isSubmitting || updateMutation.isPending;
+  const submitError = errors.root?.message;
+  const isSubmitDisabled = isPending || !isValid || !hasChanges;
 
   const resetForm = () => {
-    setTitle(review.title);
-    setContent(review.content);
-    setRating(review.rating);
-    setIsTitleTouched(false);
-    setIsContentTouched(false);
-    setSubmitError(undefined);
+    reset(defaultValues);
   };
 
-  const trimmedTitle = title.trim();
-  const trimmedContent = content.trim();
-  const titleError = isTitleTouched ? getResidenceReviewTitleError(title) : undefined;
-  const contentError = isContentTouched ? getResidenceReviewContentError(content) : undefined;
-  const isRatingValid =
-    rating >= RESIDENCE_REVIEW_RATING.MIN && rating <= RESIDENCE_REVIEW_RATING.MAX;
-  const isValid =
-    !getResidenceReviewTitleError(title) &&
-    !getResidenceReviewContentError(content) &&
-    isRatingValid;
-  const hasChanges =
-    trimmedTitle !== review.title.trim() ||
-    trimmedContent !== review.content.trim() ||
-    rating !== review.rating;
-  const isSubmitting = updateMutation.isPending;
-  const isSubmitDisabled = isSubmitting || !isValid || !hasChanges;
-
   const handleClose = () => {
-    if (isSubmitting) {
+    if (isPending) {
       return;
     }
+
     resetForm();
     onClose();
   };
 
-  const handleSubmit = () => {
-    if (isSubmitDisabled) {
-      return;
-    }
-
+  const submit = handleSubmit(async (formValues) => {
     const body: UpdateResidenceReviewInput = {};
-    if (trimmedTitle !== review.title.trim()) {
-      body.title = trimmedTitle;
+    if (formValues.title !== review.title.trim()) {
+      body.title = formValues.title;
     }
-    if (trimmedContent !== review.content.trim()) {
-      body.content = trimmedContent;
+    if (formValues.content !== review.content.trim()) {
+      body.content = formValues.content;
     }
-    if (rating !== review.rating) {
-      body.rating = rating;
+    if (formValues.rating !== review.rating) {
+      body.rating = formValues.rating;
     }
 
-    updateMutation.mutate(
-      { residenceReviewId: review.id, body },
-      {
-        onSuccess: () => {
-          onSuccess?.();
-          onClose();
-        },
-        onError: (error) => {
-          const message = getApiErrorMessage(error, "거주 후기를 수정하지 못했습니다.");
-          setSubmitError(message);
-          onError?.(message);
-        },
-      },
-    );
-  };
+    try {
+      await updateMutation.mutateAsync({ residenceReviewId: review.id, body });
+      onSuccess?.();
+      onClose();
+    } catch (error) {
+      const message = getApiErrorMessage(error, "거주 후기를 수정하지 못했습니다.");
+      setError("root", { message });
+      onError?.(message);
+    }
+  });
 
   return {
-    title,
-    content,
-    rating,
-    titleError,
-    contentError,
+    register,
+    control,
+    titleError: errors.title?.message,
+    contentError: errors.content?.message,
     submitError,
-    contentLength: trimmedContent.length,
-    isSubmitting,
+    isPending,
     isSubmitDisabled,
     handleClose,
-    handleSubmit,
-    handleTitleChange: (nextTitle: string) => {
-      setTitle(nextTitle);
-      setSubmitError(undefined);
-    },
-    handleTitleBlur: () => setIsTitleTouched(true),
-    handleContentChange: (nextContent: string) => {
-      setContent(nextContent);
-      setSubmitError(undefined);
-    },
-    handleContentBlur: () => setIsContentTouched(true),
-    handleRatingChange: (nextRating: number) => {
-      setRating(nextRating);
-      setSubmitError(undefined);
-    },
+    handleSubmit: submit,
   };
 };

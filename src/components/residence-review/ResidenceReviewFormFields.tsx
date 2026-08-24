@@ -1,6 +1,13 @@
 "use client";
 
 import { useId } from "react";
+import {
+  Controller,
+  useWatch,
+  type Control,
+  type FieldPath,
+  type UseFormRegister,
+} from "react-hook-form";
 
 import FormField from "@/components/common/FormField/FormField";
 import Input from "@/components/common/Input/Input";
@@ -12,38 +19,27 @@ import {
   RESIDENCE_REVIEW_CONTENT_MIN_LENGTH,
   RESIDENCE_REVIEW_TITLE_MAX_LENGTH,
 } from "@/lib/constants/residenceReview";
+import type { ResidenceReviewFormFieldValues } from "@/lib/schemas/residenceReviewSchema";
 
-interface ResidenceReviewFormFieldsProps {
-  title: string;
-  content: string;
-  rating: number;
+interface ResidenceReviewFormFieldsProps<T extends ResidenceReviewFormFieldValues> {
+  register: UseFormRegister<T>;
+  control: Control<T>;
   titleError?: string;
   contentError?: string;
-  contentLength: number;
-  isSubmitting: boolean;
-  onTitleChange: (title: string) => void;
-  onTitleBlur: () => void;
-  onContentChange: (content: string) => void;
-  onContentBlur: () => void;
-  onRatingChange: (rating: number) => void;
+  isPending: boolean;
 }
 
-const ResidenceReviewFormFields = ({
-  title,
-  content,
-  rating,
+const ResidenceReviewFormFields = <T extends ResidenceReviewFormFieldValues>({
+  register,
+  control,
   titleError,
   contentError,
-  contentLength,
-  isSubmitting,
-  onTitleChange,
-  onTitleBlur,
-  onContentChange,
-  onContentBlur,
-  onRatingChange,
-}: ResidenceReviewFormFieldsProps) => {
+  isPending,
+}: ResidenceReviewFormFieldsProps<T>) => {
   const titleId = useId();
   const contentId = useId();
+  const content = useWatch({ control, name: "content" as FieldPath<T> });
+  const contentLength = (typeof content === "string" ? content : "").trim().length;
 
   return (
     <>
@@ -55,12 +51,18 @@ const ResidenceReviewFormFields = ({
         >
           평점을 선택해 주세요
         </Text>
-        <ReviewStarRating
-          value={rating}
-          onChange={onRatingChange}
-          size="lg"
-          label="평점"
-          disabled={isSubmitting}
+        <Controller
+          name={"rating" as FieldPath<T>}
+          control={control}
+          render={({ field }) => (
+            <ReviewStarRating
+              value={typeof field.value === "number" ? field.value : 0}
+              onChange={field.onChange}
+              size="lg"
+              label="평점"
+              disabled={isPending}
+            />
+          )}
         />
       </div>
 
@@ -68,13 +70,11 @@ const ResidenceReviewFormFields = ({
         <Input
           id={titleId}
           size="md"
-          value={title}
           maxLength={RESIDENCE_REVIEW_TITLE_MAX_LENGTH}
-          disabled={isSubmitting}
+          disabled={isPending}
           placeholder="제목을 입력해주세요"
           error={titleError}
-          onChange={(event) => onTitleChange(event.target.value)}
-          onBlur={onTitleBlur}
+          {...register("title" as FieldPath<T>)}
         />
       </FormField>
 
@@ -82,14 +82,12 @@ const ResidenceReviewFormFields = ({
         <div className="flex w-full flex-col gap-8">
           <Textarea
             id={contentId}
-            value={content}
             maxLength={RESIDENCE_REVIEW_CONTENT_MAX_LENGTH}
-            disabled={isSubmitting}
+            disabled={isPending}
             placeholder={`최소 ${String(RESIDENCE_REVIEW_CONTENT_MIN_LENGTH)}자 이상 입력해주세요`}
             error={contentError}
             className="h-160"
-            onChange={(event) => onContentChange(event.target.value)}
-            onBlur={onContentBlur}
+            {...register("content" as FieldPath<T>)}
           />
           <Text as="span" variant="xs-regular" className="text-text-muted self-end">
             {contentLength}/{RESIDENCE_REVIEW_CONTENT_MAX_LENGTH}
