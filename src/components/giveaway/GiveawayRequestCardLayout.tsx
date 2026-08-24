@@ -13,7 +13,6 @@ interface GiveawayRequestCardLayoutProps {
   statusLabel: string;
   createdAt: string;
   children: ReactNode;
-  extra?: ReactNode;
   actions?: ReactNode;
 }
 
@@ -36,7 +35,6 @@ const GiveawayRequestCardLayout = ({
   statusLabel,
   createdAt,
   children,
-  extra,
   actions,
 }: GiveawayRequestCardLayoutProps) => {
   const appliedDate = formatRequestDate(createdAt);
@@ -73,8 +71,6 @@ const GiveawayRequestCardLayout = ({
               valueVariant={{ base: "sm-medium", md: "lg-regular" }}
             />
           </dl>
-
-          {extra}
         </div>
 
         {actions ? (
