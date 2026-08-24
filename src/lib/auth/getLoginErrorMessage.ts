@@ -15,6 +15,18 @@ export const getAccountSuspensionReason = (error: unknown): string | undefined =
     : undefined;
 };
 
+export const hasSuspensionAppealSession = (error: unknown): boolean => {
+  const { code, data } = getApiError(error);
+
+  return (
+    code === ERROR_CODES.ACCOUNT_SUSPENDED.code &&
+    typeof data === "object" &&
+    data !== null &&
+    "appealAvailable" in data &&
+    data.appealAvailable === true
+  );
+};
+
 export const getLoginErrorMessage = (error: unknown, pageAudience: AuthAudience): string => {
   const apiError = getApiError(error);
 

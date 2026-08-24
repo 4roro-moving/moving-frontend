@@ -7,7 +7,7 @@ import OAuthLayout from "@/components/auth/OAuthLayout";
 import type { AuthUser, LoginResult } from "@/lib/api/auth";
 import { getApiError } from "@/lib/api/getApiError";
 import { resolveAuthUserImage } from "@/lib/api/profile";
-import { getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
+import { getLoginErrorMessage, hasSuspensionAppealSession } from "@/lib/auth/getLoginErrorMessage";
 import {
   clearOAuthPendingSession,
   consumeOAuthClientState,
@@ -29,6 +29,10 @@ import {
 } from "@/lib/auth/oauthExchange";
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
 import {
+  clearSuspensionAppealSession,
+  markSuspensionAppealSession,
+} from "@/lib/auth/suspensionAppealSession";
+import {
   buildLoginPath,
   getAuthAudienceFromRole,
   getPostAuthRedirectPath,
@@ -37,6 +41,7 @@ import {
   type AuthAudience,
 } from "@/lib/auth/redirect";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const failOAuthCallback = (message: string, setError: (value: string) => void): void => {
@@ -66,6 +71,7 @@ const finalizeOAuthCallback = async ({
   }
 
   try {
+    clearSuspensionAppealSession();
     clearProfileCompleted();
 
     const resultAudience = getAuthAudienceFromRole(result.user.role);
@@ -92,6 +98,7 @@ const OAuthCallbackContent = () => {
   const establishSession = useAuthStore((state) => state.establishSession);
   const [error, setError] = useState<string | null>(null);
   const [loginHref, setLoginHref] = useState(buildLoginPath());
+  const [loginButtonLabel, setLoginButtonLabel] = useState<string | undefined>();
 
   useEffect(() => {
     const run = async () => {
@@ -224,6 +231,12 @@ const OAuthCallbackContent = () => {
           return;
         }
 
+        if (hasSuspensionAppealSession(err)) {
+          markSuspensionAppealSession();
+          setLoginHref(APP_ROUTES.INQUIRIES.ROOT);
+          setLoginButtonLabel("문의하기");
+        }
+
         failOAuthCallback(getLoginErrorMessage(err, pageAudience), setError);
       }
     };
@@ -231,7 +244,7 @@ const OAuthCallbackContent = () => {
     void run();
   }, [searchParams, params.provider, establishSession, router]);
 
-  return <OAuthLayout error={error} loginHref={loginHref} />;
+  return <OAuthLayout error={error} loginHref={loginHref} loginButtonLabel={loginButtonLabel} />;
 };
 
 const OAuthCallbackPage = () => {

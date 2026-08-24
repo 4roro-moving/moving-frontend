@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -16,9 +17,17 @@ import { Text, getTextVariantClass } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
 import { resolveAuthUserImage } from "@/lib/api/profile";
-import { getAccountSuspensionReason, getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
+import {
+  getAccountSuspensionReason,
+  getLoginErrorMessage,
+  hasSuspensionAppealSession,
+} from "@/lib/auth/getLoginErrorMessage";
 import { consumePasswordChangedToast } from "@/lib/auth/passwordChangedToast";
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
+import {
+  clearSuspensionAppealSession,
+  markSuspensionAppealSession,
+} from "@/lib/auth/suspensionAppealSession";
 import {
   audienceToLoginRole,
   getLoginRedirectParam,
@@ -36,11 +45,13 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
+  const router = useRouter();
   const { mutateAsync: login, isPending } = useLoginMutation();
   const establishSession = useAuthStore((state) => state.establishSession);
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [suspensionReason, setSuspensionReason] = useState<string | null>(null);
+  const [isSuspensionAppealAvailable, setIsSuspensionAppealAvailable] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const {
@@ -71,11 +82,13 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
     setSuspensionReason(null);
+    setIsSuspensionAppealAvailable(false);
 
     try {
       const role = audienceToLoginRole(audience);
       const result = await login({ ...values, role });
 
+      clearSuspensionAppealSession();
       // 이전 계정 Soft UX 힌트 제거 후 status로 다시 저장
       clearProfileCompleted();
 
@@ -89,6 +102,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       establishSession(await resolveAuthUserImage(result.user));
     } catch (error) {
       setSuspensionReason(getAccountSuspensionReason(error) ?? null);
+      setIsSuspensionAppealAvailable(hasSuspensionAppealSession(error));
       setSubmitError(getLoginErrorMessage(error, audience));
     }
   });
@@ -126,7 +140,17 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
           </div>
 
           {suspensionReason ? (
-            <AccountSuspensionNotice reason={suspensionReason} />
+            <AccountSuspensionNotice
+              reason={suspensionReason}
+              onAppealClick={
+                isSuspensionAppealAvailable
+                  ? () => {
+                      markSuspensionAppealSession();
+                      router.push(APP_ROUTES.INQUIRIES.ROOT);
+                    }
+                  : undefined
+              }
+            />
           ) : submitError ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
               {submitError}
@@ -178,11 +202,13 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
           onError={(error) => {
             if (typeof error === "string") {
               setSuspensionReason(null);
+              setIsSuspensionAppealAvailable(false);
               setSubmitError(error);
               return;
             }
 
             setSuspensionReason(getAccountSuspensionReason(error) ?? null);
+            setIsSuspensionAppealAvailable(hasSuspensionAppealSession(error));
             setSubmitError(getLoginErrorMessage(error, audience));
           }}
         />
