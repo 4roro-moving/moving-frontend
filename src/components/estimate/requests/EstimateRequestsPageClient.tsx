@@ -7,6 +7,7 @@ import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { EstimateRequestListSkeleton } from "@/components/estimate/requests/EstimateRequestLoadingSkeletons";
 import { ESTIMATE_REQUEST_CANCELED_TOAST_KEY } from "@/components/estimate/requests/estimateRequestCancelToast";
 import EstimateRequestsList from "@/components/estimate/requests/EstimateRequestsList";
+import { useListLoadingState } from "@/hooks/queries/useListLoadingState";
 import { useEstimateRequestList } from "@/hooks/useEstimateRequestList";
 import { ESTIMATE_REQUEST_LIST_PAGE_LIMIT } from "@/lib/api/estimateRequests";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
@@ -52,12 +53,13 @@ export default function EstimateRequestsPageClient() {
 
   const listStatus = statusFilter === "all" ? undefined : statusFilter;
 
-  const { data, isLoading, isError, error, refetch, isFetching, isPlaceholderData } =
-    useEstimateRequestList({
-      page,
-      limit: ESTIMATE_REQUEST_LIST_PAGE_LIMIT,
-      ...(listStatus !== undefined ? { status: listStatus } : {}),
-    });
+  const query = useEstimateRequestList({
+    page,
+    limit: ESTIMATE_REQUEST_LIST_PAGE_LIMIT,
+    ...(listStatus !== undefined ? { status: listStatus } : {}),
+  });
+  const { data, isLoading, isError, error, refetch, isFetching, isPlaceholderData } = query;
+  const { isPreviousDataLoading } = useListLoadingState(query);
 
   const estimateRequests = data?.estimateRequests ?? [];
   const pagination = data?.pagination;
@@ -106,7 +108,7 @@ export default function EstimateRequestsPageClient() {
           statusFilter={statusFilter}
           onStatusFilterChange={handleStatusFilterChange}
           isFetching={isFetching}
-          isPlaceholderData={isPlaceholderData}
+          isPreviousDataLoading={isPreviousDataLoading}
         />
       ) : null}
 
