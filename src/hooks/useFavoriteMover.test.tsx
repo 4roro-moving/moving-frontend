@@ -3,11 +3,19 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { addFavoriteMover, removeFavoriteMover } from "@/lib/api/favorites";
+import { AUTH_QUERY_UNRESOLVED_SCOPE } from "@/lib/constants/queryKeys";
 import { resetFavoriteMoverCoordinatorForTests } from "@/lib/utils/favoriteMoverCoordinator";
 import { createQueryClientWrapper, createTestQueryClient } from "@/test/createQueryClientWrapper";
 import { createDeferred } from "@/test/createDeferred";
 
 const authQueryScopeMock = vi.hoisted(() => ({ isAuthQueryReady: true }));
+
+async function flushMicrotasks() {
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+}
 
 vi.mock("@/lib/api/favorites", () => ({
   addFavoriteMover: vi.fn(),
@@ -23,7 +31,7 @@ vi.mock("@/hooks/useCustomerAuthReady", () => ({
 }));
 vi.mock("@/hooks/useAuthQueryScope", () => ({
   useAuthQueryScope: () => ({
-    authScope: authQueryScopeMock.isAuthQueryReady ? "user:user-1" : "authenticated-unresolved",
+    authScope: authQueryScopeMock.isAuthQueryReady ? "user:user-1" : AUTH_QUERY_UNRESOLVED_SCOPE,
     isAuthQueryReady: authQueryScopeMock.isAuthQueryReady,
   }),
 }));
@@ -51,7 +59,7 @@ describe("useFavoriteMover", () => {
 
     expect(result.current.canToggleFavorite).toBe(false);
     act(() => result.current.mutate({ moverId: "mover-1", nextIsFavorite: true }));
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await flushMicrotasks();
 
     expect(addFavoriteMover).not.toHaveBeenCalled();
     expect(removeFavoriteMover).not.toHaveBeenCalled();
@@ -67,7 +75,7 @@ describe("useFavoriteMover", () => {
       result.current.mutate({ moverId: "mover-1", nextIsFavorite: false });
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await flushMicrotasks();
     expect(addFavoriteMover).not.toHaveBeenCalled();
     expect(removeFavoriteMover).not.toHaveBeenCalled();
   });
@@ -88,7 +96,7 @@ describe("useFavoriteMover", () => {
     });
     await act(async () => request.resolve({ moverId: "mover-1", isFavorite: true }));
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await flushMicrotasks();
     expect(addFavoriteMover).toHaveBeenCalledTimes(1);
     expect(removeFavoriteMover).not.toHaveBeenCalled();
   });
@@ -120,7 +128,7 @@ describe("useFavoriteMover", () => {
 
     act(() => result.current.mutate({ moverId: "mover-1", nextIsFavorite: true }));
     await waitFor(() => expect(addFavoriteMover).toHaveBeenCalledTimes(1));
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await flushMicrotasks();
 
     expect(invalidateSpy).not.toHaveBeenCalled();
   });
@@ -140,6 +148,9 @@ describe("useFavoriteMover", () => {
     await waitFor(() => expect(addFavoriteMover).toHaveBeenCalledTimes(1));
 
     act(() => result.current.second.mutate({ moverId: "mover-1", nextIsFavorite: false }));
+    await flushMicrotasks();
+
+    expect(addFavoriteMover).toHaveBeenCalledTimes(1);
     expect(removeFavoriteMover).not.toHaveBeenCalled();
 
     await act(async () => addRequest.resolve({ moverId: "mover-1", isFavorite: true }));
