@@ -6,6 +6,7 @@ import EmptyState from "@/components/common/EmptyState/EmptyState";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import MoverCard from "@/components/mover/MoverCard";
+import { MoverCardSkeletonList } from "@/components/mover/MoverCardSkeleton";
 import MoversErrorPanel from "@/components/mover/MoversErrorPanel";
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { useMovers } from "@/hooks/useMovers";
@@ -28,6 +29,9 @@ const MOVERS_EMPTY_DESCRIPTION = (
   </>
 );
 
+/** 초기 로딩 스켈레톤 카드 수 */
+const MOVERS_LIST_SKELETON_COUNT = 5;
+
 export function MoversList({ filters, initialMovers }: MoversListProps) {
   const { movers, isInitialLoading, isFilterFetching, query } = useMovers(filters);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
@@ -45,7 +49,15 @@ export function MoversList({ filters, initialMovers }: MoversListProps) {
 
   let content: ReactNode;
 
-  if (query.isError && !isShowingInitialMovers) {
+  if (isInitialLoading && !isShowingInitialMovers) {
+    content = (
+      <MoverCardSkeletonList
+        variant="full"
+        count={MOVERS_LIST_SKELETON_COUNT}
+        label="기사님 목록을 불러오는 중"
+      />
+    );
+  } else if (query.isError && !isShowingInitialMovers) {
     content = (
       <MoversErrorPanel
         title="불러오지 못했어요"
