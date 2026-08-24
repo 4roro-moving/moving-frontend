@@ -103,7 +103,6 @@ function flushDesiredState(state: FavoriteSyncState): void {
   const requestedState = state.desiredState;
 
   void (async () => {
-    let requestError: unknown;
     let shouldReconcile = false;
 
     try {
@@ -113,13 +112,19 @@ function flushDesiredState(state: FavoriteSyncState): void {
       state.confirmedState = result.isFavorite;
       shouldReconcile = result.isFavorite !== requestedState;
     } catch (error) {
-      requestError = error;
+      let didRollbackFail = false;
       state.desiredState = state.confirmedState;
-      await enqueueCacheUpdate(state, state.confirmedState).catch(() => undefined);
 
-      if (isUnauthorizedError(error)) state.handlers.onUnauthorized();
+      try {
+        await enqueueCacheUpdate(state, state.confirmedState);
+      } catch {
+        didRollbackFail = true;
+      }
+
+      const isUnauthorized = isUnauthorizedError(error);
+      if (isUnauthorized) state.handlers.onUnauthorized();
       else state.handlers.onError?.(getApiErrorMessage(error));
-      shouldReconcile = !isUnauthorizedError(error);
+      shouldReconcile = didRollbackFail || !isUnauthorized;
     }
 
     state.isRequestInFlight = false;
@@ -130,11 +135,6 @@ function flushDesiredState(state: FavoriteSyncState): void {
     }
 
     if (shouldReconcile) await reconcile(state);
-
-    if (requestError) {
-      removeState(state);
-      return;
-    }
 
     flushDesiredState(state);
   })();

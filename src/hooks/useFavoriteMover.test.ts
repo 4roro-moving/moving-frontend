@@ -118,6 +118,39 @@ describe("useFavoriteMover", () => {
     await act(async () => removeRequest.resolve({ moverId: "mover-1", isFavorite: false }));
   });
 
+  it("재동기화 중 새 클릭이 들어와도 후속 요청을 유지한다", async () => {
+    const reconcileRequest = createDeferred<void>();
+    const secondAddRequest = createDeferred<{ moverId: string; isFavorite: boolean }>();
+    const removeRequest = createDeferred<{ moverId: string; isFavorite: boolean }>();
+    vi.mocked(addFavoriteMover)
+      .mockRejectedValueOnce(new Error("첫 번째 요청 실패"))
+      .mockReturnValueOnce(secondAddRequest.promise);
+    vi.mocked(removeFavoriteMover).mockReturnValueOnce(removeRequest.promise);
+    const queryClient = createTestQueryClient();
+    const invalidateSpy = vi
+      .spyOn(queryClient, "invalidateQueries")
+      .mockImplementation(() => reconcileRequest.promise);
+    const { result } = renderHook(() => useFavoriteMover(), {
+      wrapper: createQueryClientWrapper(queryClient),
+    });
+
+    act(() => result.current.mutate({ moverId: "mover-1", nextIsFavorite: true }));
+    await waitFor(() => expect(invalidateSpy).toHaveBeenCalled());
+
+    act(() => result.current.mutate({ moverId: "mover-1", nextIsFavorite: true }));
+    await waitFor(() => expect(addFavoriteMover).toHaveBeenCalledTimes(2));
+
+    await act(async () => reconcileRequest.resolve());
+    act(() => result.current.mutate({ moverId: "mover-1", nextIsFavorite: false }));
+    await flushMicrotasks();
+
+    expect(removeFavoriteMover).not.toHaveBeenCalled();
+
+    await act(async () => secondAddRequest.resolve({ moverId: "mover-1", isFavorite: true }));
+    await waitFor(() => expect(removeFavoriteMover).toHaveBeenCalledTimes(1));
+    await act(async () => removeRequest.resolve({ moverId: "mover-1", isFavorite: false }));
+  });
+
   it("예상한 상태로 성공하면 목록 쿼리를 다시 요청하지 않는다", async () => {
     vi.mocked(addFavoriteMover).mockResolvedValue({ moverId: "mover-1", isFavorite: true });
     const queryClient = createTestQueryClient();
