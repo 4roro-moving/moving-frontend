@@ -258,11 +258,11 @@ export default function ReceivedRequestsPage() {
               {query.hasNextPage && (
                 <button
                   type="button"
-                  disabled={query.isFetchingNextPage}
+                  disabled={query.isFetching}
                   onClick={() => query.fetchNextPage()}
                   className="border-border-brand text-text-brand disabled:text-text-disabled disabled:border-border-disabled mx-auto h-54 w-full max-w-[327px] rounded-xl border font-semibold disabled:cursor-not-allowed"
                 >
-                  {query.isFetchingNextPage ? "불러오는 중..." : "더 보기"}
+                  {query.isFetching ? "불러오는 중..." : "더 보기"}
                 </button>
               )}
             </>
