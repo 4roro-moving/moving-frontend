@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useEffectEvent, useId, useState, type FormEvent, type ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
 import AddressSelectModal, {
@@ -84,8 +84,14 @@ function parseNumberInput(value: string): number | "" {
   return Number.isFinite(numberValue) ? numberValue : "";
 }
 
+function hasSameCoordinates(current: AddressItem | null, next: AddressItem): boolean {
+  return (
+    current !== null && current.latitude === next.latitude && current.longitude === next.longitude
+  );
+}
+
 export default function PricePredictionForm({ isPending, onSubmit }: PricePredictionFormProps) {
-  const today = formatDateToKstISODate(new Date());
+  const [today, setToday] = useState(() => formatDateToKstISODate(new Date()));
 
   const [moveType, setMoveType] = useState<PricePredictionMoveType>("HOME");
 
@@ -120,23 +126,66 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
   } = useRouteDistance();
 
   const distanceKm = distanceData?.distanceKm ?? null;
+  const fromLatitude = fromAddress?.latitude;
+  const fromLongitude = fromAddress?.longitude;
+  const toLatitude = toAddress?.latitude;
+  const toLongitude = toAddress?.longitude;
+
+  const requestRouteDistance = useEffectEvent(
+    (
+      originLatitude: number,
+      originLongitude: number,
+      destinationLatitude: number,
+      destinationLongitude: number,
+    ) => {
+      calculateDistance({
+        origin: {
+          latitude: originLatitude,
+          longitude: originLongitude,
+        },
+        destination: {
+          latitude: destinationLatitude,
+          longitude: destinationLongitude,
+        },
+      });
+    },
+  );
 
   useEffect(() => {
-    if (!fromAddress || !toAddress) {
+    const syncKstToday = () => {
+      const nextToday = formatDateToKstISODate(new Date());
+
+      setToday((currentToday) => (currentToday === nextToday ? currentToday : nextToday));
+      setMoveDate((currentMoveDate) => (currentMoveDate < nextToday ? nextToday : currentMoveDate));
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        syncKstToday();
+      }
+    };
+
+    window.addEventListener("focus", syncKstToday);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", syncKstToday);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (
+      fromLatitude === undefined ||
+      fromLongitude === undefined ||
+      toLatitude === undefined ||
+      toLongitude === undefined
+    ) {
       return;
     }
 
-    calculateDistance({
-      origin: {
-        latitude: fromAddress.latitude,
-        longitude: fromAddress.longitude,
-      },
-      destination: {
-        latitude: toAddress.latitude,
-        longitude: toAddress.longitude,
-      },
-    });
-  }, [fromAddress, toAddress, calculateDistance]);
+    requestRouteDistance(fromLatitude, fromLongitude, toLatitude, toLongitude);
+  }, [fromLatitude, fromLongitude, toLatitude, toLongitude]);
 
   const canSubmit =
     Boolean(fromAddress && toAddress) &&
@@ -152,6 +201,17 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
     Boolean(moveDate);
 
   const handleAddressConfirm = (address: AddressItem) => {
+    if (!addressModalKind) {
+      return;
+    }
+
+    const currentAddress = addressModalKind === "출발지" ? fromAddress : toAddress;
+
+    if (hasSameCoordinates(currentAddress, address)) {
+      setAddressModalKind(null);
+      return;
+    }
+
     resetDistance();
 
     if (addressModalKind === "출발지") {
@@ -179,6 +239,8 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
     event.preventDefault();
 
     if (
+      !canSubmit ||
+      isPending ||
       !fromAddress ||
       !toAddress ||
       distanceKm === null ||
@@ -469,7 +531,7 @@ function AddressField({ label, address, disabled, onClick, onReset }: AddressFie
             type="button"
             onClick={onClick}
             disabled={disabled}
-            aria-label={`${label} 변경`}
+            aria-label={`${label}: ${address.roadAddress} 변경`}
             className={cn(
               "rounded-12 border-border-brand flex min-h-54 w-full items-center border px-20 text-left",
               "hover:bg-background-brand-muted transition-colors",
