@@ -1,19 +1,29 @@
 "use client";
 
 import Image from "next/image";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 import Button from "@/components/common/Button/Button";
 import EstimateRequestSummaryContent, {
   ESTIMATE_REQUEST_DETAIL_CARD_CLASSNAME,
 } from "@/components/estimate/EstimateRequestSummaryContent";
+import ReportModal from "@/components/report/ReportModal";
+import ReportMoreMenu from "@/components/report/ReportMoreMenu";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
 function formatElapsedTime(date: string) {
   const minutes = Math.max(1, Math.floor((Date.now() - new Date(date).getTime()) / 60000));
-  if (minutes < 60) return `${minutes}분 전`;
+
+  if (minutes < 60) {
+    return `${minutes}분 전`;
+  }
+
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}시간 전`;
+
+  if (hours < 24) {
+    return `${hours}시간 전`;
+  }
+
   return `${Math.floor(hours / 24)}일 전`;
 }
 
@@ -21,6 +31,7 @@ const ELAPSED_TICK_MS = 60_000;
 
 function subscribeElapsedTick(onStoreChange: () => void) {
   const intervalId = window.setInterval(onStoreChange, ELAPSED_TICK_MS);
+
   return () => {
     window.clearInterval(intervalId);
   };
@@ -58,38 +69,63 @@ export default function ReceivedRequestCard({
 }: ReceivedRequestCardProps) {
   const elapsedLabel = useElapsedLabel(request.createdAt);
 
-  return (
-    <article className={ESTIMATE_REQUEST_DETAIL_CARD_CLASSNAME}>
-      <EstimateRequestSummaryContent
-        moveType={request.moveType}
-        isDesignated={request.isDesignated}
-        title={`${request.customer.name} 고객님`}
-        headerMeta={elapsedLabel}
-        fromLabel={request.fromRegion}
-        toLabel={request.toRegion}
-        moveDate={request.moveDate}
-      />
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
-      <div className="flex flex-col gap-[11px] sm:grid sm:grid-cols-2 sm:gap-[11px]">
-        <Button
-          variant="outline"
-          size="cta"
-          fullWidth
-          className="order-2 sm:order-1"
-          onClick={() => onRejectEstimate(request)}
-        >
-          반려하기
-        </Button>
-        <Button
-          size="cta"
-          fullWidth
-          className="order-1"
-          onClick={() => onSendEstimate(request)}
-          rightIcon={<Image src="/icons/write.svg" alt="" width={24} height={24} />}
-        >
-          견적 보내기
-        </Button>
-      </div>
-    </article>
+  const reportAction = (
+    <ReportMoreMenu
+      ariaLabel="고객 메뉴 더보기"
+      onReport={() => setIsReportModalOpen(true)}
+      triggerSizeClassName="size-28"
+      triggerIconClassName="text-[20px] leading-none"
+      menuPositionClassName="top-[calc(100%+6px)]"
+      reportLabel={<span className="text-sm font-medium">신고하기</span>}
+    />
+  );
+
+  return (
+    <>
+      <article className={ESTIMATE_REQUEST_DETAIL_CARD_CLASSNAME}>
+        <EstimateRequestSummaryContent
+          moveType={request.moveType}
+          isDesignated={request.isDesignated}
+          title={`${request.customer.name} 고객님`}
+          headerMeta={elapsedLabel}
+          headerAction={reportAction}
+          fromLabel={request.fromRegion}
+          toLabel={request.toRegion}
+          moveDate={request.moveDate}
+        />
+
+        <div className="flex flex-col gap-[11px] sm:grid sm:grid-cols-2 sm:gap-[11px]">
+          <Button
+            variant="outline"
+            size="cta"
+            fullWidth
+            className="order-2 sm:order-1"
+            onClick={() => onRejectEstimate(request)}
+          >
+            반려하기
+          </Button>
+
+          <Button
+            size="cta"
+            fullWidth
+            className="order-1"
+            onClick={() => onSendEstimate(request)}
+            rightIcon={<Image src="/icons/write.svg" alt="" width={24} height={24} />}
+          >
+            견적 보내기
+          </Button>
+        </div>
+      </article>
+
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        targetType="CUSTOMER"
+        targetId={request.customer.id}
+        targetName={`${request.customer.name} 고객님`}
+      />
+    </>
   );
 }
