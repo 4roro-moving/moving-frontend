@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { useUpdateResidenceReview } from "@/hooks/residence-review/useUpdateResidenceReview";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
@@ -24,6 +24,14 @@ const toDefaultValues = (review: PublicResidenceReview): ResidenceReviewEditForm
   rating: review.rating,
 });
 
+const hasResidenceReviewChanges = (
+  current: Partial<ResidenceReviewEditFormValues>,
+  original: PublicResidenceReview,
+): boolean =>
+  (current.title ?? original.title).trim() !== original.title.trim() ||
+  (current.content ?? original.content).trim() !== original.content.trim() ||
+  (current.rating ?? original.rating) !== original.rating;
+
 export const useResidenceReviewEditForm = ({
   review,
   onClose,
@@ -38,16 +46,18 @@ export const useResidenceReviewEditForm = ({
     setError,
     reset,
     handleSubmit,
-    formState: { errors, isValid, isSubmitting, isDirty, touchedFields },
+    formState: { errors, isValid, isSubmitting, touchedFields },
   } = useForm<ResidenceReviewEditFormValues>({
     resolver: zodResolver(residenceReviewEditSchema),
     mode: "onTouched",
     defaultValues,
   });
 
+  const currentValues = useWatch({ control });
+  const hasChanges = hasResidenceReviewChanges(currentValues, review);
   const isPending = isSubmitting || updateMutation.isPending;
   const submitError = errors.root?.message;
-  const isSubmitDisabled = isPending || !isValid || !isDirty;
+  const isSubmitDisabled = isPending || !isValid || !hasChanges;
 
   const resetForm = () => {
     reset(defaultValues);
@@ -63,6 +73,10 @@ export const useResidenceReviewEditForm = ({
   };
 
   const submit = handleSubmit(async (formValues) => {
+    if (!hasResidenceReviewChanges(formValues, review)) {
+      return;
+    }
+
     const body: UpdateResidenceReviewInput = {
       title: formValues.title,
       content: formValues.content,
