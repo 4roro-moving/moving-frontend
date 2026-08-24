@@ -2,26 +2,24 @@
 
 import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 import { PageHeader } from "@/components/common/PageHeader";
 import { Text } from "@/components/common/Text";
-import Toast from "@/components/common/Toast/Toast";
 import GiveawayConfirmModal from "@/components/giveaway/GiveawayConfirmModal";
 import GiveawayCreateModal from "@/components/giveaway/GiveawayCreateModal";
 import GiveawayDetailActions from "@/components/giveaway/GiveawayDetailActions";
 import GiveawayDetailDivider from "@/components/giveaway/GiveawayDetailDivider";
 import GiveawayDetailImageSlider from "@/components/giveaway/GiveawayDetailImageSlider";
+import GiveawayMyRequestActionOverlays from "@/components/giveaway/GiveawayMyRequestActionOverlays";
 import GiveawayMyRequestSection from "@/components/giveaway/GiveawayMyRequestSection";
 import GiveawayReceivedRequestList from "@/components/giveaway/GiveawayReceivedRequestList";
 import GiveawayProfileAvatar from "@/components/giveaway/GiveawayProfileAvatar";
 import GiveawayReportButton from "@/components/giveaway/GiveawayReportButton";
-import GiveawayRequestCancelConfirmModal from "@/components/giveaway/GiveawayRequestCancelConfirmModal";
-import GiveawayRequestEditModal from "@/components/giveaway/GiveawayRequestEditModal";
 import GiveawayRequestFormModal from "@/components/giveaway/GiveawayRequestFormModal";
-import { useCancelGiveawayRequest } from "@/hooks/giveaway/useCancelGiveawayRequest";
 import { useCompleteGiveaway } from "@/hooks/giveaway/useCompleteGiveaway";
 import { useDeleteGiveaway } from "@/hooks/giveaway/useDeleteGiveaway";
+import { useMyGiveawayRequestActions } from "@/hooks/giveaway/useMyGiveawayRequestActions";
 import { DocumentIcon } from "@/icons";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
@@ -39,7 +37,6 @@ import type {
   GiveawayDetail,
   GiveawayRequestItem,
   GiveawayRequestListResult,
-  MyGiveawayRequestItem,
 } from "@/types/giveaway";
 
 interface GiveawayDetailViewProps {
@@ -60,14 +57,11 @@ const GiveawayDetailView = ({
   const router = useRouter();
   const deleteMutation = useDeleteGiveaway();
   const completeMutation = useCompleteGiveaway();
-  const cancelMutation = useCancelGiveawayRequest();
+  const requestActions = useMyGiveawayRequestActions();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isCompleteOpen, setIsCompleteOpen] = useState(false);
   const [isApplyOpen, setIsApplyOpen] = useState(false);
-  const [requestToEdit, setRequestToEdit] = useState<MyGiveawayRequestItem | null>(null);
-  const [requestToCancel, setRequestToCancel] = useState<MyGiveawayRequestItem | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | undefined>();
   const [completeError, setCompleteError] = useState<string | undefined>();
   const writtenAt = formatRelativeTime(giveaway.createdAt);
@@ -109,24 +103,6 @@ const GiveawayDetailView = ({
       block: "start",
     });
   };
-
-  const handleConfirmCancel = useCallback(() => {
-    if (!requestToCancel) {
-      return;
-    }
-
-    cancelMutation.mutate(requestToCancel.id, {
-      onSuccess: () => {
-        setRequestToCancel(null);
-        setToastMessage("나눔 신청을 취소했습니다.");
-      },
-      onError: (error) => {
-        setToastMessage(
-          getApiErrorMessage(error, "나눔 신청을 취소하지 못했습니다. 잠시 후 다시 시도해주세요."),
-        );
-      },
-    });
-  }, [cancelMutation, requestToCancel]);
 
   const handleComplete = async () => {
     try {
@@ -266,8 +242,8 @@ const GiveawayDetailView = ({
             <GiveawayDetailDivider />
             <GiveawayMyRequestSection
               giveaway={giveaway}
-              onEdit={setRequestToEdit}
-              onCancel={setRequestToCancel}
+              onEdit={requestActions.openEdit}
+              onCancel={requestActions.openCancel}
             />
           </>
         ) : null}
@@ -306,20 +282,7 @@ const GiveawayDetailView = ({
         giveawayId={giveaway.id}
         onClose={() => setIsApplyOpen(false)}
       />
-      <GiveawayRequestEditModal
-        open={requestToEdit !== null}
-        request={requestToEdit}
-        onClose={() => setRequestToEdit(null)}
-        onSuccess={() => setToastMessage("신청 내용을 수정했습니다.")}
-      />
-      <GiveawayRequestCancelConfirmModal
-        open={requestToCancel !== null}
-        request={requestToCancel}
-        isPending={cancelMutation.isPending}
-        onClose={() => setRequestToCancel(null)}
-        onConfirm={handleConfirmCancel}
-      />
-      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
+      <GiveawayMyRequestActionOverlays actions={requestActions} />
     </div>
   );
 };

@@ -1,21 +1,15 @@
 "use client";
 
-import { useCallback, useState } from "react";
-
 import { Text } from "@/components/common/Text";
-import Toast from "@/components/common/Toast/Toast";
-import GiveawayRequestCancelConfirmModal from "@/components/giveaway/GiveawayRequestCancelConfirmModal";
-import GiveawayRequestEditModal from "@/components/giveaway/GiveawayRequestEditModal";
+import GiveawayMyRequestActionOverlays from "@/components/giveaway/GiveawayMyRequestActionOverlays";
 import MyGiveawayRequestFilters from "@/components/giveaway/MyGiveawayRequestFilters";
 import MyGiveawayRequestListView from "@/components/giveaway/MyGiveawayRequestListView";
-import { useCancelGiveawayRequest } from "@/hooks/giveaway/useCancelGiveawayRequest";
+import { useMyGiveawayRequestActions } from "@/hooks/giveaway/useMyGiveawayRequestActions";
 import { useMyGiveawayRequests } from "@/hooks/giveaway/useMyGiveawayRequests";
-import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
   hasActiveGiveawayRequestFilters,
   type GiveawayRequestFilterState,
 } from "@/lib/utils/giveawayRequestSearchParams";
-import type { MyGiveawayRequestItem } from "@/types/giveaway";
 
 interface MyGiveawayRequestPageViewProps {
   filters: GiveawayRequestFilterState;
@@ -23,28 +17,7 @@ interface MyGiveawayRequestPageViewProps {
 
 const MyGiveawayRequestPageView = ({ filters }: MyGiveawayRequestPageViewProps) => {
   const { requests, isInitialLoading, isFilterFetching, query } = useMyGiveawayRequests(filters);
-  const cancelMutation = useCancelGiveawayRequest();
-  const [requestToEdit, setRequestToEdit] = useState<MyGiveawayRequestItem | null>(null);
-  const [requestToCancel, setRequestToCancel] = useState<MyGiveawayRequestItem | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const handleConfirmCancel = useCallback(() => {
-    if (!requestToCancel) {
-      return;
-    }
-
-    cancelMutation.mutate(requestToCancel.id, {
-      onSuccess: () => {
-        setRequestToCancel(null);
-        setToastMessage("나눔 신청을 취소했습니다.");
-      },
-      onError: (error) => {
-        setToastMessage(
-          getApiErrorMessage(error, "나눔 신청을 취소하지 못했습니다. 잠시 후 다시 시도해주세요."),
-        );
-      },
-    });
-  }, [cancelMutation, requestToCancel]);
+  const requestActions = useMyGiveawayRequestActions();
 
   return (
     <div className="bg-background-default flex w-full flex-col items-center">
@@ -60,27 +33,12 @@ const MyGiveawayRequestPageView = ({ filters }: MyGiveawayRequestPageViewProps) 
           isFilterFetching={isFilterFetching}
           hasActiveFilters={hasActiveGiveawayRequestFilters(filters)}
           query={query}
-          onEdit={setRequestToEdit}
-          onCancel={setRequestToCancel}
+          onEdit={requestActions.openEdit}
+          onCancel={requestActions.openCancel}
         />
       </div>
 
-      <GiveawayRequestEditModal
-        open={requestToEdit !== null}
-        request={requestToEdit}
-        onClose={() => setRequestToEdit(null)}
-        onSuccess={() => setToastMessage("신청 내용을 수정했습니다.")}
-      />
-
-      <GiveawayRequestCancelConfirmModal
-        open={requestToCancel !== null}
-        request={requestToCancel}
-        isPending={cancelMutation.isPending}
-        onClose={() => setRequestToCancel(null)}
-        onConfirm={handleConfirmCancel}
-      />
-
-      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
+      <GiveawayMyRequestActionOverlays actions={requestActions} />
     </div>
   );
 };
