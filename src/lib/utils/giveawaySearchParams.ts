@@ -2,7 +2,7 @@ import { REGION_OPTIONS } from "@/lib/constants/region";
 import {
   GIVEAWAY_ALL_VALUE,
   GIVEAWAY_KEYWORD_MAX_LENGTH,
-  GIVEAWAY_PAGE_LIMIT,
+  GIVEAWAY_LIST_INITIAL_LIMIT,
   GIVEAWAY_SORT_OPTIONS,
   GIVEAWAY_STATUS_FILTER_OPTIONS,
 } from "@/lib/constants/giveaway";
@@ -101,7 +101,7 @@ export const toGiveawayListQuery = (
         : undefined,
     status: isGiveawayStatus(filters.status) ? filters.status : undefined,
     sort: filters.sort,
-    limit: GIVEAWAY_PAGE_LIMIT,
+    limit: GIVEAWAY_LIST_INITIAL_LIMIT,
   };
 };
 
@@ -120,7 +120,7 @@ export const toMyGiveawayListQuery = (
   return {
     status: isGiveawayStatus(filters.status) ? filters.status : undefined,
     sort: filters.sort,
-    limit: GIVEAWAY_PAGE_LIMIT,
+    limit: GIVEAWAY_LIST_INITIAL_LIMIT,
   };
 };
 

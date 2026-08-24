@@ -5,6 +5,7 @@ import CommunityShell from "@/components/community/CommunityShell";
 import GiveawayAuthLoadingFallback from "@/components/giveaway/GiveawayAuthLoadingFallback";
 import GiveawayCardSkeletonList from "@/components/giveaway/GiveawayCardSkeletonList";
 import GiveawayCreateButton from "@/components/giveaway/GiveawayCreateButton";
+import GiveawayDetailSkeleton from "@/components/giveaway/GiveawayDetailSkeleton";
 import GiveawayPageLayout from "@/components/giveaway/GiveawayPageLayout";
 import MyGiveawayRequestCardSkeletonList from "@/components/giveaway/MyGiveawayRequestCardSkeletonList";
 import MyGiveawayRequestFilters from "@/components/giveaway/MyGiveawayRequestFilters";
@@ -23,11 +24,12 @@ import {
  *
  * pathname: 현재 페이지 경로
  */
-const isGiveawayPath = (pathname: string): boolean => {
-  return (
-    pathname === APP_ROUTES.COMMUNITY.GIVEAWAY ||
-    pathname.startsWith(`${APP_ROUTES.COMMUNITY.GIVEAWAY}/`)
-  );
+const isGiveawayListPath = (pathname: string): boolean => {
+  return pathname === APP_ROUTES.COMMUNITY.GIVEAWAY;
+};
+
+const isGiveawayDetailPath = (pathname: string): boolean => {
+  return pathname.startsWith(`${APP_ROUTES.COMMUNITY.GIVEAWAY}/`);
 };
 
 const isMyGiveawayPath = (pathname: string): boolean => {
@@ -65,7 +67,7 @@ const MyGiveawayRequestLoadingChrome = () => {
   return (
     <>
       <MyActivityTabs />
-      <div className="bg-background-subtle flex w-full flex-col items-center">
+      <div className="bg-background-default flex w-full flex-col items-center">
         <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto flex w-full flex-col gap-24 pt-40 pb-60 md:pb-52 xl:px-0 xl:pt-54 xl:pb-200">
           <MyGiveawayRequestFilters filters={GIVEAWAY_REQUEST_FILTER_DEFAULTS} />
           <MyGiveawayRequestCardSkeletonList />
@@ -76,7 +78,15 @@ const MyGiveawayRequestLoadingChrome = () => {
 };
 
 export const getCustomerProtectedLoadingFallback = (pathname: string): ReactNode => {
-  if (isGiveawayPath(pathname)) {
+  if (isGiveawayDetailPath(pathname)) {
+    return (
+      <CommunityShell showGiveawayTab>
+        <GiveawayDetailSkeleton />
+      </CommunityShell>
+    );
+  }
+
+  if (isGiveawayListPath(pathname)) {
     return (
       <Suspense fallback={<GiveawayLoadingChrome />}>
         <GiveawayAuthLoadingFallback />

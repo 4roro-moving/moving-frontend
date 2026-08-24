@@ -76,8 +76,8 @@ const MyGiveawayRequestFilters = ({ filters }: MyGiveawayRequestFiltersProps) =>
             onChange={(event) => setKeyword(event.target.value)}
             onClear={clearSearch}
             maxLength={GIVEAWAY_KEYWORD_MAX_LENGTH}
-            placeholder="텍스트를 입력해 주세요."
-            aria-label="나눔 신청글 검색"
+            placeholder="제목 또는 내용으로 신청 내역을 검색해 보세요."
+            aria-label="나눔 신청 내역 검색"
             className="w-full"
           />
         </form>

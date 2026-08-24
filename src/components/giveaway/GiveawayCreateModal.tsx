@@ -18,25 +18,30 @@ import {
   GIVEAWAY_TITLE_MAX_LENGTH,
 } from "@/lib/constants/giveaway";
 import { isRegionId, REGION_OPTIONS } from "@/lib/constants/region";
+import type { GiveawayDetail } from "@/types/giveaway";
 
 interface GiveawayCreateModalProps {
   open: boolean;
   onClose: () => void;
+  giveaway?: GiveawayDetail;
 }
 
 interface GiveawayCreateModalContentProps {
   open: boolean;
   onClose: () => void;
+  giveaway?: GiveawayDetail;
   onExitComplete?: () => void;
 }
 
 const GiveawayCreateModalContent = ({
   open,
   onClose,
+  giveaway,
   onExitComplete,
 }: GiveawayCreateModalContentProps) => {
   const router = useRouter();
   const {
+    isEdit,
     register,
     control,
     regionError,
@@ -51,9 +56,12 @@ const GiveawayCreateModalContent = ({
     handleRemoveImage,
     handleSubmit,
   } = useGiveawayCreateForm({
+    giveaway,
     onClose,
-    onSuccess: (giveaway) => {
-      router.push(APP_ROUTES.COMMUNITY.GIVEAWAY_DETAIL(giveaway.id));
+    onSuccess: (savedGiveaway) => {
+      if (!isEdit) {
+        router.push(APP_ROUTES.COMMUNITY.GIVEAWAY_DETAIL(savedGiveaway.id));
+      }
     },
   });
 
@@ -68,7 +76,7 @@ const GiveawayCreateModalContent = ({
       dismissible={false}
     >
       <div className="flex w-full items-start justify-between gap-12">
-        <Modal.Title>나눔 등록</Modal.Title>
+        <Modal.Title>{isEdit ? "나눔 수정" : "나눔 등록"}</Modal.Title>
         <Modal.Close onClose={handleClose} disabled={isPending} />
       </div>
 
@@ -156,20 +164,21 @@ const GiveawayCreateModalContent = ({
       ) : null}
 
       <Modal.Button fullWidth size="cta" disabled={isSubmitDisabled} onClick={handleSubmit}>
-        {isPending ? "등록 중..." : "등록하기"}
+        {isPending ? (isEdit ? "수정 중..." : "등록 중...") : isEdit ? "수정하기" : "등록하기"}
       </Modal.Button>
     </Modal>
   );
 };
 
-const GiveawayCreateModal = ({ open, onClose }: GiveawayCreateModalProps) => {
+const GiveawayCreateModal = ({ open, onClose, giveaway }: GiveawayCreateModalProps) => {
   const [formKey, setFormKey] = useState(0);
 
   return (
     <GiveawayCreateModalContent
-      key={formKey}
+      key={`${giveaway ? String(giveaway.id) : "create"}-${String(formKey)}`}
       open={open}
       onClose={onClose}
+      giveaway={giveaway}
       onExitComplete={() => setFormKey((current) => current + 1)}
     />
   );

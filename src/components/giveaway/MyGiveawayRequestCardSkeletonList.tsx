@@ -36,7 +36,7 @@ const MyGiveawayRequestCardSkeletonList = ({
         ))}
       </ul>
       <p className="sr-only" role="status">
-        내가 작성한 나눔 신청글을 불러오는 중
+        나눔 신청 내역을 불러오는 중
       </p>
     </div>
   );

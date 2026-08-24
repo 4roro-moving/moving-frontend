@@ -4,29 +4,32 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
-import { cancelGiveawayRequest } from "@/lib/api/giveawayRequests";
+import { rejectGiveawayRequest } from "@/lib/api/giveawayRequests";
 import {
   applyGiveawayRequestItemToCaches,
   patchGiveawayDetailQueryData,
-  toGiveawayMyRequest,
 } from "@/lib/queryOptions/giveawayCache";
 import { invalidateGiveawayRelatedQueries } from "@/lib/queryOptions/invalidateGiveawayQueries";
 
-export const useCancelGiveawayRequest = () => {
+interface RejectGiveawayRequestVariables {
+  giveawayId: number;
+  requestId: number;
+}
+
+export const useRejectGiveawayRequest = () => {
   const queryClient = useQueryClient();
   const { authScope } = useAuthQueryScope();
 
   return useApiMutation({
-    mutationFn: cancelGiveawayRequest,
-    onSuccess: (request) => {
+    mutationFn: ({ giveawayId, requestId }: RejectGiveawayRequestVariables) =>
+      rejectGiveawayRequest(giveawayId, requestId),
+    onSuccess: (request, { giveawayId }) => {
       applyGiveawayRequestItemToCaches(queryClient, authScope, request);
-      patchGiveawayDetailQueryData(queryClient, authScope, request.giveawayId, (current) => ({
+      patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
         ...current,
-        canRequest: true,
         activeRequestCount: Math.max(0, current.activeRequestCount - 1),
-        myRequest: toGiveawayMyRequest(request),
       }));
-      invalidateGiveawayRelatedQueries(queryClient, authScope, request.giveawayId);
+      invalidateGiveawayRelatedQueries(queryClient, authScope, giveawayId);
     },
   });
 };

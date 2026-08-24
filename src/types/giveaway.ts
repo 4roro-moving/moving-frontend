@@ -18,6 +18,7 @@ export type GiveawayListSort = (typeof GIVEAWAY_LIST_SORT)[keyof typeof GIVEAWAY
 export interface GiveawayAuthor {
   id: string;
   name: string;
+  imageUrl: string | null;
 }
 
 export interface GiveawayRegion {
@@ -86,16 +87,42 @@ export interface CreateGiveawayInput {
 
 export interface GiveawayImage {
   id: number;
+  imageKey: string;
   imageUrl: string;
   sortOrder: number;
 }
 
-export interface GiveawayMyRequest {
+export interface UpdateGiveawayInput {
+  title?: string;
+  description?: string;
+  regionId?: number | null;
+  imageKeys?: string[];
+}
+
+export type GiveawayExistingFormImage = {
+  kind: "existing";
   id: number;
-  status: string;
-  message: string | null;
-  createdAt: string;
-  updatedAt: string;
+  imageUrl: string;
+  imageKey: string;
+};
+
+export type GiveawayNewFormImage = {
+  kind: "new";
+  file: File;
+};
+
+export type GiveawayFormImage = GiveawayExistingFormImage | GiveawayNewFormImage;
+
+export interface GiveawayRequestListQuery {
+  status?: GiveawayRequestStatus;
+  sort: GiveawayListSort;
+  cursor?: string;
+  limit: number;
+}
+
+export interface GiveawayRequestListResult {
+  data: GiveawayRequestItem[];
+  pagination: CursorPagination;
 }
 
 export const GIVEAWAY_REQUEST_STATUS = {
@@ -107,6 +134,14 @@ export const GIVEAWAY_REQUEST_STATUS = {
 
 export type GiveawayRequestStatus =
   (typeof GIVEAWAY_REQUEST_STATUS)[keyof typeof GIVEAWAY_REQUEST_STATUS];
+
+export interface GiveawayMyRequest {
+  id: number;
+  status: GiveawayRequestStatus;
+  message: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface GiveawayRequestGiveawaySummary {
   id: number;
@@ -137,6 +172,15 @@ export interface GiveawayRequestMyListQuery {
 export interface GiveawayRequestMyListResult {
   data: MyGiveawayRequestItem[];
   pagination: CursorPagination;
+}
+
+export interface GiveawayRequestFormValues {
+  id: number;
+  message: string | null;
+}
+
+export interface CreateGiveawayRequestInput {
+  message?: string;
 }
 
 export interface UpdateGiveawayRequestInput {

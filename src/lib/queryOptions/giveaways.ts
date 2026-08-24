@@ -1,7 +1,11 @@
 import { infiniteQueryOptions } from "@tanstack/react-query";
 
 import { fetchGiveaways, fetchMyGiveaways } from "@/lib/api/giveaways";
-import { GIVEAWAY_LIST_STALE_TIME_MS } from "@/lib/constants/giveaway";
+import {
+  GIVEAWAY_LIST_INITIAL_LIMIT,
+  GIVEAWAY_LIST_PAGE_LIMIT,
+  GIVEAWAY_LIST_STALE_TIME_MS,
+} from "@/lib/constants/giveaway";
 import {
   getGiveawayListQueryKey,
   getGiveawayMyListQueryKey,
@@ -12,7 +16,12 @@ import type { GiveawayListQuery, GiveawayMyListQuery } from "@/types/giveaway";
 export const getGiveawaysInfiniteQueryOptions = (listQuery: Omit<GiveawayListQuery, "cursor">) => {
   return infiniteQueryOptions({
     queryKey: getGiveawayListQueryKey(listQuery),
-    queryFn: ({ pageParam }) => fetchGiveaways({ ...listQuery, cursor: pageParam }),
+    queryFn: ({ pageParam }) =>
+      fetchGiveaways({
+        ...listQuery,
+        cursor: pageParam,
+        limit: pageParam === undefined ? GIVEAWAY_LIST_INITIAL_LIMIT : GIVEAWAY_LIST_PAGE_LIMIT,
+      }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
       lastPage.pagination.hasNext ? (lastPage.pagination.nextCursor ?? undefined) : undefined,
@@ -26,7 +35,12 @@ export const getMyGiveawaysInfiniteQueryOptions = (
 ) => {
   return infiniteQueryOptions({
     queryKey: getGiveawayMyListQueryKey(authScope, listQuery),
-    queryFn: ({ pageParam }) => fetchMyGiveaways({ ...listQuery, cursor: pageParam }),
+    queryFn: ({ pageParam }) =>
+      fetchMyGiveaways({
+        ...listQuery,
+        cursor: pageParam,
+        limit: pageParam === undefined ? GIVEAWAY_LIST_INITIAL_LIMIT : GIVEAWAY_LIST_PAGE_LIMIT,
+      }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
       lastPage.pagination.hasNext ? (lastPage.pagination.nextCursor ?? undefined) : undefined,

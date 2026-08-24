@@ -29,7 +29,7 @@ export const APP_ROUTES = {
   MY_ACTIVITY: "/my-activity",
   // 2026.08.22 김나연 - [추가] 내가 작성한 나눔글
   MY_ACTIVITY_GIVEAWAY: "/my-activity/giveaway",
-  // 2026.08.22 김나연 - [추가] 내가 작성한 나눔 신청글
+  // 2026.08.24 김나연 - [추가] 나눔 신청 내역
   MY_ACTIVITY_GIVEAWAY_REQUESTS: "/my-activity/giveaway-requests",
   /** 고객 프로필 수정 */
   PROFILE_EDIT: "/profile/edit",

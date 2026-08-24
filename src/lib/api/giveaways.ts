@@ -12,6 +12,7 @@ import type {
   GiveawayListQuery,
   GiveawayListResult,
   GiveawayMyListQuery,
+  UpdateGiveawayInput,
 } from "@/types/giveaway";
 import { isGiveawayImageContentType } from "@/types/giveaway";
 
@@ -63,6 +64,21 @@ export const requestGiveawayImageUploadUrl = (body: GiveawayImageUploadUrlReques
 
 export const createGiveaway = (body: CreateGiveawayInput) =>
   fetchInstance.post<GiveawayDetail, CreateGiveawayInput>(API_ROUTES.GIVEAWAYS.ROOT, body);
+
+export const fetchGiveawayDetail = (giveawayId: number) =>
+  fetchInstance.get<GiveawayDetail>(API_ROUTES.GIVEAWAYS.DETAIL(giveawayId));
+
+export const updateGiveaway = (giveawayId: number, body: UpdateGiveawayInput) =>
+  fetchInstance.patch<GiveawayDetail, UpdateGiveawayInput>(
+    API_ROUTES.GIVEAWAYS.DETAIL(giveawayId),
+    body,
+  );
+
+export const deleteGiveaway = (giveawayId: number) =>
+  fetchInstance.delete<null>(API_ROUTES.GIVEAWAYS.DETAIL(giveawayId));
+
+export const completeGiveaway = (giveawayId: number) =>
+  fetchInstance.post<GiveawayDetail>(API_ROUTES.GIVEAWAYS.COMPLETE(giveawayId));
 
 export const uploadGiveawayImages = async (images: File[]): Promise<string[]> => {
   const imageKeys: string[] = [];

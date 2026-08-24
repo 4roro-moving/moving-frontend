@@ -64,10 +64,10 @@ const MyGiveawayRequestListView = ({
           href={hasActiveFilters ? undefined : APP_ROUTES.COMMUNITY.GIVEAWAY}
         />
       }
-      initialErrorFallback="내가 작성한 나눔 신청글을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
-      fetchingStatusLabel="나눔 신청글 목록을 불러오는 중이에요"
-      nextPageLoadingLabel="나눔 신청글을 더 불러오는 중이에요"
-      nextPageErrorMessage="다음 나눔 신청글을 불러오지 못했습니다."
+      initialErrorFallback="나눔 신청 내역을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
+      fetchingStatusLabel="나눔 신청 내역을 불러오는 중이에요"
+      nextPageLoadingLabel="나눔 신청 내역을 더 불러오는 중이에요"
+      nextPageErrorMessage="다음 나눔 신청 내역을 불러오지 못했습니다."
     >
       <ul className="flex w-full flex-col gap-20">
         {requests.map((request) => (
