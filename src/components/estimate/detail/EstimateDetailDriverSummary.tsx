@@ -98,6 +98,7 @@ export default function EstimateDetailDriverSummary({
             isFavorite={mover.isFavorite}
             favoriteCount={mover.favoriteCount}
             showCount
+            interactive={favoriteMutation.canToggleFavorite}
             countPosition="before"
             countVariant="2lg-medium"
             className="min-h-44 min-w-44 justify-center gap-4 px-4 py-2"

@@ -3,7 +3,8 @@ import { ApiError } from "@/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
 
-export type NotificationSseEventName = "connected" | "notification" | "notification-refresh";
+export type NotificationSseEventName =
+  "connected" | "notification" | "notification-refresh" | "account-suspended";
 
 export interface SubscribeNotificationSseParams {
   accessToken: string;

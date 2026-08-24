@@ -97,6 +97,7 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
     moverName: detail.name,
     isFavorite: detail.isFavorite,
     onToggleFavorite: toggleFavorite,
+    favoriteDisabled: !favoriteMutation.canToggleFavorite,
     onRequestEstimate: designation.requestEstimate,
     requestDisabled: designation.isRequestDisabled,
     requestButtonLabel: designation.requestButtonLabel,
@@ -119,7 +120,11 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
             <MoverDetailProfile
               detail={detail}
               onToggleFavorite={toggleFavorite}
-              showFavoriteAction={!isInitialLoading && designation.showCustomerActions}
+              showFavoriteAction={
+                !isInitialLoading &&
+                designation.showCustomerActions &&
+                favoriteMutation.canToggleFavorite
+              }
             />
             <MoverDetailServices detail={detail} />
 
