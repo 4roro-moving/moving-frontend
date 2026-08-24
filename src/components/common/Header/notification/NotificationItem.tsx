@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Text } from "@/components/common/Text";
 import { formatRelativeTime } from "@/lib/utils/date";
 import { cn } from "@/lib/utils/cn";
+import { toNotificationHref } from "@/lib/utils/notificationLink";
 import type { NotificationItem as NotificationItemType } from "@/types/notification";
 
 import {
@@ -82,7 +83,7 @@ export default function NotificationItem({
     >
       {notification.linkUrl ? (
         <Link
-          href={notification.linkUrl}
+          href={toNotificationHref(notification.linkUrl)}
           onClick={() => {
             onActivate(notification);
             onNavigate?.();

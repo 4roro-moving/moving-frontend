@@ -9,12 +9,48 @@ import { subscribeNotificationSse } from "@/lib/api/notificationSse";
 import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
 import { getAccessToken } from "@/lib/auth/token";
 import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import { applyGiveawayNotificationToCaches } from "@/lib/queryOptions/giveawayCache";
+import { parseGiveawayIdFromNotificationLinkUrl } from "@/lib/utils/notificationLink";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { ApiError } from "@/types/api";
-import type { UnreadNotificationCountResponse } from "@/types/notification";
+import {
+  isGiveawayNotificationType,
+  type UnreadNotificationCountResponse,
+} from "@/types/notification";
 
 const INITIAL_RETRY_DELAY_MS = 1_000;
 const MAX_RETRY_DELAY_MS = 30_000;
+
+interface NotificationSsePayload {
+  isRead?: boolean;
+  type?: string;
+  linkUrl?: string | null;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
+};
+
+const parseNotificationSsePayload = (data: string): NotificationSsePayload | null => {
+  try {
+    const parsed: unknown = JSON.parse(data);
+    if (!isRecord(parsed)) {
+      return null;
+    }
+
+    const nested = parsed.data;
+    const source = isRecord(nested) ? nested : parsed;
+    const linkUrl = source.linkUrl;
+
+    return {
+      isRead: typeof source.isRead === "boolean" ? source.isRead : undefined,
+      type: typeof source.type === "string" ? source.type : undefined,
+      linkUrl: typeof linkUrl === "string" || linkUrl === null ? linkUrl : undefined,
+    };
+  } catch {
+    return null;
+  }
+};
 
 function sleep(ms: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -57,35 +93,68 @@ export function useNotificationSse() {
     const unreadCountQueryKey = QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT(authScope);
     const listScopeQueryKey = QUERY_KEYS.NOTIFICATIONS.LIST_SCOPE(authScope);
 
+    const refetchActiveGiveawayQueries = () => {
+      void queryClient.refetchQueries({
+        queryKey: QUERY_KEYS.GIVEAWAYS.ALL,
+        type: "active",
+      });
+      void queryClient.refetchQueries({
+        queryKey: QUERY_KEYS.GIVEAWAY_REQUESTS.ALL,
+        type: "active",
+      });
+    };
+
+    const syncGiveawayQueriesFromNotification = (
+      type: string | undefined,
+      linkUrl: string | null | undefined,
+    ) => {
+      const giveawayId = parseGiveawayIdFromNotificationLinkUrl(linkUrl);
+      if (!isGiveawayNotificationType(type) && giveawayId === null) {
+        return;
+      }
+
+      if (giveawayId !== null) {
+        applyGiveawayNotificationToCaches(queryClient, authScope, type, giveawayId);
+      }
+
+      refetchActiveGiveawayQueries();
+    };
+
     const handleSseEvent = (eventName: string, data: string) => {
-      if (eventName === "notification") {
-        try {
-          const notification = JSON.parse(data) as {
-            isRead?: boolean;
-            type?: string;
-          };
+      if (eventName === "notification" || eventName === "message") {
+        const notification = parseNotificationSsePayload(data);
 
-          if (notification.isRead !== true) {
-            queryClient.setQueryData<UnreadNotificationCountResponse>(
-              unreadCountQueryKey,
-              (current) => ({
-                unreadCount: (current?.unreadCount ?? 0) + 1,
-              }),
-            );
+        if (eventName === "notification") {
+          if (notification !== null) {
+            if (notification.isRead !== true) {
+              queryClient.setQueryData<UnreadNotificationCountResponse>(
+                unreadCountQueryKey,
+                (current) => ({
+                  unreadCount: (current?.unreadCount ?? 0) + 1,
+                }),
+              );
+            }
+
+            // 견적 요청 반려 알림일 경우 견적 요청 캐시 무효화
+            if (notification.type === "ESTIMATE_REQUEST_REJECTED") {
+              void queryClient.invalidateQueries({
+                queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ALL,
+              });
+            }
+
+            syncGiveawayQueriesFromNotification(notification.type, notification.linkUrl);
+          } else {
+            refetchActiveGiveawayQueries();
           }
 
-          // 견적 요청 반려 알림일 경우 견적 요청 캐시 무효화
-          if (notification.type === "ESTIMATE_REQUEST_REJECTED") {
-            void queryClient.invalidateQueries({
-              queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ALL,
-            });
-          }
-        } catch {
-          // JSON 파싱 실패 시 invalidate로 보정
+          void queryClient.invalidateQueries({ queryKey: unreadCountQueryKey });
+          void queryClient.invalidateQueries({ queryKey: listScopeQueryKey });
+          return;
         }
 
-        void queryClient.invalidateQueries({ queryKey: unreadCountQueryKey });
-        void queryClient.invalidateQueries({ queryKey: listScopeQueryKey });
+        if (notification !== null) {
+          syncGiveawayQueriesFromNotification(notification.type, notification.linkUrl);
+        }
         return;
       }
 

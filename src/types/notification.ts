@@ -1,3 +1,18 @@
+export const GIVEAWAY_NOTIFICATION_TYPES = [
+  "GIVEAWAY_REQUEST_RECEIVED",
+  "GIVEAWAY_REQUEST_SELECTED",
+  "GIVEAWAY_REQUEST_REJECTED",
+  "GIVEAWAY_REQUEST_CANCELED",
+  "GIVEAWAY_COMPLETED",
+] as const;
+
+export type GiveawayNotificationType = (typeof GIVEAWAY_NOTIFICATION_TYPES)[number];
+
+export const isGiveawayNotificationType = (
+  type: string | undefined,
+): type is GiveawayNotificationType =>
+  GIVEAWAY_NOTIFICATION_TYPES.some((giveawayType) => giveawayType === type);
+
 /** 알림 패널 문구 템플릿이 정의된 타입 (notificationMessages.ts 기준) */
 export type NotificationType =
   | "ESTIMATE_REQUEST_RECEIVED"
@@ -14,7 +29,8 @@ export type NotificationType =
   | "CONTENT_RESTORED"
   | "ESTIMATE_CANCELED_BY_ADMIN"
   | "ESTIMATE_CANCELED_BY_ACCOUNT_SUSPENSION"
-  | "ESTIMATE_REQUEST_CANCELED_BY_ACCOUNT_SUSPENSION";
+  | "ESTIMATE_REQUEST_CANCELED_BY_ACCOUNT_SUSPENSION"
+  | GiveawayNotificationType;
 
 /** 백엔드 알림 목록·상세 공통 아이템 */
 export interface NotificationItem {

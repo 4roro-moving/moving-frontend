@@ -4,15 +4,19 @@ import {
   getGiveawayDetailQueryKey,
   getGiveawayRequestMyListScopeQueryKey,
   getGiveawayRequestsScopeQueryKey,
+  QUERY_KEYS,
   type AuthQueryScope,
 } from "@/lib/constants/queryKeys";
-import type {
-  GiveawayDetail,
-  GiveawayMyRequest,
-  GiveawayRequestItem,
-  GiveawayRequestListResult,
-  GiveawayRequestMyListResult,
-  MyGiveawayRequestItem,
+import {
+  GIVEAWAY_REQUEST_STATUS,
+  GIVEAWAY_STATUS,
+  type GiveawayDetail,
+  type GiveawayListResult,
+  type GiveawayMyRequest,
+  type GiveawayRequestItem,
+  type GiveawayRequestListResult,
+  type GiveawayRequestMyListResult,
+  type MyGiveawayRequestItem,
 } from "@/types/giveaway";
 
 export const toGiveawayMyRequest = (request: GiveawayRequestItem): GiveawayMyRequest => {
@@ -113,4 +117,125 @@ export const applyGiveawayRequestItemToCaches = (
     message: request.message,
     updatedAt: request.updatedAt,
   }));
+};
+
+const patchGiveawayListActiveRequestCount = (
+  queryClient: QueryClient,
+  giveawayId: number,
+  delta: number,
+) => {
+  const patchPages = (current: InfiniteData<GiveawayListResult> | undefined) => {
+    if (current === undefined || !Array.isArray(current.pages)) {
+      return current;
+    }
+
+    return {
+      ...current,
+      pages: current.pages.map((page) => ({
+        ...page,
+        data: page.data.map((item) =>
+          item.id === giveawayId
+            ? { ...item, activeRequestCount: Math.max(0, item.activeRequestCount + delta) }
+            : item,
+        ),
+      })),
+    };
+  };
+
+  queryClient.setQueriesData<InfiniteData<GiveawayListResult>>(
+    { queryKey: QUERY_KEYS.GIVEAWAYS.LIST },
+    patchPages,
+  );
+  queryClient.setQueriesData<InfiniteData<GiveawayListResult>>(
+    { queryKey: QUERY_KEYS.GIVEAWAYS.ME },
+    patchPages,
+  );
+};
+
+const patchMyGiveawayRequestsByGiveawayId = (
+  queryClient: QueryClient,
+  authScope: AuthQueryScope,
+  giveawayId: number,
+  updater: (request: MyGiveawayRequestItem) => MyGiveawayRequestItem,
+) => {
+  queryClient.setQueriesData<InfiniteData<GiveawayRequestMyListResult>>(
+    { queryKey: getGiveawayRequestMyListScopeQueryKey(authScope) },
+    (current) => {
+      if (current === undefined) {
+        return current;
+      }
+
+      return {
+        ...current,
+        pages: current.pages.map((page) => ({
+          ...page,
+          data: page.data.map((item) => (item.giveaway.id === giveawayId ? updater(item) : item)),
+        })),
+      };
+    },
+  );
+};
+
+/** SSE 알림을 화면 캐시에 바로 반영합니다. refetch 전에 버튼·카운트가 바뀌도록 합니다. */
+export const applyGiveawayNotificationToCaches = (
+  queryClient: QueryClient,
+  authScope: AuthQueryScope,
+  type: string | undefined,
+  giveawayId: number,
+) => {
+  if (type === "GIVEAWAY_REQUEST_RECEIVED") {
+    patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
+      ...current,
+      activeRequestCount: current.activeRequestCount + 1,
+    }));
+    patchGiveawayListActiveRequestCount(queryClient, giveawayId, 1);
+    return;
+  }
+
+  if (type === "GIVEAWAY_REQUEST_REJECTED") {
+    patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
+      ...current,
+      canRequest: current.status === GIVEAWAY_STATUS.AVAILABLE,
+      myRequest: current.myRequest
+        ? { ...current.myRequest, status: GIVEAWAY_REQUEST_STATUS.REJECTED }
+        : current.myRequest,
+      activeRequestCount: Math.max(0, current.activeRequestCount - 1),
+    }));
+    patchGiveawayListActiveRequestCount(queryClient, giveawayId, -1);
+    patchMyGiveawayRequestsByGiveawayId(queryClient, authScope, giveawayId, (item) =>
+      item.status === GIVEAWAY_REQUEST_STATUS.PENDING
+        ? { ...item, status: GIVEAWAY_REQUEST_STATUS.REJECTED }
+        : item,
+    );
+    return;
+  }
+
+  if (type === "GIVEAWAY_REQUEST_CANCELED") {
+    patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
+      ...current,
+      activeRequestCount: Math.max(0, current.activeRequestCount - 1),
+    }));
+    patchGiveawayListActiveRequestCount(queryClient, giveawayId, -1);
+    return;
+  }
+
+  if (type === "GIVEAWAY_REQUEST_SELECTED") {
+    patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
+      ...current,
+      status: GIVEAWAY_STATUS.IN_PROGRESS,
+      canRequest: false,
+      myRequest: current.myRequest
+        ? { ...current.myRequest, status: GIVEAWAY_REQUEST_STATUS.SELECTED }
+        : current.myRequest,
+    }));
+    return;
+  }
+
+  if (type === "GIVEAWAY_COMPLETED") {
+    patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
+      ...current,
+      status: GIVEAWAY_STATUS.COMPLETED,
+      canRequest: false,
+    }));
+  }
 };
