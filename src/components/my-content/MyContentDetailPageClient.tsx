@@ -10,10 +10,16 @@ import { useMyContentDetail } from "@/hooks/useMyContentDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { isMyContentType, type MyContentType } from "@/types/myContent";
 
-const PAGE_TITLE_BY_TYPE: Record<MyContentType, string> = {
+const HIDDEN_PAGE_TITLE_BY_TYPE: Record<MyContentType, string> = {
   review: "숨김 처리된 리뷰",
   "residence-review": "숨김 처리된 거주후기",
   giveaway: "숨김 처리된 나눔게시물",
+};
+
+const RESTORED_PAGE_TITLE_BY_TYPE: Record<MyContentType, string> = {
+  review: "복구된 리뷰",
+  "residence-review": "복구된 거주후기",
+  giveaway: "복구된 나눔게시물",
 };
 
 function parseContentId(value: string | string[] | undefined): number {
@@ -47,9 +53,9 @@ export default function MyContentDetailPageClient() {
       return "콘텐츠 처리 안내";
     }
     if (data && !data.isHidden) {
-      return PAGE_TITLE_BY_TYPE[contentType].replace("숨김 처리된 ", "처리된 ");
+      return RESTORED_PAGE_TITLE_BY_TYPE[contentType];
     }
-    return PAGE_TITLE_BY_TYPE[contentType];
+    return HIDDEN_PAGE_TITLE_BY_TYPE[contentType];
   }, [contentType, data]);
 
   if (!isValidParams) {

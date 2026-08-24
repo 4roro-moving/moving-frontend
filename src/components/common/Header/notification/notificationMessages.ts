@@ -62,14 +62,15 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
       suffix: " 문의에 답변이 등록되었어요",
     },
     //관리자가 콘텐츠(리뷰/거주후기/나눔) 숨김 처리한 경우 알림 문구
+    // content에 받침 유무가 달라 "가/이" 조사를 suffix에 두지 않음
     CONTENT_HIDDEN: {
       prefix: "",
-      suffix: "가 숨김처리 되었습니다.",
+      suffix: " 숨김처리 되었습니다.",
     },
     //관리자가 콘텐츠(리뷰/거주후기/나눔) 복구 처리한 경우 알림 문구
     CONTENT_RESTORED: {
       prefix: "",
-      suffix: "가 복구처리 되었습니다.",
+      suffix: " 복구처리 되었습니다.",
     },
   };
 
