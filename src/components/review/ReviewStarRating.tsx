@@ -1,5 +1,8 @@
 "use client";
 
+import { useId, type FocusEvent } from "react";
+
+import { Text } from "@/components/common/Text";
 import { StarIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 
@@ -8,10 +11,15 @@ interface ReviewStarRatingProps {
   value: number;
   /** 전달되면 별점 선택 UI로 동작 */
   onChange?: (rating: number) => void;
+  /** 선택형일 때 그룹 밖으로 포커스가 나갈 때만 호출 */
+  onBlur?: () => void;
   size?: "sm" | "md" | "lg";
   className?: string;
   /** 스크린 리더용 라벨 prefix */
   label?: string;
+  /** 보이는 라벨과 연결할 때 사용. 있으면 aria-label 대신 이 id를 사용합니다 */
+  labelledBy?: string;
+  error?: string;
   disabled?: boolean;
 }
 
@@ -25,23 +33,42 @@ const SIZE_CLASS = {
  * 별점 표시/선택 공통 컴포넌트
  * // 2026.07.27 정슬기 - [추가] 리뷰 별점 UI
  * // 2026.07.28 정슬기 - [수정] radiogroup/radio 제거 → group + aria-pressed (키보드 패턴 미구현 대응)
+ * // 2026.08.24 김나연 - [추가] 선택형 접근성(onBlur, labelledBy, error). 표시형은 기존 DOM 유지
  */
 export default function ReviewStarRating({
   value,
   onChange,
+  onBlur,
   size = "md",
   className,
   label = "별점",
+  labelledBy,
+  error,
   disabled = false,
 }: ReviewStarRatingProps) {
+  const errorId = useId();
   const isInteractive = typeof onChange === "function";
   const clamped = Math.min(5, Math.max(0, value));
+  const groupAriaLabel = labelledBy ? undefined : isInteractive ? label : `${label} ${clamped}점`;
 
-  return (
+  const handleGroupBlur = (event: FocusEvent<HTMLDivElement>) => {
+    const nextFocused = event.relatedTarget;
+    if (nextFocused instanceof Node && event.currentTarget.contains(nextFocused)) {
+      return;
+    }
+
+    onBlur?.();
+  };
+
+  const stars = (
     <div
       className={cn("flex items-center gap-2", className)}
       role={isInteractive ? "group" : "img"}
-      aria-label={isInteractive ? label : `${label} ${clamped}점`}
+      aria-labelledby={labelledBy}
+      aria-label={groupAriaLabel}
+      aria-invalid={isInteractive && Boolean(error) ? true : undefined}
+      aria-describedby={isInteractive && error ? errorId : undefined}
+      onBlur={isInteractive ? handleGroupBlur : undefined}
     >
       {Array.from({ length: 5 }, (_, index) => {
         const starValue = index + 1;
@@ -83,6 +110,21 @@ export default function ReviewStarRating({
         );
       })}
       {!isInteractive ? <span className="sr-only">{`${label} ${clamped}점`}</span> : null}
+    </div>
+  );
+
+  if (!isInteractive) {
+    return stars;
+  }
+
+  return (
+    <div className="flex w-full flex-col gap-4">
+      {stars}
+      {error ? (
+        <Text id={errorId} variant="xs-regular" className="text-text-error">
+          {error}
+        </Text>
+      ) : null}
     </div>
   );
 }

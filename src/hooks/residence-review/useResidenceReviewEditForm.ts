@@ -38,7 +38,7 @@ export const useResidenceReviewEditForm = ({
     setError,
     reset,
     handleSubmit,
-    formState: { errors, isValid, isSubmitting, touchedFields },
+    formState: { errors, isValid, isSubmitting, isDirty, touchedFields },
   } = useForm<ResidenceReviewEditFormValues>({
     resolver: zodResolver(residenceReviewEditSchema),
     mode: "onTouched",
@@ -47,7 +47,7 @@ export const useResidenceReviewEditForm = ({
 
   const isPending = isSubmitting || updateMutation.isPending;
   const submitError = errors.root?.message;
-  const isSubmitDisabled = isPending || !isValid;
+  const isSubmitDisabled = isPending || !isValid || !isDirty;
 
   const resetForm = () => {
     reset(defaultValues);

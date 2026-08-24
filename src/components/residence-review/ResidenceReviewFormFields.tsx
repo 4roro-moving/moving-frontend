@@ -38,6 +38,7 @@ const ResidenceReviewFormFields = <T extends ResidenceReviewFormFieldValues>({
 }: ResidenceReviewFormFieldsProps<T>) => {
   const titleId = useId();
   const contentId = useId();
+  const ratingLabelId = useId();
   const content = useWatch({ control, name: "content" as FieldPath<T> });
   const contentLength = (typeof content === "string" ? content : "").trim().length;
 
@@ -46,6 +47,7 @@ const ResidenceReviewFormFields = <T extends ResidenceReviewFormFieldValues>({
       <div className="flex w-full flex-col gap-12">
         <Text
           as="p"
+          id={ratingLabelId}
           variant={{ base: "lg-semibold", xl: "2lg-semibold" }}
           className="text-text-tertiary"
         >
@@ -54,12 +56,15 @@ const ResidenceReviewFormFields = <T extends ResidenceReviewFormFieldValues>({
         <Controller
           name={"rating" as FieldPath<T>}
           control={control}
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <ReviewStarRating
               value={typeof field.value === "number" ? field.value : 0}
               onChange={field.onChange}
+              onBlur={field.onBlur}
               size="lg"
               label="평점"
+              labelledBy={ratingLabelId}
+              error={fieldState.error?.message}
               disabled={isPending}
             />
           )}
