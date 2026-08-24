@@ -112,7 +112,7 @@ const GiveawayReceivedRequestCard = ({
             </div>
           </div>
           <ReportMoreMenu
-            ariaLabel="신청자 메뉴 더보기"
+            ariaLabel={`${request.requester.name} 신청자 메뉴 더보기`}
             onReport={() => setIsReportModalOpen(true)}
           />
         </div>
