@@ -5,11 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { deleteResidenceReview } from "@/lib/api/residenceReviews";
-import {
-  getResidenceReviewDetailQueryKey,
-  getResidenceReviewListScopeQueryKey,
-  getResidenceReviewMyListScopeQueryKey,
-} from "@/lib/constants/queryKeys";
+import { getResidenceReviewDetailQueryKey } from "@/lib/constants/queryKeys";
+import { invalidateResidenceReviewRelatedQueries } from "@/lib/queryOptions/invalidateResidenceReviewQueries";
 
 export const useDeleteResidenceReview = () => {
   const queryClient = useQueryClient();
@@ -17,14 +14,9 @@ export const useDeleteResidenceReview = () => {
 
   return useApiMutation({
     mutationFn: deleteResidenceReview,
-    onSuccess: (_data, residenceReviewId) => {
-      void queryClient.invalidateQueries({
-        queryKey: getResidenceReviewListScopeQueryKey(),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: getResidenceReviewMyListScopeQueryKey(authScope),
-      });
-      void queryClient.removeQueries({
+    onSuccess: async (_data, residenceReviewId) => {
+      await invalidateResidenceReviewRelatedQueries(queryClient, authScope, residenceReviewId);
+      queryClient.removeQueries({
         queryKey: getResidenceReviewDetailQueryKey(authScope, residenceReviewId),
       });
     },
