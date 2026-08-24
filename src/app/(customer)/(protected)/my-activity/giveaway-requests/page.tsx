@@ -4,7 +4,7 @@ import MyGiveawayRequestPageView from "@/components/giveaway/MyGiveawayRequestPa
 import { parseGiveawayRequestSearchParams } from "@/lib/utils/giveawayRequestSearchParams";
 
 export const metadata: Metadata = {
-  title: "내가 작성한 나눔 신청글",
+  title: "나눔 신청 내역",
   description: "내가 신청한 나눔 글을 확인할 수 있습니다.",
 };
 

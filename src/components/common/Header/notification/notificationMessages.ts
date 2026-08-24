@@ -1,4 +1,8 @@
-import type { NotificationType } from "@/types/notification";
+import {
+  GIVEAWAY_NOTIFICATION_TYPE,
+  isGiveawayNotificationType,
+  type NotificationType,
+} from "@/types/notification";
 
 export interface NotificationMessageTemplate {
   prefix: string;
@@ -87,12 +91,55 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
       prefix: "고객의 이용 제한으로 ",
       suffix: "이 취소되었습니다.",
     },
+    // 작성자에게 새 나눔 신청이 도착한 경우 알림 문구 (content가 완성 문장)
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_RECEIVED]: {
+      prefix: "",
+      suffix: "",
+    },
+    // 신청자가 수령자로 선정된 경우 알림 문구
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_SELECTED]: {
+      prefix: "",
+      suffix: "",
+    },
+    // 신청자의 나눔 신청이 거절된 경우 알림 문구
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_REJECTED]: {
+      prefix: "",
+      suffix: "",
+    },
+    // 작성자에게 신청 취소(대기/선정)가 도착한 경우 알림 문구
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_CANCELED]: {
+      prefix: "",
+      suffix: "",
+    },
+    // 수령자에게 나눔 완료가 안내되는 경우 알림 문구
+    [GIVEAWAY_NOTIFICATION_TYPE.COMPLETED]: {
+      prefix: "",
+      suffix: "",
+    },
   };
 
 export interface NotificationMessagePart {
   text: string;
   highlight?: boolean;
 }
+
+const GIVEAWAY_TITLE_PATTERN = /^(「.+?」)(.*)$/;
+
+const buildGiveawayNotificationMessageParts = (
+  content: string,
+): NotificationMessagePart[] | null => {
+  const match = GIVEAWAY_TITLE_PATTERN.exec(content);
+  if (!match?.[1]) {
+    return null;
+  }
+
+  const rest = match[2];
+  if (rest) {
+    return [{ text: match[1], highlight: true }, { text: rest }];
+  }
+
+  return [{ text: match[1], highlight: true }];
+};
 
 export const buildNotificationMessageParts = (
   type: NotificationType,
@@ -103,6 +150,13 @@ export const buildNotificationMessageParts = (
   // 백엔드에만 있는 신규 타입이 와도 패널이 깨지지 않도록 폴백
   if (!template) {
     return content ? [{ text: content, highlight: true }] : [{ text: "새로운 알림이 있어요" }];
+  }
+
+  if (isGiveawayNotificationType(type)) {
+    const giveawayParts = buildGiveawayNotificationMessageParts(content);
+    if (giveawayParts) {
+      return giveawayParts;
+    }
   }
 
   const { prefix, suffix } = template;

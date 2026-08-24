@@ -81,6 +81,10 @@ export const getGiveawayThumbnailOverlayLabel = (status: GiveawayStatus): string
 
 export const GIVEAWAY_DETAIL_TITLE = "나눔글 상세";
 export const GIVEAWAY_PREFERRED_REGION_LABEL = "거래 희망 지역";
+export const GIVEAWAY_VIEW_MY_REQUEST_BUTTON_LABEL = "신청 글 확인하기";
+export const GIVEAWAY_MY_REQUEST_TITLE = "내 신청 글";
+export const GIVEAWAY_MY_REQUEST_SECTION_ID = "my-giveaway-request";
+export const GIVEAWAY_MY_REQUEST_TITLE_ID = "giveaway-my-request-title";
 export const GIVEAWAY_RECEIVED_REQUESTS_TITLE = "받은 신청 내역";
 export const GIVEAWAY_RECEIVED_REQUESTS_EMPTY = "아직 받은 신청이 없어요.";
 export const GIVEAWAY_RECEIVED_REQUESTS_LOADING = "받은 신청 내역을 불러오는 중";
@@ -99,7 +103,6 @@ export const GIVEAWAY_REPORT_BUTTON_LABEL = "신고하기";
 export const GIVEAWAY_APPLY_BUTTON_LABEL = "나눔 신청하기";
 export const GIVEAWAY_APPLY_SUBMIT_LABEL = "신청하기";
 export const GIVEAWAY_APPLY_MODAL_TITLE = "나눔 신청";
-export const GIVEAWAY_APPLIED_BUTTON_LABEL = "신청 완료";
 export const GIVEAWAY_REQUEST_CONTENT_LABEL = "신청 내용";
 export const GIVEAWAY_REQUEST_DATE_LABEL = "신청일";
 export const GIVEAWAY_REQUEST_EMPTY_MESSAGE = "없음";
@@ -168,6 +171,11 @@ export const toGiveawayExistingFormImage = (image: {
 export const GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH = 1000;
 
 export const GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL = "나눔 글 보러가기";
+
+export const GIVEAWAY_REQUEST_CANCEL_SUCCESS_MESSAGE = "나눔 신청을 취소했습니다.";
+export const GIVEAWAY_REQUEST_CANCEL_ERROR_MESSAGE =
+  "나눔 신청을 취소하지 못했습니다. 잠시 후 다시 시도해주세요.";
+export const GIVEAWAY_REQUEST_EDIT_SUCCESS_MESSAGE = "신청 내용을 수정했습니다.";
 
 export const GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES = [
   "아직 신청한 나눔이 없어요.",

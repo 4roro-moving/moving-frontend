@@ -39,3 +39,5 @@ export { default as DriverBadgeIcon } from "./color/driver-badge.svg";
 export { default as GoogleIcon } from "./color/google.svg";
 export { default as KakaoLoginIcon } from "./color/kakao-login.svg";
 export { default as NaverLoginIcon } from "./color/naver-login.svg";
+// 2026.08.24 김나연 - [추가] 나눔 신청자 수 아이콘
+export { default as UserIcon } from "./user.svg";

@@ -8,13 +8,54 @@ import { logout as logoutApi } from "@/lib/api/auth";
 import { subscribeNotificationSse } from "@/lib/api/notificationSse";
 import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
 import { getAccessToken } from "@/lib/auth/token";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import {
+  getGiveawayDetailQueryKey,
+  getGiveawayRequestMyListScopeQueryKey,
+  getGiveawayRequestsScopeQueryKey,
+  QUERY_KEYS,
+} from "@/lib/constants/queryKeys";
+import { applyGiveawayNotificationToCaches } from "@/lib/queryOptions/giveawayCache";
+import { parseGiveawayIdFromNotificationLinkUrl } from "@/lib/utils/notificationLink";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { ApiError } from "@/types/api";
-import type { UnreadNotificationCountResponse } from "@/types/notification";
+import {
+  isGiveawayNotificationType,
+  type UnreadNotificationCountResponse,
+} from "@/types/notification";
 
 const INITIAL_RETRY_DELAY_MS = 1_000;
 const MAX_RETRY_DELAY_MS = 30_000;
+
+interface NotificationSsePayload {
+  isRead?: boolean;
+  type?: string;
+  linkUrl?: string | null;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
+};
+
+const parseNotificationSsePayload = (data: string): NotificationSsePayload | null => {
+  try {
+    const parsed: unknown = JSON.parse(data);
+    if (!isRecord(parsed)) {
+      return null;
+    }
+
+    const nested = parsed.data;
+    const source = isRecord(nested) ? nested : parsed;
+    const linkUrl = source.linkUrl;
+
+    return {
+      isRead: typeof source.isRead === "boolean" ? source.isRead : undefined,
+      type: typeof source.type === "string" ? source.type : undefined,
+      linkUrl: typeof linkUrl === "string" || linkUrl === null ? linkUrl : undefined,
+    };
+  } catch {
+    return null;
+  }
+};
 
 function sleep(ms: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -57,14 +98,45 @@ export function useNotificationSse() {
     const unreadCountQueryKey = QUERY_KEYS.NOTIFICATIONS.UNREAD_COUNT(authScope);
     const listScopeQueryKey = QUERY_KEYS.NOTIFICATIONS.LIST_SCOPE(authScope);
 
+    const syncGiveawayQueriesFromNotification = (
+      type: string | undefined,
+      linkUrl: string | null | undefined,
+    ) => {
+      if (!isGiveawayNotificationType(type)) {
+        return;
+      }
+
+      const giveawayId = parseGiveawayIdFromNotificationLinkUrl(linkUrl);
+
+      if (giveawayId !== null) {
+        applyGiveawayNotificationToCaches(queryClient, authScope, type, giveawayId);
+        void queryClient.invalidateQueries({
+          queryKey: getGiveawayDetailQueryKey(authScope, giveawayId),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: getGiveawayRequestsScopeQueryKey(giveawayId),
+        });
+      }
+
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.GIVEAWAYS.LIST,
+        refetchType: "active",
+      });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.GIVEAWAYS.ME,
+        refetchType: "active",
+      });
+      void queryClient.invalidateQueries({
+        queryKey: getGiveawayRequestMyListScopeQueryKey(authScope),
+        refetchType: "active",
+      });
+    };
+
     const handleSseEvent = (eventName: string, data: string) => {
       if (eventName === "notification") {
-        try {
-          const notification = JSON.parse(data) as {
-            isRead?: boolean;
-            type?: string;
-          };
+        const notification = parseNotificationSsePayload(data);
 
+        if (notification !== null) {
           if (notification.isRead !== true) {
             queryClient.setQueryData<UnreadNotificationCountResponse>(
               unreadCountQueryKey,
@@ -80,8 +152,8 @@ export function useNotificationSse() {
               queryKey: QUERY_KEYS.ESTIMATE_REQUESTS.ALL,
             });
           }
-        } catch {
-          // JSON 파싱 실패 시 invalidate로 보정
+
+          syncGiveawayQueriesFromNotification(notification.type, notification.linkUrl);
         }
 
         void queryClient.invalidateQueries({ queryKey: unreadCountQueryKey });
