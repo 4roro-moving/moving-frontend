@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { useCreateResidenceReview } from "@/hooks/residence-review/useCreateResidenceReview";
@@ -34,7 +34,6 @@ export const useResidenceReviewCreateForm = ({
   onError,
 }: UseResidenceReviewCreateFormParams) => {
   const defaultValues = getDefaultValues(defaultRegionId);
-  const [appliedDefaultRegionId, setAppliedDefaultRegionId] = useState(defaultRegionId);
   const createMutation = useCreateResidenceReview();
   const {
     register,
@@ -44,19 +43,20 @@ export const useResidenceReviewCreateForm = ({
     setError,
     reset,
     handleSubmit,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isValid, isSubmitting, touchedFields },
   } = useForm<ResidenceReviewCreateFormValues>({
     resolver: zodResolver(residenceReviewCreateSchema),
-    mode: "onChange",
+    mode: "onTouched",
     defaultValues,
   });
 
-  if (defaultRegionId !== appliedDefaultRegionId) {
-    setAppliedDefaultRegionId(defaultRegionId);
-    if (getValues("regionId") === appliedDefaultRegionId) {
-      setValue("regionId", defaultRegionId, { shouldValidate: true });
+  useEffect(() => {
+    if (defaultRegionId === null || getValues("regionId") !== null) {
+      return;
     }
-  }
+
+    setValue("regionId", defaultRegionId, { shouldValidate: true });
+  }, [defaultRegionId, getValues, setValue]);
 
   const isPending = isSubmitting || createMutation.isPending;
   const submitError = errors.root?.message;
@@ -103,9 +103,9 @@ export const useResidenceReviewCreateForm = ({
   return {
     register,
     control,
-    regionError: errors.regionId?.message,
-    titleError: errors.title?.message,
-    contentError: errors.content?.message,
+    regionError: touchedFields.regionId ? errors.regionId?.message : undefined,
+    titleError: touchedFields.title ? errors.title?.message : undefined,
+    contentError: touchedFields.content ? errors.content?.message : undefined,
     submitError,
     isPending,
     isSubmitDisabled,

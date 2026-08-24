@@ -21,9 +21,9 @@ export const useUpdateResidenceReview = () => {
   return useApiMutation({
     mutationFn: ({ residenceReviewId, body }: UpdateResidenceReviewVariables) =>
       updateResidenceReview(residenceReviewId, body),
-    onSuccess: async (review: PublicResidenceReview) => {
+    onSuccess: (review: PublicResidenceReview) => {
       queryClient.setQueryData(getResidenceReviewDetailQueryKey(authScope, review.id), review);
-      await invalidateResidenceReviewRelatedQueries(queryClient, authScope, review.id);
+      invalidateResidenceReviewRelatedQueries(queryClient, authScope, review.id);
     },
   });
 };

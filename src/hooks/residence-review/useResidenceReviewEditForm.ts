@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { useUpdateResidenceReview } from "@/hooks/residence-review/useUpdateResidenceReview";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
@@ -38,23 +38,16 @@ export const useResidenceReviewEditForm = ({
     setError,
     reset,
     handleSubmit,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isValid, isSubmitting, touchedFields },
   } = useForm<ResidenceReviewEditFormValues>({
     resolver: zodResolver(residenceReviewEditSchema),
-    mode: "onChange",
+    mode: "onTouched",
     defaultValues,
   });
 
-  const title = useWatch({ control, name: "title" });
-  const content = useWatch({ control, name: "content" });
-  const rating = useWatch({ control, name: "rating" });
-  const hasChanges =
-    title.trim() !== review.title.trim() ||
-    content.trim() !== review.content.trim() ||
-    rating !== review.rating;
   const isPending = isSubmitting || updateMutation.isPending;
   const submitError = errors.root?.message;
-  const isSubmitDisabled = isPending || !isValid || !hasChanges;
+  const isSubmitDisabled = isPending || !isValid;
 
   const resetForm = () => {
     reset(defaultValues);
@@ -70,16 +63,11 @@ export const useResidenceReviewEditForm = ({
   };
 
   const submit = handleSubmit(async (formValues) => {
-    const body: UpdateResidenceReviewInput = {};
-    if (formValues.title !== review.title.trim()) {
-      body.title = formValues.title;
-    }
-    if (formValues.content !== review.content.trim()) {
-      body.content = formValues.content;
-    }
-    if (formValues.rating !== review.rating) {
-      body.rating = formValues.rating;
-    }
+    const body: UpdateResidenceReviewInput = {
+      title: formValues.title,
+      content: formValues.content,
+      rating: formValues.rating,
+    };
 
     try {
       await updateMutation.mutateAsync({ residenceReviewId: review.id, body });
@@ -95,8 +83,8 @@ export const useResidenceReviewEditForm = ({
   return {
     register,
     control,
-    titleError: errors.title?.message,
-    contentError: errors.content?.message,
+    titleError: touchedFields.title ? errors.title?.message : undefined,
+    contentError: touchedFields.content ? errors.content?.message : undefined,
     submitError,
     isPending,
     isSubmitDisabled,

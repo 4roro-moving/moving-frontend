@@ -12,8 +12,8 @@ export const useCreateResidenceReview = () => {
 
   return useApiMutation({
     mutationFn: (body: CreateResidenceReviewInput) => createResidenceReview(body),
-    onSuccess: async () => {
-      await invalidateResidenceReviewLists(queryClient);
+    onSuccess: () => {
+      invalidateResidenceReviewLists(queryClient);
     },
   });
 };
