@@ -1,12 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { useCreateResidenceReview } from "@/hooks/residence-review/useCreateResidenceReview";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import type { RegionId } from "@/lib/constants/region";
 import {
   residenceReviewCreateSchema,
   type ResidenceReviewCreateFormValues,
@@ -14,32 +12,27 @@ import {
 import type { CreateResidenceReviewInput } from "@/types/residenceReview";
 
 interface UseResidenceReviewCreateFormParams {
-  defaultRegionId: RegionId | null;
   onClose: () => void;
   onSuccess?: () => void;
   onError?: (message: string) => void;
 }
 
-const getDefaultValues = (regionId: RegionId | null): ResidenceReviewCreateFormValues => ({
-  regionId,
+const EMPTY_VALUES: ResidenceReviewCreateFormValues = {
+  regionId: null,
   title: "",
   content: "",
   rating: 0,
-});
+};
 
 export const useResidenceReviewCreateForm = ({
-  defaultRegionId,
   onClose,
   onSuccess,
   onError,
 }: UseResidenceReviewCreateFormParams) => {
-  const defaultValues = getDefaultValues(defaultRegionId);
   const createMutation = useCreateResidenceReview();
   const {
     register,
     control,
-    getValues,
-    setValue,
     setError,
     reset,
     handleSubmit,
@@ -47,23 +40,15 @@ export const useResidenceReviewCreateForm = ({
   } = useForm<ResidenceReviewCreateFormValues>({
     resolver: zodResolver(residenceReviewCreateSchema),
     mode: "onTouched",
-    defaultValues,
+    defaultValues: EMPTY_VALUES,
   });
-
-  useEffect(() => {
-    if (defaultRegionId === null || getValues("regionId") !== null) {
-      return;
-    }
-
-    setValue("regionId", defaultRegionId, { shouldValidate: true });
-  }, [defaultRegionId, getValues, setValue]);
 
   const isPending = isSubmitting || createMutation.isPending;
   const submitError = errors.root?.message;
   const isSubmitDisabled = isPending || !isValid;
 
   const resetForm = () => {
-    reset(getDefaultValues(defaultRegionId));
+    reset(EMPTY_VALUES);
   };
 
   const handleClose = () => {

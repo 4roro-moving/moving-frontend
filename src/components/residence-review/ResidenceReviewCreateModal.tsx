@@ -9,18 +9,16 @@ import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
 import ResidenceReviewFormFields from "@/components/residence-review/ResidenceReviewFormFields";
 import { useResidenceReviewCreateForm } from "@/hooks/residence-review/useResidenceReviewCreateForm";
-import { isRegionId, REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
+import { isRegionId, REGION_OPTIONS } from "@/lib/constants/region";
 
 interface ResidenceReviewCreateModalProps {
   open: boolean;
-  defaultRegionId: RegionId | null;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
 interface ResidenceReviewCreateModalContentProps {
   open: boolean;
-  defaultRegionId: RegionId | null;
   onClose: () => void;
   onExitComplete?: () => void;
   onSuccess?: () => void;
@@ -28,7 +26,6 @@ interface ResidenceReviewCreateModalContentProps {
 
 const ResidenceReviewCreateModalContent = ({
   open,
-  defaultRegionId,
   onClose,
   onExitComplete,
   onSuccess,
@@ -45,7 +42,6 @@ const ResidenceReviewCreateModalContent = ({
     handleClose,
     handleSubmit,
   } = useResidenceReviewCreateForm({
-    defaultRegionId,
     onClose,
     onSuccess,
   });
@@ -123,7 +119,6 @@ const ResidenceReviewCreateModalContent = ({
 
 const ResidenceReviewCreateModal = ({
   open,
-  defaultRegionId,
   onClose,
   onSuccess,
 }: ResidenceReviewCreateModalProps) => {
@@ -133,7 +128,6 @@ const ResidenceReviewCreateModal = ({
     <ResidenceReviewCreateModalContent
       key={formKey}
       open={open}
-      defaultRegionId={defaultRegionId}
       onClose={onClose}
       onExitComplete={() => setFormKey((current) => current + 1)}
       onSuccess={onSuccess}
