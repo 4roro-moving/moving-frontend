@@ -85,26 +85,38 @@ export default function EmptyState({
         </div>
 
         {isSm ? (
-          <Text as="p" variant="lg-regular" className="text-text-muted text-center">
+          <Text
+            as="p"
+            variant="lg-regular"
+            className="text-text-muted text-center whitespace-pre-line"
+          >
             {description}
           </Text>
         ) : null}
 
         {isLg ? (
-          <Text as="p" variant="2xl-regular" className="text-text-muted text-center">
+          <Text
+            as="p"
+            variant="2xl-regular"
+            className="text-text-muted text-center whitespace-pre-line"
+          >
             {description}
           </Text>
         ) : null}
 
         {!size ? (
           <>
-            <Text as="p" variant="lg-regular" className="text-text-muted text-center md:hidden">
+            <Text
+              as="p"
+              variant="lg-regular"
+              className="text-text-muted text-center whitespace-pre-line md:hidden"
+            >
               {description}
             </Text>
             <Text
               as="p"
               variant="2xl-regular"
-              className="text-text-muted hidden text-center md:block"
+              className="text-text-muted hidden text-center whitespace-pre-line md:block"
             >
               {description}
             </Text>
