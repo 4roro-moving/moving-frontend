@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import AccountSuspensionNotice from "@/components/auth/AccountSuspensionNotice";
 import AuthHeader from "@/components/auth/AuthHeader";
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import Button from "@/components/common/Button/Button";
@@ -15,7 +16,7 @@ import { Text, getTextVariantClass } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
 import { resolveAuthUserImage } from "@/lib/api/profile";
-import { getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
+import { getAccountSuspensionReason, getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
 import { consumePasswordChangedToast } from "@/lib/auth/passwordChangedToast";
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
 import {
@@ -39,6 +40,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const establishSession = useAuthStore((state) => state.establishSession);
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [suspensionReason, setSuspensionReason] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const {
@@ -68,6 +70,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
+    setSuspensionReason(null);
 
     try {
       const role = audienceToLoginRole(audience);
@@ -85,6 +88,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       setPostAuthRedirectPath(nextPath);
       establishSession(await resolveAuthUserImage(result.user));
     } catch (error) {
+      setSuspensionReason(getAccountSuspensionReason(error) ?? null);
       setSubmitError(getLoginErrorMessage(error, audience));
     }
   });
@@ -121,7 +125,9 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
             </FormField>
           </div>
 
-          {submitError ? (
+          {suspensionReason ? (
+            <AccountSuspensionNotice reason={suspensionReason} />
+          ) : submitError ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
               {submitError}
             </Text>
@@ -166,7 +172,14 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
         >
           SNS로 로그인
         </Text>
-        <SocialLoginButtons audience={audience} intent="login" onError={setSubmitError} />
+        <SocialLoginButtons
+          audience={audience}
+          intent="login"
+          onError={(message) => {
+            setSuspensionReason(null);
+            setSubmitError(message);
+          }}
+        />
       </div>
     </div>
   );
