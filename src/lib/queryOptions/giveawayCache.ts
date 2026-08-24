@@ -4,14 +4,12 @@ import {
   getGiveawayDetailQueryKey,
   getGiveawayRequestMyListScopeQueryKey,
   getGiveawayRequestsScopeQueryKey,
-  QUERY_KEYS,
   type AuthQueryScope,
 } from "@/lib/constants/queryKeys";
 import {
   GIVEAWAY_REQUEST_STATUS,
   GIVEAWAY_STATUS,
   type GiveawayDetail,
-  type GiveawayListResult,
   type GiveawayMyRequest,
   type GiveawayRequestItem,
   type GiveawayRequestListResult,
@@ -120,39 +118,6 @@ export const applyGiveawayRequestItemToCaches = (
   }));
 };
 
-const patchGiveawayListActiveRequestCount = (
-  queryClient: QueryClient,
-  giveawayId: number,
-  delta: number,
-) => {
-  const patchPages = (current: InfiniteData<GiveawayListResult> | undefined) => {
-    if (current === undefined || !Array.isArray(current.pages)) {
-      return current;
-    }
-
-    return {
-      ...current,
-      pages: current.pages.map((page) => ({
-        ...page,
-        data: page.data.map((item) =>
-          item.id === giveawayId
-            ? { ...item, activeRequestCount: Math.max(0, item.activeRequestCount + delta) }
-            : item,
-        ),
-      })),
-    };
-  };
-
-  queryClient.setQueriesData<InfiniteData<GiveawayListResult>>(
-    { queryKey: QUERY_KEYS.GIVEAWAYS.LIST },
-    patchPages,
-  );
-  queryClient.setQueriesData<InfiniteData<GiveawayListResult>>(
-    { queryKey: QUERY_KEYS.GIVEAWAYS.ME },
-    patchPages,
-  );
-};
-
 const patchMyGiveawayRequestsByGiveawayId = (
   queryClient: QueryClient,
   authScope: AuthQueryScope,
@@ -191,9 +156,7 @@ export const applyGiveawayNotificationToCaches = (
       myRequest: current.myRequest
         ? { ...current.myRequest, status: GIVEAWAY_REQUEST_STATUS.REJECTED }
         : current.myRequest,
-      activeRequestCount: Math.max(0, current.activeRequestCount - 1),
     }));
-    patchGiveawayListActiveRequestCount(queryClient, giveawayId, -1);
     patchMyGiveawayRequestsByGiveawayId(queryClient, authScope, giveawayId, (item) =>
       item.status === GIVEAWAY_REQUEST_STATUS.PENDING
         ? { ...item, status: GIVEAWAY_REQUEST_STATUS.REJECTED }
