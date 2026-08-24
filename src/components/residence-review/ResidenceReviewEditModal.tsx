@@ -34,22 +34,15 @@ const ResidenceReviewEditModalContent = ({
   onSuccess,
 }: ResidenceReviewEditModalContentProps) => {
   const {
-    title,
-    content,
-    rating,
+    register,
+    control,
     titleError,
     contentError,
     submitError,
-    contentLength,
-    isSubmitting,
+    isPending,
     isSubmitDisabled,
     handleClose,
     handleSubmit,
-    handleTitleChange,
-    handleTitleBlur,
-    handleContentChange,
-    handleContentBlur,
-    handleRatingChange,
   } = useResidenceReviewEditForm({
     review,
     onClose,
@@ -59,7 +52,7 @@ const ResidenceReviewEditModalContent = ({
   return (
     <Modal
       open={open}
-      onClose={isSubmitting ? undefined : handleClose}
+      onClose={isPending ? undefined : handleClose}
       onExitComplete={onExitComplete}
       presentation="responsive"
       size="lg"
@@ -68,7 +61,7 @@ const ResidenceReviewEditModalContent = ({
     >
       <div className="flex w-full items-start justify-between gap-12">
         <Modal.Title>후기 수정</Modal.Title>
-        <Modal.Close onClose={handleClose} disabled={isSubmitting} />
+        <Modal.Close onClose={handleClose} disabled={isPending} />
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-24 overflow-y-auto xl:gap-32">
@@ -81,18 +74,11 @@ const ResidenceReviewEditModalContent = ({
         </FormField>
 
         <ResidenceReviewFormFields
-          title={title}
-          content={content}
-          rating={rating}
+          register={register}
+          control={control}
           titleError={titleError}
           contentError={contentError}
-          contentLength={contentLength}
-          isSubmitting={isSubmitting}
-          onTitleChange={handleTitleChange}
-          onTitleBlur={handleTitleBlur}
-          onContentChange={handleContentChange}
-          onContentBlur={handleContentBlur}
-          onRatingChange={handleRatingChange}
+          isPending={isPending}
         />
       </div>
 
@@ -103,7 +89,7 @@ const ResidenceReviewEditModalContent = ({
       ) : null}
 
       <Modal.Button fullWidth size="cta" disabled={isSubmitDisabled} onClick={handleSubmit}>
-        {isSubmitting ? "수정 중..." : "수정하기"}
+        {isPending ? "수정 중..." : "수정하기"}
       </Modal.Button>
     </Modal>
   );

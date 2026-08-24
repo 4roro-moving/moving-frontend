@@ -45,7 +45,6 @@ const ResidenceReviewPageView = ({
   const deleteMutation = useDeleteResidenceReview();
   const {
     canShowCreateButton,
-    defaultRegionId,
     isCreateOpen,
     isLoginRequiredOpen,
     openCreate,
@@ -148,7 +147,6 @@ const ResidenceReviewPageView = ({
 
       <ResidenceReviewCreateModal
         open={isCreateOpen}
-        defaultRegionId={defaultRegionId}
         onClose={closeCreate}
         onSuccess={() => setToastMessage("거주 후기를 작성했습니다.")}
       />

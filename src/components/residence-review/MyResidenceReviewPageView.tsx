@@ -47,7 +47,7 @@ const MyResidenceReviewPageView = () => {
     isPreviousDataLoading,
   } = useMyResidenceReviewList();
   const deleteMutation = useDeleteResidenceReview();
-  const { canShowCreateButton, defaultRegionId, isCreateOpen, openCreate, closeCreate } =
+  const { canShowCreateButton, isCreateOpen, openCreate, closeCreate } =
     useResidenceReviewCreateAction();
   const [reviewToEdit, setReviewToEdit] = useState<PublicResidenceReview | null>(null);
   const [reviewToDelete, setReviewToDelete] = useState<PublicResidenceReview | null>(null);
@@ -146,7 +146,6 @@ const MyResidenceReviewPageView = () => {
 
       <ResidenceReviewCreateModal
         open={isCreateOpen}
-        defaultRegionId={defaultRegionId}
         onClose={closeCreate}
         onSuccess={() => {
           setPage(1);
