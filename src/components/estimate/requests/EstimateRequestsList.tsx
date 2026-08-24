@@ -4,6 +4,8 @@ import EstimatesListEmptyState from "@/components/estimate/EstimatesListEmptySta
 import EstimateRequestCard from "@/components/estimate/requests/EstimateRequestCard";
 import { EstimateRequestListSkeleton } from "@/components/estimate/requests/EstimateRequestLoadingSkeletons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { PREVIOUS_DATA_LOADING_CLASS_NAME } from "@/lib/constants/loading";
+import { cn } from "@/lib/utils/cn";
 import type { EstimateRequestListStatusFilter, MyEstimateRequestItem } from "@/types/estimate";
 import type { Pagination as PaginationMeta } from "@/types/pagination";
 
@@ -30,8 +32,8 @@ interface EstimateRequestsListProps {
   statusFilter: EstimateRequestListStatusFilter;
   onStatusFilterChange: (filter: EstimateRequestListStatusFilter) => void;
   isFetching?: boolean;
-  /** keepPreviousData 잔상 — 필터/페이지 전환 중 이전 카드 숨김 */
-  isPlaceholderData?: boolean;
+  /** keepPreviousData로 이전 데이터를 표시하는 필터/페이지 전환 상태 */
+  isPreviousDataLoading?: boolean;
 }
 
 /**
@@ -49,7 +51,7 @@ export default function EstimateRequestsList({
   statusFilter,
   onStatusFilterChange,
   isFetching = false,
-  isPlaceholderData = false,
+  isPreviousDataLoading = false,
 }: EstimateRequestsListProps) {
   const isAllFilter = statusFilter === "all";
   const selectedLabel =
@@ -78,18 +80,19 @@ export default function EstimateRequestsList({
     </div>
   );
 
-  if (isPlaceholderData) {
-    return (
-      <div className="flex w-full flex-col gap-24 md:gap-40" aria-busy="true">
-        <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto w-full xl:px-0">
-          {filterSelect}
-        </div>
-        <EstimateRequestListSkeleton />
-      </div>
-    );
-  }
-
   if (pagination.totalCount === 0) {
+    if (isPreviousDataLoading) {
+      return (
+        <div className="flex w-full flex-col gap-24 md:gap-32">
+          <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto w-full xl:px-0">
+            {filterSelect}
+          </div>
+
+          <EstimateRequestListSkeleton />
+        </div>
+      );
+    }
+
     return isAllFilter ? (
       <div className="-translate-y-26 md:-translate-y-26 xl:-translate-y-40">
         <EstimatesListEmptyState
@@ -126,9 +129,17 @@ export default function EstimateRequestsList({
 
   return (
     <div
-      className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow flex w-full flex-col gap-24 md:gap-40 xl:px-0"
+      className={cn(
+        "px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow flex w-full flex-col gap-24 md:gap-40 xl:px-0",
+        isPreviousDataLoading && PREVIOUS_DATA_LOADING_CLASS_NAME,
+      )}
       aria-busy={isFetching}
     >
+      {isPreviousDataLoading ? (
+        <span className="sr-only" role="status">
+          보낸 견적 요청 목록을 불러오는 중이에요
+        </span>
+      ) : null}
       {filterSelect}
 
       <ul className="flex w-full flex-col gap-24 md:gap-40">

@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 
 import { useMyResidenceReviews } from "@/hooks/residence-review/useMyResidenceReviews";
+import { useListLoadingState } from "@/hooks/queries/useListLoadingState";
 import { RESIDENCE_REVIEW_PAGE_LIMIT } from "@/lib/constants/residenceReview";
 
 export const useMyResidenceReviewList = () => {
@@ -11,6 +12,7 @@ export const useMyResidenceReviewList = () => {
     page,
     limit: RESIDENCE_REVIEW_PAGE_LIMIT,
   });
+  const { isPreviousDataLoading } = useListLoadingState(query);
   const reviews = query.data?.reviews ?? [];
   const pagination = query.data?.pagination;
   const totalCount = pagination?.totalCount ?? 0;
@@ -43,5 +45,6 @@ export const useMyResidenceReviewList = () => {
     error: query.error,
     refetch: query.refetch,
     isFetching: query.isFetching,
+    isPreviousDataLoading,
   };
 };

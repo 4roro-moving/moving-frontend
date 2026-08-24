@@ -1,17 +1,34 @@
 import { Text } from "@/components/common/Text";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { cn } from "@/lib/utils/cn";
+import { PREVIOUS_DATA_LOADING_CLASS_NAME } from "@/lib/constants/loading";
 import { formatDateOnlyLabel } from "@/lib/utils/estimateFormat";
 import type { MoverReviewItem } from "@/types/review";
 
 interface MoverReviewListProps {
   isFetching: boolean;
+  isPreviousDataLoading: boolean;
   reviews: MoverReviewItem[];
 }
 
-export default function MoverReviewList({ isFetching, reviews }: MoverReviewListProps) {
+export default function MoverReviewList({
+  isFetching,
+  isPreviousDataLoading,
+  reviews,
+}: MoverReviewListProps) {
   return (
-    <ul className="flex w-full flex-col" aria-busy={isFetching}>
+    <ul
+      className={cn(
+        "flex w-full flex-col",
+        isPreviousDataLoading && PREVIOUS_DATA_LOADING_CLASS_NAME,
+      )}
+      aria-busy={isFetching}
+    >
+      {isPreviousDataLoading ? (
+        <li className="sr-only" role="status">
+          리뷰 목록을 불러오는 중이에요
+        </li>
+      ) : null}
       {reviews.map((review, index) => (
         <li
           key={review.id}

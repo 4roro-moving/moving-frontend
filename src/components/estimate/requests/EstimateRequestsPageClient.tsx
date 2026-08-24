@@ -7,6 +7,7 @@ import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { EstimateRequestListSkeleton } from "@/components/estimate/requests/EstimateRequestLoadingSkeletons";
 import { ESTIMATE_REQUEST_CANCELED_TOAST_KEY } from "@/components/estimate/requests/estimateRequestCancelToast";
 import EstimateRequestsList from "@/components/estimate/requests/EstimateRequestsList";
+import { useListLoadingState } from "@/hooks/queries/useListLoadingState";
 import { useEstimateRequestList } from "@/hooks/useEstimateRequestList";
 import { ESTIMATE_REQUEST_LIST_PAGE_LIMIT } from "@/lib/api/estimateRequests";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
@@ -52,12 +53,13 @@ export default function EstimateRequestsPageClient() {
 
   const listStatus = statusFilter === "all" ? undefined : statusFilter;
 
-  const { data, isLoading, isError, error, refetch, isFetching, isPlaceholderData } =
-    useEstimateRequestList({
-      page,
-      limit: ESTIMATE_REQUEST_LIST_PAGE_LIMIT,
-      ...(listStatus !== undefined ? { status: listStatus } : {}),
-    });
+  const query = useEstimateRequestList({
+    page,
+    limit: ESTIMATE_REQUEST_LIST_PAGE_LIMIT,
+    ...(listStatus !== undefined ? { status: listStatus } : {}),
+  });
+  const { data, isLoading, isError, error, refetch, isFetching, isPlaceholderData } = query;
+  const { isPreviousDataLoading } = useListLoadingState(query);
 
   const estimateRequests = data?.estimateRequests ?? [];
   const pagination = data?.pagination;
@@ -67,6 +69,7 @@ export default function EstimateRequestsPageClient() {
   // placeholder(이전 필터) 기준으로 Empty py를 바꾸지 않음
   const isEmpty =
     hasData && pagination != null && !isPlaceholderData && pagination.totalCount === 0;
+  const isAllFilterEmpty = isEmpty && statusFilter === "all";
 
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage);
@@ -82,7 +85,7 @@ export default function EstimateRequestsPageClient() {
     <div
       className={cn(
         "bg-background-default md:bg-background-subtle flex w-full flex-col items-center",
-        isEmpty ? "flex-1" : "py-38 md:py-32 xl:py-64",
+        isAllFilterEmpty ? "flex-1" : "py-38 md:py-32 xl:py-64",
       )}
     >
       {isLoading ? <EstimateRequestListSkeleton showFilter /> : null}
@@ -106,7 +109,7 @@ export default function EstimateRequestsPageClient() {
           statusFilter={statusFilter}
           onStatusFilterChange={handleStatusFilterChange}
           isFetching={isFetching}
-          isPlaceholderData={isPlaceholderData}
+          isPreviousDataLoading={isPreviousDataLoading}
         />
       ) : null}
 

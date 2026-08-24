@@ -10,6 +10,7 @@ import ResidenceReviewCardSkeletonList from "@/components/residence-review/Resid
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { useResidenceReviews } from "@/hooks/residence-review/useResidenceReviews";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { PREVIOUS_DATA_LOADING_CLASS_NAME } from "@/lib/constants/loading";
 import { cn } from "@/lib/utils/cn";
 import type { ResidenceReviewSearchParamsState } from "@/lib/utils/residenceReviewSearchParams";
 import type { PublicResidenceReview } from "@/types/residenceReview";
@@ -69,7 +70,7 @@ const ResidenceReviewList = ({ filters, onSelect, onPrefetch }: ResidenceReviewL
   } else {
     content = (
       <div
-        className={cn("flex flex-col gap-20", isFilterFetching && "opacity-60")}
+        className={cn("flex flex-col gap-20", isFilterFetching && PREVIOUS_DATA_LOADING_CLASS_NAME)}
         aria-busy={isFilterFetching}
       >
         {isFilterFetching ? (
