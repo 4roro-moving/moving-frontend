@@ -37,7 +37,7 @@ export const API_ROUTES = {
   ESTIMATE_REQUESTS: {
     ROOT: "/estimate-requests",
     DETAIL: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
-    // 2026.08.03 정슬기 - [추가] 견적 요청 soft cancel (DELETE)
+    // 2026.08.03 정슬기 - [추가] 견적 요청의 cancel (DELETE)
     DELETE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
     ACTIVE: "/estimate-requests/active",
     DESIGNATE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}/designate`,
@@ -77,6 +77,11 @@ export const API_ROUTES = {
     ROOT: "/reviews",
     ME: "/reviews/me",
     REVIEWABLE: "/reviews/reviewable",
+  },
+  /** 내가 작성한 콘텐츠 검수(숨김) 상세 — 알림 linkUrl과 동일 */
+  MY_CONTENTS: {
+    DETAIL: (contentType: string, contentId: number) =>
+      `/my-contents/${contentType}/${String(contentId)}`,
   },
   // 2026.08.22 김나연 - [추가] 나눔 API 경로
   GIVEAWAYS: {
@@ -132,5 +137,16 @@ export const API_ROUTES = {
     DETAIL: (inquiryId: number) => `/inquiries/${inquiryId}`,
     MESSAGES: (inquiryId: number) => `/inquiries/${inquiryId}/messages`,
     CLOSE: (inquiryId: number) => `/inquiries/${inquiryId}/close`,
+  },
+
+  REPORTS: {
+    ROOT: "/reports",
+    ME: "/reports/me",
+    IMAGE_UPLOAD_URL: "/reports/images/upload-url",
+  },
+
+  PRICE_PREDICTIONS: {
+    ROOT: "/price-predictions",
+    DISTANCE: "/price-predictions/distance",
   },
 } as const;

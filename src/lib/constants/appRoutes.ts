@@ -56,6 +56,11 @@ export const APP_ROUTES = {
     WRITABLE: "/reviews/writable",
     ME: "/reviews/me",
   },
+  /** 콘텐츠 숨김/복구 알림 상세 (카드 + 사유) */
+  MY_CONTENTS: {
+    DETAIL: (contentType: string, contentId: number) =>
+      `/my-contents/${contentType}/${String(contentId)}`,
+  },
   // 2026.08.20 김나연 - [수정] 커뮤니티 경로
   // 거주후기는 공개, 나눔은 (customer)/(protected)에서 RoleGuard로 보호합니다.
   COMMUNITY: {
@@ -108,4 +113,7 @@ export const APP_ROUTES = {
     ROOT: "/inquiries",
     DETAIL: (inquiryId: number) => `/inquiries/${inquiryId}`,
   },
+
+  /** AI 예상 견적 */
+  PRICE_PREDICTION: "/price-prediction",
 } as const;

@@ -18,6 +18,8 @@ import { useMyResidenceReviewList } from "@/hooks/residence-review/useMyResidenc
 import { useResidenceReviewCreateAction } from "@/hooks/residence-review/useResidenceReviewCreateAction";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { RESIDENCE_REVIEW_WRITE_BUTTON_LABEL } from "@/lib/constants/residenceReview";
+import { PREVIOUS_DATA_LOADING_CLASS_NAME } from "@/lib/constants/loading";
+import { cn } from "@/lib/utils/cn";
 import type { PublicResidenceReview } from "@/types/residenceReview";
 
 const EMPTY_DESCRIPTION = (
@@ -42,6 +44,7 @@ const MyResidenceReviewPageView = () => {
     error,
     refetch,
     isFetching,
+    isPreviousDataLoading,
   } = useMyResidenceReviewList();
   const deleteMutation = useDeleteResidenceReview();
   const { canShowCreateButton, defaultRegionId, isCreateOpen, openCreate, closeCreate } =
@@ -103,10 +106,21 @@ const MyResidenceReviewPageView = () => {
         ) : null}
 
         {hasList && pagination ? (
-          <div className="flex w-full flex-col gap-40" aria-busy={isFetching}>
+          <div className="flex w-full flex-col gap-40">
+            {isPreviousDataLoading ? (
+              <span className="sr-only" role="status">
+                내가 작성한 거주 후기 목록을 불러오는 중이에요
+              </span>
+            ) : null}
             <div className="flex w-full flex-col gap-20">
               {canShowCreateButton ? <ResidenceReviewCreateButton onClick={openCreate} /> : null}
-              <ul className="flex w-full flex-col gap-20">
+              <ul
+                className={cn(
+                  "flex w-full flex-col gap-20",
+                  isPreviousDataLoading && PREVIOUS_DATA_LOADING_CLASS_NAME,
+                )}
+                aria-busy={isPreviousDataLoading}
+              >
                 {reviews.map((review) => (
                   <li key={review.id}>
                     <MyResidenceReviewCard

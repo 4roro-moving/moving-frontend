@@ -7,6 +7,7 @@ import { Text } from "@/components/common/Text";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import { useMoversInfiniteScroll } from "@/hooks/useMoversInfiniteScroll";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
+import { PREVIOUS_DATA_LOADING_CLASS_NAME } from "@/lib/constants/loading";
 import { cn } from "@/lib/utils/cn";
 import type { ApiError } from "@/types/api";
 
@@ -67,7 +68,7 @@ const GiveawayInfiniteListChrome = <TPage,>({
   } else {
     content = (
       <div
-        className={cn("flex flex-col gap-20", isFilterFetching && "opacity-60")}
+        className={cn("flex flex-col gap-20", isFilterFetching && PREVIOUS_DATA_LOADING_CLASS_NAME)}
         aria-busy={isFilterFetching}
       >
         {isFilterFetching ? (

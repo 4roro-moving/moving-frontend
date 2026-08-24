@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 
 import { useApiInfiniteQuery } from "@/hooks/queries/useApiInfiniteQuery";
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
@@ -18,6 +18,7 @@ import type {
 export function useMoverEstimateRequests(query: MoverEstimateRequestQuery) {
   return useApiInfiniteQuery({
     ...getMoverEstimateRequestsInfiniteQueryOptions(query),
+    placeholderData: keepPreviousData,
   });
 }
 
