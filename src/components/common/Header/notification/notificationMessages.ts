@@ -1,4 +1,8 @@
-import { isGiveawayNotificationType, type NotificationType } from "@/types/notification";
+import {
+  GIVEAWAY_NOTIFICATION_TYPE,
+  isGiveawayNotificationType,
+  type NotificationType,
+} from "@/types/notification";
 
 export interface NotificationMessageTemplate {
   prefix: string;
@@ -88,27 +92,27 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
       suffix: "이 취소되었습니다.",
     },
     // 작성자에게 새 나눔 신청이 도착한 경우 알림 문구 (content가 완성 문장)
-    GIVEAWAY_REQUEST_RECEIVED: {
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_RECEIVED]: {
       prefix: "",
       suffix: "",
     },
     // 신청자가 수령자로 선정된 경우 알림 문구
-    GIVEAWAY_REQUEST_SELECTED: {
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_SELECTED]: {
       prefix: "",
       suffix: "",
     },
     // 신청자의 나눔 신청이 거절된 경우 알림 문구
-    GIVEAWAY_REQUEST_REJECTED: {
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_REJECTED]: {
       prefix: "",
       suffix: "",
     },
     // 작성자에게 신청 취소(대기/선정)가 도착한 경우 알림 문구
-    GIVEAWAY_REQUEST_CANCELED: {
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_CANCELED]: {
       prefix: "",
       suffix: "",
     },
     // 수령자에게 나눔 완료가 안내되는 경우 알림 문구
-    GIVEAWAY_COMPLETED: {
+    [GIVEAWAY_NOTIFICATION_TYPE.COMPLETED]: {
       prefix: "",
       suffix: "",
     },

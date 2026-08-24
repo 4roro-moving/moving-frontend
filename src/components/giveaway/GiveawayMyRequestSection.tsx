@@ -1,15 +1,6 @@
-"use client";
-
-import { useCallback, useMemo, useState } from "react";
-
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
-import Toast from "@/components/common/Toast/Toast";
-import GiveawayRequestCancelConfirmModal from "@/components/giveaway/GiveawayRequestCancelConfirmModal";
 import GiveawayRequestCardLayout from "@/components/giveaway/GiveawayRequestCardLayout";
-import GiveawayRequestEditModal from "@/components/giveaway/GiveawayRequestEditModal";
-import { useCancelGiveawayRequest } from "@/hooks/giveaway/useCancelGiveawayRequest";
-import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
   GIVEAWAY_EDIT_BUTTON_LABEL,
   GIVEAWAY_MY_REQUEST_SECTION_ID,
@@ -24,6 +15,8 @@ import type { GiveawayDetail, MyGiveawayRequestItem } from "@/types/giveaway";
 
 interface GiveawayMyRequestSectionProps {
   giveaway: GiveawayDetail;
+  onEdit: (request: MyGiveawayRequestItem) => void;
+  onCancel: (request: MyGiveawayRequestItem) => void;
 }
 
 const MY_REQUEST_CONTENT_TITLE_ID = "giveaway-my-request-content-title";
@@ -50,30 +43,12 @@ const toMyGiveawayRequestItem = (giveaway: GiveawayDetail): MyGiveawayRequestIte
   };
 };
 
-const GiveawayMyRequestSection = ({ giveaway }: GiveawayMyRequestSectionProps) => {
-  const request = useMemo(() => toMyGiveawayRequestItem(giveaway), [giveaway]);
-  const cancelMutation = useCancelGiveawayRequest();
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isCancelOpen, setIsCancelOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const handleConfirmCancel = useCallback(() => {
-    if (!request) {
-      return;
-    }
-
-    cancelMutation.mutate(request.id, {
-      onSuccess: () => {
-        setIsCancelOpen(false);
-        setToastMessage("나눔 신청을 취소했습니다.");
-      },
-      onError: (error) => {
-        setToastMessage(
-          getApiErrorMessage(error, "나눔 신청을 취소하지 못했습니다. 잠시 후 다시 시도해주세요."),
-        );
-      },
-    });
-  }, [cancelMutation, request]);
+const GiveawayMyRequestSection = ({
+  giveaway,
+  onEdit,
+  onCancel,
+}: GiveawayMyRequestSectionProps) => {
+  const request = toMyGiveawayRequestItem(giveaway);
 
   if (request === null) {
     return null;
@@ -113,7 +88,7 @@ const GiveawayMyRequestSection = ({ giveaway }: GiveawayMyRequestSectionProps) =
                   variant="solid"
                   size="cta"
                   fullWidth
-                  onClick={() => setIsEditOpen(true)}
+                  onClick={() => onEdit(request)}
                 >
                   {GIVEAWAY_EDIT_BUTTON_LABEL}
                 </Button>
@@ -124,7 +99,7 @@ const GiveawayMyRequestSection = ({ giveaway }: GiveawayMyRequestSectionProps) =
                   variant="outline"
                   size="cta"
                   fullWidth
-                  onClick={() => setIsCancelOpen(true)}
+                  onClick={() => onCancel(request)}
                 >
                   취소하기
                 </Button>
@@ -151,21 +126,6 @@ const GiveawayMyRequestSection = ({ giveaway }: GiveawayMyRequestSectionProps) =
           </Text>
         </div>
       </GiveawayRequestCardLayout>
-
-      <GiveawayRequestEditModal
-        open={isEditOpen}
-        request={request}
-        onClose={() => setIsEditOpen(false)}
-        onSuccess={() => setToastMessage("신청 내용을 수정했습니다.")}
-      />
-      <GiveawayRequestCancelConfirmModal
-        open={isCancelOpen}
-        request={request}
-        isPending={cancelMutation.isPending}
-        onClose={() => setIsCancelOpen(false)}
-        onConfirm={handleConfirmCancel}
-      />
-      {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}
     </section>
   );
 };

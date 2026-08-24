@@ -18,6 +18,7 @@ import {
   type GiveawayRequestMyListResult,
   type MyGiveawayRequestItem,
 } from "@/types/giveaway";
+import { GIVEAWAY_NOTIFICATION_TYPE } from "@/types/notification";
 
 export const toGiveawayMyRequest = (request: GiveawayRequestItem): GiveawayMyRequest => {
   return {
@@ -176,23 +177,14 @@ const patchMyGiveawayRequestsByGiveawayId = (
   );
 };
 
-/** SSE 알림을 화면 캐시에 바로 반영합니다. refetch 전에 버튼·카운트가 바뀌도록 합니다. */
+/** SSE 알림 중 글 ID만으로 안전하게 맞출 수 있는 상태만 즉시 반영합니다. */
 export const applyGiveawayNotificationToCaches = (
   queryClient: QueryClient,
   authScope: AuthQueryScope,
   type: string | undefined,
   giveawayId: number,
 ) => {
-  if (type === "GIVEAWAY_REQUEST_RECEIVED") {
-    patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
-      ...current,
-      activeRequestCount: current.activeRequestCount + 1,
-    }));
-    patchGiveawayListActiveRequestCount(queryClient, giveawayId, 1);
-    return;
-  }
-
-  if (type === "GIVEAWAY_REQUEST_REJECTED") {
+  if (type === GIVEAWAY_NOTIFICATION_TYPE.REQUEST_REJECTED) {
     patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
       ...current,
       canRequest: current.status === GIVEAWAY_STATUS.AVAILABLE,
@@ -210,16 +202,7 @@ export const applyGiveawayNotificationToCaches = (
     return;
   }
 
-  if (type === "GIVEAWAY_REQUEST_CANCELED") {
-    patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
-      ...current,
-      activeRequestCount: Math.max(0, current.activeRequestCount - 1),
-    }));
-    patchGiveawayListActiveRequestCount(queryClient, giveawayId, -1);
-    return;
-  }
-
-  if (type === "GIVEAWAY_REQUEST_SELECTED") {
+  if (type === GIVEAWAY_NOTIFICATION_TYPE.REQUEST_SELECTED) {
     patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
       ...current,
       status: GIVEAWAY_STATUS.IN_PROGRESS,
@@ -231,7 +214,7 @@ export const applyGiveawayNotificationToCaches = (
     return;
   }
 
-  if (type === "GIVEAWAY_COMPLETED") {
+  if (type === GIVEAWAY_NOTIFICATION_TYPE.COMPLETED) {
     patchGiveawayDetailQueryData(queryClient, authScope, giveawayId, (current) => ({
       ...current,
       status: GIVEAWAY_STATUS.COMPLETED,

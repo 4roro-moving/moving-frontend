@@ -8,7 +8,11 @@ import { logout as logoutApi } from "@/lib/api/auth";
 import { subscribeNotificationSse } from "@/lib/api/notificationSse";
 import { ensureAccessTokenRefreshed } from "@/lib/auth/refreshAccessToken";
 import { getAccessToken } from "@/lib/auth/token";
-import { QUERY_KEYS } from "@/lib/constants/queryKeys";
+import {
+  getGiveawayDetailQueryKey,
+  getGiveawayRequestsScopeQueryKey,
+  QUERY_KEYS,
+} from "@/lib/constants/queryKeys";
 import { applyGiveawayNotificationToCaches } from "@/lib/queryOptions/giveawayCache";
 import { parseGiveawayIdFromNotificationLinkUrl } from "@/lib/utils/notificationLink";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -115,6 +119,12 @@ export function useNotificationSse() {
 
       if (giveawayId !== null) {
         applyGiveawayNotificationToCaches(queryClient, authScope, type, giveawayId);
+        void queryClient.invalidateQueries({
+          queryKey: getGiveawayDetailQueryKey(authScope, giveawayId),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: getGiveawayRequestsScopeQueryKey(giveawayId),
+        });
       }
 
       refetchActiveGiveawayQueries();
@@ -143,8 +153,6 @@ export function useNotificationSse() {
             }
 
             syncGiveawayQueriesFromNotification(notification.type, notification.linkUrl);
-          } else {
-            refetchActiveGiveawayQueries();
           }
 
           void queryClient.invalidateQueries({ queryKey: unreadCountQueryKey });
