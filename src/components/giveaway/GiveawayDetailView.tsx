@@ -11,6 +11,7 @@ import GiveawayCreateModal from "@/components/giveaway/GiveawayCreateModal";
 import GiveawayDetailActions from "@/components/giveaway/GiveawayDetailActions";
 import GiveawayDetailDivider from "@/components/giveaway/GiveawayDetailDivider";
 import GiveawayDetailImageSlider from "@/components/giveaway/GiveawayDetailImageSlider";
+import GiveawayMyRequestSection from "@/components/giveaway/GiveawayMyRequestSection";
 import GiveawayReceivedRequestList from "@/components/giveaway/GiveawayReceivedRequestList";
 import GiveawayProfileAvatar from "@/components/giveaway/GiveawayProfileAvatar";
 import GiveawayReportButton from "@/components/giveaway/GiveawayReportButton";
@@ -23,6 +24,7 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import {
   GIVEAWAY_COMPLETE_BUTTON_LABEL,
   GIVEAWAY_DETAIL_TITLE,
+  GIVEAWAY_MY_REQUEST_SECTION_ID,
   GIVEAWAY_PREFERRED_REGION_LABEL,
   canApplyGiveaway,
   hasActiveGiveawayRequest,
@@ -60,7 +62,9 @@ const GiveawayDetailView = ({
   const [deleteError, setDeleteError] = useState<string | undefined>();
   const [completeError, setCompleteError] = useState<string | undefined>();
   const writtenAt = formatRelativeTime(giveaway.createdAt);
+  const hasApplied = hasActiveGiveawayRequest(giveaway.myRequest?.status);
   const showReceivedRequests = isAuthor;
+  const showMyRequest = !isAuthor && hasApplied;
 
   const handleCloseDelete = () => {
     if (deleteMutation.isPending) {
@@ -88,6 +92,13 @@ const GiveawayDetailView = ({
     } catch (error) {
       setDeleteError(getApiErrorMessage(error, "나눔 글을 삭제하지 못했습니다."));
     }
+  };
+
+  const handleViewRequest = () => {
+    document.getElementById(GIVEAWAY_MY_REQUEST_SECTION_ID)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   const handleComplete = async () => {
@@ -167,7 +178,7 @@ const GiveawayDetailView = ({
               status={giveaway.status}
               isAuthor={isAuthor}
               canRequest={canApplyGiveaway(giveaway)}
-              hasApplied={hasActiveGiveawayRequest(giveaway.myRequest?.status)}
+              hasApplied={hasApplied}
               isCompletePending={completeMutation.isPending}
               onEdit={() => setIsEditOpen(true)}
               onDelete={() => {
@@ -179,6 +190,7 @@ const GiveawayDetailView = ({
                 setIsCompleteOpen(true);
               }}
               onApply={() => setIsApplyOpen(true)}
+              onViewRequest={handleViewRequest}
             />
 
             <div className="flex items-center gap-12">
@@ -219,6 +231,13 @@ const GiveawayDetailView = ({
               isPending={isRequestsPending}
               query={requestsQuery}
             />
+          </>
+        ) : null}
+
+        {showMyRequest ? (
+          <>
+            <GiveawayDetailDivider />
+            <GiveawayMyRequestSection giveaway={giveaway} />
           </>
         ) : null}
       </div>
