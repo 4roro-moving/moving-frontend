@@ -23,6 +23,7 @@ const getInquiryAuthOptions = () => {
   return {
     // 제한 세션은 /api/inquiries 경로의 HttpOnly Cookie로 자동 전송된다.
     // 남아 있는 일반 Access Token이 제한 세션보다 우선 적용되지 않게 한다.
+    baseURL: "/api",
     skipAuth: true,
     skipRefresh: true,
   } as const;
