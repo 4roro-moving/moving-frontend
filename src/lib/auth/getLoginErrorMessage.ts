@@ -3,6 +3,9 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getAudienceMismatchMessage, type AuthAudience } from "@/lib/auth/redirect";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
 
+export const isAccountSuspended = (error: unknown): boolean =>
+  getApiError(error).code === ERROR_CODES.ACCOUNT_SUSPENDED.code;
+
 export const getAccountSuspensionReason = (error: unknown): string | undefined => {
   const { code, data } = getApiError(error);
 

@@ -20,6 +20,7 @@ import { resolveAuthUserImage } from "@/lib/api/profile";
 import {
   getAccountSuspensionReason,
   getLoginErrorMessage,
+  isAccountSuspended,
   isSuspensionAppealAvailable,
 } from "@/lib/auth/getLoginErrorMessage";
 import { consumePasswordChangedToast } from "@/lib/auth/passwordChangedToast";
@@ -51,6 +52,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [suspensionReason, setSuspensionReason] = useState<string | null>(null);
+  const [isSuspended, setIsSuspended] = useState(false);
   const [isAppealAvailable, setIsAppealAvailable] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -82,6 +84,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
     setSuspensionReason(null);
+    setIsSuspended(false);
     setIsAppealAvailable(false);
 
     try {
@@ -102,6 +105,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       establishSession(await resolveAuthUserImage(result.user));
     } catch (error) {
       setSuspensionReason(getAccountSuspensionReason(error) ?? null);
+      setIsSuspended(isAccountSuspended(error));
       setIsAppealAvailable(isSuspensionAppealAvailable(error));
       setSubmitError(getLoginErrorMessage(error, audience));
     }
@@ -139,9 +143,9 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
             </FormField>
           </div>
 
-          {suspensionReason ? (
+          {isSuspended ? (
             <AccountSuspensionNotice
-              reason={suspensionReason}
+              reason={suspensionReason ?? "정지 사유를 확인할 수 없습니다."}
               onAppealClick={
                 isAppealAvailable
                   ? () => {
