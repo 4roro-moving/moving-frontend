@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { type ReactNode } from "react";
 
 import { Text, type TextVariantProp } from "@/components/common/Text";
@@ -38,9 +39,11 @@ const FormField = ({
   variant = "default",
   labelVariant,
   required = false,
-  requiredLabel = "필수",
+  requiredLabel,
   description,
 }: FormFieldProps) => {
+  const tr = useTranslations("common");
+  const resolvedRequiredLabel = requiredLabel ?? tr("required");
   const isAuth = variant === "auth";
   const resolvedLabelVariant = labelVariant ?? FORM_FIELD_LABEL_VARIANTS[variant];
   const labelClassName = isAuth ? "text-text-secondary" : "text-text-tertiary";
@@ -58,7 +61,7 @@ const FormField = ({
           >
             *
           </Text>
-          <span className="sr-only">{requiredLabel}</span>
+          <span className="sr-only">{resolvedRequiredLabel}</span>
         </>
       ) : null}
     </>

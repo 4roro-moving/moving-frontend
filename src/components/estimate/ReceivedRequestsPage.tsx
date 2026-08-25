@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
@@ -29,6 +31,8 @@ import RejectEstimateModal from "./RejectEstimateModal";
 import SendEstimateModal from "./SendEstimateModal";
 
 export default function ReceivedRequestsPage() {
+  const tr = useTranslations("estimates");
+  const tm = useTranslations("moverSearch");
   const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -88,7 +92,7 @@ export default function ReceivedRequestsPage() {
 
   return (
     <>
-      <PageHeader title="받은 요청" />
+      <PageHeader title={tr("mover.receivedTitle")} />
 
       <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-24 pb-80 md:px-72 xl:gap-40 xl:px-0">
         <section className="flex flex-col gap-24">
@@ -102,8 +106,8 @@ export default function ReceivedRequestsPage() {
                 setKeyword("");
               }}
               className="w-full"
-              placeholder="어떤 고객님을 찾고 계세요?"
-              aria-label="고객명 검색"
+              placeholder={tr("mover.searchPlaceholder")}
+              aria-label={tr("mover.searchAria")}
             />
           </form>
 
@@ -125,13 +129,13 @@ export default function ReceivedRequestsPage() {
                       });
                     }}
                   >
-                    {moveType.label}
+                    {tm(`moveTypes.${moveType.value}`)}
                   </SelectableChip>
                 );
               })}
             </div>
             <Text as="p" variant="md-regular" className="text-text-muted mt-4">
-              기사님이 제공하는 서비스 유형의 견적 요청만 확인할 수 있어요.
+              {tr("mover.serviceTypeHint")}
             </Text>
           </div>
         </section>
@@ -141,7 +145,7 @@ export default function ReceivedRequestsPage() {
             <Skeleton className="hidden h-26 w-72 xl:block" />
           ) : (
             <Text as="p" variant="2lg-semibold" className="text-text-secondary hidden xl:block">
-              전체 {totalCount}건
+              {tr("mover.totalCount", { count: totalCount })}
             </Text>
           )}
 
@@ -150,7 +154,7 @@ export default function ReceivedRequestsPage() {
               <Skeleton className="h-20 w-64 xl:hidden" />
             ) : (
               <Text as="p" variant="md-semibold" className="text-text-secondary xl:hidden">
-                전체 {totalCount}건
+                {tr("mover.totalCount", { count: totalCount })}
               </Text>
             )}
 
@@ -163,7 +167,7 @@ export default function ReceivedRequestsPage() {
                     isDesignated: includeDesignated ? undefined : true,
                   })
                 }
-                label="지정 견적 요청"
+                label={tr("mover.designated")}
               />
 
               <Checkbox
@@ -174,14 +178,14 @@ export default function ReceivedRequestsPage() {
                     isServiceArea: serviceAreaOnly ? undefined : true,
                   })
                 }
-                label="서비스 가능 지역"
+                label={tr("mover.serviceAreaOnly")}
               />
             </div>
 
             <div className="flex items-center gap-4">
               <Select
-                desc="정렬"
-                label="요청 정렬"
+                desc={tr("mover.sort")}
+                label={tr("mover.sortAria")}
                 variant="sort"
                 size="lg"
                 defaultValue={sort}
@@ -191,19 +195,19 @@ export default function ReceivedRequestsPage() {
                   value="requestedAt"
                   onPrefetch={() => prefetchRequests({ sort: "requestedAt" })}
                 >
-                  요청일 빠른순
+                  {tr("mover.sortRequestedAt")}
                 </Select.Option>
                 <Select.Option
                   value="moveDate"
                   onPrefetch={() => prefetchRequests({ sort: "moveDate" })}
                 >
-                  이사 빠른순
+                  {tr("mover.sortMoveDate")}
                 </Select.Option>
               </Select>
 
               <button
                 type="button"
-                aria-label="필터 열기"
+                aria-label={tr("mover.openFilter")}
                 onClick={() => setIsFilterOpen(true)}
                 className="border-filter-button-border flex h-32 w-32 items-center justify-center rounded-lg border xl:hidden"
               >
@@ -216,7 +220,7 @@ export default function ReceivedRequestsPage() {
 
           {query.isError && (
             <Text as="p" variant="lg-regular" className="text-text-error py-80 text-center">
-              받은 요청을 불러오지 못했어요.
+              {tr("mover.receivedLoadFailed")}
             </Text>
           )}
 
@@ -230,7 +234,7 @@ export default function ReceivedRequestsPage() {
                 height={196}
               />
               <Text as="p" variant="xl-regular" className="text-text-subtle">
-                아직 받은 요청이 없어요!
+                {tr("mover.receivedEmpty")}
               </Text>
             </div>
           ) : null}
@@ -248,7 +252,7 @@ export default function ReceivedRequestsPage() {
               >
                 {isPreviousDataLoading ? (
                   <span className="sr-only" role="status">
-                    받은 요청 목록을 불러오는 중이에요
+                    {tr("mover.receivedLoading")}
                   </span>
                 ) : null}
                 {items.map((request) => (
@@ -312,13 +316,13 @@ export default function ReceivedRequestsPage() {
                       });
                     }}
                   >
-                    {moveType.label}
+                    {tm(`moveTypes.${moveType.value}`)}
                   </SelectableChip>
                 );
               })}
             </div>
             <Text as="p" variant="xs-regular" className="text-text-muted mt-4">
-              기사님이 제공하는 서비스 유형의 견적 요청만 확인할 수 있어요.
+              {tr("mover.serviceTypeHint")}
             </Text>
           </section>
 

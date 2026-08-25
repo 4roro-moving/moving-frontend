@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import {
   ESTIMATE_LIST_PANEL_PADDING_CLASSNAME,
@@ -151,9 +155,10 @@ function ReceivedEstimatePanelSkeleton() {
 }
 
 export function PendingEstimatesLoadingSkeleton() {
+  const tr = useTranslations("estimates");
   return (
     <div role="status" className="flex w-full flex-col">
-      <span className="sr-only">대기 중인 견적을 불러오는 중</span>
+      <span className="sr-only">{tr("pendingLoading")}</span>
       <div className="bg-background-default shadow-sub-header flex w-full flex-col">
         <div className="px-margin-mobile md:px-margin-tablet xl:px-sub-header-padding-left-desktop xl:pr-sub-header-padding-right-desktop py-24 md:py-28 xl:py-24">
           <div className="max-w-container-pending-mobile md:max-w-container-pending-tablet xl:max-w-container-pending-desktop mx-auto flex w-full flex-col gap-20 md:gap-28 xl:flex-row xl:items-center xl:justify-between xl:gap-20">
@@ -189,12 +194,13 @@ export function PendingEstimatesLoadingSkeleton() {
 }
 
 export function ReceivedEstimatesLoadingSkeleton() {
+  const tr = useTranslations("estimates");
   return (
     <div
       role="status"
       className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow flex w-full flex-col gap-24 md:gap-40 xl:px-0"
     >
-      <span className="sr-only">받은 견적을 불러오는 중</span>
+      <span className="sr-only">{tr("receivedLoading")}</span>
       <ReceivedEstimatePanelSkeleton />
       <ReceivedEstimatePanelSkeleton />
     </div>

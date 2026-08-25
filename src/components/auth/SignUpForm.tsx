@@ -2,7 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import AuthHeader from "@/components/auth/AuthHeader";
@@ -20,7 +21,7 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getProfilePath, getSocialSignUpPath, type AuthAudience } from "@/lib/auth/redirect";
 import { hasRequiredTermsAgreed } from "@/lib/auth/termsAgreement";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { signUpSchema, type SignUpFormValues } from "@/lib/schemas/signUpSchema";
+import { createSignUpSchema, type SignUpFormValues } from "@/lib/schemas/signUpSchema";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -29,6 +30,24 @@ interface SignUpFormProps {
 }
 
 const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
+  const t = useTranslations("auth");
+  const schema = useMemo(
+    () =>
+      createSignUpSchema({
+        nameRequired: t("validation.nameRequired"),
+        nameMaxLength: t("validation.nameMaxLength"),
+        emailRequired: t("validation.emailRequired"),
+        emailInvalid: t("validation.emailInvalid"),
+        phoneRequired: t("validation.phoneRequired"),
+        phoneInvalid: t("validation.phoneInvalid"),
+        passwordRequired: t("validation.passwordRequired"),
+        passwordMinLength: t("validation.passwordMinLength"),
+        passwordConfirmRequired: t("validation.passwordConfirmRequired"),
+        passwordMismatch: t("validation.passwordMismatch"),
+      }),
+    [t],
+  );
+
   const customerSignUp = useSignUpMutation();
   const moverSignUp = useSignUpMoverMutation();
   const { mutateAsync: signUp, isPending } = audience === "mover" ? moverSignUp : customerSignUp;
@@ -50,7 +69,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
     handleSubmit,
     formState: { errors, isValid, isSubmitting },
   } = useForm<SignUpFormValues>({
-    resolver: zodResolver(signUpSchema),
+    resolver: zodResolver(schema),
     mode: "onChange",
     defaultValues: {
       name: "",
@@ -67,17 +86,16 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
     setSubmitError(null);
 
     if (!hasRequiredTerms) {
-      setSubmitError("가입에 필요한 약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      setSubmitError(t("termsRequiredLoadFailed"));
       return;
     }
 
     if (!hasRequiredTermsAgreed(signUpTerms, agreementsById)) {
-      setSubmitError("필수 약관에 동의해 주세요.");
+      setSubmitError(t("termsRequiredAgreement"));
       return;
     }
 
     try {
-      // establishSession(onSuccess) 전에 목적지 예약 — GuestOnly가 profile로 이동
       setPostAuthRedirectPath(getProfilePath(audience));
       await signUp({
         email: values.email,
@@ -99,39 +117,39 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
         <form className="flex w-full flex-col gap-32 md:gap-56" onSubmit={onSubmit} noValidate>
           <div className="flex w-full flex-col gap-16 md:gap-32">
-            <FormField label="이름" labelFor="name" variant="auth">
+            <FormField label={t("name")} labelFor="name" variant="auth">
               <Input
                 id="name"
                 size="md"
                 type="text"
                 autoComplete="name"
-                placeholder="성함을 입력해 주세요"
+                placeholder={t("namePlaceholder")}
                 error={errors.name?.message}
                 maxLength={50}
                 {...register("name")}
               />
             </FormField>
 
-            <FormField label="이메일" labelFor="email" variant="auth">
+            <FormField label={t("email")} labelFor="email" variant="auth">
               <Input
                 id="email"
                 size="md"
                 type="email"
                 autoComplete="email"
-                placeholder="이메일을 입력해 주세요"
+                placeholder={t("emailPlaceholder")}
                 error={errors.email?.message}
                 {...register("email")}
               />
             </FormField>
 
-            <FormField label="전화번호" labelFor="phone" variant="auth">
+            <FormField label={t("phone")} labelFor="phone" variant="auth">
               <Input
                 id="phone"
                 size="md"
                 type="tel"
                 inputMode="numeric"
                 autoComplete="tel"
-                placeholder="숫자만 입력해 주세요"
+                placeholder={t("phonePlaceholder")}
                 numericOnly
                 stripLeadingZeros={false}
                 error={errors.phone?.message}
@@ -139,23 +157,23 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
               />
             </FormField>
 
-            <FormField label="비밀번호" labelFor="password" variant="auth">
+            <FormField label={t("password")} labelFor="password" variant="auth">
               <PasswordInput
                 id="password"
                 size="md"
                 autoComplete="new-password"
-                placeholder="비밀번호를 입력해 주세요"
+                placeholder={t("passwordPlaceholder")}
                 error={errors.password?.message}
                 {...register("password")}
               />
             </FormField>
 
-            <FormField label="비밀번호 확인" labelFor="passwordConfirm" variant="auth">
+            <FormField label={t("passwordConfirm")} labelFor="passwordConfirm" variant="auth">
               <PasswordInput
                 id="passwordConfirm"
                 size="md"
                 autoComplete="new-password"
-                placeholder="비밀번호를 다시 한번 입력해 주세요"
+                placeholder={t("passwordConfirmPlaceholder")}
                 error={errors.passwordConfirm?.message}
                 {...register("passwordConfirm")}
               />
@@ -171,13 +189,13 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
 
           {isTermsError ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
-              약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+              {t("termsLoadFailed")}
             </Text>
           ) : null}
 
           {!isTermsLoading && !isTermsError && !hasRequiredTerms ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
-              가입에 필요한 약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+              {t("termsRequiredLoadFailed")}
             </Text>
           ) : null}
 
@@ -194,7 +212,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
             fullWidth
             disabled={!isValid || !canAgree || isSubmitting || isPending}
           >
-            시작하기
+            {t("start")}
           </Button>
         </form>
 
@@ -204,7 +222,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
             variant={{ base: "xs-regular", md: "xl-regular" }}
             className="text-text-description"
           >
-            이미 무빙 회원이신가요?
+            {t("alreadyMember")}
           </Text>
           <Link
             href={loginHref}
@@ -213,7 +231,7 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
               "text-text-brand",
             )}
           >
-            로그인
+            {t("login")}
           </Link>
         </p>
       </div>
@@ -225,14 +243,14 @@ const SignUpForm = ({ audience = "customer" }: SignUpFormProps) => {
             variant={{ base: "xs-regular", md: "xl-regular" }}
             className="text-text-description"
           >
-            SNS 계정으로 간편 가입하기
+            {t("socialSignUp")}
           </Text>
           <Text
             as="p"
             variant={{ base: "xs-regular", md: "md-regular" }}
             className="text-text-description text-center"
           >
-            SNS 회원가입 시 약관 동의 페이지로 이동합니다.
+            {t("socialSignUpTermsHint")}
           </Text>
         </div>
         <SocialLoginButtons

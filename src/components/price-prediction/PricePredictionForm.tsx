@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useEffectEvent, useId, useState, type FormEvent, type ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -22,41 +23,9 @@ interface PricePredictionFormProps {
 
 type RegionKind = "출발지" | "도착지";
 
-const MOVE_TYPES: {
-  value: PricePredictionMoveType;
-  label: string;
-}[] = [
-  {
-    value: "SMALL",
-    label: "소형/원룸",
-  },
-  {
-    value: "HOME",
-    label: "가정 이사",
-  },
-  {
-    value: "OFFICE",
-    label: "사무실 이사",
-  },
-];
+const MOVE_TYPES: PricePredictionMoveType[] = ["SMALL", "HOME", "OFFICE"];
 
-const LOAD_AMOUNTS: {
-  value: PricePredictionLoadAmount;
-  label: string;
-}[] = [
-  {
-    value: "LOW",
-    label: "적음",
-  },
-  {
-    value: "MEDIUM",
-    label: "보통",
-  },
-  {
-    value: "HIGH",
-    label: "많음",
-  },
-];
+const LOAD_AMOUNTS: PricePredictionLoadAmount[] = ["LOW", "MEDIUM", "HIGH"];
 
 const inputClassName = cn(
   "rounded-12 border-border-default text-text-primary",
@@ -91,6 +60,7 @@ function hasSameCoordinates(current: AddressItem | null, next: AddressItem): boo
 }
 
 export default function PricePredictionForm({ isPending, onSubmit }: PricePredictionFormProps) {
+  const t = useTranslations("pricePrediction");
   const [today, setToday] = useState(() => formatDateToKstISODate(new Date()));
 
   const [moveType, setMoveType] = useState<PricePredictionMoveType>("HOME");
@@ -276,18 +246,18 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
         {/* 이사 유형 */}
         <div className="flex flex-col gap-16">
           <Text as="h2" variant="lg-semibold" className="text-text-primary">
-            이사 유형
+            {t("form.moveType")}
           </Text>
 
           <div className="grid grid-cols-1 gap-12 sm:grid-cols-3">
             {MOVE_TYPES.map((type) => {
-              const isSelected = moveType === type.value;
+              const isSelected = moveType === type;
 
               return (
                 <button
-                  key={type.value}
+                  key={type}
                   type="button"
-                  onClick={() => setMoveType(type.value)}
+                  onClick={() => setMoveType(type)}
                   disabled={isPending}
                   className={cn(
                     "rounded-12 flex h-54 items-center justify-center border transition-colors",
@@ -302,7 +272,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
                     variant={isSelected ? "md-semibold" : "md-medium"}
                     className={isSelected ? "text-text-brand" : "text-text-primary"}
                   >
-                    {type.label}
+                    {t(`moveTypes.${type}`)}
                   </Text>
                 </button>
               );
@@ -313,7 +283,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
         {/* 날짜 / 짐량 */}
         <div className="grid grid-cols-1 gap-20 md:grid-cols-2">
           <label className="flex flex-col gap-10">
-            <FieldLabel>이사 예정일</FieldLabel>
+            <FieldLabel>{t("form.moveDate")}</FieldLabel>
 
             <input
               type="date"
@@ -327,7 +297,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
           </label>
 
           <label className="flex flex-col gap-10">
-            <FieldLabel>짐량</FieldLabel>
+            <FieldLabel>{t("form.loadAmount")}</FieldLabel>
 
             <select
               value={loadAmount}
@@ -336,8 +306,8 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
               className={inputClassName}
             >
               {LOAD_AMOUNTS.map((amount) => (
-                <option key={amount.value} value={amount.value}>
-                  {amount.label}
+                <option key={amount} value={amount}>
+                  {t(`loadAmounts.${amount}`)}
                 </option>
               ))}
             </select>
@@ -347,7 +317,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
         {/* 주소 */}
         <div className="grid grid-cols-1 gap-20 md:grid-cols-2">
           <AddressField
-            label="출발지"
+            label={t("form.origin")}
             address={fromAddress}
             disabled={isPending || isDistancePending}
             onClick={() => setAddressModalKind("출발지")}
@@ -355,7 +325,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
           />
 
           <AddressField
-            label="도착지"
+            label={t("form.destination")}
             address={toAddress}
             disabled={isPending || isDistancePending}
             onClick={() => setAddressModalKind("도착지")}
@@ -365,7 +335,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
 
         {/* 이동 거리 */}
         <div className="flex flex-col gap-10">
-          <FieldLabel>이동 거리</FieldLabel>
+          <FieldLabel>{t("form.distance")}</FieldLabel>
 
           <div
             className={cn(
@@ -381,27 +351,26 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
                 />
 
                 <Text as="span" variant="md-medium" className="text-text-subtle">
-                  실제 이동 거리를 계산하고 있어요.
+                  {t("form.distanceCalculating")}
                 </Text>
               </div>
             ) : isDistanceError && fromAddress && toAddress ? (
               <Text as="span" variant="md-medium" className="text-text-error">
-                이동 거리를 계산하지 못했습니다. 주소를 다시 선택해주세요.
+                {t("form.distanceError")}
               </Text>
             ) : distanceKm !== null ? (
               <div className="flex w-full items-center justify-between gap-12">
                 <Text as="span" variant="md-semibold" className="text-text-primary">
-                  약 {distanceKm}
-                  km
+                  {t("form.distanceValue", { distance: distanceKm })}
                 </Text>
 
                 <Text as="span" variant="xs-regular" className="text-text-subtle">
-                  자동차 이동 경로 기준
+                  {t("form.drivingRoute")}
                 </Text>
               </div>
             ) : (
               <Text as="span" variant="md-medium" className="text-text-placeholder">
-                출발지와 도착지를 선택하면 자동으로 계산됩니다.
+                {t("form.distancePlaceholder")}
               </Text>
             )}
           </div>
@@ -409,7 +378,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
 
         {/* 평수 */}
         <label className="flex flex-col gap-10">
-          <FieldLabel>평수</FieldLabel>
+          <FieldLabel>{t("form.houseSize")}</FieldLabel>
 
           <div className="relative">
             <input
@@ -429,7 +398,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
               variant="md-medium"
               className="text-text-subtle pointer-events-none absolute top-1/2 right-20 -translate-y-1/2"
             >
-              평
+              {t("form.pyeongUnit")}
             </Text>
           </div>
         </label>
@@ -437,14 +406,14 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
         {/* 출발지 조건 */}
         <div className="flex flex-col gap-16">
           <Text as="h3" variant="lg-semibold" className="text-text-primary">
-            출발지 조건
+            {t("form.originConditions")}
           </Text>
 
           <div className="grid grid-cols-1 gap-20 md:grid-cols-2">
             <FloorInput value={fromFloor} disabled={isPending} onChange={setFromFloor} />
 
             <BooleanField
-              label="엘리베이터"
+              label={t("form.elevator")}
               value={fromElevator}
               disabled={isPending}
               onChange={setFromElevator}
@@ -455,14 +424,14 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
         {/* 도착지 조건 */}
         <div className="flex flex-col gap-16">
           <Text as="h3" variant="lg-semibold" className="text-text-primary">
-            도착지 조건
+            {t("form.destinationConditions")}
           </Text>
 
           <div className="grid grid-cols-1 gap-20 md:grid-cols-2">
             <FloorInput value={toFloor} disabled={isPending} onChange={setToFloor} />
 
             <BooleanField
-              label="엘리베이터"
+              label={t("form.elevator")}
               value={toElevator}
               disabled={isPending}
               onChange={setToElevator}
@@ -472,10 +441,10 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
 
         {/* 사다리차 */}
         <BooleanField
-          label="사다리차"
+          label={t("form.ladderTruck")}
           value={ladderTruck}
-          trueLabel="사용"
-          falseLabel="미사용"
+          trueLabel={t("form.use")}
+          falseLabel={t("form.notUse")}
           disabled={isPending}
           onChange={setLadderTruck}
         />
@@ -492,10 +461,10 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
         >
           <Text as="span" variant="lg-semibold" className="text-text-inverse">
             {isPending
-              ? "예상 견적 계산 중..."
+              ? t("form.predicting")
               : isDistancePending
-                ? "이동 거리 계산 중..."
-                : "예상 견적 확인하기"}
+                ? t("form.distanceCalculatingShort")
+                : t("form.submit")}
           </Text>
         </button>
       </form>
@@ -513,7 +482,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
 }
 
 interface AddressFieldProps {
-  label: RegionKind;
+  label: string;
   address: AddressItem | null;
   disabled: boolean;
   onClick: () => void;
@@ -521,6 +490,8 @@ interface AddressFieldProps {
 }
 
 function AddressField({ label, address, disabled, onClick, onReset }: AddressFieldProps) {
+  const t = useTranslations("pricePrediction");
+
   return (
     <div className="flex flex-col gap-10">
       <FieldLabel>{label}</FieldLabel>
@@ -531,7 +502,7 @@ function AddressField({ label, address, disabled, onClick, onReset }: AddressFie
             type="button"
             onClick={onClick}
             disabled={disabled}
-            aria-label={`${label}: ${address.roadAddress} 변경`}
+            aria-label={t("form.changeAddressAria", { label, address: address.roadAddress })}
             className={cn(
               "rounded-12 border-border-brand flex min-h-54 w-full items-center border px-20 text-left",
               "hover:bg-background-brand-muted transition-colors",
@@ -547,7 +518,7 @@ function AddressField({ label, address, disabled, onClick, onReset }: AddressFie
             type="button"
             onClick={onReset}
             disabled={disabled}
-            aria-label={`${label} 다시 선택`}
+            aria-label={t("form.reselectAddressAria", { label })}
             className="self-end disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Text
@@ -555,7 +526,7 @@ function AddressField({ label, address, disabled, onClick, onReset }: AddressFie
               variant="sm-medium"
               className="text-text-subtle hover:text-text-primary"
             >
-              다시 선택
+              {t("form.reselect")}
             </Text>
           </button>
         </div>
@@ -571,7 +542,7 @@ function AddressField({ label, address, disabled, onClick, onReset }: AddressFie
           )}
         >
           <Text as="span" variant="md-semibold" className="text-text-brand">
-            {label} 선택하기
+            {t("form.selectAddress", { label })}
           </Text>
         </button>
       )}
@@ -586,9 +557,11 @@ interface FloorInputProps {
 }
 
 function FloorInput({ value, disabled, onChange }: FloorInputProps) {
+  const t = useTranslations("pricePrediction");
+
   return (
     <label className="flex flex-col gap-10">
-      <FieldLabel>층수</FieldLabel>
+      <FieldLabel>{t("form.floor")}</FieldLabel>
 
       <div className="relative">
         <input
@@ -608,7 +581,7 @@ function FloorInput({ value, disabled, onChange }: FloorInputProps) {
           variant="md-medium"
           className="text-text-subtle pointer-events-none absolute top-1/2 right-20 -translate-y-1/2"
         >
-          층
+          {t("form.floorUnit")}
         </Text>
       </div>
     </label>
@@ -628,11 +601,14 @@ function BooleanField({
   label,
   value,
   disabled,
-  trueLabel = "있음",
-  falseLabel = "없음",
+  trueLabel,
+  falseLabel,
   onChange,
 }: BooleanFieldProps) {
+  const t = useTranslations("pricePrediction");
   const groupLabelId = useId();
+  const resolvedTrueLabel = trueLabel ?? t("form.yes");
+  const resolvedFalseLabel = falseLabel ?? t("form.no");
 
   return (
     <div className="flex flex-col gap-10">
@@ -642,11 +618,11 @@ function BooleanField({
 
       <div role="radiogroup" aria-labelledby={groupLabelId} className="grid grid-cols-2 gap-8">
         <BooleanButton selected={!value} disabled={disabled} onClick={() => onChange(false)}>
-          {falseLabel}
+          {resolvedFalseLabel}
         </BooleanButton>
 
         <BooleanButton selected={value} disabled={disabled} onClick={() => onChange(true)}>
-          {trueLabel}
+          {resolvedTrueLabel}
         </BooleanButton>
       </div>
     </div>

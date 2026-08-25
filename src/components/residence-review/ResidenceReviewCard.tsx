@@ -1,5 +1,7 @@
 "use client";
 
+import { useFormatter, useTranslations } from "next-intl";
+
 import Image from "next/image";
 import type { ReactNode } from "react";
 
@@ -8,10 +10,7 @@ import ResidenceReviewRatingText from "@/components/residence-review/ResidenceRe
 import { ProfileDefaultIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import {
-  formatResidenceReviewAuthorName,
   formatResidenceReviewRating,
-  formatResidenceReviewRegionLabel,
-  formatResidenceReviewWrittenDate,
   getResidenceReviewAuthorImageSrc,
 } from "@/lib/utils/residenceReviewFormat";
 import type { PublicResidenceReview } from "@/types/residenceReview";
@@ -23,17 +22,36 @@ interface ResidenceReviewCardProps {
 }
 
 const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCardProps) => {
+  const t = useTranslations("residenceReview");
+  const format = useFormatter();
   const authorImageSrc = getResidenceReviewAuthorImageSrc(review.author.imageUrl);
-  const authorName = formatResidenceReviewAuthorName(review.author.name);
-  const regionLabel = formatResidenceReviewRegionLabel(review.region);
-  const writtenDate = formatResidenceReviewWrittenDate(review.createdAt);
+  const authorName = review.author.name.trim() || t("customer");
+  const regionName = t(`regions.${String(review.region.id)}`);
+  const regionLabel =
+    review.region.averageRating && review.region.averageRating > 0
+      ? t("regionWithAverage", {
+          region: regionName,
+          rating: formatResidenceReviewRating(review.region.averageRating),
+        })
+      : t("regionResident", { region: regionName });
+  const writtenDate = Number.isNaN(new Date(review.createdAt).getTime())
+    ? ""
+    : format.dateTime(new Date(review.createdAt), {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
   const titleId = `residence-review-${String(review.id)}-title`;
   const descriptionId = `residence-review-${String(review.id)}-description`;
 
   const content: ReactNode = (
     <>
       <span id={descriptionId} className="sr-only">
-        {`${authorName}, 평점 ${formatResidenceReviewRating(review.rating)}, ${regionLabel}`}
+        {t("cardAria", {
+          author: authorName,
+          rating: formatResidenceReviewRating(review.rating),
+          region: regionLabel,
+        })}
       </span>
       <div className="flex w-full items-center gap-16 md:gap-20">
         <div className="bg-background-avatar rounded-12 relative hidden size-64 shrink-0 overflow-hidden md:block md:size-80">
@@ -96,7 +114,7 @@ const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCa
 
       {writtenDate ? (
         <Text as="span" variant="xs-medium" className="text-text-muted self-end md:hidden">
-          작성일 {writtenDate}
+          {t("writtenDateValue", { date: writtenDate })}
         </Text>
       ) : null}
     </>

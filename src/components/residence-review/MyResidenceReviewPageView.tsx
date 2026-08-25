@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useCallback, useState } from "react";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
@@ -17,20 +19,13 @@ import { useDeleteResidenceReview } from "@/hooks/residence-review/useDeleteResi
 import { useMyResidenceReviewList } from "@/hooks/residence-review/useMyResidenceReviewList";
 import { useResidenceReviewCreateAction } from "@/hooks/residence-review/useResidenceReviewCreateAction";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { RESIDENCE_REVIEW_WRITE_BUTTON_LABEL } from "@/lib/constants/residenceReview";
+
 import { PREVIOUS_DATA_LOADING_CLASS_NAME } from "@/lib/constants/loading";
 import { cn } from "@/lib/utils/cn";
 import type { PublicResidenceReview } from "@/types/residenceReview";
 
-const EMPTY_DESCRIPTION = (
-  <>
-    아직 작성한 거주 후기가 없어요.
-    <br />
-    거주 중인 지역에 대한 후기를 남겨보세요.
-  </>
-);
-
 const MyResidenceReviewPageView = () => {
+  const t = useTranslations("residenceReview");
   const {
     reviews,
     pagination,
@@ -62,20 +57,18 @@ const MyResidenceReviewPageView = () => {
     deleteMutation.mutate(reviewToDelete.id, {
       onSuccess: () => {
         setReviewToDelete(null);
-        setToastMessage("거주 후기를 삭제했습니다.");
+        setToastMessage(t("deleteSuccess"));
       },
       onError: (error) => {
-        setToastMessage(
-          getApiErrorMessage(error, "거주 후기를 삭제하지 못했습니다. 잠시 후 다시 시도해주세요."),
-        );
+        setToastMessage(getApiErrorMessage(error, t("deleteFailed")));
       },
     });
-  }, [deleteMutation, reviewToDelete]);
+  }, [deleteMutation, reviewToDelete, t]);
 
   return (
     <div className="bg-background-subtle flex w-full flex-col items-center">
       <Text as="h1" variant="2xl-bold" className="sr-only">
-        내가 작성한 거주 후기
+        {t("myPageTitle")}
       </Text>
 
       <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto flex w-full flex-col gap-40 pt-40 pb-60 md:pb-52 xl:px-0 xl:pt-54 xl:pb-200">
@@ -83,11 +76,8 @@ const MyResidenceReviewPageView = () => {
 
         {isError ? (
           <EstimatesQueryStatus
-            message={getApiErrorMessage(
-              error,
-              "내가 작성한 거주 후기를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
-            )}
-            actionLabel="다시 시도"
+            message={getApiErrorMessage(error, t("myListLoadFailed"))}
+            actionLabel={t("retry")}
             onAction={() => {
               void refetch();
             }}
@@ -99,8 +89,14 @@ const MyResidenceReviewPageView = () => {
           <EmptyState
             size="sm"
             imageSrc="/images/empty/character.png"
-            description={EMPTY_DESCRIPTION}
-            buttonLabel={canShowCreateButton ? RESIDENCE_REVIEW_WRITE_BUTTON_LABEL : undefined}
+            description={
+              <>
+                {t("myEmptyTitle")}
+                <br />
+                {t("myEmptyDescription")}
+              </>
+            }
+            buttonLabel={canShowCreateButton ? t("write") : undefined}
             onActionClick={canShowCreateButton ? openCreate : undefined}
           />
         ) : null}
@@ -109,7 +105,7 @@ const MyResidenceReviewPageView = () => {
           <div className="flex w-full flex-col gap-40">
             {isPreviousDataLoading ? (
               <span className="sr-only" role="status">
-                내가 작성한 거주 후기 목록을 불러오는 중이에요
+                {t("myListLoading")}
               </span>
             ) : null}
             <div className="flex w-full flex-col gap-20">
@@ -149,7 +145,7 @@ const MyResidenceReviewPageView = () => {
         onClose={closeCreate}
         onSuccess={() => {
           setPage(1);
-          setToastMessage("거주 후기를 작성했습니다.");
+          setToastMessage(t("createSuccess"));
         }}
       />
 
@@ -157,7 +153,7 @@ const MyResidenceReviewPageView = () => {
         open={reviewToEdit !== null}
         review={reviewToEdit}
         onClose={() => setReviewToEdit(null)}
-        onSuccess={() => setToastMessage("거주 후기를 수정했습니다.")}
+        onSuccess={() => setToastMessage(t("editSuccess"))}
       />
 
       <ResidenceReviewDeleteConfirmModal

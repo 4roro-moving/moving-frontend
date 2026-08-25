@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -86,6 +87,7 @@ const finalizeOAuthCallback = async ({
 };
 
 const OAuthCallbackContent = () => {
+  const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const params = useParams<{ provider: string }>();
@@ -108,21 +110,19 @@ const OAuthCallbackContent = () => {
 
       if (providerError) {
         failOAuthCallback(
-          providerError === "access_denied"
-            ? "소셜 로그인이 취소되었습니다."
-            : "소셜 로그인에 실패했습니다.",
+          providerError === "access_denied" ? t("oauthCanceled") : t("oauthFailed"),
           setError,
         );
         return;
       }
 
       if (!isOAuthProvider(routeProvider)) {
-        failOAuthCallback("지원하지 않는 소셜 로그인입니다.", setError);
+        failOAuthCallback(t("oauthUnsupportedProvider"), setError);
         return;
       }
 
       if (!code) {
-        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
+        failOAuthCallback(t("oauthInvalidInfo"), setError);
         return;
       }
 
@@ -151,17 +151,17 @@ const OAuthCallbackContent = () => {
           return;
         }
 
-        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
+        failOAuthCallback(t("oauthInvalidInfo"), setError);
         return;
       }
 
       if (pending.provider !== routeProvider) {
-        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
+        failOAuthCallback(t("oauthInvalidInfo"), setError);
         return;
       }
 
       if (pending.intent !== "login" && pending.intent !== "signup") {
-        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
+        failOAuthCallback(t("oauthInvalidInfo"), setError);
         return;
       }
 
@@ -174,7 +174,7 @@ const OAuthCallbackContent = () => {
           !getCompletedOAuthExchange(routeProvider, code) &&
           !isOAuthExchangePending(routeProvider, code)
         ) {
-          failOAuthCallback("유효하지 않은 요청입니다.", setError);
+          failOAuthCallback(t("invalidRequest"), setError);
           return;
         }
       }
@@ -229,7 +229,7 @@ const OAuthCallbackContent = () => {
     };
 
     void run();
-  }, [searchParams, params.provider, establishSession, router]);
+  }, [searchParams, params.provider, establishSession, router, t]);
 
   return <OAuthLayout error={error} loginHref={loginHref} />;
 };

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -59,13 +61,17 @@ function isChatImageContentType(value: string): value is ChatImageContentType {
   return (CHAT_IMAGE_CONTENT_TYPES as readonly string[]).includes(value);
 }
 
-function validateChatImageFile(file: File): string | null {
+function validateChatImageFile(
+  file: File,
+  imageTypeError: string,
+  imageSizeError: string,
+): string | null {
   if (!isChatImageContentType(file.type)) {
-    return "jpg, png, webp 형식의 이미지만 첨부할 수 있습니다.";
+    return imageTypeError;
   }
 
   if (file.size > CHAT_IMAGE_MAX_SIZE) {
-    return "채팅 이미지는 25MB 이하만 첨부할 수 있습니다.";
+    return imageSizeError;
   }
 
   return null;
@@ -80,6 +86,7 @@ export function useChatRoomModalController({
   open,
   estimateId,
 }: UseChatRoomModalControllerOptions) {
+  const t = useTranslations("chat");
   const [room, setRoom] = useState<ChatRoom | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [createErrorMessage, setCreateErrorMessage] = useState<string | null>(null);
@@ -99,13 +106,11 @@ export function useChatRoomModalController({
           setCreateErrorMessage(null);
         },
         onError: (error) => {
-          setCreateErrorMessage(
-            getApiErrorMessage(error, "일시적인 오류로 채팅방을 열 수 없습니다."),
-          );
+          setCreateErrorMessage(getApiErrorMessage(error, t("openFailed")));
         },
       },
     );
-  }, [estimateId, getOrCreateChatRoom]);
+  }, [estimateId, getOrCreateChatRoom, t]);
 
   useEffect(() => {
     if (!open) {
@@ -140,6 +145,7 @@ export function useConnectedChatRoomModalController({
   open,
   room,
 }: UseConnectedChatRoomModalControllerOptions) {
+  const t = useTranslations("chat");
   const queryClient = useQueryClient();
   const [messageValue, setMessageValue] = useState("");
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -218,11 +224,15 @@ export function useConnectedChatRoomModalController({
   const selectImageFile = useCallback(
     (file: File) => {
       if (isComposerDisabled) {
-        setToastMessage(room?.messageDisabledReason ?? "메시지를 보낼 수 없는 채팅방입니다.");
+        setToastMessage(room?.messageDisabledReason ?? t("messageDisabled"));
         return;
       }
 
-      const validationMessage = validateChatImageFile(file);
+      const validationMessage = validateChatImageFile(
+        file,
+        t("imageTypeError"),
+        t("imageSizeError"),
+      );
 
       if (validationMessage) {
         setToastMessage(validationMessage);
@@ -238,7 +248,7 @@ export function useConnectedChatRoomModalController({
       setMessageValue("");
       setToastMessage(null);
     },
-    [isComposerDisabled, revokeSelectedImagePreview, room?.messageDisabledReason],
+    [isComposerDisabled, revokeSelectedImagePreview, room?.messageDisabledReason, t],
   );
 
   useEffect(() => () => revokeSelectedImagePreview(), [revokeSelectedImagePreview]);
@@ -251,7 +261,7 @@ export function useConnectedChatRoomModalController({
     const contentType = file.type;
 
     if (!isChatImageContentType(contentType)) {
-      setToastMessage("jpg, png, webp 형식의 이미지만 첨부할 수 있습니다.");
+      setToastMessage(t("imageTypeError"));
       return;
     }
 
@@ -279,7 +289,7 @@ export function useConnectedChatRoomModalController({
 
       clearSelectedImage();
     } catch (error) {
-      setToastMessage(getApiErrorMessage(error, "이미지를 첨부하지 못했습니다."));
+      setToastMessage(getApiErrorMessage(error, t("imageAttachFailed")));
     } finally {
       setIsImageSending(false);
     }
@@ -392,7 +402,7 @@ export function useConnectedChatRoomModalController({
   };
 
   const messagesErrorMessage = messagesQuery.isError
-    ? getApiErrorMessage(messagesQuery.error, "대화 내역을 불러오지 못했습니다.")
+    ? getApiErrorMessage(messagesQuery.error, t("messagesLoadFailed"))
     : null;
 
   return {

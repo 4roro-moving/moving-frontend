@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import Button from "@/components/common/Button/Button";
@@ -29,6 +30,7 @@ export default function EstimateChatAction({
   onClick,
 }: EstimateChatActionProps) {
   const router = useRouter();
+  const t = useTranslations("chat.entry");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const chatRoomMutation = useGetOrCreateChatRoom();
 
@@ -42,7 +44,7 @@ export default function EstimateChatAction({
       const room = await chatRoomMutation.mutateAsync({ estimateId });
       router.push(APP_ROUTES.CHATS.ROOM(room.id));
     } catch (error) {
-      setToastMessage(getApiErrorMessage(error, "채팅방을 준비하지 못했습니다."));
+      setToastMessage(getApiErrorMessage(error, t("prepareFailed")));
     }
   };
 
@@ -58,7 +60,7 @@ export default function EstimateChatAction({
           onClick={() => void handleClick()}
           rightIcon={<WriteIcon className="size-20 shrink-0" aria-hidden="true" />}
         >
-          {chatRoomMutation.isPending ? "채팅 준비 중" : "채팅하기"}
+          {chatRoomMutation.isPending ? t("preparing") : t("openChat")}
         </Button>
       </div>
 

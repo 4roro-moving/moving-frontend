@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
@@ -31,11 +32,8 @@ interface MoverAuthGateProps {
  *
  * ADMIN 홈 경로는 getRoleHomePath의 임시 정책(기사님 찾기)을 그대로 사용합니다.
  */
-const MoverAuthGate = ({
-  children,
-  loadingMessage = "로그인 상태를 확인하는 중입니다.",
-  loadingFallback,
-}: MoverAuthGateProps) => {
+const MoverAuthGate = ({ children, loadingMessage, loadingFallback }: MoverAuthGateProps) => {
+  const t = useTranslations("auth");
   const router = useRouter();
   const pathname = usePathname();
   const { isPending, isAuthenticated, isMover, canFetch, user } = useMoverAuthReady();
@@ -55,7 +53,7 @@ const MoverAuthGate = ({
   }, [isPending, isAuthenticated, isMover, user?.role, pathname, router]);
 
   const resolvedLoadingFallback = loadingFallback ?? (
-    <EstimatesQueryStatus message={loadingMessage} />
+    <EstimatesQueryStatus message={loadingMessage ?? t("checkingLoginStatus")} />
   );
 
   if (isPending || !canFetch) {

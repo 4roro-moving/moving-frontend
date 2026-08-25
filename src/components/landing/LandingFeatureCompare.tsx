@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 
 import { Text } from "@/components/common/Text";
 
@@ -12,7 +13,9 @@ import { Text } from "@/components/common/Text";
  * // 2026.08.02 정슬기 - [수정] Desktop 랜딩 인스턴스 에셋 + cqw 텍스트 스케일(줄바꿈·위치 맞춤)
  * // 2026.08.02 정슬기 - [수정] img4 Figma 원본 재적용(가공 번짐 제거, 캔버스만 밝게)
  */
-export default function LandingFeatureCompare() {
+export default async function LandingFeatureCompare() {
+  const t = await getTranslations("landing");
+
   return (
     <>
       {/* Desktop — 1920×1081, text (417,153.33) 32px/42lh nowrap */}
@@ -20,16 +23,16 @@ export default function LandingFeatureCompare() {
         <div className="@container relative mx-auto aspect-[1920/1081] w-full max-w-[1920px]">
           <Image
             src="/images/landing/img4-lg.png"
-            alt="여러 업체의 견적 카드 비교 예시"
+            alt={t("compareImageAlt")}
             fill
             draggable={false}
             className="pointer-events-none object-cover object-top select-none"
             sizes="(min-width: 1280px) 1920px, 100vw"
           />
           <h2 className="text-text-secondary absolute top-[14.18%] left-[21.72%] z-10 text-[length:calc(32/1920*100cqw)] leading-[calc(42/1920*100cqw)] font-bold whitespace-nowrap">
-            여러 업체의 견적을
+            {t("compareTitleLine1")}
             <br />
-            한눈에 비교하고 선택해요
+            {t("compareTitleLine2")}
           </h2>
         </div>
       </section>
@@ -39,16 +42,16 @@ export default function LandingFeatureCompare() {
         <div className="@container relative aspect-[744/1008] w-full">
           <Image
             src="/images/landing/img4-md.png"
-            alt="여러 업체의 견적 카드 비교 예시"
+            alt={t("compareImageAlt")}
             fill
             draggable={false}
             className="pointer-events-none object-cover object-top select-none"
             sizes="100vw"
           />
           <h2 className="text-text-secondary absolute top-[5.6%] left-[4.3%] z-10 text-[length:calc(32/744*100cqw)] leading-[calc(42/744*100cqw)] font-bold whitespace-nowrap">
-            여러 업체의 견적을
+            {t("compareTitleLine1")}
             <br />
-            한눈에 비교하고 선택해요
+            {t("compareTitleLine2")}
           </h2>
         </div>
       </section>
@@ -58,7 +61,7 @@ export default function LandingFeatureCompare() {
         <div className="@container relative aspect-[375/1076] w-full">
           <Image
             src="/images/landing/img4-sm.png"
-            alt="여러 업체의 견적 카드 비교 예시"
+            alt={t("compareImageAlt")}
             fill
             draggable={false}
             className="pointer-events-none object-cover object-top select-none"
@@ -69,9 +72,9 @@ export default function LandingFeatureCompare() {
             variant="xl-bold"
             className="text-text-secondary absolute top-[5.2%] left-[8.5%] z-10 w-[200px] max-w-[calc(100%-64px)] text-left"
           >
-            여러 업체의 견적을
+            {t("compareTitleLine1")}
             <br />
-            한눈에 비교하고 선택해요
+            {t("compareTitleLine2")}
           </Text>
         </div>
       </section>

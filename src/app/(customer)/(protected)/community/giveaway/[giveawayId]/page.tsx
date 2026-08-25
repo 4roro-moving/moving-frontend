@@ -1,13 +1,13 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import GiveawayDetailClient from "@/components/giveaway/GiveawayDetailClient";
-import { GIVEAWAY_DETAIL_TITLE } from "@/lib/constants/giveaway";
 
-export const metadata: Metadata = {
-  title: GIVEAWAY_DETAIL_TITLE,
-  description: "나눔 글 상세와 신청 내역을 확인하세요.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("giveaway");
+  return { title: t("metadata.detailTitle"), description: t("metadata.detailDescription") };
+}
 
 interface GiveawayDetailPageProps {
   params: Promise<{ giveawayId: string }>;

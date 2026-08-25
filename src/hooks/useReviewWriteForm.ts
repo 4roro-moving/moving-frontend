@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useState } from "react";
 
 import { useCreateReview } from "@/hooks/useCreateReview";
@@ -23,6 +25,7 @@ export function useReviewWriteForm({
   onError,
   preview = false,
 }: UseReviewWriteFormOptions) {
+  const t = useTranslations("reviews");
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
   const [isContentTouched, setIsContentTouched] = useState(false);
@@ -50,7 +53,7 @@ export function useReviewWriteForm({
 
   const contentValidationError =
     isContentTouched && !isContentValid
-      ? `리뷰 내용은 ${MIN_TEXT_CONTENT_LENGTH}자 이상 ${MAX_TEXT_CONTENT_LENGTH}자 이하로 입력해 주세요.`
+      ? t("contentLengthError", { min: MIN_TEXT_CONTENT_LENGTH, max: MAX_TEXT_CONTENT_LENGTH })
       : undefined;
 
   const isSubmitDisabled = isSubmitting || rating < 1 || !isContentValid;

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import Link from "next/link";
 import { memo } from "react";
 
@@ -65,6 +67,7 @@ function MoverCard({
   onFavoriteError,
   selection,
 }: MoverCardProps) {
+  const tr = useTranslations("moverSearch");
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
 
   const toggleFavorite = (nextIsFavorite: boolean) => {
@@ -87,7 +90,7 @@ function MoverCard({
   };
 
   const detailHref = APP_ROUTES.MOVERS.DETAIL(mover.id);
-  const detailLabel = `${mover.name} 기사님 상세 보기`;
+  const detailLabel = tr("card.detailAria", { name: mover.name });
 
   const selectionControl = selection ? (
     <div
@@ -102,7 +105,7 @@ function MoverCard({
       <Checkbox
         checked={selection.checked}
         onCheckedChange={(checked) => selection.onCheckedChange(mover.id, checked)}
-        aria-label={`${mover.name} 기사님 선택`}
+        aria-label={tr("card.selectAria", { name: mover.name })}
       />
     </div>
   ) : null;
@@ -143,7 +146,7 @@ function MoverCard({
                     <DriverBadgeIcon className="h-[18.2px] w-16 shrink-0" />
 
                     <Text as="span" variant="md-semibold" className="text-text-secondary">
-                      {mover.name} 기사님
+                      {tr("card.nameWithSuffix", { name: mover.name })}
                     </Text>
                   </div>
                   <FavoriteButton
@@ -222,7 +225,7 @@ function MoverCard({
                     {mover.name}
                   </Text>
                   <Text as="span" variant="md-semibold" className="text-text-secondary">
-                    기사님
+                    {tr("card.moverSuffix")}
                   </Text>
                 </div>
                 <FavoriteButton
@@ -284,7 +287,7 @@ function MoverCard({
                     {mover.name}
                   </Text>
                   <Text as="span" variant="lg-semibold" className="text-text-secondary">
-                    기사님
+                    {tr("card.moverSuffix")}
                   </Text>
                 </div>
                 <MoverMeta

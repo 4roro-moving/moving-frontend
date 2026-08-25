@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -53,6 +55,7 @@ function isMoverDetailPath(pathname: string): boolean {
  * // 2026.08.10 정슬기 - [수정] 포커스 접근성 및 라우트 전환 stale focus 방지
  */
 export default function ScrollToTopButton() {
+  const t = useTranslations("common");
   const pathname = usePathname();
 
   const [scrolledPastThreshold, setScrolledPastThreshold] = useState(false);
@@ -103,7 +106,7 @@ export default function ScrollToTopButton() {
   return (
     <button
       type="button"
-      aria-label="맨 위로"
+      aria-label={t("scrollToTop")}
       aria-hidden={!show}
       tabIndex={show ? 0 : -1}
       onFocus={() => {

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { cn } from "@/lib/utils/cn";
 
@@ -139,13 +140,16 @@ export function MoverCardSkeletonList({
   className,
   itemClassName,
   showSelection = false,
-  label = "기사님 목록을 불러오는 중",
+  label,
 }: MoverCardSkeletonListProps) {
+  const t = useTranslations("moverSearch");
+  const resolvedLabel = label ?? t("loading");
+
   return (
     <ul
       className={cn("flex flex-col", variant === "compact" ? "gap-16" : "gap-20", className)}
       aria-busy="true"
-      aria-label={label}
+      aria-label={resolvedLabel}
     >
       {Array.from({ length: count }, (_, index) => (
         <li key={index}>

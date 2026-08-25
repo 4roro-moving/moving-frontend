@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -15,8 +17,6 @@ import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import type { MoveType } from "@/types/move";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
 
-const TOAST_FAILURE_MESSAGE = "견적 요청에 실패했습니다.";
-
 interface UseCreateEstimateRequestOptions {
   onError?: (message: string) => void;
 }
@@ -30,17 +30,18 @@ interface SubmitEstimateRequestParams {
   toDetailAddress?: string;
 }
 
-function getCreateEstimateErrorMessage(error: unknown): string {
+function getCreateEstimateErrorMessage(error: unknown, fallback: string): string {
   const { code } = getApiError(error);
 
   if (code === "ACTIVE_REQUEST_EXISTS") {
     return ERROR_CODES.ACTIVE_REQUEST_EXISTS.message;
   }
 
-  return TOAST_FAILURE_MESSAGE;
+  return fallback;
 }
 
 export function useCreateEstimateRequest(options?: UseCreateEstimateRequestOptions) {
+  const t = useTranslations("estimateRequest");
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -74,7 +75,7 @@ export function useCreateEstimateRequest(options?: UseCreateEstimateRequestOptio
         return;
       }
 
-      options?.onError?.(getCreateEstimateErrorMessage(error));
+      options?.onError?.(getCreateEstimateErrorMessage(error, t("createFailed")));
     },
   });
 

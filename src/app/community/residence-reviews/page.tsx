@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
 
 import ResidenceReviewPageView from "@/components/residence-review/ResidenceReviewPageView";
@@ -7,9 +8,9 @@ import { ROLE_STORAGE_KEY, parseSoftUxAuthRole } from "@/lib/auth/role";
 import { REFRESH_TOKEN_COOKIE_NAME } from "@/lib/auth/token";
 import { parseResidenceReviewSearchParams } from "@/lib/utils/residenceReviewSearchParams";
 
-export const metadata: Metadata = {
-  title: "거주 후기",
-  description: "지역별 거주 후기를 확인하고 검색·필터로 찾아보세요.",
+export const generateMetadata = async (): Promise<Metadata> => {
+  const t = await getTranslations("residenceReview");
+  return { title: t("pageTitle"), description: t("pageDescription") };
 };
 
 interface ResidenceReviewsPageProps {

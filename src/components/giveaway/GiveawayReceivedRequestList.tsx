@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
@@ -8,16 +9,7 @@ import GiveawayConfirmModal from "@/components/giveaway/GiveawayConfirmModal";
 import GiveawayInfiniteListChrome from "@/components/giveaway/GiveawayInfiniteListChrome";
 import GiveawayReceivedRequestCard from "@/components/giveaway/GiveawayReceivedRequestCard";
 import { useGiveawayReceivedRequestActions } from "@/hooks/giveaway/useGiveawayReceivedRequestActions";
-import {
-  GIVEAWAY_RECEIVED_REQUESTS_EMPTY,
-  GIVEAWAY_RECEIVED_REQUESTS_ERROR,
-  GIVEAWAY_RECEIVED_REQUESTS_LOADING,
-  GIVEAWAY_RECEIVED_REQUESTS_NEXT_PAGE_ERROR,
-  GIVEAWAY_RECEIVED_REQUESTS_NEXT_PAGE_LOADING,
-  GIVEAWAY_RECEIVED_REQUESTS_TITLE,
-  GIVEAWAY_REJECT_BUTTON_LABEL,
-  GIVEAWAY_SHARE_BUTTON_LABEL,
-} from "@/lib/constants/giveaway";
+import {} from "@/lib/constants/giveaway";
 import type { ApiError } from "@/types/api";
 import type {
   GiveawayRequestItem,
@@ -78,6 +70,7 @@ const GiveawayReceivedRequestList = ({
   isPending = false,
   query,
 }: GiveawayReceivedRequestListProps) => {
+  const t = useTranslations("giveaway");
   const {
     selectedRequest,
     rejectedRequest,
@@ -105,7 +98,7 @@ const GiveawayReceivedRequestList = ({
         variant={{ base: "xl-bold", md: "2xl-bold" }}
         className="text-text-primary"
       >
-        {GIVEAWAY_RECEIVED_REQUESTS_TITLE}
+        {t("receivedRequestsTitle")}
       </Text>
 
       <GiveawayInfiniteListChrome
@@ -117,19 +110,19 @@ const GiveawayReceivedRequestList = ({
           <>
             <GiveawayReceivedRequestSkeletonList />
             <p className="sr-only" role="status">
-              {GIVEAWAY_RECEIVED_REQUESTS_LOADING}
+              {t("receivedRequestsLoading")}
             </p>
           </>
         }
         emptyFallback={
           <Text as="p" variant="md-medium" className="text-text-muted">
-            {GIVEAWAY_RECEIVED_REQUESTS_EMPTY}
+            {t("receivedRequestsEmpty")}
           </Text>
         }
-        initialErrorFallback={GIVEAWAY_RECEIVED_REQUESTS_ERROR}
-        fetchingStatusLabel={GIVEAWAY_RECEIVED_REQUESTS_LOADING}
-        nextPageLoadingLabel={GIVEAWAY_RECEIVED_REQUESTS_NEXT_PAGE_LOADING}
-        nextPageErrorMessage={GIVEAWAY_RECEIVED_REQUESTS_NEXT_PAGE_ERROR}
+        initialErrorFallback={t("receivedRequestsError")}
+        fetchingStatusLabel={t("receivedRequestsLoading")}
+        nextPageLoadingLabel={t("receivedRequestsNextLoading")}
+        nextPageErrorMessage={t("receivedRequestsNextError")}
       >
         <ul className="flex w-full flex-col gap-20">
           {requests.map((request) => (
@@ -148,10 +141,10 @@ const GiveawayReceivedRequestList = ({
 
       <GiveawayConfirmModal
         open={selectedRequest !== null}
-        title="나눔 진행"
-        description="이 신청자와 나눔을 진행할까요?"
-        confirmLabel={GIVEAWAY_SHARE_BUTTON_LABEL}
-        pendingLabel="처리 중..."
+        title={t("selectRequestTitle")}
+        description={t("selectRequestDescription")}
+        confirmLabel={t("share")}
+        pendingLabel={t("processing")}
         isPending={isSelectPending}
         error={selectError}
         onClose={closeSelect}
@@ -159,10 +152,10 @@ const GiveawayReceivedRequestList = ({
       />
       <GiveawayConfirmModal
         open={rejectedRequest !== null}
-        title="신청 거절"
-        description="이 신청을 거절할까요?"
-        confirmLabel={GIVEAWAY_REJECT_BUTTON_LABEL}
-        pendingLabel="처리 중..."
+        title={t("rejectRequestTitle")}
+        description={t("rejectRequestDescription")}
+        confirmLabel={t("reject")}
+        pendingLabel={t("processing")}
         isPending={isRejectPending}
         error={rejectError}
         onClose={closeReject}

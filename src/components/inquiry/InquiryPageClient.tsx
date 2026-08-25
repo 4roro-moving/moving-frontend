@@ -10,7 +10,7 @@ import InquiryCreateModal from "@/components/inquiry/InquiryCreateModal";
 import { useInquiries } from "@/hooks/inquiry/useInquiries";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
-import type { InquiryCategory, InquiryStatus } from "@/types/inquiry";
+import type { InquiryStatus } from "@/types/inquiry";
 
 type StatusFilter = "ALL" | InquiryStatus;
 

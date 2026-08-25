@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { type ReactNode } from "react";
 import { type Metadata } from "next";
 import { cookies } from "next/headers";
@@ -15,13 +16,10 @@ import { REFRESH_TOKEN_COOKIE_NAME } from "@/lib/auth/token";
 
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "무빙",
-  description: "이사 견적을 비교하고 믿을 수 있는 기사님을 찾는 플랫폼, 무빙",
-  icons: {
-    icon: "/icons/moving-logo-icon.svg",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common");
+  return { title: t("metadata.title"), description: t("metadata.description") };
+}
 
 interface RootLayoutProps {
   children: ReactNode;

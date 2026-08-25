@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 
 interface GiveawayCardSkeletonListProps {
@@ -32,6 +35,3 @@ const GiveawayCardSkeletonList = ({ count = 8 }: GiveawayCardSkeletonListProps) 
 };
 
 export default GiveawayCardSkeletonList;
-("use client");
-
-import { useTranslations } from "next-intl";

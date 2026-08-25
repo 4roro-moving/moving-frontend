@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 import { ConnectedChatRoomModal } from "@/components/chat/ChatRoomModalContainer";
@@ -90,6 +91,7 @@ function ChatRoomPageState({
  * // 2026.08.12 김성현 - [추가] roomId 기반 채팅방 알림 진입 화면
  */
 export default function ChatRoomPageClient({ roomId }: ChatRoomPageClientProps) {
+  const t = useTranslations("chat.page");
   const router = useRouter();
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
@@ -110,35 +112,35 @@ export default function ChatRoomPageClient({ roomId }: ChatRoomPageClientProps) 
   };
 
   if (!hasHydrated || isCheckingAuth) {
-    return <ChatRoomPageState message="채팅방을 불러오는 중입니다." />;
+    return <ChatRoomPageState message={t("loading")} />;
   }
 
   if (!isAuthenticated) {
-    return <ChatRoomPageState message="로그인이 필요한 채팅방입니다." />;
+    return <ChatRoomPageState message={t("loginRequired")} />;
   }
 
   if (chatRoom.isPending) {
-    return <ChatRoomPageState message="채팅방을 불러오는 중입니다." />;
+    return <ChatRoomPageState message={t("loading")} />;
   }
 
   if (chatRoom.isError || !room) {
     return (
       <ChatRoomPageState
-        message="채팅방을 불러오지 못했습니다."
-        actionLabel="다시 시도"
+        message={t("loadFailed")}
+        actionLabel={t("retry")}
         onAction={() => void chatRoom.refetch()}
       />
     );
   }
 
   if (!currentUserId) {
-    return <ChatRoomPageState message="사용자 정보를 확인하는 중입니다." />;
+    return <ChatRoomPageState message={t("checkingUser")} />;
   }
 
   const viewMeta = resolveChatRoomViewMeta(room, currentUserId);
 
   if (!viewMeta) {
-    return <ChatRoomPageState message="이 채팅방에 접근할 수 없습니다." />;
+    return <ChatRoomPageState message={t("forbidden")} />;
   }
 
   return (
@@ -147,7 +149,7 @@ export default function ChatRoomPageClient({ roomId }: ChatRoomPageClientProps) 
       room={room}
       participantRole={viewMeta.participantRole}
       participantName={viewMeta.participantName}
-      estimateSummary={`견적 #${room.estimateId}`}
+      estimateSummary={t("estimateSummary", { id: room.estimateId })}
       onClose={handleClose}
     />
   );

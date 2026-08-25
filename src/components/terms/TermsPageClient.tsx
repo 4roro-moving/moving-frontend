@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -7,34 +8,44 @@ import TermsContent from "@/components/terms/TermsContent";
 import { usePublishedTerms } from "@/hooks/terms/usePublishedTerms";
 import { cn } from "@/lib/utils/cn";
 import type { PublishedTerms, TermsType } from "@/types/terms";
-import { TERMS_TYPE_LABEL, TERMS_TYPE_ORDER } from "@/types/terms";
+import { TERMS_TYPE_ORDER } from "@/types/terms";
 
 type TabValue = "ALL" | TermsType;
+
+const TERMS_TYPE_KEY: Record<TermsType, string> = {
+  TERMS_OF_SERVICE: "type.termsOfService",
+  PRIVACY_POLICY: "type.privacyPolicy",
+  MARKETING_POLICY: "type.marketingPolicy",
+  LOCATION_POLICY: "type.locationPolicy",
+  MOVER_POLICY: "type.moverPolicy",
+  OTHER: "type.other",
+};
 
 const formatEffectiveDate = (value: string | null) =>
   value ? value.slice(0, 10).replace(/-/g, ".") : null;
 
 /** 유형 라벨과 버전 정보. 목록과 상세가 공유합니다. */
 const TermsMeta = ({ terms }: { terms: PublishedTerms }) => {
+  const t = useTranslations("terms");
   const effectiveDate = formatEffectiveDate(terms.effectiveAt);
 
   return (
     <>
       <div className="flex items-center gap-8">
         <Text as="span" variant="sm-medium" className="text-text-brand">
-          {TERMS_TYPE_LABEL[terms.type]}
+          {t(TERMS_TYPE_KEY[terms.type])}
         </Text>
 
         {!terms.isRequired && (
           <Text as="span" variant="sm-medium" className="text-text-muted">
-            선택 동의
+            {t("optionalAgreement")}
           </Text>
         )}
       </div>
 
       <Text as="p" variant="sm-medium" className="text-text-muted">
-        버전 {terms.version}
-        {effectiveDate ? ` · ${effectiveDate} 시행` : ""}
+        {t("version", { version: terms.version })}
+        {effectiveDate ? ` · ${t("effectiveDate", { date: effectiveDate })}` : ""}
       </Text>
     </>
   );
@@ -90,6 +101,7 @@ const StateMessage = ({ children }: { children: string }) => (
 );
 
 const TermsPageClient = () => {
+  const t = useTranslations("terms");
   const [selectedTab, setSelectedTab] = useState<TabValue>("ALL");
   const { data, isPending, isError, refetch } = usePublishedTerms();
 
@@ -127,14 +139,14 @@ const TermsPageClient = () => {
 
   const renderBody = () => {
     if (isPending) {
-      return <StateMessage>약관을 불러오는 중이에요</StateMessage>;
+      return <StateMessage>{t("loading")}</StateMessage>;
     }
 
     if (isError) {
       return (
         <div className="flex min-h-[240px] w-full flex-col items-center justify-center gap-12">
           <Text as="p" variant="md-medium" className="text-text-muted">
-            약관을 불러오지 못했어요
+            {t("loadFailed")}
           </Text>
 
           <button
@@ -143,7 +155,7 @@ const TermsPageClient = () => {
             className="border-border-brand text-text-brand rounded-8 focus-visible:ring-border-brand border px-16 py-8 focus-visible:ring-1 focus-visible:outline-none"
           >
             <Text as="span" variant="md-medium">
-              다시 불러오기
+              {t("retry")}
             </Text>
           </button>
         </div>
@@ -152,7 +164,7 @@ const TermsPageClient = () => {
 
     if (activeTab === "ALL") {
       if (orderedTerms.length === 0) {
-        return <StateMessage>등록된 약관이 없습니다</StateMessage>;
+        return <StateMessage>{t("empty")}</StateMessage>;
       }
 
       return (
@@ -165,7 +177,7 @@ const TermsPageClient = () => {
     }
 
     if (!selectedTerms) {
-      return <StateMessage>등록된 약관이 없습니다</StateMessage>;
+      return <StateMessage>{t("empty")}</StateMessage>;
     }
 
     return <TermsDetail terms={selectedTerms} />;
@@ -175,19 +187,19 @@ const TermsPageClient = () => {
     <main className="px-margin-mobile max-w-container-desktop mx-auto flex w-full flex-col gap-24 py-32 md:px-40 md:py-48">
       <header className="flex flex-col gap-8">
         <Text as="h1" variant={{ base: "2xl-bold", md: "3xl-bold" }} className="text-text-primary">
-          약관 및 정책
+          {t("title")}
         </Text>
 
         <Text as="p" variant="lg-regular" className="text-text-secondary">
-          무빙 서비스 이용에 적용되는 약관과 정책을 확인할 수 있습니다.
+          {t("description")}
         </Text>
       </header>
 
-      <nav aria-label="약관 유형" className="border-border-default border-b">
+      <nav aria-label={t("typeAria")} className="border-border-default border-b">
         <ul className="flex gap-4 overflow-x-auto">
           {availableTabs.map((tab) => {
             const isActive = tab === activeTab;
-            const label = tab === "ALL" ? "전체" : TERMS_TYPE_LABEL[tab];
+            const label = tab === "ALL" ? t("all") : t(TERMS_TYPE_KEY[tab]);
 
             return (
               <li key={tab} className="shrink-0">

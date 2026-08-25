@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 
@@ -19,6 +21,7 @@ export default function MoversErrorPanel({
   isRetrying,
   onRetry,
 }: MoversErrorPanelProps) {
+  const t = useTranslations("moverSearch");
   return (
     <div role="alert" className="flex w-full flex-col items-center gap-16 py-40 text-center">
       <div className="flex flex-col gap-8">
@@ -37,7 +40,7 @@ export default function MoversErrorPanel({
         onClick={onRetry}
         className="min-w-[160px]"
       >
-        {isRetrying ? "다시 시도 중..." : actionLabel}
+        {isRetrying ? t("retrying") : actionLabel}
       </Button>
     </div>
   );

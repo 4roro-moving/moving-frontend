@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import AlertModal from "@/components/common/Modal/AlertModal";
 import Modal from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
@@ -25,6 +27,8 @@ const GiveawayConfirmModal = ({
   onClose,
   onConfirm,
 }: GiveawayConfirmModalProps) => {
+  const tCommon = useTranslations("common");
+
   return (
     <AlertModal
       open={open}
@@ -58,7 +62,7 @@ const GiveawayConfirmModal = ({
             onClick={onClose}
             className="md:flex-1"
           >
-            취소
+            {tCommon("cancel")}
           </Modal.Button>
           <Modal.Button
             type="button"

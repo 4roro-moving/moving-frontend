@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import { Text } from "@/components/common/Text";
 import { StarIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
@@ -27,10 +31,11 @@ export function MoverMeta({
   confirmedCount,
   className,
 }: MoverMetaProps) {
+  const tr = useTranslations("moverSearch");
   return (
     <dl className={cn("flex flex-wrap items-center gap-6", className)}>
       <div className={cn("flex items-center gap-2", dividerClassName)}>
-        <dt className="sr-only">평점 및 리뷰 수</dt>
+        <dt className="sr-only">{tr("meta.ratingAndReviews")}</dt>
         <dd className="m-0 flex items-center gap-2">
           <StarIcon className="text-rating-fill size-20 shrink-0" aria-hidden="true" />
           <Text
@@ -40,7 +45,7 @@ export function MoverMeta({
           >
             {rating.toFixed(1)}
           </Text>
-          <span className="sr-only">점,</span>
+          <span className="sr-only">{tr("meta.pointsSeparator")}</span>
           <Text
             as="span"
             variant="sm-medium"
@@ -49,14 +54,14 @@ export function MoverMeta({
           >
             ({reviewCount})
           </Text>
-          <span className="sr-only">리뷰 {reviewCount}개</span>
+          <span className="sr-only">{tr("meta.reviewCount", { count: reviewCount })}</span>
         </dd>
       </div>
 
       <div className={cn("flex items-center gap-4", dividerClassName)}>
         <dt>
           <Text as="span" variant="sm-medium" className={cn("text-text-muted", metaTextClassName)}>
-            경력
+            {tr("meta.career")}
           </Text>
         </dt>
         <dd className="m-0 flex items-center">
@@ -65,7 +70,7 @@ export function MoverMeta({
             variant="sm-medium"
             className={cn("text-text-secondary", metaTextClassName)}
           >
-            {careerYears}년
+            {tr("meta.careerYears", { count: careerYears })}
           </Text>
         </dd>
       </div>
@@ -78,9 +83,9 @@ export function MoverMeta({
             className={cn("text-text-muted", metaTextClassName)}
             aria-hidden="true"
           >
-            확정
+            {tr("meta.confirmed")}
           </Text>
-          <span className="sr-only">확정 건수</span>
+          <span className="sr-only">{tr("meta.confirmedCountAria")}</span>
         </dt>
         <dd className="order-1 m-0 flex items-center">
           <Text
@@ -88,7 +93,7 @@ export function MoverMeta({
             variant="sm-medium"
             className={cn("text-text-secondary", metaTextClassName)}
           >
-            {confirmedCount}건
+            {tr("meta.confirmedCount", { count: confirmedCount })}
           </Text>
         </dd>
       </div>

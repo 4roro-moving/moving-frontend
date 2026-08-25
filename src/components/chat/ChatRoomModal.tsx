@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
@@ -61,7 +62,7 @@ function ChatRoomModalContent({
   onClose,
   children,
   messageValue = "",
-  messagePlaceholder = "메시지를 입력하세요",
+  messagePlaceholder,
   selectedImagePreviewUrl,
   selectedImageName,
   isImageSending = false,
@@ -74,6 +75,8 @@ function ChatRoomModalContent({
   actions,
   estimateEdit,
 }: ChatRoomModalProps) {
+  const t = useTranslations("chat.room");
+  const resolvedMessagePlaceholder = messagePlaceholder ?? t("messagePlaceholder");
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const estimateEditSheetRef = useRef<HTMLDivElement>(null);
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
@@ -147,7 +150,7 @@ function ChatRoomModalContent({
     <Modal
       open={open}
       onClose={handleClose}
-      aria-label={`${participantName} 채팅방`}
+      aria-label={t("roomAria", { name: participantName })}
       dismissible={false}
       className={cn(
         "h-[min(720px,calc(100dvh-48px))] w-full max-w-[360px] items-stretch gap-0 overflow-hidden p-0",
@@ -181,7 +184,7 @@ function ChatRoomModalContent({
         {children ?? (
           <div className="flex h-full items-center justify-center">
             <Text variant="lg-medium" className="text-text-muted">
-              대화 내역이 없습니다.
+              {t("empty")}
             </Text>
           </div>
         )}
@@ -217,7 +220,7 @@ function ChatRoomModalContent({
               <div className="bg-background-subtle rounded-8 relative size-56 shrink-0 overflow-hidden">
                 <Image
                   src={selectedImagePreviewUrl}
-                  alt="선택한 채팅 이미지 미리보기"
+                  alt={t("selectedImagePreviewAlt")}
                   fill
                   sizes="56px"
                   unoptimized
@@ -225,7 +228,7 @@ function ChatRoomModalContent({
                 />
               </div>
               <Text variant="sm-medium" className="text-text-primary min-w-0 flex-1 truncate">
-                {selectedImageName || "선택한 이미지"}
+                {selectedImageName || t("selectedImage")}
               </Text>
               <button
                 type="button"
@@ -234,7 +237,7 @@ function ChatRoomModalContent({
                   "disabled:text-text-disabled disabled:cursor-not-allowed disabled:hover:bg-transparent",
                   "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
                 )}
-                aria-label="첨부 이미지 제거"
+                aria-label={t("removeAttachmentAria")}
                 disabled={isImageSending}
                 onClick={onClearSelectedImage}
               >
@@ -259,7 +262,7 @@ function ChatRoomModalContent({
                 "hover:bg-background-brand-hover disabled:bg-background-disabled disabled:text-text-disabled transition-colors disabled:cursor-not-allowed",
                 "focus-visible:ring-border-brand focus-visible:ring-2 focus-visible:outline-none",
               )}
-              aria-label={isBottomSheetOpen ? "채팅 메뉴 닫기" : "채팅 메뉴 열기"}
+              aria-label={isBottomSheetOpen ? t("closeMenuAria") : t("openMenuAria")}
               aria-expanded={isBottomSheetOpen}
               disabled={composerDisabled}
               onClick={handleToggleMenu}
@@ -270,10 +273,12 @@ function ChatRoomModalContent({
             </button>
 
             <input
-              aria-label="채팅 메시지 입력"
+              aria-label={t("messageInputAria")}
               value={messageValue}
               onChange={(event) => onMessageChange?.(event.target.value)}
-              placeholder={hasSelectedImage ? "선택한 이미지를 전송해 주세요" : messagePlaceholder}
+              placeholder={
+                hasSelectedImage ? t("sendSelectedImagePlaceholder") : resolvedMessagePlaceholder
+              }
               disabled={composerDisabled || hasSelectedImage}
               className={cn(
                 "bg-background-subtle text-text-primary h-44 min-w-0 flex-1 rounded-full px-16",
@@ -291,7 +296,7 @@ function ChatRoomModalContent({
               )}
               disabled={isSendDisabled}
             >
-              <Text variant="md-semibold">전송</Text>
+              <Text variant="md-semibold">{t("send")}</Text>
             </button>
           </form>
         </div>

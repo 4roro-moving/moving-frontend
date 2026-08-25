@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
@@ -22,6 +24,7 @@ export function useCancelEstimateRequest(
   estimateRequestId: number,
   options?: UseCancelEstimateRequestOptions,
 ) {
+  const t = useTranslations("estimates");
   const queryClient = useQueryClient();
   const onSuccessRef = useRef(options?.onSuccess);
   const onErrorRef = useRef(options?.onError);
@@ -54,7 +57,7 @@ export function useCancelEstimateRequest(
       onSuccessRef.current?.(request);
     },
     onError: (error) => {
-      onErrorRef.current?.(getApiErrorMessage(error, "견적 요청을 취소하지 못했습니다."));
+      onErrorRef.current?.(getApiErrorMessage(error, t("cancelRequestFailed")));
     },
   });
 }

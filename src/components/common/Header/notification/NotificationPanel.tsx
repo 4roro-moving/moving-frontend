@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -29,6 +30,7 @@ export default function NotificationPanel({
   className,
   isVisible,
 }: NotificationPanelProps) {
+  const t = useTranslations("notifications");
   const panelRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [knownPageCount, setKnownPageCount] = useState<number | null>(null);
@@ -127,7 +129,7 @@ export default function NotificationPanel({
     >
       <div className="flex items-center justify-between gap-8 py-14 pr-12 md:pl-24">
         <Text id="notification-panel-title" as="h2" variant={{ base: "2lg-bold", md: "lg-bold" }}>
-          알림
+          {t("title")}
         </Text>
 
         <div className="flex shrink-0 items-center gap-8">
@@ -140,13 +142,13 @@ export default function NotificationPanel({
             className="text-text-brand disabled:text-text-weak focus-visible:ring-border-brand rounded-4 px-2 py-2 focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed"
           >
             <Text as="span" variant={{ base: "lg-regular", md: "md-regular" }}>
-              모두 읽음처리
+              {t("markAllRead")}
             </Text>
           </button>
 
           <button
             type="button"
-            aria-label="알림 닫기"
+            aria-label={t("closeAria")}
             onClick={onClose}
             disabled={!isVisible}
             className="flex size-24 items-center justify-center"
@@ -159,19 +161,19 @@ export default function NotificationPanel({
       {isLoading ? (
         <div className="flex h-55 w-full items-center justify-center md:px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
-            알림을 불러오는 중이에요
+            {t("loading")}
           </Text>
         </div>
       ) : isError ? (
         <div className="flex h-55 w-full items-center justify-center md:px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
-            알림을 불러오지 못했어요
+            {t("loadFailed")}
           </Text>
         </div>
       ) : isEmpty ? (
         <div className="flex h-55 w-full items-center justify-center md:px-24">
           <Text as="p" variant="md-medium" className="text-text-subtle text-center">
-            새로운 알림이 없습니다
+            {t("empty")}
           </Text>
         </div>
       ) : (

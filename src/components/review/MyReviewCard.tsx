@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useFormatter, useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
@@ -9,7 +10,7 @@ import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { ProfileDefaultIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
-import { formatKoreanDateLong, getReviewMoverDisplayName } from "@/lib/utils/estimateFormat";
+import { getReviewMoverDisplayName } from "@/lib/utils/estimateFormat";
 import type { MyReviewItem } from "@/types/review";
 
 interface MyReviewCardProps {
@@ -21,9 +22,15 @@ interface MyReviewCardProps {
 // 2026.07.27 정슬기 - [수정] 카드 클릭 시 기사님 상세 페이지로 이동
 // 2026.07.30 정슬기 - [수정] 기사님 표시명 공통 헬퍼 사용
 export default function MyReviewCard({ review }: MyReviewCardProps) {
+  const t = useTranslations("reviews");
+  const format = useFormatter();
   const { mover, estimateRequest, rating, content, createdAt } = review;
   const displayName = getReviewMoverDisplayName(mover);
   const titleId = `my-review-${review.id}-title`;
+  const createdDate = new Date(createdAt);
+  const createdAtLabel = Number.isNaN(createdDate.getTime())
+    ? createdAt
+    : format.dateTime(createdDate, { year: "numeric", month: "long", day: "numeric" });
 
   return (
     <Link
@@ -49,7 +56,7 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
             {mover.imageUrl ? (
               <Image
                 src={mover.imageUrl}
-                alt={`${displayName} 프로필`}
+                alt={t("moverProfileImageAlt", { name: displayName })}
                 fill
                 sizes="50px"
                 className="object-cover"
@@ -75,7 +82,7 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
                 variant="md-medium"
                 className="text-text-muted hidden shrink-0 md:inline"
               >
-                {formatKoreanDateLong(createdAt)}
+                {createdAtLabel}
               </Text>
             </div>
             <Text
@@ -85,14 +92,14 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
             >
               {estimateRequest.fromAddress}
               <span aria-hidden="true"> → </span>
-              <span className="sr-only">에서 </span>
+              <span className="sr-only">{t("routeFromToConnector")}</span>
               {estimateRequest.toAddress}
             </Text>
           </div>
         </div>
       </div>
 
-      <ReviewStarRating value={rating} size="sm" label="내가 준 별점" />
+      <ReviewStarRating value={rating} size="sm" label={t("myRatingLabel")} />
 
       <Text
         as="p"
@@ -108,7 +115,7 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
         variant="sm-medium"
         className="text-text-muted self-end md:hidden"
       >
-        {formatKoreanDateLong(createdAt)}
+        {createdAtLabel}
       </Text>
     </Link>
   );

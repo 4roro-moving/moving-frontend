@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useId, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -15,6 +16,7 @@ import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/
 import NotificationPanel from "./NotificationPanel";
 
 export default function NotificationTrigger() {
+  const t = useTranslations("notifications");
   const notificationPanelId = useId();
   const { authScope } = useAuthQueryScope();
   // 현재 authScope 와 같을 때만 열린 것으로 간주 → 계정 전환 시 자동으로 닫힘
@@ -51,7 +53,7 @@ export default function NotificationTrigger() {
       <button
         ref={triggerRef}
         type="button"
-        aria-label={unreadCount > 0 ? `알림, 읽지 않은 알림 ${unreadCount}개` : "알림"}
+        aria-label={unreadCount > 0 ? t("triggerUnreadAria", { count: unreadCount }) : t("title")}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
         aria-controls={isOpen ? notificationPanelId : undefined}

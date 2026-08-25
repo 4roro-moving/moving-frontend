@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { useRejectGiveawayRequest } from "@/hooks/giveaway/useRejectGiveawayRequest";
@@ -8,6 +9,7 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import type { GiveawayRequestItem } from "@/types/giveaway";
 
 export const useGiveawayReceivedRequestActions = (giveawayId: number) => {
+  const t = useTranslations("giveaway");
   const selectMutation = useSelectGiveawayRequest();
   const rejectMutation = useRejectGiveawayRequest();
   const [selectedRequest, setSelectedRequest] = useState<GiveawayRequestItem | null>(null);
@@ -44,7 +46,7 @@ export const useGiveawayReceivedRequestActions = (giveawayId: number) => {
       await selectMutation.mutateAsync({ giveawayId, requestId: selectedRequest.id });
       setSelectedRequest(null);
     } catch (error) {
-      setSelectError(getApiErrorMessage(error, "나눔 상대를 선정하지 못했습니다."));
+      setSelectError(getApiErrorMessage(error, t("selectRequestFailed")));
     }
   };
 
@@ -58,7 +60,7 @@ export const useGiveawayReceivedRequestActions = (giveawayId: number) => {
       await rejectMutation.mutateAsync({ giveawayId, requestId: rejectedRequest.id });
       setRejectedRequest(null);
     } catch (error) {
-      setRejectError(getApiErrorMessage(error, "나눔 신청을 거절하지 못했습니다."));
+      setRejectError(getApiErrorMessage(error, t("rejectRequestFailed")));
     }
   };
 

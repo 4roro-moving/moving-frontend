@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -38,6 +41,3 @@ const GiveawayPageLayout = (props: GiveawayPageLayoutProps) => {
 };
 
 export default GiveawayPageLayout;
-("use client");
-
-import { useTranslations } from "next-intl";

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { forwardRef, useState } from "react";
 
 import Input, { type InputProps } from "./Input";
@@ -15,13 +17,12 @@ const EyeIcon = () => <VisibilityIcon className="size-24" />;
 const EyeOffIcon = () => <VisibilityOffIcon className="size-24" />;
 
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(function PasswordInput(
-  {
-    showPasswordAriaLabel = "비밀번호 보이기",
-    hidePasswordAriaLabel = "비밀번호 숨기기",
-    ...props
-  },
+  { showPasswordAriaLabel, hidePasswordAriaLabel, ...props },
   ref,
 ) {
+  const tr = useTranslations("common");
+  const resolvedShowLabel = showPasswordAriaLabel ?? tr("password.show");
+  const resolvedHideLabel = hidePasswordAriaLabel ?? tr("password.hide");
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -33,7 +34,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(function 
           type="button"
           onClick={() => setShowPassword((prev) => !prev)}
           className="text-icon-default"
-          aria-label={showPassword ? hidePasswordAriaLabel : showPasswordAriaLabel}
+          aria-label={showPassword ? resolvedHideLabel : resolvedShowLabel}
           tabIndex={-1}
         >
           {showPassword ? <EyeIcon /> : <EyeOffIcon />}

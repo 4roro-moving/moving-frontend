@@ -1,14 +1,16 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import GiveawayDetailDivider from "@/components/giveaway/GiveawayDetailDivider";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { GIVEAWAY_DETAIL_TITLE } from "@/lib/constants/giveaway";
 
 const GiveawayDetailSkeleton = () => {
   const t = useTranslations("giveaway");
   return (
     <div className="bg-background-default flex w-full flex-col items-center">
-      <PageHeader title={GIVEAWAY_DETAIL_TITLE} backFallbackHref={APP_ROUTES.COMMUNITY.GIVEAWAY} />
+      <PageHeader title={t("detailTitle")} backFallbackHref={APP_ROUTES.COMMUNITY.GIVEAWAY} />
 
       <div
         className="px-margin-mobile md:px-margin-tablet max-w-container-desktop xl:pb-37-5 mx-auto flex w-full flex-col gap-60 pt-35 pb-48 md:pt-44 md:pb-38 xl:px-0 xl:pt-42"
@@ -54,6 +56,3 @@ const GiveawayDetailSkeleton = () => {
 };
 
 export default GiveawayDetailSkeleton;
-("use client");
-
-import { useTranslations } from "next-intl";

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 
 import { Text } from "@/components/common/Text";
 
@@ -8,7 +9,9 @@ import { Text } from "@/components/common/Text";
  * // 2026.08.01 정슬기 - [수정] Design System app icon (Union SVG + white tile)
  * // 2026.08.02 정슬기 - [수정] 배너 그라디언트를 토큰/Tailwind 유틸로 교체
  */
-export default function LandingBottomBanner() {
+export default async function LandingBottomBanner() {
+  const t = await getTranslations("landing");
+
   return (
     <section className="bg-landing-bottom-banner flex w-full shrink-0 flex-col items-center pt-[39px] pb-[39px] md:pt-[65px] md:pb-[65px] xl:pt-[87px] xl:pb-[87px]">
       <div className="flex w-[363px] max-w-full flex-col items-center gap-12 md:gap-32">
@@ -16,7 +19,7 @@ export default function LandingBottomBanner() {
         <div className="flex size-[56px] shrink-0 items-center justify-center overflow-hidden rounded-[11px] bg-white md:size-[100px] md:rounded-[19px]">
           <Image
             src="/images/landing/brand-mark.svg"
-            alt="무빙"
+            alt={t("brandAlt")}
             width={58}
             height={60}
             unoptimized
@@ -31,11 +34,11 @@ export default function LandingBottomBanner() {
           className="text-text-inverse w-full text-center md:text-[28px] md:leading-[46px]"
         >
           <span className="md:hidden">
-            복잡한 이사 준비,
+            {t("bottomBannerLine1")}
             <br />
-            무빙 하나면 끝!
+            {t("bottomBannerLine2")}
           </span>
-          <span className="hidden md:inline">복잡한 이사 준비, 무빙 하나면 끝!</span>
+          <span className="hidden md:inline">{t("bottomBannerDesktop")}</span>
         </Text>
       </div>
     </section>

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useState, useSyncExternalStore } from "react";
 
 import Button from "@/components/common/Button/Button";
@@ -67,18 +68,19 @@ export default function ReceivedRequestCard({
   onSendEstimate,
   onRejectEstimate,
 }: ReceivedRequestCardProps) {
+  const tReport = useTranslations("report");
   const elapsedLabel = useElapsedLabel(request.createdAt);
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const reportAction = (
     <ReportMoreMenu
-      ariaLabel="고객 메뉴 더보기"
+      ariaLabel={tReport("customerMoreMenuAria")}
       onReport={() => setIsReportModalOpen(true)}
       triggerSizeClassName="size-28"
       triggerIconClassName="text-[20px] leading-none"
       menuPositionClassName="top-[calc(100%+6px)]"
-      reportLabel={<span className="text-sm font-medium">신고하기</span>}
+      reportLabel={<span className="text-sm font-medium">{tReport("reportAction")}</span>}
     />
   );
 

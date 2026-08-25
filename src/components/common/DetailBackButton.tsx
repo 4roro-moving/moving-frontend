@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Text } from "@/components/common/Text";
 import { useDetailBackNavigation } from "@/hooks/useDetailBackNavigation";
 import { ArrowLeftIcon } from "@/icons";
@@ -17,13 +19,14 @@ interface DetailBackButtonProps {
  * // 2026.08.03 정슬기- [추가]
  */
 export default function DetailBackButton({ fallbackHref, className }: DetailBackButtonProps) {
+  const t = useTranslations("common");
   const goBack = useDetailBackNavigation(fallbackHref);
 
   return (
     <button
       type="button"
       onClick={goBack}
-      aria-label="목록으로 이동"
+      aria-label={t("backToListAria")}
       className={cn(
         "text-text-muted rounded-8 inline-flex min-h-44 min-w-44 items-center gap-4 self-start",
         "-ml-8 px-8 py-8",
@@ -35,7 +38,7 @@ export default function DetailBackButton({ fallbackHref, className }: DetailBack
     >
       <ArrowLeftIcon className="size-16 shrink-0" aria-hidden="true" />
       <Text as="span" variant="sm-medium" className="text-text-muted whitespace-nowrap">
-        목록으로
+        {t("backToList")}
       </Text>
     </button>
   );

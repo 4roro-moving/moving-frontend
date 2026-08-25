@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 
 interface ReviewCardSkeletonProps {
@@ -9,8 +12,10 @@ interface ReviewCardSkeletonProps {
  * 실제 리뷰 카드의 영역을 유지해 로딩 -> 콘텐츠 전환 시 레이아웃 점프를 줄입니다.
  */
 export default function ReviewCardSkeleton({ count = 4 }: ReviewCardSkeletonProps) {
+  const t = useTranslations("reviews");
+
   return (
-    <div role="status" aria-label="리뷰 목록을 불러오는 중">
+    <div role="status" aria-label={t("listLoadingAria")}>
       <ul className="flex w-full flex-col gap-16 md:gap-20 xl:gap-24">
         {Array.from({ length: count }, (_, index) => (
           <li key={index}>
@@ -49,7 +54,7 @@ export default function ReviewCardSkeleton({ count = 4 }: ReviewCardSkeletonProp
         ))}
       </ul>
 
-      <span className="sr-only">리뷰 목록을 불러오는 중입니다.</span>
+      <span className="sr-only">{t("listLoading")}</span>
     </div>
   );
 }

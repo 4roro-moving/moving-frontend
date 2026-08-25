@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -12,17 +13,18 @@ interface MyReportsLayoutProps {
 
 const REPORT_ALLOWED_ROLES: AuthRole[] = ["CUSTOMER", "MOVER"];
 
-const MyReportsLoginSelection = () => {
+const MyReportsLoginSelection = async () => {
+  const t = await getTranslations("report");
+
   return (
     <main className="px-margin-mobile max-w-container-desktop mx-auto flex min-h-[480px] w-full items-center justify-center md:px-40">
       <div className="flex w-full max-w-[420px] flex-col items-center gap-24 text-center">
         <div className="flex flex-col gap-8">
           <Text as="h1" variant="2xl-bold" className="text-text-primary">
-            로그인이 필요합니다
+            {t("loginRequired.title")}
           </Text>
-
           <Text as="p" variant="md-regular" className="text-text-secondary">
-            신고내역을 확인할 계정 유형을 선택해 주세요.
+            {t("loginRequired.description")}
           </Text>
         </div>
 
@@ -32,16 +34,15 @@ const MyReportsLoginSelection = () => {
             className="bg-background-brand text-text-inverse rounded-8 px-20 py-12"
           >
             <Text as="span" variant="md-semibold">
-              일반 사용자 로그인
+              {t("loginRequired.customerLogin")}
             </Text>
           </Link>
-
           <Link
             href={`${APP_ROUTES.MOVER_LOGIN}?redirect=${encodeURIComponent(APP_ROUTES.REPORTS.ME)}`}
             className="border-border-brand text-text-brand rounded-8 border px-20 py-12"
           >
             <Text as="span" variant="md-semibold">
-              기사님 로그인
+              {t("loginRequired.moverLogin")}
             </Text>
           </Link>
         </div>
@@ -50,7 +51,7 @@ const MyReportsLoginSelection = () => {
   );
 };
 
-export default function MyReportsLayout({ children }: MyReportsLayoutProps) {
+export default async function MyReportsLayout({ children }: MyReportsLayoutProps) {
   return (
     <RoleGuard
       allowedRole={REPORT_ALLOWED_ROLES}

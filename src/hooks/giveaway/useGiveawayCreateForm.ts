@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -88,6 +89,7 @@ export const useGiveawayCreateForm = ({
   onClose,
   onSuccess,
 }: UseGiveawayCreateFormParams) => {
+  const t = useTranslations("giveaway");
   const isEdit = giveaway !== undefined;
   const defaultValues = giveaway ? toEditDefaultValues(giveaway) : EMPTY_VALUES;
   const createMutation = useCreateGiveaway();
@@ -143,12 +145,12 @@ export const useGiveawayCreateForm = ({
 
     for (const file of selectedFiles) {
       if (!isGiveawayImageContentType(file.type)) {
-        rejectionMessage = "jpg, png, webp 형식의 이미지만 등록할 수 있습니다.";
+        rejectionMessage = t("imageTypeError");
         continue;
       }
 
       if (file.size > GIVEAWAY_IMAGE_MAX_SIZE_BYTES) {
-        rejectionMessage = `이미지는 ${String(GIVEAWAY_IMAGE_MAX_SIZE_MB)}MB 이하여야 합니다.`;
+        rejectionMessage = t("imageSizeError", { size: GIVEAWAY_IMAGE_MAX_SIZE_MB });
         continue;
       }
 
@@ -169,9 +171,7 @@ export const useGiveawayCreateForm = ({
     }, 0);
 
     if (totalSize > GIVEAWAY_IMAGE_MAX_TOTAL_SIZE_BYTES) {
-      setImageWarning(
-        `이미지 총 용량은 ${String(GIVEAWAY_IMAGE_MAX_TOTAL_SIZE_MB)}MB 이하여야 합니다.`,
-      );
+      setImageWarning(t("imageTotalSizeError", { size: GIVEAWAY_IMAGE_MAX_TOTAL_SIZE_MB }));
       return;
     }
 
@@ -194,7 +194,7 @@ export const useGiveawayCreateForm = ({
 
   const submit = handleSubmit(async (formValues) => {
     if (formValues.regionId === null) {
-      setError("regionId", { message: "지역을 선택해 주세요." });
+      setError("regionId", { message: t("regionRequired") });
       return;
     }
 
@@ -204,7 +204,7 @@ export const useGiveawayCreateForm = ({
         const imageKeys = imagesUnchanged ? undefined : await toOrderedImageKeys(formValues.images);
 
         if (imageKeys !== undefined && imageKeys.length === 0) {
-          setError("images", { message: "이미지를 1장 이상 등록해 주세요." });
+          setError("images", { message: t("imageRequired") });
           return;
         }
 
@@ -240,10 +240,7 @@ export const useGiveawayCreateForm = ({
       onClose();
     } catch (error) {
       setError("root", {
-        message: getApiErrorMessage(
-          error,
-          isEdit ? "나눔 글을 수정하지 못했습니다." : "나눔 글을 등록하지 못했습니다.",
-        ),
+        message: getApiErrorMessage(error, isEdit ? t("editFailed") : t("createFailed")),
       });
     }
   });

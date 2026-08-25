@@ -1,5 +1,7 @@
 "use client";
 
+import { useFormatter, useTranslations } from "next-intl";
+
 import { useState } from "react";
 
 import FormField from "@/components/common/FormField/FormField";
@@ -31,6 +33,8 @@ export default function SendEstimateModal({
   onSubmit,
   isPending = false,
 }: SendEstimateModalProps) {
+  const tr = useTranslations("estimates");
+  const format = useFormatter();
   const [price, setPrice] = useState("");
   const [comment, setComment] = useState("");
   const [isCommentTouched, setIsCommentTouched] = useState(false);
@@ -57,14 +61,11 @@ export default function SendEstimateModal({
 
   const canSubmit = isPriceValid && isCommentValid && !isSubmitting;
 
-  const priceError =
-    price.length > 0 && !isPriceValid
-      ? "견적가는 1원 이상 1억 원 이하로 입력해 주세요."
-      : undefined;
+  const priceError = price.length > 0 && !isPriceValid ? tr("mover.priceRangeError") : undefined;
 
   const commentError =
     isCommentTouched && !isCommentValid
-      ? `코멘트는 ${MIN_TEXT_CONTENT_LENGTH}자 이상 ${MAX_TEXT_CONTENT_LENGTH}자 이하로 입력해 주세요.`
+      ? tr("mover.commentLength", { min: MIN_TEXT_CONTENT_LENGTH, max: MAX_TEXT_CONTENT_LENGTH })
       : undefined;
 
   const handleSubmit = () => {
@@ -88,7 +89,7 @@ export default function SendEstimateModal({
       dismissible={false}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
-        <Modal.Title>견적 보내기</Modal.Title>
+        <Modal.Title>{tr("mover.sendTitle")}</Modal.Title>
         <Modal.Close onClose={handleClose} disabled={isSubmitting} />
       </div>
 
@@ -98,7 +99,7 @@ export default function SendEstimateModal({
             density="modal"
             moveType={request.moveType}
             isDesignated={request.isDesignated}
-            title={`${request.customer.name} 고객님`}
+            title={tr("mover.customerName", { name: request.customer.name })}
             fromLabel={request.fromRegion}
             toLabel={request.toRegion}
             moveDate={request.moveDate}
@@ -106,7 +107,7 @@ export default function SendEstimateModal({
         </section>
 
         <FormField
-          label="견적가를 입력해 주세요"
+          label={tr("mover.priceLabel")}
           labelFor="estimate-price"
           variant="compact"
           className="gap-16"
@@ -116,8 +117,8 @@ export default function SendEstimateModal({
             inputMode="numeric"
             size="md"
             numericOnly
-            value={price ? Number(price).toLocaleString("ko-KR") : ""}
-            placeholder="견적가 입력"
+            value={price ? format.number(Number(price)) : ""}
+            placeholder={tr("mover.pricePlaceholder")}
             disabled={isSubmitting}
             error={priceError}
             onChange={(event) => setPrice(event.target.value)}
@@ -126,7 +127,7 @@ export default function SendEstimateModal({
         </FormField>
 
         <FormField
-          label="코멘트를 입력해 주세요"
+          label={tr("mover.commentLabel")}
           labelFor="estimate-comment"
           variant="compact"
           className="gap-16"
@@ -136,7 +137,7 @@ export default function SendEstimateModal({
               id="estimate-comment"
               value={comment}
               maxLength={MAX_TEXT_CONTENT_LENGTH}
-              placeholder={`최소 ${MIN_TEXT_CONTENT_LENGTH}자 이상 입력해 주세요`}
+              placeholder={tr("mover.commentPlaceholder", { min: MIN_TEXT_CONTENT_LENGTH })}
               error={commentError}
               disabled={isSubmitting}
               onChange={(event) => setComment(event.target.value)}
@@ -154,7 +155,7 @@ export default function SendEstimateModal({
       </div>
 
       <Modal.Button fullWidth size="cta" disabled={!canSubmit} onClick={handleSubmit}>
-        {isSubmitting ? "견적 보내는 중..." : "견적 보내기"}
+        {isSubmitting ? tr("mover.sending") : tr("mover.send")}
       </Modal.Button>
     </Modal>
   );

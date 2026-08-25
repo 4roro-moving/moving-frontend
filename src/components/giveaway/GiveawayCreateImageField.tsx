@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -31,6 +33,7 @@ const GiveawayCreateImageField = ({
   onAdd,
   onRemove,
 }: GiveawayCreateImageFieldProps) => {
+  const t = useTranslations("giveaway");
   const generatedId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const errorId = `${generatedId}-error`;
@@ -74,7 +77,7 @@ const GiveawayCreateImageField = ({
         className="sr-only"
         tabIndex={-1}
         disabled={disabled || isMaxCount}
-        aria-label="나눔 이미지 추가"
+        aria-label={t("addImageAria")}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
         onChange={handleChange}
@@ -84,7 +87,7 @@ const GiveawayCreateImageField = ({
         <div className="flex shrink-0 flex-col items-center gap-2 pt-20">
           <button
             type="button"
-            aria-label="나눔 이미지 추가"
+            aria-label={t("addImageAria")}
             aria-describedby={error ? errorId : undefined}
             disabled={disabled || isMaxCount}
             onClick={() => inputRef.current?.click()}
@@ -133,7 +136,7 @@ const GiveawayCreateImageField = ({
 
                   <button
                     type="button"
-                    aria-label={`${String(index + 1)}번째 이미지 삭제`}
+                    aria-label={t("removeImageAria", { index: index + 1 })}
                     disabled={disabled}
                     onClick={() => onRemove(index)}
                     className={cn(

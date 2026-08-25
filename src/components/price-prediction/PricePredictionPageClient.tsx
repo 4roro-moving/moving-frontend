@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -10,6 +11,7 @@ import PricePredictionForm from "./PricePredictionForm";
 import PricePredictionResult from "./PricePredictionResult";
 
 export default function PricePredictionPageClient() {
+  const t = useTranslations("pricePrediction");
   const [prediction, setPrediction] = useState<PricePredictionResponse | null>(null);
 
   const { mutate: predictPrice, isPending, isError, error, reset } = usePricePrediction();
@@ -28,11 +30,11 @@ export default function PricePredictionPageClient() {
     <div className="max-w-container-desktop mx-auto flex w-full flex-col gap-40">
       <div className="flex flex-col items-center gap-8 text-center">
         <Text as="h1" variant="2xl-bold" className="text-text-primary">
-          AI로 미리 예상 견적을 확인해보세요
+          {t("pageTitle")}
         </Text>
 
         <Text as="p" variant="md-regular" className="text-text-subtle">
-          이사 조건을 입력하면 비슷한 견적 사례를 바탕으로 예상 가격 범위를 알려드려요.
+          {t("pageDescription")}
         </Text>
       </div>
 

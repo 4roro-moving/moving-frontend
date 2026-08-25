@@ -44,10 +44,10 @@ const AuthHeader = ({ audience = "customer", mode = "login" }: AuthHeaderProps) 
   return (
     <header className="flex w-full flex-col items-center gap-0 md:gap-8">
       <div className="flex h-104 w-full items-center justify-center py-20 md:h-auto">
-        <Link href="/" aria-label="무빙 홈으로 이동">
+        <Link href="/" aria-label={t("homeAria")}>
           <Image
             src="/icons/moving-logo-text.svg"
-            alt="무빙"
+            alt={t("brandName")}
             width={112}
             height={44}
             priority

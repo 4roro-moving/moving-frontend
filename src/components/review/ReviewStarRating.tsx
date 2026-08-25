@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useId, type FocusEvent } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -41,15 +42,21 @@ export default function ReviewStarRating({
   onBlur,
   size = "md",
   className,
-  label = "별점",
+  label,
   labelledBy,
   error,
   disabled = false,
 }: ReviewStarRatingProps) {
+  const t = useTranslations("reviews");
   const errorId = useId();
+  const resolvedLabel = label ?? t("ratingLabel");
   const isInteractive = typeof onChange === "function";
   const clamped = Math.min(5, Math.max(0, value));
-  const groupAriaLabel = labelledBy ? undefined : isInteractive ? label : `${label} ${clamped}점`;
+  const groupAriaLabel = labelledBy
+    ? undefined
+    : isInteractive
+      ? resolvedLabel
+      : t("ratingScoreAria", { label: resolvedLabel, score: clamped });
 
   const handleGroupBlur = (event: FocusEvent<HTMLDivElement>) => {
     const nextFocused = event.relatedTarget;
@@ -93,7 +100,7 @@ export default function ReviewStarRating({
           <button
             key={starValue}
             type="button"
-            aria-label={`${label} ${starValue}점`}
+            aria-label={t("ratingScoreAria", { label: resolvedLabel, score: starValue })}
             aria-pressed={isSelected}
             disabled={disabled}
             className="focus-visible:ring-border-brand rounded-4 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed"
@@ -109,7 +116,11 @@ export default function ReviewStarRating({
           </button>
         );
       })}
-      {!isInteractive ? <span className="sr-only">{`${label} ${clamped}점`}</span> : null}
+      {!isInteractive ? (
+        <span className="sr-only">
+          {t("ratingScoreAria", { label: resolvedLabel, score: clamped })}
+        </span>
+      ) : null}
     </div>
   );
 
