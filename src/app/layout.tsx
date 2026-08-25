@@ -3,6 +3,9 @@ import { type Metadata } from "next";
 import { cookies } from "next/headers";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { resolveLocale } from "@/i18n/config";
+import { LOCALE_COOKIE_NAME } from "@/i18n/config";
+import { NextIntlClientProvider } from "next-intl";
 import { safeDecodeCookieValue } from "@/lib/auth/clientStorageHint";
 import { NICKNAME_STORAGE_KEY, sanitizeSoftUxNickname } from "@/lib/auth/nickname";
 import { PROFILE_COMPLETED_STORAGE_KEY, parseProfileCompleted } from "@/lib/auth/profileCompleted";
@@ -29,6 +32,7 @@ const RootLayout = async ({ children }: RootLayoutProps) => {
   /** SSR 시점 HttpOnly refreshToken 쿠키 존재 여부 (로그인 Soft UX·선제 refresh 힌트) */
   const hasRefreshCookie = Boolean(cookieStore.get(REFRESH_TOKEN_COOKIE_NAME));
   const rawProfileImage = cookieStore.get(PROFILE_IMAGE_STORAGE_KEY)?.value;
+  const initialLocale = resolveLocale(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
   const initialProfileImage = sanitizeSoftUxProfileImageUrl(
     rawProfileImage ? safeDecodeCookieValue(rawProfileImage) : null,
   );
@@ -44,17 +48,19 @@ const RootLayout = async ({ children }: RootLayoutProps) => {
   );
 
   return (
-    <html lang="ko">
+    <html lang={initialLocale}>
       <body className="flex min-h-screen flex-col">
-        <AppShell
-          hasRefreshCookie={hasRefreshCookie}
-          initialNickname={initialNickname}
-          initialRole={initialRole}
-          initialProfileImage={initialProfileImage}
-          initialProfileCompleted={initialProfileCompleted}
-        >
-          {children}
-        </AppShell>
+        <NextIntlClientProvider>
+          <AppShell
+            hasRefreshCookie={hasRefreshCookie}
+            initialNickname={initialNickname}
+            initialRole={initialRole}
+            initialProfileImage={initialProfileImage}
+            initialProfileCompleted={initialProfileCompleted}
+          >
+            {children}
+          </AppShell>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -1,0 +1,19 @@
+{
+  "common": {
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "save": "保存"
+  },
+  "status": {
+    "pending": "待機中",
+    "completed": "完了",
+    "rejected": "却下"
+  },
+  "errors": {
+    "unknown": "不明なエラーが発生しました。",
+    "network": "ネットワーク接続が不安定です。",
+    "timeout": "リクエストがタイムアウトしました。"
+  }
+}

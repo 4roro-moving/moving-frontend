@@ -1,0 +1,19 @@
+{
+  "common": {
+    "login": "Log in",
+    "logout": "Log out",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save"
+  },
+  "status": {
+    "pending": "Pending",
+    "completed": "Completed",
+    "rejected": "Rejected"
+  },
+  "errors": {
+    "unknown": "An unknown error occurred.",
+    "network": "Unable to connect to the network.",
+    "timeout": "The request timed out."
+  }
+}

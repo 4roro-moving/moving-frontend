@@ -1,0 +1,19 @@
+{
+  "common": {
+    "login": "登录",
+    "logout": "退出登录",
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存"
+  },
+  "status": {
+    "pending": "等待中",
+    "completed": "已完成",
+    "rejected": "已拒绝"
+  },
+  "errors": {
+    "unknown": "发生未知错误。",
+    "network": "网络连接不稳定。",
+    "timeout": "请求超时。"
+  }
+}
