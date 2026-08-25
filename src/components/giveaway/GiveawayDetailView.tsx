@@ -15,8 +15,9 @@ import GiveawayMyRequestActionOverlays from "@/components/giveaway/GiveawayMyReq
 import GiveawayMyRequestSection from "@/components/giveaway/GiveawayMyRequestSection";
 import GiveawayReceivedRequestList from "@/components/giveaway/GiveawayReceivedRequestList";
 import GiveawayProfileAvatar from "@/components/giveaway/GiveawayProfileAvatar";
-import GiveawayReportButton from "@/components/giveaway/GiveawayReportButton";
 import GiveawayRequestFormModal from "@/components/giveaway/GiveawayRequestFormModal";
+import ReportModal from "@/components/report/ReportModal";
+import ReportMoreMenu from "@/components/report/ReportMoreMenu";
 import { useCompleteGiveaway } from "@/hooks/giveaway/useCompleteGiveaway";
 import { useDeleteGiveaway } from "@/hooks/giveaway/useDeleteGiveaway";
 import { useMyGiveawayRequestActions } from "@/hooks/giveaway/useMyGiveawayRequestActions";
@@ -61,6 +62,7 @@ const GiveawayDetailView = ({
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isCompleteOpen, setIsCompleteOpen] = useState(false);
   const [isApplyOpen, setIsApplyOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | undefined>();
   const [completeError, setCompleteError] = useState<string | undefined>();
   const writtenAt = formatRelativeTime(giveaway.createdAt);
@@ -152,7 +154,12 @@ const GiveawayDetailView = ({
                       </Text>
                     </span>
                   </div>
-                  {isAuthor ? null : <GiveawayReportButton />}
+                  {isAuthor ? null : (
+                    <ReportMoreMenu
+                      ariaLabel="나눔 글 메뉴 더보기"
+                      onReport={() => setIsReportModalOpen(true)}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -274,6 +281,15 @@ const GiveawayDetailView = ({
         onClose={() => setIsApplyOpen(false)}
       />
       <GiveawayMyRequestActionOverlays actions={requestActions} />
+      {isAuthor ? null : (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          targetType="GIVEAWAY"
+          targetId={String(giveaway.id)}
+          targetName={giveaway.title}
+        />
+      )}
     </div>
   );
 };

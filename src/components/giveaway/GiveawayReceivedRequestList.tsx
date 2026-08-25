@@ -43,19 +43,21 @@ const GiveawayReceivedRequestSkeletonList = () => {
           <div className="bg-background-default border-border-subtle shadow-estimate-card rounded-20 flex w-full flex-col gap-16 border-[0.5px] px-20 py-24 md:gap-24 md:px-32 md:py-32 xl:px-40">
             <div className="flex w-full flex-col gap-16 xl:flex-row xl:items-center xl:gap-12">
               <div className="flex min-w-0 flex-1 flex-col gap-8">
-                <div className="flex items-center gap-12 md:gap-20">
-                  <Skeleton className="rounded-12 size-64 shrink-0 md:size-80" />
-                  <div className="flex min-w-0 flex-1 flex-col gap-8">
-                    <Skeleton className="h-26 w-80" />
-                    <Skeleton className="h-24 w-3/4" />
-                    <Skeleton className="h-18 w-64" />
+                <div className="flex items-start justify-between gap-12">
+                  <div className="flex min-w-0 flex-1 items-center gap-12 md:gap-20">
+                    <Skeleton className="rounded-12 size-64 shrink-0 md:size-80" />
+                    <div className="flex min-w-0 flex-1 flex-col gap-8">
+                      <Skeleton className="h-26 w-80" />
+                      <Skeleton className="h-24 w-3/4" />
+                      <Skeleton className="h-18 w-64" />
+                    </div>
                   </div>
+                  <Skeleton className="size-32 shrink-0 rounded-full" />
                 </div>
                 <div className="flex w-full flex-col gap-16 md:flex-row md:items-center md:gap-20">
                   <Skeleton className="h-48 w-64" />
                   <Skeleton className="h-48 w-160" />
                 </div>
-                <Skeleton className="h-22 w-64" />
               </div>
               <div className="flex w-full flex-col gap-8 xl:w-160 xl:shrink-0">
                 <Skeleton className="rounded-12 h-54 w-full" />

@@ -99,7 +99,6 @@ export const GIVEAWAY_REJECT_BUTTON_LABEL = "거절하기";
 export const GIVEAWAY_EDIT_BUTTON_LABEL = "수정하기";
 export const GIVEAWAY_DELETE_BUTTON_LABEL = "삭제하기";
 export const GIVEAWAY_COMPLETE_BUTTON_LABEL = "나눔 완료";
-export const GIVEAWAY_REPORT_BUTTON_LABEL = "신고하기";
 export const GIVEAWAY_APPLY_BUTTON_LABEL = "나눔 신청하기";
 export const GIVEAWAY_APPLY_SUBMIT_LABEL = "신청하기";
 export const GIVEAWAY_APPLY_MODAL_TITLE = "나눔 신청";
