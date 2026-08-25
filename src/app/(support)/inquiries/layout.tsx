@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import RoleGuard from "@/components/auth/RoleGuard";
+import InquiryAccessGuard from "@/components/auth/InquiryAccessGuard";
 import { Text } from "@/components/common/Text";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import type { AuthRole } from "@/lib/auth/role";
@@ -54,11 +54,11 @@ const InquiryLoginSelection = () => {
 
 export default function InquiryLayout({ children }: InquiryLayoutProps) {
   return (
-    <RoleGuard
+    <InquiryAccessGuard
       allowedRole={INQUIRY_ALLOWED_ROLES}
       unauthenticatedFallback={<InquiryLoginSelection />}
     >
       {children}
-    </RoleGuard>
+    </InquiryAccessGuard>
   );
 }

@@ -7,6 +7,7 @@ import { Text } from "@/components/common/Text";
 import { useAddInquiryMessage } from "@/hooks/inquiry/useAddInquiryMessage";
 import { useCloseInquiry } from "@/hooks/inquiry/useCloseInquiry";
 import { useInquiryDetail } from "@/hooks/inquiry/useInquiryDetail";
+import { hasSuspensionAppealSession } from "@/lib/auth/suspensionAppealSession";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { formatKoreanDateTimeWithTime } from "@/lib/utils/date";
@@ -31,6 +32,7 @@ const STATUS_LABEL: Record<InquiryStatus, string> = {
 
 const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
   const [content, setContent] = useState("");
+  const isSuspensionAppealAccess = hasSuspensionAppealSession();
 
   const { data, isPending, isError, refetch } = useInquiryDetail(inquiryId);
 
@@ -88,10 +90,12 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
   }
 
   const isClosed = data.status === "CLOSED";
+  const isReadOnly = isSuspensionAppealAccess && data.category !== "SUSPENSION_APPEAL";
 
   const trimmedContent = content.trim();
 
-  const canSend = !isClosed && trimmedContent.length > 0 && !addMessageMutation.isPending;
+  const canSend =
+    !isClosed && !isReadOnly && trimmedContent.length > 0 && !addMessageMutation.isPending;
 
   const handleMessageSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -235,7 +239,13 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
       </section>
 
       {/* 종료된 문의 */}
-      {isClosed ? (
+      {isReadOnly ? (
+        <div className="bg-background-subtle rounded-8 px-16 py-20 text-center">
+          <Text as="p" variant="md-medium" className="text-text-muted">
+            정지 상태에서는 기존 문의를 읽기 전용으로 확인할 수 있습니다.
+          </Text>
+        </div>
+      ) : isClosed ? (
         <div className="bg-background-subtle rounded-8 px-16 py-20 text-center">
           <Text as="p" variant="md-medium" className="text-text-muted">
             종료된 문의입니다. 추가 문의를 작성할 수 없습니다.
@@ -247,12 +257,14 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
           <div className="flex flex-col gap-4">
             <label htmlFor="inquiry-message">
               <Text as="span" variant="lg-semibold" className="text-text-primary">
-                추가 문의
+                {isSuspensionAppealAccess ? "이의 제기 추가 내용" : "추가 문의"}
               </Text>
             </label>
 
             <Text as="p" variant="xs-regular" className="text-text-muted">
-              기존 문의에 이어서 궁금한 내용을 남길 수 있습니다.
+              {isSuspensionAppealAccess
+                ? "정지 이의 제기와 관련된 추가 내용을 남길 수 있습니다."
+                : "기존 문의에 이어서 궁금한 내용을 남길 수 있습니다."}
             </Text>
           </div>
 
@@ -305,7 +317,7 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
             </Text>
           </Link>
 
-          {!isClosed && (
+          {!isClosed && !isSuspensionAppealAccess && (
             <button
               type="button"
               onClick={handleClose}

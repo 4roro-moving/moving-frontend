@@ -2,9 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import AccountSuspensionNotice from "@/components/auth/AccountSuspensionNotice";
 import AuthHeader from "@/components/auth/AuthHeader";
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import Button from "@/components/common/Button/Button";
@@ -15,9 +17,18 @@ import { Text, getTextVariantClass } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
 import { resolveAuthUserImage } from "@/lib/api/profile";
-import { getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
+import {
+  getAccountSuspensionReason,
+  getLoginErrorMessage,
+  isAccountSuspended,
+  isSuspensionAppealAvailable,
+} from "@/lib/auth/getLoginErrorMessage";
 import { consumePasswordChangedToast } from "@/lib/auth/passwordChangedToast";
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
+import {
+  clearSuspensionAppealSession,
+  markSuspensionAppealSession,
+} from "@/lib/auth/suspensionAppealSession";
 import {
   audienceToLoginRole,
   getLoginRedirectParam,
@@ -35,10 +46,14 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
+  const router = useRouter();
   const { mutateAsync: login, isPending } = useLoginMutation();
   const establishSession = useAuthStore((state) => state.establishSession);
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [suspensionReason, setSuspensionReason] = useState<string | null>(null);
+  const [isSuspended, setIsSuspended] = useState(false);
+  const [isAppealAvailable, setIsAppealAvailable] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const {
@@ -68,11 +83,15 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
+    setSuspensionReason(null);
+    setIsSuspended(false);
+    setIsAppealAvailable(false);
 
     try {
       const role = audienceToLoginRole(audience);
       const result = await login({ ...values, role });
 
+      clearSuspensionAppealSession();
       // 이전 계정 Soft UX 힌트 제거 후 status로 다시 저장
       clearProfileCompleted();
 
@@ -85,6 +104,9 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       setPostAuthRedirectPath(nextPath);
       establishSession(await resolveAuthUserImage(result.user));
     } catch (error) {
+      setSuspensionReason(getAccountSuspensionReason(error) ?? null);
+      setIsSuspended(isAccountSuspended(error));
+      setIsAppealAvailable(isSuspensionAppealAvailable(error));
       setSubmitError(getLoginErrorMessage(error, audience));
     }
   });
@@ -121,7 +143,19 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
             </FormField>
           </div>
 
-          {submitError ? (
+          {isSuspended ? (
+            <AccountSuspensionNotice
+              reason={suspensionReason ?? "정지 사유를 확인할 수 없습니다."}
+              onAppealClick={
+                isAppealAvailable
+                  ? () => {
+                      markSuspensionAppealSession();
+                      router.push(APP_ROUTES.INQUIRIES.ROOT);
+                    }
+                  : undefined
+              }
+            />
+          ) : submitError ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
               {submitError}
             </Text>
@@ -166,7 +200,22 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
         >
           SNS로 로그인
         </Text>
-        <SocialLoginButtons audience={audience} intent="login" onError={setSubmitError} />
+        <SocialLoginButtons
+          audience={audience}
+          intent="login"
+          onError={(error) => {
+            if (typeof error === "string") {
+              setSuspensionReason(null);
+              setIsAppealAvailable(false);
+              setSubmitError(error);
+              return;
+            }
+
+            setSuspensionReason(getAccountSuspensionReason(error) ?? null);
+            setIsAppealAvailable(isSuspensionAppealAvailable(error));
+            setSubmitError(getLoginErrorMessage(error, audience));
+          }}
+        />
       </div>
     </div>
   );

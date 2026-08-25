@@ -18,6 +18,12 @@ export const ERROR_CODES = {
     message: "선택한 회원 유형과 계정의 회원 유형이 일치하지 않습니다.",
   },
 
+  ACCOUNT_SUSPENDED: {
+    status: 403,
+    code: "ACCOUNT_SUSPENDED",
+    message: "이용이 제한된 계정입니다. 자세한 사항은 고객센터로 문의해 주세요.",
+  },
+
   OAUTH_ACCOUNT_NOT_FOUND: {
     status: 404,
     code: "OAUTH_ACCOUNT_NOT_FOUND",

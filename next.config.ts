@@ -85,6 +85,21 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    const backend = (
+      process.env.NEXT_PUBLIC_API_BASE_URL ??
+      process.env.NEXT_PUBLIC_API_URL ??
+      ""
+    ).replace(/\/$/, "");
+
+    return [
+      {
+        // 제한 세션 Cookie가 프론트 origin의 /api/inquiries 요청에만 실리도록 한다.
+        source: "/api/inquiries/:path*",
+        destination: `${backend}/inquiries/:path*`,
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);

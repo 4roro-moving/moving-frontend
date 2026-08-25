@@ -21,6 +21,7 @@ import {
 } from "@/lib/auth/profileImage";
 import { loadRole, saveRole } from "@/lib/auth/role";
 import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
+import { clearSuspensionAppealSession } from "@/lib/auth/suspensionAppealSession";
 import { clearAppQueryCache } from "@/providers/query/appQueryClient";
 import { ApiError } from "@/types/api";
 
@@ -203,6 +204,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   clearSession: () => {
     curSessionGeneration++;
     clearAuthTokens();
+    clearSuspensionAppealSession();
     clearAllClientStorageHints();
     get().markUnauthenticated();
   },
@@ -226,6 +228,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   establishSession: (user) => {
     curSessionGeneration++;
+    // 계정 전환 로그인에서는 같은 queryKey에 남은 이전 계정 데이터를 제거한다.
+    clearAppQueryCache();
     setAuthenticatedUser(set, user, false);
   },
 
@@ -363,6 +367,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // hard navigate 직전: 토큰·힌트만 정리하고 비로그인 UI paint는 생략
         curSessionGeneration++;
         clearAuthTokens();
+        clearSuspensionAppealSession();
         clearAllClientStorageHints();
         clearAppQueryCache();
       } else {
