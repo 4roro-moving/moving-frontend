@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type TransitionEvent } from "react";
+import { useTranslations } from "next-intl";
 import { createPortal } from "react-dom";
 
 import { isNavLinkActive } from "@/components/common/Header/isNavLinkActive";
@@ -30,6 +31,7 @@ interface HeaderSideNavProps {
 /** tablet·mobile GNB 사이드 네비게이션 — exit 애니메이션 후 unmount */
 const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideNavProps) => {
   const pathname = usePathname();
+  const t = useTranslations("accessibility");
   const panelRef = useRef<HTMLElement>(null);
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -87,7 +89,7 @@ const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideN
     <>
       <button
         type="button"
-        aria-label="메뉴 닫기"
+        aria-label={t("closeMenu")}
         tabIndex={isOpen ? 0 : -1}
         className={cn(
           "bg-overlay-scrim fixed inset-0 z-[9999] transition-opacity duration-200 xl:hidden",
@@ -102,7 +104,7 @@ const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideN
         id={id}
         role="dialog"
         aria-modal="true"
-        aria-label="주요 메뉴"
+        aria-label={t("mainMenu")}
         aria-hidden={!isOpen}
         tabIndex={-1}
         onTransitionEnd={handlePanelTransitionEnd}
@@ -115,7 +117,7 @@ const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideN
         <div className="border-border-subtle flex h-54 shrink-0 items-center justify-end border-b px-16 py-10">
           <button
             type="button"
-            aria-label="메뉴 닫기"
+            aria-label={t("closeMenu")}
             className="text-icon-default focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none"
             onClick={onClose}
           >
@@ -123,7 +125,7 @@ const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideN
           </button>
         </div>
 
-        <nav aria-label="모바일 주요 메뉴">
+        <nav aria-label={t("mobileMainNavigation")}>
           {emptyMessage ? (
             <Text as="p" variant="lg-medium" className="text-text-subtle px-20 py-24">
               {emptyMessage}

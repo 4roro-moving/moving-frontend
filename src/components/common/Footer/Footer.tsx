@@ -3,27 +3,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
-const FOOTER_LINKS = [
-  {
-    label: "공지사항",
-    href: APP_ROUTES.NOTICES.ROOT,
-  },
-  {
-    label: "자주 묻는 질문",
-    href: APP_ROUTES.FAQS.ROOT,
-  },
-  {
-    label: "문의하기",
-    href: APP_ROUTES.INQUIRIES.ROOT,
-  },
-];
-
 const Footer = () => {
   const pathname = usePathname();
+  const t = useTranslations("navigation");
+  const footerLinks = [
+    { label: t("notices"), href: APP_ROUTES.NOTICES.ROOT },
+    { label: t("faqs"), href: APP_ROUTES.FAQS.ROOT },
+    { label: t("inquiries"), href: APP_ROUTES.INQUIRIES.ROOT },
+  ];
 
   // 2026.08.08 윤소정 - [추가]
   // /movers/map 경로인 경우 footer 제거
@@ -37,8 +29,8 @@ const Footer = () => {
       <div className="px-margin-mobile max-w-container-desktop mx-auto flex w-full flex-col items-center gap-16 py-40 md:px-40">
         <Image src="/icons/logo_full.svg" alt="4roro-moving" width={100} height={37} />
 
-        <nav aria-label="고객지원" className="flex items-center gap-24">
-          {FOOTER_LINKS.map((link) => (
+        <nav aria-label={t("support")} className="flex items-center gap-24">
+          {footerLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}

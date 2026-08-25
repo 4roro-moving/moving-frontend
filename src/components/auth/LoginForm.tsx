@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -35,6 +36,7 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
+  const t = useTranslations("auth");
   const { mutateAsync: login, isPending } = useLoginMutation();
   const establishSession = useAuthStore((state) => state.establishSession);
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
@@ -97,24 +99,24 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
         <form className="flex w-full flex-col gap-32 md:gap-56" onSubmit={onSubmit} noValidate>
           <div className="flex w-full flex-col gap-16 md:gap-32">
-            <FormField label="이메일" labelFor="email" variant="auth">
+            <FormField label={t("email")} labelFor="email" variant="auth">
               <Input
                 id="email"
                 size="md"
                 type="email"
                 autoComplete="email"
-                placeholder="이메일을 입력해 주세요"
+                placeholder={t("emailPlaceholder")}
                 error={errors.email?.message}
                 {...register("email")}
               />
             </FormField>
 
-            <FormField label="비밀번호" labelFor="password" variant="auth">
+            <FormField label={t("password")} labelFor="password" variant="auth">
               <PasswordInput
                 id="password"
                 size="md"
                 autoComplete="current-password"
-                placeholder="비밀번호를 입력해 주세요"
+                placeholder={t("passwordPlaceholder")}
                 error={errors.password?.message}
                 {...register("password")}
               />
@@ -134,7 +136,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
             fullWidth
             disabled={!isValid || isSubmitting || isPending}
           >
-            로그인
+            {t("login")}
           </Button>
         </form>
 
@@ -144,7 +146,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
             variant={{ base: "xs-regular", md: "xl-regular" }}
             className="text-text-description"
           >
-            아직 무빙 회원이 아니신가요?
+            {t("notMember")}
           </Text>
           <Link
             href={signUpHref}
@@ -153,7 +155,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
               "text-text-brand",
             )}
           >
-            이메일로 회원가입하기
+            {t("signUpWithEmail")}
           </Link>
         </p>
       </div>
@@ -164,7 +166,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
           variant={{ base: "xs-regular", md: "xl-regular" }}
           className="text-text-description"
         >
-          SNS로 로그인
+          {t("socialLogin")}
         </Text>
         <SocialLoginButtons audience={audience} intent="login" onError={setSubmitError} />
       </div>

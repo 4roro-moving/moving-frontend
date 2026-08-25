@@ -6,6 +6,66 @@
     "confirm": "확인",
     "save": "저장"
   },
+  "navigation": {
+    "moverSearch": "기사님 찾기",
+    "community": "커뮤니티",
+    "estimateRequest": "견적 요청",
+    "pricePrediction": "예상 견적",
+    "estimateManagement": "내 견적 관리",
+    "receivedRequests": "받은 요청",
+    "scheduleManagement": "일정 관리",
+    "profileEdit": "프로필 수정",
+    "favoriteMovers": "찜한 기사님",
+    "moveReviews": "이사 리뷰",
+    "myActivity": "내 활동 내역",
+    "myPage": "마이페이지",
+    "myReports": "내 신고내역",
+    "createProfile": "프로필 생성",
+    "profileIncompleteMessage": "프로필을 완성한 뒤 이용할 수 있어요.",
+    "notices": "공지사항",
+    "faqs": "자주 묻는 질문",
+    "inquiries": "문의하기",
+    "support": "고객지원"
+  },
+  "locale": {
+    "label": "언어",
+    "select": "언어 선택",
+    "names": {
+      "ko": "한국어",
+      "en": "English",
+      "ja": "日本語",
+      "zh-CN": "简体中文"
+    }
+  },
+  "auth": {
+    "moverPrompt": "기사님이신가요?",
+    "customerPrompt": "일반 유저라면?",
+    "moverPage": "기사님 전용 페이지",
+    "customerPage": "일반 유저 전용 페이지",
+    "profileMenu": "프로필 메뉴",
+    "logoutFailed": "로그아웃에 실패했습니다. 다시 시도해 주세요.",
+    "moverSuffix": "기사님",
+    "customerSuffix": "고객님",
+    "email": "이메일",
+    "password": "비밀번호",
+    "emailPlaceholder": "이메일을 입력해 주세요",
+    "passwordPlaceholder": "비밀번호를 입력해 주세요",
+    "login": "로그인",
+    "notMember": "아직 무빙 회원이 아니신가요?",
+    "signUpWithEmail": "이메일로 회원가입하기",
+    "socialLogin": "SNS로 로그인",
+    "socialLoginWithProvider": "{provider}로 로그인",
+    "socialSignUpWithProvider": "{provider}로 회원가입하기",
+    "loginRequiredTitle": "로그인이 필요해요",
+    "loginRequiredAction": "로그인하기",
+    "loginRequiredDefaultDescription": "찜하기는 로그인 후 이용할 수 있어요."
+  },
+  "accessibility": {
+    "mainMenu": "주요 메뉴",
+    "mobileMainNavigation": "모바일 주요 메뉴",
+    "closeMenu": "메뉴 닫기",
+    "closeModal": "모달 닫기"
+  },
   "status": {
     "pending": "대기 중",
     "completed": "완료",

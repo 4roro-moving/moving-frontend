@@ -6,6 +6,66 @@
     "confirm": "Confirm",
     "save": "Save"
   },
+  "navigation": {
+    "moverSearch": "Find movers",
+    "community": "Community",
+    "estimateRequest": "Request estimate",
+    "pricePrediction": "Price prediction",
+    "estimateManagement": "My estimates",
+    "receivedRequests": "Received requests",
+    "scheduleManagement": "Schedule",
+    "profileEdit": "Edit profile",
+    "favoriteMovers": "Favorite movers",
+    "moveReviews": "Moving reviews",
+    "myActivity": "My activity",
+    "myPage": "My page",
+    "myReports": "My reports",
+    "createProfile": "Create profile",
+    "profileIncompleteMessage": "Complete your profile to use this feature.",
+    "notices": "Notices",
+    "faqs": "FAQ",
+    "inquiries": "Contact us",
+    "support": "Support"
+  },
+  "locale": {
+    "label": "Language",
+    "select": "Select language",
+    "names": {
+      "ko": "한국어",
+      "en": "English",
+      "ja": "日本語",
+      "zh-CN": "简体中文"
+    }
+  },
+  "auth": {
+    "moverPrompt": "Are you a mover?",
+    "customerPrompt": "Are you a customer?",
+    "moverPage": "Mover page",
+    "customerPage": "Customer page",
+    "profileMenu": "Profile menu",
+    "logoutFailed": "Failed to log out. Please try again.",
+    "moverSuffix": "Mover",
+    "customerSuffix": "Customer",
+    "email": "Email",
+    "password": "Password",
+    "emailPlaceholder": "Enter your email address",
+    "passwordPlaceholder": "Enter your password",
+    "login": "Log in",
+    "notMember": "Not a MOVING member yet?",
+    "signUpWithEmail": "Sign up with email",
+    "socialLogin": "Log in with social media",
+    "socialLoginWithProvider": "Log in with {provider}",
+    "socialSignUpWithProvider": "Sign up with {provider}",
+    "loginRequiredTitle": "Login required",
+    "loginRequiredAction": "Log in",
+    "loginRequiredDefaultDescription": "Please log in to add a mover to your favorites."
+  },
+  "accessibility": {
+    "mainMenu": "Main menu",
+    "mobileMainNavigation": "Mobile main navigation",
+    "closeMenu": "Close menu",
+    "closeModal": "Close modal"
+  },
   "status": {
     "pending": "Pending",
     "completed": "Completed",

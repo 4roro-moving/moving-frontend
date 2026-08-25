@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, type FocusEvent } from "react";
+import { useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
@@ -17,8 +18,6 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { useAuthStore } from "@/stores/useAuthStore";
-
-const LOGOUT_FAILURE_TOAST = "로그아웃에 실패했습니다. 다시 시도해 주세요.";
 
 export type ProfileMenuItem =
   | { type: "link"; label: string; href: string }
@@ -43,6 +42,7 @@ export default function ProfileMenuTrigger({
   imageUrl,
   isAvatarPending,
 }: ProfileMenuTriggerProps) {
+  const t = useTranslations("auth");
   const pathname = usePathname();
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
@@ -60,7 +60,7 @@ export default function ProfileMenuTrigger({
 
   const linkItems = items.filter((item) => item.type === "link");
   const logoutItem = items.find((item) => item.type === "action" && item.action === "logout");
-  const nicknameSuffix = role === "MOVER" ? "기사님" : "고객님";
+  const nicknameSuffix = role === "MOVER" ? t("moverSuffix") : t("customerSuffix");
 
   const restoreTriggerFocusIfNeeded = () => {
     const active = document.activeElement;
@@ -139,7 +139,7 @@ export default function ProfileMenuTrigger({
       try {
         await logout();
       } catch {
-        setToastMessage(LOGOUT_FAILURE_TOAST);
+        setToastMessage(t("logoutFailed"));
       }
       router.refresh();
       return;
@@ -150,7 +150,7 @@ export default function ProfileMenuTrigger({
     try {
       await logout({ deferUiClear: true });
     } catch {
-      setToastMessage(LOGOUT_FAILURE_TOAST);
+      setToastMessage(t("logoutFailed"));
     }
     window.location.assign(logoutPath);
   };
@@ -166,7 +166,7 @@ export default function ProfileMenuTrigger({
         ref={triggerRef}
         type="button"
         id={`${menuId}-trigger`}
-        aria-label="프로필 메뉴"
+        aria-label={t("profileMenu")}
         aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-controls={isOpen ? `${menuId}-menu` : undefined}

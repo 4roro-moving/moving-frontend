@@ -6,6 +6,66 @@
     "confirm": "确认",
     "save": "保存"
   },
+  "navigation": {
+    "moverSearch": "查找搬家师傅",
+    "community": "社区",
+    "estimateRequest": "请求报价",
+    "pricePrediction": "价格预测",
+    "estimateManagement": "我的报价管理",
+    "receivedRequests": "收到的请求",
+    "scheduleManagement": "日程管理",
+    "profileEdit": "编辑个人资料",
+    "favoriteMovers": "收藏的搬家师傅",
+    "moveReviews": "搬家评价",
+    "myActivity": "我的活动",
+    "myPage": "我的页面",
+    "myReports": "我的举报记录",
+    "createProfile": "创建个人资料",
+    "profileIncompleteMessage": "请先完善个人资料后再使用此功能。",
+    "notices": "公告",
+    "faqs": "常见问题",
+    "inquiries": "联系我们",
+    "support": "客户支持"
+  },
+  "locale": {
+    "label": "语言",
+    "select": "选择语言",
+    "names": {
+      "ko": "한국어",
+      "en": "English",
+      "ja": "日本語",
+      "zh-CN": "简体中文"
+    }
+  },
+  "auth": {
+    "moverPrompt": "您是搬家师傅吗？",
+    "customerPrompt": "您是普通用户吗？",
+    "moverPage": "搬家师傅专用页面",
+    "customerPage": "普通用户专用页面",
+    "profileMenu": "个人资料菜单",
+    "logoutFailed": "退出登录失败，请重试。",
+    "moverSuffix": "搬家师傅",
+    "customerSuffix": "客户",
+    "email": "电子邮箱",
+    "password": "密码",
+    "emailPlaceholder": "请输入电子邮箱",
+    "passwordPlaceholder": "请输入密码",
+    "login": "登录",
+    "notMember": "还不是MOVING会员吗？",
+    "signUpWithEmail": "使用邮箱注册",
+    "socialLogin": "使用社交账号登录",
+    "socialLoginWithProvider": "使用{provider}登录",
+    "socialSignUpWithProvider": "使用{provider}注册",
+    "loginRequiredTitle": "需要登录",
+    "loginRequiredAction": "登录",
+    "loginRequiredDefaultDescription": "登录后即可收藏搬家师傅。"
+  },
+  "accessibility": {
+    "mainMenu": "主菜单",
+    "mobileMainNavigation": "移动端主导航",
+    "closeMenu": "关闭菜单",
+    "closeModal": "关闭弹窗"
+  },
   "status": {
     "pending": "等待中",
     "completed": "已完成",

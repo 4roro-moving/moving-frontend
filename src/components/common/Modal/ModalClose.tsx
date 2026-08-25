@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import { CloseIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 
@@ -18,6 +22,8 @@ const ModalClose = ({
   className,
   iconClassName,
 }: ModalCloseProps) => {
+  const t = useTranslations("accessibility");
+
   return (
     <button
       type="button"
@@ -34,7 +40,7 @@ const ModalClose = ({
       )}
       onClick={onClose}
       disabled={disabled}
-      aria-label="모달 닫기"
+      aria-label={t("closeModal")}
     >
       <CloseIcon
         className={cn(
