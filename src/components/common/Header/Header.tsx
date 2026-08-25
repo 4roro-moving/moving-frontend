@@ -79,6 +79,10 @@ const MOVER_LOGGED_IN_LINKS = [
     label: "내 견적 관리",
     href: APP_ROUTES.MOVER_ESTIMATES.SENT,
   },
+  {
+    label: "일정 관리",
+    href: APP_ROUTES.MOVER_ESTIMATES.CALENDAR,
+  },
 ];
 
 const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
