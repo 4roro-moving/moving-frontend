@@ -1,5 +1,8 @@
 import fetchInstance from "@/lib/api/fetchInstance";
-import { hasSuspensionAppealSession } from "@/lib/auth/suspensionAppealSession";
+import {
+  hasSuspensionAppealSession,
+  invalidateSuspensionAppealSession,
+} from "@/lib/auth/suspensionAppealSession";
 import { API_ROUTES } from "@/lib/constants/apiRoutes";
 import type {
   CreateInquiryInput,
@@ -10,6 +13,7 @@ import type {
   InquiryListResult,
 } from "@/types/inquiry";
 import type { Pagination } from "@/types/pagination";
+import { ApiError } from "@/types/api";
 
 const getInquiryAuthOptions = () => {
   if (!hasSuspensionAppealSession()) {
@@ -24,6 +28,23 @@ const getInquiryAuthOptions = () => {
   } as const;
 };
 
+// 제한 세션 상태의 문의 요청이 401/403이면 제한 세션 표시 무효화
+const requestInquiry = async <T>(request: () => Promise<T>): Promise<T> => {
+  try {
+    return await request();
+  } catch (error) {
+    if (
+      hasSuspensionAppealSession() &&
+      error instanceof ApiError &&
+      (error.status === 401 || error.status === 403)
+    ) {
+      invalidateSuspensionAppealSession();
+    }
+
+    throw error;
+  }
+};
+
 export const fetchInquiries = async (query: InquiryListQuery): Promise<InquiryListResult> => {
   const params = new URLSearchParams({
     page: String(query.page),
@@ -34,9 +55,11 @@ export const fetchInquiries = async (query: InquiryListQuery): Promise<InquiryLi
     params.set("status", query.status);
   }
 
-  const result = await fetchInstance.getPaginated<InquiryListItem[], Pagination>(
-    `${API_ROUTES.INQUIRIES.ROOT}?${params.toString()}`,
-    getInquiryAuthOptions(),
+  const result = await requestInquiry(() =>
+    fetchInstance.getPaginated<InquiryListItem[], Pagination>(
+      `${API_ROUTES.INQUIRIES.ROOT}?${params.toString()}`,
+      getInquiryAuthOptions(),
+    ),
   );
 
   return {
@@ -46,25 +69,36 @@ export const fetchInquiries = async (query: InquiryListQuery): Promise<InquiryLi
 };
 
 export const fetchInquiryDetail = (inquiryId: number) =>
-  fetchInstance.get<InquiryDetail>(API_ROUTES.INQUIRIES.DETAIL(inquiryId), getInquiryAuthOptions());
+  requestInquiry(() =>
+    fetchInstance.get<InquiryDetail>(
+      API_ROUTES.INQUIRIES.DETAIL(inquiryId),
+      getInquiryAuthOptions(),
+    ),
+  );
 
 export const createInquiry = (body: CreateInquiryInput) =>
-  fetchInstance.post<InquiryDetail, CreateInquiryInput>(
-    API_ROUTES.INQUIRIES.ROOT,
-    body,
-    getInquiryAuthOptions(),
+  requestInquiry(() =>
+    fetchInstance.post<InquiryDetail, CreateInquiryInput>(
+      API_ROUTES.INQUIRIES.ROOT,
+      body,
+      getInquiryAuthOptions(),
+    ),
   );
 
 export const addInquiryMessage = (inquiryId: number, body: CreateInquiryMessageInput) =>
-  fetchInstance.post<InquiryDetail, CreateInquiryMessageInput>(
-    API_ROUTES.INQUIRIES.MESSAGES(inquiryId),
-    body,
-    getInquiryAuthOptions(),
+  requestInquiry(() =>
+    fetchInstance.post<InquiryDetail, CreateInquiryMessageInput>(
+      API_ROUTES.INQUIRIES.MESSAGES(inquiryId),
+      body,
+      getInquiryAuthOptions(),
+    ),
   );
 
 export const closeInquiry = (inquiryId: number) =>
-  fetchInstance.patch<InquiryDetail>(
-    API_ROUTES.INQUIRIES.CLOSE(inquiryId),
-    undefined,
-    getInquiryAuthOptions(),
+  requestInquiry(() =>
+    fetchInstance.patch<InquiryDetail>(
+      API_ROUTES.INQUIRIES.CLOSE(inquiryId),
+      undefined,
+      getInquiryAuthOptions(),
+    ),
   );
