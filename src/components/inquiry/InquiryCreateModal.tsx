@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import Modal from "@/components/common/Modal/Modal";
 import Select from "@/components/common/Select/Select";
@@ -14,29 +15,8 @@ interface InquiryCreateModalProps {
   onClose: () => void;
 }
 
-const CATEGORY_OPTIONS: {
-  value: InquiryCategory;
-  label: string;
-}[] = [
-  {
-    value: "SERVICE",
-    label: "서비스 이용",
-  },
-  {
-    value: "ACCOUNT",
-    label: "계정",
-  },
-  {
-    value: "SUSPENSION_APPEAL",
-    label: "정지 이의신청",
-  },
-  {
-    value: "ETC",
-    label: "기타",
-  },
-];
-
 const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
+  const t = useTranslations("supportInquiry");
   const [category, setCategory] = useState<InquiryCategory | "">("");
 
   const [title, setTitle] = useState("");
@@ -64,6 +44,13 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
 
   const hasCategory = category !== "";
 
+  const categoryOptions: { value: InquiryCategory; label: string }[] = [
+    { value: "SERVICE", label: t("categories.SERVICE") },
+    { value: "ACCOUNT", label: t("categories.ACCOUNT") },
+    { value: "SUSPENSION_APPEAL", label: t("categories.SUSPENSION_APPEAL") },
+    { value: "ETC", label: t("categories.ETC") },
+  ];
+
   const canSubmit =
     hasCategory &&
     trimmedTitle.length > 0 &&
@@ -71,7 +58,7 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
     !createMutation.isPending;
 
   const handleCategoryChange = (value: string) => {
-    const nextCategory = CATEGORY_OPTIONS.find((option) => option.value === value)?.value;
+    const nextCategory = categoryOptions.find((option) => option.value === value)?.value;
 
     if (!nextCategory) {
       return;
@@ -109,14 +96,14 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
       presentation="responsive"
       dismissible={!createMutation.isPending}
       className={cn("items-stretch gap-0 p-0", "md:max-w-[720px]", "xl:w-full xl:max-w-[720px]")}
-      aria-label="1:1 문의하기"
+      aria-label={t("create")}
     >
       <div className="border-border-default flex items-center justify-between border-b px-20 py-18 md:px-24">
         <div className="flex flex-col gap-4">
-          <Modal.Title className="text-text-primary">1:1 문의하기</Modal.Title>
+          <Modal.Title className="text-text-primary">{t("create")}</Modal.Title>
 
           <Text as="p" variant="xs-regular" className="text-text-secondary">
-            궁금한 점을 남겨주시면 확인 후 답변드릴게요.
+            {t("createDescription")}
           </Text>
         </div>
 
@@ -127,12 +114,12 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
         <div className="flex flex-col gap-20 overflow-y-auto px-20 py-20 md:px-24 md:py-24">
           <div className="flex flex-col gap-8">
             <Text as="span" variant="xs-semibold" className="text-text-primary">
-              문의 유형
+              {t("categoryLabel")}
             </Text>
 
             <Select
-              desc="문의 유형을 선택해주세요"
-              label="문의 유형"
+              desc={t("categoryPlaceholder")}
+              label={t("categoryLabel")}
               defaultValue={category}
               onChange={handleCategoryChange}
               disabled={createMutation.isPending}
@@ -149,7 +136,7 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
                 "xl:[&_button[role=combobox]]:py-0",
               )}
             >
-              {CATEGORY_OPTIONS.map((option) => (
+              {categoryOptions.map((option) => (
                 <Select.Option key={option.value} value={option.value}>
                   {option.label}
                 </Select.Option>
@@ -160,7 +147,7 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
           <div className="flex flex-col gap-8">
             <label htmlFor="inquiry-title">
               <Text as="span" variant="xs-semibold" className="text-text-primary">
-                제목
+                {t("subjectLabel")}
               </Text>
             </label>
 
@@ -169,7 +156,7 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
               type="text"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="문의 제목을 입력해주세요"
+              placeholder={t("subjectPlaceholder")}
               disabled={createMutation.isPending}
               className={cn(
                 "border-border-default bg-background-surface text-text-primary",
@@ -185,21 +172,21 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
           <div className="flex flex-col gap-8">
             <label htmlFor="inquiry-content">
               <Text as="span" variant="xs-semibold" className="text-text-primary">
-                문의 스레드
+                {t("threadLabel")}
               </Text>
             </label>
 
             <div className="border-border-default bg-background-surface rounded-8 border">
               <div className="flex min-h-[148px] flex-col gap-12 px-14 py-14">
                 <Text as="span" variant="xs-semibold" className="text-text-primary">
-                  사용자 문의 · 새 문의
+                  {t("newInquiry")}
                 </Text>
 
                 <textarea
                   id="inquiry-content"
                   value={content}
                   onChange={(event) => setContent(event.target.value)}
-                  placeholder="문의 내용을 자세히 작성해주세요"
+                  placeholder={t("contentPlaceholder")}
                   disabled={createMutation.isPending}
                   rows={4}
                   className={cn(
@@ -215,19 +202,19 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
 
               <div className="flex min-h-[72px] items-start px-14 py-16">
                 <Text as="p" variant="xs-semibold" className="text-text-primary">
-                  관리자 답변 · 문의 등록 후 답변이 이 아래에 이어서 표시됩니다.
+                  {t("adminReplyPreview")}
                 </Text>
               </div>
             </div>
 
             <Text as="p" variant="xs-regular" className="text-text-secondary">
-              ※ 답변과 추가 문의는 이 스레드에 시간순으로 이어집니다.
+              {t("threadHint")}
             </Text>
           </div>
 
           {createMutation.isError && (
             <Text as="p" variant="xs-regular" className="text-text-error" role="alert">
-              문의 등록에 실패했습니다. 잠시 후 다시 시도해주세요.
+              {t("createFailed")}
             </Text>
           )}
         </div>
@@ -244,7 +231,7 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
             )}
           >
             <Text as="span" variant="md-semibold">
-              취소
+              {t("cancel")}
             </Text>
           </button>
 
@@ -260,7 +247,7 @@ const InquiryCreateModal = ({ isOpen, onClose }: InquiryCreateModalProps) => {
             )}
           >
             <Text as="span" variant="md-semibold">
-              {createMutation.isPending ? "등록 중..." : "문의 등록"}
+              {createMutation.isPending ? t("creating") : t("createSubmit")}
             </Text>
           </button>
         </div>

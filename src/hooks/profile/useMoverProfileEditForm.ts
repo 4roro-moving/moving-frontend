@@ -6,16 +6,15 @@ import type { UseFormReset, UseFormSetError, UseFormSetFocus } from "react-hook-
 import { useUpdateMoverProfile } from "@/hooks/profile/useUpdateMoverProfile";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
-import {
-  MOVER_PROFILE_EDIT_ERROR_MESSAGE,
-  MOVER_PROFILE_EDIT_SUCCESS_MESSAGE,
-  MOVER_PROFILE_NICKNAME_ERROR_KEYWORDS,
-} from "@/lib/constants/profileMessages";
+import { MOVER_PROFILE_NICKNAME_ERROR_KEYWORDS } from "@/lib/constants/profileMessages";
 import { uploadProfileImage } from "@/lib/profile/uploadProfileImage";
 import type { MoverProfileFormValues } from "@/lib/schemas/moverProfileSchema";
 import { ApiError } from "@/types/api";
 
 interface UseMoverProfileEditFormParams {
+  saveSuccessMessage: string;
+  saveFailedMessage: string;
+  activityBaseRequiredMessage: string;
   reset: UseFormReset<MoverProfileFormValues>;
   setError: UseFormSetError<MoverProfileFormValues>;
   setFocus: UseFormSetFocus<MoverProfileFormValues>;
@@ -33,6 +32,9 @@ function hasNicknameErrorKeyword(message: string): boolean {
 }
 
 export function useMoverProfileEditForm({
+  saveSuccessMessage,
+  saveFailedMessage,
+  activityBaseRequiredMessage,
   reset,
   setError,
   setFocus,
@@ -80,7 +82,7 @@ export function useMoverProfileEditForm({
       if (!activityBaseAddress) {
         setError("activityBaseAddress", {
           type: "required",
-          message: "활동 거점을 선택해 주세요",
+          message: activityBaseRequiredMessage,
         });
         return;
       }
@@ -114,7 +116,7 @@ export function useMoverProfileEditForm({
         shouldRemoveImage: false,
       });
 
-      setToastMessage(MOVER_PROFILE_EDIT_SUCCESS_MESSAGE);
+      setToastMessage(saveSuccessMessage);
     } catch (error) {
       if (isConflictError(error) && hasNicknameErrorKeyword(error.message)) {
         setError("nickname", {
@@ -125,7 +127,7 @@ export function useMoverProfileEditForm({
         return;
       }
 
-      setSubmitError(getApiErrorMessage(error, MOVER_PROFILE_EDIT_ERROR_MESSAGE));
+      setSubmitError(getApiErrorMessage(error, saveFailedMessage));
     } finally {
       submissionInFlightRef.current = false;
       setIsSubmitting(false);

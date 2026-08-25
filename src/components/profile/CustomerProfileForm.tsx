@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -12,14 +13,15 @@ import { Text } from "@/components/common/Text";
 import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
+import { useProfileLocalizedOptions } from "@/components/profile/useProfileLocalizedOptions";
 import { useCreateCustomerProfile } from "@/hooks/profile/useCreateCustomerProfile";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getRoleHomePath } from "@/lib/auth/redirect";
-import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
-import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
+import { type RegionId } from "@/lib/constants/region";
 import { uploadProfileImage } from "@/lib/profile/uploadProfileImage";
 import {
   createCustomerProfileSchema,
+  type CustomerProfileValidationMessages,
   type CustomerProfileFormValues,
 } from "@/lib/schemas/customerProfileSchema";
 import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
@@ -38,6 +40,8 @@ const CustomerProfileForm = ({
   defaultValues,
   initialImageUrl = null,
 }: CustomerProfileFormProps) => {
+  const t = useTranslations("profile");
+  const { moveTypeOptions, regionOptions } = useProfileLocalizedOptions();
   const router = useRouter();
   const createCustomerProfile = useCreateCustomerProfile();
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -49,7 +53,17 @@ const CustomerProfileForm = ({
     setError,
     formState: { errors, isValid, isSubmitting },
   } = useForm<CustomerProfileFormValues>({
-    resolver: zodResolver(createCustomerProfileSchema({ requiresPhone })),
+    resolver: zodResolver(
+      createCustomerProfileSchema({
+        requiresPhone,
+        messages: {
+          phoneRequired: t("validation.phoneRequired"),
+          phoneInvalid: t("validation.phoneInvalid"),
+          serviceRequired: t("validation.serviceRequired"),
+          regionRequired: t("validation.regionRequired"),
+        } satisfies CustomerProfileValidationMessages,
+      }),
+    ),
     mode: "onChange",
     defaultValues: {
       phone: "",
@@ -67,7 +81,7 @@ const CustomerProfileForm = ({
 
     try {
       if (formValues.regionId === null) {
-        setSubmitError("내가 사는 지역을 선택해 주세요");
+        setSubmitError(t("validation.regionRequired"));
         return;
       }
 
@@ -93,7 +107,7 @@ const CustomerProfileForm = ({
         return;
       }
 
-      setSubmitError(getApiErrorMessage(error, "프로필 저장에 실패했습니다."));
+      setSubmitError(getApiErrorMessage(error, t("createFailed")));
     }
   });
 
@@ -105,21 +119,18 @@ const CustomerProfileForm = ({
       noValidate
       autoComplete="off"
     >
-      <ProfilePageHeader
-        title="프로필 등록"
-        description="추가 정보를 입력하여 회원가입을 완료해주세요."
-      />
+      <ProfilePageHeader title={t("createTitle")} description={t("createDescription")} />
 
       <div className="flex w-full flex-col gap-32">
         {requiresPhone ? (
-          <FormField label="전화번호" labelFor="customer-create-phone" required>
+          <FormField label={t("phone")} labelFor="customer-create-phone" required>
             <Input
               id="customer-create-phone"
               size="md"
               inputMode="numeric"
               numericOnly
               stripLeadingZeros={false}
-              placeholder="전화번호를 입력해 주세요"
+              placeholder={t("phonePlaceholder")}
               error={errors.phone?.message}
               {...register("phone")}
             />
@@ -127,7 +138,7 @@ const CustomerProfileForm = ({
         ) : null}
 
         <section className="flex w-full flex-col gap-32">
-          <FormField label="프로필 이미지" labelFor="customer-profile-image">
+          <FormField label={t("image")} labelFor="customer-profile-image">
             <Controller
               name="imageFile"
               control={control}
@@ -149,9 +160,9 @@ const CustomerProfileForm = ({
 
         <section className="flex w-full flex-col gap-32">
           <FormField
-            label="이용 서비스"
+            label={t("services")}
             labelId="customer-create-service-types-label"
-            description="*이용 서비스는 중복 선택 가능하며, 언제든 수정 가능해요!"
+            description={t("createServicesHint")}
           >
             <Controller
               name="serviceTypes"
@@ -160,7 +171,7 @@ const CustomerProfileForm = ({
                 <ProfileChipGroup<MoveType>
                   aria-labelledby="customer-create-service-types-label"
                   selectionMode="multiple"
-                  options={MOVE_TYPE_OPTIONS}
+                  options={moveTypeOptions}
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.serviceTypes?.message}
@@ -172,9 +183,9 @@ const CustomerProfileForm = ({
         </section>
 
         <FormField
-          label="내가 사는 지역"
+          label={t("region")}
           labelId="customer-create-region-label"
-          description="*내가 사는 지역은 언제든 수정 가능해요!"
+          description={t("createRegionHint")}
         >
           <Controller
             name="regionId"
@@ -183,7 +194,7 @@ const CustomerProfileForm = ({
               <ProfileChipGroup<RegionId>
                 aria-labelledby="customer-create-region-label"
                 selectionMode="single"
-                options={REGION_OPTIONS}
+                options={regionOptions}
                 value={field.value ?? null}
                 onChange={field.onChange}
                 error={errors.regionId?.message}
@@ -201,7 +212,7 @@ const CustomerProfileForm = ({
       ) : null}
 
       <Button type="submit" variant="solid" size="auth" fullWidth disabled={!isValid || isPending}>
-        시작하기
+        {t("start")}
       </Button>
     </form>
   );

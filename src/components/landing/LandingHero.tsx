@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 
 import { Text } from "@/components/common/Text";
 
@@ -10,7 +11,9 @@ import { Text } from "@/components/common/Text";
  * // 2026.08.01 정슬기 - [수정] Hero 이미지를 배경+트럭 원본 형태로 복원
  * // 2026.08.02 정슬기 - [수정] 오버레이 그라디언트를 토큰/Tailwind 유틸로 교체
  */
-export default function LandingHero() {
+export default async function LandingHero() {
+  const t = await getTranslations("landing");
+
   return (
     <section className="relative w-full overflow-hidden">
       <div className="relative flex h-[313px] w-full items-center justify-center md:h-[405px]">
@@ -42,16 +45,16 @@ export default function LandingHero() {
               variant={{ base: "xl-bold", md: "3xl-bold" }}
               className="text-text-inverse md:text-[length:var(--font-size-32)] md:leading-[var(--line-height-46)]"
             >
-              이사업체, 어떻게 고르세요?
+              {t("heroTitle")}
             </Text>
             <Text
               as="p"
               variant={{ base: "lg-regular", md: "2lg-regular" }}
               className="whitespace-nowrap text-gray-300 md:text-[length:var(--font-size-18)] md:leading-[var(--line-height-26)] md:text-gray-200"
             >
-              무빙은 여러 견적을 한눈에 비교해
+              {t("heroDescriptionLine1")}
               <br />
-              이사업체 선정 과정을 간편하게 바꿔드려요
+              {t("heroDescriptionLine2")}
             </Text>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
+import { useTranslations } from "next-intl";
 
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
@@ -21,21 +22,17 @@ import {
 } from "@/lib/utils/giveawaySearchParams";
 import type { GiveawayListSort } from "@/types/giveaway";
 
-const ALL_OPTION = { value: GIVEAWAY_ALL_VALUE, label: "전체" } as const;
-
-const REGION_FILTER_OPTIONS = [
-  ALL_OPTION,
-  ...REGION_OPTIONS.map((region) => ({
-    value: String(region.value),
-    label: region.label,
-  })),
-];
-
 interface GiveawayFiltersProps {
   filters: GiveawaySearchParamsState;
 }
 
 const GiveawayFilters = ({ filters }: GiveawayFiltersProps) => {
+  const t = useTranslations("giveaway");
+  const allOption = { value: GIVEAWAY_ALL_VALUE, label: t("all") };
+  const regionFilterOptions = [
+    allOption,
+    ...REGION_OPTIONS.map((region) => ({ value: String(region.value), label: region.label })),
+  ];
   const queryClient = useQueryClient();
   const {
     clearSearch,
@@ -81,8 +78,8 @@ const GiveawayFilters = ({ filters }: GiveawayFiltersProps) => {
             onChange={(event) => setKeyword(event.target.value)}
             onClear={clearSearch}
             maxLength={GIVEAWAY_KEYWORD_MAX_LENGTH}
-            placeholder="제목 또는 내용으로 나눔 글을 검색해 보세요."
-            aria-label="나눔 글 검색"
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("searchAria")}
             className="w-full"
           />
         </form>
@@ -94,16 +91,16 @@ const GiveawayFilters = ({ filters }: GiveawayFiltersProps) => {
             <div className="w-fit shrink-0 xl:w-160">
               <Select
                 key={`regionId-${filters.regionId}-${filterKey}`}
-                label="지역"
-                desc="지역"
+                label={t("region")}
+                desc={t("region")}
                 size="lg"
                 columns={2}
                 className="w-fit xl:w-full"
                 defaultValue={filters.regionId}
-                placeholderValue={ALL_OPTION.value}
+                placeholderValue={allOption.value}
                 onChange={(value) => replaceFilters({ regionId: value })}
               >
-                {REGION_FILTER_OPTIONS.map((option) => (
+                {regionFilterOptions.map((option) => (
                   <Select.Option
                     key={option.value}
                     value={option.value}
@@ -117,12 +114,12 @@ const GiveawayFilters = ({ filters }: GiveawayFiltersProps) => {
             <div className="w-fit shrink-0 xl:w-160">
               <Select
                 key={`status-${filters.status}-${filterKey}`}
-                label="상태"
-                desc="상태"
+                label={t("status")}
+                desc={t("status")}
                 size="lg"
                 className="w-fit xl:w-full"
                 defaultValue={filters.status}
-                placeholderValue={ALL_OPTION.value}
+                placeholderValue={allOption.value}
                 onChange={(value) => replaceFilters({ status: value })}
               >
                 {GIVEAWAY_STATUS_FILTER_OPTIONS.map((option) => (
@@ -143,7 +140,7 @@ const GiveawayFilters = ({ filters }: GiveawayFiltersProps) => {
             className="text-text-weak hover:text-text-muted shrink-0 transition-colors"
           >
             <Text as="span" variant={{ base: "md-medium", xl: "lg-medium" }}>
-              초기화
+              {t("reset")}
             </Text>
           </button>
         </div>
@@ -151,8 +148,8 @@ const GiveawayFilters = ({ filters }: GiveawayFiltersProps) => {
         <div className="w-fit shrink-0">
           <Select
             key={`sort-${filters.sort}-${filterKey}`}
-            label="정렬"
-            desc="정렬"
+            label={t("sort")}
+            desc={t("sort")}
             variant="sort"
             className="w-fit"
             defaultValue={filters.sort}

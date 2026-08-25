@@ -1,6 +1,7 @@
 "use client";
 
 import type { MouseEvent } from "react";
+import { useTranslations } from "next-intl";
 
 import { Text, type ResponsiveTextVariant, type TextVariant } from "@/components/common/Text";
 import { LikeIcon } from "@/icons";
@@ -39,6 +40,7 @@ export function FavoriteButton({
   countClassName,
   onToggle,
 }: FavoriteButtonProps) {
+  const t = useTranslations("profile");
   const icon = (
     <LikeIcon
       isFavorite={isFavorite}
@@ -71,7 +73,7 @@ export function FavoriteButton({
       <div
         className={cn("flex shrink-0 items-center", className)}
         role="group"
-        aria-label={`${moverName} 기사님 현재 찜 ${favoriteCount ?? 0}개`}
+        aria-label={t("favoriteStatus", { name: moverName, count: favoriteCount ?? 0 })}
       >
         {content}
       </div>
@@ -86,8 +88,8 @@ export function FavoriteButton({
 
   const ariaLabel =
     showCount && favoriteCount !== undefined
-      ? `${moverName} 기사님 찜, 현재 ${favoriteCount}개`
-      : `${moverName} 기사님 찜`;
+      ? t("favoriteActionWithCount", { name: moverName, count: favoriteCount })
+      : t("favoriteAction", { name: moverName });
 
   return (
     <button

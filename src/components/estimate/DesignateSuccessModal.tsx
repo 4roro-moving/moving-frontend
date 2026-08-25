@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import AlertModal from "@/components/common/Modal/AlertModal";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
@@ -17,6 +18,7 @@ export default function DesignateSuccessModal({
   estimateRequestId,
   onClose,
 }: DesignateSuccessModalProps) {
+  const t = useTranslations("estimates");
   const router = useRouter();
 
   const handleGoToEstimates = () => {
@@ -34,10 +36,10 @@ export default function DesignateSuccessModal({
     <AlertModal
       open={open}
       onClose={onClose}
-      title="지정 견적 요청 완료"
-      description="지정 견적 요청이 완료되었습니다."
+      title={t("designatedSuccessTitle")}
+      description={t("designatedSuccessDescription")}
       primaryAction={{
-        label: "지정 견적서 보러가기",
+        label: t("viewDesignatedEstimate"),
         onClick: handleGoToEstimates,
         disabled: estimateRequestId === null,
       }}

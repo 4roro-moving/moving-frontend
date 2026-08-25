@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { FormEvent, useState } from "react";
 
 import Pagination from "@/components/common/Pagination/Pagination";
@@ -8,7 +9,6 @@ import { Text } from "@/components/common/Text";
 import { useNotices } from "@/hooks/notice/useNotices";
 import { cn } from "@/lib/utils/cn";
 import type { NoticeCategory } from "@/types/notice";
-import { NOTICE_CATEGORY_LABEL } from "@/types/notice";
 
 type CategoryFilter = "ALL" | NoticeCategory;
 const PAGE_SIZE = 10;
@@ -24,6 +24,7 @@ const StateMessage = ({ children }: { children: string }) => (
 );
 
 const NoticePageClient = () => {
+  const t = useTranslations("supportNotice");
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState<CategoryFilter>("ALL");
   const [keywordInput, setKeywordInput] = useState("");
@@ -51,18 +52,18 @@ const NoticePageClient = () => {
     <main className="px-margin-mobile max-w-container-desktop mx-auto flex w-full flex-col gap-28 py-32 md:px-40 md:py-48">
       <header className="flex flex-col gap-8">
         <Text as="h1" variant={{ base: "2xl-bold", md: "3xl-bold" }} className="text-text-primary">
-          공지사항
+          {t("title")}
         </Text>
         <Text as="p" variant="lg-regular" className="text-text-secondary">
-          무빙 서비스의 주요 소식과 안내를 확인할 수 있습니다.
+          {t("description")}
         </Text>
       </header>
 
-      <nav aria-label="공지 카테고리" className="border-border-default border-b">
+      <nav aria-label={t("categoryLabel")} className="border-border-default border-b">
         <ul className="flex gap-4 overflow-x-auto">
           {CATEGORY_FILTERS.map((item) => {
             const isActive = item === category;
-            const label = item === "ALL" ? "전체" : NOTICE_CATEGORY_LABEL[item];
+            const label = t(`categories.${item}`);
 
             return (
               <li key={item} className="shrink-0">
@@ -89,14 +90,14 @@ const NoticePageClient = () => {
 
       <form onSubmit={handleSearch} className="ml-auto flex w-full max-w-[420px] gap-8">
         <label htmlFor="notice-keyword" className="sr-only">
-          공지사항 검색
+          {t("searchLabel")}
         </label>
         <input
           id="notice-keyword"
           type="search"
           value={keywordInput}
           onChange={(event) => setKeywordInput(event.target.value)}
-          placeholder="공지사항을 검색해 주세요"
+          placeholder={t("searchPlaceholder")}
           className="border-border-default text-text-primary placeholder:text-text-muted rounded-8 focus:border-border-brand min-w-0 flex-1 border px-14 py-10 outline-none"
         />
         <button
@@ -104,28 +105,28 @@ const NoticePageClient = () => {
           className="bg-background-brand text-text-inverse rounded-8 shrink-0 px-18 py-10"
         >
           <Text as="span" variant="md-semibold">
-            검색
+            {t("search")}
           </Text>
         </button>
       </form>
 
       {isPending ? (
-        <StateMessage>공지사항을 불러오는 중이에요</StateMessage>
+        <StateMessage>{t("loading")}</StateMessage>
       ) : isError ? (
         <div className="flex min-h-240 flex-col items-center justify-center gap-12">
           <Text as="p" variant="md-medium" className="text-text-muted">
-            공지사항을 불러오지 못했어요
+            {t("loadFailed")}
           </Text>
           <button
             type="button"
             onClick={() => void refetch()}
             className="border-border-brand text-text-brand rounded-8 border px-16 py-8"
           >
-            다시 불러오기
+            {t("retry")}
           </button>
         </div>
       ) : !data || data.notices.length === 0 ? (
-        <StateMessage>등록된 공지사항이 없습니다</StateMessage>
+        <StateMessage>{t("empty")}</StateMessage>
       ) : (
         <>
           <ul className="border-border-default border-t">
@@ -139,13 +140,13 @@ const NoticePageClient = () => {
                     {notice.isPinned && (
                       <span className="bg-background-brand-subtle text-text-brand rounded-6 shrink-0 px-8 py-4">
                         <Text as="span" variant="sm-semibold">
-                          중요
+                          {t("pinned")}
                         </Text>
                       </span>
                     )}
                     <span className="border-border-default text-text-secondary rounded-6 shrink-0 border px-8 py-4">
                       <Text as="span" variant="sm-medium">
-                        {NOTICE_CATEGORY_LABEL[notice.category]}
+                        {t(`categories.${notice.category}`)}
                       </Text>
                     </span>
                     <Text
@@ -159,7 +160,7 @@ const NoticePageClient = () => {
 
                   <div className="text-text-muted flex shrink-0 items-center gap-16">
                     <Text as="span" variant="xs-regular">
-                      조회 {notice.viewCount.toLocaleString()}
+                      {t("views", { count: notice.viewCount.toLocaleString() })}
                     </Text>
                     <Text as="time" variant="xs-regular">
                       {formatDate(notice.createdAt)}

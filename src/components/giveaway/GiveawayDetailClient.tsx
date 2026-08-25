@@ -2,6 +2,7 @@
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
+import { useTranslations } from "next-intl";
 import GiveawayDetailSkeleton from "@/components/giveaway/GiveawayDetailSkeleton";
 import GiveawayDetailView from "@/components/giveaway/GiveawayDetailView";
 import { useGiveawayDetail } from "@/hooks/giveaway/useGiveawayDetail";
@@ -15,6 +16,7 @@ interface GiveawayDetailClientProps {
 }
 
 const GiveawayDetailClient = ({ giveawayId }: GiveawayDetailClientProps) => {
+  const t = useTranslations("giveaway");
   const { user } = useCustomerAuthReady();
   const detailQuery = useGiveawayDetail(giveawayId);
   const isAuthor = detailQuery.data !== undefined && user?.id === detailQuery.data.author.id;
@@ -38,8 +40,8 @@ const GiveawayDetailClient = ({ giveawayId }: GiveawayDetailClientProps) => {
           <EmptyState
             size="sm"
             imageSrc="/images/empty/character.png"
-            description="나눔 글을 불러오지 못했어요"
-            buttonLabel="다시 불러오기"
+            description={t("detailLoadFailed")}
+            buttonLabel={t("reload")}
             onActionClick={() => void detailQuery.refetch()}
           />
         </main>

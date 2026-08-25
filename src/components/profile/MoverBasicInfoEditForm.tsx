@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -16,7 +17,8 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { reauthAfterPasswordChange } from "@/lib/auth/reauthAfterPasswordChange";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import {
-  moverBasicInfoEditSchema,
+  createMoverBasicInfoEditSchema,
+  type MoverBasicInfoValidationMessages,
   type MoverBasicInfoEditFormValues,
 } from "@/lib/schemas/moverBasicInfoEditSchema";
 import {
@@ -38,6 +40,7 @@ const MoverBasicInfoEditForm = ({
   hasPassword,
   defaultValues,
 }: MoverBasicInfoEditFormProps) => {
+  const t = useTranslations("profile");
   const updateMoverBasicInfo = useUpdateMoverBasicInfo();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -50,7 +53,19 @@ const MoverBasicInfoEditForm = ({
     reset,
     formState: { errors, isValid, isSubmitting, isDirty },
   } = useForm<MoverBasicInfoEditFormValues>({
-    resolver: zodResolver(moverBasicInfoEditSchema),
+    resolver: zodResolver(
+      createMoverBasicInfoEditSchema({
+        nameRequired: t("validation.nameRequired"),
+        nameMax: t("validation.nameMax", { max: 50 }),
+        phoneRequired: t("validation.phoneRequired"),
+        phoneInvalid: t("validation.phoneInvalid"),
+        currentPasswordRequired: t("validation.currentPasswordRequired"),
+        newPasswordRequired: t("validation.newPasswordRequired"),
+        newPasswordMin: t("validation.newPasswordMin"),
+        newPasswordConfirmRequired: t("validation.newPasswordConfirmRequired"),
+        newPasswordMismatch: t("validation.newPasswordMismatch"),
+      } satisfies MoverBasicInfoValidationMessages),
+    ),
     mode: "onChange",
     defaultValues: {
       name: "",
@@ -88,7 +103,7 @@ const MoverBasicInfoEditForm = ({
         newPassword: "",
         newPasswordConfirm: "",
       });
-      setToastMessage("기본정보가 수정되었습니다.");
+      setToastMessage(t("basicInfoSaveSuccess"));
     } catch (error) {
       if (
         error instanceof ApiError &&
@@ -116,7 +131,7 @@ const MoverBasicInfoEditForm = ({
         return;
       }
 
-      setSubmitError(getApiErrorMessage(error, "기본정보 수정에 실패했습니다."));
+      setSubmitError(getApiErrorMessage(error, t("basicInfoSaveFailed")));
     }
   });
 
@@ -128,7 +143,7 @@ const MoverBasicInfoEditForm = ({
       noValidate
       autoComplete="off"
     >
-      <ProfilePageHeader title="기본정보 수정" />
+      <ProfilePageHeader title={t("basicInfoTitle")} />
 
       <div
         className={cn(
@@ -144,11 +159,16 @@ const MoverBasicInfoEditForm = ({
             hasPassword ? "lg:w-[500px]" : "max-w-[500px]",
           )}
         >
-          <FormField label="이름" labelFor="mover-basic-name" required>
+          <FormField
+            label={t("name")}
+            labelFor="mover-basic-name"
+            required
+            requiredLabel={t("requiredField")}
+          >
             <Input
               id="mover-basic-name"
               size="md"
-              placeholder="성함을 입력해 주세요"
+              placeholder={t("namePlaceholder")}
               error={errors.name?.message}
               maxLength={50}
               disabled={isPending}
@@ -156,47 +176,58 @@ const MoverBasicInfoEditForm = ({
             />
           </FormField>
 
-          <FormField label="이메일" labelFor="mover-basic-email">
+          <FormField label={t("email")} labelFor="mover-basic-email">
             <Input id="mover-basic-email" size="md" type="email" value={email} disabled readOnly />
           </FormField>
 
-          <FormField label="전화번호" labelFor="mover-basic-phone" required>
+          <FormField
+            label={t("phone")}
+            labelFor="mover-basic-phone"
+            required
+            requiredLabel={t("requiredField")}
+          >
             <Input id="mover-basic-phone" size="md" readOnly disabled {...register("phone")} />
           </FormField>
         </div>
 
         {hasPassword ? (
           <div className="flex w-full flex-col gap-32 lg:w-[500px]">
-            <FormField label="현재 비밀번호" labelFor="mover-basic-current-password">
+            <FormField label={t("currentPassword")} labelFor="mover-basic-current-password">
               <PasswordInput
                 id="mover-basic-current-password"
                 size="md"
                 autoComplete="current-password"
-                placeholder="현재 비밀번호를 입력해 주세요"
+                placeholder={t("currentPasswordPlaceholder")}
+                showPasswordAriaLabel={t("showPassword")}
+                hidePasswordAriaLabel={t("hidePassword")}
                 error={errors.currentPassword?.message}
                 disabled={isPending}
                 {...register("currentPassword")}
               />
             </FormField>
 
-            <FormField label="새 비밀번호" labelFor="mover-basic-new-password">
+            <FormField label={t("newPassword")} labelFor="mover-basic-new-password">
               <PasswordInput
                 id="mover-basic-new-password"
                 size="md"
                 autoComplete="new-password"
-                placeholder="새 비밀번호를 입력해 주세요"
+                placeholder={t("newPasswordPlaceholder")}
+                showPasswordAriaLabel={t("showPassword")}
+                hidePasswordAriaLabel={t("hidePassword")}
                 error={errors.newPassword?.message}
                 disabled={isPending}
                 {...register("newPassword")}
               />
             </FormField>
 
-            <FormField label="새 비밀번호 확인" labelFor="mover-basic-new-password-confirm">
+            <FormField label={t("newPasswordConfirm")} labelFor="mover-basic-new-password-confirm">
               <PasswordInput
                 id="mover-basic-new-password-confirm"
                 size="md"
                 autoComplete="new-password"
-                placeholder="새 비밀번호를 다시 입력해 주세요"
+                placeholder={t("newPasswordConfirmPlaceholder")}
+                showPasswordAriaLabel={t("showPassword")}
+                hidePasswordAriaLabel={t("hidePassword")}
                 error={errors.newPasswordConfirm?.message}
                 disabled={isPending}
                 {...register("newPasswordConfirm")}

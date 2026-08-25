@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import NotificationTrigger from "@/components/common/Header/notification";
 import HeaderSideNav, { type HeaderSideNavLink } from "@/components/common/Header/HeaderSideNav";
 import { isNavLinkActive } from "@/components/common/Header/isNavLinkActive";
+import LocaleMenuTrigger from "@/components/common/Header/LocaleMenuTrigger";
 import ProfileMenuTrigger, {
   type ProfileMenuItem,
 } from "@/components/common/Header/ProfileMenuTrigger";
@@ -260,6 +261,7 @@ const Header = ({
 
         {isOAuthCallbackPage ? null : (
           <div className="flex shrink-0 items-center gap-16 xl:gap-32">
+            <LocaleMenuTrigger className="hidden xl:block" />
             {showAuthSkeleton ? (
               <div className="flex shrink-0 items-center gap-16 xl:gap-32" aria-hidden>
                 <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
@@ -325,6 +327,7 @@ const Header = ({
         onClose={closeSideNav}
         links={shouldHideNavLinks ? [] : sideNavLinks}
         emptyMessage={isIncomplete ? tNavigation("profileIncompleteMessage") : undefined}
+        footer={<LocaleMenuTrigger variant="side-nav" />}
       />
     </header>
   );

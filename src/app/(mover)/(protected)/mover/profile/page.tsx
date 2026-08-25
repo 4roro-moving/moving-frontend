@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import MoverProfileCreateView from "@/components/profile/MoverProfileCreateView";
 
-export const metadata: Metadata = {
-  title: "기사 프로필 등록 | 무빙",
-  description: "무빙 기사님 프로필 등록",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("profile");
+
+  return {
+    title: t("moverCreateTitle"),
+    description: t("createDescription"),
+  };
+}
 
 const MoverProfilePage = () => {
   return <MoverProfileCreateView />;

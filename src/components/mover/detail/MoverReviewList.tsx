@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import ReportModal from "@/components/report/ReportModal";
@@ -8,7 +9,7 @@ import ReportMoreMenu from "@/components/report/ReportMoreMenu";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { cn } from "@/lib/utils/cn";
 import { PREVIOUS_DATA_LOADING_CLASS_NAME } from "@/lib/constants/loading";
-import { formatDateOnlyLabel } from "@/lib/utils/estimateFormat";
+import { formatLocalizedDateOnlyLabel } from "@/lib/utils/estimateFormat";
 import type { MoverReviewItem } from "@/types/review";
 
 interface MoverReviewListProps {
@@ -32,6 +33,7 @@ export default function MoverReviewList({
   canReport,
   currentUserId,
 }: MoverReviewListProps) {
+  const t = useTranslations("profile");
   return (
     <ul
       className={cn(
@@ -42,7 +44,7 @@ export default function MoverReviewList({
     >
       {isPreviousDataLoading ? (
         <li className="sr-only" role="status">
-          리뷰 목록을 불러오는 중이에요
+          {t("moverDetailReviewListLoading")}
         </li>
       ) : null}
       {reviews.map((review, index) => (
@@ -65,6 +67,8 @@ export default function MoverReviewList({
 }
 
 function MoverReviewListItem({ review, canReport, currentUserId }: MoverReviewListItemProps) {
+  const t = useTranslations("profile");
+  const locale = useLocale();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // 작성자가 현재 로그인한 고객이면 본인 리뷰이므로 신고 불가
@@ -101,16 +105,16 @@ function MoverReviewListItem({ review, canReport, currentUserId }: MoverReviewLi
                 }}
                 className="text-text-muted"
               >
-                {formatDateOnlyLabel(review.createdAt)}
+                {formatLocalizedDateOnlyLabel(review.createdAt, locale)}
               </Text>
             </div>
 
-            <ReviewStarRating value={review.rating} size="sm" label="리뷰 별점" />
+            <ReviewStarRating value={review.rating} size="sm" label={t("reviewRating")} />
           </div>
 
           {showReport ? (
             <ReportMoreMenu
-              ariaLabel="리뷰 메뉴 더보기"
+              ariaLabel={t("reviewMenuAria")}
               onReport={() => setIsReportModalOpen(true)}
             />
           ) : null}
@@ -134,7 +138,7 @@ function MoverReviewListItem({ review, canReport, currentUserId }: MoverReviewLi
           onClose={() => setIsReportModalOpen(false)}
           targetType="REVIEW"
           targetId={String(review.id)}
-          targetName={`${review.customer.displayName}님의 리뷰`}
+          targetName={t("reviewTargetName", { name: review.customer.displayName })}
         />
       ) : null}
     </>

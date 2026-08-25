@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import { useFaqs } from "@/hooks/faq/useFaqs";
@@ -20,6 +21,7 @@ const StateMessage = ({ children }: StateMessageProps) => (
 );
 
 const FaqPageClient = () => {
+  const t = useTranslations("supportFaq");
   const [keyword, setKeyword] = useState("");
   const [openFaqId, setOpenFaqId] = useState<number | null>(null);
 
@@ -47,14 +49,14 @@ const FaqPageClient = () => {
 
   const renderBody = () => {
     if (isPending) {
-      return <StateMessage>자주 묻는 질문을 불러오는 중이에요</StateMessage>;
+      return <StateMessage>{t("loading")}</StateMessage>;
     }
 
     if (isError) {
       return (
         <div className="flex min-h-240 flex-col items-center justify-center gap-12">
           <Text as="p" variant="md-medium" className="text-text-muted">
-            자주 묻는 질문을 불러오지 못했어요
+            {t("loadFailed")}
           </Text>
 
           <button
@@ -63,7 +65,7 @@ const FaqPageClient = () => {
             className="border-border-brand text-text-brand rounded-8 border px-16 py-8"
           >
             <Text as="span" variant="md-medium">
-              다시 불러오기
+              {t("retry")}
             </Text>
           </button>
         </div>
@@ -71,11 +73,7 @@ const FaqPageClient = () => {
     }
 
     if (filteredFaqs.length === 0) {
-      return (
-        <StateMessage>
-          {keyword.trim() ? "검색 결과가 없습니다" : "등록된 자주 묻는 질문이 없습니다"}
-        </StateMessage>
-      );
+      return <StateMessage>{keyword.trim() ? t("noSearchResults") : t("empty")}</StateMessage>;
     }
 
     return (
@@ -164,18 +162,18 @@ const FaqPageClient = () => {
     <main className="px-margin-mobile max-w-container-desktop mx-auto flex w-full flex-col gap-28 py-32 md:px-40 md:py-48">
       <header className="flex flex-col gap-8">
         <Text as="h1" variant={{ base: "2xl-bold", md: "3xl-bold" }} className="text-text-primary">
-          자주 묻는 질문
+          {t("title")}
         </Text>
 
         <Text as="p" variant="lg-regular" className="text-text-secondary">
-          서비스 이용 중 자주 묻는 내용을 확인할 수 있습니다.
+          {t("description")}
         </Text>
       </header>
 
       <section className="flex flex-col gap-24">
         <div className="relative w-full max-w-[600px]">
           <label htmlFor="faq-keyword" className="sr-only">
-            자주 묻는 질문 검색
+            {t("searchLabel")}
           </label>
 
           <input
@@ -183,7 +181,7 @@ const FaqPageClient = () => {
             type="search"
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
-            placeholder="궁금한 내용을 검색해 주세요"
+            placeholder={t("searchPlaceholder")}
             className="border-border-default text-text-primary placeholder:text-text-muted rounded-8 focus:border-border-brand w-full border px-16 py-12 outline-none"
           />
         </div>

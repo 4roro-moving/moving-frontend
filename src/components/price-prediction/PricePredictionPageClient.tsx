@@ -25,7 +25,7 @@ export default function PricePredictionPageClient() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-[1920px] flex-col gap-40">
+    <div className="max-w-container-desktop mx-auto flex w-full flex-col gap-40">
       <div className="flex flex-col items-center gap-8 text-center">
         <Text as="h1" variant="2xl-bold" className="text-text-primary">
           AI로 미리 예상 견적을 확인해보세요

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, type TransitionEvent } from "react";
+import { useEffect, useRef, useState, type ReactNode, type TransitionEvent } from "react";
 import { useTranslations } from "next-intl";
 import { createPortal } from "react-dom";
 
@@ -26,10 +26,18 @@ interface HeaderSideNavProps {
   links: HeaderSideNavLink[];
   /** 프로필 미완료 시 — 링크 대신 표시할 안내 */
   emptyMessage?: string;
+  footer?: ReactNode;
 }
 
 /** tablet·mobile GNB 사이드 네비게이션 — exit 애니메이션 후 unmount */
-const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideNavProps) => {
+const HeaderSideNav = ({
+  id,
+  isOpen,
+  onClose,
+  links,
+  emptyMessage,
+  footer,
+}: HeaderSideNavProps) => {
   const pathname = usePathname();
   const t = useTranslations("accessibility");
   const panelRef = useRef<HTMLElement>(null);
@@ -158,6 +166,8 @@ const HeaderSideNav = ({ id, isOpen, onClose, links, emptyMessage }: HeaderSideN
             </ul>
           )}
         </nav>
+
+        {footer ? <div className="border-border-subtle mt-auto border-t py-8">{footer}</div> : null}
       </aside>
     </>,
     document.body,

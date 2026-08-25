@@ -1,6 +1,7 @@
 "use client";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
+import { useTranslations } from "next-intl";
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
@@ -23,6 +24,7 @@ export default function FavoriteMoversToolbar({
   onSelectAll,
   onBulkDelete,
 }: FavoriteMoversToolbarProps) {
+  const t = useTranslations("favorites");
   const canDelete = selectedCount > 0 && !disabled && !isDeleting;
 
   return (
@@ -33,7 +35,7 @@ export default function FavoriteMoversToolbar({
         onCheckedChange={onSelectAll}
         label={
           <Text as="span" variant={{ base: "md-regular", md: "lg-regular" }}>
-            {`전체선택(${selectedCount}/${totalCount})`}
+            {t("selectAll", { selected: selectedCount, total: totalCount })}
           </Text>
         }
         labelClassName="text-text-tertiary"
@@ -51,7 +53,7 @@ export default function FavoriteMoversToolbar({
         onClick={onBulkDelete}
       >
         <Text as="span" variant={{ base: "md-regular", md: "lg-regular" }} className="text-inherit">
-          선택 항목 삭제
+          {t("deleteSelected")}
         </Text>
       </button>
     </div>

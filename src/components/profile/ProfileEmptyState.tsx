@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
 
@@ -12,16 +13,13 @@ interface ProfileEmptyStateProps {
 }
 
 /** 프로필 화면 공통 EmptyState (접근 불가·조회 실패 등) */
-const ProfileEmptyState = ({
-  description,
-  href,
-  buttonLabel = "뒤로 돌아가기",
-}: ProfileEmptyStateProps) => {
+const ProfileEmptyState = ({ description, href, buttonLabel }: ProfileEmptyStateProps) => {
+  const t = useTranslations("profile");
   return (
     <EmptyState
       imageSrc="/images/empty/character.png"
       description={description}
-      buttonLabel={buttonLabel}
+      buttonLabel={buttonLabel ?? t("back")}
       href={href}
     />
   );

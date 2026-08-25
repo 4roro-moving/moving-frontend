@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Controller, type Control } from "react-hook-form";
 
 import FormField from "@/components/common/FormField/FormField";
@@ -20,6 +21,7 @@ export default function MoverActivityBaseFields({
   disabled = false,
   idPrefix,
 }: MoverActivityBaseFieldsProps) {
+  const t = useTranslations("profile");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
 
   return (
@@ -28,13 +30,18 @@ export default function MoverActivityBaseFields({
         name="activityBaseAddress"
         control={control}
         render={({ field, fieldState }) => (
-          <FormField label="활동 거점" labelFor={`${idPrefix}-activity-base`} required>
+          <FormField
+            label={t("activityBase")}
+            labelFor={`${idPrefix}-activity-base`}
+            required
+            requiredLabel={t("requiredField")}
+          >
             <Input
               id={`${idPrefix}-activity-base`}
               size="md"
               readOnly
               value={field.value?.roadAddress ?? ""}
-              placeholder="기사님의 활동 거점을 선택해 주세요"
+              placeholder={t("activityBasePlaceholder")}
               error={fieldState.error?.message}
               disabled={disabled}
               aria-haspopup="dialog"
@@ -50,7 +57,7 @@ export default function MoverActivityBaseFields({
             {isAddressModalOpen ? (
               <AddressSelectModal
                 open
-                kind="활동 거점"
+                kind={t("activityBase")}
                 onClose={() => setIsAddressModalOpen(false)}
                 onConfirm={(address) => {
                   field.onChange(address);
@@ -66,13 +73,13 @@ export default function MoverActivityBaseFields({
         name="activityBaseDetailAddress"
         control={control}
         render={({ field, fieldState }) => (
-          <FormField label="활동 거점 상세 주소" labelFor={`${idPrefix}-activity-base-detail`}>
+          <FormField label={t("activityBaseDetail")} labelFor={`${idPrefix}-activity-base-detail`}>
             <Input
               {...field}
               value={field.value ?? ""}
               id={`${idPrefix}-activity-base-detail`}
               size="md"
-              placeholder="건물명, 층 등 상세 주소를 입력해 주세요"
+              placeholder={t("activityBaseDetailPlaceholder")}
               maxLength={100}
               error={fieldState.error?.message}
               disabled={disabled}

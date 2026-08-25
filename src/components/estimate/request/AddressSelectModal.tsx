@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import Modal from "@/components/common/Modal/Modal";
 import Search from "@/components/common/Search/Search";
@@ -10,7 +11,7 @@ import { cn } from "@/lib/utils/cn";
 
 export type AddressItem = AddressSearchItem;
 
-type RegionKind = "출발지" | "도착지" | "활동 거점";
+type RegionKind = string;
 
 interface AddressSelectModalProps {
   open: boolean;
@@ -46,6 +47,7 @@ function AddressCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const t = useTranslations("estimateRequest");
   return (
     <button
       type="button"
@@ -64,14 +66,14 @@ function AddressCard({
       )}
       <div className="flex w-full flex-col gap-16">
         <div className="flex w-full items-start gap-8">
-          <AddressChip label="도로명" />
+          <AddressChip label={t("roadAddress")} />
           <Text as="span" variant="lg-regular" className="text-text-secondary flex-1">
             {address.roadAddress}
           </Text>
         </div>
         {address.jibunAddress && (
           <div className="flex w-full items-center gap-8">
-            <AddressChip label="지번" />
+            <AddressChip label={t("lotAddress")} />
             <Text as="span" variant="lg-regular" className="text-text-secondary">
               {address.jibunAddress}
             </Text>
@@ -88,6 +90,7 @@ export default function AddressSelectModal({
   onClose,
   onConfirm,
 }: AddressSelectModalProps) {
+  const t = useTranslations("estimateRequest");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<AddressItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -97,36 +100,39 @@ export default function AddressSelectModal({
 
   const selected = results.find((item) => item.id === selectedId) ?? null;
 
-  const searchAddress = useCallback(async (keyword: string) => {
-    const trimmed = keyword.trim();
-    if (!trimmed) return;
+  const searchAddress = useCallback(
+    async (keyword: string) => {
+      const trimmed = keyword.trim();
+      if (!trimmed) return;
 
-    setIsSearching(true);
-    setErrorMessage(null);
-    setSelectedId(null);
-    setHasSearched(true);
+      setIsSearching(true);
+      setErrorMessage(null);
+      setSelectedId(null);
+      setHasSearched(true);
 
-    try {
-      const response = await fetch(`/api/address/search?query=${encodeURIComponent(trimmed)}`);
-      const payload = (await response.json()) as {
-        results?: AddressItem[];
-        message?: string;
-      };
+      try {
+        const response = await fetch(`/api/address/search?query=${encodeURIComponent(trimmed)}`);
+        const payload = (await response.json()) as {
+          results?: AddressItem[];
+          message?: string;
+        };
 
-      if (!response.ok) {
+        if (!response.ok) {
+          setResults([]);
+          setErrorMessage(payload.message || t("addressSearchFailed"));
+          return;
+        }
+
+        setResults(payload.results ?? []);
+      } catch {
         setResults([]);
-        setErrorMessage(payload.message || "주소 검색에 실패했습니다.");
-        return;
+        setErrorMessage(t("addressSearchError"));
+      } finally {
+        setIsSearching(false);
       }
-
-      setResults(payload.results ?? []);
-    } catch {
-      setResults([]);
-      setErrorMessage("주소 검색 중 오류가 발생했습니다.");
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
+    },
+    [t],
+  );
 
   function handleSearch() {
     void searchAddress(query);
@@ -144,7 +150,7 @@ export default function AddressSelectModal({
     <Modal open={open} onClose={onClose} presentation="modal" size="lg" className={PANEL_CLASSNAME}>
       <div className="mb-30 flex w-full shrink-0 items-center justify-between gap-16 md:mb-40">
         <Modal.Title variant={{ base: "2lg-bold", md: "2xl-semibold" }}>
-          {kind}를 선택해주세요
+          {t("selectAddressTitle", { kind })}
         </Modal.Title>
         <Modal.Close
           size="sm"
@@ -167,8 +173,8 @@ export default function AddressSelectModal({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onClear={handleClear}
-            placeholder="주소를 검색해주세요"
-            aria-label={`${kind} 주소 검색`}
+            placeholder={t("addressSearchPlaceholder")}
+            aria-label={t("addressSearchLabel", { kind })}
             className="w-full"
           />
         </form>
@@ -177,7 +183,7 @@ export default function AddressSelectModal({
           {isSearching ? (
             <div className="flex h-full items-center justify-center">
               <Text as="p" variant="md-regular" className="text-text-placeholder">
-                주소를 검색하는 중...
+                {t("addressSearching")}
               </Text>
             </div>
           ) : errorMessage ? (
@@ -204,9 +210,7 @@ export default function AddressSelectModal({
                 variant={{ base: "md-regular", md: "lg-regular" }}
                 className="text-text-placeholder text-center"
               >
-                {hasSearched
-                  ? "검색 결과가 없습니다. 다른 주소로 검색해보세요."
-                  : "주소를 검색하면 결과가 여기에 표시됩니다"}
+                {hasSearched ? t("addressSearchEmpty") : t("addressSearchInitial")}
               </Text>
             </div>
           )}
@@ -223,7 +227,7 @@ export default function AddressSelectModal({
           onConfirm(selected);
         }}
       >
-        선택 완료
+        {t("selectComplete")}
       </Modal.Button>
     </Modal>
   );

@@ -5,6 +5,7 @@ interface GiveawayCardSkeletonListProps {
 }
 
 const GiveawayCardSkeletonList = ({ count = 8 }: GiveawayCardSkeletonListProps) => {
+  const t = useTranslations("giveaway");
   return (
     <div>
       <ul className="grid grid-cols-1 gap-20 md:grid-cols-2 xl:grid-cols-4" aria-hidden="true">
@@ -24,10 +25,13 @@ const GiveawayCardSkeletonList = ({ count = 8 }: GiveawayCardSkeletonListProps) 
         ))}
       </ul>
       <p className="sr-only" role="status">
-        나눔 글 목록을 불러오는 중
+        {t("listLoading")}
       </p>
     </div>
   );
 };
 
 export default GiveawayCardSkeletonList;
+("use client");
+
+import { useTranslations } from "next-intl";

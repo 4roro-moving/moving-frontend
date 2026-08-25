@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import { useNoticeDetail } from "@/hooks/notice/useNoticeDetail";
-import { NOTICE_CATEGORY_LABEL } from "@/types/notice";
 
 interface NoticeDetailClientProps {
   noticeId: number;
@@ -13,13 +13,14 @@ interface NoticeDetailClientProps {
 const formatDate = (value: string) => value.slice(0, 10).replace(/-/g, ".");
 
 const NoticeDetailClient = ({ noticeId }: NoticeDetailClientProps) => {
+  const t = useTranslations("supportNotice");
   const { data, isPending, isError, refetch } = useNoticeDetail(noticeId);
 
   if (isPending) {
     return (
       <main className="px-margin-mobile max-w-container-desktop mx-auto flex min-h-[420px] w-full items-center justify-center md:px-40">
         <Text as="p" variant="md-medium" className="text-text-muted">
-          공지사항을 불러오는 중이에요
+          {t("loading")}
         </Text>
       </main>
     );
@@ -29,17 +30,17 @@ const NoticeDetailClient = ({ noticeId }: NoticeDetailClientProps) => {
     return (
       <main className="px-margin-mobile max-w-container-desktop mx-auto flex min-h-[420px] w-full flex-col items-center justify-center gap-12 md:px-40">
         <Text as="p" variant="md-medium" className="text-text-muted">
-          공지사항을 불러오지 못했어요
+          {t("loadFailed")}
         </Text>
         <button
           type="button"
           onClick={() => void refetch()}
           className="border-border-brand text-text-brand rounded-8 border px-16 py-8"
         >
-          다시 불러오기
+          {t("retry")}
         </button>
         <Link href="/notices" className="text-text-secondary underline">
-          공지사항 목록으로
+          {t("title")}
         </Link>
       </main>
     );
@@ -49,7 +50,7 @@ const NoticeDetailClient = ({ noticeId }: NoticeDetailClientProps) => {
     <main className="px-margin-mobile max-w-container-desktop mx-auto flex w-full flex-col py-32 md:px-40 md:py-48">
       <Link href="/notices" className="text-text-secondary hover:text-text-primary mb-24 w-fit">
         <Text as="span" variant="md-medium">
-          ← 목록으로
+          {`← ${t("title")}`}
         </Text>
       </Link>
 
@@ -59,13 +60,13 @@ const NoticeDetailClient = ({ noticeId }: NoticeDetailClientProps) => {
             {data.isPinned && (
               <span className="bg-background-brand-subtle text-text-brand rounded-6 px-8 py-4">
                 <Text as="span" variant="sm-semibold">
-                  중요
+                  {t("pinned")}
                 </Text>
               </span>
             )}
             <span className="border-border-default text-text-secondary rounded-6 border px-8 py-4">
               <Text as="span" variant="sm-medium">
-                {NOTICE_CATEGORY_LABEL[data.category]}
+                {t(`categories.${data.category}`)}
               </Text>
             </span>
           </div>
@@ -83,7 +84,7 @@ const NoticeDetailClient = ({ noticeId }: NoticeDetailClientProps) => {
               {formatDate(data.createdAt)}
             </Text>
             <Text as="span" variant="xs-regular">
-              조회 {data.viewCount.toLocaleString()}
+              {t("views", { count: data.viewCount.toLocaleString() })}
             </Text>
           </div>
         </header>

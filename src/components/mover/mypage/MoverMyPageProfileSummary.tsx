@@ -1,6 +1,7 @@
 "use client";
 
 import { Text } from "@/components/common/Text";
+import { useLocale, useTranslations } from "next-intl";
 import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
 import { DriverBadgeIcon, LikeIcon } from "@/icons";
 import type { MoverProfileMe } from "@/types/profile";
@@ -18,6 +19,8 @@ export default function MoverMyPageProfileSummary({
   favoriteCount,
   isFavoriteCountLoading,
 }: MoverMyPageProfileSummaryProps) {
+  const t = useTranslations("profile");
+  const locale = useLocale();
   return (
     <div className="xl:flex xl:justify-between">
       <section
@@ -56,7 +59,7 @@ export default function MoverMyPageProfileSummary({
                   variant={{ base: "md-medium", md: "lg-medium" }}
                   className="text-text-muted whitespace-nowrap"
                 >
-                  {favoriteCount.toLocaleString("ko-KR")}
+                  {new Intl.NumberFormat(locale).format(favoriteCount)}
                 </Text>
               )}
             </div>
@@ -89,7 +92,7 @@ export default function MoverMyPageProfileSummary({
 
       <aside
         className="xl:w-mypage-actions-width hidden xl:block xl:pt-72"
-        aria-label="프로필 수정"
+        aria-label={t("myPageProfileEditAria")}
       >
         <MoverMyPageEditActions desktop />
       </aside>

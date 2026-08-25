@@ -24,6 +24,7 @@ interface FormFieldProps {
   /** FORM_FIELD_LABEL_VARIANTS에 해당하지 않는 라벨 타이포에 사용 */
   labelVariant?: TextVariantProp;
   required?: boolean;
+  requiredLabel?: string;
   /** 라벨 아래 부가 안내 문구 */
   description?: string;
 }
@@ -37,6 +38,7 @@ const FormField = ({
   variant = "default",
   labelVariant,
   required = false,
+  requiredLabel = "필수",
   description,
 }: FormFieldProps) => {
   const isAuth = variant === "auth";
@@ -56,7 +58,7 @@ const FormField = ({
           >
             *
           </Text>
-          <span className="sr-only">필수</span>
+          <span className="sr-only">{requiredLabel}</span>
         </>
       ) : null}
     </>

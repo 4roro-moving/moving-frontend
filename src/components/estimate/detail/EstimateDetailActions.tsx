@@ -1,4 +1,5 @@
 import type { Ref } from "react";
+import { useTranslations } from "next-intl";
 
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
@@ -46,6 +47,7 @@ export default function EstimateDetailActions({
   onCancelRequest,
   cancelButtonRef,
 }: EstimateDetailActionsProps) {
+  const t = useTranslations("estimates");
   const showPrice = typeof price === "number";
   const showCancel = canCancelRequest && typeof onCancelRequest === "function";
   // Primary(sm h-57 / detail h-64)와 Trash 정사각 높이를 맞춤 — Tablet 스택에서도 정렬 유지
@@ -58,7 +60,7 @@ export default function EstimateDetailActions({
   const priceBlock = showPrice ? (
     <div className="flex w-full flex-col gap-0">
       <Text as="p" variant="2lg-semibold" className="text-text-weak">
-        견적가
+        {t("priceLabel")}
       </Text>
       <Text as="p" variant="2xl-bold" className="text-text-primary">
         {formatPrice(price)}
@@ -80,9 +82,7 @@ export default function EstimateDetailActions({
   }
 
   const confirmDisabled = !canConfirm || isConfirming || isCanceling;
-  const reason =
-    confirmDisabledReason ??
-    (!canConfirm ? "이미 확정된 견적이 있어 추가로 확정할 수 없습니다." : null);
+  const reason = confirmDisabledReason ?? (!canConfirm ? t("alreadyConfirmed") : null);
 
   return (
     <div className={cn("flex w-full flex-col", showPrice ? "gap-12 xl:gap-30" : "gap-12")}>
@@ -96,7 +96,7 @@ export default function EstimateDetailActions({
             <button
               ref={cancelButtonRef}
               type="button"
-              aria-label="견적 요청 취소"
+              aria-label={t("cancelRequest")}
               aria-busy={isCanceling}
               disabled={isCanceling || isConfirming}
               onClick={onCancelRequest}
@@ -123,7 +123,7 @@ export default function EstimateDetailActions({
             className={cn("min-w-0 whitespace-nowrap", showCancel ? "flex-1" : "max-w-full")}
             aria-busy={isConfirming}
           >
-            {isConfirming ? "확정 중..." : "견적 확정하기"}
+            {isConfirming ? t("confirming") : t("confirmEstimate")}
           </Button>
         </div>
         {confirmDisabled && reason && !isConfirming && !isCanceling ? (

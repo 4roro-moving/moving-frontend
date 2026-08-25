@@ -5,6 +5,7 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { GIVEAWAY_DETAIL_TITLE } from "@/lib/constants/giveaway";
 
 const GiveawayDetailSkeleton = () => {
+  const t = useTranslations("giveaway");
   return (
     <div className="bg-background-default flex w-full flex-col items-center">
       <PageHeader title={GIVEAWAY_DETAIL_TITLE} backFallbackHref={APP_ROUTES.COMMUNITY.GIVEAWAY} />
@@ -45,7 +46,7 @@ const GiveawayDetailSkeleton = () => {
           </div>
         </div>
         <p className="sr-only" role="status">
-          나눔 글을 불러오는 중
+          {t("detailLoading")}
         </p>
       </div>
     </div>
@@ -53,3 +54,6 @@ const GiveawayDetailSkeleton = () => {
 };
 
 export default GiveawayDetailSkeleton;
+("use client");
+
+import { useTranslations } from "next-intl";

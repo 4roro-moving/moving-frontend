@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import ProfileCompletionGuard from "@/components/auth/ProfileCompletionGuard";
 import RoleGuard from "@/components/auth/RoleGuard";
@@ -17,8 +18,19 @@ interface CustomerProtectedLayoutProps {
  * 하위 페이지에 CustomerAuthGate(+ Guard)를 추가로 감싸지 말 것.
  */
 const CustomerProtectedLayout = ({ children }: CustomerProtectedLayoutProps) => {
+  const t = useTranslations("profile");
   const pathname = usePathname();
-  const loadingFallback = getCustomerProtectedLoadingFallback(pathname);
+  const loadingFallback = getCustomerProtectedLoadingFallback(pathname, {
+    create: {
+      title: t("createTitle"),
+      description: t("createDescription"),
+      loadingLabel: t("loading"),
+    },
+    edit: {
+      title: t("editTitle"),
+      loadingLabel: t("loading"),
+    },
+  });
 
   return (
     <RoleGuard allowedRole="CUSTOMER" loadingFallback={loadingFallback}>

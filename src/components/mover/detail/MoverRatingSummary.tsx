@@ -1,4 +1,7 @@
+"use client";
+
 import { Text } from "@/components/common/Text";
+import { useTranslations } from "next-intl";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
 import { formatRating } from "@/lib/utils/estimateFormat";
 import type { MoverDetail } from "@/types/moverDetail";
@@ -14,6 +17,7 @@ export default function MoverRatingSummary({
   reviewCount,
   ratingDistribution,
 }: MoverRatingSummaryProps) {
+  const t = useTranslations("profile");
   const maxCount = Math.max(...ratingDistribution.map((item) => item.count), 1);
   const topScore =
     ratingDistribution.find((item) => item.count === maxCount && item.count > 0)?.score ?? null;
@@ -26,15 +30,18 @@ export default function MoverRatingSummary({
           {formatRating(rating)}
         </Text>
         <div className="flex flex-col gap-2">
-          <ReviewStarRating value={Math.round(rating)} size="sm" label="평균 별점" />
+          <ReviewStarRating value={Math.round(rating)} size="sm" label={t("averageRating")} />
           <Text as="p" variant="md-regular" className="text-text-muted">
-            {reviewCount}개의 리뷰
+            {t("reviewCount", { count: reviewCount })}
           </Text>
         </div>
       </div>
 
       {hasDistribution ? (
-        <ul className="flex w-full max-w-[284px] flex-col gap-4 md:shrink-0" aria-label="별점 분포">
+        <ul
+          className="flex w-full max-w-[284px] flex-col gap-4 md:shrink-0"
+          aria-label={t("ratingDistribution")}
+        >
           {ratingDistribution.map((item) => {
             const isTop = item.score === topScore;
 
@@ -45,12 +52,12 @@ export default function MoverRatingSummary({
                   variant={isTop ? "md-bold" : "md-medium"}
                   className="text-text-tertiary w-36 shrink-0"
                 >
-                  {item.score}점
+                  {t("ratingScore", { score: item.score })}
                 </Text>
                 <div
                   className="bg-rating-track relative h-8 w-full max-w-[180px] overflow-hidden rounded-full"
                   role="img"
-                  aria-label={`${item.score}점 ${item.count}개`}
+                  aria-label={t("ratingDistributionItem", { score: item.score, count: item.count })}
                 >
                   <div
                     className="bg-rating-fill absolute inset-y-0 left-0 rounded-full"

@@ -10,13 +10,14 @@ interface MoversPageViewProps {
   initialMovers: Mover[];
 }
 
-export function MoversPageView({ filters, initialMovers }: MoversPageViewProps) {
+export async function MoversPageView({ filters, initialMovers }: MoversPageViewProps) {
+  const t = await getTranslations("moverSearch");
   return (
     <div className="bg-background-default flex w-full flex-col">
       <div className="px-margin-mobile mx-auto flex w-full max-w-[var(--container-desktop)] flex-col gap-40 pt-24 pb-80 md:px-72 xl:flex-row xl:items-start xl:justify-between xl:gap-0 xl:px-0 xl:pt-32 xl:pb-[165px]">
         <section
           className="flex w-full flex-col gap-24 md:gap-32 xl:w-[820px] xl:gap-[37px]"
-          aria-label="기사님 목록"
+          aria-label={t("listLabel")}
         >
           <MoversFilters filters={filters} />
           <MoversList filters={filters} initialMovers={initialMovers} />
@@ -27,3 +28,4 @@ export function MoversPageView({ filters, initialMovers }: MoversPageViewProps) 
     </div>
   );
 }
+import { getTranslations } from "next-intl/server";

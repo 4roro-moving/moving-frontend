@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 import Button from "@/components/common/Button/Button";
 import EmptyState from "@/components/common/EmptyState/EmptyState";
@@ -15,18 +16,11 @@ import { useFavoriteMoversInfinite } from "@/hooks/useFavoriteMovers";
 import { useFavoriteMoversSelection } from "@/hooks/useFavoriteMoversSelection";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
-const EMPTY_DESCRIPTION = (
-  <>
-    아직 찜한 기사님이 없어요.
-    <br />
-    기사님 찾기에서 마음에 드는 기사님을 찜해보세요.
-  </>
-);
-
 export const FAVORITE_MOVERS_CONTENT_CLASSNAME =
   "px-margin-mobile mx-auto flex w-full max-w-[var(--container-desktop)] flex-col pt-22 pb-80 md:px-72 md:pt-30 xl:px-0 xl:pt-32 xl:pb-[165px]";
 
 export default function FavoriteMoversContent() {
+  const t = useTranslations("favorites");
   const { isInitialLoading, movers, query, totalCount } = useFavoriteMoversInfinite();
   const loadedIds = useMemo(() => movers.map((mover) => mover.id), [movers]);
 
@@ -58,9 +52,9 @@ export default function FavoriteMoversContent() {
 
       {query.isError ? (
         <MoversErrorPanel
-          title="불러오지 못했어요"
-          description="찜한 기사님 목록을 가져오는 중 문제가 발생했습니다."
-          actionLabel="다시 시도"
+          title={t("loadFailedTitle")}
+          description={t("loadFailedDescription")}
+          actionLabel={t("retry")}
           isRetrying={query.isFetching}
           onRetry={() => {
             void query.refetch();
@@ -72,8 +66,14 @@ export default function FavoriteMoversContent() {
         <EmptyState
           size="sm"
           imageSrc="/images/empty/character.png"
-          description={EMPTY_DESCRIPTION}
-          buttonLabel="기사님 찾기"
+          description={
+            <>
+              {t("emptyTitle")}
+              <br />
+              {t("emptyDescription")}
+            </>
+          }
+          buttonLabel={t("findMovers")}
           href={APP_ROUTES.MOVERS.ROOT}
         />
       ) : null}
@@ -119,7 +119,7 @@ export default function FavoriteMoversContent() {
                 onClick={handleLoadMore}
                 className="max-w-[327px]"
               >
-                {query.isFetchingNextPage ? "불러오는 중..." : "더보기"}
+                {query.isFetchingNextPage ? t("loading") : t("more")}
               </Button>
             </div>
           ) : null}
@@ -132,7 +132,7 @@ export default function FavoriteMoversContent() {
                 onClick={handleLoadMore}
               >
                 <Text as="span" variant="md-semibold" className="text-text-brand">
-                  더 불러오지 못했어요. 다시 시도
+                  {t("loadMoreFailed")}
                 </Text>
               </button>
             </div>

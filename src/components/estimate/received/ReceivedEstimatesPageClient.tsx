@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import Toast from "@/components/common/Toast/Toast";
 import { ReceivedEstimatesLoadingSkeleton } from "@/components/estimate/EstimateLoadingSkeletons";
@@ -15,6 +16,7 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { cn } from "@/lib/utils/cn";
 
 export default function ReceivedEstimatesPageClient() {
+  const t = useTranslations("estimates");
   const { data, isError, error, isFetching, isLoading, refetch } = useReceivedEstimates();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const hasData = data !== undefined;
@@ -36,8 +38,8 @@ export default function ReceivedEstimatesPageClient() {
       {showBlockingError ? (
         <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow w-full xl:px-0">
           <EstimatesQueryStatus
-            message={getApiErrorMessage(error, "받은 견적을 불러오지 못했습니다.")}
-            actionLabel={isFetching ? "다시 시도 중..." : "다시 시도"}
+            message={getApiErrorMessage(error, t("receivedLoadFailed"))}
+            actionLabel={isFetching ? t("retrying") : t("retry")}
             actionBusy={isFetching}
             onAction={() => {
               void refetch();
@@ -52,8 +54,8 @@ export default function ReceivedEstimatesPageClient() {
           {showRefetchError ? (
             <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow w-full pb-24 xl:px-0">
               <EstimatesQueryStatus
-                message={getApiErrorMessage(error, "최신 받은 견적을 다시 불러오지 못했습니다.")}
-                actionLabel={isFetching ? "다시 시도 중..." : "다시 시도"}
+                message={getApiErrorMessage(error, t("receivedRefreshFailed"))}
+                actionLabel={isFetching ? t("retrying") : t("retry")}
                 actionBusy={isFetching}
                 onAction={() => {
                   void refetch();

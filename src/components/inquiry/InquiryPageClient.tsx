@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 import Pagination from "@/components/common/Pagination/Pagination";
@@ -15,44 +16,9 @@ type StatusFilter = "ALL" | InquiryStatus;
 
 const PAGE_SIZE = 10;
 
-const STATUS_FILTERS: {
-  label: string;
-  value: StatusFilter;
-}[] = [
-  {
-    label: "전체",
-    value: "ALL",
-  },
-  {
-    label: "답변 대기",
-    value: "OPEN",
-  },
-  {
-    label: "답변 완료",
-    value: "ANSWERED",
-  },
-  {
-    label: "종료",
-    value: "CLOSED",
-  },
-];
-
-const STATUS_LABEL: Record<InquiryStatus, string> = {
-  OPEN: "답변 대기",
-  ANSWERED: "답변 완료",
-  CLOSED: "종료",
-};
-
-const CATEGORY_LABEL: Record<InquiryCategory, string> = {
-  SUSPENSION_APPEAL: "정지 이의신청",
-  ACCOUNT: "계정",
-  SERVICE: "서비스 이용",
-  ETC: "기타",
-};
-
-const formatDate = (value: string) => value.slice(0, 10).replace(/-/g, ".");
-
 const InquiryPageClient = () => {
+  const t = useTranslations("supportInquiry");
+  const locale = useLocale();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<StatusFilter>("ALL");
 
@@ -69,6 +35,18 @@ const InquiryPageClient = () => {
     setPage(1);
   };
 
+  const statusFilters: { label: string; value: StatusFilter }[] = [
+    { label: t("statuses.ALL"), value: "ALL" },
+    { label: t("statuses.OPEN"), value: "OPEN" },
+    { label: t("statuses.ANSWERED"), value: "ANSWERED" },
+    { label: t("statuses.CLOSED"), value: "CLOSED" },
+  ];
+
+  const formatDate = (value: string) =>
+    new Intl.DateTimeFormat(locale, { year: "numeric", month: "2-digit", day: "2-digit" }).format(
+      new Date(value),
+    );
+
   return (
     <>
       <main className="px-margin-mobile max-w-container-desktop mx-auto flex w-full flex-col gap-28 py-32 md:px-40 md:py-48">
@@ -83,11 +61,11 @@ const InquiryPageClient = () => {
               }}
               className="text-text-primary"
             >
-              1:1 문의
+              {t("title")}
             </Text>
 
             <Text as="p" variant="lg-regular" className="text-text-secondary">
-              문의 내역과 답변 상태를 확인할 수 있습니다.
+              {t("description")}
             </Text>
           </div>
 
@@ -97,16 +75,16 @@ const InquiryPageClient = () => {
             className="bg-background-brand text-text-inverse rounded-8 shrink-0 px-18 py-10"
           >
             <Text as="span" variant="md-semibold">
-              문의하기
+              {t("create")}
             </Text>
           </button>
         </header>
 
         <section className="flex flex-col gap-24">
           {/* status filter */}
-          <nav aria-label="문의 상태" className="border-border-default border-b">
+          <nav aria-label={t("statusFilterLabel")} className="border-border-default border-b">
             <ul className="flex gap-4 overflow-x-auto">
-              {STATUS_FILTERS.map((filter) => {
+              {statusFilters.map((filter) => {
                 const isActive = status === filter.value;
 
                 return (
@@ -136,14 +114,14 @@ const InquiryPageClient = () => {
           {isPending ? (
             <div className="flex min-h-[240px] items-center justify-center">
               <Text as="p" variant="md-medium" className="text-text-muted">
-                문의 내역을 불러오는 중이에요
+                {t("loading")}
               </Text>
             </div>
           ) : isError ? (
             /* error */
             <div className="flex min-h-[240px] flex-col items-center justify-center gap-12">
               <Text as="p" variant="md-medium" className="text-text-muted">
-                문의 내역을 불러오지 못했어요
+                {t("loadFailed")}
               </Text>
 
               <button
@@ -152,7 +130,7 @@ const InquiryPageClient = () => {
                 className="border-border-brand text-text-brand rounded-8 border px-16 py-8"
               >
                 <Text as="span" variant="md-medium">
-                  다시 불러오기
+                  {t("retry")}
                 </Text>
               </button>
             </div>
@@ -160,7 +138,7 @@ const InquiryPageClient = () => {
             /* empty */
             <div className="flex min-h-[240px] flex-col items-center justify-center gap-16">
               <Text as="p" variant="md-medium" className="text-text-muted">
-                {status === "ALL" ? "아직 등록한 문의가 없습니다" : "해당 상태의 문의가 없습니다"}
+                {status === "ALL" ? t("empty") : t("emptyByStatus")}
               </Text>
 
               {status === "ALL" && (
@@ -170,7 +148,7 @@ const InquiryPageClient = () => {
                   className="text-text-brand"
                 >
                   <Text as="span" variant="md-semibold">
-                    첫 문의 작성하기
+                    {t("createFirst")}
                   </Text>
                 </button>
               )}
@@ -189,7 +167,7 @@ const InquiryPageClient = () => {
                         <div className="flex flex-wrap items-center gap-8">
                           <span className="border-border-default text-text-secondary rounded-6 border px-8 py-4">
                             <Text as="span" variant="xs-medium">
-                              {CATEGORY_LABEL[inquiry.category]}
+                              {t(`categories.${inquiry.category}`)}
                             </Text>
                           </span>
 
@@ -204,7 +182,7 @@ const InquiryPageClient = () => {
                             )}
                           >
                             <Text as="span" variant="xs-medium">
-                              {STATUS_LABEL[inquiry.status]}
+                              {t(`statuses.${inquiry.status}`)}
                             </Text>
                           </span>
                         </div>

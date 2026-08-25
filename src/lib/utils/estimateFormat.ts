@@ -241,3 +241,29 @@ export function formatDateOnlyLabel(value: string | Date): string {
 
   return `${year}-${mm}-${dd}`;
 }
+
+/**
+ * Review dates use the viewer locale while preserving the existing KST date boundary.
+ */
+export function formatLocalizedDateOnlyLabel(value: string | Date, locale: string): string {
+  const dateParts = isDateOnlyValue(value)
+    ? (() => {
+        const date = parseDateOnly(value);
+        return {
+          year: String(date.getFullYear()),
+          month: String(date.getMonth() + 1),
+          day: String(date.getDate()),
+        };
+      })()
+    : getKstYmdParts(toDisplayDate(value));
+  const date = new Date(
+    Date.UTC(Number(dateParts.year), Number(dateParts.month) - 1, Number(dateParts.day), 12),
+  );
+
+  return new Intl.DateTimeFormat(locale, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: KST,
+  }).format(date);
+}

@@ -20,6 +20,18 @@ import {
   GIVEAWAY_SEARCH_DEFAULTS,
 } from "@/lib/utils/giveawaySearchParams";
 
+interface CustomerProfileLoadingMessages {
+  create: {
+    title: string;
+    description: string;
+    loadingLabel: string;
+  };
+  edit: {
+    title: string;
+    loadingLabel: string;
+  };
+}
+
 /** RoleGuard auth 대기 중 고객 protected layout용 로딩 UI
  *
  * pathname: 현재 페이지 경로
@@ -77,7 +89,10 @@ const MyGiveawayRequestLoadingChrome = () => {
   );
 };
 
-export const getCustomerProtectedLoadingFallback = (pathname: string): ReactNode => {
+export const getCustomerProtectedLoadingFallback = (
+  pathname: string,
+  profileMessages: CustomerProfileLoadingMessages,
+): ReactNode => {
   if (isGiveawayDetailPath(pathname)) {
     return (
       <CommunityShell showGiveawayTab>
@@ -116,15 +131,22 @@ export const getCustomerProtectedLoadingFallback = (pathname: string): ReactNode
   if (pathname === APP_ROUTES.PROFILE) {
     return (
       <ProfileFormSkeleton
-        title="프로필 등록"
-        description="추가 정보를 입력하여 회원가입을 완료해주세요."
+        title={profileMessages.create.title}
+        description={profileMessages.create.description}
+        loadingLabel={profileMessages.create.loadingLabel}
         layout="single"
       />
     );
   }
 
   if (pathname === APP_ROUTES.PROFILE_EDIT) {
-    return <ProfileFormSkeleton title="프로필 수정" layout="twoColumn" />;
+    return (
+      <ProfileFormSkeleton
+        title={profileMessages.edit.title}
+        loadingLabel={profileMessages.edit.loadingLabel}
+        layout="twoColumn"
+      />
+    );
   }
 
   return null;
