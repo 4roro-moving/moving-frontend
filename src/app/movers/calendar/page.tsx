@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import ReservationCalendarPage from "@/components/calendar/ReservationCalendarPage";
 
@@ -15,6 +16,10 @@ export default async function CustomerReservationCalendarPage({
   searchParams,
 }: CustomerReservationCalendarPageProps) {
   const { moverId, moverName } = await searchParams;
+
+  if (!moverId?.trim()) {
+    notFound();
+  }
 
   return <ReservationCalendarPage role="customer" moverId={moverId} moverName={moverName} />;
 }
