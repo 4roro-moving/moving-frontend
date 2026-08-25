@@ -367,6 +367,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // hard navigate 직전: 토큰·힌트만 정리하고 비로그인 UI paint는 생략
         curSessionGeneration++;
         clearAuthTokens();
+        clearSuspensionAppealSession();
         clearAllClientStorageHints();
         clearAppQueryCache();
       } else {
