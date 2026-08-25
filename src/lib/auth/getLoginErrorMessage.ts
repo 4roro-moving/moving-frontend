@@ -15,7 +15,7 @@ export const getAccountSuspensionReason = (error: unknown): string | undefined =
     : undefined;
 };
 
-export const hasSuspensionAppealSession = (error: unknown): boolean => {
+export const isSuspensionAppealAvailable = (error: unknown): boolean => {
   const { code, data } = getApiError(error);
 
   return (

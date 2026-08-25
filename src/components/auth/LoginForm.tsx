@@ -20,7 +20,7 @@ import { resolveAuthUserImage } from "@/lib/api/profile";
 import {
   getAccountSuspensionReason,
   getLoginErrorMessage,
-  hasSuspensionAppealSession,
+  isSuspensionAppealAvailable,
 } from "@/lib/auth/getLoginErrorMessage";
 import { consumePasswordChangedToast } from "@/lib/auth/passwordChangedToast";
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
@@ -51,7 +51,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [suspensionReason, setSuspensionReason] = useState<string | null>(null);
-  const [isSuspensionAppealAvailable, setIsSuspensionAppealAvailable] = useState(false);
+  const [isAppealAvailable, setIsAppealAvailable] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const {
@@ -82,7 +82,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
     setSuspensionReason(null);
-    setIsSuspensionAppealAvailable(false);
+    setIsAppealAvailable(false);
 
     try {
       const role = audienceToLoginRole(audience);
@@ -102,7 +102,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       establishSession(await resolveAuthUserImage(result.user));
     } catch (error) {
       setSuspensionReason(getAccountSuspensionReason(error) ?? null);
-      setIsSuspensionAppealAvailable(hasSuspensionAppealSession(error));
+      setIsAppealAvailable(isSuspensionAppealAvailable(error));
       setSubmitError(getLoginErrorMessage(error, audience));
     }
   });
@@ -143,7 +143,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
             <AccountSuspensionNotice
               reason={suspensionReason}
               onAppealClick={
-                isSuspensionAppealAvailable
+                isAppealAvailable
                   ? () => {
                       markSuspensionAppealSession();
                       router.push(APP_ROUTES.INQUIRIES.ROOT);
@@ -202,13 +202,13 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
           onError={(error) => {
             if (typeof error === "string") {
               setSuspensionReason(null);
-              setIsSuspensionAppealAvailable(false);
+              setIsAppealAvailable(false);
               setSubmitError(error);
               return;
             }
 
             setSuspensionReason(getAccountSuspensionReason(error) ?? null);
-            setIsSuspensionAppealAvailable(hasSuspensionAppealSession(error));
+            setIsAppealAvailable(isSuspensionAppealAvailable(error));
             setSubmitError(getLoginErrorMessage(error, audience));
           }}
         />

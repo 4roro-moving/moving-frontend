@@ -7,7 +7,7 @@ import OAuthLayout from "@/components/auth/OAuthLayout";
 import type { AuthUser, LoginResult } from "@/lib/api/auth";
 import { getApiError } from "@/lib/api/getApiError";
 import { resolveAuthUserImage } from "@/lib/api/profile";
-import { getLoginErrorMessage, hasSuspensionAppealSession } from "@/lib/auth/getLoginErrorMessage";
+import { getLoginErrorMessage, isSuspensionAppealAvailable } from "@/lib/auth/getLoginErrorMessage";
 import {
   clearOAuthPendingSession,
   consumeOAuthClientState,
@@ -231,7 +231,7 @@ const OAuthCallbackContent = () => {
           return;
         }
 
-        if (hasSuspensionAppealSession(err)) {
+        if (isSuspensionAppealAvailable(err)) {
           markSuspensionAppealSession();
           setLoginHref(APP_ROUTES.INQUIRIES.ROOT);
           setLoginButtonLabel("문의하기");
