@@ -10,7 +10,6 @@ import GiveawayCardSkeletonList from "@/components/giveaway/GiveawayCardSkeleton
 import GiveawayInfiniteListChrome from "@/components/giveaway/GiveawayInfiniteListChrome";
 import {
   GIVEAWAY_ABOVE_THE_FOLD_THUMBNAIL_COUNT,
-  GIVEAWAY_EMPTY_DESCRIPTION_LINES,
   GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES,
 } from "@/lib/constants/giveaway";
 import type { ApiError } from "@/types/api";
@@ -40,9 +39,9 @@ const GiveawayListView = ({
   query,
 }: GiveawayListViewProps) => {
   const t = useTranslations("giveaway");
-  const emptyDescription = toEmptyDescription(
-    hasActiveFilters ? GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES : GIVEAWAY_EMPTY_DESCRIPTION_LINES,
-  );
+  const emptyDescription = hasActiveFilters
+    ? toEmptyDescription(GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES)
+    : toEmptyDescription([t("myEmpty"), t("myEmptyDescription")] as const);
 
   return (
     <GiveawayInfiniteListChrome

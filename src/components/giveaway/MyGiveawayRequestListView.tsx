@@ -12,7 +12,6 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import {
   GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES,
   GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL,
-  GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES,
 } from "@/lib/constants/giveaway";
 import type { ApiError } from "@/types/api";
 import type { GiveawayRequestMyListResult, MyGiveawayRequestItem } from "@/types/giveaway";
@@ -48,7 +47,7 @@ const MyGiveawayRequestListView = ({
   const emptyDescription = toEmptyDescription(
     hasActiveFilters
       ? GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES
-      : GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES,
+      : ([t("myRequestsEmpty"), t("myRequestsEmptyDescription")] as const),
   );
 
   return (

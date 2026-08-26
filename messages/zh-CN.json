@@ -1026,6 +1026,10 @@
   "giveaway": {
     "title": "分享",
     "myTitle": "我发布的分享帖",
+    "myEmpty": "您还没有发布分享帖。",
+    "myEmptyDescription": "发布您的第一条分享帖吧。",
+    "myRequestsEmpty": "您还没有申请过分享。",
+    "myRequestsEmptyDescription": "浏览分享帖并提交申请吧。",
     "detailLoadFailed": "无法加载分享帖。",
     "reload": "重新加载",
     "listLoading": "正在加载分享帖",

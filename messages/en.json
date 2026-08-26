@@ -1026,6 +1026,10 @@
   "giveaway": {
     "title": "Giveaway",
     "myTitle": "My giveaway posts",
+    "myEmpty": "You haven't created any giveaway posts yet.",
+    "myEmptyDescription": "Create your first giveaway post.",
+    "myRequestsEmpty": "You haven't requested any giveaways yet.",
+    "myRequestsEmptyDescription": "Browse giveaway posts and submit a request.",
     "detailLoadFailed": "Unable to load the giveaway post.",
     "reload": "Reload",
     "listLoading": "Loading giveaway posts",
