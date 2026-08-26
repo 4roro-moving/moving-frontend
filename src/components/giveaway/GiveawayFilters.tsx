@@ -28,10 +28,11 @@ interface GiveawayFiltersProps {
 
 const GiveawayFilters = ({ filters }: GiveawayFiltersProps) => {
   const t = useTranslations("giveaway");
-  const allOption = { value: GIVEAWAY_ALL_VALUE, label: t("all") };
+  const tRegion = useTranslations("moverSearch");
+  const allOption = { value: GIVEAWAY_ALL_VALUE };
   const regionFilterOptions = [
     allOption,
-    ...REGION_OPTIONS.map((region) => ({ value: String(region.value), label: region.label })),
+    ...REGION_OPTIONS.map((region) => ({ value: String(region.value) })),
   ];
   const queryClient = useQueryClient();
   const {
@@ -106,7 +107,9 @@ const GiveawayFilters = ({ filters }: GiveawayFiltersProps) => {
                     value={option.value}
                     onPrefetch={() => prefetchList({ regionId: option.value })}
                   >
-                    {option.label}
+                    {option.value === GIVEAWAY_ALL_VALUE
+                      ? t("all")
+                      : tRegion(`regions.${option.value}`)}
                   </Select.Option>
                 ))}
               </Select>
