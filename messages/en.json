@@ -95,16 +95,16 @@
       "title": "Moving",
       "description": "Compare multiple estimates at a glance and choose a mover more easily."
     },
-    "bottomBannerDesktop": "Bottom Banner Desktop",
-    "bottomBannerLine1": "Bottom Banner Line1",
-    "bottomBannerLine2": "Bottom Banner Line2",
-    "brandAlt": "Brand Alt",
-    "compareImageAlt": "Compare Image Alt",
-    "compareTitleLine1": "Compare Title Line1",
-    "compareTitleLine2": "Compare Title Line2",
-    "requestImageAlt": "Request Image Alt",
-    "requestTitleLine1": "Request Title Line1",
-    "requestTitleLine2": "Request Title Line2"
+    "bottomBannerDesktop": "MOVING simplifies every step of your move!",
+    "bottomBannerLine1": "Compare quotes from multiple providers",
+    "bottomBannerLine2": "at a glance and choose the best one",
+    "brandAlt": "MOVING Brand",
+    "compareImageAlt": "Moving Quote Comparison",
+    "compareTitleLine1": "Compare quotes at a glance",
+    "compareTitleLine2": "Make the right choice",
+    "requestImageAlt": "Moving Quote Request ",
+    "requestTitleLine1": "Request the moving services you need",
+    "requestTitleLine2": "and receive quotes"
   },
   "supportFaq": {
     "title": "Frequently asked questions",
