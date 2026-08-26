@@ -33,6 +33,10 @@
       "clear": "검색어 지우기",
       "submit": "검색"
     },
+    "emptyState": {
+      "noResultsTitle": "검색 결과가 없어요.",
+      "noResultsDescription": "다른 검색어나 필터로 다시 찾아보세요."
+    },
     "pagination": {
       "aria": "페이지네이션",
       "previous": "이전 페이지",
@@ -293,8 +297,6 @@
       "title": "기사님 정보를 불러오지 못했어요"
     },
     "retry": "다시 시도",
-    "emptyDescription": "다른 검색어나 필터로 다시 찾아보세요.",
-    "emptyTitle": "검색 결과가 없어요.",
     "listErrorDescription": "기사님 목록을 가져오는 중 문제가 발생했습니다.",
     "listErrorTitle": "불러오지 못했어요",
     "nextErrorDescription": "다음 기사님 목록을 가져오는 중 문제가 발생했습니다.",
@@ -1246,8 +1248,6 @@
     "myListLoadFailed": "내 거주 후기를 불러오지 못했습니다.",
     "myListLoading": "내 거주 후기를 불러오는 중",
     "myPageTitle": "내가 작성한 거주 후기",
-    "noResultsDescription": "다른 검색어나 필터로 다시 찾아보세요.",
-    "noResultsTitle": "검색 결과가 없어요.",
     "pageDescription": "지역별 거주 경험과 후기를 확인해 보세요.",
     "pageTitle": "거주 후기",
     "ratingPoints": "{rating}점",

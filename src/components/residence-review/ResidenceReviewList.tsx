@@ -25,11 +25,12 @@ interface ResidenceReviewListProps {
 
 const ResidenceReviewList = ({ filters, onSelect, onPrefetch }: ResidenceReviewListProps) => {
   const t = useTranslations("residenceReview");
+  const tCommon = useTranslations("common");
   const emptyDescription = (
     <>
-      {t("noResultsTitle")}
+      {tCommon("emptyState.noResultsTitle")}
       <br />
-      {t("noResultsDescription")}
+      {tCommon("emptyState.noResultsDescription")}
     </>
   );
   const { reviews, isInitialLoading, isFilterFetching, query } = useResidenceReviews(filters);

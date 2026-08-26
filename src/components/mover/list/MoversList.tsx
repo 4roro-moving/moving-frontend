@@ -36,6 +36,7 @@ function areFiltersEqual(first: MoversSearchParamsState, second: MoversSearchPar
 
 export function MoversList({ filters, initialMovers }: MoversListProps) {
   const t = useTranslations("moverSearch");
+  const tCommon = useTranslations("common");
   const { movers, isInitialLoading, isFilterFetching, query } = useMovers(filters);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -83,9 +84,9 @@ export function MoversList({ filters, initialMovers }: MoversListProps) {
         imageSrc="/images/empty/character.png"
         description={
           <>
-            {t("emptyTitle")}
+            {tCommon("emptyState.noResultsTitle")}
             <br />
-            {t("emptyDescription")}
+            {tCommon("emptyState.noResultsDescription")}
           </>
         }
       />

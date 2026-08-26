@@ -8,10 +8,7 @@ import EmptyState from "@/components/common/EmptyState/EmptyState";
 import GiveawayCard from "@/components/giveaway/GiveawayCard";
 import GiveawayCardSkeletonList from "@/components/giveaway/GiveawayCardSkeletonList";
 import GiveawayInfiniteListChrome from "@/components/giveaway/GiveawayInfiniteListChrome";
-import {
-  GIVEAWAY_ABOVE_THE_FOLD_THUMBNAIL_COUNT,
-  GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES,
-} from "@/lib/constants/giveaway";
+import { GIVEAWAY_ABOVE_THE_FOLD_THUMBNAIL_COUNT } from "@/lib/constants/giveaway";
 import type { ApiError } from "@/types/api";
 import type { GiveawayListItem, GiveawayListResult } from "@/types/giveaway";
 
@@ -39,8 +36,12 @@ const GiveawayListView = ({
   query,
 }: GiveawayListViewProps) => {
   const t = useTranslations("giveaway");
+  const tCommon = useTranslations("common");
   const emptyDescription = hasActiveFilters
-    ? toEmptyDescription(GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES)
+    ? toEmptyDescription([
+        tCommon("emptyState.noResultsTitle"),
+        tCommon("emptyState.noResultsDescription"),
+      ] as const)
     : toEmptyDescription([t("myEmpty"), t("myEmptyDescription")] as const);
 
   return (

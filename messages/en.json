@@ -33,6 +33,10 @@
       "clear": "Clear search",
       "submit": "Search"
     },
+    "emptyState": {
+      "noResultsTitle": "No results found.",
+      "noResultsDescription": "Try another search or filter."
+    },
     "pagination": {
       "aria": "Pagination",
       "previous": "Previous page",
@@ -293,8 +297,6 @@
       "title": "Unable to load mover details"
     },
     "retry": "Retry",
-    "emptyDescription": "Try another search or filter.",
-    "emptyTitle": "No results found.",
     "listErrorDescription": "There was a problem loading movers.",
     "listErrorTitle": "Unable to load",
     "nextErrorDescription": "There was a problem loading more movers.",
@@ -1246,8 +1248,6 @@
     "myListLoadFailed": "Failed to load your residence reviews.",
     "myListLoading": "Loading your residence reviews",
     "myPageTitle": "My residence reviews",
-    "noResultsDescription": "Try a different search term or filter.",
-    "noResultsTitle": "No results found.",
     "pageDescription": "Explore residence reviews by region.",
     "pageTitle": "Residence reviews",
     "ratingPoints": "{rating} points",

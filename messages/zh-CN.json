@@ -33,6 +33,10 @@
       "clear": "清除搜索内容",
       "submit": "搜索"
     },
+    "emptyState": {
+      "noResultsTitle": "未找到结果。",
+      "noResultsDescription": "请尝试其他关键词或筛选条件。"
+    },
     "pagination": {
       "aria": "分页",
       "previous": "上一页",
@@ -293,8 +297,6 @@
       "title": "无法加载搬家师傅信息"
     },
     "retry": "重试",
-    "emptyDescription": "请尝试其他关键词或筛选条件。",
-    "emptyTitle": "未找到结果。",
     "listErrorDescription": "加载搬家师傅列表时发生问题。",
     "listErrorTitle": "无法加载",
     "nextErrorDescription": "加载更多搬家师傅时发生问题。",
@@ -1246,8 +1248,6 @@
     "myListLoadFailed": "无法加载您的居住评价。",
     "myListLoading": "正在加载您的居住评价",
     "myPageTitle": "我的居住评价",
-    "noResultsDescription": "请尝试其他关键词或筛选条件。",
-    "noResultsTitle": "未找到结果。",
     "pageDescription": "查看各地区的居住体验和评价。",
     "pageTitle": "居住评价",
     "ratingPoints": "{rating}分",
