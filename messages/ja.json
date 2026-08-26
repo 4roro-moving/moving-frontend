@@ -960,7 +960,7 @@
       "addImage": "画像を追加",
       "ariaLabel": "通報",
       "attachmentAlt": "通報添付画像",
-      "description": "説明",
+      "description": "通報理由と必要な内容を入力してください。",
       "detailLabel": "詳細内容",
       "detailPlaceholderOptional": "追加で伝えたい内容があれば入力してください。",
       "detailPlaceholderRequired": "通報理由を詳しく入力してください。",
@@ -974,7 +974,7 @@
       "submitFailed": "通報の登録に失敗しました。",
       "submitting": "処理中...",
       "target": "通報対象",
-      "title": "タイトル",
+      "title": "通報する",
       "validation": {
         "imageSize": "画像ファイルのサイズが大きすぎます。",
         "imageType": "jpg、png、webp形式のみ添付できます。",

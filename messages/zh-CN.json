@@ -960,7 +960,7 @@
       "addImage": "添加图片",
       "ariaLabel": "举报",
       "attachmentAlt": "举报附件图片",
-      "description": "说明",
+      "description": "请输入举报原因和必要的详细内容。",
       "detailLabel": "详细内容",
       "detailPlaceholderOptional": "如有补充内容请填写。",
       "detailPlaceholderRequired": "请详细说明举报原因。",
@@ -974,7 +974,7 @@
       "submitFailed": "提交举报失败。",
       "submitting": "处理中...",
       "target": "举报对象",
-      "title": "标题",
+      "title": "举报",
       "validation": {
         "imageSize": "图片文件过大。",
         "imageType": "仅支持 jpg、png、webp 格式。",

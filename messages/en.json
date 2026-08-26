@@ -960,7 +960,7 @@
       "addImage": "Add image",
       "ariaLabel": "Report",
       "attachmentAlt": "Report attachment",
-      "description": "Description",
+      "description": "Please select a reason and provide any necessary details.",
       "detailLabel": "Details",
       "detailPlaceholderOptional": "Add any additional details.",
       "detailPlaceholderRequired": "Describe the reason for your report.",
@@ -974,7 +974,7 @@
       "submitFailed": "Failed to submit report.",
       "submitting": "Submitting...",
       "target": "Report target",
-      "title": "Title",
+      "title": "Report",
       "validation": {
         "imageSize": "The image file is too large.",
         "imageType": "Only jpg, png, and webp images are allowed.",

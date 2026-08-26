@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 import Modal from "@/components/common/Modal/Modal";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
@@ -63,6 +64,7 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
   const createMutation = useCreateReport();
   const trimmedDescription = description.trim();
   const isOtherReason = reason === "OTHER";
+  const shouldTranslateTargetName = targetType === "GIVEAWAY" || targetType === "RESIDENCE_REVIEW";
   const canSubmit =
     reason !== "" && (!isOtherReason || trimmedDescription.length > 0) && !createMutation.isPending;
 
@@ -195,7 +197,7 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
                 {t("modal.target")}
               </Text>
               <Text as="span" variant="sm-semibold" className="text-text-primary">
-                {targetName}
+                {shouldTranslateTargetName ? <AutoTranslatedText text={targetName} /> : targetName}
               </Text>
             </div>
           )}
