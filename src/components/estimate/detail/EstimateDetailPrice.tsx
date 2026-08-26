@@ -1,4 +1,7 @@
-import { getLocale, getTranslations } from "next-intl/server";
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
+
 import { Text } from "@/components/common/Text";
 import { formatPrice } from "@/lib/utils/estimateFormat";
 
@@ -6,9 +9,9 @@ interface EstimateDetailPriceProps {
   price: number;
 }
 
-export default async function EstimateDetailPrice({ price }: EstimateDetailPriceProps) {
-  const locale = await getLocale();
-  const t = await getTranslations("estimates");
+export default function EstimateDetailPrice({ price }: EstimateDetailPriceProps) {
+  const locale = useLocale();
+  const t = useTranslations("estimates");
   return (
     // 2026.07.24 정슬기 - [수정] Mobile/Tablet 견적가 justify-between, Desktop 간격 유지
     // 2026.07.25 정슬기 - [수정] Desktop 라벨↔금액 gap 61, 섹션 gap 36 (Figma 8091:48003)
