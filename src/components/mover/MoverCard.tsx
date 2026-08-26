@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { useTranslations } from "next-intl";
 
 import Link from "next/link";
@@ -129,7 +131,7 @@ function MoverCard({
           <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
           <div className="flex flex-col gap-16">
             <Text as="h3" variant="lg-semibold" className="text-text-secondary">
-              {mover.title}
+              <AutoTranslatedText text={mover.title} />
             </Text>
             <div className="flex items-center gap-8">
               <div className="bg-background-avatar rounded-12 relative size-48 shrink-0 overflow-hidden">
@@ -194,14 +196,14 @@ function MoverCard({
         <div className="flex w-full flex-col gap-16">
           <div className="flex flex-col">
             <Text as="h3" variant="lg-semibold" className="text-text-secondary">
-              {mover.title}
+              <AutoTranslatedText text={mover.title} />
             </Text>
             <Text
               as="p"
               variant="sm-medium"
               className="text-text-muted line-clamp-2 overflow-hidden text-ellipsis"
             >
-              {mover.description}
+              <AutoTranslatedText text={mover.description} />
             </Text>
           </div>
 
@@ -268,14 +270,14 @@ function MoverCard({
           <div className="flex min-w-0 flex-1 flex-col gap-20 self-stretch py-4">
             <div className="flex flex-col">
               <Text as="h3" variant="xl-semibold" className="text-text-secondary">
-                {mover.title}
+                <AutoTranslatedText text={mover.title} />
               </Text>
               <Text
                 as="p"
                 variant="md-regular"
                 className="text-text-muted line-clamp-1 overflow-hidden text-ellipsis"
               >
-                {mover.description}
+                <AutoTranslatedText text={mover.description} />
               </Text>
             </div>
 

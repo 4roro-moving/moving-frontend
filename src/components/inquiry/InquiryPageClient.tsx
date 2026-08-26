@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
@@ -195,7 +197,7 @@ const InquiryPageClient = () => {
                           }}
                           className="text-text-primary truncate"
                         >
-                          {inquiry.title}
+                          <AutoTranslatedText text={inquiry.title} />
                         </Text>
                       </div>
 

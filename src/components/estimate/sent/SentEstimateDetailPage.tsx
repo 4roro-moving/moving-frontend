@@ -1,5 +1,8 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { useState } from "react";
 
 import ChatRoomModalContainer from "@/components/chat/ChatRoomModalContainer";
@@ -19,12 +22,12 @@ import { useChatModalSearchParam } from "@/hooks/useChatModalSearchParam";
 import { useSentEstimateDetail } from "@/hooks/useSentEstimates";
 import FrameIcon from "@/icons/frame.svg";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { MOVE_TYPE_LABEL } from "@/lib/constants/moveType";
 import {
   formatKoreanDateTime,
   formatKoreanDateTimeWithTime,
   isKstDateOnOrAfter,
 } from "@/lib/utils/date";
+import { getMoveTypeLabel } from "@/lib/utils/estimateFormat";
 import type { SentEstimate } from "@/types/sentEstimate";
 
 interface SentEstimateDetailPageProps {
@@ -36,11 +39,13 @@ function formatAddress(address: string, detailAddress: string | null) {
 }
 
 function SentEstimateSummary({ estimate }: { estimate: SentEstimate }) {
+  const t = useTranslations("estimates");
   const isConfirmed = estimate.status !== "SENT";
-  const statusLabel = estimate.status === "COMPLETED" ? "이사완료" : "확정견적";
+  const statusLabel =
+    estimate.status === "COMPLETED" ? t("sent.completedStatus") : t("detail.confirmedStatus");
 
   return (
-    <section className="flex w-full flex-col gap-20 md:gap-26" aria-label="보낸 견적 요약">
+    <section className="flex w-full flex-col gap-20 md:gap-26" aria-label={t("sent.summaryAria")}>
       <div className="flex w-full flex-col gap-12 md:gap-20">
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-8 md:gap-12">
@@ -75,7 +80,7 @@ function SentEstimateSummary({ estimate }: { estimate: SentEstimate }) {
           variant={{ base: "lg-semibold", md: "2xl-semibold" }}
           className="text-text-secondary"
         >
-          {estimate.customer.name} 고객님
+          {t("mover.customerName", { name: estimate.customer.name })}
         </Text>
       </div>
 
@@ -85,6 +90,7 @@ function SentEstimateSummary({ estimate }: { estimate: SentEstimate }) {
 }
 
 function SentEstimateComment({ comment }: { comment: string }) {
+  const t = useTranslations("estimates");
   return (
     <section
       className="flex w-full flex-col gap-20 md:gap-28"
@@ -92,10 +98,10 @@ function SentEstimateComment({ comment }: { comment: string }) {
     >
       <h2 id="mover-comment-title" className="text-text-primary">
         <Text as="span" variant="lg-semibold" className="md:hidden">
-          기사님 코멘트
+          {t("moverComment")}
         </Text>
         <Text as="span" variant="xl-semibold" className="hidden md:inline">
-          기사님 코멘트
+          {t("moverComment")}
         </Text>
       </h2>
 
@@ -104,13 +110,15 @@ function SentEstimateComment({ comment }: { comment: string }) {
         variant="lg-medium"
         className="text-text-muted wrap-break-word whitespace-pre-wrap"
       >
-        {comment}
+        <AutoTranslatedText text={comment} />
       </Text>
     </section>
   );
 }
 
 export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetailPageProps) {
+  const locale = useLocale();
+  const t = useTranslations("estimates");
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const { isChatOpenRequested, clearChatOpenSearchParam } = useChatModalSearchParam();
   const query = useSentEstimateDetail(estimateId);
@@ -122,10 +130,10 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
   if (query.isError || !query.data) {
     return (
       <EstimateDetailQueryState
-        title="견적 상세"
-        message="견적을 불러오지 못했어요."
+        title={t("detail.title")}
+        message={t("detail.loadFailed")}
         backFallbackHref={APP_ROUTES.MOVER_ESTIMATES.SENT}
-        actionLabel="다시 시도"
+        actionLabel={t("retry")}
         onAction={() => void query.refetch()}
       />
     );
@@ -164,30 +172,30 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
               <EstimateDetailInfoSection
                 rows={[
                   {
-                    label: "견적 요청일",
-                    value: formatKoreanDateTime(request.requestedAt),
+                    label: t("detail.requestedAt"),
+                    value: formatKoreanDateTime(request.requestedAt, locale),
                   },
                   {
-                    label: "서비스",
-                    value: MOVE_TYPE_LABEL[request.moveType],
+                    label: t("detail.service"),
+                    value: getMoveTypeLabel(request.moveType, locale),
                   },
                   {
-                    label: "이용일",
-                    value: formatKoreanDateTime(request.moveDate),
+                    label: t("detail.useDate"),
+                    value: formatKoreanDateTime(request.moveDate, locale),
                   },
                   {
-                    label: "출발지",
+                    label: t("fromAddress"),
                     value: formatAddress(request.fromAddress, request.fromDetailAddress),
                   },
                   {
-                    label: "도착지",
+                    label: t("toAddress"),
                     value: formatAddress(request.toAddress, request.toDetailAddress),
                   },
                   ...(request.completedAt
                     ? [
                         {
-                          label: "이사 완료일시",
-                          value: formatKoreanDateTimeWithTime(request.completedAt),
+                          label: t("sent.completedAt"),
+                          value: formatKoreanDateTimeWithTime(request.completedAt, locale),
                         },
                       ]
                     : []),
@@ -215,7 +223,9 @@ export default function SentEstimateDetailPage({ estimateId }: SentEstimateDetai
         estimateId={estimate.id}
         participantRole="MOVER"
         participantName={estimate.customer.name}
-        estimateSummary={`견적가 - ${estimate.price.toLocaleString("ko-KR")}원`}
+        estimateSummary={t("pending.chatEstimateSummary", {
+          price: estimate.price.toLocaleString(),
+        })}
         estimateEdit={{
           moveDateValue: request.moveDate,
           priceValue: estimate.price,

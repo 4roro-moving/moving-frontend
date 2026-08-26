@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState, useSyncExternalStore } from "react";
 
 import Button from "@/components/common/Button/Button";
@@ -12,20 +12,20 @@ import ReportModal from "@/components/report/ReportModal";
 import ReportMoreMenu from "@/components/report/ReportMoreMenu";
 import type { MoverEstimateRequest } from "@/types/moverEstimateRequest";
 
-function formatElapsedTime(date: string) {
-  const minutes = Math.max(1, Math.floor((Date.now() - new Date(date).getTime()) / 60000));
+function formatElapsedTime(date: string, locale: string) {
+  const diffMinutes = Math.max(1, Math.floor((Date.now() - new Date(date).getTime()) / 60_000));
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
 
-  if (minutes < 60) {
-    return `${minutes}분 전`;
+  if (diffMinutes < 60) {
+    return formatter.format(-diffMinutes, "minute");
   }
 
-  const hours = Math.floor(minutes / 60);
-
+  const hours = Math.floor(diffMinutes / 60);
   if (hours < 24) {
-    return `${hours}시간 전`;
+    return formatter.format(-hours, "hour");
   }
 
-  return `${Math.floor(hours / 24)}일 전`;
+  return formatter.format(-Math.floor(hours / 24), "day");
 }
 
 const ELAPSED_TICK_MS = 60_000;
@@ -43,10 +43,10 @@ function subscribeElapsedTick(onStoreChange: () => void) {
  * 분 단위 타이머로 구독해 카드가 열린 동안 라벨이 갱신됩니다.
  * // 2026.07.30 정슬기 - [수정] 경과 시간 분 단위 갱신 구독 추가
  */
-function useElapsedLabel(createdAt: string): string | undefined {
+function useElapsedLabel(createdAt: string, locale: string): string | undefined {
   return useSyncExternalStore(
     subscribeElapsedTick,
-    () => formatElapsedTime(createdAt),
+    () => formatElapsedTime(createdAt, locale),
     () => undefined,
   );
 }
@@ -68,8 +68,10 @@ export default function ReceivedRequestCard({
   onSendEstimate,
   onRejectEstimate,
 }: ReceivedRequestCardProps) {
+  const locale = useLocale();
+  const t = useTranslations("estimates");
   const tReport = useTranslations("report");
-  const elapsedLabel = useElapsedLabel(request.createdAt);
+  const elapsedLabel = useElapsedLabel(request.createdAt, locale);
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
@@ -90,7 +92,7 @@ export default function ReceivedRequestCard({
         <EstimateRequestSummaryContent
           moveType={request.moveType}
           isDesignated={request.isDesignated}
-          title={`${request.customer.name} 고객님`}
+          title={t("mover.customerName", { name: request.customer.name })}
           headerMeta={elapsedLabel}
           headerAction={reportAction}
           fromLabel={request.fromRegion}
@@ -106,7 +108,7 @@ export default function ReceivedRequestCard({
             className="order-2 sm:order-1"
             onClick={() => onRejectEstimate(request)}
           >
-            반려하기
+            {t("mover.reject")}
           </Button>
 
           <Button
@@ -116,7 +118,7 @@ export default function ReceivedRequestCard({
             onClick={() => onSendEstimate(request)}
             rightIcon={<Image src="/icons/write.svg" alt="" width={24} height={24} />}
           >
-            견적 보내기
+            {t("mover.send")}
           </Button>
         </div>
       </article>
@@ -126,7 +128,7 @@ export default function ReceivedRequestCard({
         onClose={() => setIsReportModalOpen(false)}
         targetType="CUSTOMER"
         targetId={request.customer.id}
-        targetName={`${request.customer.name} 고객님`}
+        targetName={t("mover.customerName", { name: request.customer.name })}
       />
     </>
   );

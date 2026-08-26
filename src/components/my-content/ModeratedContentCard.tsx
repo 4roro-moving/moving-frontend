@@ -1,3 +1,4 @@
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils/cn";
@@ -55,7 +56,9 @@ export default function ModeratedContentCard({ content }: ModeratedContentCardPr
         {content.meta ? <p className="text-text-muted text-xs">{content.meta}</p> : null}
 
         {content.title ? (
-          <p className="text-text-primary text-sm font-semibold">{content.title}</p>
+          <p className="text-text-primary text-sm font-semibold">
+            <AutoTranslatedText text={content.title} />
+          </p>
         ) : null}
 
         <p

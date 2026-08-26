@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
@@ -43,6 +44,7 @@ function PendingEstimateDetailContent({
   data,
   statusBanner,
 }: PendingEstimateDetailContentProps) {
+  const t = useTranslations("estimates");
   const [confirmToastMessage, setConfirmToastMessage] = useState<string | null>(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const { isChatOpenRequested, clearChatOpenSearchParam } = useChatModalSearchParam();
@@ -59,7 +61,7 @@ function PendingEstimateDetailContent({
   };
 
   const confirmMutation = useConfirmEstimate(estimateId, {
-    onSuccess: () => setConfirmToastMessage("견적이 확정되었어요."),
+    onSuccess: () => setConfirmToastMessage(t("detail.confirmSuccess")),
     onError: setConfirmToastMessage,
   });
 
@@ -130,7 +132,7 @@ function PendingEstimateDetailContent({
         estimateId={estimateId}
         participantRole="CUSTOMER"
         participantName={displayName}
-        estimateSummary={`견적가 - ${data.price.toLocaleString("ko-KR")}원`}
+        estimateSummary={t("pending.chatEstimateSummary", { price: data.price.toLocaleString() })}
         actions={{
           // 2026.08.21 김성현 - [추가] 고객 채팅 메뉴에서 견적 확정 API 호출
           "confirm-estimate": {
@@ -163,15 +165,16 @@ function PendingEstimateDetailContent({
 }
 
 export default function PendingEstimateDetailView({ estimateId }: PendingEstimateDetailViewProps) {
+  const t = useTranslations("estimates");
   const { data, isError, error, isFetching, isLoading, refetch } = useEstimateDetail(estimateId);
   const hasData = data !== undefined;
   const showInitialSkeleton = isLoading && !hasData;
   const showBlockingError = isError && !hasData;
   const showRefetchError = isError && hasData;
-  const fallbackMessage = "견적 상세를 불러오지 못했어요.";
+  const fallbackMessage = t("detail.loadFailed");
   const isNotFound = error instanceof ApiError && error.status === 404;
   const blockingMessage = isNotFound
-    ? "존재하지 않거나 더 이상 확인할 수 없는 견적입니다."
+    ? t("detail.notFound")
     : getApiErrorMessage(error, fallbackMessage);
 
   if (showInitialSkeleton) {
@@ -190,7 +193,7 @@ export default function PendingEstimateDetailView({ estimateId }: PendingEstimat
     return (
       <EstimateDetailQueryState
         message={blockingMessage}
-        actionLabel={isNotFound ? undefined : "다시 시도"}
+        actionLabel={isNotFound ? undefined : t("retry")}
         onAction={() => {
           void refetch();
         }}

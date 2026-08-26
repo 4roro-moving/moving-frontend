@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { useFormatter, useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
@@ -168,7 +170,7 @@ function ChatMessageList({
                     variant="sm-medium"
                     className="bg-background-subtle text-text-muted rounded-12 px-12 py-8 text-center"
                   >
-                    {message.content}
+                    <AutoTranslatedText text={message.content} />
                   </Text>
                 </div>
               );
@@ -291,7 +293,7 @@ function ChatMessageList({
                         isMine ? "text-text-inverse" : "text-text-primary",
                       )}
                     >
-                      {message.content}
+                      <AutoTranslatedText text={message.content} />
                     </Text>
                   )}
                 </div>

@@ -1,3 +1,4 @@
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
@@ -36,6 +37,8 @@ function RouteArrow() {
 }
 
 export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
+  const t = useTranslations("estimates");
+  const locale = useLocale();
   const isConfirmed = estimate.status !== "SENT";
   const isCompleted = estimate.status === "COMPLETED";
   const detailHref = APP_ROUTES.MOVER_ESTIMATES.SENT_DETAIL(estimate.id);
@@ -49,7 +52,7 @@ export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
     >
       <Link
         href={detailHref}
-        aria-label={`${estimate.customerName} 고객님 견적 상세보기`}
+        aria-label={t("sent.detailAria", { name: estimate.customerName })}
         className="rounded-20 absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-border-brand)"
         onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
       />
@@ -73,14 +76,14 @@ export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
           {isConfirmed ? (
             <span className="text-text-brand flex shrink-0 items-center gap-4">
               <FrameIcon className="text-icon-brand size-20 shrink-0" />
-              <Text variant="lg-bold">확정견적</Text>
+              <Text variant="lg-bold">{t("detail.confirmedStatus")}</Text>
             </span>
           ) : null}
         </div>
 
         <div className="flex flex-col gap-12">
           <Text as="h2" variant="xl-semibold" className="text-text-primary">
-            {estimate.customerName} 고객님
+            {t("mover.customerName", { name: estimate.customerName })}
           </Text>
           <div className="bg-border-subtle h-px" />
         </div>
@@ -89,7 +92,7 @@ export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
           <div className="flex items-end gap-12">
             <div>
               <Text as="dt" variant="md-regular" className="text-text-muted">
-                출발지
+                {t("fromAddress")}
               </Text>
               <Text as="dd" variant="lg-semibold" className="text-text-secondary whitespace-nowrap">
                 {estimate.fromRegion}
@@ -98,7 +101,7 @@ export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
             <RouteArrow />
             <div>
               <Text as="dt" variant="md-regular" className="text-text-muted">
-                도착지
+                {t("toAddress")}
               </Text>
               <Text as="dd" variant="lg-semibold" className="text-text-secondary whitespace-nowrap">
                 {estimate.toRegion}
@@ -108,10 +111,10 @@ export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
 
           <div>
             <Text as="dt" variant="md-regular" className="text-text-muted">
-              이사일
+              {t("moveDate")}
             </Text>
             <Text as="dd" variant="lg-semibold" className="text-text-secondary whitespace-nowrap">
-              {formatKoreanDateTime(estimate.moveDate)}
+              {formatKoreanDateTime(estimate.moveDate, locale)}
             </Text>
           </div>
         </dl>
@@ -122,20 +125,20 @@ export default function SentEstimateCard({ estimate }: SentEstimateCardProps) {
           variant={{ base: "md-medium", md: "lg-medium" }}
           className="text-text-muted md:text-(length:--font-size-16) md:leading-26"
         >
-          견적 금액
+          {t("detail.price")}
         </Text>
         <Text
           variant={{ base: "2lg-bold", md: "2xl-bold" }}
           className="text-text-secondary md:text-(length:--font-size-24) md:leading-32"
         >
-          {estimate.price.toLocaleString("ko-KR")}원
+          {t("detail.priceWon", { price: estimate.price.toLocaleString() })}
         </Text>
       </div>
 
       {isCompleted ? (
         <div className="bg-overlay-card-disabled border-border-dimmed rounded-20 group-hover:border-border-brand pointer-events-none absolute inset-[-0.5px] z-20 flex items-center justify-center border transition-colors duration-200">
           <Text variant="2lg-semibold" className="text-text-inverse">
-            이사 완료된 견적이에요
+            {t("sent.completedNotice")}
           </Text>
         </div>
       ) : null}

@@ -39,12 +39,6 @@ const isNavigateSocialLoginButtons = (
   return "hrefForProvider" in props;
 };
 
-const SOCIAL_PROVIDER_NAME: Record<OAuthProvider, string> = {
-  google: "Google",
-  kakao: "카카오",
-  naver: "네이버",
-};
-
 const SOCIAL_PROVIDERS: {
   provider: OAuthProvider;
   className: string;
@@ -117,7 +111,7 @@ const SocialLoginButtons = (props: SocialLoginButtonsProps) => {
             isDisabled && "cursor-not-allowed opacity-60",
             buttonClassName,
           );
-          const providerName = SOCIAL_PROVIDER_NAME[provider];
+          const providerName = t(`providers.${provider}`);
           const ariaLabel = isSignUpAction
             ? t("socialSignUpWithProvider", { provider: providerName })
             : t("socialLoginWithProvider", { provider: providerName });

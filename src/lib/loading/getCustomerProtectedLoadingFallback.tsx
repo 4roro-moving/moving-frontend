@@ -21,6 +21,7 @@ import {
 } from "@/lib/utils/giveawaySearchParams";
 
 interface CustomerProfileLoadingMessages {
+  favoritesTitle: string;
   create: {
     title: string;
     description: string;
@@ -120,7 +121,7 @@ export const getCustomerProtectedLoadingFallback = (
   if (pathname === APP_ROUTES.MOVERS.FAVORITES) {
     return (
       <div className="bg-background-subtle flex w-full flex-col">
-        <PageHeader title="찜한 기사님" />
+        <PageHeader title={profileMessages.favoritesTitle} />
         <div className={FAVORITE_MOVERS_CONTENT_CLASSNAME}>
           <FavoriteMoversLoadingSkeleton />
         </div>

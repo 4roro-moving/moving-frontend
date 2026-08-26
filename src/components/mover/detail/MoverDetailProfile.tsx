@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 
@@ -42,7 +44,7 @@ export default function MoverDetailProfile({
             }}
             className="text-text-secondary wrap-break-word"
           >
-            {detail.title}
+            <AutoTranslatedText text={detail.title} />
           </Text>
         </div>
 
@@ -97,7 +99,7 @@ export default function MoverDetailProfile({
           }}
           className="text-text-muted whitespace-pre-line"
         >
-          {detail.description}
+          <AutoTranslatedText text={detail.description} />
         </Text>
       </div>
 

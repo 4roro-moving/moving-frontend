@@ -1,6 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -19,6 +21,7 @@ interface GiveawayCardProps {
 
 const GiveawayCard = ({ giveaway, preloadThumbnail = false }: GiveawayCardProps) => {
   const t = useTranslations("giveaway");
+  const locale = useLocale();
   const detailHref = APP_ROUTES.COMMUNITY.GIVEAWAY_DETAIL(giveaway.id);
   const overlayLabel =
     giveaway.status === "IN_PROGRESS"
@@ -26,7 +29,7 @@ const GiveawayCard = ({ giveaway, preloadThumbnail = false }: GiveawayCardProps)
       : giveaway.status === "COMPLETED"
         ? t("statusCompleted")
         : null;
-  const writtenAt = formatRelativeTime(giveaway.createdAt);
+  const writtenAt = formatRelativeTime(giveaway.createdAt, locale);
   const titleId = `giveaway-${String(giveaway.id)}-title`;
   const statusId = `giveaway-${String(giveaway.id)}-status`;
 
@@ -72,7 +75,7 @@ const GiveawayCard = ({ giveaway, preloadThumbnail = false }: GiveawayCardProps)
           variant={{ base: "lg-semibold", xl: "xl-semibold" }}
           className="text-text-primary line-clamp-1 text-center"
         >
-          {giveaway.title}
+          <AutoTranslatedText text={giveaway.title} />
         </Text>
         <div className="flex w-full items-center justify-between">
           {writtenAt ? (

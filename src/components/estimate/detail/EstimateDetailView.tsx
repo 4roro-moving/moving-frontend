@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
@@ -37,6 +38,7 @@ interface EstimateDetailContentProps {
 }
 
 function EstimateDetailContent({ estimateId, data, statusBanner }: EstimateDetailContentProps) {
+  const t = useTranslations("estimates");
   const [confirmToastMessage, setConfirmToastMessage] = useState<string | null>(null);
 
   const estimateRequestId = data.estimateRequest.id;
@@ -45,7 +47,7 @@ function EstimateDetailContent({ estimateId, data, statusBanner }: EstimateDetai
   const displayName = data.mover.nickname || data.mover.name;
 
   const confirmMutation = useConfirmEstimate(estimateId, {
-    onSuccess: () => setConfirmToastMessage("견적이 확정되었어요."),
+    onSuccess: () => setConfirmToastMessage(t("detail.confirmSuccess")),
     onError: setConfirmToastMessage,
   });
 
@@ -119,15 +121,16 @@ function EstimateDetailContent({ estimateId, data, statusBanner }: EstimateDetai
 }
 
 export default function EstimateDetailView({ estimateId }: EstimateDetailViewProps) {
+  const t = useTranslations("estimates");
   const { data, isError, error, isFetching, isLoading, refetch } = useEstimateDetail(estimateId);
   const hasData = data !== undefined;
   const showInitialSkeleton = isLoading && !hasData;
   const showBlockingError = isError && !hasData;
   const showRefetchError = isError && hasData;
-  const fallbackMessage = "견적 상세를 불러오지 못했어요.";
+  const fallbackMessage = t("detail.loadFailed");
   const isNotFound = error instanceof ApiError && error.status === 404;
   const blockingMessage = isNotFound
-    ? "존재하지 않거나 더 이상 확인할 수 없는 견적입니다."
+    ? t("detail.notFound")
     : getApiErrorMessage(error, fallbackMessage);
 
   if (showInitialSkeleton) {
@@ -146,7 +149,7 @@ export default function EstimateDetailView({ estimateId }: EstimateDetailViewPro
     return (
       <EstimateDetailQueryState
         message={blockingMessage}
-        actionLabel={isNotFound ? undefined : "다시 시도"}
+        actionLabel={isNotFound ? undefined : t("retry")}
         onAction={() => {
           void refetch();
         }}

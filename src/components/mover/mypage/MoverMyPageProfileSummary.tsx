@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { Text } from "@/components/common/Text";
 import { useLocale, useTranslations } from "next-intl";
 import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
@@ -73,14 +75,14 @@ export default function MoverMyPageProfileSummary({
               variant="2lg-semibold"
               className="text-text-tertiary break-words whitespace-pre-wrap"
             >
-              {profile.shortIntro}
+              <AutoTranslatedText text={profile.shortIntro} />
             </Text>
             <Text
               as="p"
               variant={{ base: "md-regular", md: "lg-regular" }}
               className="text-text-muted break-words whitespace-pre-wrap"
             >
-              {profile.description}
+              <AutoTranslatedText text={profile.description} />
             </Text>
           </div>
 

@@ -4,64 +4,63 @@ export interface CalendarCell {
 }
 
 /** Date → "2025년 7월 1일" */
-export function formatKoreanDate(date: Date): string {
-  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+export function formatKoreanDate(date: Date, locale = "ko"): string {
+  return new Intl.DateTimeFormat(locale, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(date);
 }
 
 /** ISO datetime → "N분 전" / "N시간 전" / "N일 전" */
-export function formatRelativeTime(date: string | Date): string {
+export function formatRelativeTime(date: string | Date, locale = "ko"): string {
   const target = date instanceof Date ? date : new Date(date);
 
   if (Number.isNaN(target.getTime())) {
     return "";
   }
 
-  const minutes = Math.max(1, Math.floor((Date.now() - target.getTime()) / 60_000));
+  const diffMinutes = Math.max(1, Math.floor((Date.now() - target.getTime()) / 60_000));
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
 
-  if (minutes < 60) {
-    return `${minutes}분 전`;
+  if (diffMinutes < 60) {
+    return formatter.format(-diffMinutes, "minute");
   }
 
-  const hours = Math.floor(minutes / 60);
+  const hours = Math.floor(diffMinutes / 60);
   if (hours < 24) {
-    return `${hours}시간 전`;
+    return formatter.format(-hours, "hour");
   }
 
-  return `${Math.floor(hours / 24)}일 전`;
+  return formatter.format(-Math.floor(hours / 24), "day");
 }
 
 /** ISO 날짜 문자열 → KST 기준 "2025년 07월 01일 (화)" */
-export function formatKoreanDateTime(date: string): string {
-  // 2026.07.24 정슬기 - [수정] date-only는 parseDateOnly로 파싱해 타임존 밀림 방지
+export function formatKoreanDateTime(date: string, locale = "ko"): string {
   const parsed = /^\d{4}-\d{2}-\d{2}$/.test(date) ? parseDateOnly(date) : new Date(date);
 
   if (Number.isNaN(parsed.getTime())) {
-    throw new RangeError("유효하지 않은 날짜입니다.");
+    throw new RangeError("Invalid date.");
   }
 
-  const parts = new Intl.DateTimeFormat("ko-KR", {
+  return new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
     weekday: "short",
     timeZone: "Asia/Seoul",
-  }).formatToParts(parsed);
-
-  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((part) => part.type === type)?.value ?? "";
-
-  return `${getPart("year")}년 ${getPart("month")}월 ${getPart("day")}일 (${getPart("weekday")})`;
+  }).format(parsed);
 }
 
 /** ISO datetime → KST 기준 "2025년 07월 01일 (화) 14:30" */
-export function formatKoreanDateTimeWithTime(date: string): string {
+export function formatKoreanDateTimeWithTime(date: string, locale = "ko"): string {
   const parsed = new Date(date);
 
   if (Number.isNaN(parsed.getTime())) {
-    throw new RangeError("유효하지 않은 날짜입니다.");
+    throw new RangeError("Invalid date.");
   }
 
-  const parts = new Intl.DateTimeFormat("ko-KR", {
+  return new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -70,12 +69,7 @@ export function formatKoreanDateTimeWithTime(date: string): string {
     minute: "2-digit",
     hourCycle: "h23",
     timeZone: "Asia/Seoul",
-  }).formatToParts(parsed);
-
-  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((part) => part.type === type)?.value ?? "";
-
-  return `${getPart("year")}년 ${getPart("month")}월 ${getPart("day")}일 (${getPart("weekday")}) ${getPart("hour")}:${getPart("minute")}`;
+  }).format(parsed);
 }
 
 /** 한국 시간 기준으로 기준일이 대상 날짜와 같거나 이후인지 확인합니다. */

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import Toast from "@/components/common/Toast/Toast";
@@ -14,6 +15,7 @@ import { usePendingEstimateSections } from "@/hooks/usePendingEstimateSections";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 
 export default function PendingEstimatesPageClient() {
+  const t = useTranslations("estimates");
   const { data, isError, error, isFetching, isLoading, refetch } = usePendingEstimateSections();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const hasData = data !== undefined;
@@ -29,8 +31,8 @@ export default function PendingEstimatesPageClient() {
         <div className="bg-background-subtle px-margin-mobile md:px-margin-tablet flex w-full justify-center pt-35 pb-64 md:pt-42 md:pb-80 xl:px-0 xl:pt-78 xl:pb-80">
           <div className="max-w-container-pending-mobile md:max-w-container-pending-tablet xl:max-w-container-pending-desktop w-full">
             <EstimatesQueryStatus
-              message={getApiErrorMessage(error, "대기 중인 견적을 불러오지 못했습니다.")}
-              actionLabel={isFetching ? "다시 시도 중..." : "다시 시도"}
+              message={getApiErrorMessage(error, t("pending.loadFailed"))}
+              actionLabel={isFetching ? t("retrying") : t("retry")}
               actionBusy={isFetching}
               onAction={() => {
                 void refetch();
@@ -47,8 +49,8 @@ export default function PendingEstimatesPageClient() {
             <div className="bg-background-subtle px-margin-mobile md:px-margin-tablet flex w-full justify-center pt-20 md:pt-24 xl:px-0">
               <div className="max-w-container-pending-mobile md:max-w-container-pending-tablet xl:max-w-container-pending-desktop w-full">
                 <EstimatesQueryStatus
-                  message={getApiErrorMessage(error, "최신 대기 견적을 다시 불러오지 못했습니다.")}
-                  actionLabel={isFetching ? "다시 시도 중..." : "다시 시도"}
+                  message={getApiErrorMessage(error, t("pending.refreshFailed"))}
+                  actionLabel={isFetching ? t("retrying") : t("retry")}
                   actionBusy={isFetching}
                   onAction={() => {
                     void refetch();
@@ -63,7 +65,7 @@ export default function PendingEstimatesPageClient() {
             sections={data.sections}
             onFavoriteError={setToastMessage}
             onConfirmError={setToastMessage}
-            onConfirmSuccess={() => setToastMessage("견적이 확정되었어요.")}
+            onConfirmSuccess={() => setToastMessage(t("detail.confirmSuccess"))}
           />
         </>
       ) : null}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import Button from "@/components/common/Button/Button";
@@ -15,6 +16,7 @@ interface SentEstimateCompleteActionProps {
 export default function SentEstimateCompleteAction({
   estimateId,
 }: SentEstimateCompleteActionProps) {
+  const t = useTranslations("estimates");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const completeMutation = useCompleteSentEstimate(estimateId);
@@ -23,9 +25,9 @@ export default function SentEstimateCompleteAction({
     try {
       await completeMutation.mutateAsync();
       setIsConfirmOpen(false);
-      setToastMessage("이사 완료 처리되었습니다.");
+      setToastMessage(t("sent.completeSuccess"));
     } catch (error) {
-      setToastMessage(getApiErrorMessage(error, "이사 완료 처리하지 못했습니다."));
+      setToastMessage(getApiErrorMessage(error, t("sent.completeFailed")));
     }
   };
 
@@ -39,13 +41,13 @@ export default function SentEstimateCompleteAction({
         disabled={completeMutation.isPending}
         onClick={() => setIsConfirmOpen(true)}
       >
-        이사 완료
+        {t("sent.complete")}
       </Button>
 
       <AlertModal
         open={isConfirmOpen}
-        title="이사를 완료하셨나요?"
-        description="완료 처리하면 고객님이 리뷰를 작성할 수 있으며 이전 상태로 되돌릴 수 없습니다."
+        title={t("sent.completeConfirmTitle")}
+        description={t("sent.completeConfirmDescription")}
         onClose={() => setIsConfirmOpen(false)}
         closeDisabled={completeMutation.isPending}
         actions={
@@ -57,7 +59,7 @@ export default function SentEstimateCompleteAction({
               disabled={completeMutation.isPending}
               onClick={() => setIsConfirmOpen(false)}
             >
-              돌아가기
+              {t("requests.goBack")}
             </Button>
             <Button
               size="cta"
@@ -66,7 +68,7 @@ export default function SentEstimateCompleteAction({
               aria-busy={completeMutation.isPending}
               onClick={() => void handleComplete()}
             >
-              {completeMutation.isPending ? "완료 처리 중..." : "이사 완료"}
+              {completeMutation.isPending ? t("sent.completing") : t("sent.complete")}
             </Button>
           </div>
         }

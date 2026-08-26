@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import EstimateDetailLayout, {
   ESTIMATE_DETAIL_LAYOUT_CLASSES,
@@ -18,8 +19,9 @@ function DetailSectionSkeleton() {
 }
 
 export default function EstimateDetailPageSkeleton() {
+  const t = useTranslations("estimates");
   return (
-    <div aria-busy="true" aria-label="견적 상세 정보를 불러오는 중입니다.">
+    <div aria-busy="true" aria-label={t("detail.loading")}>
       <EstimateDetailLayout
         showProfile
         backFallbackHref={APP_ROUTES.MOVER_ESTIMATES.SENT}

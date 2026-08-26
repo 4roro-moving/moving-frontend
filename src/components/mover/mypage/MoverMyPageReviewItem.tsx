@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { Text } from "@/components/common/Text";
 import { useLocale, useTranslations } from "next-intl";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
@@ -45,7 +47,7 @@ export default function MoverMyPageReviewItem({ review, hasDivider }: MoverMyPag
           variant={{ base: "md-regular", md: "2lg-regular" }}
           className="text-text-primary break-words whitespace-pre-wrap"
         >
-          {review.content}
+          <AutoTranslatedText text={review.content} />
         </Text>
       </article>
     </li>

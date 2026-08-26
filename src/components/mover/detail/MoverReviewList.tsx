@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -128,7 +130,7 @@ function MoverReviewListItem({ review, canReport, currentUserId }: MoverReviewLi
           }}
           className="text-text-primary whitespace-pre-line"
         >
-          {review.content}
+          <AutoTranslatedText text={review.content} />
         </Text>
       </article>
 

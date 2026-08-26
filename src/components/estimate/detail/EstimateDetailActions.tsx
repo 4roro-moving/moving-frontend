@@ -1,5 +1,5 @@
 import type { Ref } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
@@ -48,6 +48,7 @@ export default function EstimateDetailActions({
   cancelButtonRef,
 }: EstimateDetailActionsProps) {
   const t = useTranslations("estimates");
+  const locale = useLocale();
   const showPrice = typeof price === "number";
   const showCancel = canCancelRequest && typeof onCancelRequest === "function";
   // Primary(sm h-57 / detail h-64)와 Trash 정사각 높이를 맞춤 — Tablet 스택에서도 정렬 유지
@@ -63,7 +64,7 @@ export default function EstimateDetailActions({
         {t("priceLabel")}
       </Text>
       <Text as="p" variant="2xl-bold" className="text-text-primary">
-        {formatPrice(price)}
+        {formatPrice(price, locale)}
       </Text>
     </div>
   ) : null;

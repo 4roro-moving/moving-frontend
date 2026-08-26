@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { useTranslations } from "next-intl";
 
 import Image from "next/image";
@@ -220,7 +222,7 @@ const ResidenceReviewDetailModal = ({
                   }}
                   className="text-text-primary"
                 >
-                  {currentReview.title}
+                  <AutoTranslatedText text={currentReview.title} />
                 </Text>
 
                 <Text
@@ -231,7 +233,7 @@ const ResidenceReviewDetailModal = ({
                   }}
                   className="text-text-secondary whitespace-pre-wrap"
                 >
-                  {currentReview.content}
+                  <AutoTranslatedText text={currentReview.content} />
                 </Text>
               </div>
             </div>

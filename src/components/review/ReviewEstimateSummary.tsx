@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
@@ -50,6 +50,7 @@ function RouteField({
 
 export default function ReviewEstimateSummary({ item }: ReviewEstimateSummaryProps) {
   const t = useTranslations("reviews");
+  const locale = useLocale();
   const { estimateRequest, mover } = item;
   const moverLabel = getReviewMoverDisplayName(mover);
 
@@ -120,7 +121,7 @@ export default function ReviewEstimateSummary({ item }: ReviewEstimateSummaryPro
 
           <RouteField
             label={t("moveDate")}
-            value={formatMoveDateLabelSafe(estimateRequest.moveDate)}
+            value={formatMoveDateLabelSafe(estimateRequest.moveDate, "-", locale)}
           />
         </dl>
 

@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -134,7 +136,7 @@ const ReportCard = ({ report }: ReportCardProps) => {
             variant="md-regular"
             className={cn("text-text-secondary", !isOpen && "line-clamp-2")}
           >
-            {report.description}
+            <AutoTranslatedText text={report.description} />
           </Text>
         ) : null}
       </button>
@@ -185,11 +187,11 @@ const ReportCard = ({ report }: ReportCardProps) => {
                   </dt>
                   <dd>
                     <Text
-                      as="p"
+                      as="dd"
                       variant="md-regular"
-                      className="text-text-primary break-words whitespace-pre-wrap"
+                      className="text-text-primary wrap-break-word whitespace-pre-wrap"
                     >
-                      {report.description}
+                      <AutoTranslatedText text={report.description} />
                     </Text>
                   </dd>
                 </div>

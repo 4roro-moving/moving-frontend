@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 import Button from "@/components/common/Button/Button";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import { Text } from "@/components/common/Text";
@@ -60,8 +61,9 @@ function InfoField({ label, value, fullValue = value }: InfoFieldProps) {
 // 2026.08.07 정슬기 - [수정] Figma 작성 가능 리뷰 카드 내부 레이아웃 반영
 export default function WritableReviewCard({ item, onWriteClick }: WritableReviewCardProps) {
   const t = useTranslations("reviews");
+  const locale = useLocale();
   const { mover, estimateRequest, price } = item;
-  const moverLabel = getReviewMoverDisplayName(mover);
+  const moverLabel = getReviewMoverDisplayName(mover, locale);
   const titleId = `writable-review-${item.estimateId}-title`;
   const shortIntro = mover.shortIntro?.trim() ?? "";
 
@@ -112,7 +114,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
                     className="text-text-muted w-full truncate"
                     title={shortIntro}
                   >
-                    {shortIntro}
+                    <AutoTranslatedText text={shortIntro} />
                   </Text>
                 ) : null}
               </div>
@@ -130,7 +132,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
                 {t("estimatePrice")}
               </Text>
               <Text as="p" variant="2xl-bold" className="text-text-secondary w-full text-right">
-                {formatPrice(price)}
+                {formatPrice(price, locale)}
               </Text>
             </div>
           </div>
@@ -142,7 +144,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
             {t("estimatePrice")}
           </Text>
           <Text as="p" variant={{ base: "xl-bold", md: "2xl-bold" }} className="text-text-primary">
-            {formatPrice(price)}
+            {formatPrice(price, locale)}
           </Text>
         </div>
 
@@ -173,7 +175,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
 
             <InfoField
               label={t("moveDate")}
-              value={formatMoveDateLabelSafe(estimateRequest.moveDate)}
+              value={formatMoveDateLabelSafe(estimateRequest.moveDate, "-", locale)}
             />
           </dl>
 

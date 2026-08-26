@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { FormEvent, useState } from "react";
@@ -154,7 +156,7 @@ const NoticePageClient = () => {
                       variant={{ base: "md-medium", md: "lg-medium" }}
                       className="text-text-primary truncate"
                     >
-                      {notice.title}
+                      <AutoTranslatedText text={notice.title} />
                     </Text>
                   </div>
 

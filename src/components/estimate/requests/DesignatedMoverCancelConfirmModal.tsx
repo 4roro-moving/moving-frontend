@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Modal from "@/components/common/Modal/Modal";
 import { cn } from "@/lib/utils/cn";
 
@@ -32,18 +33,19 @@ export default function DesignatedMoverCancelConfirmModal({
   onClose,
   onConfirm,
 }: DesignatedMoverCancelConfirmModalProps) {
+  const t = useTranslations("estimates");
   return (
     <Modal open={open} onClose={isPending ? undefined : onClose} className={PANEL_CLASSNAME}>
       <div className="flex w-full items-start justify-between gap-10">
         <Modal.Title variant={{ base: "xl-bold", md: "2xl-semibold" }}>
-          지정 견적 요청을 취소할까요?
+          {t("requests.designatedCancelTitle")}
         </Modal.Title>
         <Modal.Close onClose={onClose} disabled={isPending} />
       </div>
 
       <div className="flex w-full flex-col items-stretch gap-20 md:gap-40">
         <Modal.Desc variant={{ base: "md-medium", md: "2lg-medium" }}>
-          {moverDisplayName}에게 보낸 지정 견적 요청이 취소됩니다.
+          {t("requests.designatedCancelDescription", { name: moverDisplayName })}
         </Modal.Desc>
 
         <div className="flex w-full flex-col-reverse gap-8 md:flex-row md:gap-12">
@@ -56,7 +58,7 @@ export default function DesignatedMoverCancelConfirmModal({
             onClick={onClose}
             className="md:flex-1"
           >
-            취소
+            {t("commonCancel")}
           </Modal.Button>
           <Modal.Button
             type="button"
@@ -67,7 +69,7 @@ export default function DesignatedMoverCancelConfirmModal({
             onClick={onConfirm}
             className="md:flex-1"
           >
-            {isPending ? "취소 중..." : "지정 취소"}
+            {isPending ? t("requests.canceling") : t("requests.designatedCancel")}
           </Modal.Button>
         </div>
       </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { useFormatter, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -75,7 +77,7 @@ const MyGiveawayRequestCard = ({ request, onEdit, onCancel }: MyGiveawayRequestC
                 variant={{ base: "lg-semibold", md: "2lg-bold" }}
                 className="text-text-secondary line-clamp-1"
               >
-                {request.giveaway.title}
+                <AutoTranslatedText text={request.giveaway.title} />
               </Text>
             </Link>
             <Text

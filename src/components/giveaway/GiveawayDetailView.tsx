@@ -1,6 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
+import { useLocale, useTranslations } from "next-intl";
 import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -55,6 +57,7 @@ const GiveawayDetailView = ({
   requestsQuery,
 }: GiveawayDetailViewProps) => {
   const t = useTranslations("giveaway");
+  const locale = useLocale();
   const router = useRouter();
   const deleteMutation = useDeleteGiveaway();
   const completeMutation = useCompleteGiveaway();
@@ -66,7 +69,7 @@ const GiveawayDetailView = ({
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | undefined>();
   const [completeError, setCompleteError] = useState<string | undefined>();
-  const writtenAt = formatRelativeTime(giveaway.createdAt);
+  const writtenAt = formatRelativeTime(giveaway.createdAt, locale);
   const hasApplied = hasActiveGiveawayRequest(giveaway.myRequest?.status);
   const showReceivedRequests = isAuthor;
   const showMyRequest = !isAuthor && hasApplied;
@@ -127,7 +130,7 @@ const GiveawayDetailView = ({
                   variant={{ base: "xl-semibold", xl: "2xl-semibold" }}
                   className="text-text-secondary"
                 >
-                  {giveaway.title}
+                  <AutoTranslatedText text={giveaway.title} />
                 </Text>
 
                 <div className="flex w-full items-center gap-12">
@@ -171,7 +174,7 @@ const GiveawayDetailView = ({
                 variant={{ base: "md-medium", xl: "2lg-medium" }}
                 className="text-text-primary min-h-200 whitespace-pre-wrap"
               >
-                {giveaway.description}
+                <AutoTranslatedText text={giveaway.description} />
               </Text>
 
               <GiveawayDetailDivider />

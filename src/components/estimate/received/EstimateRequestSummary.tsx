@@ -1,3 +1,4 @@
+import { useLocale, useTranslations } from "next-intl";
 import { Text } from "@/components/common/Text";
 import {
   formatMoveDateLabel,
@@ -18,12 +19,14 @@ interface EstimateRequestSummaryProps {
  * 이 컴포넌트는 received EstimateDetailPanel에서만 사용됩니다.
  */
 export default function EstimateRequestSummary({ data }: EstimateRequestSummaryProps) {
+  const t = useTranslations("estimates");
+  const locale = useLocale();
   const requestDate = formatRequestDateLabel(data.createdAt);
 
   return (
     <section
       className="flex w-full flex-col gap-16 md:gap-24 xl:w-260 xl:shrink-0 xl:gap-40"
-      aria-label="견적 정보"
+      aria-label={t("detail.infoTitle")}
     >
       <div className="flex w-full items-center justify-center md:justify-between">
         <Text
@@ -31,7 +34,7 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
           variant="xl-semibold"
           className="text-text-secondary text-center md:text-left"
         >
-          견적 정보
+          {t("detail.infoTitle")}
         </Text>
         <Text
           as="time"
@@ -46,14 +49,14 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
       <dl className="flex w-full flex-col gap-12 md:gap-16">
         <div className="flex w-full items-center justify-between gap-12">
           <Text as="dt" variant="lg-semibold" className="text-text-brand shrink-0">
-            이사 유형
+            {t("detail.moveType")}
           </Text>
           <Text
             as="dd"
             variant="lg-semibold"
             className="text-text-primary text-right wrap-break-word"
           >
-            {getMoveTypeLabel(data.moveType)}
+            {getMoveTypeLabel(data.moveType, locale)}
           </Text>
         </div>
 
@@ -62,7 +65,7 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
 
         <div className="flex w-full items-start justify-between gap-12">
           <Text as="dt" variant="lg-semibold" className="text-text-brand shrink-0">
-            출발지
+            {t("fromAddress")}
           </Text>
           <Text
             as="dd"
@@ -74,7 +77,7 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
         </div>
         <div className="flex w-full items-start justify-between gap-12">
           <Text as="dt" variant="lg-semibold" className="text-text-brand shrink-0">
-            도착지
+            {t("toAddress")}
           </Text>
           <Text
             as="dd"
@@ -90,14 +93,14 @@ export default function EstimateRequestSummary({ data }: EstimateRequestSummaryP
 
         <div className="flex w-full items-center justify-between gap-12">
           <Text as="dt" variant="lg-semibold" className="text-text-brand shrink-0">
-            이용일
+            {t("detail.useDate")}
           </Text>
           <Text
             as="dd"
             variant="lg-semibold"
             className="text-text-primary text-right wrap-break-word"
           >
-            {formatMoveDateLabel(data.moveDate)}
+            {formatMoveDateLabel(data.moveDate, locale)}
           </Text>
         </div>
       </dl>

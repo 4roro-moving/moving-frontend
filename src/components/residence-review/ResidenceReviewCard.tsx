@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { useFormatter, useTranslations } from "next-intl";
 
 import Image from "next/image";
@@ -101,14 +103,14 @@ const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCa
           variant={{ base: "lg-semibold", xl: "xl-semibold" }}
           className="text-text-primary line-clamp-1"
         >
-          {review.title}
+          <AutoTranslatedText text={review.title} />
         </Text>
         <Text
           as="span"
           variant={{ base: "md-medium", xl: "2lg-medium" }}
           className="text-text-muted line-clamp-2"
         >
-          {review.content}
+          <AutoTranslatedText text={review.content} />
         </Text>
       </div>
 

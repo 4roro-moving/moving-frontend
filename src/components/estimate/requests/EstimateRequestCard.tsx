@@ -1,3 +1,4 @@
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
@@ -31,6 +32,8 @@ interface EstimateRequestCardProps {
  * // 2026.07.30 정슬기 - [유지] 목록은 DesignatedChip만 표시, 기사님 이름은 상세에서 확인
  */
 export default function EstimateRequestCard({ request }: EstimateRequestCardProps) {
+  const t = useTranslations("estimates");
+  const locale = useLocale();
   const designatedCount = request.designatedMovers.length;
   const titleId = `estimate-request-${request.id}-title`;
   const href = APP_ROUTES.ESTIMATES.REQUEST_DETAIL(request.id);
@@ -69,7 +72,7 @@ export default function EstimateRequestCard({ request }: EstimateRequestCardProp
             variant="md-semibold"
             className={cn("shrink-0", getEstimateRequestStatusTextClassName(request.status))}
           >
-            {getEstimateRequestStatusLabel(request.status)}
+            {getEstimateRequestStatusLabel(request.status, locale)}
           </Text>
         </div>
 
@@ -80,17 +83,17 @@ export default function EstimateRequestCard({ request }: EstimateRequestCardProp
             variant={{ base: "lg-semibold", md: "2lg-semibold" }}
             className="text-text-primary"
           >
-            {getMoveTypeLabel(request.moveType)}
+            {getMoveTypeLabel(request.moveType, locale)}
           </Text>
           <Text as="p" variant="xs-regular" className="text-text-muted">
-            견적 요청일 {formatRequestDateLabel(request.createdAt)}
+            {t("detail.requestedAtWithDate", { date: formatRequestDateLabel(request.createdAt) })}
           </Text>
         </div>
 
         <dl className="flex w-full flex-col gap-8 md:gap-12">
           <div className="flex w-full items-start justify-between gap-12">
             <Text as="dt" variant="md-regular" className="text-text-muted shrink-0">
-              출발지
+              {t("fromAddress")}
             </Text>
             <Text
               as="dd"
@@ -102,7 +105,7 @@ export default function EstimateRequestCard({ request }: EstimateRequestCardProp
           </div>
           <div className="flex w-full items-start justify-between gap-12">
             <Text as="dt" variant="md-regular" className="text-text-muted shrink-0">
-              도착지
+              {t("toAddress")}
             </Text>
             <Text
               as="dd"
@@ -114,10 +117,10 @@ export default function EstimateRequestCard({ request }: EstimateRequestCardProp
           </div>
           <div className="flex w-full items-center justify-between gap-12">
             <Text as="dt" variant="md-regular" className="text-text-muted shrink-0">
-              이사 예정일
+              {t("requests.moveDate")}
             </Text>
             <Text as="dd" variant="md-semibold" className="text-text-primary m-0 text-right">
-              {formatMoveDateLabelSafe(request.moveDate)}
+              {formatMoveDateLabelSafe(request.moveDate, "-", locale)}
             </Text>
           </div>
         </dl>

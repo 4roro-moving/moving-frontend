@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { FormEvent, useState } from "react";
@@ -163,7 +165,7 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
           }}
           className="text-text-primary"
         >
-          {data.title}
+          <AutoTranslatedText text={data.title} />
         </Text>
 
         <Text as="time" variant="xs-regular" className="text-text-muted">
@@ -217,7 +219,7 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
                 variant="md-regular"
                 className="text-text-primary leading-relaxed break-words whitespace-pre-wrap"
               >
-                {message.content}
+                <AutoTranslatedText text={message.content} />
               </Text>
             </article>
           ))

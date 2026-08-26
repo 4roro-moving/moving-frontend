@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 import Modal from "@/components/common/Modal/Modal";
@@ -41,6 +42,7 @@ export default function EstimateRequestCancelHubModal({
   onSelectDesignateCancel,
   onSelectFullCancel,
 }: EstimateRequestCancelHubModalProps) {
+  const t = useTranslations("estimates");
   const hasDesignatedMovers = designatedMovers.length > 0;
 
   return (
@@ -51,24 +53,24 @@ export default function EstimateRequestCancelHubModal({
       className={PANEL_CLASSNAME}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-12">
-        <Modal.Title variant={{ base: "xl-bold", md: "2xl-semibold" }}>견적 요청 취소</Modal.Title>
+        <Modal.Title variant={{ base: "xl-bold", md: "2xl-semibold" }}>
+          {t("requests.cancelTitle")}
+        </Modal.Title>
         <Modal.Close onClose={onClose} disabled={closeDisabled} />
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col items-stretch gap-16 md:gap-32">
         <Modal.Desc variant={{ base: "md-medium", md: "2lg-medium" }}>
-          {hasDesignatedMovers
-            ? "지정한 기사님만 취소하거나, 견적 요청 전체를 취소할 수 있어요."
-            : "견적 요청 전체를 취소할 수 있어요. 취소하면 받은 견적도 함께 취소됩니다."}
+          {hasDesignatedMovers ? t("requests.cancelHubWithDesignated") : t("requests.cancelHubAll")}
         </Modal.Desc>
 
         {hasDesignatedMovers ? (
           <section
             className="flex min-h-0 w-full flex-1 flex-col gap-10 md:gap-12"
-            aria-label="지정 견적 요청 대상 기사님"
+            aria-label={t("requests.designatedTargetsAria")}
           >
             <Text as="h3" variant="md-semibold" className="text-text-brand shrink-0">
-              지정 견적 요청
+              {t("requests.designatedTitle")}
             </Text>
 
             <ul className="flex min-h-0 w-full flex-1 flex-col gap-10 overflow-y-auto pr-2 md:gap-12">
@@ -85,7 +87,7 @@ export default function EstimateRequestCancelHubModal({
                       <div className="bg-background-avatar rounded-12 relative size-36 shrink-0 overflow-hidden md:size-40">
                         <Image
                           src={resolveMoverProfileImageSrc(imageUrl)}
-                          alt={`${displayName} 프로필`}
+                          alt={t("received.profileAlt", { name: displayName })}
                           fill
                           sizes="40px"
                           className="object-cover"
@@ -105,11 +107,11 @@ export default function EstimateRequestCancelHubModal({
                       variant="outline"
                       size="cta"
                       disabled={closeDisabled}
-                      aria-label={`${displayName} 지정 취소`}
+                      aria-label={t("requests.designatedCancelAria", { name: displayName })}
                       onClick={() => onSelectDesignateCancel(item.moverId)}
                       className="rounded-12 h-36 min-w-0 shrink-0 px-10 py-6 md:h-40 md:px-12 md:py-8"
                     >
-                      지정 취소
+                      {t("requests.designatedCancel")}
                     </Modal.Button>
                   </li>
                 );
@@ -128,7 +130,7 @@ export default function EstimateRequestCancelHubModal({
             onClick={onClose}
             className="md:flex-1"
           >
-            돌아가기
+            {t("requests.goBack")}
           </Modal.Button>
           <Modal.Button
             type="button"
@@ -139,7 +141,7 @@ export default function EstimateRequestCancelHubModal({
             onClick={onSelectFullCancel}
             className="md:flex-1"
           >
-            전체 취소
+            {t("requests.cancelAll")}
           </Modal.Button>
         </div>
       </div>

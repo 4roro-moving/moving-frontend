@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -18,6 +19,8 @@ interface DatePickerFieldProps {
 }
 
 export default function DatePickerField({ value, onChange, className }: DatePickerFieldProps) {
+  const t = useTranslations("estimateRequest");
+  const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const { isRendered: isPopupRendered, isVisible: isPopupVisible } = usePresence(
     isOpen,
@@ -65,7 +68,7 @@ export default function DatePickerField({ value, onChange, className }: DatePick
           suppressHydrationWarning
           className="text-text-secondary flex-1 text-left"
         >
-          {formatKoreanDate(value)}
+          {formatKoreanDate(value, locale)}
         </Text>
         <ChevronDownIcon
           className={cn("text-text-tertiary shrink-0 transition-transform", isOpen && "rotate-180")}
@@ -76,7 +79,7 @@ export default function DatePickerField({ value, onChange, className }: DatePick
         <div
           id="estimate-date-picker-popup"
           role="region"
-          aria-label="날짜 선택"
+          aria-label={t("dateSelectAria")}
           aria-hidden={!isPopupVisible}
           className={cn(
             "absolute top-full left-0 z-20 mt-8 w-full",

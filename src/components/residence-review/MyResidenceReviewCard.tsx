@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { useFormatter, useTranslations } from "next-intl";
 
 import Button from "@/components/common/Button/Button";
@@ -54,10 +56,10 @@ const MyResidenceReviewCard = ({ review, onEdit, onDelete }: MyResidenceReviewCa
               variant={{ base: "lg-semibold", md: "2lg-bold" }}
               className="text-text-primary line-clamp-1"
             >
-              {review.title}
+              <AutoTranslatedText text={review.title} />
             </Text>
             <Text as="p" variant="md-regular" className="text-text-muted line-clamp-1">
-              {review.content}
+              <AutoTranslatedText text={review.content} />
             </Text>
           </div>
         </div>

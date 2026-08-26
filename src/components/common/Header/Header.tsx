@@ -134,7 +134,7 @@ const Header = ({
   // OAuth callback은 code 교환 중이므로 우측 액션·스켈레톤도 숨김
   const showAuthSkeleton = !isOAuthCallbackPage && isAuthPending && !initialIsLogin && !initialRole;
 
-  const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
+  const nickname = user?.name ?? displayName ?? initialNickname ?? tCommon("nicknameFallback");
 
   const hintedImageUrl = profileImage ?? initialProfileImage ?? null;
   const imageUrl = isAuthPending ? hintedImageUrl : (user?.imageUrl ?? profileImage ?? null);
@@ -153,7 +153,7 @@ const Header = ({
     <>
       <Image
         src="/icons/moving-logo-icon.svg"
-        alt="무빙"
+        alt={tCommon("brandName")}
         width={32}
         height={32}
         priority
@@ -161,7 +161,7 @@ const Header = ({
       />
       <Image
         src="/icons/logo_full.svg"
-        alt="무빙"
+        alt={tCommon("brandName")}
         width={116}
         height={44}
         priority
@@ -171,7 +171,7 @@ const Header = ({
   ) : (
     <Image
       src="/icons/logo_full.svg"
-      alt="무빙"
+      alt={tCommon("brandName")}
       width={116}
       height={44}
       priority

@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -76,7 +78,7 @@ const NoticeDetailClient = ({ noticeId }: NoticeDetailClientProps) => {
             variant={{ base: "2xl-bold", md: "3xl-bold" }}
             className="text-text-primary"
           >
-            {data.title}
+            <AutoTranslatedText text={data.title} />
           </Text>
 
           <div className="text-text-muted flex items-center gap-16">
@@ -95,7 +97,7 @@ const NoticeDetailClient = ({ noticeId }: NoticeDetailClientProps) => {
             variant={{ base: "md-regular", md: "lg-regular" }}
             className="text-text-primary leading-relaxed break-words whitespace-pre-wrap"
           >
-            {data.content}
+            <AutoTranslatedText text={data.content} />
           </Text>
         </div>
       </article>

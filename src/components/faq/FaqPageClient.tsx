@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -146,7 +148,7 @@ const FaqPageClient = () => {
                       }}
                       className="text-text-secondary wrap-break-word whitespace-pre-wrap"
                     >
-                      {faq.answer}
+                      <AutoTranslatedText text={faq.answer} />
                     </Text>
                   </div>
                 </div>

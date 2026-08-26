@@ -272,7 +272,7 @@ export default function ReceivedRequestsPage() {
                   onClick={() => query.fetchNextPage()}
                   className="border-border-brand text-text-brand disabled:text-text-disabled disabled:border-border-disabled mx-auto h-54 w-full max-w-[327px] rounded-xl border font-semibold disabled:cursor-not-allowed"
                 >
-                  {query.isFetching ? "불러오는 중..." : "더 보기"}
+                  {query.isFetching ? tr("mover.loadingMore") : tr("mover.loadMore")}
                 </button>
               )}
             </>
@@ -290,13 +290,13 @@ export default function ReceivedRequestsPage() {
       >
         <div className="flex w-full flex-col gap-28">
           <div className="flex w-full shrink-0 items-center justify-between">
-            <Modal.Title variant="2lg-bold">필터</Modal.Title>
+            <Modal.Title variant="2lg-bold">{tr("mover.filterTitle")}</Modal.Title>
             <Modal.Close size="sm" onClose={() => setIsFilterOpen(false)} />
           </div>
 
           <section className="flex flex-col gap-8">
             <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
-              이사 유형
+              {tr("mover.moveType")}
             </Text>
 
             <div className="flex flex-wrap gap-12">
@@ -328,18 +328,20 @@ export default function ReceivedRequestsPage() {
 
           <section className="flex flex-col gap-8">
             <Text as="h3" variant="lg-semibold" className="text-text-tertiary">
-              지역 및 견적
+              {tr("mover.regionAndEstimate")}
             </Text>
 
             <div className="flex flex-col gap-12">
               {[
                 {
-                  label: "지정 견적 요청",
+                  id: "designated",
+                  label: tr("mover.designated"),
                   checked: includeDesignated,
                   onChange: setIncludeDesignated,
                 },
                 {
-                  label: "서비스 가능 지역",
+                  id: "serviceArea",
+                  label: tr("mover.serviceAreaOnly"),
                   checked: serviceAreaOnly,
                   onChange: setServiceAreaOnly,
                 },
@@ -349,7 +351,7 @@ export default function ReceivedRequestsPage() {
                   checked={filter.checked}
                   onCheckedChange={filter.onChange}
                   onPrefetch={() => {
-                    if (filter.label === "지정 견적 요청") {
+                    if (filter.id === "designated") {
                       prefetchRequests({
                         isDesignated: includeDesignated ? undefined : true,
                       });
@@ -368,7 +370,7 @@ export default function ReceivedRequestsPage() {
         </div>
 
         <Modal.Button fullWidth size="cta" onClick={() => setIsFilterOpen(false)}>
-          조회하기
+          {tr("mover.applyFilters")}
         </Modal.Button>
       </Modal>
 

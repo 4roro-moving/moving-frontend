@@ -1,5 +1,7 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
@@ -106,7 +108,7 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
         variant={{ base: "md-regular", md: "lg-regular" }}
         className="text-text-secondary break-words whitespace-pre-wrap"
       >
-        {content}
+        <AutoTranslatedText text={content} />
       </Text>
 
       <Text

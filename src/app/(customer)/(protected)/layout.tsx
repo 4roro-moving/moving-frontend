@@ -19,8 +19,10 @@ interface CustomerProtectedLayoutProps {
  */
 const CustomerProtectedLayout = ({ children }: CustomerProtectedLayoutProps) => {
   const t = useTranslations("profile");
+  const tFavorites = useTranslations("favorites");
   const pathname = usePathname();
   const loadingFallback = getCustomerProtectedLoadingFallback(pathname, {
+    favoritesTitle: tFavorites("title"),
     create: {
       title: t("createTitle"),
       description: t("createDescription"),
