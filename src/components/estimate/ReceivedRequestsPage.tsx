@@ -8,6 +8,7 @@ import { type FormEvent, useState } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
 import SelectableChip from "@/components/common/Chip/SelectableChip";
+import EmptyState from "@/components/common/EmptyState/EmptyState";
 import Modal from "@/components/common/Modal/Modal";
 import { PageHeader } from "@/components/common/PageHeader";
 import Search from "@/components/common/Search/Search";
@@ -33,6 +34,7 @@ import SendEstimateModal from "./SendEstimateModal";
 export default function ReceivedRequestsPage() {
   const tr = useTranslations("estimates");
   const tm = useTranslations("moverSearch");
+  const tCommon = useTranslations("common");
   const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -85,6 +87,8 @@ export default function ReceivedRequestsPage() {
   const items = query.data?.pages.flatMap((page) => page.items) ?? [];
   const totalCount = query.data?.pages[0]?.pagination.totalCount ?? 0;
   const { isInitialLoading, isPreviousDataLoading } = useListLoadingState(query);
+  const hasActiveFilters =
+    keyword.length > 0 || moveTypes.length > 0 || includeDesignated || serviceAreaOnly;
   const shouldShowEmpty =
     !isInitialLoading && !isPreviousDataLoading && !query.isError && items.length === 0;
   const shouldShowEmptyLoading =
@@ -225,18 +229,21 @@ export default function ReceivedRequestsPage() {
           )}
 
           {shouldShowEmpty ? (
-            <div className="py-page-header-height-desktop flex flex-col items-center gap-32">
-              <Image
-                className="opacity-50"
-                src="/images/empty-received-requests.png"
-                alt=""
-                width={240}
-                height={196}
-              />
-              <Text as="p" variant="xl-regular" className="text-text-subtle">
-                {tr("mover.receivedEmpty")}
-              </Text>
-            </div>
+            <EmptyState
+              size="sm"
+              imageSrc="/images/empty-received-requests.png"
+              description={
+                hasActiveFilters ? (
+                  <>
+                    {tCommon("emptyState.noResultsTitle")}
+                    <br />
+                    {tCommon("emptyState.noResultsDescription")}
+                  </>
+                ) : (
+                  tr("mover.receivedEmpty")
+                )
+              }
+            />
           ) : null}
 
           {shouldShowEmptyLoading ? <ReceivedRequestsSkeleton /> : null}
