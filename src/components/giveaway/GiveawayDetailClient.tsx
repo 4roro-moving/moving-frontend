@@ -9,7 +9,6 @@ import { useGiveawayDetail } from "@/hooks/giveaway/useGiveawayDetail";
 import { useGiveawayReceivedRequests } from "@/hooks/giveaway/useGiveawayReceivedRequests";
 import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { GIVEAWAY_DETAIL_TITLE } from "@/lib/constants/giveaway";
 
 interface GiveawayDetailClientProps {
   giveawayId: number;
@@ -32,10 +31,7 @@ const GiveawayDetailClient = ({ giveawayId }: GiveawayDetailClientProps) => {
   if (detailQuery.isError || !detailQuery.data) {
     return (
       <>
-        <PageHeader
-          title={GIVEAWAY_DETAIL_TITLE}
-          backFallbackHref={APP_ROUTES.COMMUNITY.GIVEAWAY}
-        />
+        <PageHeader title={t("detailTitle")} backFallbackHref={APP_ROUTES.COMMUNITY.GIVEAWAY} />
         <main>
           <EmptyState
             size="sm"
