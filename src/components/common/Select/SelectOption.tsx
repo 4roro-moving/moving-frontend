@@ -55,7 +55,7 @@ const SelectOption = ({ children, value, onPrefetch }: SelectOptionProps) => {
       <Text
         as="span"
         variant={getOptionTextVariant(isSort, isMultiColumn)}
-        className="text-text-secondary block min-w-0 truncate"
+        className={cn("text-text-secondary block min-w-0", !isSort && "truncate")}
         title={typeof children === "string" ? children : undefined}
       >
         {children}

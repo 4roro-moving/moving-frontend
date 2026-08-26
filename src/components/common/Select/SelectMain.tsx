@@ -212,7 +212,11 @@ const SelectMain = ({
             <Text
               as="span"
               variant={getTriggerTextVariant(variant, isOpen)}
-              className="max-w-[calc(100%-26px)] truncate xl:max-w-[calc(100%-42px)]"
+              className={cn(
+                variant === "sort"
+                  ? "whitespace-nowrap"
+                  : "max-w-[calc(100%-26px)] truncate xl:max-w-[calc(100%-42px)]",
+              )}
               title={typeof triggerLabel === "string" ? triggerLabel : undefined}
             >
               {triggerLabel}
