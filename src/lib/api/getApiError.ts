@@ -14,7 +14,9 @@ export interface ApiErrorBody {
 }
 
 /** Axios / ApiError / Error에서 백엔드 공통 에러 형식({ error: { code, message } })을 꺼냅니다. */
-export const getApiError = (error: unknown): { code?: string; message?: string } => {
+export const getApiError = (
+  error: unknown,
+): { code?: string; message?: string; data?: unknown } => {
   if (error instanceof ApiError) {
     const validationMessage =
       error.code === "VALIDATION_ERROR" ? getValidationDataMessage(error.data?.details) : undefined;
@@ -22,6 +24,7 @@ export const getApiError = (error: unknown): { code?: string; message?: string }
     return {
       code: error.code,
       message: validationMessage ?? error.message,
+      data: error.data?.details,
     };
   }
 
@@ -36,6 +39,7 @@ export const getApiError = (error: unknown): { code?: string; message?: string }
       code,
       message:
         validationMessage ?? error.response?.data?.error?.message ?? error.response?.data?.message,
+      data: error.response?.data?.error?.data,
     };
   }
 

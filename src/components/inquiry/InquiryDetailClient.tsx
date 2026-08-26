@@ -10,6 +10,7 @@ import { Text } from "@/components/common/Text";
 import { useAddInquiryMessage } from "@/hooks/inquiry/useAddInquiryMessage";
 import { useCloseInquiry } from "@/hooks/inquiry/useCloseInquiry";
 import { useInquiryDetail } from "@/hooks/inquiry/useInquiryDetail";
+import { hasSuspensionAppealSession } from "@/lib/auth/suspensionAppealSession";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 
@@ -21,6 +22,7 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
   const t = useTranslations("supportInquiry");
   const locale = useLocale();
   const [content, setContent] = useState("");
+  const isSuspensionAppealAccess = hasSuspensionAppealSession();
 
   const { data, isPending, isError, refetch } = useInquiryDetail(inquiryId);
 
@@ -82,10 +84,12 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
   }
 
   const isClosed = data.status === "CLOSED";
+  const isReadOnly = isSuspensionAppealAccess && data.category !== "SUSPENSION_APPEAL";
 
   const trimmedContent = content.trim();
 
-  const canSend = !isClosed && trimmedContent.length > 0 && !addMessageMutation.isPending;
+  const canSend =
+    !isClosed && !isReadOnly && trimmedContent.length > 0 && !addMessageMutation.isPending;
 
   const handleMessageSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -227,7 +231,13 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
       </section>
 
       {/* 종료된 문의 */}
-      {isClosed ? (
+      {isReadOnly ? (
+        <div className="bg-background-subtle rounded-8 px-16 py-20 text-center">
+          <Text as="p" variant="md-medium" className="text-text-muted">
+            {t("readOnlyDuringSuspension")}
+          </Text>
+        </div>
+      ) : isClosed ? (
         <div className="bg-background-subtle rounded-8 px-16 py-20 text-center">
           <Text as="p" variant="md-medium" className="text-text-muted">
             {t("closedHint")}
@@ -239,12 +249,14 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
           <div className="flex flex-col gap-4">
             <label htmlFor="inquiry-message">
               <Text as="span" variant="lg-semibold" className="text-text-primary">
-                {t("additionalLabel")}
+                {isSuspensionAppealAccess ? t("appealAdditionalLabel") : t("additionalLabel")}
               </Text>
             </label>
 
             <Text as="p" variant="xs-regular" className="text-text-muted">
-              {t("additionalDescription")}
+              {isSuspensionAppealAccess
+                ? t("appealAdditionalDescription")
+                : t("additionalDescription")}
             </Text>
           </div>
 
@@ -297,7 +309,7 @@ const InquiryDetailClient = ({ inquiryId }: InquiryDetailClientProps) => {
             </Text>
           </Link>
 
-          {!isClosed && (
+          {!isClosed && !isSuspensionAppealAccess && (
             <button
               type="button"
               onClick={handleClose}

@@ -10,6 +10,7 @@ import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import { Text, getTextVariantClass } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import { useSignUpTerms } from "@/hooks/auth/useSignUpTerms";
+import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { consumeOAuthNeedSignUpToast } from "@/lib/auth/oauthNeedSignUpToast";
 import type { AuthAudience } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
@@ -154,7 +155,9 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
           disabledMessage={!canAgree && hasRequiredTerms ? requiredTermsAgreeMessage : undefined}
           describedBy={termsHint ? termsHintId : undefined}
           agreements={agreements}
-          onError={setSubmitError}
+          onError={(error) => {
+            setSubmitError(typeof error === "string" ? error : getApiErrorMessage(error));
+          }}
         />
       </div>
     </div>

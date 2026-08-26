@@ -25,8 +25,9 @@ export const buildClearRefreshTokenCookie = (path: string): string => {
 };
 
 /**
- * 페이지(F5) 요청에도 쿠키가 실리도록 Path를 `/`로 맞춥니다.
- * 백엔드 Path=/api/auth 이면 document 요청에 쿠키가 안 실려 SSR이 비로그인으로 렌더됩니다.
+ * refreshToken만 페이지 요청에도 실리도록 Path를 `/`로 맞춥니다.
+ * 백엔드 Path=/api/auth 상태면 document 요청에 쿠키가 실리지 않아 SSR이 비로그인으로 렌더됩니다.
+ * 제한 세션 등 다른 쿠키는 백엔드가 지정한 경로를 유지합니다.
  */
 const rewriteSetCookiePathForApp = (setCookie: string): string => {
   if (/;\s*Path=/i.test(setCookie)) {
@@ -65,8 +66,12 @@ export const forwardBackendResponse = async (backendRes: Response): Promise<Next
   for (const cookie of setCookies) {
     if (isRefreshTokenSetCookie(cookie)) {
       hasRefreshTokenCookie = true;
+      res.headers.append("Set-Cookie", rewriteSetCookiePathForApp(cookie));
+      continue;
     }
-    res.headers.append("Set-Cookie", rewriteSetCookiePathForApp(cookie));
+
+    // refreshToken이 아니라면 백엔드가 설정한 쿠키 속성을 그대로 전달
+    res.headers.append("Set-Cookie", cookie);
   }
 
   if (hasRefreshTokenCookie) {

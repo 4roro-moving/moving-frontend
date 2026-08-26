@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { GoogleIcon, KakaoLoginIcon, NaverLoginIcon } from "@/icons";
-import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import type { OAuthIntent, OAuthProvider } from "@/lib/auth/oauth";
 import type { AuthAudience } from "@/lib/auth/redirect";
 import { startOAuthLogin } from "@/lib/auth/startOAuthLogin";
@@ -19,7 +18,8 @@ interface SocialLoginButtonsBaseProps {
   /** 비활성 클릭 시 `onError`로 전달할 안내. 없으면 클릭을 무시합니다. */
   disabledMessage?: string;
   describedBy?: string;
-  onError?: (message: string) => void;
+  /** 초기화 메시지 문자열 또는 OAuth 시작 중 발생한 원본 오류를 전달합니다. */
+  onError?: (error: unknown) => void;
 }
 
 interface SocialLoginButtonsOAuthProps extends SocialLoginButtonsBaseProps {
@@ -95,7 +95,7 @@ const SocialLoginButtons = (props: SocialLoginButtonsProps) => {
         ...(props.agreements ? { agreements: props.agreements } : {}),
       });
     } catch (err) {
-      onError?.(getApiErrorMessage(err));
+      onError?.(err);
       setIsPending(false);
     }
   };

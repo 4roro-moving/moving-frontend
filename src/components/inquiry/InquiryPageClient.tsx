@@ -10,6 +10,7 @@ import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
 import InquiryCreateModal from "@/components/inquiry/InquiryCreateModal";
 import { useInquiries } from "@/hooks/inquiry/useInquiries";
+import { hasSuspensionAppealSession } from "@/lib/auth/suspensionAppealSession";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import type { InquiryStatus } from "@/types/inquiry";
@@ -25,6 +26,7 @@ const InquiryPageClient = () => {
   const [status, setStatus] = useState<StatusFilter>("ALL");
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const isSuspensionAppealAccess = hasSuspensionAppealSession();
 
   const { data, isPending, isError, refetch } = useInquiries({
     page,
@@ -67,7 +69,7 @@ const InquiryPageClient = () => {
             </Text>
 
             <Text as="p" variant="lg-regular" className="text-text-secondary">
-              {t("description")}
+              {isSuspensionAppealAccess ? t("suspensionAppealDescription") : t("description")}
             </Text>
           </div>
 
@@ -229,7 +231,11 @@ const InquiryPageClient = () => {
         </section>
       </main>
 
-      <InquiryCreateModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      <InquiryCreateModal
+        isOpen={isCreateModalOpen}
+        isSuspensionAppealAccess={isSuspensionAppealAccess}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </>
   );
 };
