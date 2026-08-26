@@ -1047,6 +1047,11 @@
     "searchPlaceholder": "タイトルまたは内容で譲渡投稿を検索",
     "searchAria": "譲渡投稿を検索",
     "status": "状態",
+    "statusValues": {
+      "AVAILABLE": "譲渡可能",
+      "IN_PROGRESS": "進行中",
+      "COMPLETED": "完了"
+    },
     "reset": "リセット",
     "sort": "並び替え",
     "requestCancelTitle": "申請をキャンセル",

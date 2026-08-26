@@ -1047,6 +1047,11 @@
     "searchPlaceholder": "Search giveaway posts by title or content.",
     "searchAria": "Search giveaway posts",
     "status": "Status",
+    "statusValues": {
+      "AVAILABLE": "Available",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed"
+    },
     "reset": "Reset",
     "sort": "Sort",
     "requestCancelTitle": "Cancel request",

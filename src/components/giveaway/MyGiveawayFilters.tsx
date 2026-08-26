@@ -64,7 +64,7 @@ const MyGiveawayFilters = ({ filters }: MyGiveawayFiltersProps) => {
                 value={option.value}
                 onPrefetch={() => prefetchList({ status: option.value })}
               >
-                {t(`sortValues.${option.value}`)}
+                {option.value === GIVEAWAY_ALL_VALUE ? t("all") : t(`statusValues.${option.value}`)}
               </Select.Option>
             ))}
           </Select>

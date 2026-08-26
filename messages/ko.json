@@ -1047,6 +1047,11 @@
     "searchPlaceholder": "제목 또는 내용으로 나눔 글을 검색해 보세요.",
     "searchAria": "나눔 글 검색",
     "status": "상태",
+    "statusValues": {
+      "AVAILABLE": "나눔 가능",
+      "IN_PROGRESS": "진행 중",
+      "COMPLETED": "나눔 완료"
+    },
     "reset": "초기화",
     "sort": "정렬",
     "requestCancelTitle": "신청 취소",
