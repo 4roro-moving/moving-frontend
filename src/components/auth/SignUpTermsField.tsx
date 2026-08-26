@@ -37,7 +37,7 @@ const SignUpTermsFieldSkeleton = () => {
       aria-busy="true"
       aria-label={t("termsLoadingAria")}
     >
-      <Text as="legend" variant="md-medium" className="text-text-primary">
+      <Text as="legend" variant="md-medium" className="text-text-primary mb-2">
         {t("termsAgreement")}
       </Text>
       {Array.from({ length: SIGN_UP_TERMS_SKELETON_ROW_COUNT }, (_, index) => (
@@ -73,7 +73,7 @@ const SignUpTermsField = ({
   return (
     <>
       <fieldset className="flex w-full flex-col gap-12">
-        <Text as="legend" variant="md-medium" className="text-text-primary">
+        <Text as="legend" variant="md-medium" className="text-text-primary mb-6">
           {t("termsAgreement")}
         </Text>
         {terms.map((item) => (
@@ -82,8 +82,20 @@ const SignUpTermsField = ({
               id={`terms-${String(item.id)}`}
               checked={checkedById[String(item.id)] === true}
               onCheckedChange={(checked) => onCheckedChange(item.id, checked)}
-              label={`${item.isRequired ? t("required") : t("optional")} ${t(TERMS_TYPE_KEY[item.type])}`}
-              labelClassName="text-text-secondary"
+              label={
+                <span className="flex items-center gap-4">
+                  <Text
+                    as="span"
+                    variant="lg-semibold"
+                    className={item.isRequired ? "text-text-brand" : "text-text-muted"}
+                  >
+                    {item.isRequired ? t("required") : t("optional")}
+                  </Text>
+                  <Text as="span" variant="lg-medium" className="text-text-secondary">
+                    {t(TERMS_TYPE_KEY[item.type])}
+                  </Text>
+                </span>
+              }
             />
             <button
               type="button"
