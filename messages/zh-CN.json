@@ -1030,6 +1030,7 @@
     "myEmptyDescription": "发布您的第一条分享帖吧。",
     "myRequestsEmpty": "您还没有申请过分享。",
     "myRequestsEmptyDescription": "浏览分享帖并提交申请吧。",
+    "myRequestsEmptyAction": "查看分享帖",
     "detailLoadFailed": "无法加载分享帖。",
     "reload": "重新加载",
     "listLoading": "正在加载分享帖",

@@ -1030,6 +1030,7 @@
     "myEmptyDescription": "첫 나눔 글을 작성해 보세요.",
     "myRequestsEmpty": "아직 신청한 나눔이 없어요.",
     "myRequestsEmptyDescription": "나눔 글을 둘러보고 신청해 보세요.",
+    "myRequestsEmptyAction": "나눔 글 보러가기",
     "detailLoadFailed": "나눔 글을 불러오지 못했어요",
     "reload": "다시 불러오기",
     "listLoading": "나눔 글 목록을 불러오는 중",

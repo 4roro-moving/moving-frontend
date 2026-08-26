@@ -169,8 +169,6 @@ export const toGiveawayExistingFormImage = (image: {
 
 export const GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH = 1000;
 
-export const GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL = "나눔 글 보러가기";
-
 export const GIVEAWAY_REQUEST_CANCEL_SUCCESS_MESSAGE = "나눔 신청을 취소했습니다.";
 export const GIVEAWAY_REQUEST_CANCEL_ERROR_MESSAGE =
   "나눔 신청을 취소하지 못했습니다. 잠시 후 다시 시도해주세요.";

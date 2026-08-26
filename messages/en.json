@@ -1030,6 +1030,7 @@
     "myEmptyDescription": "Create your first giveaway post.",
     "myRequestsEmpty": "You haven't requested any giveaways yet.",
     "myRequestsEmptyDescription": "Browse giveaway posts and submit a request.",
+    "myRequestsEmptyAction": "Browse Giveaway Posts",
     "detailLoadFailed": "Unable to load the giveaway post.",
     "reload": "Reload",
     "listLoading": "Loading giveaway posts",

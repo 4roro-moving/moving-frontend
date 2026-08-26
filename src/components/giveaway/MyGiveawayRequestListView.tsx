@@ -9,10 +9,7 @@ import GiveawayInfiniteListChrome from "@/components/giveaway/GiveawayInfiniteLi
 import MyGiveawayRequestCard from "@/components/giveaway/MyGiveawayRequestCard";
 import MyGiveawayRequestCardSkeletonList from "@/components/giveaway/MyGiveawayRequestCardSkeletonList";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import {
-  GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES,
-  GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL,
-} from "@/lib/constants/giveaway";
+import { GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES } from "@/lib/constants/giveaway";
 import type { ApiError } from "@/types/api";
 import type { GiveawayRequestMyListResult, MyGiveawayRequestItem } from "@/types/giveaway";
 
@@ -62,7 +59,7 @@ const MyGiveawayRequestListView = ({
           size="sm"
           imageSrc="/images/empty/character.png"
           description={emptyDescription}
-          buttonLabel={hasActiveFilters ? undefined : GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL}
+          buttonLabel={hasActiveFilters ? undefined : t("myRequestsEmptyAction")}
           href={hasActiveFilters ? undefined : APP_ROUTES.COMMUNITY.GIVEAWAY}
         />
       }

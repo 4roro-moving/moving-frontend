@@ -1030,6 +1030,7 @@
     "myEmptyDescription": "最初の譲渡投稿を作成してみましょう。",
     "myRequestsEmpty": "まだ申請した譲渡がありません。",
     "myRequestsEmptyDescription": "譲渡投稿を見て、申請してみましょう。",
+    "myRequestsEmptyAction": "譲渡投稿を見る",
     "detailLoadFailed": "譲渡投稿を読み込めませんでした。",
     "reload": "再読み込み",
     "listLoading": "譲渡投稿を読み込んでいます",
