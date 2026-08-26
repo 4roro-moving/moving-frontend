@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useApiMutation } from "@/hooks/queries/useApiMutation";
@@ -22,6 +24,7 @@ interface UseCreateReviewOptions {
  * // 2026.07.30 정슬기 - [수정] useApiMutation + ME_ROOT/REVIEWABLE/기사 리뷰·상세 invalidate
  */
 export function useCreateReview(options: UseCreateReviewOptions = {}) {
+  const t = useTranslations("reviews");
   const queryClient = useQueryClient();
   const { authScope } = useAuthQueryScope();
 
@@ -48,7 +51,7 @@ export function useCreateReview(options: UseCreateReviewOptions = {}) {
       options.onSuccess?.();
     },
     onError: (error) => {
-      options.onError?.(getApiErrorMessage(error, "리뷰 등록에 실패했습니다."));
+      options.onError?.(getApiErrorMessage(error, t("createFailed")));
     },
   });
 }

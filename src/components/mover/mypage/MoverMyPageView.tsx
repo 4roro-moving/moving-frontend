@@ -1,8 +1,7 @@
 "use client";
-import Link from "next/link";
 
-import { Text } from "@/components/common/Text";
-import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { useTranslations } from "next-intl";
+
 import { PageHeader } from "@/components/common/PageHeader";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import ProfileEmptyState from "@/components/profile/ProfileEmptyState";
@@ -26,6 +25,7 @@ interface MoverMyPageContentProps {
 }
 
 function MoverMyPageContent({ profile }: MoverMyPageContentProps) {
+  const t = useTranslations("profile");
   const { detail, isInitialLoading, query } = useMoverDetail(profile.userId);
 
   return (
@@ -75,8 +75,8 @@ function MoverMyPageContent({ profile }: MoverMyPageContentProps) {
             ) : (
               <section aria-labelledby="mover-reviews">
                 <EstimatesQueryStatus
-                  message="리뷰 정보를 불러오지 못했습니다."
-                  actionLabel="다시 시도"
+                  message={t("myPageReviewsLoadFailed")}
+                  actionLabel={t("retry")}
                   onAction={() => {
                     void query.refetch();
                   }}
@@ -92,9 +92,10 @@ function MoverMyPageContent({ profile }: MoverMyPageContentProps) {
 }
 
 export function MoverMyPageSkeleton() {
+  const t = useTranslations("profile");
   return (
     <div className="bg-background-default flex w-full flex-col overflow-x-hidden">
-      <PageHeader title="마이페이지" />
+      <PageHeader title={t("myPageTitle")} />
       <MoverMyPageBanner />
 
       <div className="px-mypage-mobile-padding md:px-margin-tablet md:pt-mypage-content-top-tablet xl:pt-mypage-content-top-desktop w-full pt-23 pb-56 md:pb-72 xl:px-0 xl:pb-120">
@@ -127,6 +128,7 @@ export function MoverMyPageSkeleton() {
 }
 
 export default function MoverMyPageView() {
+  const t = useTranslations("profile");
   const { canFetch, isPending: isAuthPending, user } = useMoverAuthReady();
   const canLoadProfile = canFetch && Boolean(user?.id);
   const { data: moverProfile, isPending: isProfilePending, isError } = useMoverProfileMe(canFetch);
@@ -142,12 +144,12 @@ export default function MoverMyPageView() {
   if (isError || !moverProfile) {
     return (
       <div className="bg-background-default flex w-full flex-col overflow-x-hidden">
-        <PageHeader title="마이페이지" />
+        <PageHeader title={t("myPageTitle")} />
         <MoverMyPageBanner />
         <div className="px-mypage-mobile-padding md:px-margin-tablet flex w-full justify-center py-40 xl:px-0">
           <div className="xl:w-mypage-content-width w-full">
             <ProfileEmptyState
-              description="기사님 프로필 정보를 불러오지 못했습니다."
+              description={t("myPageLoadFailed")}
               href={getRoleHomePath(user?.role)}
             />
           </div>
@@ -158,7 +160,7 @@ export default function MoverMyPageView() {
 
   return (
     <div className="bg-background-default flex w-full flex-col overflow-x-hidden">
-      <PageHeader title="마이페이지" />
+      <PageHeader title={t("myPageTitle")} />
       <MoverMyPageContent profile={moverProfile} />
     </div>
   );

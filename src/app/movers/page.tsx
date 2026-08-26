@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import {
   dehydrate,
@@ -16,10 +17,10 @@ import { mapMoverListItemToMover } from "@/lib/utils/mapMover";
 import { parseMoversSearchParams, toMoversListQuery } from "@/lib/utils/moversSearchParams";
 import type { Mover, MoversListResult } from "@/types/mover";
 
-export const metadata: Metadata = {
-  title: "기사님 찾기",
-  description: "내 이사 조건에 맞는 기사님을 찾고, 평점과 경력, 확정 건수를 비교해 보세요.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("moverSearch");
+  return { title: t("metadata.title"), description: t("metadata.description") };
+}
 
 interface MoversPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

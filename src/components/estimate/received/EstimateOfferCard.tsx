@@ -1,8 +1,10 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
@@ -25,12 +27,13 @@ interface EstimateOfferCardProps {
 }
 
 function EstimateStatusBadge({ status }: { status: ReceivedEstimateListItem["status"] }) {
+  const t = useTranslations("estimates");
   if (status === "CONFIRMED") {
     return (
       <span className="flex shrink-0 items-center gap-4">
         <ConfirmedCheckIcon className="text-icon-brand size-20 shrink-0" />
         <Text as="span" variant="lg-bold" className="text-text-brand">
-          확정견적
+          {t("detail.confirmedStatus")}
         </Text>
       </span>
     );
@@ -38,7 +41,7 @@ function EstimateStatusBadge({ status }: { status: ReceivedEstimateListItem["sta
 
   return (
     <Text as="span" variant="lg-semibold" className="text-text-subtle shrink-0">
-      견적대기
+      {t("detail.waitingStatus")}
     </Text>
   );
 }
@@ -49,9 +52,11 @@ export default function EstimateOfferCard({
   className,
   onFavoriteError,
 }: EstimateOfferCardProps) {
+  const t = useTranslations("estimates");
+  const locale = useLocale();
   const { mover, status, isDesignated, price } = offer;
   const displayName = mover.nickname || mover.name;
-  const intro = mover.shortIntro ?? "고객님의 물품을 안전하게 운송해 드립니다.";
+  const intro = mover.shortIntro ?? t("received.defaultIntro");
   const detailHref = APP_ROUTES.ESTIMATES.DETAIL(offer.id);
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
 
@@ -77,14 +82,14 @@ export default function EstimateOfferCard({
               variant="lg-semibold"
               className="text-text-secondary min-w-0 break-words md:hidden"
             >
-              {intro}
+              <AutoTranslatedText text={intro} />
             </Text>
             <Text
               as="p"
               variant="2lg-semibold"
               className="text-text-secondary hidden min-w-0 truncate md:block"
             >
-              {intro}
+              <AutoTranslatedText text={intro} />
             </Text>
 
             <div className="hidden shrink-0 md:block">
@@ -98,13 +103,13 @@ export default function EstimateOfferCard({
               href={detailHref}
               onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
               className="focus-visible:ring-border-brand rounded-8 flex min-w-0 flex-1 items-end gap-12 focus-visible:ring-2 focus-visible:outline-none"
-              aria-label={`${displayName} 기사님 견적 상세 보기`}
+              aria-label={t("received.detailAria", { name: displayName })}
             >
               <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
                 {mover.imageUrl ? (
                   <Image
                     src={resolveMoverProfileImageSrc(mover.imageUrl)}
-                    alt={`${displayName} 기사님 프로필`}
+                    alt={t("received.profileAlt", { name: displayName })}
                     fill
                     sizes="50px"
                     className="object-cover"
@@ -120,14 +125,14 @@ export default function EstimateOfferCard({
                   variant="md-semibold"
                   className="text-text-primary break-words md:hidden"
                 >
-                  {displayName} 기사님
+                  {t("detail.moverName", { name: displayName })}
                 </Text>
                 <Text
                   as="p"
                   variant="lg-semibold"
                   className="text-text-primary hidden break-words md:block"
                 >
-                  {displayName} 기사님
+                  {t("detail.moverName", { name: displayName })}
                 </Text>
 
                 <div className="flex w-full flex-wrap items-center gap-x-8 gap-y-4">
@@ -135,13 +140,15 @@ export default function EstimateOfferCard({
                     <StarIcon className="text-rating-fill size-20 shrink-0" />
                     <div className="flex items-center gap-2">
                       <Text as="span" variant="sm-medium" className="text-text-secondary">
-                        <span className="sr-only">평점 </span>
+                        <span className="sr-only">{t("detail.rating")} </span>
                         {formatRating(mover.averageRating)}
-                        <span className="sr-only">점, 리뷰 </span>
+                        <span className="sr-only">{t("detail.pointsReviews")} </span>
                       </Text>
                       <Text as="span" variant="sm-medium" className="text-text-muted">
                         <span aria-hidden="true">({mover.reviewCount})</span>
-                        <span className="sr-only">{mover.reviewCount}개</span>
+                        <span className="sr-only">
+                          {t("detail.reviewCount", { count: mover.reviewCount })}
+                        </span>
                       </Text>
                     </div>
                   </div>
@@ -150,10 +157,10 @@ export default function EstimateOfferCard({
 
                   <div className="flex items-center gap-4">
                     <Text as="span" variant="sm-medium" className="text-text-muted">
-                      경력
+                      {t("detail.career")}
                     </Text>
                     <Text as="span" variant="sm-medium" className="text-text-secondary">
-                      {mover.career}년
+                      {t("detail.careerYears", { count: mover.career })}
                     </Text>
                   </div>
 
@@ -164,10 +171,10 @@ export default function EstimateOfferCard({
 
                   <div className="flex items-center gap-4">
                     <Text as="span" variant="sm-medium" className="text-text-secondary">
-                      {mover.confirmedCount}건
+                      {t("detail.confirmedCount", { count: mover.confirmedCount })}
                     </Text>
                     <Text as="span" variant="sm-medium" className="text-text-muted">
-                      확정
+                      {t("detail.confirmed")}
                     </Text>
                   </div>
                 </div>
@@ -194,17 +201,17 @@ export default function EstimateOfferCard({
           </div>
           <div className="flex items-center gap-8 md:gap-12">
             <Text as="span" variant="md-medium" className="text-text-muted shrink-0">
-              견적 금액
+              {t("detail.price")}
             </Text>
             <Text as="p" variant="2lg-bold" className="text-text-primary break-words md:hidden">
-              {formatPrice(price)}
+              {formatPrice(price, locale)}
             </Text>
             <Text
               as="p"
               variant="2xl-bold"
               className="text-text-primary hidden break-words md:block"
             >
-              {formatPrice(price)}
+              {formatPrice(price, locale)}
             </Text>
           </div>
         </div>

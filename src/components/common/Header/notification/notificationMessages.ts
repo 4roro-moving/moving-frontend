@@ -4,9 +4,27 @@ import {
   type NotificationType,
 } from "@/types/notification";
 
+type NotificationMessageKey =
+  | "estimateRequestReceived"
+  | "designatedRequestPrefix"
+  | "estimateReceived"
+  | "estimateConfirmed"
+  | "estimateRequestRejected"
+  | "estimateRequestCanceled"
+  | "reviewReceived"
+  | "chatMessageReceived"
+  | "inquiryAnswered"
+  | "contentHidden"
+  | "contentRestored"
+  | "adminCanceledPrefix"
+  | "moverSuspendedPrefix"
+  | "customerSuspendedPrefix"
+  | "canceledSuffix"
+  | "fallback";
+
 export interface NotificationMessageTemplate {
-  prefix: string;
-  suffix: string;
+  prefixKey?: NotificationMessageKey;
+  suffixKey?: NotificationMessageKey;
 }
 
 /**
@@ -17,105 +35,77 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
   {
     //고객이 견적 요청을 올린 경우 관련 기사에게 알림 문구
     ESTIMATE_REQUEST_RECEIVED: {
-      prefix: "",
-      suffix: " 견적 요청이 도착했어요",
+      suffixKey: "estimateRequestReceived",
     },
     //고객이 지정 견적 요청한 경우 기사에게 알림 문구
     DESIGNATED_REQUEST_RECEIVED: {
-      prefix: "나를 지정한 ",
-      suffix: " 견적 요청이 도착했어요",
+      prefixKey: "designatedRequestPrefix",
+      suffixKey: "estimateRequestReceived",
     },
     //기사가 견적을 보낸 경우 알림 문구
     ESTIMATE_RECEIVED: {
-      prefix: "",
-      suffix: "이 도착했어요",
+      suffixKey: "estimateReceived",
     },
     //고객이 견적을 확정한 경우 알림 문구
     ESTIMATE_CONFIRMED: {
-      prefix: "",
-      suffix: " 견적이 확정 되었어요",
+      suffixKey: "estimateConfirmed",
     },
     //기사가 견적 요청을 반려했을 때 알림 문구
     ESTIMATE_REQUEST_REJECTED: {
-      prefix: "",
-      suffix: " 님이 견적 요청을 반려했어요",
+      suffixKey: "estimateRequestRejected",
     },
     //고객이 견적 요청을 취소했을 때 알림 문구
     ESTIMATE_REQUEST_CANCELED: {
-      prefix: "",
-      suffix: " 님이 견적 요청을 취소했어요",
+      suffixKey: "estimateRequestCanceled",
     },
     //고객이 리뷰를 남긴 경우 기사에게 알림 문구
     REVIEW_RECEIVED: {
-      prefix: "",
-      suffix: " 리뷰를 남겼어요",
+      suffixKey: "reviewReceived",
     },
     //메세지 도착 알림 post 아직 없음
     CHAT_MESSAGE_RECEIVED: {
-      prefix: "",
-      suffix: "님으로부터 메시지가 도착했습니다.",
+      suffixKey: "chatMessageReceived",
     },
     //공지사항 추가 알림 문구
-    NOTICE_RECEIVED: {
-      prefix: "",
-      suffix: "",
-    },
+    NOTICE_RECEIVED: {},
     //문의 답변 등록 알림 문구
     INQUIRY_ANSWERED: {
-      prefix: "",
-      suffix: " 문의에 답변이 등록되었어요",
+      suffixKey: "inquiryAnswered",
     },
     //관리자가 콘텐츠(리뷰/거주후기/나눔) 숨김 처리한 경우 알림 문구
     // content에 받침 유무가 달라 "가/이" 조사를 suffix에 두지 않음
     CONTENT_HIDDEN: {
-      prefix: "",
-      suffix: " 숨김처리 되었습니다.",
+      suffixKey: "contentHidden",
     },
     //관리자가 콘텐츠(리뷰/거주후기/나눔) 복구 처리한 경우 알림 문구
     CONTENT_RESTORED: {
-      prefix: "",
-      suffix: " 복구처리 되었습니다.",
+      suffixKey: "contentRestored",
     },
     // 관리자가 확정 견적 거래를 취소한 경우 고객/기사에게 알림 문구
     ESTIMATE_CANCELED_BY_ADMIN: {
-      prefix: "관리자 조치로 ",
-      suffix: "가 취소되었습니다.",
+      prefixKey: "adminCanceledPrefix",
+      suffixKey: "canceledSuffix",
     },
     // 기사의 정지로 고객의 견적 요청이 취소된 경우, 고객에게 알림 문구
     ESTIMATE_CANCELED_BY_ACCOUNT_SUSPENSION: {
-      prefix: "기사의 이용 제한으로 ",
-      suffix: "이 취소되었습니다.",
+      prefixKey: "moverSuspendedPrefix",
+      suffixKey: "canceledSuffix",
     },
     // 고객의 정지로 견적 요청이 취소된 경우, 견적을 보낸 기사와 지정 견적 대상 기사에게 알림 문구
     ESTIMATE_REQUEST_CANCELED_BY_ACCOUNT_SUSPENSION: {
-      prefix: "고객의 이용 제한으로 ",
-      suffix: "이 취소되었습니다.",
+      prefixKey: "customerSuspendedPrefix",
+      suffixKey: "canceledSuffix",
     },
     // 작성자에게 새 나눔 신청이 도착한 경우 알림 문구 (content가 완성 문장)
-    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_RECEIVED]: {
-      prefix: "",
-      suffix: "",
-    },
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_RECEIVED]: {},
     // 신청자가 수령자로 선정된 경우 알림 문구
-    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_SELECTED]: {
-      prefix: "",
-      suffix: "",
-    },
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_SELECTED]: {},
     // 신청자의 나눔 신청이 거절된 경우 알림 문구
-    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_REJECTED]: {
-      prefix: "",
-      suffix: "",
-    },
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_REJECTED]: {},
     // 작성자에게 신청 취소(대기/선정)가 도착한 경우 알림 문구
-    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_CANCELED]: {
-      prefix: "",
-      suffix: "",
-    },
+    [GIVEAWAY_NOTIFICATION_TYPE.REQUEST_CANCELED]: {},
     // 수령자에게 나눔 완료가 안내되는 경우 알림 문구
-    [GIVEAWAY_NOTIFICATION_TYPE.COMPLETED]: {
-      prefix: "",
-      suffix: "",
-    },
+    [GIVEAWAY_NOTIFICATION_TYPE.COMPLETED]: {},
   };
 
 export interface NotificationMessagePart {
@@ -144,12 +134,13 @@ const buildGiveawayNotificationMessageParts = (
 export const buildNotificationMessageParts = (
   type: NotificationType,
   content: string,
+  translate: (key: NotificationMessageKey) => string,
 ): NotificationMessagePart[] => {
   const template = NOTIFICATION_MESSAGE_TEMPLATES[type];
 
   // 백엔드에만 있는 신규 타입이 와도 패널이 깨지지 않도록 폴백
   if (!template) {
-    return content ? [{ text: content, highlight: true }] : [{ text: "새로운 알림이 있어요" }];
+    return content ? [{ text: content, highlight: true }] : [{ text: translate("fallback") }];
   }
 
   if (isGiveawayNotificationType(type)) {
@@ -159,7 +150,8 @@ export const buildNotificationMessageParts = (
     }
   }
 
-  const { prefix, suffix } = template;
+  const prefix = template.prefixKey ? translate(template.prefixKey) : "";
+  const suffix = template.suffixKey ? translate(template.suffixKey) : "";
   const parts: NotificationMessagePart[] = [];
 
   if (prefix) {

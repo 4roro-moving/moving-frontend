@@ -1,12 +1,14 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
 import { UserIcon, GalleryIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import { getGiveawayThumbnailOverlayLabel } from "@/lib/constants/giveaway";
 import { cn } from "@/lib/utils/cn";
 import { formatRelativeTime } from "@/lib/utils/date";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
@@ -18,9 +20,16 @@ interface GiveawayCardProps {
 }
 
 const GiveawayCard = ({ giveaway, preloadThumbnail = false }: GiveawayCardProps) => {
+  const t = useTranslations("giveaway");
+  const locale = useLocale();
   const detailHref = APP_ROUTES.COMMUNITY.GIVEAWAY_DETAIL(giveaway.id);
-  const overlayLabel = getGiveawayThumbnailOverlayLabel(giveaway.status);
-  const writtenAt = formatRelativeTime(giveaway.createdAt);
+  const overlayLabel =
+    giveaway.status === "IN_PROGRESS"
+      ? t("statusInProgress")
+      : giveaway.status === "COMPLETED"
+        ? t("statusCompleted")
+        : null;
+  const writtenAt = formatRelativeTime(giveaway.createdAt, locale);
   const titleId = `giveaway-${String(giveaway.id)}-title`;
   const statusId = `giveaway-${String(giveaway.id)}-status`;
 
@@ -66,7 +75,7 @@ const GiveawayCard = ({ giveaway, preloadThumbnail = false }: GiveawayCardProps)
           variant={{ base: "lg-semibold", xl: "xl-semibold" }}
           className="text-text-primary line-clamp-1 text-center"
         >
-          {giveaway.title}
+          <AutoTranslatedText text={giveaway.title} />
         </Text>
         <div className="flex w-full items-center justify-between">
           {writtenAt ? (
@@ -83,7 +92,7 @@ const GiveawayCard = ({ giveaway, preloadThumbnail = false }: GiveawayCardProps)
           )}
           <span
             className="flex items-center gap-2"
-            aria-label={`신청 ${String(giveaway.activeRequestCount)}건`}
+            aria-label={t("requestCountAria", { count: giveaway.activeRequestCount })}
           >
             <UserIcon className="size-16" aria-hidden="true" />
             <Text as="span" variant="md-medium" className="text-text-muted">

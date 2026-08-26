@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -22,24 +23,16 @@ import Calendar from "./Calendar";
 import DatePickerField from "./DatePickerField";
 import MoveTypeCard from "./MoveTypeCard";
 
-const TOAST_INVALID_ZIP_MESSAGE = "우편번호 정보가 올바르지 않습니다. 주소를 다시 선택해주세요.";
-const TOAST_FORBIDDEN_ROLE_MESSAGE = "고객 계정으로만 견적을 요청할 수 있어요.";
-const ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE = "고객님의 견적 정보를 불러오지 못했습니다.";
 const HOME_PATH = "/";
 const FORBIDDEN_REDIRECT_DELAY_MS = 1500;
-
-const MOBILE_STEP_TITLES = {
-  1: "이사 유형을 선택해주세요",
-  2: "이사 예정일을 선택해주세요",
-  3: "이사 지역을 선택해주세요",
-} as const;
 
 type RegionKind = "출발지" | "도착지";
 type MobileStep = 1 | 2 | 3;
 
 function StepIndicator({ current }: { current: MobileStep }) {
+  const t = useTranslations("estimateRequest");
   return (
-    <div className="flex items-center gap-8" aria-label={`3단계 중 ${current}단계`}>
+    <div className="flex items-center gap-8" aria-label={t("stepAria", { current })}>
       {([1, 2, 3] as const).map((page) => {
         const isActive = page === current;
         return (
@@ -83,12 +76,15 @@ function RegionField({
   onReset,
   onDetailChange,
 }: RegionFieldProps) {
+  const t = useTranslations("estimateRequest");
+  const isFrom = kind === "출발지";
+  const kindLabel = isFrom ? t("fromAddress") : t("toAddress");
   const detailInputId = `${kind}-detail-address`;
 
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col gap-12">
       <Text as="span" variant="lg-medium" className="text-text-primary">
-        {kind}
+        {kindLabel}
       </Text>
       <div className="flex min-w-0 flex-col items-end gap-8">
         {value ? (
@@ -109,13 +105,13 @@ function RegionField({
             className="rounded-12 border-border-brand hover:bg-background-brand-muted flex h-[54px] w-full items-center border px-24 py-16 transition-colors"
           >
             <Text as="span" variant="lg-semibold" className="text-text-brand">
-              {kind} 선택하기
+              {t("selectAddressKind", { kind: kindLabel })}
             </Text>
           </button>
         )}
 
         <label htmlFor={detailInputId} className="sr-only">
-          {kind} 상세주소
+          {t("detailAddressLabel", { kind: kindLabel })}
         </label>
         <input
           id={detailInputId}
@@ -123,7 +119,7 @@ function RegionField({
           value={detailValue}
           onChange={(event) => onDetailChange(event.target.value)}
           maxLength={DETAIL_ADDRESS_MAX_LENGTH}
-          placeholder={value ? "상세주소를 입력해 주세요" : "주소를 먼저 선택해 주세요"}
+          placeholder={value ? t("detailAddressPlaceholder") : t("selectAddressFirst")}
           disabled={!value}
           className={cn(
             "rounded-12 border-border-brand text-text-brand placeholder:text-text-weak",
@@ -143,7 +139,7 @@ function RegionField({
                 variant="md-medium"
                 className="text-text-subtle hover:text-text-primary"
               >
-                수정하기
+                {t("editAddress")}
               </Text>
             </button>
           )}
@@ -154,6 +150,12 @@ function RegionField({
 }
 
 export default function EstimateRequestForm() {
+  const t = useTranslations("estimateRequest");
+  const mobileStepTitles: Record<MobileStep, string> = {
+    1: t("stepMoveType"),
+    2: t("stepMoveDate"),
+    3: t("stepRegion"),
+  };
   const router = useRouter();
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
@@ -248,13 +250,13 @@ export default function EstimateRequestForm() {
     }
 
     if (!isCustomer) {
-      setToastMessage(TOAST_FORBIDDEN_ROLE_MESSAGE);
+      setToastMessage(t("forbiddenRole"));
       router.replace(HOME_PATH);
       return;
     }
 
     if (!/^\d{5}$/.test(fromAddress.zipCode) || !/^\d{5}$/.test(toAddress.zipCode)) {
-      setToastMessage(TOAST_INVALID_ZIP_MESSAGE);
+      setToastMessage(t("invalidZip"));
       return;
     }
 
@@ -282,7 +284,7 @@ export default function EstimateRequestForm() {
     !isAuthReady || !isAuthenticated || isAccessDenied || (isCustomer && isActiveLoading);
 
   const accessDeniedToastMessage =
-    isAccessDenied && isAccessDeniedToastVisible ? TOAST_FORBIDDEN_ROLE_MESSAGE : null;
+    isAccessDenied && isAccessDeniedToastVisible ? t("forbiddenRole") : null;
 
   const visibleToastMessage = toastMessage ?? accessDeniedToastMessage;
 
@@ -297,7 +299,7 @@ export default function EstimateRequestForm() {
       <div className="flex min-h-[40vh] w-full items-center justify-center">
         {toastElement}
         <Text as="p" variant="lg-regular" className="text-text-subtle">
-          불러오는 중...
+          {t("loading")}
         </Text>
       </div>
     );
@@ -309,7 +311,7 @@ export default function EstimateRequestForm() {
     return (
       <div className="flex min-h-[40vh] w-full items-center justify-center">
         <Text as="p" variant="lg-regular" className="text-text-subtle">
-          불러오는 중...
+          {t("loading")}
         </Text>
       </div>
     );
@@ -319,7 +321,7 @@ export default function EstimateRequestForm() {
     return (
       <>
         {toastElement}
-        <ActiveEstimateBlocked description={ACTIVE_ESTIMATE_LOAD_ERROR_MESSAGE} />
+        <ActiveEstimateBlocked description={t("activeLoadFailed")} />
       </>
     );
   }
@@ -336,19 +338,19 @@ export default function EstimateRequestForm() {
           description={
             isConfirmedRequest ? (
               <>
-                확정한 견적으로 이사를 준비 중이에요!
+                {t("activeConfirmedLine1")}
                 <br />
-                이사 완료 후 새로운 견적을 요청할 수 있어요.
+                {t("activeConfirmedLine2")}
               </>
             ) : (
               <>
-                현재 진행 중인 이사 견적이 있어요!
+                {t("activeBlockedTitle")}
                 <br />
-                진행 중인 이사 완료 후 새로운 견적을 받아보세요.
+                {t("activeBlockedDescription")}
               </>
             )
           }
-          buttonLabel={isConfirmedRequest ? "진행 중인 견적 보기" : "대기 중인 견적 보기"}
+          buttonLabel={isConfirmedRequest ? t("viewActiveConfirmed") : t("viewPending")}
           href={isConfirmedRequest ? activeRequestDetailHref : APP_ROUTES.ESTIMATES.PENDING}
           onButtonClick={
             isConfirmedRequest
@@ -373,10 +375,10 @@ export default function EstimateRequestForm() {
       {/* Desktop title */}
       <div className="hidden flex-col items-center gap-8 text-center md:flex">
         <Text as="h1" variant="2xl-bold" className="text-text-primary">
-          이사 유형, 예정일과 지역을 선택해주세요
+          {t("title")}
         </Text>
         <Text as="p" variant="lg-regular" className="text-text-subtle">
-          견적을 요청하면 최대 5개의 견적을 받을 수 있어요 :)
+          {t("description")}
         </Text>
       </div>
 
@@ -385,10 +387,10 @@ export default function EstimateRequestForm() {
         <StepIndicator current={mobileStep} />
         <div className="flex flex-col items-center">
           <Text as="h1" variant="xl-bold" className="text-text-primary">
-            {MOBILE_STEP_TITLES[mobileStep]}
+            {mobileStepTitles[mobileStep]}
           </Text>
           <Text as="p" variant="md-regular" className="text-text-subtle">
-            견적을 요청하면 최대 5개의 견적을 받을 수 있어요 :)
+            {t("description")}
           </Text>
         </div>
       </div>
@@ -399,14 +401,14 @@ export default function EstimateRequestForm() {
           className={cn("flex flex-col gap-16 md:mb-64", mobileStep !== 1 && "hidden md:flex")}
         >
           <Text as="h2" variant="2lg-bold" className="text-text-tertiary hidden md:block">
-            이사 유형
+            {t("moveType")}
           </Text>
           <div className="flex flex-col gap-16 md:flex-row">
             {MOVE_TYPE_CARDS.map((type) => (
               <MoveTypeCard
                 key={type.id}
-                title={type.title}
-                description={type.description}
+                title={t(`moveTypes.${type.id}.title`)}
+                description={t(`moveTypes.${type.id}.description`)}
                 imageSrc={type.imageSrc}
                 selected={selectedType === type.id}
                 onSelect={() => setSelectedType(type.id)}
@@ -424,7 +426,7 @@ export default function EstimateRequestForm() {
             )}
           >
             <Text as="h2" variant="2lg-bold" className="text-text-tertiary hidden md:block">
-              이사 예정일
+              {t("moveDate")}
             </Text>
             <DatePickerField
               value={moveDate}
@@ -444,7 +446,7 @@ export default function EstimateRequestForm() {
             )}
           >
             <Text as="h2" variant="2lg-bold" className="text-text-tertiary hidden md:block">
-              이사 지역
+              {t("region")}
             </Text>
             <div className="flex w-full min-w-0 flex-col gap-24 md:w-[520px] md:max-w-full md:flex-row md:gap-16">
               <RegionField
@@ -483,7 +485,7 @@ export default function EstimateRequestForm() {
             className="rounded-12 border-border-brand text-text-brand flex h-[54px] flex-1 items-center justify-center border px-24 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Text as="span" variant="lg-semibold" className="text-text-brand">
-              이전
+              {t("previous")}
             </Text>
           </button>
         )}
@@ -502,9 +504,9 @@ export default function EstimateRequestForm() {
           <Text as="span" variant="lg-semibold" className="text-text-inverse">
             {mobileStep === 3
               ? createMutation.isPending
-                ? "요청 중..."
-                : "견적 요청하기"
-              : "다음"}
+                ? t("requesting")
+                : t("submit")
+              : t("next")}
           </Text>
         </button>
       </div>
@@ -523,7 +525,7 @@ export default function EstimateRequestForm() {
           )}
         >
           <Text as="span" variant="2lg-semibold" className="text-text-inverse">
-            {createMutation.isPending ? "요청 중..." : "견적 요청하기"}
+            {createMutation.isPending ? t("requesting") : t("submit")}
           </Text>
         </button>
       </div>

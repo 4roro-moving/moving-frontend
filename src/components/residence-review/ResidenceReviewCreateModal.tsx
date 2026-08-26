@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 
@@ -30,6 +32,7 @@ const ResidenceReviewCreateModalContent = ({
   onExitComplete,
   onSuccess,
 }: ResidenceReviewCreateModalContentProps) => {
+  const t = useTranslations("residenceReview");
   const {
     register,
     control,
@@ -57,12 +60,12 @@ const ResidenceReviewCreateModalContent = ({
       dismissible={false}
     >
       <div className="flex w-full items-start justify-between gap-12">
-        <Modal.Title>후기 작성</Modal.Title>
+        <Modal.Title>{t("createTitle")}</Modal.Title>
         <Modal.Close onClose={handleClose} disabled={isPending} />
       </div>
 
       <FormField
-        label="지역을 선택해주세요."
+        label={t("selectRegion")}
         variant="compact"
         labelId="residence-review-create-region"
       >
@@ -71,8 +74,8 @@ const ResidenceReviewCreateModalContent = ({
           control={control}
           render={({ field }) => (
             <Select
-              label="지역"
-              desc="지역"
+              label={t("region")}
+              desc={t("region")}
               size="lg"
               columns={2}
               className="w-full"
@@ -111,7 +114,7 @@ const ResidenceReviewCreateModalContent = ({
       ) : null}
 
       <Modal.Button fullWidth size="cta" disabled={isSubmitDisabled} onClick={handleSubmit}>
-        {isPending ? "작성 중..." : "작성하기"}
+        {isPending ? t("creating") : t("create")}
       </Modal.Button>
     </Modal>
   );

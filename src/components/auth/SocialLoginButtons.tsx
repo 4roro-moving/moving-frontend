@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { GoogleIcon, KakaoLoginIcon, NaverLoginIcon } from "@/icons";
@@ -38,12 +39,6 @@ const isNavigateSocialLoginButtons = (
   return "hrefForProvider" in props;
 };
 
-const SOCIAL_PROVIDER_NAME: Record<OAuthProvider, string> = {
-  google: "Google",
-  kakao: "카카오",
-  naver: "네이버",
-};
-
 const SOCIAL_PROVIDERS: {
   provider: OAuthProvider;
   className: string;
@@ -70,17 +65,13 @@ const SOCIAL_PROVIDERS: {
   },
 ];
 
-const getSocialButtonAriaLabel = (provider: OAuthProvider, isSignUp: boolean): string => {
-  const providerName = SOCIAL_PROVIDER_NAME[provider];
-  return isSignUp ? `${providerName}로 회원가입하기` : `${providerName}로 로그인`;
-};
-
 /**
  * SNS 간편 로그인 버튼 그룹.
  * OAuth 모드에서는 Provider 인가 URL로 이동한 뒤 `/oauth/{provider}/callback`에서 code를 교환합니다.
  * 이동 모드에서는 소셜 회원가입 페이지 등 내부 경로로 연결합니다.
  */
 const SocialLoginButtons = (props: SocialLoginButtonsProps) => {
+  const t = useTranslations("auth");
   const {
     className,
     audience = "customer",
@@ -120,7 +111,10 @@ const SocialLoginButtons = (props: SocialLoginButtonsProps) => {
             isDisabled && "cursor-not-allowed opacity-60",
             buttonClassName,
           );
-          const ariaLabel = getSocialButtonAriaLabel(provider, isSignUpAction);
+          const providerName = t(`providers.${provider}`);
+          const ariaLabel = isSignUpAction
+            ? t("socialSignUpWithProvider", { provider: providerName })
+            : t("socialLoginWithProvider", { provider: providerName });
 
           if (isNavigateSocialLoginButtons(props)) {
             return (

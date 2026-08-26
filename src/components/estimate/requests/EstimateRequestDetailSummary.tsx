@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -34,6 +35,7 @@ export default function EstimateRequestDetailSummary({
   statusClassName = "text-text-brand",
   showConfirmedIcon = false,
 }: EstimateRequestDetailSummaryProps) {
+  const t = useTranslations("estimates");
   const statusBadge = showConfirmedIcon ? (
     <span className="flex shrink-0 items-center gap-4">
       <ConfirmedCheckIcon className="text-icon-brand size-20 shrink-0" />
@@ -48,7 +50,10 @@ export default function EstimateRequestDetailSummary({
   );
 
   return (
-    <section className="flex w-full flex-col gap-16 md:gap-20" aria-label="견적 요청 요약">
+    <section
+      className="flex w-full flex-col gap-16 md:gap-20"
+      aria-label={t("requests.summaryAria")}
+    >
       <div className="flex w-full flex-col gap-12">
         {/* Figma 8093:49879 — chip gap 12 */}
         <div className="flex flex-wrap items-center gap-8 md:gap-12">

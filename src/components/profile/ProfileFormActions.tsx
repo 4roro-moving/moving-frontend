@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import Button from "@/components/common/Button/Button";
 import { cn } from "@/lib/utils/cn";
@@ -14,11 +15,12 @@ interface ProfileFormActionsProps {
 
 /** 프로필·기본정보 수정 폼 공통 취소/제출 액션 */
 const ProfileFormActions = ({
-  submitLabel = "수정하기",
-  cancelLabel = "취소",
+  submitLabel,
+  cancelLabel,
   isSubmitDisabled = false,
   className,
 }: ProfileFormActionsProps) => {
+  const t = useTranslations("profile");
   const router = useRouter();
 
   return (
@@ -36,7 +38,7 @@ const ProfileFormActions = ({
         className="md:w-[240px]"
         onClick={() => router.back()}
       >
-        {cancelLabel}
+        {cancelLabel ?? t("cancel")}
       </Button>
       <Button
         type="submit"
@@ -46,7 +48,7 @@ const ProfileFormActions = ({
         className="md:w-[240px]"
         disabled={isSubmitDisabled}
       >
-        {submitLabel}
+        {submitLabel ?? t("edit")}
       </Button>
     </div>
   );

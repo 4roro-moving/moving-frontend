@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import DetailHeroBanner from "@/components/common/DetailHeroBanner";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -32,6 +33,7 @@ interface MoverDetailViewProps {
 }
 
 export default function MoverDetailView({ moverId, initialDetail }: MoverDetailViewProps) {
+  const t = useTranslations("profile");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
@@ -62,7 +64,7 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
   if (isInitialLoading && !displayedDetail) {
     return (
       <div className="bg-background-default flex w-full max-w-full flex-col overflow-x-hidden">
-        <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+        <PageHeader title={t("moverDetailTitle")} backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
         <MoverDetailPageSkeleton />
       </div>
     );
@@ -72,7 +74,7 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
     if (isNotFound) {
       return (
         <div className="bg-background-default flex w-full max-w-full flex-col overflow-x-hidden">
-          <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+          <PageHeader title={t("moverDetailTitle")} backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
           <MoverDetailNotFoundStatus />
         </div>
       );
@@ -80,13 +82,13 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
 
     return (
       <div className="bg-background-default flex w-full flex-1 flex-col overflow-x-hidden">
-        <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+        <PageHeader title={t("moverDetailTitle")} backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
 
         <div className="flex w-full flex-1 flex-col items-center justify-center">
           <MoversErrorPanel
-            title="불러오지 못했어요"
-            description="기사님 정보를 가져오는 중 문제가 발생했습니다."
-            actionLabel="다시 시도"
+            title={t("moverDetailLoadTitle")}
+            description={t("moverDetailLoadDescription")}
+            actionLabel={t("retry")}
             isRetrying={query.isFetching}
             onRetry={() => {
               void query.refetch();
@@ -128,9 +130,14 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
 
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] xl:pb-0">
-      <PageHeader title="기사님 상세" backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
+      <PageHeader title={t("moverDetailTitle")} backFallbackHref={APP_ROUTES.MOVERS.ROOT} />
 
-      <DetailHeroBanner imageUrl={detail.profileImageSrc} name={detail.name} preloadProfileImage />
+      <DetailHeroBanner
+        imageUrl={detail.profileImageSrc}
+        name={detail.name}
+        profileImageAlt={t("moverProfileImageAlt", { name: detail.name })}
+        preloadProfileImage
+      />
 
       <div className="px-margin-mobile md:px-margin-tablet flex w-full flex-col items-center pt-24 pb-64 md:pt-28 md:pb-80 xl:px-0 xl:pb-[150px]">
         <div className="max-w-container-desktop flex w-full flex-col items-stretch gap-32 md:gap-40 xl:flex-row xl:items-start xl:justify-between">
@@ -202,7 +209,7 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
           onClose={() => setIsReportModalOpen(false)}
           targetType="MOVER"
           targetId={detail.id}
-          targetName={`${detail.name} 기사님`}
+          targetName={t("moverName", { name: detail.name })}
         />
       ) : null}
 

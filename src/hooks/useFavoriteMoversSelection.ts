@@ -1,12 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useCallback, useMemo, useState } from "react";
 
 import { useBulkRemoveFavoriteMovers } from "@/hooks/useBulkRemoveFavoriteMovers";
 import { MAX_BULK_FAVORITE_MOVERS } from "@/lib/api/favorites";
-
-const MAX_SELECTION_MESSAGE = `한 번에 최대 ${MAX_BULK_FAVORITE_MOVERS}명까지 선택할 수 있습니다.`;
-const MAX_EXCLUSION_MESSAGE = `전체 선택에서 최대 ${MAX_BULK_FAVORITE_MOVERS}명까지 제외할 수 있습니다.`;
 
 interface UseFavoriteMoversSelectionOptions {
   loadedIds: string[];
@@ -18,6 +17,7 @@ export function useFavoriteMoversSelection({
   loadedIds,
   totalCount,
 }: UseFavoriteMoversSelectionOptions) {
+  const t = useTranslations("favorites");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   /** 화면에 안 보이는 찜까지 포함해 전체를 고른 상태 */
   const [isSelectAll, setIsSelectAll] = useState(false);
@@ -72,7 +72,7 @@ export function useFavoriteMoversSelection({
           !excludedIdSet.has(moverId) &&
           excludedIds.length >= MAX_BULK_FAVORITE_MOVERS
         ) {
-          setToastMessage(MAX_EXCLUSION_MESSAGE);
+          setToastMessage(t("maxExclusion", { count: MAX_BULK_FAVORITE_MOVERS }));
           return;
         }
 
@@ -90,7 +90,7 @@ export function useFavoriteMoversSelection({
         !selectedIdSet.has(moverId) &&
         selectedIds.length >= MAX_BULK_FAVORITE_MOVERS
       ) {
-        setToastMessage(MAX_SELECTION_MESSAGE);
+        setToastMessage(t("maxSelection", { count: MAX_BULK_FAVORITE_MOVERS }));
         return;
       }
 
@@ -101,7 +101,7 @@ export function useFavoriteMoversSelection({
         return prev.filter((id) => id !== moverId);
       });
     },
-    [excludedIdSet, excludedIds.length, isSelectAll, selectedIdSet, selectedIds.length],
+    [excludedIdSet, excludedIds.length, isSelectAll, selectedIdSet, selectedIds.length, t],
   );
 
   const removeFavoritesByIds = useCallback(

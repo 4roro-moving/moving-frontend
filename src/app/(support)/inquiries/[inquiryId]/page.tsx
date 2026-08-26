@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
 import InquiryDetailClient from "@/components/inquiry/InquiryDetailClient";
@@ -8,14 +9,10 @@ interface InquiryDetailPageProps {
   }>;
 }
 
-export const metadata: Metadata = {
-  title: "1:1 문의 상세 | 무빙",
-  description: "등록한 1:1 문의 내용과 답변 내역을 확인할 수 있습니다.",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("supportInquiry");
+  return { title: t("metadata.detailTitle"), description: t("metadata.detailDescription") };
+}
 
 export default async function InquiryDetailPage({ params }: InquiryDetailPageProps) {
   const { inquiryId } = await params;

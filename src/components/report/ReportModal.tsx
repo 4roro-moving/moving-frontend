@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
 
 import Modal from "@/components/common/Modal/Modal";
@@ -29,35 +30,28 @@ interface ImagePreview {
   url: string;
 }
 
-const REPORT_REASON_OPTIONS: {
-  value: ReportReason;
-  label: string;
-}[] = [
-  {
-    value: "SPAM",
-    label: "스팸 또는 반복적인 내용",
-  },
-  {
-    value: "ABUSE",
-    label: "욕설 또는 괴롭힘",
-  },
-  {
-    value: "INAPPROPRIATE",
-    label: "부적절한 내용",
-  },
-  {
-    value: "FALSE_INFO",
-    label: "사기 또는 허위 정보",
-  },
-  {
-    value: "OTHER",
-    label: "기타",
-  },
+const REPORT_REASON_VALUES: ReportReason[] = [
+  "SPAM",
+  "ABUSE",
+  "INAPPROPRIATE",
+  "FALSE_INFO",
+  "OTHER",
 ];
+
+const REASON_KEY: Record<ReportReason, string> = {
+  SPAM: "spam",
+  ABUSE: "abuse",
+  FALSE_INFO: "falseInfo",
+  INAPPROPRIATE: "inappropriate",
+  PRIVACY: "privacy",
+  OTHER: "other",
+};
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
 const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: ReportModalProps) => {
+  const t = useTranslations("report");
+  const tCommon = useTranslations("common");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imagesRef = useRef<ImagePreview[]>([]);
 
@@ -67,10 +61,8 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
 
   const createMutation = useCreateReport();
-
   const trimmedDescription = description.trim();
   const isOtherReason = reason === "OTHER";
-
   const canSubmit =
     reason !== "" && (!isOtherReason || trimmedDescription.length > 0) && !createMutation.isPending;
 
@@ -80,19 +72,13 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
 
   useEffect(() => {
     return () => {
-      imagesRef.current.forEach(({ url }) => {
-        URL.revokeObjectURL(url);
-      });
+      imagesRef.current.forEach(({ url }) => URL.revokeObjectURL(url));
     };
   }, []);
 
   const resetForm = () => {
-    imagesRef.current.forEach(({ url }) => {
-      URL.revokeObjectURL(url);
-    });
-
+    imagesRef.current.forEach(({ url }) => URL.revokeObjectURL(url));
     imagesRef.current = [];
-
     setReason("");
     setDescription("");
     setImages([]);
@@ -106,37 +92,26 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
   };
 
   const handleClose = () => {
-    if (createMutation.isPending) {
-      return;
-    }
-
+    if (createMutation.isPending) return;
     resetForm();
     onClose();
   };
 
   const handleReasonChange = (value: string) => {
-    const nextReason = REPORT_REASON_OPTIONS.find((option) => option.value === value)?.value;
-
-    if (!nextReason) {
-      return;
-    }
-
+    const nextReason = REPORT_REASON_VALUES.find((option) => option === value);
+    if (!nextReason) return;
     setReason(nextReason);
     setValidationMessage(null);
   };
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files ?? []);
-
     setValidationMessage(null);
 
-    if (selectedFiles.length === 0) {
-      return;
-    }
+    if (selectedFiles.length === 0) return;
 
     if (images.length + selectedFiles.length > REPORT_IMAGE_MAX_COUNT) {
-      setValidationMessage(`이미지는 최대 ${REPORT_IMAGE_MAX_COUNT}장까지 첨부할 수 있습니다.`);
-
+      setValidationMessage(t("modal.validation.maxImages", { count: REPORT_IMAGE_MAX_COUNT }));
       event.target.value = "";
       return;
     }
@@ -146,51 +121,36 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
     );
 
     if (invalidTypeFile) {
-      setValidationMessage("JPG, PNG, WEBP 이미지만 첨부할 수 있습니다.");
+      setValidationMessage(t("modal.validation.imageType"));
       event.target.value = "";
       return;
     }
 
     const oversizedFile = selectedFiles.find((file) => file.size > REPORT_IMAGE_MAX_SIZE);
-
     if (oversizedFile) {
-      setValidationMessage("이미지는 한 장당 최대 5MB까지 첨부할 수 있습니다.");
-
+      setValidationMessage(t("modal.validation.imageSize"));
       event.target.value = "";
       return;
     }
 
-    const nextImages = selectedFiles.map((file) => ({
-      file,
-      url: URL.createObjectURL(file),
-    }));
-
+    const nextImages = selectedFiles.map((file) => ({ file, url: URL.createObjectURL(file) }));
     setImages((current) => [...current, ...nextImages]);
-
     event.target.value = "";
   };
 
   const handleRemoveImage = (index: number) => {
     setImages((current) => {
       const targetImage = current[index];
-
-      if (targetImage) {
-        URL.revokeObjectURL(targetImage.url);
-      }
-
+      if (targetImage) URL.revokeObjectURL(targetImage.url);
       return current.filter((_, imageIndex) => imageIndex !== index);
     });
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    if (!reason || !canSubmit) {
-      return;
-    }
+    if (!reason || !canSubmit) return;
 
     setValidationMessage(null);
-
     createMutation.mutate(
       {
         targetType,
@@ -215,45 +175,38 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
       presentation="responsive"
       dismissible={!createMutation.isPending}
       className={cn("items-stretch gap-0 p-0", "md:max-w-[720px]", "xl:w-full xl:max-w-[720px]")}
-      aria-label="신고하기"
+      aria-label={t("modal.ariaLabel")}
     >
-      {/* Header */}
       <div className="border-border-default flex items-center justify-between border-b px-20 py-18 md:px-24">
         <div className="flex flex-col gap-4">
-          <Modal.Title className="text-text-primary">신고하기</Modal.Title>
-
+          <Modal.Title className="text-text-primary">{t("modal.title")}</Modal.Title>
           <Text as="p" variant="xs-regular" className="text-text-secondary">
-            신고 사유와 필요한 내용을 입력해주세요.
+            {t("modal.description")}
           </Text>
         </div>
-
         <Modal.Close onClose={handleClose} disabled={createMutation.isPending} size="sm" />
       </div>
 
       <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-        {/* Content */}
         <div className="flex flex-col gap-20 overflow-y-auto px-20 py-20 md:px-24 md:py-24">
           {targetName && (
             <div className="border-border-default bg-background-subtle rounded-8 flex flex-col gap-4 border px-14 py-12">
               <Text as="span" variant="xs-regular" className="text-text-secondary">
-                신고 대상
+                {t("modal.target")}
               </Text>
-
               <Text as="span" variant="sm-semibold" className="text-text-primary">
                 {targetName}
               </Text>
             </div>
           )}
 
-          {/* 신고 사유 */}
           <div className="flex flex-col gap-8">
             <Text as="span" variant="xs-semibold" className="text-text-primary">
-              신고 사유
+              {t("modal.reasonLabel")}
             </Text>
-
             <Select
-              desc="신고 사유를 선택해주세요"
-              label="신고 사유"
+              desc={t("modal.reasonPlaceholder")}
+              label={t("modal.reasonLabel")}
               defaultValue={reason}
               onChange={handleReasonChange}
               disabled={createMutation.isPending}
@@ -270,24 +223,22 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
                 "xl:[&_button[role=combobox]]:py-0",
               )}
             >
-              {REPORT_REASON_OPTIONS.map((option) => (
-                <Select.Option key={option.value} value={option.value}>
-                  {option.label}
+              {REPORT_REASON_VALUES.map((value) => (
+                <Select.Option key={value} value={value}>
+                  {t(`reasons.${REASON_KEY[value]}`)}
                 </Select.Option>
               ))}
             </Select>
           </div>
 
-          {/* 상세 내용 */}
           <div className="flex flex-col gap-8">
             <div className="flex items-center justify-between gap-12">
               <label htmlFor="report-description">
                 <Text as="span" variant="xs-semibold" className="text-text-primary">
-                  상세 내용
+                  {t("modal.detailLabel")}
                   {isOtherReason && <span className="text-text-brand ml-4">*</span>}
                 </Text>
               </label>
-
               <Text as="span" variant="xs-regular" className="text-text-muted">
                 {description.length}/{REPORT_DESCRIPTION_MAX_LENGTH}
               </Text>
@@ -301,8 +252,8 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
               }
               placeholder={
                 isOtherReason
-                  ? "신고 내용을 자세히 작성해주세요."
-                  : "필요한 경우 상세 내용을 작성해주세요."
+                  ? t("modal.detailPlaceholderRequired")
+                  : t("modal.detailPlaceholderOptional")
               }
               disabled={createMutation.isPending}
               rows={5}
@@ -320,24 +271,21 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
 
             {isOtherReason && (
               <Text as="p" variant="xs-regular" className="text-text-secondary">
-                기타 사유를 선택한 경우 상세 내용을 입력해주세요.
+                {t("modal.otherReasonHelper")}
               </Text>
             )}
           </div>
 
-          {/* 이미지 */}
           <div className="flex flex-col gap-8">
             <div className="flex items-end justify-between gap-12">
               <div className="flex flex-col gap-4">
                 <Text as="span" variant="xs-semibold" className="text-text-primary">
-                  이미지 첨부
+                  {t("modal.imageLabel")}
                 </Text>
-
                 <Text as="p" variant="xs-regular" className="text-text-secondary">
-                  JPG, PNG, WEBP · 장당 최대 5MB
+                  {t("modal.imageHelper")}
                 </Text>
               </div>
-
               <Text as="span" variant="xs-regular" className="text-text-muted">
                 {images.length}/{REPORT_IMAGE_MAX_COUNT}
               </Text>
@@ -361,17 +309,16 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
                 >
                   <Image
                     src={image.url}
-                    alt={`신고 첨부 이미지 ${index + 1}`}
+                    alt={t("modal.attachmentAlt", { index: index + 1 })}
                     fill
                     unoptimized
                     className="object-cover"
                   />
-
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(index)}
                     disabled={createMutation.isPending}
-                    aria-label={`첨부 이미지 ${index + 1} 삭제`}
+                    aria-label={t("modal.removeAttachmentAria", { index: index + 1 })}
                     className={cn(
                       "absolute top-4 right-4",
                       "flex h-20 w-20 items-center justify-center rounded-full",
@@ -402,31 +349,27 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
                   <Text as="span" variant="lg-regular">
                     +
                   </Text>
-
                   <Text as="span" variant="xs-regular">
-                    이미지
+                    {t("modal.addImage")}
                   </Text>
                 </button>
               )}
             </div>
           </div>
 
-          {/* 클라이언트 검증 에러 */}
           {validationMessage && (
             <Text as="p" variant="xs-regular" className="text-text-error" role="alert">
               {validationMessage}
             </Text>
           )}
 
-          {/* API 에러 */}
           {createMutation.isError && (
             <Text as="p" variant="xs-regular" className="text-text-error" role="alert">
-              신고 접수에 실패했습니다. 잠시 후 다시 시도해주세요.
+              {t("modal.submitFailed")}
             </Text>
           )}
         </div>
 
-        {/* Footer */}
         <div className="border-border-default flex items-center justify-between gap-12 border-t px-20 py-16 md:px-24">
           <button
             type="button"
@@ -439,7 +382,7 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
             )}
           >
             <Text as="span" variant="md-semibold">
-              취소
+              {tCommon("cancel")}
             </Text>
           </button>
 
@@ -455,7 +398,7 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
             )}
           >
             <Text as="span" variant="md-semibold">
-              {createMutation.isPending ? "신고 중..." : "신고하기"}
+              {createMutation.isPending ? t("modal.submitting") : t("modal.submit")}
             </Text>
           </button>
         </div>

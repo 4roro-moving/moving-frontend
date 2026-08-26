@@ -1,9 +1,11 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import EmptyState from "@/components/common/EmptyState/EmptyState";
 
 const OAUTH_LOADING_IMAGE = "/images/empty/moving-car.png";
 const OAUTH_ERROR_IMAGE = "/images/empty-received-requests.png";
-const OAUTH_LOADING_MESSAGE = "로그인 처리 중...";
-const DEFAULT_LOGIN_BUTTON_LABEL = "로그인으로 돌아가기";
 
 interface OAuthLayoutProps {
   /** 에러 문구. 있으면 에러 UI + 로그인 버튼, 없으면 로딩 UI */
@@ -17,15 +19,12 @@ interface OAuthLayoutProps {
  * OAuth callback 로딩·에러 공통 레이아웃.
  * Figma empty-state: Mobile/Tablet sm · Desktop lg
  */
-const OAuthLayout = ({
-  error,
-  loginHref,
-  loginButtonLabel = DEFAULT_LOGIN_BUTTON_LABEL,
-}: OAuthLayoutProps) => {
+const OAuthLayout = ({ error, loginHref, loginButtonLabel }: OAuthLayoutProps) => {
+  const t = useTranslations("auth");
   const isError = Boolean(error);
   const imageSrc = isError ? OAUTH_ERROR_IMAGE : OAUTH_LOADING_IMAGE;
-  const description = isError ? error : OAUTH_LOADING_MESSAGE;
-  const buttonLabel = isError ? loginButtonLabel : undefined;
+  const description = isError ? error : t("oauthProcessing");
+  const buttonLabel = isError ? (loginButtonLabel ?? t("backToLogin")) : undefined;
   const href = isError ? loginHref : undefined;
 
   return (

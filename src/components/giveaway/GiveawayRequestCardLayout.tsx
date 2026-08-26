@@ -1,12 +1,8 @@
+import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import ResidenceReviewInfoItem from "@/components/residence-review/ResidenceReviewInfoItem";
-import {
-  GIVEAWAY_REQUEST_DATE_LABEL,
-  GIVEAWAY_REQUEST_STATUS_FIELD_LABEL,
-  GIVEAWAY_REQUEST_STATUS_FIELD_LABEL_COMPACT,
-} from "@/lib/constants/giveaway";
-import { formatKoreanDateTime } from "@/lib/utils/date";
+import {} from "@/lib/constants/giveaway";
 
 interface GiveawayRequestCardLayoutProps {
   labelledBy: string;
@@ -22,14 +18,6 @@ const InfoDivider = () => {
   );
 };
 
-const formatRequestDate = (value: string): string => {
-  try {
-    return formatKoreanDateTime(value);
-  } catch {
-    return "";
-  }
-};
-
 const GiveawayRequestCardLayout = ({
   labelledBy,
   statusLabel,
@@ -37,7 +25,18 @@ const GiveawayRequestCardLayout = ({
   children,
   actions,
 }: GiveawayRequestCardLayoutProps) => {
-  const appliedDate = formatRequestDate(createdAt);
+  const t = useTranslations("giveaway");
+  const format = useFormatter();
+  const date = new Date(createdAt);
+  const appliedDate = Number.isNaN(date.getTime())
+    ? ""
+    : format.dateTime(date, {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
 
   return (
     <article
@@ -50,14 +49,14 @@ const GiveawayRequestCardLayout = ({
 
           <dl className="flex w-full flex-col gap-16 md:flex-row md:items-center md:gap-20">
             <ResidenceReviewInfoItem
-              label={GIVEAWAY_REQUEST_STATUS_FIELD_LABEL_COMPACT}
+              label={t("requestStatusCompact")}
               value={statusLabel}
               className="md:hidden"
               labelVariant={{ base: "xs-regular", md: "md-regular" }}
               valueVariant={{ base: "sm-medium", md: "lg-regular" }}
             />
             <ResidenceReviewInfoItem
-              label={GIVEAWAY_REQUEST_STATUS_FIELD_LABEL}
+              label={t("requestStatus")}
               value={statusLabel}
               className="hidden md:flex"
               labelVariant={{ base: "xs-regular", md: "md-regular" }}
@@ -65,7 +64,7 @@ const GiveawayRequestCardLayout = ({
             />
             <InfoDivider />
             <ResidenceReviewInfoItem
-              label={GIVEAWAY_REQUEST_DATE_LABEL}
+              label={t("requestDate")}
               value={appliedDate}
               labelVariant={{ base: "xs-regular", md: "md-regular" }}
               valueVariant={{ base: "sm-medium", md: "lg-regular" }}

@@ -1,11 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
 
 import { Text } from "@/components/common/Text";
 import { ChevronLeftIcon, ChevronRightIcon, GalleryIcon } from "@/icons";
-import { getGiveawayThumbnailOverlayLabel } from "@/lib/constants/giveaway";
 import { cn } from "@/lib/utils/cn";
 import type { GiveawayImage, GiveawayStatus } from "@/types/giveaway";
 
@@ -22,11 +22,8 @@ interface GiveawayDetailImageSliderProps {
   status: GiveawayStatus;
 }
 
-const getGiveawaySlideLabel = (index: number, total: number) => {
-  return `나눔 이미지 ${String(index + 1)}/${String(total)}`;
-};
-
 const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSliderProps) => {
+  const t = useTranslations("giveaway");
   const imageIdsKey = images.map((image) => String(image.id)).join(",");
   const [slide, setSlide] = useState({ imageIdsKey, currentIndex: 0 });
 
@@ -35,11 +32,17 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
   }
 
   const currentIndex = slide.imageIdsKey === imageIdsKey ? slide.currentIndex : 0;
-  const overlayLabel = getGiveawayThumbnailOverlayLabel(status);
+  const overlayLabel =
+    status === "IN_PROGRESS"
+      ? t("statusInProgress")
+      : status === "COMPLETED"
+        ? t("statusCompleted")
+        : null;
   const hasMultiple = images.length > 1;
   const safeIndex = Math.min(currentIndex, Math.max(images.length - 1, 0));
   const translateClass = SLIDE_TRANSLATE_CLASS[safeIndex] ?? "translate-x-0";
-  const slideStatus = images.length > 0 ? getGiveawaySlideLabel(safeIndex, images.length) : "";
+  const slideStatus =
+    images.length > 0 ? t("imageAria", { index: safeIndex + 1, total: images.length }) : "";
 
   const goToPrevious = () => {
     setSlide((current) => {
@@ -65,7 +68,7 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
     <div
       role="region"
       aria-roledescription="carousel"
-      aria-label="나눔 이미지"
+      aria-label={t("imagesAria")}
       className="bg-background-muted rounded-6 relative aspect-square w-full overflow-hidden"
     >
       {images.length === 0 ? (
@@ -82,7 +85,7 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
             >
               <Image
                 src={image.imageUrl}
-                alt={getGiveawaySlideLabel(index, images.length)}
+                alt={t("imageAria", { index: index + 1, total: images.length })}
                 fill
                 sizes="(min-width: 1280px) 500px, (min-width: 768px) 268px, 90vw"
                 className="object-cover"
@@ -111,7 +114,7 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
         <>
           <button
             type="button"
-            aria-label="이전 이미지"
+            aria-label={t("previousImage")}
             onClick={goToPrevious}
             className="bg-background-default/80 hover:bg-background-muted focus-visible:ring-border-brand absolute top-1/2 left-12 flex size-36 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:outline-none"
           >
@@ -119,7 +122,7 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
           </button>
           <button
             type="button"
-            aria-label="다음 이미지"
+            aria-label={t("nextImage")}
             onClick={goToNext}
             className="bg-background-default/80 hover:bg-background-muted focus-visible:ring-border-brand absolute top-1/2 right-12 flex size-36 -translate-y-1/2 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:outline-none"
           >

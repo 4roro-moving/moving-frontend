@@ -1,26 +1,27 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 
 const MOVE_TYPES = [
   {
-    title: "소형이사",
-    description: "원룸, 투룸, 20평대 미만",
+    titleKey: "smallMoveTitle",
+    descriptionKey: "smallMoveDescription",
     imageSrc: "/images/landing/move-type-small.png",
     imageClassName: "size-56 md:size-[99px]",
     featured: false,
   },
   {
-    title: "가정이사",
-    description: "쓰리룸, 20평대 미만",
+    titleKey: "homeMoveTitle",
+    descriptionKey: "homeMoveDescription",
     imageSrc: "/images/landing/move-type-home.png",
     imageClassName: "size-[97px] md:size-[156px]",
     featured: true,
   },
   {
-    title: "기업, 사무실 이사",
-    description: "사무실, 상업공간",
+    titleKey: "officeMoveTitle",
+    descriptionKey: "officeMoveDescription",
     imageSrc: "/images/landing/move-type-office.png",
     imageClassName: "size-[62px] md:size-[99px]",
     featured: false,
@@ -35,7 +36,9 @@ const MOVE_TYPES = [
  * // 2026.08.01 정슬기 - [수정] Mobile 카드가 화면 너비를 채우도록 조정
  * // 2026.08.02 정슬기 - [수정] 카드 배경을 background-muted 토큰으로 교체
  */
-export default function LandingMoveTypes() {
+export default async function LandingMoveTypes() {
+  const t = await getTranslations("landing");
+
   return (
     <section className="bg-background-default w-full overflow-x-hidden pt-[53px] pb-[61px] md:pt-[69px] md:pb-[109px] xl:pt-[115px] xl:pb-[125px]">
       <div className="mx-auto flex w-full max-w-[1160px] flex-col gap-[34px] md:gap-40 md:px-32 xl:flex-row xl:items-center xl:justify-between xl:gap-48 xl:px-0">
@@ -44,15 +47,15 @@ export default function LandingMoveTypes() {
           variant={{ base: "xl-bold", md: "3xl-bold" }}
           className="text-text-primary ml-32 w-full max-w-[183px] shrink-0 md:ml-0 md:max-w-[292px] md:text-[length:var(--font-size-32)] md:leading-[var(--line-height-46)]"
         >
-          번거로운 선정과정,
+          {t("moveTypesTitleLine1")}
           <br />
-          이사 유형부터 선택해요
+          {t("moveTypesTitleLine2")}
         </Text>
 
         <ul className="relative left-1/2 grid h-[162px] w-[399px] shrink-0 -translate-x-1/2 grid-cols-[112px_153px_112px] items-center gap-11 md:static md:flex md:h-auto md:w-full md:translate-x-0 md:justify-center md:gap-16 xl:w-auto xl:gap-24">
           {MOVE_TYPES.map((item) => (
             <li
-              key={item.title}
+              key={item.titleKey}
               className={cn(
                 "flex min-w-0 flex-col items-center",
                 item.featured
@@ -82,14 +85,14 @@ export default function LandingMoveTypes() {
                       : "text-[10px] leading-[13px] md:text-[length:var(--font-size-16)] md:leading-[var(--line-height-26)]",
                   )}
                 >
-                  {item.title}
+                  {t(item.titleKey)}
                 </Text>
                 <Text
                   as="p"
                   variant="sm-medium"
                   className="text-text-muted text-[7px] leading-[11px] md:text-[length:var(--font-size-13)] md:leading-[var(--line-height-22)]"
                 >
-                  {item.description}
+                  {t(item.descriptionKey)}
                 </Text>
               </div>
             </li>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Text } from "@/components/common/Text";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
@@ -29,12 +31,13 @@ export default function NotificationPagination({
   isFetching,
   onChangePage,
 }: NotificationPaginationProps) {
+  const t = useTranslations("notifications");
   const isPrevDisabled = currentPage <= 1 || isFetching;
   const isNextDisabled = currentPage >= pageCount || isFetching;
   const visiblePages = getVisiblePages(currentPage, pageCount);
 
   return (
-    <nav aria-label="알림 페이지네이션" className="flex w-full items-center justify-center py-12">
+    <nav aria-label={t("paginationAria")} className="flex w-full items-center justify-center py-12">
       <ul className="flex items-center gap-4">
         <li>
           <button
@@ -45,7 +48,7 @@ export default function NotificationPagination({
             )}
             onClick={() => onChangePage(currentPage - 1)}
             disabled={isPrevDisabled}
-            aria-label="이전 페이지"
+            aria-label={t("previousPage")}
           >
             <ChevronLeftIcon className="size-16" />
           </button>
@@ -66,7 +69,7 @@ export default function NotificationPagination({
                 )}
                 onClick={() => onChangePage(page)}
                 disabled={isCurrent || isFetching}
-                aria-label={`${page} 페이지`}
+                aria-label={t("pageAria", { page })}
                 aria-current={isCurrent ? "page" : undefined}
               >
                 <Text variant="md-regular">{page}</Text>
@@ -84,7 +87,7 @@ export default function NotificationPagination({
             )}
             onClick={() => onChangePage(currentPage + 1)}
             disabled={isNextDisabled}
-            aria-label="다음 페이지"
+            aria-label={t("nextPage")}
           >
             <ChevronRightIcon className="size-16" />
           </button>

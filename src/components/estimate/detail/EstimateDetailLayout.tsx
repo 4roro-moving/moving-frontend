@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import DetailHeroBanner from "@/components/common/DetailHeroBanner";
@@ -46,7 +47,8 @@ export default function EstimateDetailLayout({
   statusBanner,
   footer,
 }: EstimateDetailLayoutProps) {
-  const headerTitle = title ?? "견적 상세";
+  const t = useTranslations("estimates");
+  const headerTitle = title ?? t("detail.title");
 
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
@@ -111,7 +113,8 @@ export function EstimateDetailQueryState({
   backFallbackHref,
   className,
 }: EstimateDetailQueryStateProps) {
-  const headerTitle = title ?? "견적 상세";
+  const t = useTranslations("estimates");
+  const headerTitle = title ?? t("detail.title");
 
   return (
     <div className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden">
@@ -153,14 +156,16 @@ export function EstimateDetailLoadingState({
   mainClassName,
   asideClassName,
 }: EstimateDetailLoadingStateProps) {
+  const t = useTranslations("estimates");
+
   return (
     <div
       role="status"
       className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden"
     >
-      <span className="sr-only">견적 상세를 불러오는 중</span>
+      <span className="sr-only">{t("detail.loading")}</span>
 
-      <PageHeader title={title ?? "견적 상세"} backFallbackHref={backFallbackHref} />
+      <PageHeader title={title ?? t("detail.title")} backFallbackHref={backFallbackHref} />
 
       {showProfile ? (
         <div className="relative h-160 w-full shrink-0 md:h-200 xl:h-64.75">

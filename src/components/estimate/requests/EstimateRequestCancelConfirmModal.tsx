@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Modal from "@/components/common/Modal/Modal";
 import { cn } from "@/lib/utils/cn";
 
@@ -28,19 +29,20 @@ export default function EstimateRequestCancelConfirmModal({
   onClose,
   onConfirm,
 }: EstimateRequestCancelConfirmModalProps) {
+  const t = useTranslations("estimates");
   // pending 중 ESC/overlay 닫기 방지 — FavoriteMoversDeleteConfirmModal과 동일
   return (
     <Modal open={open} onClose={isPending ? undefined : onClose} className={PANEL_CLASSNAME}>
       <div className="flex w-full items-start justify-between gap-10">
         <Modal.Title variant={{ base: "xl-bold", md: "2xl-semibold" }}>
-          견적 요청을 취소하시겠어요?
+          {t("requests.cancelConfirmTitle")}
         </Modal.Title>
         <Modal.Close onClose={onClose} disabled={isPending} />
       </div>
 
       <div className="flex w-full flex-col items-stretch gap-20 md:gap-40">
         <Modal.Desc variant={{ base: "md-medium", md: "2lg-medium" }}>
-          견적 요청을 취소하면 받은 견적도 함께 취소되며 더 이상 진행할 수 없습니다.
+          {t("requests.cancelConfirmDescription")}
         </Modal.Desc>
 
         <div className="flex w-full flex-col-reverse gap-8 md:flex-row md:gap-12">
@@ -53,7 +55,7 @@ export default function EstimateRequestCancelConfirmModal({
             onClick={onClose}
             className="md:flex-1"
           >
-            돌아가기
+            {t("requests.goBack")}
           </Modal.Button>
           <Modal.Button
             type="button"
@@ -64,7 +66,7 @@ export default function EstimateRequestCancelConfirmModal({
             onClick={onConfirm}
             className="md:flex-1"
           >
-            {isPending ? "취소 중..." : "견적 요청 취소"}
+            {isPending ? t("requests.canceling") : t("cancelRequest")}
           </Modal.Button>
         </div>
       </div>

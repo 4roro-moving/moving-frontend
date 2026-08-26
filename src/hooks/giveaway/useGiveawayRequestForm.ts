@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { useCreateGiveawayRequest } from "@/hooks/giveaway/useCreateGiveawayRequest";
@@ -16,14 +17,6 @@ interface UseGiveawayRequestFormParams {
   onSuccess?: () => void;
 }
 
-const getMessageError = (value: string): string | undefined => {
-  if (value.length > GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH) {
-    return `신청 내용은 ${String(GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH)}자 이하여야 합니다.`;
-  }
-
-  return undefined;
-};
-
 export const useGiveawayRequestForm = ({
   mode,
   giveawayId,
@@ -31,6 +24,12 @@ export const useGiveawayRequestForm = ({
   onClose,
   onSuccess,
 }: UseGiveawayRequestFormParams) => {
+  const t = useTranslations("giveaway");
+  const getMessageError = (message: string): string | undefined =>
+    message.length > GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH
+      ? t("requestMessageMaxLength", { count: GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH })
+      : undefined;
+
   const initialMessage = request?.message ?? "";
   const [message, setMessage] = useState(initialMessage);
   const [isTouched, setIsTouched] = useState(false);
@@ -79,7 +78,7 @@ export const useGiveawayRequestForm = ({
             onClose();
           },
           onError: (error) => {
-            setSubmitError(getApiErrorMessage(error, "나눔을 신청하지 못했습니다."));
+            setSubmitError(getApiErrorMessage(error, t("requestCreateFailed")));
           },
         },
       );
@@ -102,7 +101,7 @@ export const useGiveawayRequestForm = ({
           onClose();
         },
         onError: (error) => {
-          setSubmitError(getApiErrorMessage(error, "신청 내용을 수정하지 못했습니다."));
+          setSubmitError(getApiErrorMessage(error, t("requestEditFailed")));
         },
       },
     );

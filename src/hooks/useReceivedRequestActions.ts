@@ -1,9 +1,14 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import { useState } from "react";
 
 import { useRejectMoverEstimate, useSendMoverEstimate } from "@/hooks/useMoverEstimateRequests";
 import type { MoverEstimateRequest, SendEstimateInput } from "@/types/moverEstimateRequest";
 
 export function useReceivedRequestActions() {
+  const t = useTranslations("estimates");
   const [selectedRequest, setSelectedRequest] = useState<MoverEstimateRequest | null>(null);
   const [isSendOpen, setIsSendOpen] = useState(false);
 
@@ -52,10 +57,10 @@ export function useReceivedRequestActions() {
       {
         onSuccess: () => {
           setIsSendOpen(false);
-          setToastMessage("견적을 보냈습니다.");
+          setToastMessage(t("mover.sentSuccess"));
         },
         onError: (error) => {
-          setToastMessage(error instanceof Error ? error.message : "견적 전송에 실패했습니다.");
+          setToastMessage(error instanceof Error ? error.message : t("mover.sendFailed"));
         },
       },
     );
@@ -72,10 +77,10 @@ export function useReceivedRequestActions() {
       {
         onSuccess: () => {
           setIsRejectOpen(false);
-          setToastMessage("요청을 반려했습니다.");
+          setToastMessage(t("mover.rejectSuccess"));
         },
         onError: (error) => {
-          setToastMessage(error instanceof Error ? error.message : "요청 반려에 실패했습니다.");
+          setToastMessage(error instanceof Error ? error.message : t("mover.rejectFailed"));
         },
       },
     );

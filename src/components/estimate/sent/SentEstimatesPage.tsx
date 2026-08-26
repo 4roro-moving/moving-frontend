@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
 import MoverEstimateTabs from "@/components/estimate/MoverEstimateTabs";
@@ -9,6 +10,7 @@ import SentEstimateCard from "@/components/estimate/sent/SentEstimateCard";
 import { useSentEstimates } from "@/hooks/useSentEstimates";
 
 export default function SentEstimatesPage() {
+  const t = useTranslations("estimates");
   const sentinelRef = useRef<HTMLDivElement>(null);
   const query = useSentEstimates();
   const { fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError } = query;
@@ -33,20 +35,20 @@ export default function SentEstimatesPage() {
     <>
       <MoverEstimateTabs />
       <main className="bg-background-subtle min-h-[calc(100vh-108px)] px-24 pt-24 pb-[77px] md:min-h-[calc(100vh-142px)] md:px-72 md:pt-32 md:pb-40 xl:min-h-[calc(100vh-168px)] xl:px-0 xl:pt-[59px] xl:pb-[107px]">
-        <h1 className="sr-only">보낸 견적 조회</h1>
+        <h1 className="sr-only">{t("tabs.sent")}</h1>
 
         {query.isPending ? <MoverEstimateCardGridSkeleton /> : null}
 
         {query.isError ? (
           <EstimatesQueryStatus
-            message="보낸 견적을 불러오지 못했어요."
-            actionLabel="다시 시도"
+            message={t("sent.loadFailed")}
+            actionLabel={t("retry")}
             onAction={() => void query.refetch()}
           />
         ) : null}
 
         {!query.isPending && !query.isError && estimates.length === 0 ? (
-          <EstimatesQueryStatus message="아직 보낸 견적이 없어요." />
+          <EstimatesQueryStatus message={t("sent.empty")} />
         ) : null}
 
         {estimates.length > 0 ? (
@@ -73,14 +75,12 @@ export default function SentEstimatesPage() {
 
         <div ref={sentinelRef} className="h-1 w-full" aria-hidden="true" />
 
-        {query.isFetchingNextPage ? (
-          <EstimatesQueryStatus message="다음 견적을 불러오는 중이에요." />
-        ) : null}
+        {query.isFetchingNextPage ? <EstimatesQueryStatus message={t("sent.nextLoading")} /> : null}
 
         {isFetchNextPageError ? (
           <EstimatesQueryStatus
-            message="다음 견적을 불러오지 못했어요."
-            actionLabel="다시 시도"
+            message={t("sent.nextLoadFailed")}
+            actionLabel={t("retry")}
             onAction={() => void fetchNextPage()}
           />
         ) : null}

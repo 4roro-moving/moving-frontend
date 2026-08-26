@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 import Button from "@/components/common/Button/Button";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import { Text } from "@/components/common/Text";
@@ -58,8 +60,10 @@ function InfoField({ label, value, fullValue = value }: InfoFieldProps) {
 // 2026.07.30 정슬기 - [수정] 기사님 표시명 공통 헬퍼 사용
 // 2026.08.07 정슬기 - [수정] Figma 작성 가능 리뷰 카드 내부 레이아웃 반영
 export default function WritableReviewCard({ item, onWriteClick }: WritableReviewCardProps) {
+  const t = useTranslations("reviews");
+  const locale = useLocale();
   const { mover, estimateRequest, price } = item;
-  const moverLabel = getReviewMoverDisplayName(mover);
+  const moverLabel = getReviewMoverDisplayName(mover, locale);
   const titleId = `writable-review-${item.estimateId}-title`;
   const shortIntro = mover.shortIntro?.trim() ?? "";
 
@@ -75,7 +79,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
             {mover.imageUrl ? (
               <Image
                 src={mover.imageUrl}
-                alt={`${moverLabel} 프로필`}
+                alt={t("moverProfileImageAlt", { name: moverLabel })}
                 fill
                 sizes="(min-width: 1280px) 100px, (min-width: 768px) 80px, 64px"
                 className="object-cover"
@@ -110,7 +114,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
                     className="text-text-muted w-full truncate"
                     title={shortIntro}
                   >
-                    {shortIntro}
+                    <AutoTranslatedText text={shortIntro} />
                   </Text>
                 ) : null}
               </div>
@@ -125,10 +129,10 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
 
             <div className="hidden w-160 shrink-0 flex-col items-end xl:flex">
               <Text as="span" variant="lg-medium" className="text-text-muted w-full text-right">
-                견적 금액
+                {t("estimatePrice")}
               </Text>
               <Text as="p" variant="2xl-bold" className="text-text-secondary w-full text-right">
-                {formatPrice(price)}
+                {formatPrice(price, locale)}
               </Text>
             </div>
           </div>
@@ -137,10 +141,10 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
         {/* 모바일/태블릿 금액 */}
         <div className="flex items-end justify-between gap-12 xl:hidden">
           <Text as="span" variant="sm-medium" className="text-text-muted">
-            견적 금액
+            {t("estimatePrice")}
           </Text>
           <Text as="p" variant={{ base: "xl-bold", md: "2xl-bold" }} className="text-text-primary">
-            {formatPrice(price)}
+            {formatPrice(price, locale)}
           </Text>
         </div>
 
@@ -148,7 +152,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
         <div className="flex w-full flex-col gap-16 xl:flex-row xl:items-start xl:justify-between">
           <dl className="grid min-w-0 flex-1 grid-cols-1 gap-12 md:grid-cols-[1fr_auto_1fr_auto_1.4fr] md:items-center md:gap-20">
             <InfoField
-              label="출발지"
+              label={t("fromAddress")}
               value={summarizeAddress(estimateRequest.fromAddress)}
               fullValue={estimateRequest.fromAddress}
             />
@@ -159,7 +163,7 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
             />
 
             <InfoField
-              label="도착지"
+              label={t("toAddress")}
               value={summarizeAddress(estimateRequest.toAddress)}
               fullValue={estimateRequest.toAddress}
             />
@@ -169,7 +173,10 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
               aria-hidden="true"
             />
 
-            <InfoField label="이사일" value={formatMoveDateLabelSafe(estimateRequest.moveDate)} />
+            <InfoField
+              label={t("moveDate")}
+              value={formatMoveDateLabelSafe(estimateRequest.moveDate, "-", locale)}
+            />
           </dl>
 
           <Button
@@ -179,9 +186,9 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
             fullWidth
             className="xl:w-160 xl:shrink-0"
             onClick={() => onWriteClick(item)}
-            aria-label={`${moverLabel} 리뷰 작성하기`}
+            aria-label={t("writeReviewAria", { name: moverLabel })}
           >
-            리뷰 작성하기
+            {t("writeReview")}
           </Button>
         </div>
       </div>

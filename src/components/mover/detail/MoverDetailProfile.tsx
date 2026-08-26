@@ -1,6 +1,9 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import { FavoriteButton } from "@/components/mover/FavoriteButton";
@@ -26,8 +29,9 @@ export default function MoverDetailProfile({
   showFavoriteAction = true,
   showReportAction = false,
 }: MoverDetailProfileProps) {
+  const t = useTranslations("profile");
   return (
-    <section className="flex w-full flex-col gap-36 md:gap-32" aria-label="기사님 소개">
+    <section className="flex w-full flex-col gap-36 md:gap-32" aria-label={t("moverDetailIntro")}>
       <div className="flex w-full flex-col gap-16 md:gap-20">
         <div className="flex w-full flex-col gap-12">
           <MoverServiceTypeChips serviceTypes={detail.serviceTypes} size="md" />
@@ -40,7 +44,7 @@ export default function MoverDetailProfile({
             }}
             className="text-text-secondary wrap-break-word"
           >
-            {detail.title}
+            <AutoTranslatedText text={detail.title} />
           </Text>
         </div>
 
@@ -56,7 +60,7 @@ export default function MoverDetailProfile({
               }}
               className="text-text-primary"
             >
-              {detail.name} 기사님
+              {t("moverName", { name: detail.name })}
             </Text>
           </div>
 
@@ -78,7 +82,7 @@ export default function MoverDetailProfile({
 
             {showReportAction ? (
               <ReportMoreMenu
-                ariaLabel="기사님 메뉴 더보기"
+                ariaLabel={t("moverDetailMenuAria")}
                 onReport={onReport}
                 triggerSizeClassName="size-36"
                 triggerIconClassName="text-[24px] leading-none"
@@ -95,7 +99,7 @@ export default function MoverDetailProfile({
           }}
           className="text-text-muted whitespace-pre-line"
         >
-          {detail.description}
+          <AutoTranslatedText text={detail.description} />
         </Text>
       </div>
 
@@ -105,12 +109,15 @@ export default function MoverDetailProfile({
           "rounded-12 px-40 py-22",
           "md:rounded-16 md:px-[100px] md:py-28",
         )}
-        aria-label="기사님 실적"
+        aria-label={t("moverDetailPerformance")}
       >
-        <StatItem label="진행" value={`${detail.confirmedCount}건`} />
+        <StatItem
+          label={t("myPageCompleted")}
+          value={t("myPageCompletedCount", { count: detail.confirmedCount })}
+        />
 
         <StatItem
-          label="리뷰"
+          label={t("myPageReviews")}
           value={
             <span className="flex items-center gap-2 md:gap-6">
               <StarIcon
@@ -145,7 +152,10 @@ export default function MoverDetailProfile({
           }
         />
 
-        <StatItem label="총 경력" value={`${detail.careerYears}년`} />
+        <StatItem
+          label={t("myPageCareer")}
+          value={t("myPageCareerYears", { years: detail.careerYears })}
+        />
       </div>
     </section>
   );

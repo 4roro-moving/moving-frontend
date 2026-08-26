@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import FormField from "@/components/common/FormField/FormField";
@@ -12,12 +13,13 @@ import ProfileChipGroup from "@/components/profile/ProfileChipGroup";
 import ProfileFormActions from "@/components/profile/ProfileFormActions";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
+import { useProfileLocalizedOptions } from "@/components/profile/useProfileLocalizedOptions";
 import { useCustomerProfileEditForm } from "@/hooks/profile/useCustomerProfileEditForm";
-import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import { CUSTOMER_PROFILE_NAME_MAX_LENGTH } from "@/lib/constants/profileValidation";
-import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
+import { type RegionId } from "@/lib/constants/region";
 import {
-  customerProfileEditSchema,
+  createCustomerProfileEditSchema,
+  type CustomerProfileEditValidationMessages,
   type CustomerProfileEditFormValues,
 } from "@/lib/schemas/customerProfileEditSchema";
 import { preventEnterSubmitOnInput } from "@/lib/utils/preventEnterSubmitOnInput";
@@ -36,6 +38,8 @@ const CustomerProfileEditForm = ({
   defaultValues,
   initialImageUrl = null,
 }: CustomerProfileEditFormProps) => {
+  const t = useTranslations("profile");
+  const { moveTypeOptions, regionOptions } = useProfileLocalizedOptions();
   const {
     register,
     control,
@@ -47,7 +51,19 @@ const CustomerProfileEditForm = ({
     setValue,
     formState: { errors, isValid, dirtyFields, isDirty },
   } = useForm<CustomerProfileEditFormValues>({
-    resolver: zodResolver(customerProfileEditSchema),
+    resolver: zodResolver(
+      createCustomerProfileEditSchema({
+        nameRequired: t("validation.nameRequired"),
+        nameMax: t("validation.nameMax", { max: CUSTOMER_PROFILE_NAME_MAX_LENGTH }),
+        serviceRequired: t("validation.serviceRequired"),
+        regionRequired: t("validation.regionRequired"),
+        currentPasswordRequired: t("validation.currentPasswordRequired"),
+        newPasswordRequired: t("validation.newPasswordRequired"),
+        newPasswordMin: t("validation.newPasswordMin"),
+        newPasswordConfirmRequired: t("validation.newPasswordConfirmRequired"),
+        newPasswordMismatch: t("validation.newPasswordMismatch"),
+      } satisfies CustomerProfileEditValidationMessages),
+    ),
     mode: "onChange",
     defaultValues: {
       name: "",
@@ -68,6 +84,12 @@ const CustomerProfileEditForm = ({
   const { submitError, toastMessage, isPending, setToastMessage, submit } =
     useCustomerProfileEditForm({
       hasPassword,
+      messages: {
+        noChanges: t("editNoChanges"),
+        partialSaveFailed: t("editPartialSaveFailed"),
+        saveSuccess: t("editSaveSuccess"),
+        saveFailed: t("editSaveFailed"),
+      },
       reset,
       resetField,
       setError,
@@ -84,15 +106,20 @@ const CustomerProfileEditForm = ({
       noValidate
       autoComplete="off"
     >
-      <ProfilePageHeader title="프로필 수정" />
+      <ProfilePageHeader title={t("editTitle")} />
 
       <div className="flex w-full flex-col gap-32 lg:flex-row lg:items-start lg:justify-between lg:gap-[120px]">
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">
-          <FormField label="이름" labelFor="customer-edit-name" required>
+          <FormField
+            label={t("name")}
+            labelFor="customer-edit-name"
+            required
+            requiredLabel={t("requiredField")}
+          >
             <Input
               id="customer-edit-name"
               size="md"
-              placeholder="성함을 입력해 주세요"
+              placeholder={t("namePlaceholder")}
               error={errors.name?.message}
               maxLength={CUSTOMER_PROFILE_NAME_MAX_LENGTH}
               disabled={isPending}
@@ -100,7 +127,7 @@ const CustomerProfileEditForm = ({
             />
           </FormField>
 
-          <FormField label="이메일" labelFor="customer-edit-email">
+          <FormField label={t("email")} labelFor="customer-edit-email">
             <Input
               id="customer-edit-email"
               size="md"
@@ -111,42 +138,51 @@ const CustomerProfileEditForm = ({
             />
           </FormField>
 
-          <FormField label="전화번호" labelFor="customer-edit-phone">
+          <FormField label={t("phone")} labelFor="customer-edit-phone">
             <Input id="customer-edit-phone" size="md" readOnly disabled {...register("phone")} />
           </FormField>
 
           {hasPassword ? (
             <>
-              <FormField label="현재 비밀번호" labelFor="customer-edit-current-password">
+              <FormField label={t("currentPassword")} labelFor="customer-edit-current-password">
                 <PasswordInput
                   id="customer-edit-current-password"
                   size="md"
                   autoComplete="current-password"
-                  placeholder="현재 비밀번호를 입력해 주세요"
+                  placeholder={t("currentPasswordPlaceholder")}
+                  showPasswordAriaLabel={t("showPassword")}
+                  hidePasswordAriaLabel={t("hidePassword")}
                   error={errors.currentPassword?.message}
                   disabled={isPending}
                   {...register("currentPassword")}
                 />
               </FormField>
 
-              <FormField label="새 비밀번호" labelFor="customer-edit-new-password">
+              <FormField label={t("newPassword")} labelFor="customer-edit-new-password">
                 <PasswordInput
                   id="customer-edit-new-password"
                   size="md"
                   autoComplete="new-password"
-                  placeholder="새 비밀번호를 입력해 주세요"
+                  placeholder={t("newPasswordPlaceholder")}
+                  showPasswordAriaLabel={t("showPassword")}
+                  hidePasswordAriaLabel={t("hidePassword")}
                   error={errors.newPassword?.message}
                   disabled={isPending}
                   {...register("newPassword")}
                 />
               </FormField>
 
-              <FormField label="새 비밀번호 확인" labelFor="customer-edit-new-password-confirm">
+              <FormField
+                label={t("newPasswordConfirm")}
+                labelFor="customer-edit-new-password-confirm"
+              >
                 <PasswordInput
                   id="customer-edit-new-password-confirm"
                   size="md"
                   autoComplete="new-password"
-                  placeholder="새 비밀번호를 다시 입력해 주세요"
+                  placeholder={t("newPasswordConfirmPlaceholder")}
+                  showPasswordAriaLabel={t("showPassword")}
+                  hidePasswordAriaLabel={t("hidePassword")}
                   error={errors.newPasswordConfirm?.message}
                   disabled={isPending}
                   {...register("newPasswordConfirm")}
@@ -157,7 +193,7 @@ const CustomerProfileEditForm = ({
         </div>
 
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">
-          <FormField label="프로필 이미지" labelFor="customer-edit-profile-image">
+          <FormField label={t("image")} labelFor="customer-edit-profile-image">
             <Controller
               name="imageFile"
               control={control}
@@ -184,9 +220,9 @@ const CustomerProfileEditForm = ({
           </FormField>
 
           <FormField
-            label="이용 서비스"
+            label={t("services")}
             labelId="customer-edit-service-types-label"
-            description="*견적 요청 시 이용 서비스를 선택할 수 있어요."
+            description={t("editServicesHint")}
           >
             <Controller
               name="serviceTypes"
@@ -195,7 +231,7 @@ const CustomerProfileEditForm = ({
                 <ProfileChipGroup<MoveType>
                   aria-labelledby="customer-edit-service-types-label"
                   selectionMode="multiple"
-                  options={MOVE_TYPE_OPTIONS}
+                  options={moveTypeOptions}
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.serviceTypes?.message}
@@ -206,9 +242,9 @@ const CustomerProfileEditForm = ({
           </FormField>
 
           <FormField
-            label="내가 사는 지역"
+            label={t("region")}
             labelId="customer-edit-region-label"
-            description="*견적 요청 시 지역을 설정할 수 있어요."
+            description={t("editRegionHint")}
           >
             <Controller
               name="regionId"
@@ -217,7 +253,7 @@ const CustomerProfileEditForm = ({
                 <ProfileChipGroup<RegionId>
                   aria-labelledby="customer-edit-region-label"
                   selectionMode="single"
-                  options={REGION_OPTIONS}
+                  options={regionOptions}
                   value={field.value ?? null}
                   onChange={field.onChange}
                   error={errors.regionId?.message}

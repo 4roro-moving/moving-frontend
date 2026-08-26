@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useState } from "react";
 
 import Textarea from "@/components/common/Input/Textarea";
@@ -27,6 +29,7 @@ export default function RejectEstimateModal({
   onExitComplete,
   onSubmit,
 }: RejectEstimateModalProps) {
+  const tr = useTranslations("estimates");
   const [reason, setReason] = useState("");
   const [isReasonTouched, setIsReasonTouched] = useState(false);
   const [hasSubmissionStarted, setHasSubmissionStarted] = useState(false);
@@ -46,7 +49,10 @@ export default function RejectEstimateModal({
     trimmedReason.length <= MAX_TEXT_CONTENT_LENGTH;
   const reasonError =
     isReasonTouched && !isReasonValid
-      ? `반려 사유는 ${MIN_TEXT_CONTENT_LENGTH}자 이상 ${MAX_TEXT_CONTENT_LENGTH}자 이하로 입력해 주세요.`
+      ? tr("mover.rejectReasonLength", {
+          min: MIN_TEXT_CONTENT_LENGTH,
+          max: MAX_TEXT_CONTENT_LENGTH,
+        })
       : undefined;
 
   const handleSubmit = () => {
@@ -67,7 +73,7 @@ export default function RejectEstimateModal({
       dismissible={false}
     >
       <div className="flex w-full shrink-0 items-center justify-between gap-16">
-        <Modal.Title>제안 반려</Modal.Title>
+        <Modal.Title>{tr("mover.rejectTitle")}</Modal.Title>
         <Modal.Close onClose={handleClose} disabled={isSubmitting} />
       </div>
 
@@ -77,7 +83,7 @@ export default function RejectEstimateModal({
             density="modal"
             moveType={request.moveType}
             isDesignated={request.isDesignated}
-            title={`${request.customer.name} 고객님`}
+            title={tr("mover.customerName", { name: request.customer.name })}
             fromLabel={request.fromRegion}
             toLabel={request.toRegion}
             moveDate={request.moveDate}
@@ -85,7 +91,7 @@ export default function RejectEstimateModal({
         </section>
 
         <FormField
-          label="반려 사유를 입력해 주세요"
+          label={tr("mover.rejectReasonLabel")}
           labelFor="reject-reason"
           variant="compact"
           className="gap-16"
@@ -95,7 +101,7 @@ export default function RejectEstimateModal({
               id="reject-reason"
               value={reason}
               maxLength={MAX_TEXT_CONTENT_LENGTH}
-              placeholder={`최소 ${MIN_TEXT_CONTENT_LENGTH}자 이상 입력해 주세요`}
+              placeholder={tr("mover.commentPlaceholder", { min: MIN_TEXT_CONTENT_LENGTH })}
               error={reasonError}
               disabled={isSubmitting}
               onChange={(event) => setReason(event.target.value)}
@@ -117,7 +123,7 @@ export default function RejectEstimateModal({
         disabled={!isReasonValid || isSubmitting}
         onClick={handleSubmit}
       >
-        {isSubmitting ? "반려하는 중..." : "반려하기"}
+        {isSubmitting ? tr("mover.rejecting") : tr("mover.reject")}
       </Modal.Button>
     </Modal>
   );

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 
 interface MyGiveawayRequestCardSkeletonListProps {
@@ -7,6 +10,7 @@ interface MyGiveawayRequestCardSkeletonListProps {
 const MyGiveawayRequestCardSkeletonList = ({
   count = 3,
 }: MyGiveawayRequestCardSkeletonListProps) => {
+  const t = useTranslations("giveaway");
   return (
     <div>
       <ul className="flex w-full flex-col gap-20" aria-hidden="true">
@@ -36,7 +40,7 @@ const MyGiveawayRequestCardSkeletonList = ({
         ))}
       </ul>
       <p className="sr-only" role="status">
-        나눔 신청 내역을 불러오는 중
+        {t("myRequestsLoading")}
       </p>
     </div>
   );

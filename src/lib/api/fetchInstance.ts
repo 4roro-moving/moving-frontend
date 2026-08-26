@@ -17,6 +17,8 @@ export interface FetchRequestOptions extends RequestInit {
   skipAuth?: boolean;
   /** true면 401이어도 /auth/refresh 재시도 안 함 */
   skipRefresh?: boolean;
+  /** 요청별 timeout(ms). 미지정 시 DEFAULT_TIMEOUT_MS */
+  timeoutMs?: number;
 }
 
 const NO_REFRESH_ENDPOINTS: readonly string[] = [
@@ -94,8 +96,11 @@ const getRequestHeaders = async (
   return headers;
 };
 
-const buildTimeoutSignal = (signal?: AbortSignal): AbortSignal => {
-  const timeoutSignal = AbortSignal.timeout(DEFAULT_TIMEOUT_MS);
+const buildTimeoutSignal = (
+  signal?: AbortSignal,
+  timeoutMs: number = DEFAULT_TIMEOUT_MS,
+): AbortSignal => {
+  const timeoutSignal = AbortSignal.timeout(timeoutMs);
 
   return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
 };
@@ -112,6 +117,7 @@ const requestBody = async <T, TPagination = Pagination>(
     baseURL = BASE_URL,
     skipAuth,
     skipRefresh,
+    timeoutMs,
     headers: customHeaders,
     ...fetchOptions
   } = options;
@@ -122,7 +128,7 @@ const requestBody = async <T, TPagination = Pagination>(
     ...fetchOptions,
     credentials: "include",
     headers,
-    signal: buildTimeoutSignal(fetchOptions.signal ?? undefined),
+    signal: buildTimeoutSignal(fetchOptions.signal ?? undefined, timeoutMs ?? DEFAULT_TIMEOUT_MS),
   });
 
   if (res.status === 204) {

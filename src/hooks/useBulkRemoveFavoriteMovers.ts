@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -18,10 +20,6 @@ import {
   type FavoriteMoversCacheData,
 } from "@/lib/utils/favoriteMoverCache";
 import { ApiError } from "@/types/api";
-
-const LOGIN_REQUIRED_MESSAGE = "로그인이 필요한 서비스입니다.";
-const CUSTOMER_REQUIRED_MESSAGE = "고객만 이용할 수 있는 서비스입니다.";
-const ALL_FAILED_MESSAGE = "선택한 기사님을 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.";
 
 function isUnauthorizedError(error: unknown): boolean {
   if (error instanceof ApiError) {
@@ -45,6 +43,7 @@ interface BulkRemoveFavoriteContext {
 
 /** 찜한 기사님 일괄 해제 — DELETE /favorites/movers bulk + 캐시 무효화 */
 export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMoversOptions) {
+  const t = useTranslations("favorites");
   const queryClient = useQueryClient();
   const router = useRouter();
   const loginRequiredModal = useLoginRequiredModal();
@@ -107,7 +106,7 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
         return;
       }
 
-      onErrorRef.current?.(getApiErrorMessage(error, ALL_FAILED_MESSAGE));
+      onErrorRef.current?.(getApiErrorMessage(error, t("bulkDeleteFailed")));
     },
     onSettled: () => {
       void invalidateFavoriteRelatedQueries(queryClient, authScope);
@@ -121,16 +120,16 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
       mutateOptions?: Parameters<typeof baseMutateAsync>[1],
     ) => {
       if (auth.isPending) {
-        return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
+        return Promise.reject(new Error(t("loginRequired")));
       }
 
       if (!auth.isAuthenticated || !hasAuthSession()) {
         requireLogin();
-        return Promise.reject(new Error(LOGIN_REQUIRED_MESSAGE));
+        return Promise.reject(new Error(t("loginRequired")));
       }
 
       if (!isCustomer) {
-        return Promise.reject(new Error(CUSTOMER_REQUIRED_MESSAGE));
+        return Promise.reject(new Error(t("customerRequired")));
       }
 
       if (variables.mode === "ids" && variables.moverIds.length === 0) {
@@ -139,7 +138,7 @@ export function useBulkRemoveFavoriteMovers(options?: UseBulkRemoveFavoriteMover
 
       return baseMutateAsync(variables, mutateOptions);
     },
-    [auth.isAuthenticated, auth.isPending, baseMutateAsync, isCustomer, requireLogin],
+    [auth.isAuthenticated, auth.isPending, baseMutateAsync, isCustomer, requireLogin, t],
   );
 
   return useMemo(() => ({ ...mutation, mutateAsync }), [mutation, mutateAsync]);

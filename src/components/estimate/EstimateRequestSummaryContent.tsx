@@ -1,10 +1,13 @@
+"use client";
+
+import { useFormatter, useTranslations } from "next-intl";
+
 import type { ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { ArrowRightIcon } from "@/icons";
-import { formatKoreanDateTime } from "@/lib/utils/date";
 import { cn } from "@/lib/utils/cn";
 import type { MoveType } from "@/types/move";
 
@@ -47,6 +50,8 @@ export default function EstimateRequestSummaryContent({
   className,
   density = "card",
 }: EstimateRequestSummaryContentProps) {
+  const t = useTranslations("estimates");
+  const format = useFormatter();
   const isModal = density === "modal";
 
   const locationValueVariant = isModal
@@ -98,7 +103,7 @@ export default function EstimateRequestSummaryContent({
         <div className="flex items-end gap-12">
           <div className={cn(isModal && "flex items-center gap-8 xl:block")}>
             <Text as="dt" variant="md-regular" className="text-text-muted">
-              출발지
+              {t("fromAddress")}
             </Text>
 
             <Text
@@ -114,7 +119,7 @@ export default function EstimateRequestSummaryContent({
 
           <div className={cn(isModal && "flex items-center gap-8 xl:block")}>
             <Text as="dt" variant="md-regular" className="text-text-muted">
-              도착지
+              {t("toAddress")}
             </Text>
 
             <Text
@@ -129,7 +134,7 @@ export default function EstimateRequestSummaryContent({
 
         <div className={cn(isModal && "flex items-center gap-8 xl:block")}>
           <Text as="dt" variant="md-regular" className="text-text-muted">
-            이사일
+            {t("moveDate")}
           </Text>
 
           <Text
@@ -137,7 +142,11 @@ export default function EstimateRequestSummaryContent({
             variant={locationValueVariant}
             className={cn(locationValueClass, "m-0 whitespace-nowrap")}
           >
-            {formatKoreanDateTime(moveDate)}
+            {format.dateTime(new Date(moveDate), {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            })}
           </Text>
         </div>
       </dl>

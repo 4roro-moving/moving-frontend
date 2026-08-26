@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import EstimatesListEmptyState from "@/components/estimate/EstimatesListEmptyState";
 import type { ReceivedEstimatePanel } from "@/types/estimate";
 
@@ -12,8 +13,9 @@ export default function ReceivedEstimatesList({
   panels,
   onFavoriteError,
 }: ReceivedEstimatesListProps) {
+  const t = useTranslations("estimates");
   if (panels.length === 0) {
-    return <EstimatesListEmptyState description="받은 견적이 없습니다." alignWithFilter />;
+    return <EstimatesListEmptyState description={t("received.empty")} alignWithFilter />;
   }
 
   return (

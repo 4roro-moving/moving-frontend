@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -12,11 +13,7 @@ import AddressSelectModal from "@/components/estimate/request/AddressSelectModal
 import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
 import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips";
 import KakaoMap from "@/components/mover/map/KakaoMap";
-import {
-  type MoverRecommendation,
-  type MoverRecommendationMatchType,
-  useMoverRecommendations,
-} from "@/hooks/useMoverRecommendations";
+import { type MoverRecommendation, useMoverRecommendations } from "@/hooks/useMoverRecommendations";
 import { useRecommendationRegionIds } from "@/hooks/useRecommendationRegionIds";
 import { DriverBadgeIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
@@ -26,14 +23,10 @@ import type { MoveType } from "@/types/move";
 type AddressModalKind = "출발지" | "도착지"; // 모달 종류
 type MoveTypeFilter = "ALL" | MoveType; //이사 유형 필터
 
-const MATCH_LABEL: Record<MoverRecommendationMatchType, string> = {
-  BOTH: "출발지·도착지 모두 가능",
-  DEPARTURE: "출발지 지역 서비스",
-  DESTINATION: "도착지 지역 서비스",
-}; // 서버에서 받아오는 값 아니고 useMoverRecommendations에서 API 비교 후 생성
-
 //기사 표시 카드
 function RecommendationCard({ mover }: { mover: MoverRecommendation }) {
+  const t = useTranslations("moverRecommendation");
+
   return (
     <article className="rounded-16 bg-background-surface border-border-subtle border p-16 shadow-[-2px_-2px_10px_0_rgba(220,220,220,0.2),2px_2px_10px_0_rgba(220,220,220,0.2)]">
       <div>
@@ -41,7 +34,7 @@ function RecommendationCard({ mover }: { mover: MoverRecommendation }) {
           {/* 실제 서비스 유형 */}
           <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
           <span className="text-text-brand text-[12px] font-semibold">
-            {MATCH_LABEL[mover.matchType]}
+            {t(`match.${mover.matchType}`)}
           </span>
         </div>
 
@@ -64,7 +57,7 @@ function RecommendationCard({ mover }: { mover: MoverRecommendation }) {
             <div className="mb-4 flex items-center gap-4">
               <DriverBadgeIcon className="h-20 w-18 shrink-0" />
               <Text as="span" variant="md-semibold" className="text-text-secondary">
-                {mover.name} 기사님
+                {t("moverName", { name: mover.name })}
               </Text>
             </div>
             <div className="text-text-muted flex flex-wrap items-center gap-6 text-[13px]">
@@ -73,9 +66,9 @@ function RecommendationCard({ mover }: { mover: MoverRecommendation }) {
               </span>
               <span>({mover.reviewCount})</span>
               <span aria-hidden="true">·</span>
-              <span>경력 {mover.careerYears}년</span>
+              <span>{t("careerYears", { count: mover.careerYears })}</span>
               <span aria-hidden="true">·</span>
-              <span>{mover.confirmedCount}건 확정</span>
+              <span>{t("confirmedCount", { count: mover.confirmedCount })}</span>
             </div>
           </div>
         </div>
@@ -85,13 +78,16 @@ function RecommendationCard({ mover }: { mover: MoverRecommendation }) {
         href={APP_ROUTES.MOVERS.DETAIL(mover.id)}
         className="border-border-default text-text-secondary rounded-12 hover:bg-background-hover mt-14 flex h-40 w-full items-center justify-center border text-[14px] font-semibold"
       >
-        프로필 보기
+        {t("viewProfile")}
       </Link>
     </article>
   );
 }
 
 export function MoverRecommendationMapPage() {
+  const t = useTranslations("moverRecommendation");
+  const tMoverSearch = useTranslations("moverSearch");
+
   const [departure, setDeparture] = useState<AddressSearchItem | null>(null);
   const [destination, setDestination] = useState<AddressSearchItem | null>(null);
   const [moveType, setMoveType] = useState<MoveTypeFilter>("ALL");
@@ -152,10 +148,10 @@ export function MoverRecommendationMapPage() {
         <aside className="border-border-subtle z-10 flex w-full shrink-0 flex-col border-b bg-white lg:h-full lg:w-[430px] lg:overflow-hidden lg:border-r lg:border-b-0">
           <div className="border-border-subtle shrink-0 border-b p-24 lg:p-28">
             <Text as="h1" variant="2xl-semibold" className="text-text-secondary mb-8">
-              지역 맞춤 기사님 추천
+              {t("title")}
             </Text>
             <Text as="p" variant="sm-medium" className="text-text-muted mb-24">
-              출발지와 도착지를 입력하면 서비스 지역이 일치하는 기사님을 찾아드려요.
+              {t("description")}
             </Text>
 
             <div className="flex flex-col gap-12">
@@ -169,12 +165,12 @@ export function MoverRecommendationMapPage() {
                     setAddressModalKind("출발지");
                   }
                 }}
-                placeholder="출발지를 입력해 주세요."
-                aria-label="출발지"
+                placeholder={t("departurePlaceholder")}
+                aria-label={t("departure")}
                 aria-haspopup="dialog"
                 leftSlot={
                   <span className="bg-text-secondary flex size-24 shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-white">
-                    출
+                    {t("departureShort")}
                   </span>
                 }
               />
@@ -188,27 +184,27 @@ export function MoverRecommendationMapPage() {
                     setAddressModalKind("도착지");
                   }
                 }}
-                placeholder="도착지를 입력해 주세요."
-                aria-label="도착지"
+                placeholder={t("destinationPlaceholder")}
+                aria-label={t("destination")}
                 aria-haspopup="dialog"
                 leftSlot={
                   <span className="bg-background-brand flex size-24 shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-white">
-                    도
+                    {t("destinationShort")}
                   </span>
                 }
               />
               <Select
-                desc="이사 유형 전체"
-                label="이사 유형"
+                desc={t("allMoveTypes")}
+                label={t("moveType")}
                 defaultValue={moveType}
                 placeholderValue="ALL"
                 onChange={(value) => setMoveType(value as MoveTypeFilter)}
                 className="w-full [&>button]:w-full"
               >
-                <Select.Option value="ALL">이사 유형 전체</Select.Option>
-                <Select.Option value="SMALL">소형이사</Select.Option>
-                <Select.Option value="HOME">가정이사</Select.Option>
-                <Select.Option value="OFFICE">사무실이사</Select.Option>
+                <Select.Option value="ALL">{t("allMoveTypes")}</Select.Option>
+                <Select.Option value="SMALL">{tMoverSearch("moveTypes.SMALL")}</Select.Option>
+                <Select.Option value="HOME">{tMoverSearch("moveTypes.HOME")}</Select.Option>
+                <Select.Option value="OFFICE">{tMoverSearch("moveTypes.OFFICE")}</Select.Option>
               </Select>
               <Button
                 size="cta"
@@ -216,7 +212,7 @@ export function MoverRecommendationMapPage() {
                 disabled={!departure || !destination}
                 onClick={handleSearch}
               >
-                기사님 검색
+                {t("search")}
               </Button>
             </div>
           </div>
@@ -225,29 +221,25 @@ export function MoverRecommendationMapPage() {
             <div className="mb-16 flex items-end justify-between gap-12">
               <div>
                 <Text as="h2" variant="xl-semibold" className="text-text-secondary">
-                  추천 기사님 {movers.length}명
+                  {t("recommendedCount", { count: movers.length })}
                 </Text>
                 <Text as="p" variant="sm-medium" className="text-text-muted mt-2">
-                  지역 일치도 우선 · 평점 높은 순
+                  {t("sortDescription")}
                 </Text>
               </div>
             </div>
 
             <div className="rounded-12 mb-16 flex min-h-60 flex-col justify-center gap-2 bg-[#fff6f3] px-14 py-10 text-[12px] leading-[18px] text-[#8a4a3d]">
-              <span className="block">추천 목록은 등록된 서비스 가능 지역 기준입니다.</span>
-              <span className="block">실제 가능 여부는 견적 요청 시 확인해 주세요.</span>
+              <span className="block">{t("serviceRegionNotice")}</span>
+              <span className="block">{t("availabilityNotice")}</span>
             </div>
 
             {!hasSearched ? (
               <div className="text-text-muted rounded-16 border-border-subtle flex min-h-160 items-center justify-center border px-20 text-center text-[14px]">
-                출발지와 도착지를 입력하고 기사님을 검색해 주세요.
+                {t("searchPrompt")}
               </div>
             ) : isLoading ? (
-              <div
-                role="status"
-                className="flex flex-col gap-12"
-                aria-label="추천 기사님을 불러오는 중"
-              >
+              <div role="status" className="flex flex-col gap-12" aria-label={t("loading")}>
                 {Array.from({ length: 3 }, (_, index) => (
                   <Skeleton key={index} className="rounded-16 h-176 w-full" />
                 ))}
@@ -258,21 +250,19 @@ export function MoverRecommendationMapPage() {
                 className="rounded-16 border-border-subtle flex min-h-160 flex-col items-center justify-center gap-12 border px-20 text-center"
               >
                 <Text as="p" variant="sm-medium" className="text-text-error">
-                  {isRegionError
-                    ? "선택한 주소의 지역 정보를 확인하지 못했습니다."
-                    : "추천 기사님을 불러오지 못했습니다."}
+                  {isRegionError ? t("regionLoadFailed") : t("moversLoadFailed")}
                 </Text>
                 <button
                   type="button"
                   className="text-text-brand text-[14px] font-semibold"
                   onClick={() => void (isRegionError ? refetchRegions() : refetch())}
                 >
-                  다시 시도
+                  {t("retry")}
                 </button>
               </div>
             ) : departureRegionId === null || destinationRegionId === null ? (
               <div className="text-text-error rounded-16 border-border-subtle flex min-h-160 items-center justify-center border px-20 text-center text-[14px]">
-                선택한 주소의 지역 정보를 확인할 수 없습니다.
+                {t("regionUnavailable")}
               </div>
             ) : movers.length > 0 ? (
               <div className="flex flex-col gap-12">
@@ -282,7 +272,7 @@ export function MoverRecommendationMapPage() {
               </div>
             ) : (
               <div className="text-text-muted rounded-16 border-border-subtle flex min-h-160 items-center justify-center border text-center text-[14px]">
-                선택한 조건에 맞는 기사님이 없습니다.
+                {t("empty")}
               </div>
             )}
           </div>

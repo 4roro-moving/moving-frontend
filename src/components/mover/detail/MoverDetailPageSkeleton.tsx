@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { MOVER_REVIEW_PAGE_LIMIT } from "@/lib/api/movers";
 import { cn } from "@/lib/utils/cn";
@@ -12,11 +16,13 @@ export function MoverDetailReviewsSkeleton({
   count = MOVER_REVIEW_PAGE_LIMIT,
   className,
 }: MoverDetailReviewsSkeletonProps) {
+  const t = useTranslations("profile");
+
   return (
     <ul
       className={cn("flex w-full flex-col", className)}
       aria-busy="true"
-      aria-label="리뷰 목록을 불러오는 중"
+      aria-label={t("moverDetailReviewListLoading")}
     >
       {Array.from({ length: count }, (_, index) => (
         <li
@@ -46,11 +52,13 @@ export function MoverDetailReviewsSkeleton({
 
 /** 기사 상세 페이지 전체 로딩 스켈레톤 */
 export default function MoverDetailPageSkeleton() {
+  const t = useTranslations("profile");
+
   return (
     <div
       className="bg-background-default flex w-full max-w-full flex-col items-start overflow-x-hidden pb-[110px] xl:pb-0"
       aria-busy="true"
-      aria-label="기사님 정보를 불러오는 중"
+      aria-label={t("moverDetailLoading")}
     >
       <div className="relative h-160 w-full shrink-0 md:h-200 xl:h-64.75">
         <div className="bg-background-brand absolute top-0 left-1/2 h-30.5 w-full max-w-480 -translate-x-1/2 md:h-42.5 xl:h-56.25" />

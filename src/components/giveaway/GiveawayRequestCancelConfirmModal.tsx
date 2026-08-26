@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import AlertModal from "@/components/common/Modal/AlertModal";
@@ -22,6 +23,7 @@ const GiveawayRequestCancelConfirmModal = ({
   onClose,
   onConfirm,
 }: GiveawayRequestCancelConfirmModalProps) => {
+  const t = useTranslations("giveaway");
   const [cachedRequest, setCachedRequest] = useState(request);
 
   if (request !== null && request !== cachedRequest) {
@@ -31,8 +33,8 @@ const GiveawayRequestCancelConfirmModal = ({
   const displayedRequest = request ?? cachedRequest;
   const isSelected = displayedRequest?.status === GIVEAWAY_REQUEST_STATUS.SELECTED;
   const description = isSelected
-    ? "선정된 신청을 취소할까요? 나눔이 다시 신청 가능 상태로 돌아갑니다."
-    : "나눔 신청을 취소할까요? 취소 후에도 다시 신청할 수 있습니다.";
+    ? t("requestCancelSelectedDescription")
+    : t("requestCancelDescription");
 
   return (
     <AlertModal
@@ -40,7 +42,7 @@ const GiveawayRequestCancelConfirmModal = ({
       onClose={onClose}
       closeDisabled={isPending}
       size="sm"
-      title="신청 취소"
+      title={t("requestCancelTitle")}
       description={description}
       actions={
         <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
@@ -53,7 +55,7 @@ const GiveawayRequestCancelConfirmModal = ({
             onClick={onClose}
             className="md:flex-1"
           >
-            닫기
+            {t("close")}
           </Modal.Button>
           <Modal.Button
             type="button"
@@ -64,7 +66,7 @@ const GiveawayRequestCancelConfirmModal = ({
             onClick={onConfirm}
             className="md:flex-1"
           >
-            {isPending ? "취소 중..." : "취소하기"}
+            {isPending ? t("canceling") : t("cancelRequest")}
           </Modal.Button>
         </div>
       }

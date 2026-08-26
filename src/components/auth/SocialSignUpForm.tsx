@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useEffect, useId, useState } from "react";
 
 import AuthHeader from "@/components/auth/AuthHeader";
@@ -19,9 +20,8 @@ interface SocialSignUpFormProps {
   audience?: AuthAudience;
 }
 
-const REQUIRED_TERMS_AGREE_MESSAGE = "필수 약관에 동의해 주세요.";
-
 const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
+  const t = useTranslations("auth");
   const {
     signUpTerms,
     agreementsById,
@@ -35,10 +35,11 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const termsHintId = useId();
+  const requiredTermsAgreeMessage = t("termsRequiredAgreement");
   const termsHint = isTermsError
-    ? "약관을 불러오지 못해 소셜 가입을 진행할 수 없습니다."
+    ? t("socialTermsUnavailable")
     : !isTermsLoading && !canAgree
-      ? "필수 약관에 동의한 뒤 가입할 수 있습니다."
+      ? t("socialTermsRequiredHint")
       : null;
 
   const loginHref = audience === "mover" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
@@ -46,15 +47,20 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
 
   useEffect(() => {
     const timerId = window.setTimeout(() => {
-      setToastMessage(consumeOAuthNeedSignUpToast());
+      const reason = consumeOAuthNeedSignUpToast();
+      if (reason === "need-signup") {
+        setToastMessage(t("oauthNeedSignUpToast"));
+      } else if (reason === "terms-required") {
+        setToastMessage(t("oauthTermsRequiredToast"));
+      }
     }, 0);
     return () => {
       window.clearTimeout(timerId);
     };
-  }, []);
+  }, [t]);
 
   const visibleSubmitError =
-    canAgree && submitError === REQUIRED_TERMS_AGREE_MESSAGE ? null : submitError;
+    canAgree && submitError === requiredTermsAgreeMessage ? null : submitError;
 
   return (
     <div className="flex w-full flex-col items-center gap-40 md:gap-48">
@@ -72,13 +78,13 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
 
           {isTermsError ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
-              약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+              {t("termsLoadFailed")}
             </Text>
           ) : null}
 
           {!isTermsLoading && !isTermsError && !hasRequiredTerms ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
-              가입에 필요한 약관을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+              {t("termsRequiredLoadFailed")}
             </Text>
           ) : null}
 
@@ -96,7 +102,7 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
               variant={{ base: "xs-regular", md: "xl-regular" }}
               className="text-text-description"
             >
-              이미 무빙 회원이신가요?
+              {t("alreadyMember")}
             </Text>
             <Link
               href={loginHref}
@@ -105,7 +111,7 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
                 "text-text-brand",
               )}
             >
-              로그인
+              {t("login")}
             </Link>
           </p>
           <p className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
@@ -114,7 +120,7 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
               variant={{ base: "xs-regular", md: "xl-regular" }}
               className="text-text-description"
             >
-              이메일로 가입하시겠어요?
+              {t("preferEmailSignUp")}
             </Text>
             <Link
               href={localSignUpHref}
@@ -123,7 +129,7 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
                 "text-text-brand",
               )}
             >
-              이메일로 회원가입하기
+              {t("signUpWithEmail")}
             </Link>
           </p>
         </div>
@@ -135,7 +141,7 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
           variant={{ base: "xs-regular", md: "xl-regular" }}
           className="text-text-description"
         >
-          SNS 계정으로 간편 가입하기
+          {t("socialSignUp")}
         </Text>
         {termsHint ? (
           <p id={termsHintId} className="sr-only">
@@ -146,7 +152,7 @@ const SocialSignUpForm = ({ audience = "customer" }: SocialSignUpFormProps) => {
           audience={audience}
           intent="signup"
           disabled={!canAgree}
-          disabledMessage={!canAgree && hasRequiredTerms ? REQUIRED_TERMS_AGREE_MESSAGE : undefined}
+          disabledMessage={!canAgree && hasRequiredTerms ? requiredTermsAgreeMessage : undefined}
           describedBy={termsHint ? termsHintId : undefined}
           agreements={agreements}
           onError={(error) => {

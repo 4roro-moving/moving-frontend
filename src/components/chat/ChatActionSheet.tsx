@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ComponentType, SVGProps } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -23,24 +24,24 @@ const CHAT_ACTIONS_BY_ROLE: Record<ChatParticipantRole, ChatActionItem[]> = {
   MOVER: [
     {
       id: "estimate-revision",
-      label: "견적 수정",
+      label: "estimateRevision",
       icon: WriteIcon,
     },
     {
       id: "attach-photo",
-      label: "사진 첨부하기",
+      label: "attachPhoto",
       icon: GalleryIcon,
     },
   ],
   CUSTOMER: [
     {
       id: "attach-photo",
-      label: "사진 첨부하기",
+      label: "attachPhoto",
       icon: GalleryIcon,
     },
     {
       id: "confirm-estimate",
-      label: "견적 확정",
+      label: "confirmEstimate",
       icon: ConfirmedCheckIcon,
     },
   ],
@@ -69,6 +70,7 @@ export default function ChatActionSheet({
   onClose,
   actions,
 }: ChatActionSheetProps) {
+  const t = useTranslations("chat");
   const { isRendered, isVisible } = usePresence(open, SHEET_EXIT_DURATION_MS);
 
   if (!isRendered) return null;
@@ -94,7 +96,7 @@ export default function ChatActionSheet({
   return (
     <div
       role="region"
-      aria-label="채팅 메뉴"
+      aria-label={t("menuAria")}
       inert={!isVisible ? true : undefined}
       className={cn(
         "border-border-subtle bg-background-surface shrink-0 border-t px-40 pt-16 pb-20",
@@ -127,7 +129,7 @@ export default function ChatActionSheet({
                 variant="sm-semibold"
                 className="text-text-primary text-center whitespace-nowrap"
               >
-                {item.label}
+                {t(`actions.${item.label}`)}
               </Text>
             </button>
           );

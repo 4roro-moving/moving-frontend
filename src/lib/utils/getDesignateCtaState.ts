@@ -26,16 +26,9 @@ export const DESIGNATE_CTA_DISABLED_STATUSES: readonly DesignateCtaStatus[] = [
   "serviceTypeMismatch",
 ];
 
-const DESIGNATE_CTA_BUTTON_LABEL = {
-  confirmed: "진행 중인 견적 보기",
-  alreadyDesignated: "지정 견적 요청 완료",
-  notEditable: "지정 견적 요청 불가",
-  expired: "만료된 견적 요청",
-  limitExceeded: "지정 한도 초과",
-  serviceTypeMismatch: "서비스 유형 불일치",
-} as const satisfies Record<
-  Exclude<DesignateCtaStatus, "needEstimateRequest" | "available">,
-  string
+export type DesignateCtaButtonLabel = Exclude<
+  DesignateCtaStatus,
+  "needEstimateRequest" | "available"
 >;
 
 export interface DesignateCtaState {
@@ -44,8 +37,8 @@ export interface DesignateCtaState {
   estimateRequestId: number | null;
   /** 클릭 시 Toast로 표시할 메시지. 모달·버튼 비활성으로 처리하는 케이스는 null */
   message: string | null;
-  /** 비활성 CTA 등에서 기본 라벨 대신 쓸 문구. null이면 기본 "지정 견적 요청하기" */
-  buttonLabel: string | null;
+  /** 비활성 CTA 등에서 기본 라벨 대신 쓸 locale key 상태. null이면 기본 CTA를 사용한다. */
+  buttonLabel: DesignateCtaButtonLabel | null;
 }
 
 /**
@@ -90,7 +83,7 @@ export function getDesignateCtaState(
       canSubmit: false,
       estimateRequestId,
       message: null,
-      buttonLabel: DESIGNATE_CTA_BUTTON_LABEL.confirmed,
+      buttonLabel: "confirmed",
     };
   }
 
@@ -101,7 +94,7 @@ export function getDesignateCtaState(
       canSubmit: false,
       estimateRequestId,
       message: null,
-      buttonLabel: DESIGNATE_CTA_BUTTON_LABEL.notEditable,
+      buttonLabel: "notEditable",
     };
   }
 
@@ -112,7 +105,7 @@ export function getDesignateCtaState(
       canSubmit: false,
       estimateRequestId,
       message: null,
-      buttonLabel: DESIGNATE_CTA_BUTTON_LABEL.expired,
+      buttonLabel: "expired",
     };
   }
 
@@ -122,7 +115,7 @@ export function getDesignateCtaState(
       canSubmit: false,
       estimateRequestId,
       message: null,
-      buttonLabel: DESIGNATE_CTA_BUTTON_LABEL.alreadyDesignated,
+      buttonLabel: "alreadyDesignated",
     };
   }
 
@@ -132,7 +125,7 @@ export function getDesignateCtaState(
       canSubmit: false,
       estimateRequestId,
       message: null,
-      buttonLabel: DESIGNATE_CTA_BUTTON_LABEL.limitExceeded,
+      buttonLabel: "limitExceeded",
     };
   }
 
@@ -142,7 +135,7 @@ export function getDesignateCtaState(
       canSubmit: false,
       estimateRequestId,
       message: null,
-      buttonLabel: DESIGNATE_CTA_BUTTON_LABEL.serviceTypeMismatch,
+      buttonLabel: "serviceTypeMismatch",
     };
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 
 import Pagination from "@/components/common/Pagination/Pagination";
@@ -40,6 +41,7 @@ export default function MoverDetailReviews({
   canReport,
   currentUserId,
 }: MoverDetailReviewsProps) {
+  const t = useTranslations("profile");
   const [currentPage, setCurrentPage] = useState(1);
 
   const queryClient = useQueryClient();
@@ -105,17 +107,17 @@ export default function MoverDetailReviews({
         }}
         className="text-text-primary"
       >
-        리뷰
+        {t("myPageReviews")}
       </Text>
 
       {isEmpty ? (
         <div className="flex w-full flex-col items-center py-24 text-center">
           <Text as="p" variant="lg-semibold" className="text-text-primary">
-            아직 등록된 리뷰가 없어요!
+            {t("myPageReviewsEmptyTitle")}
           </Text>
 
           <Text as="p" variant="md-regular" className="text-text-subtle">
-            가장 먼저 리뷰를 등록해보세요
+            {t("myPageReviewsEmptyDescription")}
           </Text>
         </div>
       ) : (
@@ -132,8 +134,8 @@ export default function MoverDetailReviews({
 
           {shouldShowError ? (
             <EstimatesQueryStatus
-              message={getApiErrorMessage(error, "리뷰를 불러오지 못했습니다.")}
-              actionLabel="다시 시도"
+              message={getApiErrorMessage(error, t("myPageReviewsLoadFailed"))}
+              actionLabel={t("retry")}
               onAction={() => {
                 void refetch();
               }}

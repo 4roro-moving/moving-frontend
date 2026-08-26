@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import PricePredictionPageClient from "@/components/price-prediction/PricePredictionPageClient";
 
-export const metadata: Metadata = {
-  title: "예상 견적 | MOVING",
-  description: "이사 조건을 입력하고 유사 견적 데이터를 기반으로 예상 이사 비용을 확인해보세요.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("pricePrediction");
+
+  return {
+    title: t("metadataTitle"),
+    description: t("metadataDescription"),
+  };
+}
 
 export default function PricePredictionPage() {
   return (

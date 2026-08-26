@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import Pagination from "@/components/common/Pagination/Pagination";
 import { Text } from "@/components/common/Text";
@@ -63,6 +64,7 @@ export default function MoverMyPageReviews({
   reviewCount,
   ratingDistribution,
 }: MoverMyPageReviewsProps) {
+  const t = useTranslations("profile");
   const [currentPage, setCurrentPage] = useState(1);
   const { data, isLoading, isError, error, isFetching, refetch } = useMoverReviews(moverId, {
     page: currentPage,
@@ -86,7 +88,7 @@ export default function MoverMyPageReviews({
           variant={{ base: "lg-semibold", md: "xl-semibold" }}
           className="text-text-secondary"
         >
-          리뷰
+          {t("myPageReviews")}
         </Text>
 
         {!isEmpty ? (
@@ -96,9 +98,9 @@ export default function MoverMyPageReviews({
                 {formatRating(rating)}
               </Text>
               <div className="flex flex-col">
-                <ReviewStarRating value={Math.round(rating)} size="sm" label="평균 별점" />
+                <ReviewStarRating value={Math.round(rating)} size="sm" label={t("averageRating")} />
                 <Text as="p" variant="md-regular" className="text-text-muted">
-                  {totalCount}개의 리뷰
+                  {t("reviewCount", { count: totalCount })}
                 </Text>
               </div>
             </div>
@@ -111,10 +113,10 @@ export default function MoverMyPageReviews({
       {isEmpty ? (
         <div className="flex flex-col items-center py-24 text-center">
           <Text as="p" variant="lg-semibold" className="text-text-primary">
-            아직 등록된 리뷰가 없어요!
+            {t("myPageReviewsEmptyTitle")}
           </Text>
           <Text as="p" variant="md-regular" className="text-text-subtle">
-            가장 먼저 리뷰를 등록해보세요
+            {t("myPageReviewsEmptyDescription")}
           </Text>
         </div>
       ) : null}
@@ -123,8 +125,8 @@ export default function MoverMyPageReviews({
 
       {shouldShowError ? (
         <EstimatesQueryStatus
-          message={getApiErrorMessage(error, "리뷰를 불러오지 못했습니다.")}
-          actionLabel="다시 시도"
+          message={getApiErrorMessage(error, t("myPageReviewsLoadFailed"))}
+          actionLabel={t("retry")}
           onAction={() => {
             void refetch();
           }}

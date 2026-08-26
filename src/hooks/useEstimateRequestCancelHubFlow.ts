@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
@@ -20,6 +22,7 @@ export function useEstimateRequestCancelHubFlow(
   estimateRequestId: number,
   designatedMovers: MyEstimateRequestDesignatedMover[],
 ) {
+  const t = useTranslations("estimates");
   const router = useRouter();
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -87,7 +90,7 @@ export function useEstimateRequestCancelHubFlow(
       setConfirmStep("none");
       setDesignateMoverId(null);
       setIsHubOpen(true);
-      setToastMessage("지정 견적 요청을 취소했어요.");
+      setToastMessage(t("designatedCancelSuccess"));
     },
     onError: (message) => {
       setToastMessage(message);

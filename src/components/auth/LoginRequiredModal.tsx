@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import AlertModal from "@/components/common/Modal/AlertModal";
 import { getLoginRedirectPath } from "@/lib/auth/session";
@@ -16,13 +17,8 @@ interface LoginRequiredModalProps {
  * 비로그인 사용자가 인증 필요 액션(찜 등)을 눌렀을 때 안내
  * Figma: modal/general-request-required 계열 레이아웃
  */
-const DEFAULT_DESCRIPTION = "찜하기는 로그인 후 이용할 수 있어요.";
-
-export function LoginRequiredModal({
-  open,
-  onClose,
-  description = DEFAULT_DESCRIPTION,
-}: LoginRequiredModalProps) {
+export function LoginRequiredModal({ open, onClose, description }: LoginRequiredModalProps) {
+  const t = useTranslations("auth");
   const router = useRouter();
 
   const handleLogin = () => {
@@ -34,9 +30,9 @@ export function LoginRequiredModal({
     <AlertModal
       open={open}
       onClose={onClose}
-      title="로그인이 필요해요"
-      description={description}
-      primaryAction={{ label: "로그인하기", onClick: handleLogin }}
+      title={t("loginRequiredTitle")}
+      description={description ?? t("loginRequiredDefaultDescription")}
+      primaryAction={{ label: t("loginRequiredAction"), onClick: handleLogin }}
     />
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import FormField from "@/components/common/FormField/FormField";
 import Textarea from "@/components/common/Input/Textarea";
@@ -40,6 +41,7 @@ function ReviewWriteModalContent({
   onError,
   preview = false,
 }: ReviewWriteModalContentProps) {
+  const t = useTranslations("reviews");
   const {
     rating,
     content,
@@ -73,7 +75,7 @@ function ReviewWriteModalContent({
       dismissible={false}
     >
       <div className="flex w-full items-start justify-between gap-12 md:gap-16">
-        <Modal.Title>리뷰 작성</Modal.Title>
+        <Modal.Title>{t("writeTitle")}</Modal.Title>
         <Modal.Close onClose={handleClose} disabled={isSubmitting} />
       </div>
 
@@ -86,20 +88,20 @@ function ReviewWriteModalContent({
             variant={{ base: "lg-semibold", xl: "2lg-semibold" }}
             className="text-text-tertiary"
           >
-            평점을 선택해 주세요
+            {t("ratingPrompt")}
           </Text>
 
           <ReviewStarRating
             value={rating}
             onChange={handleRatingChange}
             size="lg"
-            label="별점"
+            label={t("ratingLabel")}
             disabled={isSubmitting}
           />
         </div>
 
         <FormField
-          label="상세 후기를 작성해주세요"
+          label={t("contentLabel")}
           labelFor="review-content"
           variant="compact"
           className="w-full gap-12"
@@ -110,7 +112,7 @@ function ReviewWriteModalContent({
               value={content}
               maxLength={MAX_TEXT_CONTENT_LENGTH}
               disabled={isSubmitting}
-              placeholder={`최소 ${MIN_TEXT_CONTENT_LENGTH}자 이상 입력해 주세요`}
+              placeholder={t("contentPlaceholder", { min: MIN_TEXT_CONTENT_LENGTH })}
               error={contentValidationError}
               className="h-160"
               onChange={(event) => handleContentChange(event.target.value)}
@@ -131,7 +133,7 @@ function ReviewWriteModalContent({
       ) : null}
 
       <Modal.Button fullWidth size="cta" disabled={isSubmitDisabled} onClick={handleSubmit}>
-        {isSubmitting ? "리뷰 등록 중..." : "리뷰 등록"}
+        {isSubmitting ? t("submitting") : t("submit")}
       </Modal.Button>
     </Modal>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 import Button from "@/components/common/Button/Button";
@@ -73,9 +74,16 @@ const DEPARTURE_MARKER_URL = `data:image/svg+xml;charset=UTF-8,${encodeURICompon
 const DESTINATION_MARKER_URL = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(DESTINATION_MARKER_SVG)}`;
 const EMPTY_MOVERS: Mover[] = [];
 
-function createMoverSummary(mover: Mover): HTMLElement {
+interface MoverSummaryLabels {
+  summary: (name: string) => string;
+  moverName: (name: string) => string;
+  stats: (rating: string, reviewCount: number, careerYears: number) => string;
+  viewProfile: string;
+}
+
+function createMoverSummary(mover: Mover, labels: MoverSummaryLabels): HTMLElement {
   const card = document.createElement("article");
-  card.setAttribute("aria-label", `${mover.name} 기사님 요약`);
+  card.setAttribute("aria-label", labels.summary(mover.name));
   card.style.cssText = MOVER_SUMMARY_STYLES.card;
 
   const header = document.createElement("div");
@@ -87,17 +95,17 @@ function createMoverSummary(mover: Mover): HTMLElement {
   const identity = document.createElement("div");
   identity.style.cssText = MOVER_SUMMARY_STYLES.identity;
   const name = document.createElement("strong");
-  name.textContent = `${mover.name} 기사님`;
+  name.textContent = labels.moverName(mover.name);
   name.style.cssText = MOVER_SUMMARY_STYLES.name;
   const stats = document.createElement("span");
-  stats.textContent = `★ ${mover.rating.toFixed(1)} · 리뷰 ${mover.reviewCount} · 경력 ${mover.careerYears}년`;
+  stats.textContent = labels.stats(mover.rating.toFixed(1), mover.reviewCount, mover.careerYears);
   stats.style.cssText = MOVER_SUMMARY_STYLES.stats;
   identity.append(name, stats);
   header.append(avatar, identity);
 
   const link = document.createElement("a");
   link.href = APP_ROUTES.MOVERS.DETAIL(mover.id);
-  link.textContent = "프로필 보기";
+  link.textContent = labels.viewProfile;
   link.style.cssText = MOVER_SUMMARY_STYLES.profileLink;
   let isNavigating = false;
   const openProfile = (event: Event) => {
@@ -118,6 +126,7 @@ function createMoverSummary(mover: Mover): HTMLElement {
 }
 
 export default function KakaoMap({ departure, destination, movers = EMPTY_MOVERS }: KakaoMapProps) {
+  const t = useTranslations("moverRecommendation");
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [retryCount, setRetryCount] = useState(0);
@@ -166,13 +175,13 @@ export default function KakaoMap({ departure, destination, movers = EMPTY_MOVERS
             new maps.Marker({
               map,
               position: departurePosition,
-              title: "출발지",
+              title: t("departure"),
               image: departureMarkerImage,
             }),
             new maps.Marker({
               map,
               position: destinationPosition,
-              title: "도착지",
+              title: t("destination"),
               image: destinationMarkerImage,
             }),
           );
@@ -194,10 +203,16 @@ export default function KakaoMap({ departure, destination, movers = EMPTY_MOVERS
             );
             const marker = new maps.Marker({
               position: moverPosition,
-              title: `${mover.name} 기사님`,
+              title: t("moverName", { name: mover.name }),
               image: moverMarkerImage,
             });
-            const card = createMoverSummary(mover);
+            const card = createMoverSummary(mover, {
+              summary: (name) => t("mapMoverSummary", { name }),
+              moverName: (name) => t("moverName", { name }),
+              stats: (rating, reviewCount, careerYears) =>
+                t("mapMoverStats", { rating, reviewCount, careerYears }),
+              viewProfile: t("viewProfile"),
+            });
             const overlay = new maps.CustomOverlay({
               position: moverPosition,
               content: card,
@@ -262,11 +277,11 @@ export default function KakaoMap({ departure, destination, movers = EMPTY_MOVERS
       moverClusterer?.clear();
       routeMarkers.forEach((marker) => marker.setMap(null));
     };
-  }, [departure, destination, movers, retryCount]);
+  }, [departure, destination, movers, retryCount, t]);
 
   return (
     <section
-      aria-label={departure && destination ? "출발지와 도착지 지도" : "서울시청 중심 지도"}
+      aria-label={departure && destination ? t("routeMapAria") : t("defaultMapAria")}
       className="bg-background-subtle relative min-h-[520px] flex-1 lg:min-h-0"
     >
       <div ref={containerRef} className="absolute inset-0" />
@@ -274,7 +289,7 @@ export default function KakaoMap({ departure, destination, movers = EMPTY_MOVERS
       {status === "loading" && (
         <div className="bg-background-subtle absolute inset-0 z-10 flex items-center justify-center">
           <Text as="p" variant="md-medium" className="text-text-muted">
-            지도를 불러오는 중입니다.
+            {t("mapLoading")}
           </Text>
         </div>
       )}
@@ -285,7 +300,7 @@ export default function KakaoMap({ departure, destination, movers = EMPTY_MOVERS
           className="bg-background-subtle absolute inset-0 z-10 flex flex-col items-center justify-center gap-16 px-24 text-center"
         >
           <Text as="p" variant="md-medium" className="text-text-error">
-            지도를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+            {t("mapLoadFailed")}
           </Text>
           <Button
             size="md"
@@ -294,7 +309,7 @@ export default function KakaoMap({ departure, destination, movers = EMPTY_MOVERS
               setRetryCount((count) => count + 1);
             }}
           >
-            다시 시도
+            {t("retry")}
           </Button>
         </div>
       )}

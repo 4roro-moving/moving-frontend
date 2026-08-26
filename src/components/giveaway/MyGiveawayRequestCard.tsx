@@ -1,5 +1,8 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
+import { useFormatter, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -8,12 +11,7 @@ import { Text } from "@/components/common/Text";
 import ResidenceReviewInfoItem from "@/components/residence-review/ResidenceReviewInfoItem";
 import { GalleryIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import {
-  canCancelGiveawayRequest,
-  canEditGiveawayRequest,
-  getGiveawayRequestStatusLabel,
-} from "@/lib/constants/giveaway";
-import { formatKoreanDateTime } from "@/lib/utils/date";
+import { canCancelGiveawayRequest, canEditGiveawayRequest } from "@/lib/constants/giveaway";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import type { MyGiveawayRequestItem } from "@/types/giveaway";
 
@@ -29,23 +27,20 @@ const InfoDivider = () => {
   );
 };
 
-const formatRequestDate = (value: string): string => {
-  try {
-    return formatKoreanDateTime(value);
-  } catch {
-    return "";
-  }
-};
-
 const MyGiveawayRequestCard = ({ request, onEdit, onCancel }: MyGiveawayRequestCardProps) => {
+  const t = useTranslations("giveaway");
+  const format = useFormatter();
   const titleId = `my-giveaway-request-${String(request.id)}-title`;
   const detailHref = APP_ROUTES.COMMUNITY.GIVEAWAY_DETAIL(request.giveaway.id);
-  const statusLabel = getGiveawayRequestStatusLabel(request.status);
-  const appliedDate = formatRequestDate(request.createdAt);
+  const statusLabel = t(`requestStatusValues.${request.status}`);
+  const date = new Date(request.createdAt);
+  const appliedDate = Number.isNaN(date.getTime())
+    ? ""
+    : format.dateTime(date, { year: "numeric", month: "2-digit", day: "2-digit" });
   const canEdit = canEditGiveawayRequest(request);
   const canCancel = canCancelGiveawayRequest(request);
   const hasActions = canEdit || canCancel;
-  const message = request.message?.trim() || "없음";
+  const message = request.message?.trim() || t("none");
 
   return (
     <article
@@ -82,7 +77,7 @@ const MyGiveawayRequestCard = ({ request, onEdit, onCancel }: MyGiveawayRequestC
                 variant={{ base: "lg-semibold", md: "2lg-bold" }}
                 className="text-text-secondary line-clamp-1"
               >
-                {request.giveaway.title}
+                <AutoTranslatedText text={request.giveaway.title} />
               </Text>
             </Link>
             <Text
@@ -96,14 +91,18 @@ const MyGiveawayRequestCard = ({ request, onEdit, onCancel }: MyGiveawayRequestC
         </div>
 
         <dl className="flex w-full flex-col gap-16 md:flex-row md:items-center md:gap-20">
-          <ResidenceReviewInfoItem label="상태" value={statusLabel} className="md:hidden" />
           <ResidenceReviewInfoItem
-            label="신청 상태"
+            label={t("requestStatusCompact")}
+            value={statusLabel}
+            className="md:hidden"
+          />
+          <ResidenceReviewInfoItem
+            label={t("requestStatus")}
             value={statusLabel}
             className="hidden md:flex"
           />
           <InfoDivider />
-          <ResidenceReviewInfoItem label="신청일" value={appliedDate} />
+          <ResidenceReviewInfoItem label={t("requestDate")} value={appliedDate} />
         </dl>
 
         <div className="flex min-w-0 flex-col">
@@ -112,7 +111,7 @@ const MyGiveawayRequestCard = ({ request, onEdit, onCancel }: MyGiveawayRequestC
             variant={{ base: "lg-semibold", md: "2lg-bold" }}
             className="text-text-secondary"
           >
-            신청 내용
+            {t("requestContent")}
           </Text>
           <Text
             as="p"
@@ -134,7 +133,7 @@ const MyGiveawayRequestCard = ({ request, onEdit, onCancel }: MyGiveawayRequestC
               fullWidth
               onClick={() => onEdit(request)}
             >
-              수정하기
+              {t("edit")}
             </Button>
           ) : null}
           {canCancel ? (
@@ -145,7 +144,7 @@ const MyGiveawayRequestCard = ({ request, onEdit, onCancel }: MyGiveawayRequestC
               fullWidth
               onClick={() => onCancel(request)}
             >
-              취소하기
+              {t("cancelRequest")}
             </Button>
           ) : null}
         </div>

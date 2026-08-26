@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import Pagination from "@/components/common/Pagination/Pagination";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import MyReviewCard from "@/components/review/MyReviewCard";
@@ -19,6 +21,7 @@ import {
 } from "@/lib/constants/reviewConstants";
 
 export default function MyReviewsPageClient() {
+  const t = useTranslations("reviews");
   const { page, currentPage, setPage, handlePageChange } = useReviewPagination({
     totalPages: Number.MAX_SAFE_INTEGER,
     canCorrectPage: false,
@@ -47,7 +50,7 @@ export default function MyReviewsPageClient() {
   const hasList = !isLoading && !isError && reviews.length > 0;
 
   return (
-    <ReviewPageFrame title="내가 작성한 리뷰">
+    <ReviewPageFrame title={t("myTitle")}>
       {isLoading ? <ReviewCardSkeleton /> : null}
 
       {isError ? (
@@ -72,7 +75,7 @@ export default function MyReviewsPageClient() {
         >
           {isPreviousDataLoading ? (
             <span className="sr-only" role="status">
-              내가 작성한 리뷰 목록을 불러오는 중이에요
+              {t("myListLoading")}
             </span>
           ) : null}
           <ul className="flex w-full flex-col gap-16 md:gap-20 xl:gap-24">

@@ -9,7 +9,6 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { getRoleHomePath } from "@/lib/auth/redirect";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
 import {
-  MOVER_PROFILE_CREATE_ERROR_MESSAGE,
   MOVER_PROFILE_NICKNAME_ERROR_KEYWORDS,
   MOVER_PROFILE_PHONE_ERROR_KEYWORD,
 } from "@/lib/constants/profileMessages";
@@ -19,6 +18,8 @@ import { ApiError } from "@/types/api";
 
 interface UseMoverProfileCreateFormParams {
   requiresPhone: boolean;
+  createFailedMessage: string;
+  activityBaseRequiredMessage: string;
   setError: UseFormSetError<MoverProfileFormValues>;
   setFocus: UseFormSetFocus<MoverProfileFormValues>;
 }
@@ -38,6 +39,8 @@ function hasNicknameErrorKeyword(message: string): boolean {
 
 export function useMoverProfileCreateForm({
   requiresPhone,
+  createFailedMessage,
+  activityBaseRequiredMessage,
   setError,
   setFocus,
 }: UseMoverProfileCreateFormParams) {
@@ -84,7 +87,7 @@ export function useMoverProfileCreateForm({
       if (!activityBaseAddress) {
         setError("activityBaseAddress", {
           type: "required",
-          message: "활동 거점을 선택해 주세요",
+          message: activityBaseRequiredMessage,
         });
         return;
       }
@@ -131,7 +134,7 @@ export function useMoverProfileCreateForm({
         }
       }
 
-      setSubmitError(getApiErrorMessage(error, MOVER_PROFILE_CREATE_ERROR_MESSAGE));
+      setSubmitError(getApiErrorMessage(error, createFailedMessage));
     } finally {
       submissionInFlightRef.current = false;
       setIsSubmitting(false);

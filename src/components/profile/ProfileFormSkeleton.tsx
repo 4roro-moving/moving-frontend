@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils/cn";
 interface ProfileFormSkeletonProps {
   title: string;
   description?: string;
+  loadingLabel?: string;
   /** customer create: single, 그 외: twoColumn */
   layout?: "single" | "twoColumn";
 }
@@ -20,6 +21,7 @@ const FieldSkeleton = () => (
 const ProfileFormSkeleton = ({
   title,
   description,
+  loadingLabel,
   layout = "twoColumn",
 }: ProfileFormSkeletonProps) => {
   return (
@@ -33,7 +35,7 @@ const ProfileFormSkeleton = ({
     >
       <ProfilePageHeader title={title} description={description} />
 
-      <span className="sr-only">불러오는 중입니다.</span>
+      {loadingLabel ? <span className="sr-only">{loadingLabel}</span> : null}
 
       {layout === "single" ? (
         <div className="flex w-full flex-col gap-32">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import Select from "@/components/common/Select/Select";
@@ -11,16 +12,10 @@ import type { MoveType } from "@/types/move";
 
 import EstimateOfferCard from "./EstimateOfferCard";
 
-const FILTER_OPTIONS: { value: EstimateOfferFilter; label: string }[] = [
-  { value: "all", label: "전체" },
-  { value: "confirmed", label: "확정 견적" },
-];
-
-const FILTER_VALUES = new Set<EstimateOfferFilter>(FILTER_OPTIONS.map((option) => option.value));
 const OFFER_LIST_CLASS_NAME = "flex w-full flex-col items-start";
 
 function isEstimateOfferFilter(value: string): value is EstimateOfferFilter {
-  return FILTER_VALUES.has(value as EstimateOfferFilter);
+  return value === "all" || value === "confirmed";
 }
 
 interface EstimateOfferSectionProps {
@@ -34,6 +29,11 @@ export default function EstimateOfferSection({
   moveType,
   onFavoriteError,
 }: EstimateOfferSectionProps) {
+  const t = useTranslations("estimates");
+  const filterOptions: { value: EstimateOfferFilter; label: string }[] = [
+    { value: "all", label: t("received.filterAll") },
+    { value: "confirmed", label: t("received.filterConfirmed") },
+  ];
   const [filter, setFilter] = useState<EstimateOfferFilter>("all");
 
   const filteredOffers = useMemo(() => {
@@ -44,10 +44,13 @@ export default function EstimateOfferSection({
   }, [filter, offers]);
 
   return (
-    <section className="flex min-w-0 flex-1 flex-col gap-16 md:gap-20" aria-label="견적 목록">
+    <section
+      className="flex min-w-0 flex-1 flex-col gap-16 md:gap-20"
+      aria-label={t("received.listAria")}
+    >
       <div className="flex items-start gap-8">
         <Text as="h2" variant="xl-semibold" className="text-text-secondary">
-          견적 목록
+          {t("received.listTitle")}
         </Text>
         <Text as="span" variant="xl-semibold" className="text-text-brand">
           {filteredOffers.length}
@@ -56,8 +59,8 @@ export default function EstimateOfferSection({
 
       <div className="flex flex-col gap-4">
         <Select
-          label="견적 상태 필터"
-          desc="전체"
+          label={t("received.filterAria")}
+          desc={t("received.filterAll")}
           defaultValue="all"
           size="lg"
           className="w-128 md:w-160"
@@ -67,7 +70,7 @@ export default function EstimateOfferSection({
             }
           }}
         >
-          {FILTER_OPTIONS.map((option) => (
+          {filterOptions.map((option) => (
             <Select.Option key={option.value} value={option.value}>
               {option.label}
             </Select.Option>
@@ -81,7 +84,7 @@ export default function EstimateOfferSection({
             <div className="bg-background-default flex w-full flex-col items-stretch gap-8 border-0 py-20 md:px-8">
               <div className="border-border-muted rounded-12 flex min-h-268 w-full items-center border border-solid px-12 py-12 pr-20 shadow-none">
                 <EstimatesQueryStatus
-                  message="해당 조건의 견적이 없어요."
+                  message={t("received.emptyByFilter")}
                   className="min-h-0 px-0 py-0"
                 />
               </div>

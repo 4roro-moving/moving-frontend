@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
 import { Text } from "@/components/common/Text";
 import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
 import {
@@ -19,10 +22,14 @@ interface MoverMyPageProfileSectionProps {
 }
 
 function ActivitySummary({ profile }: { profile: MoverProfileMe }) {
+  const t = useTranslations("profile");
   const stats = [
-    { label: "진행", value: `${profile.completedCount}건` },
-    { label: "리뷰", value: formatRating(profile.averageRating ?? 0) },
-    { label: "총 경력", value: `${profile.career}년` },
+    {
+      label: t("myPageCompleted"),
+      value: t("myPageCompletedCount", { count: profile.completedCount }),
+    },
+    { label: t("myPageReviews"), value: formatRating(profile.averageRating ?? 0) },
+    { label: t("myPageCareer"), value: t("myPageCareerYears", { years: profile.career }) },
   ];
 
   return (
@@ -36,7 +43,7 @@ function ActivitySummary({ profile }: { profile: MoverProfileMe }) {
         variant={{ base: "lg-semibold", md: "xl-semibold" }}
         className="text-text-primary"
       >
-        활동 현황
+        {t("myPageActivity")}
       </Text>
 
       <div className="border-border-subtle bg-background-subtle rounded-16 flex h-26.25 items-center border px-40 md:h-30">
@@ -59,6 +66,7 @@ function ActivitySummary({ profile }: { profile: MoverProfileMe }) {
 }
 
 function ServiceSections({ profile }: { profile: MoverProfileMe }) {
+  const t = useTranslations("profile");
   return (
     <div className="flex w-full flex-col gap-24 md:gap-40">
       <section className="flex flex-col gap-8 md:gap-16" aria-labelledby="mover-service-types">
@@ -68,7 +76,7 @@ function ServiceSections({ profile }: { profile: MoverProfileMe }) {
           variant={{ base: "lg-semibold", md: "xl-semibold" }}
           className="text-text-primary"
         >
-          제공 서비스
+          {t("moverServices")}
         </Text>
         <MoverOfferedServiceChips serviceTypes={profile.serviceTypes} />
       </section>
@@ -80,7 +88,7 @@ function ServiceSections({ profile }: { profile: MoverProfileMe }) {
           variant={{ base: "lg-semibold", md: "xl-semibold" }}
           className="text-text-primary"
         >
-          서비스 가능 지역
+          {t("moverRegions")}
         </Text>
         <div className="flex flex-wrap gap-8 md:gap-12">
           {profile.regions.map((region) => (
@@ -97,6 +105,7 @@ export default function MoverMyPageProfileSection({
   favoriteCount,
   isFavoriteCountLoading,
 }: MoverMyPageProfileSectionProps) {
+  const t = useTranslations("profile");
   return (
     <>
       <div className="xl:flex xl:justify-between">
@@ -136,7 +145,7 @@ export default function MoverMyPageProfileSection({
                     variant={{ base: "md-medium", md: "lg-medium" }}
                     className="text-text-muted whitespace-nowrap"
                   >
-                    {favoriteCount.toLocaleString("ko-KR")}
+                    {favoriteCount.toLocaleString()}
                   </Text>
                 )}
               </div>
@@ -149,14 +158,14 @@ export default function MoverMyPageProfileSection({
               variant="2lg-semibold"
               className="text-text-tertiary break-words whitespace-pre-wrap"
             >
-              {profile.shortIntro}
+              <AutoTranslatedText text={profile.shortIntro} />
             </Text>
             <Text
               as="p"
               variant={{ base: "md-regular", md: "lg-regular" }}
               className="text-text-muted break-words whitespace-pre-wrap"
             >
-              {profile.description}
+              <AutoTranslatedText text={profile.description} />
             </Text>
           </div>
 
@@ -165,7 +174,10 @@ export default function MoverMyPageProfileSection({
           </div>
         </section>
 
-        <aside className="hidden xl:block xl:w-70.75 xl:pt-72" aria-label="프로필 수정">
+        <aside
+          className="hidden xl:block xl:w-70.75 xl:pt-72"
+          aria-label={t("myPageProfileEditAria")}
+        >
           <MoverMyPageEditActions desktop />
         </aside>
       </div>

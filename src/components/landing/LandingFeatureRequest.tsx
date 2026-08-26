@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 
 import { Text } from "@/components/common/Text";
 
@@ -9,7 +10,9 @@ import { Text } from "@/components/common/Text";
  * // 2026.08.01 정슬기 - [수정] img3_sm/md Figma inset 크롭 반영 (양옆 검정 여백 제거)
  * // 2026.08.03 정슬기 - [수정] 기본값과 동일한 priority={false} 제거
  */
-export default function LandingFeatureRequest() {
+export default async function LandingFeatureRequest() {
+  const t = await getTranslations("landing");
+
   return (
     <>
       {/* Desktop — 1402×787, rect 정렬됨, text (752,152) */}
@@ -18,7 +21,7 @@ export default function LandingFeatureRequest() {
           <div className="relative aspect-[1402/787] w-full">
             <Image
               src="/images/landing/img3-lg.png"
-              alt="견적 상세 화면 예시"
+              alt={t("requestImageAlt")}
               fill
               draggable={false}
               className="pointer-events-none object-cover object-left-top select-none"
@@ -29,9 +32,9 @@ export default function LandingFeatureRequest() {
               variant="3xl-bold"
               className="text-text-inverse absolute top-[19.3%] left-[53.7%] z-10 w-[27.3%] max-w-[382px] text-left"
             >
-              원하는 이사 서비스를 요청하고
+              {t("requestTitleLine1")}
               <br />
-              견적을 받아보세요
+              {t("requestTitleLine2")}
             </Text>
           </div>
         </div>
@@ -44,7 +47,7 @@ export default function LandingFeatureRequest() {
             <div className="absolute inset-[0_-5.6%_0_-9.72%]">
               <Image
                 src="/images/landing/img3-md.png"
-                alt="견적 상세 화면 예시"
+                alt={t("requestImageAlt")}
                 fill
                 draggable={false}
                 className="pointer-events-none object-cover object-top select-none"
@@ -56,9 +59,9 @@ export default function LandingFeatureRequest() {
               variant="3xl-bold"
               className="text-text-inverse absolute top-[5.9%] right-[8%] left-auto z-10 w-[56%] max-w-[382px] text-right"
             >
-              원하는 이사 서비스를 요청하고
+              {t("requestTitleLine1")}
               <br />
-              견적을 받아보세요
+              {t("requestTitleLine2")}
             </Text>
           </div>
         </div>
@@ -70,7 +73,7 @@ export default function LandingFeatureRequest() {
           <div className="absolute inset-[0_-3.41%_0.1%_-13.84%]">
             <Image
               src="/images/landing/img3-sm.png"
-              alt="견적 상세 화면 예시"
+              alt={t("requestImageAlt")}
               fill
               draggable={false}
               className="pointer-events-none object-cover object-top select-none"
@@ -82,9 +85,9 @@ export default function LandingFeatureRequest() {
             variant="xl-bold"
             className="text-text-inverse absolute top-[5.8%] right-[8.5%] left-auto z-10 w-[239px] max-w-[calc(100%-64px)] text-right"
           >
-            원하는 이사 서비스를 요청하고
+            {t("featureRequest.titleFirst")}
             <br />
-            견적을 받아보세요
+            {t("featureRequest.titleSecond")}
           </Text>
         </div>
       </section>

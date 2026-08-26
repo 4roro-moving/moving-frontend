@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useRouter } from "next/navigation";
 
 import Button from "@/components/common/Button/Button";
@@ -12,6 +14,7 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
  * // 2026.07.31 정슬기 - [수정] 동일 origin referrer일 때만 back, 그 외 홈 이동
  */
 export default function NotFoundView() {
+  const t = useTranslations("common");
   const router = useRouter();
 
   const handleBack = () => {
@@ -47,16 +50,16 @@ export default function NotFoundView() {
               variant={{ base: "lg-semibold", md: "2lg-semibold" }}
               className="text-text-primary"
             >
-              페이지를 찾을 수 없습니다.
+              {t("notFound.title")}
             </Text>
             <Text
               as="p"
               variant={{ base: "md-regular", md: "lg-regular" }}
               className="text-text-muted"
             >
-              입력하신 주소가 잘못되었거나
+              {t("notFound.descriptionFirst")}
               <br />
-              페이지가 이동 또는 삭제되었을 수 있습니다.
+              {t("notFound.descriptionSecond")}
             </Text>
           </div>
         </div>
@@ -71,7 +74,7 @@ export default function NotFoundView() {
               router.push(APP_ROUTES.HOME);
             }}
           >
-            홈으로 이동
+            {t("notFound.home")}
           </Button>
           <Button
             type="button"
@@ -80,7 +83,7 @@ export default function NotFoundView() {
             className="w-full sm:w-auto sm:min-w-160"
             onClick={handleBack}
           >
-            이전 페이지로 이동
+            {t("notFound.back")}
           </Button>
         </div>
       </div>

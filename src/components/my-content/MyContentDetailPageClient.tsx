@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
 
@@ -10,18 +11,6 @@ import { useMyContentDetail } from "@/hooks/useMyContentDetail";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { isMyContentType, type MyContentType } from "@/types/myContent";
 
-const HIDDEN_PAGE_TITLE_BY_TYPE: Record<MyContentType, string> = {
-  review: "숨김 처리된 리뷰",
-  "residence-review": "숨김 처리된 거주후기",
-  giveaway: "숨김 처리된 나눔게시물",
-};
-
-const RESTORED_PAGE_TITLE_BY_TYPE: Record<MyContentType, string> = {
-  review: "복구된 리뷰",
-  "residence-review": "복구된 거주후기",
-  giveaway: "복구된 나눔게시물",
-};
-
 function parseContentId(value: string | string[] | undefined): number {
   const raw = Array.isArray(value) ? value[0] : value;
   const parsed = Number(raw);
@@ -29,6 +18,7 @@ function parseContentId(value: string | string[] | undefined): number {
 }
 
 export default function MyContentDetailPageClient() {
+  const t = useTranslations("myContent");
   const params = useParams<{ contentType: string; contentId: string }>();
 
   const contentTypeParam = Array.isArray(params.contentType)
@@ -50,27 +40,27 @@ export default function MyContentDetailPageClient() {
 
   const pageTitle = useMemo(() => {
     if (!contentType) {
-      return "콘텐츠 처리 안내";
+      return t("processingTitle");
     }
     if (data && !data.isHidden) {
-      return RESTORED_PAGE_TITLE_BY_TYPE[contentType];
+      return t(`restoredTitle.${contentType}`);
     }
-    return HIDDEN_PAGE_TITLE_BY_TYPE[contentType];
-  }, [contentType, data]);
+    return t(`hiddenTitle.${contentType}`);
+  }, [contentType, data, t]);
 
   if (!isValidParams) {
-    return <EstimatesQueryStatus message="올바르지 않은 콘텐츠 링크입니다." />;
+    return <EstimatesQueryStatus message={t("invalidLink")} />;
   }
 
   if (isLoading) {
-    return <EstimatesQueryStatus message="콘텐츠를 불러오는 중입니다." />;
+    return <EstimatesQueryStatus message={t("loading")} />;
   }
 
   if (isError) {
     return (
       <EstimatesQueryStatus
-        message={getApiErrorMessage(error, "콘텐츠를 불러오지 못했습니다.")}
-        actionLabel="다시 시도"
+        message={getApiErrorMessage(error, t("loadFailed"))}
+        actionLabel={t("retry")}
         onAction={() => {
           void refetch();
         }}
@@ -80,7 +70,7 @@ export default function MyContentDetailPageClient() {
   }
 
   if (!data) {
-    return <EstimatesQueryStatus message="표시할 콘텐츠가 없습니다." />;
+    return <EstimatesQueryStatus message={t("empty")} />;
   }
 
   return (
@@ -90,7 +80,7 @@ export default function MyContentDetailPageClient() {
           {pageTitle}
         </Text>
         <Text as="p" variant="md-regular" className="text-text-muted">
-          관리자 처리 결과와 사유를 확인할 수 있습니다.
+          {t("description")}
         </Text>
       </header>
 

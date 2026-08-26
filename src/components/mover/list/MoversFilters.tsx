@@ -1,16 +1,15 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 
 import Search from "@/components/common/Search/Search";
 import Select from "@/components/common/Select/Select";
 import { Text } from "@/components/common/Text";
-import { SORT_OPTIONS } from "@/components/mover/list/constants";
 import { useAuthQueryScope } from "@/hooks/useAuthQueryScope";
 import { useMoversFilters } from "@/hooks/useMoversFilters";
-import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
-import { REGION_OPTIONS } from "@/lib/constants/region";
+import { REGION_DISPLAY_ORDER } from "@/lib/constants/region";
 import { getMoversInfiniteQueryOptions } from "@/lib/queryOptions/movers";
 import {
   MOVERS_ALL_VALUE,
@@ -19,23 +18,12 @@ import {
 } from "@/lib/utils/moversSearchParams";
 import type { MoverSort } from "@/types/mover";
 
-const ALL_OPTION = { value: MOVERS_ALL_VALUE, label: "전체" } as const;
-
-const REGION_FILTER_OPTIONS = [
-  ALL_OPTION,
-  ...REGION_OPTIONS.map((region) => ({
-    value: String(region.value),
-    label: region.label,
-  })),
-];
-
-const MOVE_TYPE_FILTER_OPTIONS = [ALL_OPTION, ...MOVE_TYPE_OPTIONS];
-
 interface MoversFiltersProps {
   filters: MoversSearchParamsState;
 }
 
 export function MoversFilters({ filters }: MoversFiltersProps) {
+  const t = useTranslations("moverSearch");
   const queryClient = useQueryClient();
   const { authScope, isAuthQueryReady } = useAuthQueryScope();
   const {
@@ -47,6 +35,28 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
     setKeyword,
     submitSearch,
   } = useMoversFilters(filters);
+
+  const allOption = { value: MOVERS_ALL_VALUE, label: t("all") };
+  const regionFilterOptions = [
+    allOption,
+    ...REGION_DISPLAY_ORDER.map((value) => ({
+      value: String(value),
+      label: t(`regions.${value}`),
+    })),
+  ];
+  const moveTypeFilterOptions = [
+    allOption,
+    ...(["SMALL", "HOME", "OFFICE"] as const).map((value) => ({
+      value,
+      label: t(`moveTypes.${value}`),
+    })),
+  ];
+  const sortOptions: { value: MoverSort; label: string }[] = [
+    { value: "reviewCount", label: t("sort.reviewCount") },
+    { value: "rating", label: t("sort.rating") },
+    { value: "career", label: t("sort.career") },
+    { value: "confirmedCount", label: t("sort.confirmedCount") },
+  ];
 
   const prefetchMovers = useCallback(
     (patch: Partial<MoversSearchParamsState>) => {
@@ -82,8 +92,8 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
             onClear={clearSearch}
-            placeholder="찾고 싶은 닉네임을 입력해보세요"
-            aria-label="기사님 검색"
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("searchLabel")}
             className="w-full"
           />
         </form>
@@ -95,16 +105,16 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
             <div className="w-fit shrink-0 xl:w-[160px]">
               <Select
                 key={`serviceArea-${filters.serviceArea}-${filterKey}`}
-                label="지역"
-                desc="지역"
+                label={t("regionLabel")}
+                desc={t("regionLabel")}
                 size="lg"
                 columns={2}
                 className="w-fit xl:w-full"
                 defaultValue={filters.serviceArea}
-                placeholderValue={ALL_OPTION.value}
+                placeholderValue={allOption.value}
                 onChange={(value) => replaceFilters({ serviceArea: value })}
               >
-                {REGION_FILTER_OPTIONS.map((option) => (
+                {regionFilterOptions.map((option) => (
                   <Select.Option
                     key={option.value}
                     value={option.value}
@@ -118,15 +128,15 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
             <div className="w-fit shrink-0 xl:w-[160px]">
               <Select
                 key={`moveType-${filters.moveType}-${filterKey}`}
-                label="서비스"
-                desc="서비스"
+                label={t("serviceLabel")}
+                desc={t("serviceLabel")}
                 size="lg"
                 className="w-fit xl:w-full"
                 defaultValue={filters.moveType}
-                placeholderValue={ALL_OPTION.value}
+                placeholderValue={allOption.value}
                 onChange={(value) => replaceFilters({ moveType: value })}
               >
-                {MOVE_TYPE_FILTER_OPTIONS.map((option) => (
+                {moveTypeFilterOptions.map((option) => (
                   <Select.Option
                     key={option.value}
                     value={option.value}
@@ -144,7 +154,7 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
             className="text-text-weak hover:text-text-muted shrink-0 transition-colors"
           >
             <Text as="span" variant={{ base: "md-medium", xl: "lg-medium" }}>
-              초기화
+              {t("reset")}
             </Text>
           </button>
         </div>
@@ -152,14 +162,14 @@ export function MoversFilters({ filters }: MoversFiltersProps) {
         <div className="w-fit shrink-0">
           <Select
             key={`sort-${filters.sort}-${filterKey}`}
-            label="정렬"
-            desc="정렬"
+            label={t("sortLabel")}
+            desc={t("sortLabel")}
             variant="sort"
             className="w-fit"
             defaultValue={filters.sort}
             onChange={(value) => replaceFilters({ sort: value as MoverSort })}
           >
-            {SORT_OPTIONS.map((option) => (
+            {sortOptions.map((option) => (
               <Select.Option
                 key={option.value}
                 value={option.value}

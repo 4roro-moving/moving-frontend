@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRef, type FormEvent, type RefObject } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -41,6 +42,7 @@ export default function ChatEstimateEditSheet({
   focusRef,
   className,
 }: ChatEstimateEditSheetProps) {
+  const t = useTranslations("chat.estimateEdit");
   const { isRendered, isVisible } = usePresence(open, SHEET_EXIT_DURATION_MS);
   const formRef = useRef<HTMLFormElement>(null);
   const minMoveDate = formatDateToKstISODate(new Date());
@@ -71,7 +73,7 @@ export default function ChatEstimateEditSheet({
     <div
       ref={focusRef}
       role="region"
-      aria-label="견적 수정"
+      aria-label={t("ariaLabel")}
       aria-hidden={!isVisible}
       tabIndex={-1}
       className={cn(
@@ -85,17 +87,17 @@ export default function ChatEstimateEditSheet({
       <form ref={formRef} className="flex w-full flex-col gap-16" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4">
           <Text as="h2" variant="lg-semibold" className="text-text-primary">
-            견적 수정
+            {t("title")}
           </Text>
           <Text as="p" variant="sm-medium" className="text-text-muted">
-            이사 일시와 견적 금액을 수정한 뒤 고객에게 전송하세요.
+            {t("description")}
           </Text>
         </div>
 
         <div className="flex w-full flex-col gap-8">
           <label htmlFor="chat-estimate-move-date" className="text-text-secondary">
             <Text as="span" variant="sm-semibold">
-              이사 일시
+              {t("moveDate")}
             </Text>
           </label>
           <input
@@ -117,7 +119,7 @@ export default function ChatEstimateEditSheet({
         <div className="flex w-full flex-col gap-8">
           <label htmlFor="chat-estimate-price" className="text-text-secondary">
             <Text as="span" variant="sm-semibold">
-              견적 금액
+              {t("price")}
             </Text>
           </label>
           <input
@@ -141,7 +143,7 @@ export default function ChatEstimateEditSheet({
         <div className="flex w-full flex-col gap-8">
           <label htmlFor="chat-estimate-comment" className="text-text-secondary">
             <Text as="span" variant="sm-semibold">
-              기사님 코멘트
+              {t("comment")}
             </Text>
           </label>
           <textarea
@@ -173,7 +175,7 @@ export default function ChatEstimateEditSheet({
             onClick={onCancel}
           >
             <Text as="span" variant="md-semibold">
-              취소
+              {t("cancel")}
             </Text>
           </button>
           <button
@@ -187,7 +189,7 @@ export default function ChatEstimateEditSheet({
             aria-busy={isSubmitting}
           >
             <Text as="span" variant="md-semibold">
-              {isSubmitting ? "전송 중..." : "고객에게 전송"}
+              {isSubmitting ? t("submitting") : t("submit")}
             </Text>
           </button>
         </div>

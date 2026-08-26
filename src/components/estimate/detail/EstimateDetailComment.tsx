@@ -1,3 +1,8 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 import { Text } from "@/components/common/Text";
 
 interface EstimateDetailCommentProps {
@@ -10,6 +15,7 @@ interface EstimateDetailCommentProps {
  * // 2026.08.03 정슬기 - [추가] 받았던/대기 견적 상세용
  */
 export default function EstimateDetailComment({ comment }: EstimateDetailCommentProps) {
+  const t = useTranslations("estimates");
   const trimmed = comment.trim();
 
   if (!trimmed) {
@@ -23,10 +29,11 @@ export default function EstimateDetailComment({ comment }: EstimateDetailComment
     >
       <h2 id="estimate-detail-mover-comment-title" className="text-text-primary">
         <Text as="span" variant="lg-semibold" className="md:hidden">
-          기사님 코멘트
+          {t("moverComment")}
         </Text>
+
         <Text as="span" variant="xl-semibold" className="hidden md:inline">
-          기사님 코멘트
+          {t("moverComment")}
         </Text>
       </h2>
 
@@ -35,7 +42,7 @@ export default function EstimateDetailComment({ comment }: EstimateDetailComment
         variant="lg-medium"
         className="text-text-muted wrap-break-word whitespace-pre-wrap"
       >
-        {trimmed}
+        <AutoTranslatedText text={trimmed} />
       </Text>
     </section>
   );

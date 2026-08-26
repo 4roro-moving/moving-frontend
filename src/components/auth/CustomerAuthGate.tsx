@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
@@ -36,9 +37,10 @@ interface CustomerAuthGateProps {
  */
 export default function CustomerAuthGate({
   children,
-  loadingMessage = "로그인 상태를 확인하는 중입니다.",
+  loadingMessage,
   loadingFallback,
 }: CustomerAuthGateProps) {
+  const t = useTranslations("auth");
   const router = useRouter();
   const pathname = usePathname();
   const { isPending, isAuthenticated, isCustomer, canFetch, user } = useCustomerAuthReady();
@@ -61,7 +63,7 @@ export default function CustomerAuthGate({
   }, [isPending, isAuthenticated, isCustomer, user?.role, pathname, router]);
 
   const resolvedLoadingFallback = loadingFallback ?? (
-    <EstimatesQueryStatus message={loadingMessage} />
+    <EstimatesQueryStatus message={loadingMessage ?? t("checkingLoginStatus")} />
   );
 
   if (isPending) {

@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/components/common/Button/Button";
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { Text } from "@/components/common/Text";
 import { LikeOutlineButton } from "@/components/mover/detail/LikeOutlineButton";
@@ -28,8 +29,10 @@ export default function MoverDetailActions({
   onRequestEstimate,
   layout,
   requestDisabled = false,
-  requestButtonLabel = "지정 견적 요청하기",
+  requestButtonLabel,
 }: MoverDetailActionsProps) {
+  const t = useTranslations("profile");
+  const resolvedRequestButtonLabel = requestButtonLabel ?? t("moverDetailEstimateRequest");
   const calendarHref = `${APP_ROUTES.MOVERS.CALENDAR}?moverId=${encodeURIComponent(moverId)}&moverName=${encodeURIComponent(moverName)}`;
 
   if (layout === "sticky") {
@@ -53,7 +56,7 @@ export default function MoverDetailActions({
             disabled={requestDisabled}
             onClick={onRequestEstimate}
           >
-            {requestButtonLabel}
+            {resolvedRequestButtonLabel}
           </Button>
           <Button
             href={calendarHref}
@@ -62,7 +65,7 @@ export default function MoverDetailActions({
             fullWidth
             className="rounded-16 min-w-0 flex-1 shadow-none"
           >
-            일정 확인
+            {t("moverDetailCalendar")}
           </Button>
         </div>
       </div>
@@ -70,10 +73,12 @@ export default function MoverDetailActions({
   }
 
   return (
-    <section className="hidden w-full flex-col gap-16 xl:flex" aria-label="견적 요청">
-      <Text as="p" variant="2lg-semibold" className="text-text-secondary">
-        {moverName} 기사님에게
-        <br /> 지정 견적을 요청해보세요!
+    <section
+      className="hidden w-full flex-col gap-16 xl:flex"
+      aria-label={t("moverDetailEstimateRequest")}
+    >
+      <Text as="p" variant="2lg-semibold" className="text-text-secondary whitespace-pre-line">
+        {t("moverDetailRequestPrompt", { name: moverName })}
       </Text>
 
       <Button
@@ -84,11 +89,11 @@ export default function MoverDetailActions({
         disabled={requestDisabled}
         onClick={onRequestEstimate}
       >
-        {requestButtonLabel}
+        {resolvedRequestButtonLabel}
       </Button>
 
       <Button href={calendarHref} variant="outline" size="detail" fullWidth>
-        기사님 일정 확인하기
+        {t("moverDetailCalendarCheck")}
       </Button>
 
       <LikeOutlineButton
@@ -112,11 +117,12 @@ export function MoverDetailActionsSkeleton({
   layout,
   moverName = "",
 }: MoverDetailActionsSkeletonProps) {
+  const t = useTranslations("profile");
   if (layout === "sticky") {
     return (
       <div
         className="border-border-subtle bg-background-default px-margin-mobile md:px-margin-tablet fixed inset-x-0 bottom-0 z-20 border-t py-28 xl:hidden"
-        aria-label="견적 요청 정보를 불러오는 중"
+        aria-label={t("moverDetailEstimateLoading")}
         aria-busy="true"
       >
         <div className="mx-auto flex w-full max-w-[600px] items-center gap-8">
@@ -131,12 +137,11 @@ export function MoverDetailActionsSkeleton({
   return (
     <section
       className="hidden w-full flex-col gap-16 xl:flex"
-      aria-label="견적 요청 정보를 불러오는 중"
+      aria-label={t("moverDetailEstimateLoading")}
       aria-busy="true"
     >
-      <Text as="p" variant="2lg-semibold" className="text-text-secondary">
-        {moverName} 기사님에게
-        <br /> 지정 견적을 요청해보세요!
+      <Text as="p" variant="2lg-semibold" className="text-text-secondary whitespace-pre-line">
+        {t("moverDetailRequestPrompt", { name: moverName })}
       </Text>
       <Skeleton className="rounded-16 h-64 w-full" />
       <Skeleton className="rounded-16 h-64 w-full" />

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useState } from "react";
 
 import SelectableChip from "@/components/common/Chip/SelectableChip";
@@ -33,6 +35,7 @@ const ResidenceReviewEditModalContent = ({
   onExitComplete,
   onSuccess,
 }: ResidenceReviewEditModalContentProps) => {
+  const t = useTranslations("residenceReview");
   const {
     register,
     control,
@@ -60,12 +63,12 @@ const ResidenceReviewEditModalContent = ({
       dismissible={false}
     >
       <div className="flex w-full items-start justify-between gap-12">
-        <Modal.Title>후기 수정</Modal.Title>
+        <Modal.Title>{t("editTitle")}</Modal.Title>
         <Modal.Close onClose={handleClose} disabled={isPending} />
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col gap-24 overflow-y-auto xl:gap-32">
-        <FormField label="후기 지역" variant="compact" labelId="residence-review-region">
+        <FormField label={t("reviewRegion")} variant="compact" labelId="residence-review-region">
           <div role="group" aria-labelledby="residence-review-region">
             <SelectableChip selected size="responsive">
               {review.region.name}
@@ -89,7 +92,7 @@ const ResidenceReviewEditModalContent = ({
       ) : null}
 
       <Modal.Button fullWidth size="cta" disabled={isSubmitDisabled} onClick={handleSubmit}>
-        {isPending ? "수정 중..." : "수정하기"}
+        {isPending ? t("editing") : t("edit")}
       </Modal.Button>
     </Modal>
   );

@@ -1,5 +1,9 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
+import { useTranslations } from "next-intl";
+
 import Link from "next/link";
 import { memo } from "react";
 
@@ -65,6 +69,7 @@ function MoverCard({
   onFavoriteError,
   selection,
 }: MoverCardProps) {
+  const tr = useTranslations("moverSearch");
   const favoriteMutation = useFavoriteMover({ onError: onFavoriteError });
 
   const toggleFavorite = (nextIsFavorite: boolean) => {
@@ -87,7 +92,7 @@ function MoverCard({
   };
 
   const detailHref = APP_ROUTES.MOVERS.DETAIL(mover.id);
-  const detailLabel = `${mover.name} 기사님 상세 보기`;
+  const detailLabel = tr("card.detailAria", { name: mover.name });
 
   const selectionControl = selection ? (
     <div
@@ -102,7 +107,7 @@ function MoverCard({
       <Checkbox
         checked={selection.checked}
         onCheckedChange={(checked) => selection.onCheckedChange(mover.id, checked)}
-        aria-label={`${mover.name} 기사님 선택`}
+        aria-label={tr("card.selectAria", { name: mover.name })}
       />
     </div>
   ) : null;
@@ -126,7 +131,7 @@ function MoverCard({
           <MoverServiceTypeChips serviceTypes={mover.serviceTypes} size="sm" />
           <div className="flex flex-col gap-16">
             <Text as="h3" variant="lg-semibold" className="text-text-secondary">
-              {mover.title}
+              <AutoTranslatedText text={mover.title} />
             </Text>
             <div className="flex items-center gap-8">
               <div className="bg-background-avatar rounded-12 relative size-48 shrink-0 overflow-hidden">
@@ -143,7 +148,7 @@ function MoverCard({
                     <DriverBadgeIcon className="h-[18.2px] w-16 shrink-0" />
 
                     <Text as="span" variant="md-semibold" className="text-text-secondary">
-                      {mover.name} 기사님
+                      {tr("card.nameWithSuffix", { name: mover.name })}
                     </Text>
                   </div>
                   <FavoriteButton
@@ -191,14 +196,14 @@ function MoverCard({
         <div className="flex w-full flex-col gap-16">
           <div className="flex flex-col">
             <Text as="h3" variant="lg-semibold" className="text-text-secondary">
-              {mover.title}
+              <AutoTranslatedText text={mover.title} />
             </Text>
             <Text
               as="p"
               variant="sm-medium"
               className="text-text-muted line-clamp-2 overflow-hidden text-ellipsis"
             >
-              {mover.description}
+              <AutoTranslatedText text={mover.description} />
             </Text>
           </div>
 
@@ -222,7 +227,7 @@ function MoverCard({
                     {mover.name}
                   </Text>
                   <Text as="span" variant="md-semibold" className="text-text-secondary">
-                    기사님
+                    {tr("card.moverSuffix")}
                   </Text>
                 </div>
                 <FavoriteButton
@@ -265,14 +270,14 @@ function MoverCard({
           <div className="flex min-w-0 flex-1 flex-col gap-20 self-stretch py-4">
             <div className="flex flex-col">
               <Text as="h3" variant="xl-semibold" className="text-text-secondary">
-                {mover.title}
+                <AutoTranslatedText text={mover.title} />
               </Text>
               <Text
                 as="p"
                 variant="md-regular"
                 className="text-text-muted line-clamp-1 overflow-hidden text-ellipsis"
               >
-                {mover.description}
+                <AutoTranslatedText text={mover.description} />
               </Text>
             </div>
 
@@ -284,7 +289,7 @@ function MoverCard({
                     {mover.name}
                   </Text>
                   <Text as="span" variant="lg-semibold" className="text-text-secondary">
-                    기사님
+                    {tr("card.moverSuffix")}
                   </Text>
                 </div>
                 <MoverMeta

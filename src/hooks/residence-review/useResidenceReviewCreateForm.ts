@@ -1,12 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { useCreateResidenceReview } from "@/hooks/residence-review/useCreateResidenceReview";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
-  residenceReviewCreateSchema,
+  createResidenceReviewSchemas,
   type ResidenceReviewCreateFormValues,
 } from "@/lib/schemas/residenceReviewSchema";
 import type { CreateResidenceReviewInput } from "@/types/residenceReview";
@@ -29,6 +31,8 @@ export const useResidenceReviewCreateForm = ({
   onSuccess,
   onError,
 }: UseResidenceReviewCreateFormParams) => {
+  const t = useTranslations("residenceReview");
+  const { createSchema } = createResidenceReviewSchemas(t);
   const createMutation = useCreateResidenceReview();
   const {
     register,
@@ -38,7 +42,7 @@ export const useResidenceReviewCreateForm = ({
     handleSubmit,
     formState: { errors, isValid, isSubmitting, touchedFields },
   } = useForm<ResidenceReviewCreateFormValues>({
-    resolver: zodResolver(residenceReviewCreateSchema),
+    resolver: zodResolver(createSchema),
     mode: "onTouched",
     defaultValues: EMPTY_VALUES,
   });
@@ -62,7 +66,7 @@ export const useResidenceReviewCreateForm = ({
 
   const submit = handleSubmit(async (formValues) => {
     if (formValues.regionId === null) {
-      setError("regionId", { message: "지역을 선택해 주세요." });
+      setError("regionId", { message: t("validationRegion") });
       return;
     }
 
@@ -79,7 +83,7 @@ export const useResidenceReviewCreateForm = ({
       resetForm();
       onClose();
     } catch (error) {
-      const message = getApiErrorMessage(error, "거주 후기를 작성하지 못했습니다.");
+      const message = getApiErrorMessage(error, t("createFailed"));
       setError("root", { message });
       onError?.(message);
     }

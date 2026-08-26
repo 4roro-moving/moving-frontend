@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
@@ -42,6 +44,7 @@ const MyGiveawayRequestListView = ({
   onEdit,
   onCancel,
 }: MyGiveawayRequestListViewProps) => {
+  const t = useTranslations("giveaway");
   const emptyDescription = toEmptyDescription(
     hasActiveFilters
       ? GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES
@@ -64,10 +67,10 @@ const MyGiveawayRequestListView = ({
           href={hasActiveFilters ? undefined : APP_ROUTES.COMMUNITY.GIVEAWAY}
         />
       }
-      initialErrorFallback="나눔 신청 내역을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
-      fetchingStatusLabel="나눔 신청 내역을 불러오는 중이에요"
-      nextPageLoadingLabel="나눔 신청 내역을 더 불러오는 중이에요"
-      nextPageErrorMessage="다음 나눔 신청 내역을 불러오지 못했습니다."
+      initialErrorFallback={t("myRequestsLoadFailed")}
+      fetchingStatusLabel={t("myRequestsLoading")}
+      nextPageLoadingLabel={t("myRequestsNextLoading")}
+      nextPageErrorMessage={t("myRequestsNextError")}
     >
       <ul className="flex w-full flex-col gap-20">
         {requests.map((request) => (
