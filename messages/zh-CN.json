@@ -863,6 +863,14 @@
     "termsLoadingAria": "正在加载条款",
     "termsRequiredAgreement": "同意所有必选条款",
     "termsRequiredLoadFailed": "无法加载必选条款。",
+    "termsType": {
+      "termsOfService": "服务条款",
+      "privacyPolicy": "隐私政策",
+      "marketingPolicy": "同意接收营销信息",
+      "locationPolicy": "位置信息使用条款",
+      "moverPolicy": "搬家师傅使用政策",
+      "other": "其他条款"
+    },
     "validation": {
       "emailInvalid": "请输入有效的邮箱地址。",
       "emailRequired": "请输入邮箱。",

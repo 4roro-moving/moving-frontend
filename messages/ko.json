@@ -863,6 +863,14 @@
     "termsLoadingAria": "약관을 불러오는 중",
     "termsRequiredAgreement": "필수 약관 전체 동의",
     "termsRequiredLoadFailed": "필수 약관을 불러오지 못했습니다.",
+    "termsType": {
+      "termsOfService": "서비스 이용약관",
+      "privacyPolicy": "개인정보 처리방침",
+      "marketingPolicy": "마케팅 정보 수신 동의",
+      "locationPolicy": "위치정보 이용약관",
+      "moverPolicy": "기사님 이용 정책",
+      "other": "기타 약관"
+    },
     "validation": {
       "emailInvalid": "올바른 이메일 형식을 입력해 주세요.",
       "emailRequired": "이메일을 입력해 주세요.",

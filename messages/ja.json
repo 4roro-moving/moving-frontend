@@ -863,6 +863,14 @@
     "termsLoadingAria": "規約を読み込み中",
     "termsRequiredAgreement": "必須規約にすべて同意",
     "termsRequiredLoadFailed": "必須規約を読み込めませんでした。",
+    "termsType": {
+      "termsOfService": "サービス利用規約",
+      "privacyPolicy": "プライバシーポリシー",
+      "marketingPolicy": "マーケティング情報の受信に同意",
+      "locationPolicy": "位置情報利用規約",
+      "moverPolicy": "業者利用ポリシー",
+      "other": "その他の規約"
+    },
     "validation": {
       "emailInvalid": "正しいメールアドレスを入力してください。",
       "emailRequired": "メールアドレスを入力してください。",

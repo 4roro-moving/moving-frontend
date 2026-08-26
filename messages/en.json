@@ -863,6 +863,14 @@
     "termsLoadingAria": "Loading terms",
     "termsRequiredAgreement": "Agree to all required terms",
     "termsRequiredLoadFailed": "Failed to load required terms.",
+    "termsType": {
+      "termsOfService": "Terms of Service",
+      "privacyPolicy": "Privacy Policy",
+      "marketingPolicy": "Marketing Communications Consent",
+      "locationPolicy": "Location Information Terms",
+      "moverPolicy": "Mover Policy",
+      "other": "Other Terms"
+    },
     "validation": {
       "emailInvalid": "Enter a valid email address.",
       "emailRequired": "Enter your email.",
