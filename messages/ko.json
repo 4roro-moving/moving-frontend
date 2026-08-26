@@ -1563,7 +1563,23 @@
     "previousPage": "이전 알림 페이지",
     "title": "제목",
     "triggerUnreadAria": "읽지 않은 알림 {count}개",
-    "unread": "읽지 않음"
+    "unread": "읽지 않음",
+    "estimateRequestReceived": " 견적 요청이 도착했어요",
+    "designatedRequestPrefix": "나를 지정한 ",
+    "estimateReceived": "이 도착했어요",
+    "estimateConfirmed": " 견적이 확정 되었어요",
+    "estimateRequestRejected": " 님이 견적 요청을 반려했어요",
+    "estimateRequestCanceled": " 님이 견적 요청을 취소했어요",
+    "reviewReceived": " 리뷰를 남겼어요",
+    "chatMessageReceived": "님으로부터 메시지가 도착했습니다.",
+    "inquiryAnswered": " 문의에 답변이 등록되었어요",
+    "contentHidden": " 숨김처리 되었습니다.",
+    "contentRestored": " 복구처리 되었습니다.",
+    "adminCanceledPrefix": "관리자 조치로 ",
+    "moverSuspendedPrefix": "기사의 이용 제한으로 ",
+    "customerSuspendedPrefix": "고객의 이용 제한으로 ",
+    "canceledSuffix": "이 취소되었습니다.",
+    "fallback": "새로운 알림이 있어요"
   },
   "pricePrediction": {
     "form": {

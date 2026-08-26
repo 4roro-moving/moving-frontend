@@ -1563,7 +1563,23 @@
     "previousPage": "前の通知ページ",
     "title": "タイトル",
     "triggerUnreadAria": "未読通知{count}件",
-    "unread": "未読"
+    "unread": "未読",
+    "estimateRequestReceived": " 見積もり依頼が届きました。",
+    "designatedRequestPrefix": "私を指定した ",
+    "estimateReceived": " が届きました。",
+    "estimateConfirmed": " の見積もりが確定しました。",
+    "estimateRequestRejected": " さんが見積もり依頼を断りました。",
+    "estimateRequestCanceled": " さんが見積もり依頼をキャンセルしました。",
+    "reviewReceived": " さんがレビューを投稿しました。",
+    "chatMessageReceived": "さんからメッセージが届きました。",
+    "inquiryAnswered": " のお問い合わせに回答が登録されました。",
+    "contentHidden": " は非表示になりました。",
+    "contentRestored": " は復元されました。",
+    "adminCanceledPrefix": "管理者の対応により ",
+    "moverSuspendedPrefix": "業者の利用制限により ",
+    "customerSuspendedPrefix": "顧客の利用制限により ",
+    "canceledSuffix": " がキャンセルされました。",
+    "fallback": "新しい通知があります。"
   },
   "pricePrediction": {
     "form": {

@@ -1563,7 +1563,23 @@
     "previousPage": "Previous notification page",
     "title": "Title",
     "triggerUnreadAria": "{count} unread notifications",
-    "unread": "Unread"
+    "unread": "Unread",
+    "estimateRequestReceived": " has sent an estimate request.",
+    "designatedRequestPrefix": "A designated estimate request from ",
+    "estimateReceived": " has arrived.",
+    "estimateConfirmed": " estimate has been confirmed.",
+    "estimateRequestRejected": " rejected your estimate request.",
+    "estimateRequestCanceled": " canceled the estimate request.",
+    "reviewReceived": " left a review.",
+    "chatMessageReceived": " sent you a message.",
+    "inquiryAnswered": " has received a response.",
+    "contentHidden": " has been hidden.",
+    "contentRestored": " has been restored.",
+    "adminCanceledPrefix": "Due to an administrator action, ",
+    "moverSuspendedPrefix": "Due to the mover's account restriction, ",
+    "customerSuspendedPrefix": "Due to the customer's account restriction, ",
+    "canceledSuffix": " has been canceled.",
+    "fallback": "You have a new notification."
   },
   "pricePrediction": {
     "form": {

@@ -1563,7 +1563,23 @@
     "previousPage": "上一页通知",
     "title": "标题",
     "triggerUnreadAria": "{count}条未读通知",
-    "unread": "未读"
+    "unread": "未读",
+    "estimateRequestReceived": " 向您发送了报价请求。",
+    "designatedRequestPrefix": "指定您的 ",
+    "estimateReceived": " 已送达。",
+    "estimateConfirmed": " 的报价已确认。",
+    "estimateRequestRejected": " 拒绝了您的报价请求。",
+    "estimateRequestCanceled": " 取消了报价请求。",
+    "reviewReceived": " 留下了评价。",
+    "chatMessageReceived": " 向您发送了消息。",
+    "inquiryAnswered": " 的咨询已有回复。",
+    "contentHidden": " 已被隐藏。",
+    "contentRestored": " 已恢复显示。",
+    "adminCanceledPrefix": "因管理员处理，",
+    "moverSuspendedPrefix": "因搬家师傅账号受限，",
+    "customerSuspendedPrefix": "因客户账号受限，",
+    "canceledSuffix": " 已被取消。",
+    "fallback": "您有一条新通知。"
   },
   "pricePrediction": {
     "form": {
