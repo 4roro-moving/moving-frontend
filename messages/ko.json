@@ -1174,7 +1174,7 @@
   },
   "residenceReview": {
     "editTitle": "후기 수정",
-    "region": "후기 지역",
+    "region": "지역",
     "editing": "수정 중...",
     "edit": "수정하기",
     "retry": "다시 시도",

@@ -1174,7 +1174,7 @@
   },
   "residenceReview": {
     "editTitle": "Edit Review",
-    "region": "Review region",
+    "region": "Region",
     "editing": "Saving...",
     "edit": "Edit",
     "retry": "Retry",
