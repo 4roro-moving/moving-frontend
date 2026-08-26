@@ -42,9 +42,11 @@ export default function MoverDetailView({ moverId, initialDetail }: MoverDetailV
   // 기사 프로필 자체는 로그인한 고객만 신고 가능
   const canReportMover = !isAuthPending && isAuthenticated && user?.role === "CUSTOMER";
 
-  // 리뷰는 로그인한 고객/기사 모두 신고 가능
+  // 리뷰: 고객은 신고 가능, 기사는 본인 상세의 리뷰만 신고 가능
   const canReportReviews =
-    !isAuthPending && isAuthenticated && (user?.role === "CUSTOMER" || user?.role === "MOVER");
+    !isAuthPending &&
+    isAuthenticated &&
+    (user?.role === "CUSTOMER" || (user?.role === "MOVER" && user.id === moverId));
 
   const { detail: queryDetail, isInitialLoading, isNotFound, query } = useMoverDetail(moverId);
 

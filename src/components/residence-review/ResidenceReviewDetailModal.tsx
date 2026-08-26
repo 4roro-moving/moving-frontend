@@ -54,6 +54,7 @@ const ResidenceReviewDetailModal = ({
   const format = useFormatter();
 
   const userId = useAuthStore((state) => state.user?.id);
+  const userRole = useAuthStore((state) => state.user?.role);
 
   const { data, isError, error, refetch, isFetching } = useResidenceReviewDetail({
     residenceReviewId: review?.id ?? null,
@@ -71,7 +72,8 @@ const ResidenceReviewDetailModal = ({
 
   const isOwner = isAuthenticated && isResidenceReviewOwner(currentReview, userId);
 
-  const showReport = isAuthenticated && !isOwner;
+  // MOVER는 거주후기 기능을 사용하지 않으므로 신고 UI를 노출하지 않는다.
+  const showReport = isAuthenticated && !isOwner && userRole === "CUSTOMER";
 
   let writtenDate = "";
 
