@@ -25,16 +25,29 @@ interface MoversListProps {
 /** 초기 로딩 스켈레톤 카드 수 */
 const MOVERS_LIST_SKELETON_COUNT = 5;
 
+function areFiltersEqual(first: MoversSearchParamsState, second: MoversSearchParamsState) {
+  return (
+    first.keyword === second.keyword &&
+    first.serviceArea === second.serviceArea &&
+    first.moveType === second.moveType &&
+    first.sort === second.sort
+  );
+}
+
 export function MoversList({ filters, initialMovers }: MoversListProps) {
   const t = useTranslations("moverSearch");
   const { movers, isInitialLoading, isFilterFetching, query } = useMovers(filters);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  // 첫 진입 전환은 제외하고, 필터 변경 중에만 이전 목록 로딩 상태를 표시한다.
+  const [initialFilters] = useState(filters);
   const isShowingInitialMovers = isInitialLoading && initialMovers.length > 0;
   const displayedMovers = isShowingInitialMovers ? initialMovers : movers;
+  const isPreviousMoversLoading = isFilterFetching && !areFiltersEqual(filters, initialFilters);
 
   const sentinelRef = useMoversInfiniteScroll({
-    enabled: !isInitialLoading && !isFilterFetching && !query.isError && displayedMovers.length > 0,
+    enabled:
+      !isInitialLoading && !isPreviousMoversLoading && !query.isError && displayedMovers.length > 0,
     hasNextPage,
     isFetchingNextPage,
     isFetchNextPageError,
@@ -80,10 +93,13 @@ export function MoversList({ filters, initialMovers }: MoversListProps) {
   } else {
     content = (
       <div
-        className={cn("flex flex-col gap-20", isFilterFetching && PREVIOUS_DATA_LOADING_CLASS_NAME)}
-        aria-busy={isFilterFetching}
+        className={cn(
+          "flex flex-col gap-20",
+          isPreviousMoversLoading && PREVIOUS_DATA_LOADING_CLASS_NAME,
+        )}
+        aria-busy={isPreviousMoversLoading}
       >
-        {isFilterFetching ? (
+        {isPreviousMoversLoading ? (
           <span className="sr-only" role="status">
             {t("loading")}
           </span>
