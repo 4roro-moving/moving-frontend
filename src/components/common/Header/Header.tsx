@@ -334,7 +334,6 @@ const Header = ({
           <div className="relative z-50 flex shrink-0 items-center gap-16 xl:gap-32">
             <NotificationTrigger />
             <ProfileMenuTrigger
-              key={pathname}
               nickname={nickname}
               imageUrl={imageUrl}
               items={profileMenuItems}

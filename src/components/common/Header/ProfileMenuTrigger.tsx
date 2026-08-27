@@ -15,10 +15,16 @@ import type { AuthRole } from "@/lib/auth/role";
 import { isPublicPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
+import { DEFAULT_PROFILE_IMAGE } from "@/lib/utils/safeImageSrc";
 import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const LOGOUT_FAILURE_TOAST = "로그아웃에 실패했습니다. 다시 시도해 주세요.";
+const HEADER_PROFILE_FALLBACK_SRC = DEFAULT_PROFILE_IMAGE;
+const HEADER_PROFILE_FRAME_CLASSNAME =
+  "bg-background-avatar rounded-100 relative size-24 overflow-hidden xl:size-36";
+const HEADER_PROFILE_IMAGE_CLASSNAME = "size-full object-cover";
+const HEADER_PROFILE_SKELETON_CLASSNAME = "size-24 rounded-full xl:size-36";
 
 export type ProfileMenuItem =
   | { type: "link"; label: string; href: string }
@@ -26,6 +32,46 @@ export type ProfileMenuItem =
 
 const LINK_ITEM_CLASS =
   "hover:bg-background-hover focus-visible:bg-background-hover flex w-full items-center py-14 pr-12 pl-24 transition-colors focus-visible:outline-none";
+
+const HeaderProfileFallbackImage = () => {
+  return (
+    <div className={HEADER_PROFILE_FRAME_CLASSNAME}>
+      <Image
+        src={HEADER_PROFILE_FALLBACK_SRC}
+        alt=""
+        width={36}
+        height={36}
+        className={HEADER_PROFILE_IMAGE_CLASSNAME}
+      />
+    </div>
+  );
+};
+
+const HeaderProfilePhoto = ({ src }: { src: string }) => {
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
+
+  if (status === "error") {
+    return <HeaderProfileFallbackImage />;
+  }
+
+  return (
+    <div className={HEADER_PROFILE_FRAME_CLASSNAME}>
+      {status === "loading" ? <Skeleton className={HEADER_PROFILE_SKELETON_CLASSNAME} /> : null}
+      <Image
+        src={src}
+        alt=""
+        width={36}
+        height={36}
+        className={cn(
+          HEADER_PROFILE_IMAGE_CLASSNAME,
+          status === "loading" && "pointer-events-none absolute inset-0 opacity-0",
+        )}
+        onLoad={() => setStatus("loaded")}
+        onError={() => setStatus("error")}
+      />
+    </div>
+  );
+};
 
 interface ProfileMenuTriggerProps {
   nickname: string;
@@ -48,7 +94,8 @@ export default function ProfileMenuTrigger({
   const logout = useAuthStore((state) => state.logout);
   const safeImageUrl = sanitizeSoftUxProfileImageUrl(imageUrl);
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [menuOpenForPath, setMenuOpenForPath] = useState<string | null>(null);
+  const isOpen = menuOpenForPath === pathname;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const { isRendered: isMenuRendered, isVisible: isMenuVisible } = usePresence(
     isOpen,
@@ -72,12 +119,12 @@ export default function ProfileMenuTrigger({
   const closeQuiet = useCallback(() => {
     // aria-hidden 적용 전에 포커스를 메뉴 밖으로 이동
     restoreTriggerFocusIfNeeded();
-    setIsOpen(false);
+    setMenuOpenForPath(null);
   }, []);
 
   const closeWithFocus = useCallback(() => {
     triggerRef.current?.focus();
-    setIsOpen(false);
+    setMenuOpenForPath(null);
   }, []);
 
   const containerRef = useClickOutside<HTMLDivElement>(closeQuiet);
@@ -130,7 +177,7 @@ export default function ProfileMenuTrigger({
 
   const handleLogout = async () => {
     triggerRef.current?.focus();
-    setIsOpen(false);
+    setMenuOpenForPath(null);
 
     const isPublicPage = isPublicPath(pathname);
     const logoutPath = role === "MOVER" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
@@ -171,28 +218,14 @@ export default function ProfileMenuTrigger({
         aria-expanded={isOpen}
         aria-controls={isOpen ? `${menuId}-menu` : undefined}
         className="focus-visible:ring-border-brand rounded-8 flex items-center focus-visible:ring-2 focus-visible:outline-none xl:gap-16"
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={() => setMenuOpenForPath((current) => (current === pathname ? null : pathname))}
       >
         {isAvatarPending ? (
-          <Skeleton className="size-24 rounded-full xl:size-36" />
+          <Skeleton className={HEADER_PROFILE_SKELETON_CLASSNAME} />
         ) : safeImageUrl ? (
-          <div className="rounded-100 overflow-hidden">
-            <Image
-              src={safeImageUrl}
-              alt=""
-              width={36}
-              height={36}
-              className="rounded-4 size-24 xl:size-36 xl:rounded-none"
-            />
-          </div>
+          <HeaderProfilePhoto key={safeImageUrl} src={safeImageUrl} />
         ) : (
-          <Image
-            src="/icons/profile-default.svg"
-            alt=""
-            width={36}
-            height={36}
-            className="rounded-4 size-24 xl:size-36 xl:rounded-none"
-          />
+          <HeaderProfileFallbackImage />
         )}
         <Text as="span" variant="2lg-medium" className="text-text-primary hidden xl:block">
           {nickname}
