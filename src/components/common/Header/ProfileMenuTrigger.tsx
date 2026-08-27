@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils/cn";
 import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { useAuthStore } from "@/stores/useAuthStore";
 
-const HEADER_PROFILE_AVATAR_CLASSNAME = "rounded-100 size-24 xl:size-36";
+const HEADER_PROFILE_AVATAR_CLASSNAME = "bg-background-muted rounded-100 size-24 xl:size-36";
 const HEADER_PROFILE_SKELETON_CLASSNAME = "size-24 rounded-full xl:size-36";
 
 export type ProfileMenuItem =
