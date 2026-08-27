@@ -175,7 +175,7 @@ const ReportModal = ({ isOpen, onClose, targetType, targetId, targetName }: Repo
       open={isOpen}
       onClose={handleClose}
       presentation="responsive"
-      dismissible={!createMutation.isPending}
+      dismissible={false}
       className={cn("items-stretch gap-0 p-0", "md:max-w-[720px]", "xl:w-full xl:max-w-[720px]")}
       aria-label={t("modal.ariaLabel")}
     >
