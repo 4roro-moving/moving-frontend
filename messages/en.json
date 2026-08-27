@@ -1112,6 +1112,7 @@
     "requesterCustomerName": "{name}",
     "imageIndexAria": "Giveaway image {current}/{total}",
     "imageAria": "Giveaway image",
+    "imageLoadFailed": "Failed to load {alt}",
     "previousImage": "Previous image",
     "nextImage": "Next image",
     "nextLoading": "Loading more giveaways",

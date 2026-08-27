@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -25,15 +26,13 @@ interface GiveawayThumbnailFallbackProps {
   alt?: string;
 }
 
-const getGiveawayThumbnailLoadErrorLabel = (alt: string) => {
-  return `${alt}를 불러오지 못했습니다`;
-};
-
 const GiveawayThumbnailFallback = ({ iconClassName, alt = "" }: GiveawayThumbnailFallbackProps) => {
+  const t = useTranslations("giveaway");
+
   return (
     <div className="flex size-full items-center justify-center">
       <GalleryIcon className={cn("text-icon-subtle size-40", iconClassName)} aria-hidden="true" />
-      {alt ? <span className="sr-only">{getGiveawayThumbnailLoadErrorLabel(alt)}</span> : null}
+      {alt ? <span className="sr-only">{t("imageLoadFailed", { alt })}</span> : null}
     </div>
   );
 };

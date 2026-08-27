@@ -1112,6 +1112,7 @@
     "requesterCustomerName": "{name}师傅",
     "imageIndexAria": "分享图片 {current}/{total}",
     "imageAria": "分享图片",
+    "imageLoadFailed": "无法加载{alt}",
     "previousImage": "上一张图片",
     "nextImage": "下一张图片",
     "nextLoading": "正在加载更多分享帖子",
