@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
-import { UserIcon, GalleryIcon } from "@/icons";
+import GiveawayThumbnailImage from "@/components/giveaway/GiveawayThumbnailImage";
+import { UserIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { getGiveawayThumbnailOverlayLabel } from "@/lib/constants/giveaway";
 import { cn } from "@/lib/utils/cn";
@@ -36,20 +36,11 @@ const GiveawayCard = ({ giveaway, preloadThumbnail = false }: GiveawayCardProps)
       onClick={(event) => markInternalDetailNavigationOnClick(event, detailHref)}
     >
       <div className="bg-background-muted rounded-6 relative h-[219px] w-full overflow-hidden">
-        {giveaway.thumbnailUrl ? (
-          <Image
-            src={giveaway.thumbnailUrl}
-            alt=""
-            fill
-            sizes="(min-width: 1280px) 265px, (min-width: 768px) 45vw, 90vw"
-            preload={preloadThumbnail}
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex size-full items-center justify-center">
-            <GalleryIcon className="text-icon-subtle size-40" aria-hidden="true" />
-          </div>
-        )}
+        <GiveawayThumbnailImage
+          src={giveaway.thumbnailUrl}
+          sizes="(min-width: 1280px) 265px, (min-width: 768px) 45vw, 90vw"
+          preload={preloadThumbnail}
+        />
         {overlayLabel ? (
           <div className="bg-overlay-card-disabled pointer-events-none absolute inset-0 flex items-center justify-center">
             <Text as="span" id={statusId} variant="2lg-semibold" className="text-text-inverse">

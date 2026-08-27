@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 
 import { Text } from "@/components/common/Text";
+import GiveawayThumbnailImage from "@/components/giveaway/GiveawayThumbnailImage";
 import { ChevronLeftIcon, ChevronRightIcon, GalleryIcon } from "@/icons";
 import { getGiveawayThumbnailOverlayLabel } from "@/lib/constants/giveaway";
 import { cn } from "@/lib/utils/cn";
@@ -80,12 +80,10 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
               className="relative size-full shrink-0"
               aria-hidden={index !== safeIndex}
             >
-              <Image
+              <GiveawayThumbnailImage
                 src={image.imageUrl}
                 alt={getGiveawaySlideLabel(index, images.length)}
-                fill
                 sizes="(min-width: 1280px) 500px, (min-width: 768px) 268px, 90vw"
-                className="object-cover"
                 priority={index === 0}
               />
             </div>

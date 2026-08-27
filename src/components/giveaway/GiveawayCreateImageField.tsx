@@ -24,6 +24,29 @@ const getImageKey = (image: GiveawayFormImage, index: number) => {
   return `new-${image.file.name}-${String(image.file.lastModified)}-${String(index)}`;
 };
 
+const GiveawayCreatePreviewImage = ({ src }: { src: string }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return (
+      <div className="bg-background-avatar rounded-12 flex size-full items-center justify-center">
+        <GalleryIcon className="text-icon-subtle size-24 md:size-32" aria-hidden="true" />
+      </div>
+    );
+  }
+
+  return (
+    // blob URL — Next Image 도메인 제한 회피
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt=""
+      className="bg-background-avatar rounded-12 size-full object-cover"
+      onError={() => setHasError(true)}
+    />
+  );
+};
+
 const GiveawayCreateImageField = ({
   images,
   error,
@@ -115,13 +138,7 @@ const GiveawayCreateImageField = ({
                   key={getImageKey(image, index)}
                   className="relative size-64 shrink-0 md:size-100"
                 >
-                  {/* blob URL — Next Image 도메인 제한 회피 */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={previewUrl}
-                    alt=""
-                    className="bg-background-avatar rounded-12 size-full object-cover"
-                  />
+                  <GiveawayCreatePreviewImage key={previewUrl} src={previewUrl} />
 
                   {index === 0 ? (
                     <div className="bg-background-avatar rounded-b-12 pointer-events-none absolute inset-x-0 bottom-0 flex h-1/4 items-center justify-center">

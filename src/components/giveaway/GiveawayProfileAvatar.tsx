@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 
 import { ProfileDefaultIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
@@ -9,6 +12,30 @@ interface GiveawayProfileAvatarProps {
   className?: string;
   sizes?: string;
 }
+
+interface GiveawayProfileAvatarInnerProps {
+  src: string;
+  sizes: string;
+}
+
+const GiveawayProfileAvatarInner = ({ src, sizes }: GiveawayProfileAvatarInnerProps) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return <ProfileDefaultIcon className="size-full" aria-hidden="true" />;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt=""
+      fill
+      sizes={sizes}
+      className="object-cover"
+      onError={() => setHasError(true)}
+    />
+  );
+};
 
 const GiveawayProfileAvatar = ({
   imageUrl,
@@ -22,7 +49,7 @@ const GiveawayProfileAvatar = ({
       className={cn("bg-background-avatar rounded-20 relative shrink-0 overflow-hidden", className)}
     >
       {src ? (
-        <Image src={src} alt="" fill sizes={sizes} className="object-cover" />
+        <GiveawayProfileAvatarInner key={src} src={src} sizes={sizes} />
       ) : (
         <ProfileDefaultIcon className="size-full" aria-hidden="true" />
       )}
