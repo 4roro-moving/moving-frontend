@@ -1519,7 +1519,7 @@
     "departure": "出发地",
     "departurePlaceholder": "请选择出发地",
     "departureShort": "出发",
-    "description": "说明",
+    "description": "输入出发地和目的地，我们会为您匹配服务区域合适的搬家师傅。",
     "destination": "目的地",
     "destinationPlaceholder": "请选择目的地",
     "destinationShort": "到达",
@@ -1543,7 +1543,7 @@
     "searchPrompt": "输入条件查找推荐搬家师傅。",
     "serviceRegionNotice": "根据搬家师傅的服务地区进行推荐。",
     "sortDescription": "按推荐顺序显示。",
-    "title": "标题",
+    "title": "为您推荐当地搬家师傅",
     "viewProfile": "查看个人资料",
     "match": {
       "BOTH": "出发地和目的地均可服务",

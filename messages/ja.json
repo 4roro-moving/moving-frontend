@@ -1519,7 +1519,7 @@
     "departure": "出発地",
     "departurePlaceholder": "出発地を選択してください",
     "departureShort": "出発",
-    "description": "説明",
+    "description": "出発地と目的地を入力すると、対応エリアに合った引っ越し業者をご案内します。",
     "destination": "到着地",
     "destinationPlaceholder": "到着地を選択してください",
     "destinationShort": "到着",
@@ -1543,7 +1543,7 @@
     "searchPrompt": "条件を入力しておすすめ業者を探しましょう。",
     "serviceRegionNotice": "業者のサービス地域を基準におすすめします。",
     "sortDescription": "おすすめ順に表示されます。",
-    "title": "タイトル",
+    "title": "エリアに合った引っ越し業者のおすすめ",
     "viewProfile": "プロフィールを見る",
     "match": {
       "BOTH": "出発地・到着地どちらも対応",
