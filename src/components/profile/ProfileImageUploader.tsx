@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, type ChangeEvent } from "react";
+import { useTranslations } from "next-intl";
 
 import { PROFILE_IMAGE_CONTENT_TYPES } from "@/types/profile";
 import { Text } from "@/components/common/Text";
@@ -32,6 +33,7 @@ const ProfileImageUploader = ({
   disabled = false,
   className,
 }: ProfileImageUploaderProps) => {
+  const t = useTranslations("profile");
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const errorId = `${inputId}-error`;
@@ -85,7 +87,7 @@ const ProfileImageUploader = ({
       <div className="relative size-100 md:size-160">
         <button
           type="button"
-          aria-label="프로필 이미지 선택"
+          aria-label={t("selectImage")}
           aria-describedby={error ? errorId : undefined}
           disabled={disabled}
           onClick={() => {
@@ -108,7 +110,7 @@ const ProfileImageUploader = ({
         {canClear ? (
           <button
             type="button"
-            aria-label="프로필 이미지 초기화"
+            aria-label={t("clearImage")}
             disabled={disabled}
             onClick={handleClear}
             className={cn(

@@ -17,10 +17,6 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
 import {
   CUSTOMER_PROFILE_CURRENT_PASSWORD_ERROR_KEYWORD,
-  CUSTOMER_PROFILE_EDIT_ERROR_MESSAGE,
-  CUSTOMER_PROFILE_EDIT_PARTIAL_SAVE_ERROR_MESSAGE,
-  CUSTOMER_PROFILE_EDIT_SUCCESS_MESSAGE,
-  CUSTOMER_PROFILE_NO_CHANGES_MESSAGE,
   CUSTOMER_PROFILE_PHONE_ERROR_KEYWORD,
 } from "@/lib/constants/profileMessages";
 import { buildCustomerProfileEditPayloads } from "@/lib/profile/buildCustomerProfileEditPayloads";
@@ -31,10 +27,18 @@ import { ApiError } from "@/types/api";
 
 interface UseCustomerProfileEditFormParams {
   hasPassword: boolean;
+  messages: CustomerProfileEditMessages;
   reset: UseFormReset<CustomerProfileEditFormValues>;
   resetField: UseFormResetField<CustomerProfileEditFormValues>;
   setError: UseFormSetError<CustomerProfileEditFormValues>;
   setFocus: UseFormSetFocus<CustomerProfileEditFormValues>;
+}
+
+export interface CustomerProfileEditMessages {
+  noChanges: string;
+  partialSaveFailed: string;
+  saveSuccess: string;
+  saveFailed: string;
 }
 
 type CustomerProfileDirtyFields = Partial<
@@ -58,6 +62,7 @@ function isUnauthorizedError(error: unknown): error is ApiError {
 
 export function useCustomerProfileEditForm({
   hasPassword,
+  messages,
   reset,
   resetField,
   setError,
@@ -95,7 +100,7 @@ export function useCustomerProfileEditForm({
       });
 
       if (!basic && !profile) {
-        setSubmitError(CUSTOMER_PROFILE_NO_CHANGES_MESSAGE);
+        setSubmitError(messages.noChanges);
         return;
       }
 
@@ -125,7 +130,7 @@ export function useCustomerProfileEditForm({
           }
 
           if (didBasicSucceed) {
-            setSubmitError(CUSTOMER_PROFILE_EDIT_PARTIAL_SAVE_ERROR_MESSAGE);
+            setSubmitError(messages.partialSaveFailed);
             return;
           }
 
@@ -147,7 +152,7 @@ export function useCustomerProfileEditForm({
         newPasswordConfirm: "",
       });
 
-      setToastMessage(CUSTOMER_PROFILE_EDIT_SUCCESS_MESSAGE);
+      setToastMessage(messages.saveSuccess);
     } catch (error) {
       if (isConflictError(error) && error.message.includes(CUSTOMER_PROFILE_PHONE_ERROR_KEYWORD)) {
         setError("phone", {
@@ -170,7 +175,7 @@ export function useCustomerProfileEditForm({
         return;
       }
 
-      setSubmitError(getApiErrorMessage(error, CUSTOMER_PROFILE_EDIT_ERROR_MESSAGE));
+      setSubmitError(getApiErrorMessage(error, messages.saveFailed));
     } finally {
       setIsSubmitting(false);
     }

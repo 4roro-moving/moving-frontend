@@ -1,19 +1,21 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import MoverAuthGate from "@/components/auth/MoverAuthGate";
 import SentEstimateDetailPage from "@/components/estimate/sent/SentEstimateDetailPage";
 
-export const metadata: Metadata = {
-  title: "견적 상세",
-  description: "기사님이 보낸 확정 견적의 상세 정보를 확인합니다.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("estimates");
+  return { title: t("metadata.sentDetailTitle"), description: t("metadata.sentDetailDescription") };
+}
 
 interface PageProps {
   params: Promise<{ estimateId: string }>;
 }
 
 export default async function SentEstimateDetailRoute({ params }: PageProps) {
+  const t = await getTranslations("estimates");
   const { estimateId: estimateIdParam } = await params;
   const estimateId = Number(estimateIdParam);
 
@@ -22,7 +24,7 @@ export default async function SentEstimateDetailRoute({ params }: PageProps) {
   }
 
   return (
-    <MoverAuthGate loadingMessage="보낸 견적을 불러오는 중입니다.">
+    <MoverAuthGate loadingMessage={t("loading")}>
       <SentEstimateDetailPage estimateId={estimateId} />
     </MoverAuthGate>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { type ReactNode } from "react";
 
@@ -38,6 +39,7 @@ const GiveawayInfiniteListChrome = <TPage,>({
   nextPageErrorMessage,
   children,
 }: GiveawayInfiniteListChromeProps<TPage>) => {
+  const t = useTranslations("giveaway");
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
 
   const sentinelRef = useMoversInfiniteScroll({
@@ -56,7 +58,7 @@ const GiveawayInfiniteListChrome = <TPage,>({
     content = (
       <EstimatesQueryStatus
         message={getApiErrorMessage(query.error, initialErrorFallback)}
-        actionLabel="다시 시도"
+        actionLabel={t("retry")}
         onAction={() => {
           void refetch();
         }}
@@ -100,7 +102,7 @@ const GiveawayInfiniteListChrome = <TPage,>({
           <EstimatesQueryStatus
             className="py-24 md:py-32"
             message={nextPageErrorMessage}
-            actionLabel="다시 시도"
+            actionLabel={t("retry")}
             onAction={() => {
               void fetchNextPage();
             }}

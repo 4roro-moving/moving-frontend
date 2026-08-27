@@ -42,11 +42,6 @@ export const GIVEAWAY_EMPTY_DESCRIPTION_LINES = [
   "첫 나눔 글을 작성해 보세요.",
 ] as const;
 
-export const GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES = [
-  "검색 결과가 없어요.",
-  "다른 검색어나 필터로 다시 찾아보세요.",
-] as const;
-
 export const GIVEAWAY_SORT_OPTIONS = [
   { value: GIVEAWAY_LIST_SORT.LATEST, label: "최신 순" },
   { value: GIVEAWAY_LIST_SORT.OLDEST, label: "오래된 순" },
@@ -79,8 +74,6 @@ export const getGiveawayThumbnailOverlayLabel = (status: GiveawayStatus): string
   return null;
 };
 
-export const GIVEAWAY_DETAIL_TITLE = "나눔글 상세";
-export const GIVEAWAY_PREFERRED_REGION_LABEL = "거래 희망 지역";
 export const GIVEAWAY_VIEW_MY_REQUEST_BUTTON_LABEL = "신청 글 확인하기";
 export const GIVEAWAY_MY_REQUEST_TITLE = "내 신청 글";
 export const GIVEAWAY_MY_REQUEST_SECTION_ID = "my-giveaway-request";
@@ -168,8 +161,6 @@ export const toGiveawayExistingFormImage = (image: {
 };
 
 export const GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH = 1000;
-
-export const GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL = "나눔 글 보러가기";
 
 export const GIVEAWAY_REQUEST_CANCEL_SUCCESS_MESSAGE = "나눔 신청을 취소했습니다.";
 export const GIVEAWAY_REQUEST_CANCEL_ERROR_MESSAGE =

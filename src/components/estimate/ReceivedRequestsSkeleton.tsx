@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ESTIMATE_REQUEST_DETAIL_CARD_CLASSNAME } from "@/components/estimate/EstimateRequestSummaryContent";
@@ -38,11 +42,12 @@ function ReceivedRequestCardSkeleton() {
 }
 
 export default function ReceivedRequestsSkeleton() {
+  const tr = useTranslations("estimates");
   return (
     <div
       className="grid w-full grid-cols-1 gap-24 md:max-w-[588px] xl:max-w-none xl:grid-cols-2"
       role="status"
-      aria-label="받은 요청을 불러오는 중입니다."
+      aria-label={tr("mover.receivedLoading")}
       aria-busy="true"
     >
       <ReceivedRequestCardSkeleton />
@@ -52,9 +57,10 @@ export default function ReceivedRequestsSkeleton() {
 }
 
 export function ReceivedRequestsPageSkeleton() {
+  const tr = useTranslations("estimates");
   return (
     <div className="bg-background-default text-text-primary min-h-screen">
-      <PageHeader title="받은 요청" />
+      <PageHeader title={tr("mover.receivedTitle")} />
 
       <main className="mx-auto flex max-w-[1200px] flex-col gap-0 px-24 pb-80 md:px-[72px] xl:gap-40 xl:px-0">
         <section className="flex flex-col gap-24">

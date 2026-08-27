@@ -1,6 +1,7 @@
 "use client";
 
 import { Text } from "@/components/common/Text";
+import { useTranslations } from "next-intl";
 import {
   MoverOfferedServiceChips,
   MoverServiceChip,
@@ -21,10 +22,14 @@ interface MoverMyPageRegionsProps {
 }
 
 export function MoverMyPageActivity({ profile }: MoverMyPageActivityProps) {
+  const t = useTranslations("profile");
   const stats = [
-    { label: "진행", value: `${profile.completedCount}건` },
-    { label: "리뷰", value: formatRating(profile.averageRating ?? 0) },
-    { label: "총 경력", value: `${profile.career}년` },
+    {
+      label: t("myPageCompleted"),
+      value: t("myPageCompletedCount", { count: profile.completedCount }),
+    },
+    { label: t("myPageReviews"), value: formatRating(profile.averageRating ?? 0) },
+    { label: t("myPageCareer"), value: t("myPageCareerYears", { years: profile.career }) },
   ];
 
   return (
@@ -38,7 +43,7 @@ export function MoverMyPageActivity({ profile }: MoverMyPageActivityProps) {
         variant={{ base: "lg-semibold", md: "xl-semibold" }}
         className="text-text-secondary"
       >
-        활동 현황
+        {t("myPageActivity")}
       </Text>
 
       <div className="border-border-subtle bg-background-subtle h-mypage-activity-mobile rounded-16 flex items-center justify-between border px-40 md:h-120 md:px-160">
@@ -61,6 +66,7 @@ export function MoverMyPageActivity({ profile }: MoverMyPageActivityProps) {
 }
 
 export function MoverMyPageServices({ profile }: MoverMyPageServicesProps) {
+  const t = useTranslations("profile");
   return (
     <section className="flex flex-col gap-8 md:gap-16" aria-labelledby="mover-service-types">
       <Text
@@ -69,7 +75,7 @@ export function MoverMyPageServices({ profile }: MoverMyPageServicesProps) {
         variant={{ base: "lg-semibold", md: "xl-semibold" }}
         className="text-text-secondary"
       >
-        제공 서비스
+        {t("moverServices")}
       </Text>
       <MoverOfferedServiceChips serviceTypes={profile.serviceTypes} />
     </section>
@@ -77,6 +83,8 @@ export function MoverMyPageServices({ profile }: MoverMyPageServicesProps) {
 }
 
 export function MoverMyPageRegions({ profile }: MoverMyPageRegionsProps) {
+  const t = useTranslations("profile");
+  const tMoverSearch = useTranslations("moverSearch");
   return (
     <section className="flex flex-col gap-8 md:gap-16" aria-labelledby="mover-service-regions">
       <Text
@@ -85,11 +93,15 @@ export function MoverMyPageRegions({ profile }: MoverMyPageRegionsProps) {
         variant={{ base: "lg-semibold", md: "xl-semibold" }}
         className="text-text-secondary"
       >
-        서비스 가능 지역
+        {t("moverRegions")}
       </Text>
       <div className="flex flex-wrap gap-12">
         {profile.regions.map((region) => (
-          <MoverServiceChip key={region.id} label={region.name} variant="region" />
+          <MoverServiceChip
+            key={region.id}
+            label={tMoverSearch(`regions.${region.id}`)}
+            variant="region"
+          />
         ))}
       </div>
     </section>

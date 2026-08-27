@@ -6,11 +6,28 @@ import MoverEstimateListPageSkeleton from "@/components/estimate/MoverEstimateLi
 import { MoverMyPageSkeleton } from "@/components/mover/mypage/MoverMyPageView";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
+interface ProfileLoadingMessages {
+  create: {
+    title: string;
+    description: string;
+    loadingLabel: string;
+  };
+  basicInfo: {
+    title: string;
+    loadingLabel: string;
+  };
+  title: string;
+  loadingLabel: string;
+}
+
 /** RoleGuard auth 대기 중 기사 protected layout용 로딩 UI
  *
  * pathname: 현재 페이지 경로
  */
-export const getMoverProtectedLoadingFallback = (pathname: string): ReactNode => {
+export const getMoverProtectedLoadingFallback = (
+  pathname: string,
+  profileMessages: ProfileLoadingMessages,
+): ReactNode => {
   if (pathname === APP_ROUTES.MOVER_ESTIMATES.RECEIVED_REQUESTS) {
     return <ReceivedRequestsPageSkeleton />;
   }
@@ -25,19 +42,32 @@ export const getMoverProtectedLoadingFallback = (pathname: string): ReactNode =>
   if (pathname === APP_ROUTES.MOVER_PROFILE) {
     return (
       <ProfileFormSkeleton
-        title="기사님 프로필 등록"
-        description="추가 정보를 입력하여 회원가입을 완료해주세요."
+        title={profileMessages.create.title}
+        description={profileMessages.create.description}
+        loadingLabel={profileMessages.create.loadingLabel}
         layout="twoColumn"
       />
     );
   }
 
   if (pathname === APP_ROUTES.MOVER_PROFILE_EDIT) {
-    return <ProfileFormSkeleton title="프로필 수정" layout="twoColumn" />;
+    return (
+      <ProfileFormSkeleton
+        title={profileMessages.title}
+        loadingLabel={profileMessages.loadingLabel}
+        layout="twoColumn"
+      />
+    );
   }
 
   if (pathname === APP_ROUTES.MOVER_BASIC_EDIT) {
-    return <ProfileFormSkeleton title="기본정보 수정" layout="twoColumn" />;
+    return (
+      <ProfileFormSkeleton
+        title={profileMessages.basicInfo.title}
+        loadingLabel={profileMessages.basicInfo.loadingLabel}
+        layout="twoColumn"
+      />
+    );
   }
 
   if (pathname === APP_ROUTES.MOVER_MYPAGE) {

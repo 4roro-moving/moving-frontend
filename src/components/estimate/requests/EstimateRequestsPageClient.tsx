@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import Toast from "@/components/common/Toast/Toast";
@@ -14,11 +15,11 @@ import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { cn } from "@/lib/utils/cn";
 import type { EstimateRequestListStatusFilter } from "@/types/estimate";
 
-function readCanceledToastMessage(): string | null {
+function readCanceledToastMessage(message: string): string | null {
   try {
     if (sessionStorage.getItem(ESTIMATE_REQUEST_CANCELED_TOAST_KEY) === "1") {
       sessionStorage.removeItem(ESTIMATE_REQUEST_CANCELED_TOAST_KEY);
-      return "견적 요청이 취소되었습니다.";
+      return message;
     }
   } catch {
     // ignore
@@ -37,6 +38,7 @@ function readCanceledToastMessage(): string | null {
  * // 2026.08.04 정슬기 - [수정] sessionStorage Toast를 useEffect에서 소비 (hydration 안전)
  */
 export default function EstimateRequestsPageClient() {
+  const t = useTranslations("estimates");
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<EstimateRequestListStatusFilter>("all");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -44,12 +46,12 @@ export default function EstimateRequestsPageClient() {
   useEffect(() => {
     // 마운트 후 비동기로 소비 — 렌더 중 sessionStorage 부작용·hydration mismatch 방지
     const timerId = window.setTimeout(() => {
-      setToastMessage(readCanceledToastMessage());
+      setToastMessage(readCanceledToastMessage(t("requests.cancelSuccess")));
     }, 0);
     return () => {
       window.clearTimeout(timerId);
     };
-  }, []);
+  }, [t]);
 
   const listStatus = statusFilter === "all" ? undefined : statusFilter;
 
@@ -92,8 +94,8 @@ export default function EstimateRequestsPageClient() {
 
       {isError ? (
         <EstimatesQueryStatus
-          message={getApiErrorMessage(error, "보낸 견적 요청을 불러오지 못했습니다.")}
-          actionLabel="다시 시도"
+          message={getApiErrorMessage(error, t("requests.loadFailed"))}
+          actionLabel={t("retry")}
           onAction={() => {
             void refetch();
           }}

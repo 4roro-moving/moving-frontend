@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import MoverEstimateTabs from "@/components/estimate/MoverEstimateTabs";
 
@@ -37,11 +38,13 @@ function EstimateCardSkeleton() {
 }
 
 export function MoverEstimateCardGridSkeleton() {
+  const t = useTranslations("estimates");
+
   return (
     <div
       className="mx-auto grid w-full min-w-0 grid-cols-1 gap-20 md:max-w-[600px] md:gap-32 xl:max-w-[1200px] xl:grid-cols-2 xl:gap-24"
       role="status"
-      aria-label="견적 목록을 불러오는 중입니다."
+      aria-label={t("mover.listLoading")}
       aria-busy="true"
     >
       <EstimateCardSkeleton />

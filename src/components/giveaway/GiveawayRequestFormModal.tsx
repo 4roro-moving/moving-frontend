@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import FormField from "@/components/common/FormField/FormField";
@@ -7,11 +8,7 @@ import Textarea from "@/components/common/Input/Textarea";
 import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
 import { Text } from "@/components/common/Text";
 import { useGiveawayRequestForm } from "@/hooks/giveaway/useGiveawayRequestForm";
-import {
-  GIVEAWAY_APPLY_MODAL_TITLE,
-  GIVEAWAY_APPLY_SUBMIT_LABEL,
-  GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH,
-} from "@/lib/constants/giveaway";
+import { GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH } from "@/lib/constants/giveaway";
 import type { GiveawayRequestFormValues } from "@/types/giveaway";
 
 interface GiveawayRequestFormModalProps {
@@ -42,6 +39,8 @@ const GiveawayRequestFormModalContent = ({
   onSuccess,
   onExitComplete,
 }: GiveawayRequestFormModalContentProps) => {
+  const t = useTranslations("giveaway");
+
   const {
     message,
     messageError,
@@ -60,9 +59,9 @@ const GiveawayRequestFormModalContent = ({
     onSuccess,
   });
 
-  const title = mode === "create" ? GIVEAWAY_APPLY_MODAL_TITLE : "신청 내용 수정";
-  const submitLabel = mode === "create" ? GIVEAWAY_APPLY_SUBMIT_LABEL : "수정하기";
-  const pendingLabel = mode === "create" ? "신청 중..." : "수정 중...";
+  const title = mode === "create" ? t("requestCreateTitle") : t("requestEditTitle");
+  const submitLabel = mode === "create" ? t("requestSubmit") : t("requestEditSubmit");
+  const pendingLabel = mode === "create" ? t("requestSubmitting") : t("requestEditing");
   const fieldId =
     mode === "create" ? "giveaway-request-apply-message" : "giveaway-request-edit-message";
 
@@ -81,13 +80,13 @@ const GiveawayRequestFormModalContent = ({
         <Modal.Close onClose={handleClose} disabled={isSubmitting} />
       </div>
 
-      <FormField label="신청 내용을 작성해 주세요" labelFor={fieldId} variant="compact">
+      <FormField label={t("requestMessageLabel")} labelFor={fieldId} variant="compact">
         <Textarea
           id={fieldId}
           value={message}
           maxLength={GIVEAWAY_REQUEST_MESSAGE_MAX_LENGTH}
           disabled={isSubmitting}
-          placeholder="나눔 받고 싶은 이유를 적어 주세요"
+          placeholder={t("requestMessagePlaceholder")}
           error={messageError}
           className="h-160"
           onChange={(event) => handleMessageChange(event.target.value)}

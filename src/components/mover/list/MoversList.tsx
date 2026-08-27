@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
@@ -21,26 +22,33 @@ interface MoversListProps {
   initialMovers: Mover[];
 }
 
-const MOVERS_EMPTY_DESCRIPTION = (
-  <>
-    검색 결과가 없어요.
-    <br />
-    다른 검색어나 필터로 다시 찾아보세요.
-  </>
-);
-
 /** 초기 로딩 스켈레톤 카드 수 */
 const MOVERS_LIST_SKELETON_COUNT = 5;
 
+function areFiltersEqual(first: MoversSearchParamsState, second: MoversSearchParamsState) {
+  return (
+    first.keyword === second.keyword &&
+    first.serviceArea === second.serviceArea &&
+    first.moveType === second.moveType &&
+    first.sort === second.sort
+  );
+}
+
 export function MoversList({ filters, initialMovers }: MoversListProps) {
+  const t = useTranslations("moverSearch");
+  const tCommon = useTranslations("common");
   const { movers, isInitialLoading, isFilterFetching, query } = useMovers(filters);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  // 첫 진입 전환은 제외하고, 필터 변경 중에만 이전 목록 로딩 상태를 표시한다.
+  const [initialFilters] = useState(filters);
   const isShowingInitialMovers = isInitialLoading && initialMovers.length > 0;
   const displayedMovers = isShowingInitialMovers ? initialMovers : movers;
+  const isPreviousMoversLoading = isFilterFetching && !areFiltersEqual(filters, initialFilters);
 
   const sentinelRef = useMoversInfiniteScroll({
-    enabled: !isInitialLoading && !isFilterFetching && !query.isError && displayedMovers.length > 0,
+    enabled:
+      !isInitialLoading && !isPreviousMoversLoading && !query.isError && displayedMovers.length > 0,
     hasNextPage,
     isFetchingNextPage,
     isFetchNextPageError,
@@ -54,15 +62,15 @@ export function MoversList({ filters, initialMovers }: MoversListProps) {
       <MoverCardSkeletonList
         variant="full"
         count={MOVERS_LIST_SKELETON_COUNT}
-        label="기사님 목록을 불러오는 중"
+        label={t("loading")}
       />
     );
   } else if (query.isError && !isShowingInitialMovers) {
     content = (
       <MoversErrorPanel
-        title="불러오지 못했어요"
-        description="기사님 목록을 가져오는 중 문제가 발생했습니다."
-        actionLabel="다시 시도"
+        title={t("listErrorTitle")}
+        description={t("listErrorDescription")}
+        actionLabel={t("retry")}
         isRetrying={query.isFetching}
         onRetry={() => {
           void refetch();
@@ -74,18 +82,27 @@ export function MoversList({ filters, initialMovers }: MoversListProps) {
       <EmptyState
         size="sm"
         imageSrc="/images/empty/character.png"
-        description={MOVERS_EMPTY_DESCRIPTION}
+        description={
+          <>
+            {tCommon("emptyState.noResultsTitle")}
+            <br />
+            {tCommon("emptyState.noResultsDescription")}
+          </>
+        }
       />
     );
   } else {
     content = (
       <div
-        className={cn("flex flex-col gap-20", isFilterFetching && PREVIOUS_DATA_LOADING_CLASS_NAME)}
-        aria-busy={isFilterFetching}
+        className={cn(
+          "flex flex-col gap-20",
+          isPreviousMoversLoading && PREVIOUS_DATA_LOADING_CLASS_NAME,
+        )}
+        aria-busy={isPreviousMoversLoading}
       >
-        {isFilterFetching ? (
+        {isPreviousMoversLoading ? (
           <span className="sr-only" role="status">
-            기사님 목록을 불러오는 중이에요
+            {t("loading")}
           </span>
         ) : null}
         <ul className="flex flex-col gap-20">
@@ -114,7 +131,7 @@ export function MoversList({ filters, initialMovers }: MoversListProps) {
               aria-hidden="true"
             />
             <Text as="p" variant="sm-medium" className="text-text-muted">
-              기사님을 더 불러오는 중이에요
+              {t("nextLoading")}
             </Text>
           </div>
         ) : null}
@@ -122,9 +139,9 @@ export function MoversList({ filters, initialMovers }: MoversListProps) {
         {/* 재시도 중에는 스켈레톤만 보여 패널·스켈레톤이 겹치지 않게 함 */}
         {isFetchNextPageError && !isFetchingNextPage ? (
           <MoversErrorPanel
-            title="더 불러오지 못했어요"
-            description="다음 기사님 목록을 가져오는 중 문제가 발생했습니다."
-            actionLabel="다시 시도"
+            title={t("nextErrorTitle")}
+            description={t("nextErrorDescription")}
+            actionLabel={t("retry")}
             isRetrying={false}
             onRetry={() => {
               void fetchNextPage();

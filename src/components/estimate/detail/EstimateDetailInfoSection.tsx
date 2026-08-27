@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Text } from "@/components/common/Text";
 
 export interface EstimateDetailInfoRowItem {
@@ -45,18 +46,23 @@ interface EstimateDetailInfoSectionProps {
  * // 2026.07.29 정슬기 - [추가] EstimateDetailInfo·요청 상세 공통
  */
 export function EstimateDetailInfoSection({
-  title = "견적 정보",
+  title,
   rows,
   "aria-label": ariaLabel,
 }: EstimateDetailInfoSectionProps) {
+  const t = useTranslations("estimates");
+  const resolvedTitle = title ?? t("detail.infoTitle");
   return (
-    <section className="flex w-full flex-col gap-20 md:gap-28" aria-label={ariaLabel ?? title}>
+    <section
+      className="flex w-full flex-col gap-20 md:gap-28"
+      aria-label={ariaLabel ?? resolvedTitle}
+    >
       <h2 className="text-text-primary">
         <Text as="span" variant="lg-semibold" className="md:hidden">
-          {title}
+          {resolvedTitle}
         </Text>
         <Text as="span" variant="xl-semibold" className="hidden md:inline">
-          {title}
+          {resolvedTitle}
         </Text>
       </h2>
 

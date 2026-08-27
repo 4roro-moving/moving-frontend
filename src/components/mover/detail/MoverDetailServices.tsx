@@ -1,9 +1,11 @@
+"use client";
+
 import { Text } from "@/components/common/Text";
+import { useTranslations } from "next-intl";
 import {
   MoverOfferedServiceChips,
   MoverServiceChip,
 } from "@/components/mover/detail/MoverServiceChip";
-import { REGION_LABEL } from "@/lib/constants/region";
 import type { MoverDetail } from "@/types/moverDetail";
 
 interface MoverDetailServicesProps {
@@ -11,6 +13,8 @@ interface MoverDetailServicesProps {
 }
 
 export default function MoverDetailServices({ detail }: MoverDetailServicesProps) {
+  const t = useTranslations("profile");
+  const tMoverSearch = useTranslations("moverSearch");
   return (
     <dl className="flex w-full flex-col gap-32 md:gap-40">
       <div className="flex w-full flex-col gap-16">
@@ -19,7 +23,7 @@ export default function MoverDetailServices({ detail }: MoverDetailServicesProps
           variant={{ base: "lg-semibold", md: "xl-semibold" }}
           className="text-text-primary"
         >
-          제공 서비스
+          {t("moverServices")}
         </Text>
         <dd className="m-0">
           <MoverOfferedServiceChips serviceTypes={detail.serviceTypes} />
@@ -32,11 +36,15 @@ export default function MoverDetailServices({ detail }: MoverDetailServicesProps
           variant={{ base: "lg-semibold", md: "xl-semibold" }}
           className="text-text-primary"
         >
-          서비스 가능 지역
+          {t("moverRegions")}
         </Text>
         <dd className="m-0 flex flex-wrap gap-8 md:gap-12">
           {detail.serviceAreas.map((regionId) => (
-            <MoverServiceChip key={regionId} label={REGION_LABEL[regionId]} variant="region" />
+            <MoverServiceChip
+              key={regionId}
+              label={tMoverSearch(`regions.${regionId}`)}
+              variant="region"
+            />
           ))}
         </dd>
       </div>

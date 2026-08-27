@@ -1,3 +1,4 @@
+import { useLocale, useTranslations } from "next-intl";
 import {
   formatDetailDateLabel,
   formatMoveDateLabel,
@@ -12,16 +13,21 @@ interface EstimateDetailInfoProps {
 }
 
 export default function EstimateDetailInfo({ detail }: EstimateDetailInfoProps) {
+  const t = useTranslations("estimates");
+  const locale = useLocale();
   const { estimateRequest, createdAt } = detail;
 
   return (
     <EstimateDetailInfoSection
       rows={[
-        { label: "견적 요청일", value: formatDetailDateLabel(createdAt) },
-        { label: "서비스", value: getMoveTypeLabel(estimateRequest.moveType) },
-        { label: "이용일", value: formatMoveDateLabel(estimateRequest.moveDate) },
-        { label: "출발지", value: estimateRequest.fromAddress },
-        { label: "도착지", value: estimateRequest.toAddress },
+        { label: t("detail.requestedAt"), value: formatDetailDateLabel(createdAt) },
+        { label: t("detail.service"), value: getMoveTypeLabel(estimateRequest.moveType, locale) },
+        {
+          label: t("detail.useDate"),
+          value: formatMoveDateLabel(estimateRequest.moveDate, locale),
+        },
+        { label: t("fromAddress"), value: estimateRequest.fromAddress },
+        { label: t("toAddress"), value: estimateRequest.toAddress },
       ]}
     />
   );

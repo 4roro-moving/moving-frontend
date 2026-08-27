@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -12,10 +13,13 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { parsePositiveIntId } from "@/lib/utils/parsePositiveIntId";
 
-export const metadata: Metadata = {
-  title: "견적 상세",
-  description: "이사 견적 상세 정보를 확인하세요.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("estimates");
+  return {
+    title: t("metadata.pendingDetailTitle"),
+    description: t("metadata.pendingDetailDescription"),
+  };
+}
 
 interface PendingEstimateDetailPageProps {
   params: Promise<{ estimateId: string }>;

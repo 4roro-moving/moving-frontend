@@ -1,13 +1,14 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import ChatRoomPageClient from "@/components/chat/ChatRoomPageClient";
 import { parsePositiveIntId } from "@/lib/utils/parsePositiveIntId";
 
-export const metadata: Metadata = {
-  title: "채팅방",
-  description: "이사 견적 채팅방입니다.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("chat");
+  return { title: t("metadata.title"), description: t("metadata.description") };
+}
 
 interface ChatRoomPageProps {
   params: Promise<{ roomId: string }>;

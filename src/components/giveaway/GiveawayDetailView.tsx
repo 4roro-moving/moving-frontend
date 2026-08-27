@@ -1,5 +1,8 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
+import { useLocale, useTranslations } from "next-intl";
 import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -24,13 +27,7 @@ import { useMyGiveawayRequestActions } from "@/hooks/giveaway/useMyGiveawayReque
 import { UserIcon } from "@/icons";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import {
-  GIVEAWAY_COMPLETE_BUTTON_LABEL,
-  GIVEAWAY_DETAIL_TITLE,
-  GIVEAWAY_PREFERRED_REGION_LABEL,
-  canApplyGiveaway,
-  hasActiveGiveawayRequest,
-} from "@/lib/constants/giveaway";
+import { canApplyGiveaway, hasActiveGiveawayRequest } from "@/lib/constants/giveaway";
 import { formatRelativeTime } from "@/lib/utils/date";
 import type { ApiError } from "@/types/api";
 import type {
@@ -54,6 +51,9 @@ const GiveawayDetailView = ({
   isRequestsPending = false,
   requestsQuery,
 }: GiveawayDetailViewProps) => {
+  const t = useTranslations("giveaway");
+  const tRegion = useTranslations("moverSearch");
+  const locale = useLocale();
   const router = useRouter();
   const deleteMutation = useDeleteGiveaway();
   const completeMutation = useCompleteGiveaway();
@@ -65,7 +65,7 @@ const GiveawayDetailView = ({
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | undefined>();
   const [completeError, setCompleteError] = useState<string | undefined>();
-  const writtenAt = formatRelativeTime(giveaway.createdAt);
+  const writtenAt = formatRelativeTime(giveaway.createdAt, locale);
   const hasApplied = hasActiveGiveawayRequest(giveaway.myRequest?.status);
   const showReceivedRequests = isAuthor;
   const showMyRequest = !isAuthor && hasApplied;
@@ -94,7 +94,7 @@ const GiveawayDetailView = ({
       await deleteMutation.mutateAsync(giveaway.id);
       router.push(APP_ROUTES.COMMUNITY.GIVEAWAY);
     } catch (error) {
-      setDeleteError(getApiErrorMessage(error, "나눔 글을 삭제하지 못했습니다."));
+      setDeleteError(getApiErrorMessage(error, t("deleteFailed")));
     }
   };
 
@@ -104,13 +104,13 @@ const GiveawayDetailView = ({
       await completeMutation.mutateAsync(giveaway.id);
       setIsCompleteOpen(false);
     } catch (error) {
-      setCompleteError(getApiErrorMessage(error, "나눔을 완료하지 못했습니다."));
+      setCompleteError(getApiErrorMessage(error, t("completeFailed")));
     }
   };
 
   return (
     <div className="bg-background-default flex w-full flex-col items-center">
-      <PageHeader title={GIVEAWAY_DETAIL_TITLE} backFallbackHref={APP_ROUTES.COMMUNITY.GIVEAWAY} />
+      <PageHeader title={t("detailTitle")} backFallbackHref={APP_ROUTES.COMMUNITY.GIVEAWAY} />
 
       <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop xl:pb-37-5 mx-auto flex w-full flex-col gap-60 pt-35 pb-48 md:pt-44 md:pb-38 xl:px-0 xl:pt-42">
         <article className="flex w-full flex-col items-center gap-30 md:flex-row md:items-start md:justify-between md:gap-60">
@@ -126,7 +126,7 @@ const GiveawayDetailView = ({
                   variant={{ base: "xl-semibold", xl: "2xl-semibold" }}
                   className="text-text-secondary"
                 >
-                  {giveaway.title}
+                  <AutoTranslatedText text={giveaway.title} />
                 </Text>
 
                 <div className="flex w-full items-center gap-12">
@@ -142,7 +142,7 @@ const GiveawayDetailView = ({
                     ) : null}
                     <span
                       className="flex items-center gap-2"
-                      aria-label={`신청 ${String(giveaway.activeRequestCount)}건`}
+                      aria-label={t("requestCountAria", { count: giveaway.activeRequestCount })}
                     >
                       <UserIcon className="size-16" aria-hidden="true" />
                       <Text
@@ -156,7 +156,7 @@ const GiveawayDetailView = ({
                   </div>
                   {isAuthor ? null : (
                     <ReportMoreMenu
-                      ariaLabel="나눔 글 메뉴 더보기"
+                      ariaLabel={t("moreMenuAria")}
                       onReport={() => setIsReportModalOpen(true)}
                     />
                   )}
@@ -170,7 +170,7 @@ const GiveawayDetailView = ({
                 variant={{ base: "md-medium", xl: "2lg-medium" }}
                 className="text-text-primary min-h-200 whitespace-pre-wrap"
               >
-                {giveaway.description}
+                <AutoTranslatedText text={giveaway.description} />
               </Text>
 
               <GiveawayDetailDivider />
@@ -214,7 +214,7 @@ const GiveawayDetailView = ({
                     variant={{ base: "sm-medium", xl: "md-medium" }}
                     className="text-text-muted"
                   >
-                    {`${GIVEAWAY_PREFERRED_REGION_LABEL} - ${giveaway.region.name}`}
+                    {`${t("preferredRegion")} - ${tRegion(`regions.${giveaway.region.id}`)}`}
                   </Text>
                 ) : null}
               </div>
@@ -254,10 +254,10 @@ const GiveawayDetailView = ({
       />
       <GiveawayConfirmModal
         open={isDeleteOpen}
-        title="나눔 글 삭제"
-        description="작성한 나눔 글을 삭제할까요? 삭제하면 되돌릴 수 없습니다."
-        confirmLabel="삭제"
-        pendingLabel="삭제 중..."
+        title={t("deleteTitle")}
+        description={t("deleteDescription")}
+        confirmLabel={t("delete")}
+        pendingLabel={t("deleting")}
         isPending={deleteMutation.isPending}
         error={deleteError}
         onClose={handleCloseDelete}
@@ -265,10 +265,10 @@ const GiveawayDetailView = ({
       />
       <GiveawayConfirmModal
         open={isCompleteOpen}
-        title="나눔 완료"
-        description="나눔을 완료할까요? 완료하면 되돌릴 수 없습니다."
-        confirmLabel={GIVEAWAY_COMPLETE_BUTTON_LABEL}
-        pendingLabel="완료 중..."
+        title={t("completeTitle")}
+        description={t("completeDescription")}
+        confirmLabel={t("complete")}
+        pendingLabel={t("completing")}
         isPending={completeMutation.isPending}
         error={completeError}
         onClose={handleCloseComplete}

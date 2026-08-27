@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
@@ -15,11 +18,12 @@ interface EstimateDetailDriverSummaryProps {
 }
 
 function ConfirmedStatus() {
+  const t = useTranslations("estimates");
   return (
     <span className="flex shrink-0 items-center gap-4">
       <ConfirmedCheckIcon className="text-icon-brand size-20 shrink-0" />
       <Text as="span" variant="lg-bold" className="text-text-brand">
-        확정견적
+        {t("detail.confirmedStatus")}
       </Text>
     </span>
   );
@@ -30,6 +34,7 @@ export default function EstimateDetailDriverSummary({
   detail,
   onFavoriteError,
 }: EstimateDetailDriverSummaryProps) {
+  const t = useTranslations("estimates");
   const { mover, isConfirmed, isDesignated, estimateRequest } = detail;
   const displayName = mover.nickname || mover.name;
   const intro = mover.shortIntro?.trim() || null;
@@ -37,7 +42,10 @@ export default function EstimateDetailDriverSummary({
 
   return (
     // 2026.07.25 정슬기 - [수정] Desktop driver-summary: gap 20, badge gap 12, 하단 divider(Figma)
-    <section className="flex w-full flex-col gap-16 md:gap-20" aria-label="기사 정보">
+    <section
+      className="flex w-full flex-col gap-16 md:gap-20"
+      aria-label={t("detail.moverInfoAria")}
+    >
       <div className="flex w-full flex-col gap-12">
         <div className="flex flex-wrap items-center gap-8 md:gap-12">
           <MoveTypeChip moveType={estimateRequest.moveType} />
@@ -48,12 +56,12 @@ export default function EstimateDetailDriverSummary({
             </div>
           ) : (
             <Text as="span" variant="lg-semibold" className="text-text-subtle shrink-0 md:hidden">
-              견적대기
+              {t("detail.waitingStatus")}
             </Text>
           )}
         </div>
 
-        {/* md+: 소개 왼쪽 + 상태(확정견적/견적대기) 오른쪽 — 본문 컬럼 안에서 자연스럽게 정렬 */}
+        {/* md+: 소개 왼쪽 + 상태({t("detail.confirmedStatus")}/{t("detail.waitingStatus")}) 오른쪽 — 본문 컬럼 안에서 자연스럽게 정렬 */}
         {/* 2026.08.03 정슬기 - [수정] 확정 안내 문구 제거 후 배지만 유지, 과도한 중앙 강제 정렬 제거 */}
         <div className="flex w-full items-center justify-between gap-12">
           {intro ? (
@@ -63,14 +71,14 @@ export default function EstimateDetailDriverSummary({
                 variant="2lg-semibold"
                 className="text-text-secondary min-w-0 wrap-break-word md:hidden"
               >
-                {intro}
+                <AutoTranslatedText text={intro} />
               </Text>
               <Text
                 as="p"
                 variant="2xl-semibold"
                 className="text-text-secondary hidden min-w-0 wrap-break-word md:block"
               >
-                {intro}
+                <AutoTranslatedText text={intro} />
               </Text>
             </>
           ) : null}
@@ -79,7 +87,7 @@ export default function EstimateDetailDriverSummary({
               <ConfirmedStatus />
             ) : (
               <Text as="span" variant="lg-semibold" className="text-text-subtle">
-                견적대기
+                {t("detail.waitingStatus")}
               </Text>
             )}
           </div>
@@ -91,7 +99,7 @@ export default function EstimateDetailDriverSummary({
       <div className="flex w-full flex-col gap-8">
         <div className="flex w-full items-center justify-between gap-8">
           <Text as="p" variant="2lg-semibold" className="text-text-primary min-w-0 wrap-break-word">
-            {displayName} 기사님
+            {t("detail.moverName", { name: displayName })}
           </Text>
           <FavoriteButton
             moverName={displayName}
@@ -113,13 +121,15 @@ export default function EstimateDetailDriverSummary({
             <StarIcon className="text-rating-fill size-20 shrink-0" />
             <div className="flex items-center gap-2">
               <Text as="span" variant="md-medium" className="text-text-secondary">
-                <span className="sr-only">평점 </span>
+                <span className="sr-only">{t("detail.rating")} </span>
                 {formatRating(mover.averageRating)}
-                <span className="sr-only">점, 리뷰 </span>
+                <span className="sr-only">{t("detail.pointsReviews")} </span>
               </Text>
               <Text as="span" variant="md-medium" className="text-rating-count">
                 <span aria-hidden="true">({mover.reviewCount})</span>
-                <span className="sr-only">{mover.reviewCount}개</span>
+                <span className="sr-only">
+                  {t("detail.reviewCount", { count: mover.reviewCount })}
+                </span>
               </Text>
             </div>
           </div>
@@ -128,10 +138,10 @@ export default function EstimateDetailDriverSummary({
 
           <div className="flex items-center gap-4">
             <Text as="span" variant="md-medium" className="text-text-muted">
-              경력
+              {t("detail.career")}
             </Text>
             <Text as="span" variant="md-medium" className="text-text-secondary">
-              {mover.career}년
+              {t("detail.careerYears", { count: mover.career })}
             </Text>
           </div>
 
@@ -139,10 +149,10 @@ export default function EstimateDetailDriverSummary({
 
           <div className="flex items-center gap-4">
             <Text as="span" variant="md-medium" className="text-text-secondary">
-              {mover.confirmedCount}건
+              {t("detail.confirmedCount", { count: mover.confirmedCount })}
             </Text>
             <Text as="span" variant="md-medium" className="text-text-muted">
-              확정
+              {t("detail.confirmed")}
             </Text>
           </div>
         </div>

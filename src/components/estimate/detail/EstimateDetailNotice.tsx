@@ -6,7 +6,8 @@ import { InfoIcon } from "@/icons";
  * // 2026.07.29 정슬기 - [추가]
  * // 2026.07.29 정슬기 - [수정] notice 텍스트 토큰으로 아이콘 색·Figma 패딩 맞춤
  */
-export default function EstimateDetailNotice() {
+export default async function EstimateDetailNotice() {
+  const t = await getTranslations("estimates");
   return (
     <div
       role="status"
@@ -14,8 +15,9 @@ export default function EstimateDetailNotice() {
     >
       <InfoIcon className="text-notice-text size-24 shrink-0" aria-hidden="true" />
       <Text as="p" variant="lg-semibold" className="text-notice-text min-w-0 wrap-break-word">
-        확정하지 않은 견적이에요!
+        {t("unconfirmedNotice")}
       </Text>
     </div>
   );
 }
+import { getTranslations } from "next-intl/server";

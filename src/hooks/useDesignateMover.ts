@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -21,6 +23,7 @@ interface DesignateMoverVariables {
 
 /** POST /estimate-requests/:id/designate */
 export function useDesignateMover(options?: UseDesignateMoverOptions) {
+  const t = useTranslations("estimates");
   const queryClient = useQueryClient();
   const onSuccessRef = useRef(options?.onSuccess);
   const onErrorRef = useRef(options?.onError);
@@ -45,7 +48,7 @@ export function useDesignateMover(options?: UseDesignateMoverOptions) {
       onSuccessRef.current?.(data);
     },
     onError: (error) => {
-      onErrorRef.current?.(getApiErrorMessage(error, "지정 견적 요청에 실패했습니다."));
+      onErrorRef.current?.(getApiErrorMessage(error, t("designateFailed")));
     },
   });
 }

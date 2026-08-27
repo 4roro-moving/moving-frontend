@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
@@ -7,11 +9,6 @@ import GiveawayInfiniteListChrome from "@/components/giveaway/GiveawayInfiniteLi
 import MyGiveawayRequestCard from "@/components/giveaway/MyGiveawayRequestCard";
 import MyGiveawayRequestCardSkeletonList from "@/components/giveaway/MyGiveawayRequestCardSkeletonList";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import {
-  GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES,
-  GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL,
-  GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES,
-} from "@/lib/constants/giveaway";
 import type { ApiError } from "@/types/api";
 import type { GiveawayRequestMyListResult, MyGiveawayRequestItem } from "@/types/giveaway";
 
@@ -42,10 +39,15 @@ const MyGiveawayRequestListView = ({
   onEdit,
   onCancel,
 }: MyGiveawayRequestListViewProps) => {
+  const t = useTranslations("giveaway");
+  const tCommon = useTranslations("common");
   const emptyDescription = toEmptyDescription(
     hasActiveFilters
-      ? GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES
-      : GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES,
+      ? ([
+          tCommon("emptyState.noResultsTitle"),
+          tCommon("emptyState.noResultsDescription"),
+        ] as const)
+      : ([t("myRequestsEmpty"), t("myRequestsEmptyDescription")] as const),
   );
 
   return (
@@ -60,14 +62,14 @@ const MyGiveawayRequestListView = ({
           size="sm"
           imageSrc="/images/empty/character.png"
           description={emptyDescription}
-          buttonLabel={hasActiveFilters ? undefined : GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL}
+          buttonLabel={hasActiveFilters ? undefined : t("myRequestsEmptyAction")}
           href={hasActiveFilters ? undefined : APP_ROUTES.COMMUNITY.GIVEAWAY}
         />
       }
-      initialErrorFallback="나눔 신청 내역을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
-      fetchingStatusLabel="나눔 신청 내역을 불러오는 중이에요"
-      nextPageLoadingLabel="나눔 신청 내역을 더 불러오는 중이에요"
-      nextPageErrorMessage="다음 나눔 신청 내역을 불러오지 못했습니다."
+      initialErrorFallback={t("myRequestsLoadFailed")}
+      fetchingStatusLabel={t("myRequestsLoading")}
+      nextPageLoadingLabel={t("myRequestsNextLoading")}
+      nextPageErrorMessage={t("myRequestsNextError")}
     >
       <ul className="flex w-full flex-col gap-20">
         {requests.map((request) => (

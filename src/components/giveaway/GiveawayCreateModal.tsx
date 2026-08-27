@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 
@@ -39,6 +40,8 @@ const GiveawayCreateModalContent = ({
   giveaway,
   onExitComplete,
 }: GiveawayCreateModalContentProps) => {
+  const t = useTranslations("giveaway");
+  const tRegion = useTranslations("moverSearch");
   const router = useRouter();
   const {
     isEdit,
@@ -76,18 +79,18 @@ const GiveawayCreateModalContent = ({
       dismissible={false}
     >
       <div className="flex w-full items-start justify-between gap-12">
-        <Modal.Title>{isEdit ? "나눔 수정" : "나눔 등록"}</Modal.Title>
+        <Modal.Title>{isEdit ? t("editTitle") : t("createTitle")}</Modal.Title>
         <Modal.Close onClose={handleClose} disabled={isPending} />
       </div>
 
-      <FormField label="지역을 선택해주세요." variant="compact" labelId="giveaway-create-region">
+      <FormField label={t("regionPrompt")} variant="compact" labelId="giveaway-create-region">
         <Controller
           name="regionId"
           control={control}
           render={({ field }) => (
             <Select
-              label="지역"
-              desc="지역"
+              label={t("region")}
+              desc={t("region")}
               size="lg"
               columns={2}
               className="w-full"
@@ -101,7 +104,7 @@ const GiveawayCreateModalContent = ({
             >
               {REGION_OPTIONS.map((region) => (
                 <Select.Option key={region.value} value={String(region.value)}>
-                  {region.label}
+                  {tRegion(`regions.${region.value}`)}
                 </Select.Option>
               ))}
             </Select>
@@ -124,24 +127,20 @@ const GiveawayCreateModalContent = ({
           )}
         />
 
-        <FormField
-          label="상품명을 입력해 주세요"
-          labelFor="giveaway-create-title"
-          variant="compact"
-        >
+        <FormField label={t("itemNameLabel")} labelFor="giveaway-create-title" variant="compact">
           <Input
             id="giveaway-create-title"
             size="md"
             maxLength={GIVEAWAY_TITLE_MAX_LENGTH}
             disabled={isPending}
-            placeholder="제목을 입력해주세요"
+            placeholder={t("titlePlaceholder")}
             error={titleError}
             {...register("title")}
           />
         </FormField>
 
         <FormField
-          label="상품 설명을 작성해 주세요"
+          label={t("descriptionLabel")}
           labelFor="giveaway-create-description"
           variant="compact"
         >
@@ -149,7 +148,7 @@ const GiveawayCreateModalContent = ({
             id="giveaway-create-description"
             maxLength={GIVEAWAY_DESCRIPTION_MAX_LENGTH}
             disabled={isPending}
-            placeholder="상품 설명을 입력해주세요"
+            placeholder={t("descriptionPlaceholder")}
             error={descriptionError}
             className="h-160"
             {...register("description")}
@@ -164,7 +163,7 @@ const GiveawayCreateModalContent = ({
       ) : null}
 
       <Modal.Button fullWidth size="cta" disabled={isSubmitDisabled} onClick={handleSubmit}>
-        {isPending ? (isEdit ? "수정 중..." : "등록 중...") : isEdit ? "수정하기" : "등록하기"}
+        {isPending ? (isEdit ? t("editing") : t("creating")) : isEdit ? t("edit") : t("create")}
       </Modal.Button>
     </Modal>
   );

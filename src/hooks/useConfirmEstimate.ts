@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
@@ -22,6 +24,7 @@ interface UseConfirmEstimateOptions {
  * // 2026.07.29 정슬기 - [수정] DETAIL 캐시 키 통합에 맞춰 setQueryData·invalidate 정리
  */
 export function useConfirmEstimate(estimateId: number, options?: UseConfirmEstimateOptions) {
+  const t = useTranslations("estimates");
   const queryClient = useQueryClient();
   const onSuccessRef = useRef(options?.onSuccess);
   const onErrorRef = useRef(options?.onError);
@@ -49,7 +52,7 @@ export function useConfirmEstimate(estimateId: number, options?: UseConfirmEstim
       onSuccessRef.current?.(detail);
     },
     onError: (error) => {
-      onErrorRef.current?.(getApiErrorMessage(error, "견적을 확정하지 못했습니다."));
+      onErrorRef.current?.(getApiErrorMessage(error, t("confirmFailed")));
     },
   });
 }

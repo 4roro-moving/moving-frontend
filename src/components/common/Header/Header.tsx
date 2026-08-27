@@ -4,10 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import NotificationTrigger from "@/components/common/Header/notification";
 import HeaderSideNav, { type HeaderSideNavLink } from "@/components/common/Header/HeaderSideNav";
 import { isNavLinkActive } from "@/components/common/Header/isNavLinkActive";
+import LocaleMenuTrigger from "@/components/common/Header/LocaleMenuTrigger";
 import ProfileMenuTrigger, {
   type ProfileMenuItem,
 } from "@/components/common/Header/ProfileMenuTrigger";
@@ -27,126 +29,6 @@ const isLoginPagePath = (pathname: string): boolean => {
   return [APP_ROUTES.LOGIN, APP_ROUTES.MOVER_LOGIN].some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
-};
-
-const PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE = "프로필을 완성한 뒤 이용할 수 있어요.";
-
-const PROFILE_LOGOUT_MENU_ITEM: ProfileMenuItem = {
-  type: "action",
-  label: "로그아웃",
-  action: "logout",
-};
-
-const COMMUNITY_NAV_LINK = {
-  label: "커뮤니티",
-  href: APP_ROUTES.COMMUNITY.RESIDENCE_REVIEWS,
-} as const;
-
-const LOGGED_OUT_LINKS = [
-  {
-    label: "기사님 찾기",
-    href: APP_ROUTES.MOVERS.ROOT,
-  },
-  COMMUNITY_NAV_LINK,
-];
-
-const CUSTOMER_LOGGED_IN_LINKS = [
-  {
-    label: "견적 요청",
-    href: APP_ROUTES.ESTIMATE_REQUEST,
-  },
-  {
-    label: "기사님 찾기",
-    href: APP_ROUTES.MOVERS.ROOT,
-  },
-  {
-    label: "예상 견적",
-    href: APP_ROUTES.PRICE_PREDICTION,
-  },
-  {
-    label: "내 견적 관리",
-    href: APP_ROUTES.ESTIMATES.ROOT,
-  },
-  COMMUNITY_NAV_LINK,
-];
-
-const MOVER_LOGGED_IN_LINKS = [
-  {
-    label: "받은 요청",
-    href: APP_ROUTES.MOVER_ESTIMATES.ROOT,
-  },
-  {
-    label: "내 견적 관리",
-    href: APP_ROUTES.MOVER_ESTIMATES.SENT,
-  },
-];
-
-const CUSTOMER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
-  {
-    type: "link",
-    label: "프로필 수정",
-    href: APP_ROUTES.PROFILE_EDIT,
-  },
-  {
-    type: "link",
-    label: "찜한 기사님",
-    href: APP_ROUTES.MOVERS.FAVORITES,
-  },
-  {
-    type: "link",
-    label: "이사 리뷰",
-    href: APP_ROUTES.REVIEWS.WRITABLE,
-  },
-  {
-    type: "link",
-    label: "내 활동 내역",
-    href: APP_ROUTES.MY_ACTIVITY,
-  },
-  PROFILE_LOGOUT_MENU_ITEM,
-];
-
-const MOVER_PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
-  {
-    type: "link",
-    label: "마이페이지",
-    href: APP_ROUTES.MOVER_MYPAGE,
-  },
-  {
-    type: "link",
-    label: "내 신고내역",
-    href: APP_ROUTES.REPORTS.ME,
-  },
-  PROFILE_LOGOUT_MENU_ITEM,
-];
-
-/** nav role 분기 — 미확정 시 고객 메뉴 (F5 깜빡임 방지) */
-const getHeaderNavLinks = (isLogin: boolean, role: AuthRole | null): HeaderSideNavLink[] => {
-  if (!isLogin) {
-    return LOGGED_OUT_LINKS;
-  }
-
-  switch (role) {
-    case "MOVER":
-      return MOVER_LOGGED_IN_LINKS;
-    case "ADMIN":
-      return [];
-    case "CUSTOMER":
-    default:
-      return CUSTOMER_LOGGED_IN_LINKS;
-  }
-};
-
-/** nav와 동일한 role 분기 — 미확정 시 고객 메뉴 (F5 깜빡임 방지) */
-const getCompletedProfileMenuItems = (role: AuthRole | null): ProfileMenuItem[] => {
-  switch (role) {
-    case "MOVER":
-      return MOVER_PROFILE_MENU_ITEMS;
-    case "ADMIN":
-      return [PROFILE_LOGOUT_MENU_ITEM];
-    case "CUSTOMER":
-    default:
-      return CUSTOMER_PROFILE_MENU_ITEMS;
-  }
 };
 
 export interface HeaderProps {
@@ -169,6 +51,9 @@ const Header = ({
   initialProfileImage = null,
   initialProfileCompleted = null,
 }: HeaderProps) => {
+  const tCommon = useTranslations("common");
+  const tNavigation = useTranslations("navigation");
+  const tAccessibility = useTranslations("accessibility");
   const pathname = usePathname();
   const mobileMenuId = useId();
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
@@ -204,7 +89,33 @@ const Header = ({
   // 확정 후 loadRole 공백 시에도 SSR role 힌트 유지 (Header 표시용)
   const roleForNav = resolvedRole ?? initialRole;
 
-  const navLinks = getHeaderNavLinks(isLogin, roleForNav);
+  const communityNavLink = {
+    label: tNavigation("community"),
+    href: APP_ROUTES.COMMUNITY.RESIDENCE_REVIEWS,
+  } as const;
+  const loggedOutLinks: HeaderSideNavLink[] = [
+    { label: tNavigation("moverSearch"), href: APP_ROUTES.MOVERS.ROOT },
+    communityNavLink,
+  ];
+  const customerLoggedInLinks: HeaderSideNavLink[] = [
+    { label: tNavigation("estimateRequest"), href: APP_ROUTES.ESTIMATE_REQUEST },
+    { label: tNavigation("moverSearch"), href: APP_ROUTES.MOVERS.ROOT },
+    { label: tNavigation("pricePrediction"), href: APP_ROUTES.PRICE_PREDICTION },
+    { label: tNavigation("estimateManagement"), href: APP_ROUTES.ESTIMATES.ROOT },
+    communityNavLink,
+  ];
+  const moverLoggedInLinks: HeaderSideNavLink[] = [
+    { label: tNavigation("receivedRequests"), href: APP_ROUTES.MOVER_ESTIMATES.ROOT },
+    { label: tNavigation("estimateManagement"), href: APP_ROUTES.MOVER_ESTIMATES.SENT },
+    { label: tNavigation("scheduleManagement"), href: APP_ROUTES.MOVER_ESTIMATES.CALENDAR },
+  ];
+  const navLinks = !isLogin
+    ? loggedOutLinks
+    : roleForNav === "MOVER"
+      ? moverLoggedInLinks
+      : roleForNav === "ADMIN"
+        ? []
+        : customerLoggedInLinks;
 
   const isLoginPage = isLoginPagePath(pathname);
   const isOAuthCallbackPage = isOAuthCallbackPath(pathname);
@@ -215,15 +126,15 @@ const Header = ({
     ? isOAuthCallbackPage
       ? []
       : isLoginPage
-        ? LOGGED_OUT_LINKS
-        : [...LOGGED_OUT_LINKS, { label: "로그인", href: getLoginRedirectPath() }]
+        ? loggedOutLinks
+        : [...loggedOutLinks, { label: tCommon("login"), href: getLoginRedirectPath() }]
     : navLinks;
 
   // hydrate/checkAuth 전·로그인 힌트(refresh·role) 없으면 스켈레톤 — isLogin과 기준 맞춤
   // OAuth callback은 code 교환 중이므로 우측 액션·스켈레톤도 숨김
   const showAuthSkeleton = !isOAuthCallbackPage && isAuthPending && !initialIsLogin && !initialRole;
 
-  const nickname = user?.name ?? displayName ?? initialNickname ?? "닉네임";
+  const nickname = user?.name ?? displayName ?? initialNickname ?? tCommon("nicknameFallback");
 
   const hintedImageUrl = profileImage ?? initialProfileImage ?? null;
   const imageUrl = isAuthPending ? hintedImageUrl : (user?.imageUrl ?? profileImage ?? null);
@@ -242,7 +153,7 @@ const Header = ({
     <>
       <Image
         src="/icons/moving-logo-icon.svg"
-        alt="무빙"
+        alt={tCommon("brandName")}
         width={32}
         height={32}
         priority
@@ -250,7 +161,7 @@ const Header = ({
       />
       <Image
         src="/icons/logo_full.svg"
-        alt="무빙"
+        alt={tCommon("brandName")}
         width={116}
         height={44}
         priority
@@ -260,7 +171,7 @@ const Header = ({
   ) : (
     <Image
       src="/icons/logo_full.svg"
-      alt="무빙"
+      alt={tCommon("brandName")}
       width={116}
       height={44}
       priority
@@ -268,12 +179,39 @@ const Header = ({
     />
   );
 
-  const completedProfileMenuItems = getCompletedProfileMenuItems(roleForNav);
+  const profileLogoutMenuItem: ProfileMenuItem = {
+    type: "action",
+    label: tCommon("logout"),
+    action: "logout",
+  };
+  const completedProfileMenuItems: ProfileMenuItem[] =
+    roleForNav === "MOVER"
+      ? [
+          { type: "link", label: tNavigation("myPage"), href: APP_ROUTES.MOVER_MYPAGE },
+          { type: "link", label: tNavigation("myReports"), href: APP_ROUTES.REPORTS.ME },
+          profileLogoutMenuItem,
+        ]
+      : roleForNav === "ADMIN"
+        ? [profileLogoutMenuItem]
+        : [
+            { type: "link", label: tNavigation("profileEdit"), href: APP_ROUTES.PROFILE_EDIT },
+            {
+              type: "link",
+              label: tNavigation("favoriteMovers"),
+              href: APP_ROUTES.MOVERS.FAVORITES,
+            },
+            { type: "link", label: tNavigation("moveReviews"), href: APP_ROUTES.REVIEWS.WRITABLE },
+            { type: "link", label: tNavigation("myActivity"), href: APP_ROUTES.MY_ACTIVITY },
+            profileLogoutMenuItem,
+          ];
 
   const profileMenuItems: ProfileMenuItem[] = !isLogin
     ? completedProfileMenuItems
     : isIncomplete
-      ? [{ type: "link", label: "프로필 생성", href: profileCreatePath }, PROFILE_LOGOUT_MENU_ITEM]
+      ? [
+          { type: "link", label: tNavigation("createProfile"), href: profileCreatePath },
+          profileLogoutMenuItem,
+        ]
       : completedProfileMenuItems;
 
   return (
@@ -294,7 +232,7 @@ const Header = ({
           {/* Mobile은 햄버거 전까지 링크 숨김 — 좁은 폭에서 GNB 가로 스크롤 방지 */}
           {/* 2026.08.04 정슬기 - [수정] */}
           {!shouldHideNavLinks ? (
-            <nav aria-label="주요 메뉴" className="hidden min-w-0 xl:block">
+            <nav aria-label={tAccessibility("mainMenu")} className="hidden min-w-0 xl:block">
               <ul className="flex items-center xl:gap-40">
                 {navLinks.map((link) => {
                   const isActive = isNavLinkActive(pathname, link.href);
@@ -321,58 +259,64 @@ const Header = ({
           ) : null}
         </div>
 
-        {isOAuthCallbackPage ? null : showAuthSkeleton ? (
-          <div className="flex shrink-0 items-center gap-16 xl:gap-32" aria-hidden>
-            <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
-            <div className="flex items-center gap-16">
-              <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
-              <div className="bg-background-subtle rounded-4 h-20 w-64 animate-pulse" />
-            </div>
-            <div className="bg-background-subtle rounded-4 size-24 animate-pulse xl:hidden" />
-          </div>
-        ) : isLogin ? (
-          <div className="relative z-50 flex shrink-0 items-center gap-16 xl:gap-32">
-            <NotificationTrigger />
-            <ProfileMenuTrigger
-              nickname={nickname}
-              imageUrl={imageUrl}
-              items={profileMenuItems}
-              role={roleForNav}
-              isAvatarPending={isAvatarPending}
-            />
-            <button
-              ref={menuButtonRef}
-              type="button"
-              aria-label="주요 메뉴"
-              aria-expanded={isSideNavOpen}
-              aria-controls={mobileMenuId}
-              className="focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none xl:hidden"
-              onClick={openSideNav}
-            >
-              <MenuIcon className="text-icon-muted size-24" />
-            </button>
-          </div>
-        ) : (
-          <div className="flex shrink-0 items-center gap-16">
-            {!shouldHideAuthChrome ? (
-              <Link
-                href={getLoginRedirectPath()}
-                className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 hidden h-40 items-center px-20 transition-colors xl:flex"
-              >
-                <Text variant="md-semibold">로그인</Text>
-              </Link>
-            ) : null}
-            <button
-              ref={menuButtonRef}
-              type="button"
-              aria-label="주요 메뉴"
-              aria-expanded={isSideNavOpen}
-              aria-controls={mobileMenuId}
-              className="focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none xl:hidden"
-              onClick={openSideNav}
-            >
-              <MenuIcon aria-hidden="true" className="size-24" />
-            </button>
+        {isOAuthCallbackPage ? null : (
+          <div className="flex shrink-0 items-center gap-16 xl:gap-32">
+            <LocaleMenuTrigger className="hidden xl:block" />
+            {showAuthSkeleton ? (
+              <div className="flex shrink-0 items-center gap-16 xl:gap-32" aria-hidden>
+                <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
+                <div className="flex items-center gap-16">
+                  <div className="bg-background-subtle size-36 animate-pulse rounded-full" />
+                  <div className="bg-background-subtle rounded-4 h-20 w-64 animate-pulse" />
+                </div>
+                <div className="bg-background-subtle rounded-4 size-24 animate-pulse xl:hidden" />
+              </div>
+            ) : isLogin ? (
+              <div className="relative z-50 flex shrink-0 items-center gap-16 xl:gap-32">
+                <NotificationTrigger />
+                <ProfileMenuTrigger
+                  key={pathname}
+                  nickname={nickname}
+                  imageUrl={imageUrl}
+                  items={profileMenuItems}
+                  role={roleForNav}
+                  isAvatarPending={isAvatarPending}
+                />
+                <button
+                  ref={menuButtonRef}
+                  type="button"
+                  aria-label={tAccessibility("mainMenu")}
+                  aria-expanded={isSideNavOpen}
+                  aria-controls={mobileMenuId}
+                  className="focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none xl:hidden"
+                  onClick={openSideNav}
+                >
+                  <MenuIcon className="text-icon-muted size-24" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex shrink-0 items-center gap-16">
+                {!shouldHideAuthChrome ? (
+                  <Link
+                    href={getLoginRedirectPath()}
+                    className="bg-background-brand text-text-inverse hover:bg-background-brand-hover rounded-8 hidden h-40 items-center px-20 transition-colors xl:flex"
+                  >
+                    <Text variant="md-semibold">{tCommon("login")}</Text>
+                  </Link>
+                ) : null}
+                <button
+                  ref={menuButtonRef}
+                  type="button"
+                  aria-label={tAccessibility("mainMenu")}
+                  aria-expanded={isSideNavOpen}
+                  aria-controls={mobileMenuId}
+                  className="focus-visible:ring-border-brand rounded-4 flex size-24 items-center justify-center focus-visible:ring-2 focus-visible:outline-none xl:hidden"
+                  onClick={openSideNav}
+                >
+                  <MenuIcon aria-hidden="true" className="size-24" />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -382,7 +326,8 @@ const Header = ({
         isOpen={isSideNavOpen}
         onClose={closeSideNav}
         links={shouldHideNavLinks ? [] : sideNavLinks}
-        emptyMessage={isIncomplete ? PROFILE_INCOMPLETE_SIDE_NAV_MESSAGE : undefined}
+        emptyMessage={isIncomplete ? tNavigation("profileIncompleteMessage") : undefined}
+        footer={<LocaleMenuTrigger variant="side-nav" />}
       />
     </header>
   );

@@ -1,3 +1,4 @@
+import { useLocale, useTranslations } from "next-intl";
 import { Text } from "@/components/common/Text";
 import { ChevronRightThinIcon } from "@/icons";
 import {
@@ -16,6 +17,8 @@ export default function PendingEstimateRequestHeader({
   request,
   titleId,
 }: PendingEstimateRequestHeaderProps) {
+  const t = useTranslations("estimates");
+  const locale = useLocale();
   return (
     <header className="bg-background-default shadow-sub-header flex w-full flex-col">
       <div className="px-margin-mobile md:px-margin-tablet xl:px-sub-header-padding-left-desktop xl:pr-sub-header-padding-right-desktop py-24 md:flex md:min-h-202 md:flex-col md:justify-center md:py-0 xl:flex xl:min-h-124 xl:items-center xl:py-0">
@@ -27,21 +30,23 @@ export default function PendingEstimateRequestHeader({
               variant={{ base: "xl-bold", md: "2xl-bold" }}
               className="text-text-primary"
             >
-              {getMoveTypeLabel(request.moveType)}
+              {getMoveTypeLabel(request.moveType, locale)}
             </Text>
             <Text
               as="p"
               variant={{ base: "xs-regular", md: "md-regular" }}
               className="text-text-muted"
             >
-              견적 요청일 {formatKoreanDateLong(request.createdAt)}
+              {t("detail.requestedAtWithDate", {
+                date: formatKoreanDateLong(request.createdAt, locale),
+              })}
             </Text>
           </div>
 
           <dl className="flex w-full flex-col gap-4 md:hidden">
             <div className="flex w-full items-center justify-between gap-12">
               <Text as="dt" variant="md-regular" className="text-text-muted">
-                출발지
+                {t("fromAddress")}
               </Text>
               <Text
                 as="dd"
@@ -53,7 +58,7 @@ export default function PendingEstimateRequestHeader({
             </div>
             <div className="flex w-full items-center justify-between gap-12">
               <Text as="dt" variant="md-regular" className="text-text-muted">
-                도착지
+                {t("toAddress")}
               </Text>
               <Text
                 as="dd"
@@ -65,10 +70,10 @@ export default function PendingEstimateRequestHeader({
             </div>
             <div className="flex w-full items-center justify-between gap-12">
               <Text as="dt" variant="md-regular" className="text-text-muted">
-                이사일
+                {t("moveDate")}
               </Text>
               <Text as="dd" variant="md-semibold" className="text-text-primary m-0">
-                {formatMoveDateLabel(request.moveDate)}
+                {formatMoveDateLabel(request.moveDate, locale)}
               </Text>
             </div>
           </dl>
@@ -77,7 +82,7 @@ export default function PendingEstimateRequestHeader({
             <div className="flex min-w-0 items-end gap-12">
               <div className="flex min-w-0 flex-col items-start">
                 <Text as="dt" variant="md-regular" className="text-text-muted">
-                  출발지
+                  {t("fromAddress")}
                 </Text>
                 <Text
                   as="dd"
@@ -94,7 +99,7 @@ export default function PendingEstimateRequestHeader({
 
               <div className="flex min-w-0 flex-col items-start justify-center">
                 <Text as="dt" variant="md-regular" className="text-text-muted">
-                  도착지
+                  {t("toAddress")}
                 </Text>
                 <Text
                   as="dd"
@@ -108,10 +113,10 @@ export default function PendingEstimateRequestHeader({
 
             <div className="flex shrink-0 flex-col items-start justify-center xl:min-w-160">
               <Text as="dt" variant="md-regular" className="text-text-muted">
-                이사일
+                {t("moveDate")}
               </Text>
               <Text as="dd" variant="2lg-semibold" className="text-text-primary m-0">
-                {formatMoveDateLabel(request.moveDate)}
+                {formatMoveDateLabel(request.moveDate, locale)}
               </Text>
             </div>
           </dl>

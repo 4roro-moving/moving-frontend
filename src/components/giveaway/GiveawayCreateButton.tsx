@@ -1,7 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import Button from "@/components/common/Button/Button";
-import { GIVEAWAY_WRITE_BUTTON_LABEL } from "@/lib/constants/giveaway";
 
 interface GiveawayCreateButtonProps {
   onClick?: () => void;
@@ -9,6 +10,8 @@ interface GiveawayCreateButtonProps {
 }
 
 const GiveawayCreateButton = ({ onClick, disabled = false }: GiveawayCreateButtonProps) => {
+  const t = useTranslations("giveaway");
+
   return (
     <div className="flex w-full justify-end">
       <Button
@@ -18,7 +21,7 @@ const GiveawayCreateButton = ({ onClick, disabled = false }: GiveawayCreateButto
         disabled={disabled}
         onClick={onClick}
       >
-        {GIVEAWAY_WRITE_BUTTON_LABEL}
+        {t("write")}
       </Button>
     </div>
   );

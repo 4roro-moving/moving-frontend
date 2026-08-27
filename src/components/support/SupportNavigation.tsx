@@ -2,37 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 
-const SUPPORT_LINKS = [
-  {
-    label: "공지사항",
-    href: APP_ROUTES.NOTICES.ROOT,
-  },
-  {
-    label: "자주 묻는 질문",
-    href: APP_ROUTES.FAQS.ROOT,
-  },
-  {
-    label: "1:1 문의",
-    href: APP_ROUTES.INQUIRIES.ROOT,
-  },
-] as const;
-
 const SupportNavigation = () => {
   const pathname = usePathname();
+  const t = useTranslations("navigation");
+  const supportLinks = [
+    { label: t("notices"), href: APP_ROUTES.NOTICES.ROOT },
+    { label: t("faqs"), href: APP_ROUTES.FAQS.ROOT },
+    { label: t("inquiries"), href: APP_ROUTES.INQUIRIES.ROOT },
+  ];
 
   return (
     <nav
-      aria-label="고객지원 메뉴"
+      aria-label={t("support")}
       className="bg-background-default border-border-subtle shadow-tab h-tab-height-mobile xl:h-tab-height-desktop w-full overflow-x-auto border-b"
     >
       <div className="px-margin-mobile md:px-margin-tablet mx-auto h-full w-full max-w-(--container-desktop) xl:px-0">
         <div className="flex h-full items-center gap-24 md:gap-32 xl:gap-40">
-          {SUPPORT_LINKS.map(({ label, href }) => {
+          {supportLinks.map(({ label, href }) => {
             const isActive = pathname === href || pathname.startsWith(`${href}/`);
 
             return (

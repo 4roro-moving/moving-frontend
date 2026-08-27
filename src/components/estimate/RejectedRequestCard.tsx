@@ -1,7 +1,10 @@
+"use client";
+
+import { useFormatter, useTranslations } from "next-intl";
+
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
-import { formatKoreanDateTime } from "@/lib/utils/date";
 import type { RejectedEstimateRequestItem } from "@/types/moverEstimateRequest";
 
 interface RejectedRequestCardProps {
@@ -9,6 +12,8 @@ interface RejectedRequestCardProps {
 }
 
 export default function RejectedRequestCard({ item }: RejectedRequestCardProps) {
+  const t = useTranslations("estimates");
+  const format = useFormatter();
   const { request } = item;
 
   return (
@@ -21,7 +26,7 @@ export default function RejectedRequestCard({ item }: RejectedRequestCardProps) 
 
         <div className="flex flex-col gap-12">
           <Text as="h2" variant="xl-semibold" className="text-text-primary">
-            {request.customer.name} 고객님
+            {t("mover.customerName", { name: request.customer.name })}
           </Text>
           <div className="bg-border-subtle h-px" />
         </div>
@@ -30,7 +35,7 @@ export default function RejectedRequestCard({ item }: RejectedRequestCardProps) 
           <div className="flex items-end gap-12">
             <div>
               <Text as="dt" variant="md-regular" className="text-text-muted">
-                출발지
+                {t("fromAddress")}
               </Text>
               <Text as="dd" variant="lg-semibold" className="text-text-secondary">
                 {request.fromRegion}
@@ -42,7 +47,7 @@ export default function RejectedRequestCard({ item }: RejectedRequestCardProps) 
             </span>
             <div>
               <Text as="dt" variant="md-regular" className="text-text-muted">
-                도착지
+                {t("toAddress")}
               </Text>
               <Text as="dd" variant="lg-semibold" className="text-text-secondary">
                 {request.toRegion}
@@ -52,10 +57,14 @@ export default function RejectedRequestCard({ item }: RejectedRequestCardProps) 
 
           <div>
             <Text as="dt" variant="md-regular" className="text-text-muted">
-              이사일
+              {t("moveDate")}
             </Text>
             <Text as="dd" variant="lg-semibold" className="text-text-secondary whitespace-nowrap">
-              {formatKoreanDateTime(request.moveDate)}
+              {format.dateTime(new Date(request.moveDate), {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              })}
             </Text>
           </div>
         </dl>
@@ -63,7 +72,7 @@ export default function RejectedRequestCard({ item }: RejectedRequestCardProps) 
 
       <div className="border-border-default flex h-47 items-end justify-between border-t md:h-52">
         <Text variant={{ base: "md-medium", md: "lg-medium" }} className="text-text-muted">
-          견적 금액
+          {t("priceLabel")}
         </Text>
         <Text variant={{ base: "2lg-bold", md: "2xl-bold" }} className="text-text-secondary">
           -
@@ -72,7 +81,7 @@ export default function RejectedRequestCard({ item }: RejectedRequestCardProps) 
 
       <div className="bg-overlay-card-disabled border-border-dimmed rounded-20 absolute inset-0 flex items-center justify-center border">
         <Text variant="2lg-semibold" className="text-text-inverse">
-          반려된 요청이에요
+          {t("mover.rejectedOverlay")}
         </Text>
       </div>
     </article>

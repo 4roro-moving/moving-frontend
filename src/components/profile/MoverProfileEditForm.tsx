@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import FormField from "@/components/common/FormField/FormField";
@@ -13,16 +14,20 @@ import MoverActivityBaseFields from "@/components/profile/MoverActivityBaseField
 import ProfileFormActions from "@/components/profile/ProfileFormActions";
 import ProfileImageUploader from "@/components/profile/ProfileImageUploader";
 import ProfilePageHeader from "@/components/profile/ProfilePageHeader";
+import { useProfileLocalizedOptions } from "@/components/profile/useProfileLocalizedOptions";
 import { useMoverProfileEditForm } from "@/hooks/profile/useMoverProfileEditForm";
-import { MOVE_TYPE_OPTIONS } from "@/lib/constants/moveType";
 import {
+  MOVER_PROFILE_CAREER_MAX,
+  MOVER_PROFILE_CAREER_MIN,
   MOVER_PROFILE_DESCRIPTION_MAX_LENGTH,
   MOVER_PROFILE_NICKNAME_MAX_LENGTH,
+  MOVER_PROFILE_NICKNAME_MIN_LENGTH,
   MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH,
 } from "@/lib/constants/profileValidation";
-import { REGION_OPTIONS, type RegionId } from "@/lib/constants/region";
+import { type RegionId } from "@/lib/constants/region";
 import {
-  moverProfileSchema,
+  createMoverProfileSchema,
+  type MoverProfileValidationMessages,
   type MoverProfileFormValues,
   type ValidatedMoverProfileFormValues,
 } from "@/lib/schemas/moverProfileSchema";
@@ -38,6 +43,8 @@ const MoverProfileEditForm = ({
   defaultValues,
   initialImageUrl = null,
 }: MoverProfileEditFormProps) => {
+  const t = useTranslations("profile");
+  const { moveTypeOptions, regionOptions } = useProfileLocalizedOptions();
   const {
     register,
     control,
@@ -48,7 +55,39 @@ const MoverProfileEditForm = ({
     setValue,
     formState: { errors, isValid, isDirty },
   } = useForm<MoverProfileFormValues, unknown, ValidatedMoverProfileFormValues>({
-    resolver: zodResolver(moverProfileSchema),
+    resolver: zodResolver(
+      createMoverProfileSchema({
+        requiresPhone: false,
+        messages: {
+          phoneRequired: t("validation.phoneRequired"),
+          phoneInvalid: t("validation.phoneInvalid"),
+          nicknameMin: t("validation.moverNicknameMin", {
+            min: MOVER_PROFILE_NICKNAME_MIN_LENGTH,
+          }),
+          nicknameMax: t("validation.moverNicknameMax", {
+            max: MOVER_PROFILE_NICKNAME_MAX_LENGTH,
+          }),
+          careerRequired: t("validation.moverCareerRequired"),
+          careerNumeric: t("validation.moverCareerNumeric"),
+          careerRange: t("validation.moverCareerRange", {
+            min: MOVER_PROFILE_CAREER_MIN,
+            max: MOVER_PROFILE_CAREER_MAX,
+          }),
+          shortIntroRequired: t("validation.moverShortIntroRequired"),
+          shortIntroMax: t("validation.moverShortIntroMax", {
+            max: MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH,
+          }),
+          descriptionRequired: t("validation.moverDescriptionRequired"),
+          descriptionMax: t("validation.moverDescriptionMax", {
+            max: MOVER_PROFILE_DESCRIPTION_MAX_LENGTH,
+          }),
+          activityBaseRequired: t("validation.moverActivityBaseRequired"),
+          activityBaseDetailMax: t("validation.moverActivityBaseDetailMax", { max: 100 }),
+          serviceTypesRequired: t("validation.moverServiceTypesRequired"),
+          regionIdsRequired: t("validation.moverRegionIdsRequired"),
+        } satisfies MoverProfileValidationMessages,
+      }),
+    ),
     mode: "onChange",
     defaultValues: {
       imageFile: null,
@@ -69,6 +108,9 @@ const MoverProfileEditForm = ({
 
   const { submitError, toastMessage, isPending, setToastMessage, submit } = useMoverProfileEditForm(
     {
+      saveSuccessMessage: t("editSaveSuccess"),
+      saveFailedMessage: t("editSaveFailed"),
+      activityBaseRequiredMessage: t("validation.moverActivityBaseRequired"),
       reset,
       setError,
       setFocus,
@@ -84,11 +126,11 @@ const MoverProfileEditForm = ({
       onKeyDown={preventEnterSubmitOnInput}
       noValidate
     >
-      <ProfilePageHeader title="프로필 수정" />
+      <ProfilePageHeader title={t("editTitle")} />
 
       <div className="flex w-full flex-col gap-32 lg:flex-row lg:items-start lg:justify-between lg:gap-[120px]">
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">
-          <FormField label="프로필 이미지" labelFor="mover-edit-profile-image">
+          <FormField label={t("image")} labelFor="mover-edit-profile-image">
             <Controller
               name="imageFile"
               control={control}
@@ -114,11 +156,16 @@ const MoverProfileEditForm = ({
             />
           </FormField>
 
-          <FormField label="별명" labelFor="mover-edit-nickname" required>
+          <FormField
+            label={t("moverNickname")}
+            labelFor="mover-edit-nickname"
+            required
+            requiredLabel={t("requiredField")}
+          >
             <Input
               id="mover-edit-nickname"
               size="md"
-              placeholder="사이트에 노출될 별명을 입력해 주세요"
+              placeholder={t("moverNicknamePlaceholder")}
               error={errors.nickname?.message}
               maxLength={MOVER_PROFILE_NICKNAME_MAX_LENGTH}
               disabled={isPending}
@@ -126,24 +173,34 @@ const MoverProfileEditForm = ({
             />
           </FormField>
 
-          <FormField label="경력" labelFor="mover-edit-career" required>
+          <FormField
+            label={t("moverCareer")}
+            labelFor="mover-edit-career"
+            required
+            requiredLabel={t("requiredField")}
+          >
             <Input
               id="mover-edit-career"
               size="md"
               inputMode="numeric"
               numericOnly
-              placeholder="기사님의 경력을 입력해 주세요"
+              placeholder={t("moverCareerPlaceholder")}
               error={errors.career?.message}
               disabled={isPending}
               {...register("career")}
             />
           </FormField>
 
-          <FormField label="한 줄 소개" labelFor="mover-edit-shortIntro" required>
+          <FormField
+            label={t("moverShortIntro")}
+            labelFor="mover-edit-shortIntro"
+            required
+            requiredLabel={t("requiredField")}
+          >
             <Input
               id="mover-edit-shortIntro"
               size="md"
-              placeholder="한 줄 소개를 입력해 주세요"
+              placeholder={t("moverShortIntroPlaceholder")}
               error={errors.shortIntro?.message}
               maxLength={MOVER_PROFILE_SHORT_INTRO_MAX_LENGTH}
               disabled={isPending}
@@ -153,10 +210,15 @@ const MoverProfileEditForm = ({
         </div>
 
         <div className="flex w-full flex-col gap-32 lg:w-[500px]">
-          <FormField label="상세 설명" labelFor="mover-edit-description" required>
+          <FormField
+            label={t("moverDescription")}
+            labelFor="mover-edit-description"
+            required
+            requiredLabel={t("requiredField")}
+          >
             <Textarea
               id="mover-edit-description"
-              placeholder="상세 내용을 입력해 주세요"
+              placeholder={t("moverDescriptionPlaceholder")}
               error={errors.description?.message}
               maxLength={MOVER_PROFILE_DESCRIPTION_MAX_LENGTH}
               disabled={isPending}
@@ -167,7 +229,12 @@ const MoverProfileEditForm = ({
           {/* 기사 활동 거점 추가 */}
           <MoverActivityBaseFields control={control} disabled={isPending} idPrefix="mover-edit" />
 
-          <FormField label="제공 서비스" labelId="mover-edit-service-types-label" required>
+          <FormField
+            label={t("moverServices")}
+            labelId="mover-edit-service-types-label"
+            required
+            requiredLabel={t("requiredField")}
+          >
             <Controller
               name="serviceTypes"
               control={control}
@@ -175,7 +242,7 @@ const MoverProfileEditForm = ({
                 <ProfileChipGroup<MoveType>
                   aria-labelledby="mover-edit-service-types-label"
                   selectionMode="multiple"
-                  options={MOVE_TYPE_OPTIONS}
+                  options={moveTypeOptions}
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.serviceTypes?.message}
@@ -185,7 +252,12 @@ const MoverProfileEditForm = ({
             />
           </FormField>
 
-          <FormField label="서비스 가능 지역" labelId="mover-edit-region-label" required>
+          <FormField
+            label={t("moverRegions")}
+            labelId="mover-edit-region-label"
+            required
+            requiredLabel={t("requiredField")}
+          >
             <Controller
               name="regionIds"
               control={control}
@@ -193,7 +265,7 @@ const MoverProfileEditForm = ({
                 <ProfileChipGroup<RegionId>
                   aria-labelledby="mover-edit-region-label"
                   selectionMode="multiple"
-                  options={REGION_OPTIONS}
+                  options={regionOptions}
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.regionIds?.message}

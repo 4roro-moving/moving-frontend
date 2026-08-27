@@ -1,16 +1,12 @@
+import { useTranslations } from "next-intl";
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import GiveawayRequestCardLayout from "@/components/giveaway/GiveawayRequestCardLayout";
 import {
-  GIVEAWAY_EDIT_BUTTON_LABEL,
   GIVEAWAY_MY_REQUEST_SECTION_ID,
-  GIVEAWAY_MY_REQUEST_TITLE,
   GIVEAWAY_MY_REQUEST_TITLE_ID,
-  GIVEAWAY_REQUEST_CONTENT_LABEL,
-  GIVEAWAY_REQUEST_EMPTY_MESSAGE,
   canCancelGiveawayRequest,
   canEditGiveawayRequest,
-  getGiveawayRequestStatusLabel,
 } from "@/lib/constants/giveaway";
 import type { GiveawayDetail, MyGiveawayRequestItem } from "@/types/giveaway";
 
@@ -49,6 +45,7 @@ const GiveawayMyRequestSection = ({
   onEdit,
   onCancel,
 }: GiveawayMyRequestSectionProps) => {
+  const t = useTranslations("giveaway");
   const request = toMyGiveawayRequestItem(giveaway);
 
   if (request === null) {
@@ -58,8 +55,8 @@ const GiveawayMyRequestSection = ({
   const canEdit = canEditGiveawayRequest(request);
   const canCancel = canCancelGiveawayRequest(request);
   const hasActions = canEdit || canCancel;
-  const message = request.message?.trim() || GIVEAWAY_REQUEST_EMPTY_MESSAGE;
-  const statusLabel = getGiveawayRequestStatusLabel(request.status);
+  const message = request.message?.trim() || t("none");
+  const statusLabel = t(`requestStatusValues.${request.status}`);
 
   return (
     <section
@@ -74,7 +71,7 @@ const GiveawayMyRequestSection = ({
         variant={{ base: "xl-bold", md: "2xl-bold" }}
         className="text-text-primary focus-visible:ring-border-brand rounded-4 focus-visible:ring-2 focus-visible:outline-none"
       >
-        {GIVEAWAY_MY_REQUEST_TITLE}
+        {t("myRequestTitle")}
       </Text>
 
       <GiveawayRequestCardLayout
@@ -92,7 +89,7 @@ const GiveawayMyRequestSection = ({
                   fullWidth
                   onClick={() => onEdit(request)}
                 >
-                  {GIVEAWAY_EDIT_BUTTON_LABEL}
+                  {t("edit")}
                 </Button>
               ) : null}
               {canCancel ? (
@@ -103,7 +100,7 @@ const GiveawayMyRequestSection = ({
                   fullWidth
                   onClick={() => onCancel(request)}
                 >
-                  취소하기
+                  {t("cancelRequest")}
                 </Button>
               ) : null}
             </>
@@ -117,7 +114,7 @@ const GiveawayMyRequestSection = ({
             variant={{ base: "lg-semibold", md: "2lg-bold" }}
             className="text-text-secondary"
           >
-            {GIVEAWAY_REQUEST_CONTENT_LABEL}
+            {t("requestContent")}
           </Text>
           <Text
             as="p"

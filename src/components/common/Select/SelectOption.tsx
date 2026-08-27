@@ -20,7 +20,7 @@ function getOptionTextVariant(isSort: boolean, isMultiColumn: boolean): TextVari
   }
 
   if (isMultiColumn) {
-    return { base: "md-medium", xl: "2lg-medium" };
+    return { base: "md-medium", xl: "lg-medium" };
   }
 
   return { base: "md-medium", xl: "lg-medium" };
@@ -52,7 +52,12 @@ const SelectOption = ({ children, value, onPrefetch }: SelectOptionProps) => {
       onFocus={onPrefetch}
       onPointerEnter={onPrefetch}
     >
-      <Text variant={getOptionTextVariant(isSort, isMultiColumn)} className="text-text-secondary">
+      <Text
+        as="span"
+        variant={getOptionTextVariant(isSort, isMultiColumn)}
+        className={cn("text-text-secondary block min-w-0", !isSort && "truncate")}
+        title={typeof children === "string" ? children : undefined}
+      >
         {children}
       </Text>
     </button>

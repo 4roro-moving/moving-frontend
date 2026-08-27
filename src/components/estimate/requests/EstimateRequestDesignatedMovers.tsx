@@ -1,5 +1,8 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 import { Text } from "@/components/common/Text";
@@ -17,11 +20,12 @@ interface EstimateRequestDesignatedMoversProps {
  * 개별 지정 취소는 견적 요청 취소 허브 모달에서 처리한다.
  * // 2026.07.30 정슬기 - [추가] 지정 견적 요청 기사님 정보 표시
  * // 2026.08.07 정슬기 - [수정] 지정 취소는 취소 허브 모달로 이동
- * // 2026.08.11 정슬기 - [수정] 지정 기사 응답 상태 및 반려 사유 표시
+ * // 2026.08.11 정슬기 - [수정] 지정 기사 응답 상태 및 {t("requests.rejectionReason")} 표시
  */
 export default function EstimateRequestDesignatedMovers({
   designatedMovers,
 }: EstimateRequestDesignatedMoversProps) {
+  const t = useTranslations("estimates");
   if (designatedMovers.length === 0) {
     return null;
   }
@@ -29,11 +33,11 @@ export default function EstimateRequestDesignatedMovers({
   return (
     <section
       className="flex w-full flex-col gap-20 md:gap-28"
-      aria-label="지정 견적 요청 기사님 응답 현황"
+      aria-label={t("requests.designatedAria")}
     >
       <div className="flex w-full flex-col gap-8">
         <Text as="p" variant="md-semibold" className="text-text-brand">
-          지정 견적 요청
+          {t("requests.designatedTitle")}
         </Text>
 
         <Text
@@ -41,7 +45,7 @@ export default function EstimateRequestDesignatedMovers({
           variant={{ base: "lg-semibold", md: "xl-semibold" }}
           className="text-text-primary"
         >
-          기사님 응답 현황
+          {t("requests.designatedResponseStatus")}
         </Text>
       </div>
 
@@ -58,7 +62,7 @@ export default function EstimateRequestDesignatedMovers({
                 <div className="bg-background-avatar rounded-12 relative size-40 shrink-0 overflow-hidden md:size-48">
                   <Image
                     src={resolveMoverProfileImageSrc(imageUrl)}
-                    alt={`${displayName} 프로필`}
+                    alt={t("received.profileAlt", { name: displayName })}
                     fill
                     sizes="48px"
                     className="object-cover"
@@ -76,7 +80,7 @@ export default function EstimateRequestDesignatedMovers({
                 {status === "ARRIVED" && (
                   <span className="border-border-brand bg-background-brand-muted rounded-8 shrink-0 border px-10 py-6">
                     <Text as="span" variant="sm-semibold" className="text-text-brand">
-                      견적 도착
+                      {t("requests.designatedEstimateArrived")}
                     </Text>
                   </span>
                 )}
@@ -84,7 +88,7 @@ export default function EstimateRequestDesignatedMovers({
                 {status === "REJECTED" && (
                   <span className="border-border-error rounded-8 shrink-0 border bg-red-100 px-10 py-6">
                     <Text as="span" variant="sm-semibold" className="text-text-error">
-                      반려
+                      {t("requests.designatedRejected")}
                     </Text>
                   </span>
                 )}
@@ -92,7 +96,7 @@ export default function EstimateRequestDesignatedMovers({
                 {status === "WAITING" && (
                   <span className="border-border-default bg-background-muted rounded-8 shrink-0 border px-10 py-6">
                     <Text as="span" variant="sm-semibold" className="text-text-muted">
-                      응답 대기
+                      {t("requests.designatedPending")}
                     </Text>
                   </span>
                 )}
@@ -101,7 +105,7 @@ export default function EstimateRequestDesignatedMovers({
               {item.rejection && (
                 <div className="bg-background-muted rounded-12 ml-52 px-16 py-12 md:ml-60">
                   <Text as="p" variant="sm-semibold" className="text-text-secondary">
-                    반려 사유
+                    {t("requests.rejectionReason")}
                   </Text>
 
                   <Text
@@ -109,7 +113,7 @@ export default function EstimateRequestDesignatedMovers({
                     variant="md-regular"
                     className="text-text-primary mt-4 wrap-break-word"
                   >
-                    {item.rejection.reason}
+                    <AutoTranslatedText text={item.rejection.reason} />
                   </Text>
                 </div>
               )}

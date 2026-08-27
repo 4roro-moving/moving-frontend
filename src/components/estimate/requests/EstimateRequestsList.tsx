@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import Pagination from "@/components/common/Pagination/Pagination";
 import Select from "@/components/common/Select/Select";
 import EstimatesListEmptyState from "@/components/estimate/EstimatesListEmptyState";
@@ -9,19 +10,8 @@ import { cn } from "@/lib/utils/cn";
 import type { EstimateRequestListStatusFilter, MyEstimateRequestItem } from "@/types/estimate";
 import type { Pagination as PaginationMeta } from "@/types/pagination";
 
-const STATUS_FILTER_OPTIONS: { value: EstimateRequestListStatusFilter; label: string }[] = [
-  { value: "all", label: "전체" },
-  // Figma·Badge·필터 동일 표기: OPEN = 진행 중
-  { value: "OPEN", label: "진행 중" },
-  { value: "COMPLETED", label: "이사 완료" },
-];
-
-const STATUS_FILTER_VALUES = new Set<EstimateRequestListStatusFilter>(
-  STATUS_FILTER_OPTIONS.map((option) => option.value),
-);
-
 function isStatusFilter(value: string): value is EstimateRequestListStatusFilter {
-  return STATUS_FILTER_VALUES.has(value as EstimateRequestListStatusFilter);
+  return value === "all" || value === "OPEN" || value === "COMPLETED";
 }
 
 interface EstimateRequestsListProps {
@@ -53,14 +43,21 @@ export default function EstimateRequestsList({
   isFetching = false,
   isPreviousDataLoading = false,
 }: EstimateRequestsListProps) {
+  const t = useTranslations("estimates");
+  const statusFilterOptions: { value: EstimateRequestListStatusFilter; label: string }[] = [
+    { value: "all", label: t("requests.filterAll") },
+    { value: "OPEN", label: t("requests.filterOpen") },
+    { value: "COMPLETED", label: t("requests.filterCompleted") },
+  ];
   const isAllFilter = statusFilter === "all";
   const selectedLabel =
-    STATUS_FILTER_OPTIONS.find((option) => option.value === statusFilter)?.label ?? "전체";
+    statusFilterOptions.find((option) => option.value === statusFilter)?.label ??
+    t("requests.filterAll");
 
   const filterSelect = (
     <div className="flex w-full justify-end">
       <Select
-        label="견적 요청 상태 필터"
+        label={t("requests.filterAria")}
         desc={selectedLabel}
         defaultValue={statusFilter}
         size="lg"
@@ -71,7 +68,7 @@ export default function EstimateRequestsList({
           }
         }}
       >
-        {STATUS_FILTER_OPTIONS.map((option) => (
+        {statusFilterOptions.map((option) => (
           <Select.Option key={option.value} value={option.value}>
             {option.label}
           </Select.Option>
@@ -98,12 +95,12 @@ export default function EstimateRequestsList({
         <EstimatesListEmptyState
           description={
             <>
-              아직 보낸 견적 요청이 없어요
+              {t("requests.emptyTitle")}
               <br />
-              견적 요청을 작성하고 기사님의 견적을 받아보세요
+              {t("requests.emptyDescription")}
             </>
           }
-          buttonLabel="견적 요청하기"
+          buttonLabel={t("requests.create")}
           href={APP_ROUTES.ESTIMATE_REQUEST}
           alignWithFilter
         />
@@ -117,9 +114,9 @@ export default function EstimateRequestsList({
         <EstimatesListEmptyState
           description={
             <>
-              해당 상태의 견적 요청이 없어요.
+              {t("requests.emptyByStatusTitle")}
               <br />
-              다른 상태를 선택해 확인해보세요.
+              {t("requests.emptyByStatusDescription")}
             </>
           }
         />
@@ -137,7 +134,7 @@ export default function EstimateRequestsList({
     >
       {isPreviousDataLoading ? (
         <span className="sr-only" role="status">
-          보낸 견적 요청 목록을 불러오는 중이에요
+          {t("requests.loading")}
         </span>
       ) : null}
       {filterSelect}

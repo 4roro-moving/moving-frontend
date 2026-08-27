@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 
 interface ResidenceReviewCardSkeletonListProps {
@@ -5,6 +7,7 @@ interface ResidenceReviewCardSkeletonListProps {
 }
 
 const ResidenceReviewCardSkeletonList = ({ count = 5 }: ResidenceReviewCardSkeletonListProps) => {
+  const t = useTranslations("residenceReview");
   return (
     <div>
       <ul className="flex flex-col gap-20" aria-hidden="true">
@@ -26,7 +29,7 @@ const ResidenceReviewCardSkeletonList = ({ count = 5 }: ResidenceReviewCardSkele
         ))}
       </ul>
       <p className="sr-only" role="status">
-        거주 후기 목록을 불러오는 중
+        {t("listLoading")}
       </p>
     </div>
   );

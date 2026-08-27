@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Text } from "@/components/common/Text";
 import { useListboxKeyboardNav } from "@/hooks/useListboxKeyboardNav";
 import { usePresence } from "@/hooks/usePresence";
@@ -25,6 +27,7 @@ const PaginationEllipsis = ({
   onSelect,
   className,
 }: PaginationEllipsisProps) => {
+  const tr = useTranslations("common");
   const hiddenPages = Array.from({ length: Math.max(0, end - start - 1) }, (_, i) => start + 1 + i);
   const { isRendered: isListboxRendered, isVisible: isListboxVisible } = usePresence(
     isOpen,
@@ -45,7 +48,7 @@ const PaginationEllipsis = ({
         className={cn(className, "flex items-center justify-center")}
         onClick={() => onOpenChange(isOpen ? null : index)}
         onKeyDown={handleTriggerKeyDown}
-        aria-label="숨겨진 페이지 더보기"
+        aria-label={tr("pagination.more")}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
@@ -80,7 +83,7 @@ const PaginationEllipsis = ({
                   onOpenChange(null);
                   focusTrigger();
                 }}
-                aria-label={`${page} 페이지`}
+                aria-label={tr("pagination.page", { page })}
               >
                 <Text variant="sm-medium" className="text-text-primary">
                   {page}

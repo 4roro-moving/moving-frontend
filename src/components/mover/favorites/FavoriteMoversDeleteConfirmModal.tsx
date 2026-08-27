@@ -2,6 +2,7 @@
 
 import AlertModal from "@/components/common/Modal/AlertModal";
 import Modal from "@/components/common/Modal/Modal";
+import { useTranslations } from "next-intl";
 
 export interface FavoriteMoversDeleteConfirmModalProps {
   open: boolean;
@@ -19,14 +20,15 @@ export default function FavoriteMoversDeleteConfirmModal({
   onClose,
   onConfirm,
 }: FavoriteMoversDeleteConfirmModalProps) {
+  const t = useTranslations("favorites");
   return (
     <AlertModal
       open={open}
       onClose={onClose}
       closeDisabled={isPending}
       size="sm"
-      title="찜 해제 확인"
-      description={`찜한 기사님 ${count}명의 찜을 모두 해제할까요?`}
+      title={t("deleteConfirmTitle")}
+      description={t("deleteConfirmDescription", { count })}
       actions={
         <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
           <Modal.Button
@@ -38,7 +40,7 @@ export default function FavoriteMoversDeleteConfirmModal({
             onClick={onClose}
             className="md:flex-1"
           >
-            취소
+            {t("cancel")}
           </Modal.Button>
           <Modal.Button
             type="button"
@@ -49,7 +51,7 @@ export default function FavoriteMoversDeleteConfirmModal({
             onClick={onConfirm}
             className="md:flex-1"
           >
-            {isPending ? "해제 중..." : "모두 해제"}
+            {isPending ? t("deleting") : t("deleteAll")}
           </Modal.Button>
         </div>
       }

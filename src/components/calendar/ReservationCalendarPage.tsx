@@ -1,5 +1,6 @@
 "use client";
 
+import { useFormatter, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -22,13 +23,7 @@ interface CalendarDay {
   monthOffset: number;
 }
 
-const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
-const AVAILABILITY_LABEL: Record<AvailabilityDisplay, string> = {
-  available: "예약 가능",
-  full: "마감",
-  off: "휴무",
-  unknown: "조회 전",
-};
+const WEEKDAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
@@ -65,28 +60,32 @@ const getCalendarDays = (year: number, month: number): CalendarDay[] => {
 };
 
 //날짜 상태를 작은 배지 형태로 표시 available, full, off
-const AvailabilityPill = ({ status }: { status: AvailabilityDisplay }) => (
-  <span
-    className={cn(
-      "rounded-100 inline-flex items-center gap-5 px-8 py-3 text-[11px] leading-18 font-semibold md:px-10 md:text-[13px]",
-      status === "available" && "bg-background-brand-muted text-text-brand",
-      status === "full" && "bg-background-hover text-text-muted",
-      status === "off" && "bg-[#eef0f3] text-[#74777d]",
-      status === "unknown" && "bg-background-disabled text-text-disabled",
-    )}
-  >
+const AvailabilityPill = ({ status }: { status: AvailabilityDisplay }) => {
+  const t = useTranslations("reservationCalendar");
+
+  return (
     <span
       className={cn(
-        "size-5 rounded-full",
-        status === "available" && "bg-background-brand",
-        status === "full" && "bg-gray-400",
-        status === "off" && "bg-black-100",
-        status === "unknown" && "bg-gray-300",
+        "rounded-100 inline-flex items-center gap-5 px-8 py-3 text-[11px] leading-18 font-semibold md:px-10 md:text-[13px]",
+        status === "available" && "bg-background-brand-muted text-text-brand",
+        status === "full" && "bg-background-hover text-text-muted",
+        status === "off" && "bg-[#eef0f3] text-[#74777d]",
+        status === "unknown" && "bg-background-disabled text-text-disabled",
       )}
-    />
-    {AVAILABILITY_LABEL[status]}
-  </span>
-);
+    >
+      <span
+        className={cn(
+          "size-5 rounded-full",
+          status === "available" && "bg-background-brand",
+          status === "full" && "bg-gray-400",
+          status === "off" && "bg-black-100",
+          status === "unknown" && "bg-gray-300",
+        )}
+      />
+      {t(`status.${status}`)}
+    </span>
+  );
+};
 
 interface ReservationCalendarPageProps {
   role: CalendarRole;
@@ -97,9 +96,12 @@ interface ReservationCalendarPageProps {
 export default function ReservationCalendarPage({
   role,
   moverId,
-  moverName = "기사님",
+  moverName,
 }: ReservationCalendarPageProps) {
+  const t = useTranslations("reservationCalendar");
+  const format = useFormatter();
   const isMover = role === "mover";
+  const displayedMoverName = moverName ?? t("moverDefaultName");
   const authenticatedMoverId = useAuthStore((state) => state.user?.id);
   //기사 ID 결정
   const resolvedMoverId = isMover ? authenticatedMoverId : moverId;
@@ -156,14 +158,14 @@ export default function ReservationCalendarPage({
       { date: selectedDate, status: status === "off" ? "OFF" : "AVAILABLE" },
       {
         onSuccess: () =>
-          setToastMessage(status === "off" ? "휴무로 변경했습니다." : "휴무를 해제했습니다."),
-        onError: (error) => setToastMessage(error.message || "일정 변경에 실패했습니다."),
+          setToastMessage(status === "off" ? t("toast.setOff") : t("toast.unsetOff")),
+        onError: (error) => setToastMessage(error.message || t("toast.updateFailed")),
       },
     );
   };
 
   if (!resolvedMoverId) {
-    return <EstimatesQueryStatus message="기사 정보를 확인할 수 없습니다." />;
+    return <EstimatesQueryStatus message={t("moverUnavailable")} />;
   }
 
   // 아직 조회되지 않은 날짜는 예약 가능으로 추정하지 않고 조회 전 상태로 표시
@@ -181,15 +183,13 @@ export default function ReservationCalendarPage({
               variant={{ base: "2xl-bold", xl: "3xl-bold" }}
               className="text-text-primary"
             >
-              {isMover ? "예약 일정 관리" : `${moverName} 일정`}
+              {isMover ? t("moverTitle") : t("customerTitle", { moverName: displayedMoverName })}
             </Text>
             <Text as="p" variant="lg-regular" className="text-text-muted mt-6">
-              {isMover
-                ? "날짜를 선택해 휴무일을 관리해 보세요. 예약 마감은 확정 일정에 따라 자동 반영됩니다."
-                : "기사님의 일정을 확인하고 예약 가능한 날에 견적을 요청해 보세요."}
+              {isMover ? t("moverDescription") : t("customerDescription")}
             </Text>
           </div>
-          <div className="flex flex-wrap items-center gap-12" aria-label="일정 상태 안내">
+          <div className="flex flex-wrap items-center gap-12" aria-label={t("statusGuideAria")}>
             {(["available", "full", "off"] as const).map((status) => (
               <AvailabilityPill key={status} status={status} />
             ))}
@@ -203,7 +203,7 @@ export default function ReservationCalendarPage({
             <button
               type="button"
               onClick={() => moveMonth(-1)}
-              aria-label="이전 달"
+              aria-label={t("previousMonth")}
               className="hover:bg-background-hover rounded-8 flex size-40 items-center justify-center transition-colors"
             >
               <span aria-hidden className="text-text-tertiary text-2xl">
@@ -215,12 +215,12 @@ export default function ReservationCalendarPage({
               variant={{ base: "xl-bold", md: "2xl-bold" }}
               className="text-text-primary"
             >
-              {year}년 {month + 1}월
+              {format.dateTime(new Date(year, month, 1), { year: "numeric", month: "long" })}
             </Text>
             <button
               type="button"
               onClick={() => moveMonth(1)}
-              aria-label="다음 달"
+              aria-label={t("nextMonth")}
               className="hover:bg-background-hover rounded-8 flex size-40 items-center justify-center transition-colors"
             >
               <span aria-hidden className="text-text-tertiary text-2xl">
@@ -230,13 +230,13 @@ export default function ReservationCalendarPage({
           </div>
 
           <div className="border-border-subtle bg-background-subtle grid grid-cols-7 border-b py-10">
-            {WEEKDAYS.map((weekday, index) => (
+            {WEEKDAY_KEYS.map((weekday, index) => (
               <Text
                 key={weekday}
                 variant="md-semibold"
                 className={cn("text-center", index === 0 ? "text-text-brand" : "text-text-muted")}
               >
-                {weekday}
+                {t(`weekday.${weekday}`)}
               </Text>
             ))}
           </div>
@@ -253,7 +253,14 @@ export default function ReservationCalendarPage({
                 <button
                   type="button"
                   key={`${key}-${index}`}
-                  aria-label={`${cellDate.getFullYear()}년 ${cellDate.getMonth() + 1}월 ${day}일, ${AVAILABILITY_LABEL[status]}`}
+                  aria-label={t("dayAria", {
+                    date: format.dateTime(cellDate, {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }),
+                    status: t(`status.${status}`),
+                  })}
                   aria-pressed={isSelected}
                   onClick={() => {
                     setSelectedDate(key);
@@ -282,14 +289,14 @@ export default function ReservationCalendarPage({
             {calendarQuery.isPending ? (
               <div className="bg-background-surface/80 absolute inset-0 flex items-center justify-center">
                 <Text as="p" variant="md-medium" className="text-text-muted">
-                  일정을 불러오는 중입니다.
+                  {t("loading")}
                 </Text>
               </div>
             ) : calendarQuery.isError ? (
               <div className="bg-background-surface/90 absolute inset-0 flex items-center justify-center">
                 <EstimatesQueryStatus
-                  message="일정을 불러오지 못했습니다."
-                  actionLabel="다시 시도"
+                  message={t("loadFailed")}
+                  actionLabel={t("retry")}
                   onAction={() => void calendarQuery.refetch()}
                 />
               </div>
@@ -300,30 +307,32 @@ export default function ReservationCalendarPage({
         <section className="border-border-default bg-background-surface rounded-16 sticky bottom-6 mt-8 flex flex-col gap-10 border p-12 shadow-[0_8px_30px_rgba(17,17,17,0.10)] md:flex-row md:items-center md:justify-between md:p-14">
           <div className="flex items-center gap-14">
             <div className="bg-background-brand-muted text-text-brand rounded-12 flex size-52 shrink-0 flex-col items-center justify-center">
-              <span className="text-[11px] font-medium">{selectedDate.slice(5, 7)}월</span>
+              <span className="text-[11px] font-medium">
+                {format.dateTime(new Date(`${selectedDate}T00:00:00`), { month: "short" })}
+              </span>
               <span className="text-[20px] leading-22 font-bold">{selectedDay}</span>
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-8">
                 <Text as="h3" variant="lg-bold" className="text-text-primary">
-                  선택한 날짜
+                  {t("selectedDate")}
                 </Text>
                 <AvailabilityPill status={selectedStatusForDisplay} />
               </div>
               <Text as="p" variant="sm-medium" className="text-text-muted mt-3">
                 {selectedReservation
-                  ? `${selectedReservation.customerName} 고객님의 확정 일정이 있습니다.`
+                  ? t("confirmedReservation", { customerName: selectedReservation.customerName })
                   : isMover
                     ? isPastSelectedDate
-                      ? "과거 날짜의 일정은 변경할 수 없습니다."
-                      : "예약 가능 또는 휴무 상태로 변경할 수 있습니다."
+                      ? t("pastDate")
+                      : t("moverDateEditable")
                     : selectedStatusForDisplay === "available"
-                      ? "견적 요청이 가능한 날짜예요."
+                      ? t("availableForEstimate")
                       : selectedStatusForDisplay === "full"
-                        ? "예약이 마감된 날짜예요. 다른 날짜를 선택해 주세요."
+                        ? t("fullDate")
                         : selectedStatusForDisplay === "off"
-                          ? "기사님이 휴무로 지정한 날짜예요."
-                          : "일정 상태를 확인하는 중입니다."}
+                          ? t("offDate")
+                          : t("checkingStatus")}
               </Text>
             </div>
           </div>
@@ -350,7 +359,7 @@ export default function ReservationCalendarPage({
                       : "border-border-default text-text-secondary hover:bg-background-subtle",
                   )}
                 >
-                  {AVAILABILITY_LABEL[status]}
+                  {t(`status.${status}`)}
                 </button>
               ))}
             </div>
@@ -362,7 +371,7 @@ export default function ReservationCalendarPage({
               href={estimateRequestHref}
               className="bg-background-brand hover:bg-background-brand-hover text-text-inverse rounded-8 flex h-48 w-full items-center justify-center px-24 text-[16px] font-semibold transition-colors md:w-auto"
             >
-              이 날짜로 견적 요청하기
+              {t("requestEstimateForDate")}
             </Link>
           ) : (
             <button
@@ -370,7 +379,7 @@ export default function ReservationCalendarPage({
               disabled
               className="bg-background-disabled text-text-disabled rounded-8 h-48 w-full px-24 text-[16px] font-semibold md:w-auto"
             >
-              견적 요청 불가
+              {t("estimateUnavailable")}
             </button>
           )}
         </section>

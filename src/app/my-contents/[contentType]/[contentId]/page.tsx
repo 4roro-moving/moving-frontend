@@ -1,15 +1,19 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
 import CustomerAuthGate from "@/components/auth/CustomerAuthGate";
 import MyContentDetailPageClient from "@/components/my-content/MyContentDetailPageClient";
 
-export const metadata: Metadata = {
-  title: "콘텐츠 처리 안내",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("myContent");
+  return { title: t("metadata.title"), description: t("metadata.description") };
+}
 
-export default function MyContentDetailPage() {
+export default async function MyContentDetailPage() {
+  const t = await getTranslations("myContent");
+
   return (
-    <CustomerAuthGate loadingMessage="콘텐츠를 불러오는 중입니다.">
+    <CustomerAuthGate loadingMessage={t("loading")}>
       <MyContentDetailPageClient />
     </CustomerAuthGate>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import Pagination from "@/components/common/Pagination/Pagination";
 import Toast from "@/components/common/Toast/Toast";
@@ -13,16 +14,12 @@ import WritableReviewCard from "@/components/review/WritableReviewCard";
 import { useReviewPagination } from "@/hooks/useReviewPagination";
 import { useReviewableEstimates } from "@/hooks/useReviewableEstimates";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import {
-  REVIEW_CREATED_MESSAGE,
-  REVIEW_LIST_ERROR_MESSAGE,
-  REVIEW_PAGE_LIMIT,
-  REVIEW_RETRY_LABEL,
-} from "@/lib/constants/reviewConstants";
+import { REVIEW_PAGE_LIMIT } from "@/lib/constants/reviewConstants";
 import { buildClientPagination } from "@/lib/utils/pagination";
 import type { ReviewableEstimateItem } from "@/types/review";
 
 export default function WritableReviewsPageClient() {
+  const t = useTranslations("reviews");
   const { data, isLoading, isError, error, refetch, isFetching } = useReviewableEstimates();
 
   const [selectedItem, setSelectedItem] = useState<ReviewableEstimateItem | null>(null);
@@ -56,13 +53,13 @@ export default function WritableReviewsPageClient() {
   const hasList = !isLoading && !isError && data !== undefined && data.length > 0;
 
   return (
-    <ReviewPageFrame title="작성 가능한 리뷰">
+    <ReviewPageFrame title={t("writableTitle")}>
       {isLoading ? <ReviewCardSkeleton /> : null}
 
       {isError ? (
         <EstimatesQueryStatus
-          message={getApiErrorMessage(error, REVIEW_LIST_ERROR_MESSAGE)}
-          actionLabel={REVIEW_RETRY_LABEL}
+          message={getApiErrorMessage(error, t("listLoadFailed"))}
+          actionLabel={t("retry")}
           onAction={() => {
             void refetch();
           }}
@@ -97,7 +94,7 @@ export default function WritableReviewsPageClient() {
         open={Boolean(selectedItem)}
         item={selectedItem}
         onClose={() => setSelectedItem(null)}
-        onSuccess={() => setToastMessage(REVIEW_CREATED_MESSAGE)}
+        onSuccess={() => setToastMessage(t("created"))}
       />
 
       {toastMessage ? <Toast onClose={() => setToastMessage(null)}>{toastMessage}</Toast> : null}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 
 import Button from "@/components/common/Button/Button";
@@ -70,6 +71,7 @@ function FavoriteMoversSidebarStatus({
 }
 
 export function FavoriteMoversSidebar() {
+  const t = useTranslations("favorites");
   const {
     isInitialLoading,
     isCustomerLoggedIn,
@@ -93,7 +95,7 @@ export function FavoriteMoversSidebar() {
     <aside className="hidden w-full flex-col gap-16 xl:flex xl:w-[327px] xl:shrink-0 xl:self-stretch xl:pt-[192px]">
       <div className="flex w-full items-center justify-between gap-12">
         <Text as="h2" variant="xl-semibold" className="text-text-secondary">
-          찜한 기사님
+          {t("sidebarTitle")}
         </Text>
         {showMoreLink ? (
           <Link
@@ -101,51 +103,51 @@ export function FavoriteMoversSidebar() {
             className="text-text-muted hover:text-text-secondary focus-visible:ring-border-brand rounded-8 flex shrink-0 items-center gap-2 focus-visible:ring-2 focus-visible:outline-none"
           >
             <Text as="span" variant="md-medium">
-              더보기
+              {t("more")}
             </Text>
             <ChevronRightThinIcon className="size-16" aria-hidden="true" />
           </Link>
         ) : null}
       </div>
       <Text as="p" variant="md-regular" className="text-text-muted">
-        최근 찜한 기사님을 최대 {FAVORITE_MOVERS_SIDEBAR_LIMIT}명까지 표시합니다.
+        {t("sidebarDescription", { count: FAVORITE_MOVERS_SIDEBAR_LIMIT })}
       </Text>
 
       {isInitialLoading ? (
         <MoverCardSkeletonList
           variant="compact"
           count={FAVORITE_MOVERS_SKELETON_COUNT}
-          label="찜한 기사님을 불러오는 중"
+          label={t("loading")}
         />
       ) : !isCustomerLoggedIn ? (
         <FavoriteMoversSidebarStatus
-          title="아직 로그인하지 않았어요"
+          title={t("loginTitle")}
           description={
             <>
-              로그인하면 찜한 기사님을
+              {t("loginDescriptionFirst")}
               <br />
-              여기에서 바로 확인할 수 있어요.
+              {t("loginDescriptionSecond")}
             </>
           }
           action={{
             type: "link",
-            label: "로그인하기",
+            label: t("login"),
             href: getLoginRedirectPath(),
           }}
         />
       ) : query.isError ? (
         <FavoriteMoversSidebarStatus
-          title="불러오지 못했어요"
+          title={t("loadFailedTitle")}
           description={
             <>
-              찜한 기사님 목록을 가져오는 중
+              {t("loadFailedFirst")}
               <br />
-              문제가 발생했습니다.
+              {t("loadFailedSecond")}
             </>
           }
           action={{
             type: "button",
-            label: query.isFetching ? "다시 시도 중..." : "다시 시도",
+            label: query.isFetching ? t("retrying") : t("retry"),
             onClick: () => {
               void query.refetch();
             },
@@ -154,12 +156,12 @@ export function FavoriteMoversSidebar() {
         />
       ) : movers.length === 0 ? (
         <FavoriteMoversSidebarStatus
-          title="찜한 기사님이 없어요"
+          title={t("emptyTitle")}
           description={
             <>
-              마음에 드는 기사님을 찜하면
+              {t("sidebarEmptyFirst")}
               <br />
-              여기에서 바로 모아볼 수 있어요.
+              {t("sidebarEmptySecond")}
             </>
           }
         />

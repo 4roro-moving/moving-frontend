@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 
@@ -20,13 +22,12 @@ import {
 } from "@/lib/utils/residenceReviewSearchParams";
 import type { ResidenceReviewListSort } from "@/types/residenceReview";
 
-const ALL_OPTION = { value: RESIDENCE_REVIEW_ALL_VALUE, label: "전체" } as const;
+const ALL_OPTION_VALUE = RESIDENCE_REVIEW_ALL_VALUE;
 
 const REGION_FILTER_OPTIONS = [
-  ALL_OPTION,
+  { value: RESIDENCE_REVIEW_ALL_VALUE },
   ...REGION_OPTIONS.map((region) => ({
     value: String(region.value),
-    label: region.label,
   })),
 ];
 
@@ -35,6 +36,7 @@ interface ResidenceReviewFiltersProps {
 }
 
 const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
+  const t = useTranslations("residenceReview");
   const queryClient = useQueryClient();
   const {
     clearSearch,
@@ -79,8 +81,8 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
             onClear={clearSearch}
-            placeholder="텍스트를 입력해 주세요."
-            aria-label="거주 후기 검색"
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("searchAria")}
             className="w-full"
           />
         </form>
@@ -92,13 +94,13 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
             <div className="w-fit shrink-0 xl:w-160">
               <Select
                 key={`regionId-${filters.regionId}-${filterKey}`}
-                label="지역"
-                desc="지역"
+                label={t("region")}
+                desc={t("region")}
                 size="lg"
                 columns={2}
                 className="w-fit xl:w-full"
                 defaultValue={filters.regionId}
-                placeholderValue={ALL_OPTION.value}
+                placeholderValue={ALL_OPTION_VALUE}
                 onChange={(value) => replaceFilters({ regionId: value })}
               >
                 {REGION_FILTER_OPTIONS.map((option) => (
@@ -107,7 +109,9 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
                     value={option.value}
                     onPrefetch={() => prefetchList({ regionId: option.value })}
                   >
-                    {option.label}
+                    {option.value === RESIDENCE_REVIEW_ALL_VALUE
+                      ? t("all")
+                      : t(`regions.${option.value}`)}
                   </Select.Option>
                 ))}
               </Select>
@@ -115,12 +119,12 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
             <div className="w-fit shrink-0 xl:w-160">
               <Select
                 key={`rating-${filters.rating}-${filterKey}`}
-                label="별점"
-                desc="별점"
+                label={t("rating")}
+                desc={t("rating")}
                 size="lg"
                 className="w-fit xl:w-full"
                 defaultValue={filters.rating}
-                placeholderValue={ALL_OPTION.value}
+                placeholderValue={ALL_OPTION_VALUE}
                 onChange={(value) => replaceFilters({ rating: value })}
               >
                 {RESIDENCE_REVIEW_RATING_OPTIONS.map((option) => (
@@ -129,7 +133,9 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
                     value={option.value}
                     onPrefetch={() => prefetchList({ rating: option.value })}
                   >
-                    {option.label}
+                    {option.value === RESIDENCE_REVIEW_ALL_VALUE
+                      ? t("all")
+                      : t("ratingPoints", { rating: option.value })}
                   </Select.Option>
                 ))}
               </Select>
@@ -141,7 +147,7 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
             className="text-text-weak hover:text-text-muted shrink-0 transition-colors"
           >
             <Text as="span" variant={{ base: "md-medium", xl: "lg-medium" }}>
-              초기화
+              {t("reset")}
             </Text>
           </button>
         </div>
@@ -149,8 +155,8 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
         <div className="w-fit shrink-0">
           <Select
             key={`sort-${filters.sort}-${filterKey}`}
-            label="정렬"
-            desc="정렬"
+            label={t("sort")}
+            desc={t("sort")}
             variant="sort"
             className="w-fit"
             defaultValue={filters.sort}
@@ -162,7 +168,7 @@ const ResidenceReviewFilters = ({ filters }: ResidenceReviewFiltersProps) => {
                 value={option.value}
                 onPrefetch={() => prefetchList({ sort: option.value })}
               >
-                {option.label}
+                {option.value === "createdAt" ? t("sortNewest") : t("sortOldest")}
               </Select.Option>
             ))}
           </Select>

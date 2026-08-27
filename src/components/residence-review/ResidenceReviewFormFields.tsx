@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useId } from "react";
 import {
   Controller,
@@ -36,6 +38,7 @@ const ResidenceReviewFormFields = <T extends ResidenceReviewFormFieldValues>({
   contentError,
   isPending,
 }: ResidenceReviewFormFieldsProps<T>) => {
+  const t = useTranslations("residenceReview");
   const titleId = useId();
   const contentId = useId();
   const ratingLabelId = useId();
@@ -51,7 +54,7 @@ const ResidenceReviewFormFields = <T extends ResidenceReviewFormFieldValues>({
           variant={{ base: "lg-semibold", xl: "2lg-semibold" }}
           className="text-text-tertiary"
         >
-          평점을 선택해 주세요
+          {t("selectRating")}
         </Text>
         <Controller
           name={"rating" as FieldPath<T>}
@@ -62,7 +65,7 @@ const ResidenceReviewFormFields = <T extends ResidenceReviewFormFieldValues>({
               onChange={field.onChange}
               onBlur={field.onBlur}
               size="lg"
-              label="평점"
+              label={t("rating")}
               labelledBy={ratingLabelId}
               error={fieldState.error?.message}
               disabled={isPending}
@@ -71,25 +74,25 @@ const ResidenceReviewFormFields = <T extends ResidenceReviewFormFieldValues>({
         />
       </div>
 
-      <FormField label="제목을 입력해 주세요" labelFor={titleId} variant="compact">
+      <FormField label={t("titleLabel")} labelFor={titleId} variant="compact">
         <Input
           id={titleId}
           size="md"
           maxLength={RESIDENCE_REVIEW_TITLE_MAX_LENGTH}
           disabled={isPending}
-          placeholder="제목을 입력해주세요"
+          placeholder={t("titlePlaceholder")}
           error={titleError}
           {...register("title" as FieldPath<T>)}
         />
       </FormField>
 
-      <FormField label="상세 후기를 작성해 주세요" labelFor={contentId} variant="compact">
+      <FormField label={t("contentLabel")} labelFor={contentId} variant="compact">
         <div className="flex w-full flex-col gap-8">
           <Textarea
             id={contentId}
             maxLength={RESIDENCE_REVIEW_CONTENT_MAX_LENGTH}
             disabled={isPending}
-            placeholder={`최소 ${String(RESIDENCE_REVIEW_CONTENT_MIN_LENGTH)}자 이상 입력해주세요`}
+            placeholder={t("contentPlaceholder", { count: RESIDENCE_REVIEW_CONTENT_MIN_LENGTH })}
             error={contentError}
             className="h-160"
             {...register("content" as FieldPath<T>)}

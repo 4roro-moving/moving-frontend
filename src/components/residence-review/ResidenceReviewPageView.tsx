@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 
@@ -18,7 +20,7 @@ import { useDeleteResidenceReview } from "@/hooks/residence-review/useDeleteResi
 import { useResidenceReviewCreateAction } from "@/hooks/residence-review/useResidenceReviewCreateAction";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import type { AuthRole } from "@/lib/auth/role";
-import { RESIDENCE_REVIEW_WRITE_LOGIN_DESCRIPTION } from "@/lib/constants/residenceReview";
+
 import { getResidenceReviewDetailQueryOptions } from "@/lib/queryOptions/residenceReviews";
 import type { ResidenceReviewSearchParamsState } from "@/lib/utils/residenceReviewSearchParams";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -35,6 +37,7 @@ const ResidenceReviewPageView = ({
   initialRole = null,
   initialIsLogin = false,
 }: ResidenceReviewPageViewProps) => {
+  const t = useTranslations("residenceReview");
   const queryClient = useQueryClient();
   const { authScope, isAuthQueryReady } = useAuthQueryScope();
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
@@ -98,8 +101,8 @@ const ResidenceReviewPageView = ({
   }, []);
 
   const handleEditSuccess = useCallback(() => {
-    setToastMessage("거주 후기를 수정했습니다.");
-  }, []);
+    setToastMessage(t("editSuccess"));
+  }, [t]);
 
   const handleEditExitComplete = useCallback(() => {
     if (shouldRestoreDetailRef.current && selectedReview !== null) {
@@ -119,20 +122,18 @@ const ResidenceReviewPageView = ({
         setReviewToDelete(null);
         setIsDetailOpen(false);
         setSelectedReview(null);
-        setToastMessage("거주 후기를 삭제했습니다.");
+        setToastMessage(t("deleteSuccess"));
       },
       onError: (error) => {
-        setToastMessage(
-          getApiErrorMessage(error, "거주 후기를 삭제하지 못했습니다. 잠시 후 다시 시도해주세요."),
-        );
+        setToastMessage(getApiErrorMessage(error, t("deleteFailed")));
       },
     });
-  }, [deleteMutation, reviewToDelete]);
+  }, [deleteMutation, reviewToDelete, t]);
 
   return (
     <div className="bg-background-default flex w-full flex-col items-center">
       <Text as="h1" variant="2xl-bold" className="sr-only">
-        거주 후기
+        {t("pageTitle")}
       </Text>
 
       <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop mx-auto flex w-full flex-col gap-24 pt-24 pb-80 xl:px-0 xl:pt-32 xl:pb-120">
@@ -148,13 +149,13 @@ const ResidenceReviewPageView = ({
       <ResidenceReviewCreateModal
         open={isCreateOpen}
         onClose={closeCreate}
-        onSuccess={() => setToastMessage("거주 후기를 작성했습니다.")}
+        onSuccess={() => setToastMessage(t("createSuccess"))}
       />
 
       <LoginRequiredModal
         open={isLoginRequiredOpen}
         onClose={closeLoginRequired}
-        description={RESIDENCE_REVIEW_WRITE_LOGIN_DESCRIPTION}
+        description={t("loginRequiredDescription")}
       />
 
       <ResidenceReviewDetailModal

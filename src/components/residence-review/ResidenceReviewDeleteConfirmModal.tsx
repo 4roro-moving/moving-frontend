@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import AlertModal from "@/components/common/Modal/AlertModal";
 import Modal from "@/components/common/Modal/Modal";
 
@@ -16,14 +18,15 @@ const ResidenceReviewDeleteConfirmModal = ({
   onClose,
   onConfirm,
 }: ResidenceReviewDeleteConfirmModalProps) => {
+  const t = useTranslations("residenceReview");
   return (
     <AlertModal
       open={open}
       onClose={onClose}
       closeDisabled={isPending}
       size="sm"
-      title="후기 삭제"
-      description="작성한 거주 후기를 삭제할까요? 삭제하면 되돌릴 수 없습니다."
+      title={t("deleteTitle")}
+      description={t("deleteDescription")}
       actions={
         <div className="flex w-full flex-col-reverse gap-10 md:flex-row md:gap-12">
           <Modal.Button
@@ -35,7 +38,7 @@ const ResidenceReviewDeleteConfirmModal = ({
             onClick={onClose}
             className="md:flex-1"
           >
-            취소
+            {t("cancel")}
           </Modal.Button>
           <Modal.Button
             type="button"
@@ -46,7 +49,7 @@ const ResidenceReviewDeleteConfirmModal = ({
             onClick={onConfirm}
             className="md:flex-1"
           >
-            {isPending ? "삭제 중..." : "삭제"}
+            {isPending ? t("deleting") : t("delete")}
           </Modal.Button>
         </div>
       }

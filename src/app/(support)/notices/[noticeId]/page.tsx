@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -7,10 +8,10 @@ interface NoticeDetailPageProps {
   params: Promise<{ noticeId: string }>;
 }
 
-export const metadata: Metadata = {
-  title: "공지사항 상세 | 무빙",
-  description: "무빙 서비스의 공지사항 상세 내용을 확인할 수 있습니다.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("supportNotice");
+  return { title: t("metadata.detailTitle"), description: t("metadata.detailDescription") };
+}
 
 export default async function NoticeDetailPage({ params }: NoticeDetailPageProps) {
   const { noticeId } = await params;

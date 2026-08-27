@@ -1,3 +1,5 @@
+import { useFormatter, useTranslations } from "next-intl";
+
 import { Text } from "@/components/common/Text";
 import { cn } from "@/lib/utils/cn";
 import type { PricePredictionResponse } from "@/types/pricePrediction";
@@ -9,16 +11,16 @@ interface PricePredictionResultProps {
   error: Error | null;
 }
 
-function formatPrice(price: number) {
-  return `${price.toLocaleString("ko-KR")}원`;
-}
-
 export default function PricePredictionResult({
   prediction,
   isPending,
   isError,
   error,
 }: PricePredictionResultProps) {
+  const t = useTranslations("pricePrediction");
+  const format = useFormatter();
+  const formatPrice = (price: number) =>
+    format.number(price, { style: "currency", currency: "KRW", maximumFractionDigits: 0 });
   if (isPending) {
     return (
       <ResultContainer>
@@ -34,11 +36,11 @@ export default function PricePredictionResult({
 
           <div className="flex flex-col items-center gap-8 text-center">
             <Text as="p" variant="lg-semibold" className="text-text-primary">
-              예상 견적을 계산하고 있어요
+              {t("result.calculatingTitle")}
             </Text>
 
             <Text as="p" variant="md-regular" className="text-text-subtle">
-              입력한 조건과 비슷한 견적 사례를 찾고 있습니다.
+              {t("result.calculatingDescription")}
             </Text>
           </div>
         </div>
@@ -58,11 +60,11 @@ export default function PricePredictionResult({
 
           <div className="flex flex-col gap-8">
             <Text as="p" variant="lg-semibold" className="text-text-primary">
-              예상 견적을 불러오지 못했어요
+              {t("result.errorTitle")}
             </Text>
 
             <Text as="p" variant="md-regular" className="text-text-subtle">
-              {error?.message || "잠시 후 다시 시도해주세요."}
+              {error?.message || t("result.errorFallback")}
             </Text>
           </div>
         </div>
@@ -76,19 +78,17 @@ export default function PricePredictionResult({
         <div className="flex min-h-[360px] flex-col items-center justify-center gap-16 px-12 text-center">
           <div className="bg-background-brand-muted flex h-32 items-center rounded-full px-16">
             <Text as="span" variant="sm-semibold" className="text-text-brand">
-              AI 예상
+              {t("result.aiBadge")}
             </Text>
           </div>
 
           <div className="flex flex-col gap-8">
             <Text as="p" variant="lg-semibold" className="text-text-primary">
-              이사 조건을 입력해주세요
+              {t("result.emptyTitle")}
             </Text>
 
             <Text as="p" variant="md-regular" className="text-text-subtle">
-              입력한 조건과 비슷한 견적 사례를 분석해
-              <br className="hidden lg:block" />
-              예상 가격 범위를 알려드려요.
+              {t("result.emptyDescription")}
             </Text>
           </div>
         </div>
@@ -101,23 +101,24 @@ export default function PricePredictionResult({
       <div className="flex flex-col gap-28">
         <div className="bg-background-brand-muted flex h-32 w-fit items-center rounded-full px-16">
           <Text as="span" variant="sm-semibold" className="text-text-brand">
-            AI 예상
+            {t("result.aiBadge")}
           </Text>
         </div>
 
         <div className="flex flex-col gap-12">
           <Text as="h2" variant="xl-bold" className="text-text-primary">
-            예상 견적
+            {t("result.title")}
           </Text>
 
           <Text as="p" variant="3xl-bold" className="text-text-brand">
-            약 {formatPrice(prediction.estimatedPrice)}
+            {t("result.estimatedPrice", { price: formatPrice(prediction.estimatedPrice) })}
           </Text>
 
           <Text as="p" variant="md-medium" className="text-text-primary">
-            예상 범위 {formatPrice(prediction.priceRange.min)}
-            {" ~ "}
-            {formatPrice(prediction.priceRange.max)}
+            {t("result.priceRange", {
+              min: formatPrice(prediction.priceRange.min),
+              max: formatPrice(prediction.priceRange.max),
+            })}
           </Text>
         </div>
 
@@ -126,17 +127,17 @@ export default function PricePredictionResult({
         <div className="flex flex-col gap-16">
           <div className="flex items-center justify-between">
             <Text as="span" variant="md-medium" className="text-text-subtle">
-              참고한 유사 견적
+              {t("result.sampleLabel")}
             </Text>
 
             <Text as="span" variant="md-semibold" className="text-text-primary">
-              {prediction.sampleCount}건
+              {t("result.sampleCount", { count: prediction.sampleCount })}
             </Text>
           </div>
 
           <div className="bg-background-subtle rounded-12 flex flex-col gap-8 p-16">
             <Text as="p" variant="md-semibold" className="text-text-primary">
-              {getMoveTypeLabel(prediction.factors.moveType)}
+              {t(`moveTypes.${prediction.factors.moveType}`)}
             </Text>
 
             <Text as="p" variant="md-regular" className="text-text-secondary">
@@ -144,22 +145,28 @@ export default function PricePredictionResult({
             </Text>
 
             <Text as="p" variant="xs-regular" className="text-text-subtle">
-              {prediction.factors.distanceKm}km · {prediction.factors.houseSize}평 · 짐량{" "}
-              {getLoadAmountLabel(prediction.factors.loadAmount)}
+              {t("result.factorSummary", {
+                distance: prediction.factors.distanceKm,
+                size: prediction.factors.houseSize,
+                load: t(`loadAmounts.${prediction.factors.loadAmount}`),
+              })}
             </Text>
 
             <div className="flex flex-wrap gap-8 pt-4">
-              <ConditionChip active={prediction.factors.isWeekend}>주말</ConditionChip>
+              <ConditionChip active={prediction.factors.isWeekend}>
+                {t("result.weekend")}
+              </ConditionChip>
 
-              <ConditionChip active={prediction.factors.isPeakSeason}>성수기</ConditionChip>
+              <ConditionChip active={prediction.factors.isPeakSeason}>
+                {t("result.peakSeason")}
+              </ConditionChip>
             </div>
           </div>
         </div>
 
         <div className="rounded-12 bg-background-subtle p-16">
           <Text as="p" variant="xs-regular" className="text-text-subtle">
-            예상 견적은 유사한 이사 사례를 바탕으로 계산한 참고 금액입니다. 실제 견적은 기사님, 날짜
-            및 현장 조건에 따라 달라질 수 있어요.
+            {t("result.disclaimer")}
           </Text>
         </div>
       </div>
@@ -199,26 +206,4 @@ function ConditionChip({ active, children }: { active: boolean; children: React.
       </Text>
     </span>
   );
-}
-
-function getMoveTypeLabel(moveType: PricePredictionResponse["factors"]["moveType"]) {
-  switch (moveType) {
-    case "SMALL":
-      return "소형/원룸 이사";
-    case "HOME":
-      return "가정 이사";
-    case "OFFICE":
-      return "사무실 이사";
-  }
-}
-
-function getLoadAmountLabel(loadAmount: PricePredictionResponse["factors"]["loadAmount"]) {
-  switch (loadAmount) {
-    case "LOW":
-      return "적음";
-    case "MEDIUM":
-      return "보통";
-    case "HIGH":
-      return "많음";
-  }
 }

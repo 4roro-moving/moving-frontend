@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -6,10 +7,13 @@ import { EstimateRequestDetailSkeleton } from "@/components/estimate/requests/Es
 import EstimateRequestDetailView from "@/components/estimate/requests/EstimateRequestDetailView";
 import { parsePositiveIntId } from "@/lib/utils/parsePositiveIntId";
 
-export const metadata: Metadata = {
-  title: "견적 상세",
-  description: "이사 견적 상세 정보를 확인하세요.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("estimates");
+  return {
+    title: t("metadata.requestDetailTitle"),
+    description: t("metadata.requestDetailDescription"),
+  };
+}
 
 interface EstimateRequestDetailPageProps {
   params: Promise<{ estimateRequestId: string }>;

@@ -1,13 +1,14 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
 import CustomerAuthGate from "@/components/auth/CustomerAuthGate";
 import { ReceivedEstimatesLoadingSkeleton } from "@/components/estimate/EstimateLoadingSkeletons";
 import ReceivedEstimatesPageClient from "@/components/estimate/received/ReceivedEstimatesPageClient";
 
-export const metadata: Metadata = {
-  title: "받았던 견적",
-  description: "요청한 이사에 대해 받은 견적 목록을 확인하고 비교합니다.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("estimates");
+  return { title: t("metadata.receivedTitle"), description: t("metadata.receivedDescription") };
+}
 
 export default function ReceivedEstimatesPage() {
   return (

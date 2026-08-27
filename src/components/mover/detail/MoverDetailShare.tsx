@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import { shareKakaoMoverCustom, toKakaoShareImageUrl, toKakaoSharePath } from "@/lib/kakao/share";
@@ -38,7 +39,6 @@ interface MoverDetailShareProps {
   profileImageSrc: string;
 }
 
-const SHARE_TITLE = "나만 알기엔 아쉬운 기사님인가요?";
 const FACEBOOK_SHARE_UI_ENABLED = hasFacebookAppId();
 
 export default function MoverDetailShare({
@@ -47,6 +47,7 @@ export default function MoverDetailShare({
   onToastMessage,
   profileImageSrc,
 }: MoverDetailShareProps) {
+  const t = useTranslations("profile");
   const { busyAction, isBusy, shareCopy, shareFacebook } = usePageShare({ onToastMessage });
   const [isKakaoSharing, setIsKakaoSharing] = useState(false);
   const kakaoSharingRef = useRef(false);
@@ -75,11 +76,11 @@ export default function MoverDetailShare({
           ...kakaoShare,
           PATH,
         },
-        onMissingConfig: () => onToastMessage?.("카카오톡 공유 설정이 필요합니다."),
+        onMissingConfig: () => onToastMessage?.(t("shareKakaoConfigNeeded")),
         onError: (message) => onToastMessage?.(message),
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "카카오톡 공유에 실패했습니다.";
+      const message = error instanceof Error ? error.message : t("shareKakaoFailed");
       onToastMessage?.(message);
     } finally {
       kakaoSharingRef.current = false;
@@ -90,7 +91,7 @@ export default function MoverDetailShare({
   return (
     <section
       className="flex w-full flex-col gap-12 md:gap-22"
-      aria-label={SHARE_TITLE}
+      aria-label={t("moverDetailShareTitle")}
       aria-busy={isShareBusy}
     >
       <Text
@@ -98,13 +99,13 @@ export default function MoverDetailShare({
         variant={{ base: "lg-semibold", xl: "xl-semibold" }}
         className="text-text-secondary"
       >
-        {SHARE_TITLE}
+        {t("moverDetailShareTitle")}
       </Text>
 
       <div className="flex items-start gap-10 md:gap-16">
         <button
           type="button"
-          aria-label="링크 복사"
+          aria-label={t("copyLink")}
           aria-busy={busyAction === "copy"}
           disabled={isShareBusy}
           onClick={shareCopy}
@@ -119,7 +120,7 @@ export default function MoverDetailShare({
 
         <button
           type="button"
-          aria-label="카카오톡 공유"
+          aria-label={t("shareKakao")}
           aria-busy={isKakaoSharing}
           disabled={isShareBusy}
           onClick={() => void handleKakaoShare()}
@@ -134,10 +135,12 @@ export default function MoverDetailShare({
 
         <button
           type="button"
-          aria-label={FACEBOOK_SHARE_UI_ENABLED ? "페이스북 공유" : "페이스북 공유 (준비 중)"}
+          aria-label={
+            FACEBOOK_SHARE_UI_ENABLED ? t("shareFacebook") : t("shareFacebookUnavailable")
+          }
           aria-busy={busyAction === "facebook"}
           disabled={!FACEBOOK_SHARE_UI_ENABLED || isShareBusy}
-          title={FACEBOOK_SHARE_UI_ENABLED ? undefined : "준비 중"}
+          title={FACEBOOK_SHARE_UI_ENABLED ? undefined : t("comingSoon")}
           onClick={shareFacebook}
           className={cn(
             iconButtonClassName,

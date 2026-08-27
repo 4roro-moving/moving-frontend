@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -25,6 +27,7 @@ interface CancelDesignatedMoverVariables {
  * // 2026.08.07 정슬기 - [추가]
  */
 export function useCancelDesignatedMover(options?: UseCancelDesignatedMoverOptions) {
+  const t = useTranslations("estimates");
   const queryClient = useQueryClient();
   const onSuccessRef = useRef(options?.onSuccess);
   const onErrorRef = useRef(options?.onError);
@@ -60,7 +63,7 @@ export function useCancelDesignatedMover(options?: UseCancelDesignatedMoverOptio
       onSuccessRef.current?.(data);
     },
     onError: (error) => {
-      onErrorRef.current?.(getApiErrorMessage(error, "지정 견적 요청을 취소하지 못했습니다."));
+      onErrorRef.current?.(getApiErrorMessage(error, t("designatedCancelFailed")));
     },
   });
 }

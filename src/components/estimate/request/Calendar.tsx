@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -7,8 +8,6 @@ import { cn } from "@/lib/utils/cn";
 import { addMonths, getMonthMatrix, isBeforeDay, isSameDay, startOfDay } from "@/lib/utils/date";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "../icons";
-
-const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 interface CalendarProps {
   selected: Date;
@@ -19,6 +18,16 @@ interface CalendarProps {
 }
 
 export default function Calendar({ selected, onSelect, minDate, className }: CalendarProps) {
+  const t = useTranslations("estimateRequest");
+  const weekdays = [
+    t("weekdays.sun"),
+    t("weekdays.mon"),
+    t("weekdays.tue"),
+    t("weekdays.wed"),
+    t("weekdays.thu"),
+    t("weekdays.fri"),
+    t("weekdays.sat"),
+  ];
   const selectedMonthKey = selected.getFullYear() * 12 + selected.getMonth();
   const [viewMonth, setViewMonth] = useState<Date>(
     () => new Date(selected.getFullYear(), selected.getMonth(), 1),
@@ -50,18 +59,18 @@ export default function Calendar({ selected, onSelect, minDate, className }: Cal
           type="button"
           onClick={() => setViewMonth((m) => addMonths(m, -1))}
           disabled={isPrevDisabled}
-          aria-label="이전 달"
+          aria-label={t("previousMonth")}
           className="rounded-8 hover:bg-background-hover flex size-32 items-center justify-center disabled:pointer-events-none disabled:opacity-40"
         >
           <ChevronLeftIcon className="text-text-tertiary" />
         </button>
         <Text as="span" variant="lg-semibold" className="text-text-primary">
-          {viewMonth.getFullYear()}년 {viewMonth.getMonth() + 1}월
+          {t("monthTitle", { year: viewMonth.getFullYear(), month: viewMonth.getMonth() + 1 })}
         </Text>
         <button
           type="button"
           onClick={() => setViewMonth((m) => addMonths(m, 1))}
-          aria-label="다음 달"
+          aria-label={t("nextMonth")}
           className="rounded-8 hover:bg-background-hover flex size-32 items-center justify-center"
         >
           <ChevronRightIcon className="text-text-tertiary" />
@@ -70,7 +79,7 @@ export default function Calendar({ selected, onSelect, minDate, className }: Cal
 
       {/* 요일 */}
       <div className="grid shrink-0 grid-cols-7">
-        {WEEKDAYS.map((weekday) => (
+        {weekdays.map((weekday) => (
           <Text
             key={weekday}
             as="span"

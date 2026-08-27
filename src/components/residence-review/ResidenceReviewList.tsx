@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { type ReactNode } from "react";
 
 import EmptyState from "@/components/common/EmptyState/EmptyState";
@@ -21,15 +23,16 @@ interface ResidenceReviewListProps {
   onPrefetch?: (review: PublicResidenceReview) => void;
 }
 
-const EMPTY_DESCRIPTION = (
-  <>
-    검색 결과가 없어요.
-    <br />
-    다른 검색어나 필터로 다시 찾아보세요.
-  </>
-);
-
 const ResidenceReviewList = ({ filters, onSelect, onPrefetch }: ResidenceReviewListProps) => {
+  const t = useTranslations("residenceReview");
+  const tCommon = useTranslations("common");
+  const emptyDescription = (
+    <>
+      {tCommon("emptyState.noResultsTitle")}
+      <br />
+      {tCommon("emptyState.noResultsDescription")}
+    </>
+  );
   const { reviews, isInitialLoading, isFilterFetching, query } = useResidenceReviews(filters);
   const { hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage, refetch } = query;
 
@@ -48,11 +51,8 @@ const ResidenceReviewList = ({ filters, onSelect, onPrefetch }: ResidenceReviewL
   } else if (query.isError && reviews.length === 0) {
     content = (
       <EstimatesQueryStatus
-        message={getApiErrorMessage(
-          query.error,
-          "거주 후기 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
-        )}
-        actionLabel="다시 시도"
+        message={getApiErrorMessage(query.error, t("listLoadFailed"))}
+        actionLabel={t("retry")}
         onAction={() => {
           void refetch();
         }}
@@ -61,11 +61,7 @@ const ResidenceReviewList = ({ filters, onSelect, onPrefetch }: ResidenceReviewL
     );
   } else if (reviews.length === 0) {
     content = (
-      <EmptyState
-        size="sm"
-        imageSrc="/images/empty/character.png"
-        description={EMPTY_DESCRIPTION}
-      />
+      <EmptyState size="sm" imageSrc="/images/empty/character.png" description={emptyDescription} />
     );
   } else {
     content = (
@@ -75,7 +71,7 @@ const ResidenceReviewList = ({ filters, onSelect, onPrefetch }: ResidenceReviewL
       >
         {isFilterFetching ? (
           <span className="sr-only" role="status">
-            후기 목록을 불러오는 중이에요
+            {t("listLoading")}
           </span>
         ) : null}
         <ul className="flex flex-col gap-20">
@@ -99,7 +95,7 @@ const ResidenceReviewList = ({ filters, onSelect, onPrefetch }: ResidenceReviewL
               aria-hidden="true"
             />
             <Text as="p" variant="sm-medium" className="text-text-muted">
-              후기를 더 불러오는 중이에요
+              {t("loadMoreLoading")}
             </Text>
           </div>
         ) : null}
@@ -107,8 +103,8 @@ const ResidenceReviewList = ({ filters, onSelect, onPrefetch }: ResidenceReviewL
         {isFetchNextPageError && !isFetchingNextPage ? (
           <EstimatesQueryStatus
             className="py-24 md:py-32"
-            message="다음 후기를 불러오지 못했습니다."
-            actionLabel="다시 시도"
+            message={t("loadMoreFailed")}
+            actionLabel={t("retry")}
             onAction={() => {
               void fetchNextPage();
             }}

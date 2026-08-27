@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -43,6 +44,8 @@ export default function PendingEstimateCard({
   onConfirmError,
   onConfirmSuccess,
 }: PendingEstimateCardProps) {
+  const t = useTranslations("estimates");
+  const locale = useLocale();
   const { mover, status, isDesignated, price } = offer;
   const displayName = mover.nickname || mover.name;
   const intro = mover.shortIntro?.trim() || null;
@@ -59,10 +62,10 @@ export default function PendingEstimateCard({
   });
 
   const statusLabel = isConfirmedEstimate(status)
-    ? "확정견적"
+    ? t("detail.confirmedStatus")
     : isPendingEstimate(status)
-      ? "견적대기"
-      : "견적만료";
+      ? t("detail.waitingStatus")
+      : t("detail.expiredStatus");
 
   return (
     <article
@@ -122,7 +125,7 @@ export default function PendingEstimateCard({
                 {mover.imageUrl ? (
                   <Image
                     src={resolveMoverProfileImageSrc(mover.imageUrl)}
-                    alt={`${displayName} 기사님 프로필`}
+                    alt={t("received.profileAlt", { name: displayName })}
                     fill
                     sizes="50px"
                     className="object-cover"
@@ -143,7 +146,7 @@ export default function PendingEstimateCard({
                       variant="md-semibold"
                       className="text-text-primary truncate"
                     >
-                      {displayName} 기사님
+                      {t("detail.moverName", { name: displayName })}
                     </Text>
                   </div>
                   <FavoriteButton
@@ -163,31 +166,33 @@ export default function PendingEstimateCard({
                   <div className="flex items-center gap-2">
                     <StarIcon className="text-rating-fill size-20 shrink-0" />
                     <Text as="span" variant="sm-medium" className="text-text-secondary">
-                      <span className="sr-only">평점 </span>
+                      <span className="sr-only">{t("detail.rating")} </span>
                       {formatRating(mover.averageRating)}
-                      <span className="sr-only">점, 리뷰 </span>
+                      <span className="sr-only">{t("detail.pointsReviews")} </span>
                     </Text>
                     <Text as="span" variant="sm-medium" className="text-text-muted">
                       <span aria-hidden="true">({mover.reviewCount})</span>
-                      <span className="sr-only">{mover.reviewCount}개</span>
+                      <span className="sr-only">
+                        {t("detail.reviewCount", { count: mover.reviewCount })}
+                      </span>
                     </Text>
                   </div>
                   <span className="bg-border-muted h-14 w-px shrink-0" aria-hidden="true" />
                   <div className="flex items-center gap-4">
                     <Text as="span" variant="sm-medium" className="text-text-muted">
-                      경력
+                      {t("detail.career")}
                     </Text>
                     <Text as="span" variant="sm-medium" className="text-text-secondary">
-                      {mover.career}년
+                      {t("detail.careerYears", { count: mover.career })}
                     </Text>
                   </div>
                   <span className="bg-border-muted h-14 w-px shrink-0" aria-hidden="true" />
                   <div className="flex items-center gap-4">
                     <Text as="span" variant="sm-medium" className="text-text-secondary">
-                      {mover.confirmedCount}건
+                      {t("detail.confirmedCount", { count: mover.confirmedCount })}
                     </Text>
                     <Text as="span" variant="sm-medium" className="text-text-muted">
-                      확정
+                      {t("detail.confirmed")}
                     </Text>
                   </div>
                 </div>
@@ -199,16 +204,16 @@ export default function PendingEstimateCard({
         {/* Figma: price row h47(sm) / h52(lg) */}
         <div className="flex h-47 w-full items-end justify-between gap-24 md:h-52">
           <Text as="span" variant="md-medium" className="text-text-muted shrink-0 md:hidden">
-            견적 금액
+            {t("detail.price")}
           </Text>
           <Text as="span" variant="lg-medium" className="text-text-muted hidden shrink-0 md:inline">
-            견적 금액
+            {t("detail.price")}
           </Text>
           <Text as="p" variant="xl-bold" className="text-text-primary md:hidden">
-            {formatPrice(price)}
+            {formatPrice(price, locale)}
           </Text>
           <Text as="p" variant="2xl-bold" className="text-text-primary hidden md:block">
-            {formatPrice(price)}
+            {formatPrice(price, locale)}
           </Text>
         </div>
       </div>
@@ -225,7 +230,7 @@ export default function PendingEstimateCard({
           )}
         >
           <Text as="span" variant="lg-semibold">
-            상세보기
+            {t("detail.viewDetails")}
           </Text>
         </Link>
         <Button
@@ -238,7 +243,7 @@ export default function PendingEstimateCard({
           onClick={() => confirmMutation.mutate()}
           className="md:flex-1"
         >
-          {confirmMutation.isPending ? "확정 중..." : "견적 확정하기"}
+          {confirmMutation.isPending ? t("confirming") : t("confirmEstimate")}
         </Button>
       </div>
     </article>

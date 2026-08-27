@@ -2,9 +2,12 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import AccountSuspensionNotice from "@/components/auth/AccountSuspensionNotice";
 import AuthHeader from "@/components/auth/AuthHeader";
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import Button from "@/components/common/Button/Button";
@@ -15,9 +18,18 @@ import { Text, getTextVariantClass } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import { useLoginMutation } from "@/hooks/auth/useLoginMutation";
 import { resolveAuthUserImage } from "@/lib/api/profile";
-import { getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
+import {
+  getAccountSuspensionReason,
+  getLoginErrorMessage,
+  isAccountSuspended,
+  isSuspensionAppealAvailable,
+} from "@/lib/auth/getLoginErrorMessage";
 import { consumePasswordChangedToast } from "@/lib/auth/passwordChangedToast";
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
+import {
+  clearSuspensionAppealSession,
+  markSuspensionAppealSession,
+} from "@/lib/auth/suspensionAppealSession";
 import {
   audienceToLoginRole,
   getLoginRedirectParam,
@@ -35,10 +47,15 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
+  const t = useTranslations("auth");
+  const router = useRouter();
   const { mutateAsync: login, isPending } = useLoginMutation();
   const establishSession = useAuthStore((state) => state.establishSession);
   const setPostAuthRedirectPath = useAuthStore((state) => state.setPostAuthRedirectPath);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [suspensionReason, setSuspensionReason] = useState<string | null>(null);
+  const [isSuspended, setIsSuspended] = useState(false);
+  const [isAppealAvailable, setIsAppealAvailable] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const {
@@ -68,11 +85,15 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null);
+    setSuspensionReason(null);
+    setIsSuspended(false);
+    setIsAppealAvailable(false);
 
     try {
       const role = audienceToLoginRole(audience);
       const result = await login({ ...values, role });
 
+      clearSuspensionAppealSession();
       // 이전 계정 Soft UX 힌트 제거 후 status로 다시 저장
       clearProfileCompleted();
 
@@ -85,6 +106,9 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       setPostAuthRedirectPath(nextPath);
       establishSession(await resolveAuthUserImage(result.user));
     } catch (error) {
+      setSuspensionReason(getAccountSuspensionReason(error) ?? null);
+      setIsSuspended(isAccountSuspended(error));
+      setIsAppealAvailable(isSuspensionAppealAvailable(error));
       setSubmitError(getLoginErrorMessage(error, audience));
     }
   });
@@ -97,31 +121,43 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       <div className="flex w-full flex-col items-center gap-48 md:gap-24">
         <form className="flex w-full flex-col gap-32 md:gap-56" onSubmit={onSubmit} noValidate>
           <div className="flex w-full flex-col gap-16 md:gap-32">
-            <FormField label="이메일" labelFor="email" variant="auth">
+            <FormField label={t("email")} labelFor="email" variant="auth">
               <Input
                 id="email"
                 size="md"
                 type="email"
                 autoComplete="email"
-                placeholder="이메일을 입력해 주세요"
+                placeholder={t("emailPlaceholder")}
                 error={errors.email?.message}
                 {...register("email")}
               />
             </FormField>
 
-            <FormField label="비밀번호" labelFor="password" variant="auth">
+            <FormField label={t("password")} labelFor="password" variant="auth">
               <PasswordInput
                 id="password"
                 size="md"
                 autoComplete="current-password"
-                placeholder="비밀번호를 입력해 주세요"
+                placeholder={t("passwordPlaceholder")}
                 error={errors.password?.message}
                 {...register("password")}
               />
             </FormField>
           </div>
 
-          {submitError ? (
+          {isSuspended ? (
+            <AccountSuspensionNotice
+              reason={suspensionReason ?? t("suspensionReasonUnavailable")}
+              onAppealClick={
+                isAppealAvailable
+                  ? () => {
+                      markSuspensionAppealSession();
+                      router.push(APP_ROUTES.INQUIRIES.ROOT);
+                    }
+                  : undefined
+              }
+            />
+          ) : submitError ? (
             <Text as="p" variant="md-medium" className="text-text-error" role="alert">
               {submitError}
             </Text>
@@ -134,7 +170,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
             fullWidth
             disabled={!isValid || isSubmitting || isPending}
           >
-            로그인
+            {t("login")}
           </Button>
         </form>
 
@@ -144,7 +180,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
             variant={{ base: "xs-regular", md: "xl-regular" }}
             className="text-text-description"
           >
-            아직 무빙 회원이 아니신가요?
+            {t("notMember")}
           </Text>
           <Link
             href={signUpHref}
@@ -153,7 +189,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
               "text-text-brand",
             )}
           >
-            이메일로 회원가입하기
+            {t("signUpWithEmail")}
           </Link>
         </p>
       </div>
@@ -164,9 +200,24 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
           variant={{ base: "xs-regular", md: "xl-regular" }}
           className="text-text-description"
         >
-          SNS로 로그인
+          {t("socialLogin")}
         </Text>
-        <SocialLoginButtons audience={audience} intent="login" onError={setSubmitError} />
+        <SocialLoginButtons
+          audience={audience}
+          intent="login"
+          onError={(error) => {
+            if (typeof error === "string") {
+              setSuspensionReason(null);
+              setIsAppealAvailable(false);
+              setSubmitError(error);
+              return;
+            }
+
+            setSuspensionReason(getAccountSuspensionReason(error) ?? null);
+            setIsAppealAvailable(isSuspensionAppealAvailable(error));
+            setSubmitError(getLoginErrorMessage(error, audience));
+          }}
+        />
       </div>
     </div>
   );

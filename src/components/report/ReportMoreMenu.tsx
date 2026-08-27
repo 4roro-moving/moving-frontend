@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -22,14 +23,16 @@ export default function ReportMoreMenu({
   triggerSizeClassName = "size-32",
   triggerIconClassName = "text-[22px] leading-none",
   menuPositionClassName = "top-[calc(100%+8px)]",
-  reportLabel = (
-    <Text as="span" variant="sm-medium">
-      신고하기
-    </Text>
-  ),
+  reportLabel,
 }: ReportMoreMenuProps) {
+  const t = useTranslations("report");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useClickOutside<HTMLDivElement>(() => setIsOpen(false));
+  const resolvedReportLabel = reportLabel ?? (
+    <Text as="span" variant="sm-medium">
+      {t("reportAction")}
+    </Text>
+  );
 
   const handleReport = () => {
     setIsOpen(false);
@@ -81,7 +84,7 @@ export default function ReportMoreMenu({
             )}
           >
             <Image src="/icons/report.svg" alt="" width={18} height={18} aria-hidden="true" />
-            {reportLabel}
+            {resolvedReportLabel}
           </button>
         </div>
       ) : null}

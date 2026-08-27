@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
 import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
@@ -32,6 +33,7 @@ export function useMoverDesignation({
   moverServiceTypes,
   onError,
 }: UseMoverDesignationOptions) {
+  const t = useTranslations("profile");
   const router = useRouter();
 
   const [isEstimateRequestModalOpen, setIsEstimateRequestModalOpen] = useState(false);
@@ -76,11 +78,19 @@ export function useMoverDesignation({
     (isCustomerLoggedIn && isActiveError && isActiveFetching) ||
     (ctaState !== null && isDesignateCtaDisabled(ctaState.status));
 
-  const requestButtonLabel =
-    ctaState?.buttonLabel ??
-    (designateMutation.isPending || (isActiveError && isActiveFetching)
-      ? "요청 중..."
-      : "지정 견적 요청하기");
+  const designationButtonLabels = {
+    confirmed: t("designationCtaConfirmed"),
+    alreadyDesignated: t("designationCtaAlreadyDesignated"),
+    notEditable: t("designationCtaNotEditable"),
+    expired: t("designationCtaExpired"),
+    limitExceeded: t("designationCtaLimitExceeded"),
+    serviceTypeMismatch: t("designationCtaServiceTypeMismatch"),
+  };
+  const requestButtonLabel = ctaState?.buttonLabel
+    ? designationButtonLabels[ctaState.buttonLabel]
+    : designateMutation.isPending || (isActiveError && isActiveFetching)
+      ? t("designationPending")
+      : t("moverDetailEstimateRequest");
 
   const isActionsLoading =
     isAuthPending || (isCustomerLoggedIn && isActiveLoading) || isServiceTypesLoading;
@@ -91,7 +101,7 @@ export function useMoverDesignation({
     }
 
     if (!isAuthenticated) {
-      loginRequiredModal?.openLoginRequiredModal("지정 견적 요청은 로그인 후 이용할 수 있어요.");
+      loginRequiredModal?.openLoginRequiredModal(t("designationLoginRequired"));
       return;
     }
 
@@ -109,7 +119,7 @@ export function useMoverDesignation({
     if (isActiveError) {
       const result = await refetchActiveRequest();
       if (result.error) {
-        onError("견적 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
+        onError(t("designationLoadFailed"));
         return;
       }
       request = result.data ?? null;

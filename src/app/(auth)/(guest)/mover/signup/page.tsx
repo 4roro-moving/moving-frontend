@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import AuthLayout from "@/components/auth/AuthLayout";
 import SignUpForm from "@/components/auth/SignUpForm";
 
-export const metadata: Metadata = {
-  title: "기사님 회원가입 | 무빙",
-  description: "무빙 기사님 회원가입",
+export const generateMetadata = async (): Promise<Metadata> => {
+  const t = await getTranslations("auth");
+
+  return {
+    title: t("metadata.moverSignUpTitle"),
+    description: t("metadata.moverSignUpDescription"),
+  };
 };
 
 const MoverSignUpPage = () => {

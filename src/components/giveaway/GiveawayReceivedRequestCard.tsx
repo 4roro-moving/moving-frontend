@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import Button from "@/components/common/Button/Button";
@@ -8,15 +9,7 @@ import { Text } from "@/components/common/Text";
 import GiveawayRequestCardLayout from "@/components/giveaway/GiveawayRequestCardLayout";
 import ReportModal from "@/components/report/ReportModal";
 import ReportMoreMenu from "@/components/report/ReportMoreMenu";
-import {
-  GIVEAWAY_REJECT_BUTTON_LABEL,
-  GIVEAWAY_REQUEST_CONTENT_LABEL,
-  GIVEAWAY_REQUEST_EMPTY_MESSAGE,
-  GIVEAWAY_SHARE_BUTTON_LABEL,
-  canRejectGiveawayRequest,
-  canSelectGiveawayRequest,
-  getGiveawayRequestStatusLabel,
-} from "@/lib/constants/giveaway";
+import { canRejectGiveawayRequest, canSelectGiveawayRequest } from "@/lib/constants/giveaway";
 import type { GiveawayRequestItem, GiveawayStatus } from "@/types/giveaway";
 
 interface GiveawayReceivedRequestCardProps {
@@ -34,11 +27,12 @@ const GiveawayReceivedRequestCard = ({
   onSelect,
   onReject,
 }: GiveawayReceivedRequestCardProps) => {
+  const t = useTranslations("giveaway");
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const canSelect = canSelectGiveawayRequest(giveawayStatus, request.status);
   const canReject = canRejectGiveawayRequest(giveawayStatus, request.status);
-  const message = request.message?.trim() || GIVEAWAY_REQUEST_EMPTY_MESSAGE;
-  const statusLabel = getGiveawayRequestStatusLabel(request.status);
+  const message = request.message?.trim() || t("none");
+  const statusLabel = t(`requestStatusValues.${request.status}`);
   const titleId = `giveaway-request-${String(request.id)}-title`;
   const hasActions = canSelect || canReject;
 
@@ -60,7 +54,7 @@ const GiveawayReceivedRequestCard = ({
                   disabled={isActionPending}
                   onClick={() => onSelect(request)}
                 >
-                  {GIVEAWAY_SHARE_BUTTON_LABEL}
+                  {t("share")}
                 </Button>
               ) : null}
               {canReject ? (
@@ -72,7 +66,7 @@ const GiveawayReceivedRequestCard = ({
                   disabled={isActionPending}
                   onClick={() => onReject(request)}
                 >
-                  {GIVEAWAY_REJECT_BUTTON_LABEL}
+                  {t("reject")}
                 </Button>
               ) : null}
             </>
@@ -100,7 +94,7 @@ const GiveawayReceivedRequestCard = ({
                 variant={{ base: "xs-medium", md: "xs-medium" }}
                 className="text-text-muted"
               >
-                {GIVEAWAY_REQUEST_CONTENT_LABEL}
+                {t("requestContent")}
               </Text>
               <Text
                 as="p"
@@ -112,7 +106,7 @@ const GiveawayReceivedRequestCard = ({
             </div>
           </div>
           <ReportMoreMenu
-            ariaLabel={`${request.requester.name} 신청자 메뉴 더보기`}
+            ariaLabel={t("requesterMoreMenuAria", { name: request.requester.name })}
             onReport={() => setIsReportModalOpen(true)}
           />
         </div>
@@ -122,7 +116,7 @@ const GiveawayReceivedRequestCard = ({
         onClose={() => setIsReportModalOpen(false)}
         targetType="CUSTOMER"
         targetId={request.requester.id}
-        targetName={`${request.requester.name} 고객님`}
+        targetName={request.requester.name}
       />
     </>
   );

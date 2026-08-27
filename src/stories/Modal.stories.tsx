@@ -46,6 +46,27 @@ const BOTTOM_SHEET_SOURCE = `const [open, setOpen] = useState(false);
     </Modal.Button>
 </Modal>`;
 
+const NON_DISMISSIBLE_FORM_SOURCE = `const [open, setOpen] = useState(false);
+
+<Modal
+  open={open}
+  onClose={() => setOpen(false)}
+  presentation="responsive"
+  dismissible={false}
+  className="items-stretch gap-30 px-24 pt-32 pb-40 text-left xl:gap-40"
+>
+  <div className="flex items-center justify-between gap-12">
+    <Modal.Title>작성 모달 제목</Modal.Title>
+    <Modal.Close onClose={() => setOpen(false)} />
+  </div>
+
+  <Modal.Desc>작성·제출 모달은 배경 클릭과 Escape로 닫히지 않습니다.</Modal.Desc>
+
+  <Modal.Button fullWidth size="cta" onClick={() => setOpen(false)}>
+    작성 완료
+  </Modal.Button>
+</Modal>`;
+
 const meta = {
   title: "Overlay/Modal",
   component: Modal,
@@ -55,7 +76,7 @@ const meta = {
     docs: {
       description: {
         component: `
-\`Modal.Title\`, \`Modal.Desc\`, \`Modal.Close\`, \`Modal.Button\`을 조합해 사용하는 공통 모달입니다. 열려 있는 동안 배경 페이지의 스크롤을 막으며, 키보드 포커스를 모달 내부에 유지합니다. Escape 키나 바깥 영역을 눌러 닫을 수 있습니다.
+\`Modal.Title\`, \`Modal.Desc\`, \`Modal.Close\`, \`Modal.Button\`을 조합해 사용하는 공통 모달입니다. 열려 있는 동안 배경 페이지의 스크롤을 막으며, 키보드 포커스를 모달 내부에 유지합니다. 기본값은 Escape 키나 바깥 영역을 눌러 닫을 수 있으며, 작성·제출 모달은 \`dismissible={false}\`로 작성 내용 유실을 방지합니다.
   `,
       },
     },
@@ -102,7 +123,7 @@ const meta = {
     },
     onClose: {
       control: false,
-      description: "Escape 또는 오버레이 클릭 시 호출되는 닫기 핸들러",
+      description: "dismissible이 true일 때 Escape 또는 오버레이 클릭 시 호출되는 닫기 핸들러",
       table: { type: { summary: "() => void" } },
     },
     className: {
@@ -117,7 +138,8 @@ const meta = {
     },
     dismissible: {
       control: "boolean",
-      description: "Escape 키 또는 오버레이 클릭으로 모달을 닫을지 여부",
+      description:
+        "Escape 키 또는 오버레이 클릭으로 모달을 닫을지 여부. 작성·제출 모달은 작성 내용 유실 방지를 위해 false를 사용",
       table: { type: { summary: "boolean" }, defaultValue: { summary: "true" } },
     },
     "aria-label": {
@@ -183,6 +205,20 @@ export const BottomSheet: Story = {
         story: "화면 크기와 관계없이 하단에 붙고 전체 너비를 사용하는 바텀시트입니다.",
       },
       source: { code: BOTTOM_SHEET_SOURCE, language: "tsx" },
+    },
+  },
+  render: (args) => <ModalWithTrigger {...args} />,
+};
+
+export const NonDismissibleForm: Story = {
+  args: { dismissible: false },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "작성·제출 모달 예시입니다. 배경 클릭과 Escape로 닫히지 않으며, 닫기 버튼이나 완료 액션으로만 닫습니다.",
+      },
+      source: { code: NON_DISMISSIBLE_FORM_SOURCE, language: "tsx" },
     },
   },
   render: (args) => <ModalWithTrigger {...args} />,

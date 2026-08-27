@@ -1,9 +1,9 @@
 "use client";
 
+import { useFormatter, useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
-import { formatRelativeTime } from "@/lib/utils/date";
 import { cn } from "@/lib/utils/cn";
 import type { NotificationItem as NotificationItemType } from "@/types/notification";
 
@@ -26,9 +26,10 @@ interface NotificationItemProps {
 function getNotificationA11yLabel(
   notification: NotificationItemType,
   messageParts: NotificationMessagePart[],
+  unreadLabel: string,
 ): string {
   const message = messageParts.map((part) => part.text).join("");
-  return notification.isRead ? message : `${message}, 읽지 않음`;
+  return notification.isRead ? message : `${message}, ${unreadLabel}`;
 }
 
 function NotificationContent({
@@ -39,6 +40,9 @@ function NotificationContent({
   messageParts: NotificationMessagePart[];
 }) {
   const isRead = notification.isRead;
+  const format = useFormatter();
+  const createdAt = new Date(notification.createdAt);
+  const relativeTime = Number.isNaN(createdAt.getTime()) ? "" : format.relativeTime(createdAt);
 
   return (
     <>
@@ -57,7 +61,7 @@ function NotificationContent({
         </Text>
       </p>
       <Text as="p" variant="md-medium" className={isRead ? "text-text-weak" : "text-text-muted"}>
-        {formatRelativeTime(notification.createdAt)}
+        {relativeTime}
       </Text>
     </>
   );
@@ -70,8 +74,9 @@ export default function NotificationItem({
   onActivate,
   onNavigate,
 }: NotificationItemProps) {
-  const messageParts = buildNotificationMessageParts(notification.type, notification.content);
-  const a11yLabel = getNotificationA11yLabel(notification, messageParts);
+  const t = useTranslations("notifications");
+  const messageParts = buildNotificationMessageParts(notification.type, notification.content, t);
+  const a11yLabel = getNotificationA11yLabel(notification, messageParts, t("unread"));
 
   return (
     <li

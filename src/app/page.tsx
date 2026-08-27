@@ -1,11 +1,12 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
 import LandingPage from "@/components/landing/LandingPage";
 
-export const metadata: Metadata = {
-  title: "무빙",
-  description: "무빙은 여러 견적을 한눈에 비교해 이사업체 선정 과정을 간편하게 바꿔드려요",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("landing");
+  return { title: t("metadata.title"), description: t("metadata.description") };
+}
 
 /**
  * 홈(/) — 랜딩 (Desktop / Tablet / Mobile)

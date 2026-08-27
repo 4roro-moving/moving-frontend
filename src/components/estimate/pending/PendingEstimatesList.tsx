@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import EstimatesListEmptyState from "@/components/estimate/EstimatesListEmptyState";
 import PendingEstimateCard from "@/components/estimate/pending/PendingEstimateCard";
 import PendingEstimateRequestHeader from "@/components/estimate/pending/PendingEstimateRequestHeader";
@@ -23,10 +24,11 @@ export default function PendingEstimatesList({
   onConfirmError,
   onConfirmSuccess,
 }: PendingEstimatesListProps) {
+  const t = useTranslations("estimates");
   const waitingSections = sections.filter(isWaitingSection);
 
   if (waitingSections.length === 0) {
-    return <EstimatesListEmptyState description="대기 중인 견적이 없습니다." alignWithFilter />;
+    return <EstimatesListEmptyState description={t("pending.empty")} alignWithFilter />;
   }
 
   return (

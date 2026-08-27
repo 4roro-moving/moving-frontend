@@ -1,12 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 
 import { useUpdateResidenceReview } from "@/hooks/residence-review/useUpdateResidenceReview";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import {
-  residenceReviewEditSchema,
+  createResidenceReviewSchemas,
   type ResidenceReviewEditFormValues,
 } from "@/lib/schemas/residenceReviewSchema";
 import type { PublicResidenceReview, UpdateResidenceReviewInput } from "@/types/residenceReview";
@@ -38,6 +40,8 @@ export const useResidenceReviewEditForm = ({
   onSuccess,
   onError,
 }: UseResidenceReviewEditFormParams) => {
+  const t = useTranslations("residenceReview");
+  const { editSchema } = createResidenceReviewSchemas(t);
   const defaultValues = toDefaultValues(review);
   const updateMutation = useUpdateResidenceReview();
   const {
@@ -48,7 +52,7 @@ export const useResidenceReviewEditForm = ({
     handleSubmit,
     formState: { errors, isValid, isSubmitting, touchedFields },
   } = useForm<ResidenceReviewEditFormValues>({
-    resolver: zodResolver(residenceReviewEditSchema),
+    resolver: zodResolver(editSchema),
     mode: "onTouched",
     defaultValues,
   });
@@ -88,7 +92,7 @@ export const useResidenceReviewEditForm = ({
       onSuccess?.();
       onClose();
     } catch (error) {
-      const message = getApiErrorMessage(error, "거주 후기를 수정하지 못했습니다.");
+      const message = getApiErrorMessage(error, t("editFailed"));
       setError("root", { message });
       onError?.(message);
     }

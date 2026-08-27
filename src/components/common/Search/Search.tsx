@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { cva, type VariantProps } from "class-variance-authority";
 import { forwardRef, useState, type ComponentPropsWithoutRef } from "react";
 
@@ -33,9 +35,11 @@ export interface SearchProps
 }
 
 const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
-  { size, className, placeholder = "검색", value, onClear, ...props },
+  { size, className, placeholder, value, onClear, ...props },
   ref,
 ) {
+  const tr = useTranslations("common");
+  const resolvedPlaceholder = placeholder ?? tr("search.placeholder");
   const [isFocused, setIsFocused] = useState(false);
   const resolvedSize = size ?? "md";
   const hasValue = value.length > 0;
@@ -69,7 +73,7 @@ const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
         ref={ref}
         type="text"
         value={value}
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         className={cn(
           textVariantClass,
           "placeholder:text-text-placeholder min-w-0 flex-1 bg-transparent outline-none",
@@ -83,7 +87,7 @@ const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
               type="button"
               onMouseDown={(event) => event.preventDefault()}
               onClick={onClear}
-              aria-label="검색어 지우기"
+              aria-label={tr("search.clear")}
               className={cn(
                 "focus-visible:ring-border-brand flex shrink-0 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
                 iconSizeClass,
@@ -95,7 +99,7 @@ const Search = forwardRef<HTMLInputElement, SearchProps>(function Search(
           <button
             type="submit"
             onMouseDown={(event) => event.preventDefault()}
-            aria-label="검색"
+            aria-label={tr("search.submit")}
             className={cn(
               "focus-visible:ring-border-brand flex shrink-0 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
               iconSizeClass,

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
@@ -48,6 +49,8 @@ function RouteField({
 }
 
 export default function ReviewEstimateSummary({ item }: ReviewEstimateSummaryProps) {
+  const t = useTranslations("reviews");
+  const locale = useLocale();
   const { estimateRequest, mover } = item;
   const moverLabel = getReviewMoverDisplayName(mover);
 
@@ -85,7 +88,7 @@ export default function ReviewEstimateSummary({ item }: ReviewEstimateSummaryPro
             {mover.imageUrl ? (
               <Image
                 src={mover.imageUrl}
-                alt={`${moverLabel} 프로필`}
+                alt={t("moverProfileImageAlt", { name: moverLabel })}
                 fill
                 sizes="50px"
                 className="object-cover"
@@ -101,7 +104,7 @@ export default function ReviewEstimateSummary({ item }: ReviewEstimateSummaryPro
         <dl className="flex w-full items-end justify-between gap-12 xl:justify-start xl:gap-40">
           <div className="flex min-w-0 items-end gap-12">
             <RouteField
-              label="출발지"
+              label={t("fromAddress")}
               value={summarizeAddress(estimateRequest.fromAddress)}
               fullValue={estimateRequest.fromAddress}
             />
@@ -110,13 +113,16 @@ export default function ReviewEstimateSummary({ item }: ReviewEstimateSummaryPro
               <ArrowRightIcon size={16} className="hidden xl:block" />
             </span>
             <RouteField
-              label="도착지"
+              label={t("toAddress")}
               value={summarizeAddress(estimateRequest.toAddress)}
               fullValue={estimateRequest.toAddress}
             />
           </div>
 
-          <RouteField label="이사일" value={formatMoveDateLabelSafe(estimateRequest.moveDate)} />
+          <RouteField
+            label={t("moveDate")}
+            value={formatMoveDateLabelSafe(estimateRequest.moveDate, "-", locale)}
+          />
         </dl>
 
         <div className="bg-border-subtle h-px w-full" />

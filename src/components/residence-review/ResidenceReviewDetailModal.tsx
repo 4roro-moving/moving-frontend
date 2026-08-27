@@ -1,5 +1,8 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
+import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 
 import Button from "@/components/common/Button/Button";
@@ -15,9 +18,8 @@ import { useResidenceReviewDetail } from "@/hooks/residence-review/useResidenceR
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
 import { cn } from "@/lib/utils/cn";
-import { formatKoreanDateTime } from "@/lib/utils/date";
+
 import {
-  formatResidenceReviewAuthorName,
   formatResidenceReviewRating,
   isResidenceReviewOwner,
 } from "@/lib/utils/residenceReviewFormat";
@@ -43,9 +45,12 @@ const ResidenceReviewDetailModal = ({
   onDelete,
   onExitComplete,
 }: ResidenceReviewDetailModalProps) => {
+  const t = useTranslations("residenceReview");
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const format = useFormatter();
 
   const userId = useAuthStore((state) => state.user?.id);
+  const userRole = useAuthStore((state) => state.user?.role);
 
   const { data, isError, error, refetch, isFetching } = useResidenceReviewDetail({
     residenceReviewId: review?.id ?? null,
@@ -61,12 +66,19 @@ const ResidenceReviewDetailModal = ({
 
   const isOwner = isAuthenticated && isResidenceReviewOwner(currentReview, userId);
 
-  const showReport = isAuthenticated && !isOwner;
+  // MOVER는 거주후기 기능을 사용하지 않으므로 신고 UI를 노출하지 않는다.
+  const showReport = isAuthenticated && !isOwner && userRole === "CUSTOMER";
 
   let writtenDate = "";
 
   try {
-    writtenDate = formatKoreanDateTime(currentReview.createdAt);
+    writtenDate = format.dateTime(new Date(currentReview.createdAt), {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   } catch {
     writtenDate = "";
   }
@@ -87,7 +99,7 @@ const ResidenceReviewDetailModal = ({
         className={cn(RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME, "gap-24 xl:gap-32")}
       >
         <div className="flex w-full items-start justify-between gap-12">
-          <Modal.Title>후기 상세</Modal.Title>
+          <Modal.Title>{t("detailTitle")}</Modal.Title>
 
           <Modal.Close onClose={handleDetailClose} />
         </div>
@@ -96,7 +108,7 @@ const ResidenceReviewDetailModal = ({
           <EstimatesQueryStatus
             className="py-40"
             message={getApiErrorMessage(error, ERROR_CODES.RESIDENCE_REVIEW_NOT_FOUND.message)}
-            actionLabel="다시 시도"
+            actionLabel={t("retry")}
             actionBusy={isFetching}
             onAction={() => {
               void refetch();
@@ -124,7 +136,7 @@ const ResidenceReviewDetailModal = ({
                   }}
                   className="text-text-primary"
                 >
-                  {formatResidenceReviewAuthorName(currentReview.author.name)}
+                  {currentReview.author.name.trim() || t("customer")}
                 </Text>
 
                 <div className="flex items-center gap-12">
@@ -136,7 +148,7 @@ const ResidenceReviewDetailModal = ({
 
                   {showReport ? (
                     <ReportMoreMenu
-                      ariaLabel="더보기"
+                      ariaLabel={t("more")}
                       onReport={() => setIsReportModalOpen(true)}
                     />
                   ) : null}
@@ -146,8 +158,8 @@ const ResidenceReviewDetailModal = ({
               <div className="border-border-subtle border-y py-16">
                 <dl className="flex w-full items-start gap-16">
                   <ResidenceReviewInfoItem
-                    label="후기 지역"
-                    value={currentReview.region.name}
+                    label={t("reviewRegion")}
+                    value={t(`regions.${String(currentReview.region.id)}`)}
                     labelVariant={{
                       base: "xs-regular",
                       xl: "md-regular",
@@ -160,7 +172,7 @@ const ResidenceReviewDetailModal = ({
                   />
 
                   <ResidenceReviewInfoItem
-                    label="지역 평점"
+                    label={t("regionRating")}
                     value={formatResidenceReviewRating(currentReview.region.averageRating)}
                     labelVariant={{
                       base: "xs-regular",
@@ -174,7 +186,7 @@ const ResidenceReviewDetailModal = ({
                   />
 
                   <ResidenceReviewInfoItem
-                    label="작성일"
+                    label={t("writtenDate")}
                     value={writtenDate}
                     labelVariant={{
                       base: "xs-regular",
@@ -198,7 +210,7 @@ const ResidenceReviewDetailModal = ({
                   }}
                   className="text-text-primary"
                 >
-                  {currentReview.title}
+                  <AutoTranslatedText text={currentReview.title} />
                 </Text>
 
                 <Text
@@ -209,7 +221,7 @@ const ResidenceReviewDetailModal = ({
                   }}
                   className="text-text-secondary whitespace-pre-wrap"
                 >
-                  {currentReview.content}
+                  <AutoTranslatedText text={currentReview.content} />
                 </Text>
               </div>
             </div>
@@ -223,7 +235,7 @@ const ResidenceReviewDetailModal = ({
                   fullWidth
                   onClick={() => onEdit(currentReview)}
                 >
-                  수정
+                  {t("edit")}
                 </Button>
 
                 <Button
@@ -233,7 +245,7 @@ const ResidenceReviewDetailModal = ({
                   fullWidth
                   onClick={() => onDelete(currentReview)}
                 >
-                  삭제
+                  {t("delete")}
                 </Button>
               </div>
             ) : null}

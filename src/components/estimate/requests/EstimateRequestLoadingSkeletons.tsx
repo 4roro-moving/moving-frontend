@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import EstimateDetailLayout, {
   ESTIMATE_DETAIL_LAYOUT_CLASSES,
@@ -59,11 +60,13 @@ export function EstimateRequestListSkeleton({
   count = 3,
   showFilter = false,
 }: EstimateRequestListSkeletonProps) {
+  const t = useTranslations("estimates");
+
   return (
     <div
       className="px-margin-mobile md:px-margin-tablet max-w-container-desktop-narrow mx-auto flex w-full flex-col gap-24 md:gap-40 xl:px-0"
       role="status"
-      aria-label="보낸 견적 요청을 불러오는 중"
+      aria-label={t("requests.loading")}
     >
       {showFilter ? (
         <div className="flex w-full justify-start" aria-hidden="true">
@@ -79,7 +82,7 @@ export function EstimateRequestListSkeleton({
         ))}
       </ul>
 
-      <span className="sr-only">보낸 견적 요청을 불러오는 중입니다.</span>
+      <span className="sr-only">{t("requests.loading")}</span>
     </div>
   );
 }
@@ -117,10 +120,11 @@ function EstimateRequestDetailMainSkeleton() {
 
 /** 보낸 견적 요청 상세 최초 로딩 Skeleton */
 export function EstimateRequestDetailSkeleton() {
+  const t = useTranslations("estimates");
   return (
-    <div role="status" aria-label="견적 요청 상세를 불러오는 중">
+    <div role="status" aria-label={t("requests.detailLoading")}>
       <EstimateDetailLayout
-        title="견적 상세"
+        title={t("detail.title")}
         showProfile={false}
         backFallbackHref={APP_ROUTES.ESTIMATES.REQUESTS}
         contentClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.contentClassName}
@@ -128,7 +132,7 @@ export function EstimateRequestDetailSkeleton() {
         mainClassName={ESTIMATE_DETAIL_LAYOUT_CLASSES.mainClassName}
         main={<EstimateRequestDetailMainSkeleton />}
       />
-      <span className="sr-only">견적 요청 상세를 불러오는 중입니다.</span>
+      <span className="sr-only">{t("requests.detailLoading")}</span>
     </div>
   );
 }

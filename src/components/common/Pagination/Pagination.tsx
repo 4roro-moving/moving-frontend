@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useState, useSyncExternalStore } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -144,6 +146,7 @@ const Pagination = ({
   onPagePrefetch,
   className,
 }: PaginationProps) => {
+  const tr = useTranslations("common");
   const isLg = useSyncExternalStore(subscribeToXl, getXlSnapshot, getServerSnapshot);
 
   const [openEllipsisIndex, setOpenEllipsisIndex] = useState<number | null>(null);
@@ -181,7 +184,7 @@ const Pagination = ({
   );
 
   return (
-    <nav aria-label="페이지네이션" className={className}>
+    <nav aria-label={tr("pagination.aria")} className={className}>
       <div
         ref={containerRef}
         className={cn("flex items-center justify-center", isLg ? "gap-10" : "gap-8")}
@@ -196,7 +199,7 @@ const Pagination = ({
           onPointerEnter={() => prefetchPage(currentPage - 1)}
           onFocus={() => prefetchPage(currentPage - 1)}
           disabled={isPrevDisabled}
-          aria-label="이전 페이지"
+          aria-label={tr("pagination.previous")}
         >
           <ChevronLeftIcon className="size-24" />
         </button>
@@ -229,7 +232,7 @@ const Pagination = ({
                   onPointerEnter={() => prefetchPage(item.page)}
                   onFocus={() => prefetchPage(item.page)}
                   disabled={item.page === currentPage}
-                  aria-label={`${item.page} 페이지`}
+                  aria-label={tr("pagination.page", { page: item.page })}
                   aria-current={item.page === currentPage ? "page" : undefined}
                 >
                   <Text
@@ -261,7 +264,7 @@ const Pagination = ({
           onPointerEnter={() => prefetchPage(currentPage + 1)}
           onFocus={() => prefetchPage(currentPage + 1)}
           disabled={isNextDisabled}
-          aria-label="다음 페이지"
+          aria-label={tr("pagination.next")}
         >
           <ChevronRightIcon className="size-24" />
         </button>

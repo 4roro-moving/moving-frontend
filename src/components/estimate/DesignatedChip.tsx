@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import { Text } from "@/components/common/Text";
 import {
   iconChipVariants,
@@ -13,13 +17,14 @@ interface DesignatedChipProps {
 }
 
 export default function DesignatedChip({ size = "md", className }: DesignatedChipProps) {
+  const t = useTranslations("estimates");
   const chipSize = size ?? "md";
 
   return (
     <span className={cn("bg-red-100", iconChipVariants({ size: chipSize }), className)}>
       <DocumentIcon className="size-20 shrink-0 text-red-200" />
       <Text as="span" variant={ICON_CHIP_TEXT_VARIANT[chipSize]} className="text-red-200">
-        지정 견적 요청
+        {t("mover.designated")}
       </Text>
     </span>
   );

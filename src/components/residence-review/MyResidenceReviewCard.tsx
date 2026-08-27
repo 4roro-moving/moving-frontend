@@ -1,10 +1,13 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
+import { useFormatter, useTranslations } from "next-intl";
+
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
 import ResidenceReviewInfoItem from "@/components/residence-review/ResidenceReviewInfoItem";
 import ResidenceReviewRatingText from "@/components/residence-review/ResidenceReviewRatingText";
-import { formatKoreanDateTime } from "@/lib/utils/date";
 import { formatResidenceReviewRating } from "@/lib/utils/residenceReviewFormat";
 import type { PublicResidenceReview } from "@/types/residenceReview";
 
@@ -21,11 +24,19 @@ const InfoDivider = () => {
 };
 
 const MyResidenceReviewCard = ({ review, onEdit, onDelete }: MyResidenceReviewCardProps) => {
+  const t = useTranslations("residenceReview");
+  const format = useFormatter();
   const titleId = `my-residence-review-${String(review.id)}-title`;
   let writtenDate = "";
 
   try {
-    writtenDate = formatKoreanDateTime(review.createdAt);
+    writtenDate = format.dateTime(new Date(review.createdAt), {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   } catch {
     writtenDate = "";
   }
@@ -45,36 +56,43 @@ const MyResidenceReviewCard = ({ review, onEdit, onDelete }: MyResidenceReviewCa
               variant={{ base: "lg-semibold", md: "2lg-bold" }}
               className="text-text-primary line-clamp-1"
             >
-              {review.title}
+              <AutoTranslatedText text={review.title} />
             </Text>
             <Text as="p" variant="md-regular" className="text-text-muted line-clamp-1">
-              {review.content}
+              <AutoTranslatedText text={review.content} />
             </Text>
           </div>
         </div>
 
         <dl className="flex w-full flex-col gap-16 md:flex-row md:items-center md:gap-20">
           <div className="flex items-start gap-16 md:items-center md:gap-20">
-            <ResidenceReviewInfoItem label="후기 지역" value={review.region.name} />
+            <ResidenceReviewInfoItem
+              label={t("reviewRegion")}
+              value={t(`regions.${String(review.region.id)}`)}
+            />
             <InfoDivider />
             <ResidenceReviewInfoItem
-              label="지역 평균"
+              label={t("regionAverage")}
               value={formatResidenceReviewRating(review.region.averageRating)}
             />
             <InfoDivider />
             <ResidenceReviewInfoItem
-              label="작성일"
+              label={t("writtenDate")}
               value={writtenDate}
               className="hidden md:flex"
             />
           </div>
-          <ResidenceReviewInfoItem label="작성일" value={writtenDate} className="md:hidden" />
+          <ResidenceReviewInfoItem
+            label={t("writtenDate")}
+            value={writtenDate}
+            className="md:hidden"
+          />
         </dl>
       </div>
 
       <div className="flex w-full flex-col gap-8 md:flex-row md:gap-12 xl:w-160 xl:shrink-0 xl:flex-col xl:gap-8">
         <Button type="button" variant="solid" size="cta" fullWidth onClick={() => onEdit(review)}>
-          수정하기
+          {t("edit")}
         </Button>
         <Button
           type="button"
@@ -83,7 +101,7 @@ const MyResidenceReviewCard = ({ review, onEdit, onDelete }: MyResidenceReviewCa
           fullWidth
           onClick={() => onDelete(review)}
         >
-          삭제하기
+          {t("delete")}
         </Button>
       </div>
     </article>

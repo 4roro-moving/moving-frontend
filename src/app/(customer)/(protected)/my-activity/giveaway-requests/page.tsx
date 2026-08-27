@@ -1,12 +1,13 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
 import MyGiveawayRequestPageView from "@/components/giveaway/MyGiveawayRequestPageView";
 import { parseGiveawayRequestSearchParams } from "@/lib/utils/giveawayRequestSearchParams";
 
-export const metadata: Metadata = {
-  title: "나눔 신청 내역",
-  description: "내가 신청한 나눔 글을 확인할 수 있습니다.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("giveaway");
+  return { title: t("metadata.myRequestsTitle"), description: t("metadata.myRequestsDescription") };
+}
 
 interface MyGiveawayRequestPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

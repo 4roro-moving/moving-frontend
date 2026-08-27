@@ -1,15 +1,10 @@
+import { useTranslations } from "next-intl";
 import type { MouseEvent } from "react";
 
 import Button from "@/components/common/Button/Button";
 import {
-  GIVEAWAY_APPLY_BUTTON_LABEL,
-  GIVEAWAY_COMPLETE_BUTTON_LABEL,
-  GIVEAWAY_DELETE_BUTTON_LABEL,
-  GIVEAWAY_EDIT_BUTTON_LABEL,
   GIVEAWAY_MY_REQUEST_SECTION_ID,
   GIVEAWAY_MY_REQUEST_TITLE_ID,
-  GIVEAWAY_THUMBNAIL_OVERLAY_LABEL,
-  GIVEAWAY_VIEW_MY_REQUEST_BUTTON_LABEL,
   canCompleteGiveaway,
   canDeleteGiveaway,
   canEditGiveaway,
@@ -56,15 +51,17 @@ const GiveawayDetailActions = ({
   onComplete,
   onApply,
 }: GiveawayDetailActionsProps) => {
+  const t = useTranslations("giveaway");
+
   if (isAuthor) {
     if (canEditGiveaway(status) && canDeleteGiveaway(status)) {
       return (
         <div className="flex w-full gap-10">
           <Button type="button" variant="solid" size="cta" fullWidth onClick={onEdit}>
-            {GIVEAWAY_EDIT_BUTTON_LABEL}
+            {t("edit")}
           </Button>
           <Button type="button" variant="outline" size="cta" fullWidth onClick={onDelete}>
-            {GIVEAWAY_DELETE_BUTTON_LABEL}
+            {t("delete")}
           </Button>
         </div>
       );
@@ -80,7 +77,7 @@ const GiveawayDetailActions = ({
           disabled={isCompletePending}
           onClick={onComplete}
         >
-          {isCompletePending ? "완료 중..." : GIVEAWAY_COMPLETE_BUTTON_LABEL}
+          {isCompletePending ? t("completing") : t("complete")}
         </Button>
       );
     }
@@ -88,7 +85,7 @@ const GiveawayDetailActions = ({
     if (status === GIVEAWAY_STATUS.COMPLETED) {
       return (
         <Button type="button" variant="solid" size="cta" fullWidth disabled>
-          {GIVEAWAY_THUMBNAIL_OVERLAY_LABEL.COMPLETED}
+          {t("statusCompleted")}
         </Button>
       );
     }
@@ -99,7 +96,7 @@ const GiveawayDetailActions = ({
   if (status === GIVEAWAY_STATUS.COMPLETED) {
     return (
       <Button type="button" variant="solid" size="cta" fullWidth disabled>
-        {GIVEAWAY_THUMBNAIL_OVERLAY_LABEL.COMPLETED}
+        {t("statusCompleted")}
       </Button>
     );
   }
@@ -113,7 +110,7 @@ const GiveawayDetailActions = ({
         fullWidth
         onClick={handleViewMyRequestClick}
       >
-        {GIVEAWAY_VIEW_MY_REQUEST_BUTTON_LABEL}
+        {t("viewMyRequest")}
       </Button>
     );
   }
@@ -121,7 +118,7 @@ const GiveawayDetailActions = ({
   if (status === GIVEAWAY_STATUS.IN_PROGRESS) {
     return (
       <Button type="button" variant="solid" size="cta" fullWidth disabled>
-        {GIVEAWAY_THUMBNAIL_OVERLAY_LABEL.IN_PROGRESS}
+        {t("statusInProgress")}
       </Button>
     );
   }
@@ -129,7 +126,7 @@ const GiveawayDetailActions = ({
   if (canRequest) {
     return (
       <Button type="button" variant="solid" size="cta" fullWidth onClick={onApply}>
-        {GIVEAWAY_APPLY_BUTTON_LABEL}
+        {t("apply")}
       </Button>
     );
   }

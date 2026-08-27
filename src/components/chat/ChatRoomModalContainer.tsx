@@ -1,5 +1,8 @@
 "use client";
 
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+
+import { useFormatter, useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, type ChangeEvent } from "react";
 
@@ -12,7 +15,6 @@ import {
   useConnectedChatRoomModalController,
 } from "@/hooks/useChatRoomModalController";
 import { cn } from "@/lib/utils/cn";
-import { formatKoreanDateTime } from "@/lib/utils/date";
 import { CHAT_IMAGE_CONTENT_TYPES } from "@/types/chat";
 import type { ChatActionItem, ChatParticipantRole } from "@/components/chat/ChatActionSheet";
 import type { ChatEstimateEditConfig } from "@/components/chat/ChatRoomModal";
@@ -54,42 +56,6 @@ interface ChatMessageListProps {
   onRespondEstimateRevision: (revisionId: number, response: "APPROVED" | "REJECTED") => void;
 }
 
-function formatMessageTime(createdAt: string): string {
-  const date = new Date(createdAt);
-
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
-
-  return new Intl.DateTimeFormat("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Seoul",
-  }).format(date);
-}
-
-function formatRevisionMoveDate(moveDate: string): string {
-  try {
-    return formatKoreanDateTime(moveDate);
-  } catch {
-    return "-";
-  }
-}
-
-function getRevisionStatusLabel(status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELED") {
-  switch (status) {
-    case "PENDING":
-      return "응답 대기 중";
-    case "APPROVED":
-      return "승인됨";
-    case "REJECTED":
-      return "거절됨";
-    case "CANCELED":
-      return "취소됨";
-  }
-}
-
 function ChatMessageList({
   messages,
   participantRole,
@@ -100,12 +66,31 @@ function ChatMessageList({
   isActionPending,
   onRespondEstimateRevision,
 }: ChatMessageListProps) {
+  const t = useTranslations("chat.messages");
+  const format = useFormatter();
+  const formatMessageTime = (createdAt: string) => {
+    const date = new Date(createdAt);
+    return Number.isNaN(date.getTime())
+      ? ""
+      : format.dateTime(date, { hour: "2-digit", minute: "2-digit" });
+  };
+  const formatRevisionMoveDate = (moveDate: string) => {
+    const date = new Date(moveDate);
+    return Number.isNaN(date.getTime())
+      ? "-"
+      : format.dateTime(date, {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+  };
+  const formatPrice = (price: number) => format.number(price);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const latestMessageId = messages.at(-1)?.id ?? null;
-  const previousMessagesButtonLabel = isFetchingNextPage
-    ? "이전 메시지 불러오는 중"
-    : "이전 메시지 더보기";
+  const previousMessagesButtonLabel = isFetchingNextPage ? t("loadingPrevious") : t("loadPrevious");
 
   useEffect(() => {
     if (latestMessageId === null) {
@@ -129,7 +114,7 @@ function ChatMessageList({
     return (
       <div className="flex h-full items-center justify-center">
         <Text variant="lg-medium" className="text-text-muted">
-          대화 내역을 불러오는 중입니다.
+          {t("loading")}
         </Text>
       </div>
     );
@@ -139,7 +124,7 @@ function ChatMessageList({
     return (
       <div className="flex h-full items-center justify-center">
         <Text variant="lg-medium" className="text-text-muted">
-          대화 내역이 없습니다.
+          {t("empty")}
         </Text>
       </div>
     );
@@ -149,7 +134,7 @@ function ChatMessageList({
     <div
       ref={scrollContainerRef}
       role="region"
-      aria-label="채팅 메시지 목록"
+      aria-label={t("listAria")}
       tabIndex={0}
       className={cn(
         "h-full min-h-0 overflow-y-auto",
@@ -185,7 +170,7 @@ function ChatMessageList({
                     variant="sm-medium"
                     className="bg-background-subtle text-text-muted rounded-12 px-12 py-8 text-center"
                   >
-                    {message.content}
+                    <AutoTranslatedText text={message.content} />
                   </Text>
                 </div>
               );
@@ -207,7 +192,7 @@ function ChatMessageList({
               >
                 {!isMine ? (
                   <Text variant="sm-medium" className="text-text-muted">
-                    {sender?.name ?? "무빙"}
+                    {sender?.name ?? t("serviceName")}
                   </Text>
                 ) : null}
                 <div
@@ -225,22 +210,22 @@ function ChatMessageList({
                         variant="md-semibold"
                         className={isMine ? "text-text-inverse" : "text-text-primary"}
                       >
-                        견적 수정 요청
+                        {t("revisionRequest")}
                       </Text>
                       <div className="flex flex-col gap-6">
                         <Text
                           variant="sm-medium"
                           className={isMine ? "text-text-inverse" : "text-text-secondary"}
                         >
-                          이사일 {formatRevisionMoveDate(revision.previousMoveDate)} →{" "}
+                          {t("moveDate")} {formatRevisionMoveDate(revision.previousMoveDate)} →{" "}
                           {formatRevisionMoveDate(revision.requestedMoveDate)}
                         </Text>
                         <Text
                           variant="sm-medium"
                           className={isMine ? "text-text-inverse" : "text-text-secondary"}
                         >
-                          견적가 {revision.previousPrice.toLocaleString("ko-KR")}원 →{" "}
-                          {revision.requestedPrice.toLocaleString("ko-KR")}원
+                          {t("price")} {formatPrice(revision.previousPrice)} →{" "}
+                          {formatPrice(revision.requestedPrice)}
                         </Text>
                         <Text
                           as="p"
@@ -266,7 +251,7 @@ function ChatMessageList({
                             disabled={isActionPending}
                             onClick={() => onRespondEstimateRevision(revision.id, "REJECTED")}
                           >
-                            <Text variant="sm-semibold">거절</Text>
+                            <Text variant="sm-semibold">{t("reject")}</Text>
                           </button>
                           <button
                             type="button"
@@ -278,7 +263,7 @@ function ChatMessageList({
                             disabled={isActionPending}
                             onClick={() => onRespondEstimateRevision(revision.id, "APPROVED")}
                           >
-                            <Text variant="sm-semibold">승인</Text>
+                            <Text variant="sm-semibold">{t("approve")}</Text>
                           </button>
                         </div>
                       ) : (
@@ -286,14 +271,14 @@ function ChatMessageList({
                           variant="xs-medium"
                           className={isMine ? "text-text-inverse" : "text-text-muted"}
                         >
-                          {getRevisionStatusLabel(revision.status)}
+                          {t(`revisionStatus.${revision.status}`)}
                         </Text>
                       )}
                     </div>
                   ) : message.type === "IMAGE" && message.imageUrl ? (
                     <Image
                       src={message.imageUrl}
-                      alt="첨부 이미지"
+                      alt={t("attachmentAlt")}
                       width={240}
                       height={240}
                       sizes="240px"
@@ -308,7 +293,7 @@ function ChatMessageList({
                         isMine ? "text-text-inverse" : "text-text-primary",
                       )}
                     >
-                      {message.content}
+                      <AutoTranslatedText text={message.content} />
                     </Text>
                   )}
                 </div>
@@ -339,6 +324,7 @@ export function ConnectedChatRoomModal({
   actions,
   estimateEdit,
 }: ConnectedChatRoomModalProps) {
+  const t = useTranslations("chat.messages");
   const chat = useConnectedChatRoomModalController({ open, room });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatImageAccept = CHAT_IMAGE_CONTENT_TYPES.join(",");
@@ -387,7 +373,7 @@ export function ConnectedChatRoomModal({
         accept={chatImageAccept}
         className="sr-only"
         tabIndex={-1}
-        aria-label="채팅 이미지 첨부"
+        aria-label={t("attachImageAria")}
         onChange={handleFileChange}
       />
 
@@ -403,7 +389,7 @@ export function ConnectedChatRoomModal({
         composerDisabled={!isChatContentReady || chat.isComposerDisabled}
         composerDisabledMessage={isChatContentReady ? chat.messageDisabledReason : null}
         messagePlaceholder={
-          isChatContentReady && chat.isComposerDisabled ? "메시지를 보낼 수 없습니다." : undefined
+          isChatContentReady && chat.isComposerDisabled ? t("composerDisabled") : undefined
         }
         sendDisabled={chat.sendDisabled}
         onMessageChange={chat.setMessageValue}
@@ -423,7 +409,7 @@ export function ConnectedChatRoomModal({
           ) : (
             <div className="flex h-full items-center justify-center">
               <Text variant="lg-medium" className="text-text-muted">
-                대화 내역을 불러오는 중입니다.
+                {t("loading")}
               </Text>
             </div>
           )
@@ -437,7 +423,7 @@ export function ConnectedChatRoomModal({
               className="text-text-brand rounded-12 px-12 py-8"
               onClick={() => void chat.refetchMessages()}
             >
-              <Text variant="sm-semibold">다시 시도</Text>
+              <Text variant="sm-semibold">{t("retry")}</Text>
             </button>
           </div>
         ) : (

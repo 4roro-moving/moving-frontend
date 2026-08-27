@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -7,7 +8,7 @@ import OAuthLayout from "@/components/auth/OAuthLayout";
 import type { AuthUser, LoginResult } from "@/lib/api/auth";
 import { getApiError } from "@/lib/api/getApiError";
 import { resolveAuthUserImage } from "@/lib/api/profile";
-import { getLoginErrorMessage } from "@/lib/auth/getLoginErrorMessage";
+import { getLoginErrorMessage, isSuspensionAppealAvailable } from "@/lib/auth/getLoginErrorMessage";
 import {
   clearOAuthPendingSession,
   consumeOAuthClientState,
@@ -29,6 +30,10 @@ import {
 } from "@/lib/auth/oauthExchange";
 import { clearProfileCompleted } from "@/lib/auth/profileCompleted";
 import {
+  clearSuspensionAppealSession,
+  markSuspensionAppealSession,
+} from "@/lib/auth/suspensionAppealSession";
+import {
   buildLoginPath,
   getAuthAudienceFromRole,
   getPostAuthRedirectPath,
@@ -37,6 +42,7 @@ import {
   type AuthAudience,
 } from "@/lib/auth/redirect";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const failOAuthCallback = (message: string, setError: (value: string) => void): void => {
@@ -66,6 +72,7 @@ const finalizeOAuthCallback = async ({
   }
 
   try {
+    clearSuspensionAppealSession();
     clearProfileCompleted();
 
     const resultAudience = getAuthAudienceFromRole(result.user.role);
@@ -86,12 +93,15 @@ const finalizeOAuthCallback = async ({
 };
 
 const OAuthCallbackContent = () => {
+  const t = useTranslations("auth");
+  const tInquiry = useTranslations("supportInquiry");
   const router = useRouter();
   const searchParams = useSearchParams();
   const params = useParams<{ provider: string }>();
   const establishSession = useAuthStore((state) => state.establishSession);
   const [error, setError] = useState<string | null>(null);
   const [loginHref, setLoginHref] = useState(buildLoginPath());
+  const [loginButtonLabel, setLoginButtonLabel] = useState<string | undefined>();
 
   useEffect(() => {
     const run = async () => {
@@ -108,21 +118,19 @@ const OAuthCallbackContent = () => {
 
       if (providerError) {
         failOAuthCallback(
-          providerError === "access_denied"
-            ? "소셜 로그인이 취소되었습니다."
-            : "소셜 로그인에 실패했습니다.",
+          providerError === "access_denied" ? t("oauthCanceled") : t("oauthFailed"),
           setError,
         );
         return;
       }
 
       if (!isOAuthProvider(routeProvider)) {
-        failOAuthCallback("지원하지 않는 소셜 로그인입니다.", setError);
+        failOAuthCallback(t("oauthUnsupportedProvider"), setError);
         return;
       }
 
       if (!code) {
-        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
+        failOAuthCallback(t("oauthInvalidInfo"), setError);
         return;
       }
 
@@ -151,17 +159,17 @@ const OAuthCallbackContent = () => {
           return;
         }
 
-        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
+        failOAuthCallback(t("oauthInvalidInfo"), setError);
         return;
       }
 
       if (pending.provider !== routeProvider) {
-        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
+        failOAuthCallback(t("oauthInvalidInfo"), setError);
         return;
       }
 
       if (pending.intent !== "login" && pending.intent !== "signup") {
-        failOAuthCallback("소셜 로그인 정보가 올바르지 않습니다.", setError);
+        failOAuthCallback(t("oauthInvalidInfo"), setError);
         return;
       }
 
@@ -174,7 +182,7 @@ const OAuthCallbackContent = () => {
           !getCompletedOAuthExchange(routeProvider, code) &&
           !isOAuthExchangePending(routeProvider, code)
         ) {
-          failOAuthCallback("유효하지 않은 요청입니다.", setError);
+          failOAuthCallback(t("invalidRequest"), setError);
           return;
         }
       }
@@ -224,14 +232,20 @@ const OAuthCallbackContent = () => {
           return;
         }
 
+        if (isSuspensionAppealAvailable(err)) {
+          markSuspensionAppealSession();
+          setLoginHref(APP_ROUTES.INQUIRIES.ROOT);
+          setLoginButtonLabel(tInquiry("create"));
+        }
+
         failOAuthCallback(getLoginErrorMessage(err, pageAudience), setError);
       }
     };
 
     void run();
-  }, [searchParams, params.provider, establishSession, router]);
+  }, [searchParams, params.provider, establishSession, router, t, tInquiry]);
 
-  return <OAuthLayout error={error} loginHref={loginHref} />;
+  return <OAuthLayout error={error} loginHref={loginHref} loginButtonLabel={loginButtonLabel} />;
 };
 
 const OAuthCallbackPage = () => {

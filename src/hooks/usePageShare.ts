@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useCallback, useRef, useState } from "react";
 
 import { shareFacebook } from "@/lib/facebook/share";
@@ -10,17 +12,18 @@ interface UsePageShareOptions {
 }
 
 export function usePageShare({ onToastMessage }: UsePageShareOptions = {}) {
+  const t = useTranslations("common");
   const [busyAction, setBusyAction] = useState<"copy" | "facebook" | null>(null);
   const busyRef = useRef(false);
 
   const resolveUrl = useCallback(() => {
     const url = getCurrentPageShareUrl();
     if (!url) {
-      onToastMessage?.("공유할 주소를 확인할 수 없습니다.");
+      onToastMessage?.(t("share.noUrl"));
       return null;
     }
     return url;
-  }, [onToastMessage]);
+  }, [onToastMessage, t]);
 
   const runExclusive = useCallback(async (action: typeof busyAction, task: () => Promise<void>) => {
     if (busyRef.current) return;
@@ -40,12 +43,12 @@ export function usePageShare({ onToastMessage }: UsePageShareOptions = {}) {
       if (!url) return;
       try {
         await copyShareLink(url);
-        onToastMessage?.("링크가 복사되었습니다.");
+        onToastMessage?.(t("share.copied"));
       } catch {
-        onToastMessage?.("링크 복사에 실패했습니다.");
+        onToastMessage?.(t("share.copyFailed"));
       }
     });
-  }, [onToastMessage, resolveUrl, runExclusive]);
+  }, [onToastMessage, resolveUrl, runExclusive, t]);
 
   const shareFacebookHandler = useCallback(() => {
     void runExclusive("facebook", async () => {

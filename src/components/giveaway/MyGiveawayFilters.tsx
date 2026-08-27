@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 
 import Select from "@/components/common/Select/Select";
@@ -19,13 +20,12 @@ import {
 } from "@/lib/utils/giveawaySearchParams";
 import type { GiveawayListSort } from "@/types/giveaway";
 
-const ALL_OPTION = { value: GIVEAWAY_ALL_VALUE, label: "전체" } as const;
-
 interface MyGiveawayFiltersProps {
   filters: GiveawayMyFilterState;
 }
 
 const MyGiveawayFilters = ({ filters }: MyGiveawayFiltersProps) => {
+  const t = useTranslations("giveaway");
   const queryClient = useQueryClient();
   const { authScope } = useAuthQueryScope();
   const { filterKey, replaceFilters, resetFilters } = useMyGiveawayFilters(filters);
@@ -50,12 +50,12 @@ const MyGiveawayFilters = ({ filters }: MyGiveawayFiltersProps) => {
         <div className="w-fit shrink-0 xl:w-160">
           <Select
             key={`status-${filters.status}-${filterKey}`}
-            label="상태"
-            desc="상태"
+            label={t("status")}
+            desc={t("status")}
             size="lg"
             className="w-fit xl:w-full"
             defaultValue={filters.status}
-            placeholderValue={ALL_OPTION.value}
+            placeholderValue={GIVEAWAY_ALL_VALUE}
             onChange={(value) => replaceFilters({ status: value })}
           >
             {GIVEAWAY_STATUS_FILTER_OPTIONS.map((option) => (
@@ -64,7 +64,7 @@ const MyGiveawayFilters = ({ filters }: MyGiveawayFiltersProps) => {
                 value={option.value}
                 onPrefetch={() => prefetchList({ status: option.value })}
               >
-                {option.label}
+                {option.value === GIVEAWAY_ALL_VALUE ? t("all") : t(`statusValues.${option.value}`)}
               </Select.Option>
             ))}
           </Select>
@@ -75,7 +75,7 @@ const MyGiveawayFilters = ({ filters }: MyGiveawayFiltersProps) => {
           className="text-text-weak hover:text-text-muted shrink-0 transition-colors"
         >
           <Text as="span" variant={{ base: "md-medium", xl: "lg-medium" }}>
-            초기화
+            {t("reset")}
           </Text>
         </button>
       </div>
@@ -83,8 +83,8 @@ const MyGiveawayFilters = ({ filters }: MyGiveawayFiltersProps) => {
       <div className="w-fit shrink-0">
         <Select
           key={`sort-${filters.sort}-${filterKey}`}
-          label="정렬"
-          desc="정렬"
+          label={t("sort")}
+          desc={t("sort")}
           variant="sort"
           className="w-fit"
           defaultValue={filters.sort}
@@ -96,7 +96,7 @@ const MyGiveawayFilters = ({ filters }: MyGiveawayFiltersProps) => {
               value={option.value}
               onPrefetch={() => prefetchList({ sort: option.value })}
             >
-              {option.label}
+              {t(`sortValues.${option.value}`)}
             </Select.Option>
           ))}
         </Select>

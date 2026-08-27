@@ -1,4 +1,7 @@
+"use client";
+
 import { cva, type VariantProps } from "class-variance-authority";
+import { useTranslations } from "next-intl";
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 
 import { Text } from "@/components/common/Text";
@@ -40,11 +43,13 @@ export const LikeOutlineButton = forwardRef<HTMLButtonElement, LikeOutlineButton
     { size = "sm", isFavorite = false, moverName, className, type = "button", ...props },
     ref,
   ) {
+    const t = useTranslations("profile");
     const resolvedSize = size ?? "sm";
-    const namePrefix = moverName ? `${moverName} ` : "";
-    const label = isFavorite ? "기사님 찜 해제하기" : "기사님 찜하기";
-    const accessibleLabel =
-      resolvedSize === "sm" ? `${namePrefix}기사님 찜` : `${namePrefix}${label}`;
+    const label = t(isFavorite ? "moverDetailUnfavorite" : "moverDetailFavorite");
+    const accessibleLabel = t(
+      resolvedSize === "sm" ? "moverDetailFavoriteAria" : "moverDetailFavoriteActionAria",
+      { name: moverName ?? "", action: label },
+    );
 
     return (
       <button
