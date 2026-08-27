@@ -1,8 +1,18 @@
 import type { Preview } from "@storybook/nextjs-vite";
+import { NextIntlClientProvider } from "next-intl";
 
 import "../src/app/globals.css";
+import messages from "../messages/ko.json";
+import { DEFAULT_LOCALE } from "../src/i18n/config";
 
 const preview: Preview = {
+  decorators: [
+    (Story) => (
+      <NextIntlClientProvider locale={DEFAULT_LOCALE} messages={messages}>
+        <Story />
+      </NextIntlClientProvider>
+    ),
+  ],
   parameters: {
     layout: "centered",
     controls: {
