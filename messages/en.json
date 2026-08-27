@@ -1519,7 +1519,7 @@
     "departure": "Departure",
     "departurePlaceholder": "Select departure",
     "departureShort": "From",
-    "description": "Description",
+    "description": "Enter your pickup and destination locations, and we’ll find movers who serve your area.",
     "destination": "Destination",
     "destinationPlaceholder": "Select destination",
     "destinationShort": "To",
@@ -1543,7 +1543,7 @@
     "searchPrompt": "Enter your conditions to find movers.",
     "serviceRegionNotice": "Recommendations are based on mover service areas.",
     "sortDescription": "Sorted by recommendation.",
-    "title": "Title",
+    "title": "Recommended Movers in Your Area",
     "viewProfile": "View profile",
     "match": {
       "BOTH": "Matches both areas",
