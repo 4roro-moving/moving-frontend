@@ -1,8 +1,13 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import ModeratedContentCard from "@/components/my-content/ModeratedContentCard";
 import { Text } from "@/components/common/Text";
 import type { MyContentDetail } from "@/types/myContent";
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+});
 
 const hiddenResidenceReview: MyContentDetail = {
   contentType: "RESIDENCE_REVIEW",
@@ -89,6 +94,13 @@ const meta = {
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <QueryClientProvider client={queryClient}>
+        <Story />
+      </QueryClientProvider>
+    ),
+  ],
 } satisfies Meta<typeof ModeratedContentCard>;
 
 export default meta;
