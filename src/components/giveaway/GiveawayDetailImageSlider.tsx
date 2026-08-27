@@ -87,7 +87,7 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
                 src={image.imageUrl}
                 alt={t("imageAria", { index: index + 1, total: images.length })}
                 sizes="(min-width: 1280px) 500px, (min-width: 768px) 268px, 90vw"
-                priority={index === 0}
+                preload={index === 0}
               />
             </div>
           ))}

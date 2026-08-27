@@ -14,7 +14,6 @@ interface GiveawayThumbnailImageProps {
   className?: string;
   iconClassName?: string;
   preload?: boolean;
-  priority?: boolean;
 }
 
 interface GiveawayThumbnailImageInnerProps extends Omit<GiveawayThumbnailImageProps, "src"> {
@@ -46,7 +45,6 @@ const GiveawayThumbnailImageInner = ({
   className,
   iconClassName,
   preload = false,
-  priority = false,
 }: GiveawayThumbnailImageInnerProps) => {
   const [hasError, setHasError] = useState(false);
 
@@ -61,7 +59,6 @@ const GiveawayThumbnailImageInner = ({
       fill
       sizes={sizes}
       preload={preload}
-      priority={priority}
       className={cn("object-cover", className)}
       onError={() => setHasError(true)}
     />

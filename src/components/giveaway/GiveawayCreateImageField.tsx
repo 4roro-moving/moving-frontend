@@ -26,7 +26,11 @@ const getImageKey = (image: GiveawayFormImage, index: number) => {
   return `new-${image.file.name}-${String(image.file.lastModified)}-${String(index)}`;
 };
 
-const GiveawayCreatePreviewImage = ({ src }: { src: string }) => {
+interface GiveawayCreatePreviewImageProps {
+  src: string;
+}
+
+const GiveawayCreatePreviewImage = ({ src }: GiveawayCreatePreviewImageProps) => {
   const [hasError, setHasError] = useState(false);
 
   if (hasError) {
