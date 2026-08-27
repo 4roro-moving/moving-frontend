@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 
 import Button from "@/components/common/Button/Button";
 import Modal, { RESPONSIVE_FORM_MODAL_PANEL_CLASSNAME } from "@/components/common/Modal/Modal";
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import { Text } from "@/components/common/Text";
 import EstimatesQueryStatus from "@/components/estimate/EstimatesQueryStatus";
 import ReportModal from "@/components/report/ReportModal";
@@ -12,7 +12,6 @@ import ReportMoreMenu from "@/components/report/ReportMoreMenu";
 import ResidenceReviewInfoItem from "@/components/residence-review/ResidenceReviewInfoItem";
 import ResidenceReviewRatingText from "@/components/residence-review/ResidenceReviewRatingText";
 import { useResidenceReviewDetail } from "@/hooks/residence-review/useResidenceReviewDetail";
-import { ProfileDefaultIcon } from "@/icons";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
 import { cn } from "@/lib/utils/cn";
@@ -20,7 +19,6 @@ import { formatKoreanDateTime } from "@/lib/utils/date";
 import {
   formatResidenceReviewAuthorName,
   formatResidenceReviewRating,
-  getResidenceReviewAuthorImageSrc,
   isResidenceReviewOwner,
 } from "@/lib/utils/residenceReviewFormat";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -60,8 +58,6 @@ const ResidenceReviewDetailModal = ({
   if (!currentReview) {
     return null;
   }
-
-  const authorImageSrc = getResidenceReviewAuthorImageSrc(currentReview.author.imageUrl);
 
   const isOwner = isAuthenticated && isResidenceReviewOwner(currentReview, userId);
 
@@ -132,19 +128,11 @@ const ResidenceReviewDetailModal = ({
                 </Text>
 
                 <div className="flex items-center gap-12">
-                  <div className="bg-background-avatar rounded-12 relative size-48 shrink-0 overflow-hidden xl:size-64">
-                    {authorImageSrc ? (
-                      <Image
-                        src={authorImageSrc}
-                        alt=""
-                        fill
-                        sizes="64px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <ProfileDefaultIcon className="size-full" aria-hidden="true" />
-                    )}
-                  </div>
+                  <ProfileAvatar
+                    imageUrl={currentReview.author.imageUrl}
+                    className="rounded-12 size-48 xl:size-64"
+                    sizes="64px"
+                  />
 
                   {showReport ? (
                     <ReportMoreMenu

@@ -3,7 +3,7 @@ import { isAllowedImageRemoteUrl } from "@/lib/constants/allowedImageHosts";
 const isLocalPublicPath = (src: string) =>
   src.startsWith("/") && !src.startsWith("//") && !src.includes("\\") && !src.includes("..");
 
-export const getGiveawaySafeImageSrc = (imageUrl: string | null | undefined) => {
+export const getAllowedImageSrc = (imageUrl: string | null | undefined) => {
   const trimmed = imageUrl?.trim() ?? "";
   if (!trimmed) {
     return null;
@@ -15,5 +15,3 @@ export const getGiveawaySafeImageSrc = (imageUrl: string | null | undefined) => 
 
   return null;
 };
-
-export const getGiveawayProfileImageSrc = getGiveawaySafeImageSrc;

@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { GalleryIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
-import { getGiveawaySafeImageSrc } from "@/lib/utils/giveawayProfileImage";
+import { getAllowedImageSrc } from "@/lib/utils/safeImageSrc";
 
 interface GiveawayThumbnailImageProps {
   src: string | null | undefined;
@@ -59,7 +59,7 @@ const GiveawayThumbnailImageInner = ({
 };
 
 const GiveawayThumbnailImage = ({ src, ...props }: GiveawayThumbnailImageProps) => {
-  const safeSrc = getGiveawaySafeImageSrc(src);
+  const safeSrc = getAllowedImageSrc(src);
 
   if (!safeSrc) {
     return <GiveawayThumbnailFallback iconClassName={props.iconClassName} />;

@@ -5,20 +5,20 @@ import { useState } from "react";
 
 import { ProfileDefaultIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
-import { getGiveawayProfileImageSrc } from "@/lib/utils/giveawayProfileImage";
+import { getAllowedImageSrc } from "@/lib/utils/safeImageSrc";
 
-interface GiveawayProfileAvatarProps {
+interface ProfileAvatarProps {
   imageUrl: string | null | undefined;
   className?: string;
   sizes?: string;
 }
 
-interface GiveawayProfileAvatarInnerProps {
+interface ProfileAvatarInnerProps {
   src: string;
   sizes: string;
 }
 
-const GiveawayProfileAvatarInner = ({ src, sizes }: GiveawayProfileAvatarInnerProps) => {
+const ProfileAvatarInner = ({ src, sizes }: ProfileAvatarInnerProps) => {
   const [hasError, setHasError] = useState(false);
 
   if (hasError) {
@@ -37,19 +37,15 @@ const GiveawayProfileAvatarInner = ({ src, sizes }: GiveawayProfileAvatarInnerPr
   );
 };
 
-const GiveawayProfileAvatar = ({
-  imageUrl,
-  className,
-  sizes = "56px",
-}: GiveawayProfileAvatarProps) => {
-  const src = getGiveawayProfileImageSrc(imageUrl);
+const ProfileAvatar = ({ imageUrl, className, sizes = "56px" }: ProfileAvatarProps) => {
+  const src = getAllowedImageSrc(imageUrl);
 
   return (
     <div
       className={cn("bg-background-avatar rounded-20 relative shrink-0 overflow-hidden", className)}
     >
       {src ? (
-        <GiveawayProfileAvatarInner key={src} src={src} sizes={sizes} />
+        <ProfileAvatarInner key={src} src={src} sizes={sizes} />
       ) : (
         <ProfileDefaultIcon className="size-full" aria-hidden="true" />
       )}
@@ -57,4 +53,4 @@ const GiveawayProfileAvatar = ({
   );
 };
 
-export default GiveawayProfileAvatar;
+export default ProfileAvatar;

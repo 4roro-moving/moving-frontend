@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { PageHeader } from "@/components/common/PageHeader";
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import { Text } from "@/components/common/Text";
 import GiveawayConfirmModal from "@/components/giveaway/GiveawayConfirmModal";
 import GiveawayCreateModal from "@/components/giveaway/GiveawayCreateModal";
@@ -14,7 +15,6 @@ import GiveawayDetailImageSlider from "@/components/giveaway/GiveawayDetailImage
 import GiveawayMyRequestActionOverlays from "@/components/giveaway/GiveawayMyRequestActionOverlays";
 import GiveawayMyRequestSection from "@/components/giveaway/GiveawayMyRequestSection";
 import GiveawayReceivedRequestList from "@/components/giveaway/GiveawayReceivedRequestList";
-import GiveawayProfileAvatar from "@/components/giveaway/GiveawayProfileAvatar";
 import GiveawayRequestFormModal from "@/components/giveaway/GiveawayRequestFormModal";
 import ReportModal from "@/components/report/ReportModal";
 import ReportMoreMenu from "@/components/report/ReportMoreMenu";
@@ -195,7 +195,7 @@ const GiveawayDetailView = ({
             />
 
             <div className="flex items-center gap-12">
-              <GiveawayProfileAvatar
+              <ProfileAvatar
                 imageUrl={giveaway.author.imageUrl}
                 className="rounded-12 size-64"
                 sizes="64px"
