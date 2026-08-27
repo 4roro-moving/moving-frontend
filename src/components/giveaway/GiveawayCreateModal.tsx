@@ -41,6 +41,7 @@ const GiveawayCreateModalContent = ({
   onExitComplete,
 }: GiveawayCreateModalContentProps) => {
   const t = useTranslations("giveaway");
+  const tRegion = useTranslations("moverSearch");
   const router = useRouter();
   const {
     isEdit,
@@ -103,7 +104,7 @@ const GiveawayCreateModalContent = ({
             >
               {REGION_OPTIONS.map((region) => (
                 <Select.Option key={region.value} value={String(region.value)}>
-                  {region.label}
+                  {tRegion(`regions.${region.value}`)}
                 </Select.Option>
               ))}
             </Select>

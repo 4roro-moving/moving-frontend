@@ -46,7 +46,7 @@ const selectVariants = cva("relative", {
 
 const selectTriggerVariants = cva(
   [
-    "flex w-fit items-center justify-between whitespace-nowrap transition-colors xl:w-full",
+    "flex w-fit min-w-0 max-w-full items-center justify-between whitespace-nowrap transition-colors xl:w-full",
     "text-text-secondary",
     "disabled:cursor-not-allowed disabled:text-text-disabled",
   ],
@@ -179,7 +179,7 @@ const SelectMain = ({
       : undefined;
 
   const chevronClassName = cn(
-    variant === "sort" ? "size-20 text-icon-muted" : "size-20 xl:size-36",
+    variant === "sort" ? "size-20 shrink-0 text-icon-muted" : "size-20 shrink-0 xl:size-36",
     variant === "default" && (isOpen ? "text-icon-brand" : "text-icon-default"),
   );
 
@@ -209,7 +209,14 @@ const SelectMain = ({
             onClick={() => setIsOpen((prev) => !prev)}
             onKeyDown={handleTriggerKeyDown}
           >
-            <Text variant={getTriggerTextVariant(variant, isOpen)}>{triggerLabel}</Text>
+            <Text
+              as="span"
+              variant={getTriggerTextVariant(variant, isOpen)}
+              className={cn(variant === "sort" ? "whitespace-nowrap" : "min-w-0 truncate")}
+              title={typeof triggerLabel === "string" ? triggerLabel : undefined}
+            >
+              {triggerLabel}
+            </Text>
             {isOpen ? (
               <ChevronUpIcon className={chevronClassName} />
             ) : (

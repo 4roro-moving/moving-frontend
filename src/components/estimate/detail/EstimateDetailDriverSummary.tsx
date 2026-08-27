@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+
+import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
@@ -69,14 +71,14 @@ export default function EstimateDetailDriverSummary({
                 variant="2lg-semibold"
                 className="text-text-secondary min-w-0 wrap-break-word md:hidden"
               >
-                {intro}
+                <AutoTranslatedText text={intro} />
               </Text>
               <Text
                 as="p"
                 variant="2xl-semibold"
                 className="text-text-secondary hidden min-w-0 wrap-break-word md:block"
               >
-                {intro}
+                <AutoTranslatedText text={intro} />
               </Text>
             </>
           ) : null}

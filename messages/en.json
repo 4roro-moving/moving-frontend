@@ -33,6 +33,10 @@
       "clear": "Clear search",
       "submit": "Search"
     },
+    "emptyState": {
+      "noResultsTitle": "No results found.",
+      "noResultsDescription": "Try another search or filter."
+    },
     "pagination": {
       "aria": "Pagination",
       "previous": "Previous page",
@@ -95,16 +99,16 @@
       "title": "Moving",
       "description": "Compare multiple estimates at a glance and choose a mover more easily."
     },
-    "bottomBannerDesktop": "Bottom Banner Desktop",
-    "bottomBannerLine1": "Bottom Banner Line1",
-    "bottomBannerLine2": "Bottom Banner Line2",
-    "brandAlt": "Brand Alt",
-    "compareImageAlt": "Compare Image Alt",
-    "compareTitleLine1": "Compare Title Line1",
-    "compareTitleLine2": "Compare Title Line2",
-    "requestImageAlt": "Request Image Alt",
-    "requestTitleLine1": "Request Title Line1",
-    "requestTitleLine2": "Request Title Line2"
+    "bottomBannerDesktop": "MOVING simplifies every step of your move!",
+    "bottomBannerLine1": "Compare quotes from multiple providers",
+    "bottomBannerLine2": "at a glance and choose the best one",
+    "brandAlt": "MOVING Brand",
+    "compareImageAlt": "Moving Quote Comparison",
+    "compareTitleLine1": "Compare quotes at a glance",
+    "compareTitleLine2": "Make the right choice",
+    "requestImageAlt": "Moving Quote Request ",
+    "requestTitleLine1": "Request the moving services you need",
+    "requestTitleLine2": "and receive quotes"
   },
   "supportFaq": {
     "title": "Frequently asked questions",
@@ -293,8 +297,6 @@
       "title": "Unable to load mover details"
     },
     "retry": "Retry",
-    "emptyDescription": "Try another search or filter.",
-    "emptyTitle": "No results found.",
     "listErrorDescription": "There was a problem loading movers.",
     "listErrorTitle": "Unable to load",
     "nextErrorDescription": "There was a problem loading more movers.",
@@ -863,6 +865,14 @@
     "termsLoadingAria": "Loading terms",
     "termsRequiredAgreement": "Agree to all required terms",
     "termsRequiredLoadFailed": "Failed to load required terms.",
+    "termsType": {
+      "termsOfService": "Terms of Service",
+      "privacyPolicy": "Privacy Policy",
+      "marketingPolicy": "Marketing Communications Consent",
+      "locationPolicy": "Location Information Terms",
+      "moverPolicy": "Mover Policy",
+      "other": "Other Terms"
+    },
     "validation": {
       "emailInvalid": "Enter a valid email address.",
       "emailRequired": "Enter your email.",
@@ -960,7 +970,7 @@
       "addImage": "Add image",
       "ariaLabel": "Report",
       "attachmentAlt": "Report attachment",
-      "description": "Description",
+      "description": "Please select a reason and provide any necessary details.",
       "detailLabel": "Details",
       "detailPlaceholderOptional": "Add any additional details.",
       "detailPlaceholderRequired": "Describe the reason for your report.",
@@ -974,7 +984,7 @@
       "submitFailed": "Failed to submit report.",
       "submitting": "Submitting...",
       "target": "Report target",
-      "title": "Title",
+      "title": "Report",
       "validation": {
         "imageSize": "The image file is too large.",
         "imageType": "Only jpg, png, and webp images are allowed.",
@@ -1026,6 +1036,11 @@
   "giveaway": {
     "title": "Giveaway",
     "myTitle": "My giveaway posts",
+    "myEmpty": "You haven't created any giveaway posts yet.",
+    "myEmptyDescription": "Create your first giveaway post.",
+    "myRequestsEmpty": "You haven't requested any giveaways yet.",
+    "myRequestsEmptyDescription": "Browse giveaway posts and submit a request.",
+    "myRequestsEmptyAction": "Browse Giveaway Posts",
     "detailLoadFailed": "Unable to load the giveaway post.",
     "reload": "Reload",
     "listLoading": "Loading giveaway posts",
@@ -1041,11 +1056,17 @@
     "creating": "Creating...",
     "editing": "Saving...",
     "create": "Create",
+    "write": "Create Giveaway Post",
     "edit": "Save changes",
     "all": "All",
     "searchPlaceholder": "Search giveaway posts by title or content.",
     "searchAria": "Search giveaway posts",
     "status": "Status",
+    "statusValues": {
+      "AVAILABLE": "Available",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed"
+    },
     "reset": "Reset",
     "sort": "Sort",
     "requestCancelTitle": "Cancel request",
@@ -1163,7 +1184,7 @@
   },
   "residenceReview": {
     "editTitle": "Edit Review",
-    "region": "Review region",
+    "region": "Region",
     "editing": "Saving...",
     "edit": "Edit",
     "retry": "Retry",
@@ -1227,8 +1248,6 @@
     "myListLoadFailed": "Failed to load your residence reviews.",
     "myListLoading": "Loading your residence reviews",
     "myPageTitle": "My residence reviews",
-    "noResultsDescription": "Try a different search term or filter.",
-    "noResultsTitle": "No results found.",
     "pageDescription": "Explore residence reviews by region.",
     "pageTitle": "Residence reviews",
     "ratingPoints": "{rating} points",
@@ -1544,7 +1563,23 @@
     "previousPage": "Previous notification page",
     "title": "Title",
     "triggerUnreadAria": "{count} unread notifications",
-    "unread": "Unread"
+    "unread": "Unread",
+    "estimateRequestReceived": " has sent an estimate request.",
+    "designatedRequestPrefix": "A designated estimate request from ",
+    "estimateReceived": " has arrived.",
+    "estimateConfirmed": " estimate has been confirmed.",
+    "estimateRequestRejected": " rejected your estimate request.",
+    "estimateRequestCanceled": " canceled the estimate request.",
+    "reviewReceived": " left a review.",
+    "chatMessageReceived": " sent you a message.",
+    "inquiryAnswered": " has received a response.",
+    "contentHidden": " has been hidden.",
+    "contentRestored": " has been restored.",
+    "adminCanceledPrefix": "Due to an administrator action, ",
+    "moverSuspendedPrefix": "Due to the mover's account restriction, ",
+    "customerSuspendedPrefix": "Due to the customer's account restriction, ",
+    "canceledSuffix": " has been canceled.",
+    "fallback": "You have a new notification."
   },
   "pricePrediction": {
     "form": {

@@ -9,11 +9,6 @@ import GiveawayInfiniteListChrome from "@/components/giveaway/GiveawayInfiniteLi
 import MyGiveawayRequestCard from "@/components/giveaway/MyGiveawayRequestCard";
 import MyGiveawayRequestCardSkeletonList from "@/components/giveaway/MyGiveawayRequestCardSkeletonList";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import {
-  GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES,
-  GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL,
-  GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES,
-} from "@/lib/constants/giveaway";
 import type { ApiError } from "@/types/api";
 import type { GiveawayRequestMyListResult, MyGiveawayRequestItem } from "@/types/giveaway";
 
@@ -45,10 +40,14 @@ const MyGiveawayRequestListView = ({
   onCancel,
 }: MyGiveawayRequestListViewProps) => {
   const t = useTranslations("giveaway");
+  const tCommon = useTranslations("common");
   const emptyDescription = toEmptyDescription(
     hasActiveFilters
-      ? GIVEAWAY_EMPTY_FILTER_DESCRIPTION_LINES
-      : GIVEAWAY_REQUEST_EMPTY_DESCRIPTION_LINES,
+      ? ([
+          tCommon("emptyState.noResultsTitle"),
+          tCommon("emptyState.noResultsDescription"),
+        ] as const)
+      : ([t("myRequestsEmpty"), t("myRequestsEmptyDescription")] as const),
   );
 
   return (
@@ -63,7 +62,7 @@ const MyGiveawayRequestListView = ({
           size="sm"
           imageSrc="/images/empty/character.png"
           description={emptyDescription}
-          buttonLabel={hasActiveFilters ? undefined : GIVEAWAY_REQUEST_EMPTY_BUTTON_LABEL}
+          buttonLabel={hasActiveFilters ? undefined : t("myRequestsEmptyAction")}
           href={hasActiveFilters ? undefined : APP_ROUTES.COMMUNITY.GIVEAWAY}
         />
       }

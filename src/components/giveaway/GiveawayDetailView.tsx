@@ -27,12 +27,7 @@ import { useMyGiveawayRequestActions } from "@/hooks/giveaway/useMyGiveawayReque
 import { UserIcon } from "@/icons";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
-import {
-  GIVEAWAY_DETAIL_TITLE,
-  GIVEAWAY_PREFERRED_REGION_LABEL,
-  canApplyGiveaway,
-  hasActiveGiveawayRequest,
-} from "@/lib/constants/giveaway";
+import { canApplyGiveaway, hasActiveGiveawayRequest } from "@/lib/constants/giveaway";
 import { formatRelativeTime } from "@/lib/utils/date";
 import type { ApiError } from "@/types/api";
 import type {
@@ -57,6 +52,7 @@ const GiveawayDetailView = ({
   requestsQuery,
 }: GiveawayDetailViewProps) => {
   const t = useTranslations("giveaway");
+  const tRegion = useTranslations("moverSearch");
   const locale = useLocale();
   const router = useRouter();
   const deleteMutation = useDeleteGiveaway();
@@ -114,7 +110,7 @@ const GiveawayDetailView = ({
 
   return (
     <div className="bg-background-default flex w-full flex-col items-center">
-      <PageHeader title={GIVEAWAY_DETAIL_TITLE} backFallbackHref={APP_ROUTES.COMMUNITY.GIVEAWAY} />
+      <PageHeader title={t("detailTitle")} backFallbackHref={APP_ROUTES.COMMUNITY.GIVEAWAY} />
 
       <div className="px-margin-mobile md:px-margin-tablet max-w-container-desktop xl:pb-37-5 mx-auto flex w-full flex-col gap-60 pt-35 pb-48 md:pt-44 md:pb-38 xl:px-0 xl:pt-42">
         <article className="flex w-full flex-col items-center gap-30 md:flex-row md:items-start md:justify-between md:gap-60">
@@ -218,7 +214,7 @@ const GiveawayDetailView = ({
                     variant={{ base: "sm-medium", xl: "md-medium" }}
                     className="text-text-muted"
                   >
-                    {`${GIVEAWAY_PREFERRED_REGION_LABEL} - ${giveaway.region.name}`}
+                    {`${t("preferredRegion")} - ${tRegion(`regions.${giveaway.region.id}`)}`}
                   </Text>
                 ) : null}
               </div>

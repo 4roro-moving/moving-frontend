@@ -108,7 +108,7 @@ const FaqPageClient = () => {
                   variant={{ base: "md-medium", md: "lg-medium" }}
                   className="text-text-primary min-w-0 flex-1"
                 >
-                  {faq.question}
+                  <AutoTranslatedText text={faq.question} />
                 </Text>
 
                 <ChevronDownIcon

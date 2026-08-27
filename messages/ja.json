@@ -33,6 +33,10 @@
       "clear": "検索語をクリア",
       "submit": "検索"
     },
+    "emptyState": {
+      "noResultsTitle": "検索結果がありません。",
+      "noResultsDescription": "別の検索語やフィルターをお試しください。"
+    },
     "pagination": {
       "aria": "ページネーション",
       "previous": "前のページ",
@@ -95,7 +99,7 @@
       "title": "Moving",
       "description": "複数の見積もりを一目で比較し、引越し業者をより簡単に選べます。"
     },
-    "bottomBannerDesktop": "下部バナー（デスクトップ）",
+    "bottomBannerDesktop": "複雑な引っ越し準備も、MOVINGひとつで完了！",
     "bottomBannerLine1": "引越し見積もりを一目で比較して",
     "bottomBannerLine2": "自分に合う業者を見つけましょう",
     "brandAlt": "MOVINGブランド",
@@ -293,8 +297,6 @@
       "title": "業者情報を読み込めませんでした"
     },
     "retry": "再試行",
-    "emptyDescription": "別の検索語やフィルターをお試しください。",
-    "emptyTitle": "検索結果がありません。",
     "listErrorDescription": "業者一覧の読み込み中に問題が発生しました。",
     "listErrorTitle": "読み込めませんでした",
     "nextErrorDescription": "次の業者一覧の読み込み中に問題が発生しました。",
@@ -863,6 +865,14 @@
     "termsLoadingAria": "規約を読み込み中",
     "termsRequiredAgreement": "必須規約にすべて同意",
     "termsRequiredLoadFailed": "必須規約を読み込めませんでした。",
+    "termsType": {
+      "termsOfService": "サービス利用規約",
+      "privacyPolicy": "プライバシーポリシー",
+      "marketingPolicy": "マーケティング情報の受信に同意",
+      "locationPolicy": "位置情報利用規約",
+      "moverPolicy": "業者利用ポリシー",
+      "other": "その他の規約"
+    },
     "validation": {
       "emailInvalid": "正しいメールアドレスを入力してください。",
       "emailRequired": "メールアドレスを入力してください。",
@@ -960,7 +970,7 @@
       "addImage": "画像を追加",
       "ariaLabel": "通報",
       "attachmentAlt": "通報添付画像",
-      "description": "説明",
+      "description": "通報理由と必要な内容を入力してください。",
       "detailLabel": "詳細内容",
       "detailPlaceholderOptional": "追加で伝えたい内容があれば入力してください。",
       "detailPlaceholderRequired": "通報理由を詳しく入力してください。",
@@ -974,7 +984,7 @@
       "submitFailed": "通報の登録に失敗しました。",
       "submitting": "処理中...",
       "target": "通報対象",
-      "title": "タイトル",
+      "title": "通報する",
       "validation": {
         "imageSize": "画像ファイルのサイズが大きすぎます。",
         "imageType": "jpg、png、webp形式のみ添付できます。",
@@ -1026,6 +1036,11 @@
   "giveaway": {
     "title": "譲渡",
     "myTitle": "作成した譲渡投稿",
+    "myEmpty": "まだ譲渡投稿がありません。",
+    "myEmptyDescription": "最初の譲渡投稿を作成してみましょう。",
+    "myRequestsEmpty": "まだ申請した譲渡がありません。",
+    "myRequestsEmptyDescription": "譲渡投稿を見て、申請してみましょう。",
+    "myRequestsEmptyAction": "譲渡投稿を見る",
     "detailLoadFailed": "譲渡投稿を読み込めませんでした。",
     "reload": "再読み込み",
     "listLoading": "譲渡投稿を読み込んでいます",
@@ -1041,11 +1056,17 @@
     "creating": "登録中...",
     "editing": "更新中...",
     "create": "登録する",
+    "write": "譲渡投稿を作成",
     "edit": "更新する",
     "all": "すべて",
     "searchPlaceholder": "タイトルまたは内容で譲渡投稿を検索",
     "searchAria": "譲渡投稿を検索",
     "status": "状態",
+    "statusValues": {
+      "AVAILABLE": "譲渡可能",
+      "IN_PROGRESS": "進行中",
+      "COMPLETED": "完了"
+    },
     "reset": "リセット",
     "sort": "並び替え",
     "requestCancelTitle": "申請をキャンセル",
@@ -1163,7 +1184,7 @@
   },
   "residenceReview": {
     "editTitle": "レビューを編集",
-    "region": "レビュー地域",
+    "region": "地域",
     "editing": "更新中...",
     "edit": "変更",
     "retry": "再試行",
@@ -1227,8 +1248,6 @@
     "myListLoadFailed": "自分の居住レビューを読み込めませんでした。",
     "myListLoading": "自分の居住レビューを読み込み中",
     "myPageTitle": "自分の居住レビュー",
-    "noResultsDescription": "別の検索語やフィルターをお試しください。",
-    "noResultsTitle": "検索結果がありません。",
     "pageDescription": "地域別の居住体験レビューを確認できます。",
     "pageTitle": "居住レビュー",
     "ratingPoints": "{rating}点",
@@ -1544,7 +1563,23 @@
     "previousPage": "前の通知ページ",
     "title": "タイトル",
     "triggerUnreadAria": "未読通知{count}件",
-    "unread": "未読"
+    "unread": "未読",
+    "estimateRequestReceived": " 見積もり依頼が届きました。",
+    "designatedRequestPrefix": "私を指定した ",
+    "estimateReceived": " が届きました。",
+    "estimateConfirmed": " の見積もりが確定しました。",
+    "estimateRequestRejected": " さんが見積もり依頼を断りました。",
+    "estimateRequestCanceled": " さんが見積もり依頼をキャンセルしました。",
+    "reviewReceived": " さんがレビューを投稿しました。",
+    "chatMessageReceived": "さんからメッセージが届きました。",
+    "inquiryAnswered": " のお問い合わせに回答が登録されました。",
+    "contentHidden": " は非表示になりました。",
+    "contentRestored": " は復元されました。",
+    "adminCanceledPrefix": "管理者の対応により ",
+    "moverSuspendedPrefix": "業者の利用制限により ",
+    "customerSuspendedPrefix": "顧客の利用制限により ",
+    "canceledSuffix": " がキャンセルされました。",
+    "fallback": "新しい通知があります。"
   },
   "pricePrediction": {
     "form": {

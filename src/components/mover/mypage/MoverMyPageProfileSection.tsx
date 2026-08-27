@@ -67,6 +67,7 @@ function ActivitySummary({ profile }: { profile: MoverProfileMe }) {
 
 function ServiceSections({ profile }: { profile: MoverProfileMe }) {
   const t = useTranslations("profile");
+  const tMoverSearch = useTranslations("moverSearch");
   return (
     <div className="flex w-full flex-col gap-24 md:gap-40">
       <section className="flex flex-col gap-8 md:gap-16" aria-labelledby="mover-service-types">
@@ -92,7 +93,11 @@ function ServiceSections({ profile }: { profile: MoverProfileMe }) {
         </Text>
         <div className="flex flex-wrap gap-8 md:gap-12">
           {profile.regions.map((region) => (
-            <MoverServiceChip key={region.id} label={region.name} variant="region" />
+            <MoverServiceChip
+              key={region.id}
+              label={tMoverSearch(`regions.${region.id}`)}
+              variant="region"
+            />
           ))}
         </div>
       </section>

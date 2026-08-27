@@ -89,7 +89,7 @@ const ResidenceReviewCreateModalContent = ({
             >
               {REGION_OPTIONS.map((region) => (
                 <Select.Option key={region.value} value={String(region.value)}>
-                  {region.label}
+                  {t(`regions.${region.value}`)}
                 </Select.Option>
               ))}
             </Select>

@@ -1,8 +1,12 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import NavigationTabs from "@/components/common/NavigationTabs/NavigationTabs";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 
-export default async function MyEstimateTabs() {
-  const t = await getTranslations("estimates");
+export default function MyEstimateTabs() {
+  const t = useTranslations("estimates");
   const tabs = [
     { href: APP_ROUTES.ESTIMATES.PENDING, label: t("tabs.pending") },
     { href: APP_ROUTES.ESTIMATES.RECEIVED, label: t("tabs.received") },
@@ -10,4 +14,3 @@ export default async function MyEstimateTabs() {
   ];
   return <NavigationTabs ariaLabel={t("tabs.label")} items={tabs} />;
 }
-import { getTranslations } from "next-intl/server";
