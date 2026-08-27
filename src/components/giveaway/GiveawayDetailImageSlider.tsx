@@ -1,10 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import { useState } from "react";
 
 import { Text } from "@/components/common/Text";
+import GiveawayThumbnailImage from "@/components/giveaway/GiveawayThumbnailImage";
 import { ChevronLeftIcon, ChevronRightIcon, GalleryIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
 import type { GiveawayImage, GiveawayStatus } from "@/types/giveaway";
@@ -83,13 +83,11 @@ const GiveawayDetailImageSlider = ({ images, status }: GiveawayDetailImageSlider
               className="relative size-full shrink-0"
               aria-hidden={index !== safeIndex}
             >
-              <Image
+              <GiveawayThumbnailImage
                 src={image.imageUrl}
                 alt={t("imageAria", { index: index + 1, total: images.length })}
-                fill
                 sizes="(min-width: 1280px) 500px, (min-width: 768px) 268px, 90vw"
-                className="object-cover"
-                priority={index === 0}
+                preload={index === 0}
               />
             </div>
           ))}

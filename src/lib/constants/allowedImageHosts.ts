@@ -71,7 +71,7 @@ function matchesPathnamePattern(urlPathname: string, pattern: string): boolean {
   return urlPathname === prefix || urlPathname.startsWith(`${prefix}/`);
 }
 
-/** resolveMoverProfileImageSrc용 원격 URL 허용 여부 */
+/** getAllowedImageSrc · Next/Image remote URL 허용 여부 */
 export const isAllowedImageRemoteUrl = (src: string): boolean => {
   try {
     const url = new URL(src);

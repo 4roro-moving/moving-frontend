@@ -1,15 +1,15 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, type FocusEvent } from "react";
 import { useTranslations } from "next-intl";
 
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
+import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { usePresence } from "@/hooks/usePresence";
 import { sanitizeSoftUxProfileImageUrl } from "@/lib/auth/profileImage";
 import type { AuthRole } from "@/lib/auth/role";
@@ -18,6 +18,9 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
 import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { useAuthStore } from "@/stores/useAuthStore";
+
+const HEADER_PROFILE_AVATAR_CLASSNAME = "bg-background-muted rounded-100 size-24 xl:size-36";
+const HEADER_PROFILE_SKELETON_CLASSNAME = "size-24 rounded-full xl:size-36";
 
 export type ProfileMenuItem =
   | { type: "link"; label: string; href: string }
@@ -48,7 +51,8 @@ export default function ProfileMenuTrigger({
   const logout = useAuthStore((state) => state.logout);
   const safeImageUrl = sanitizeSoftUxProfileImageUrl(imageUrl);
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [menuOpenForPath, setMenuOpenForPath] = useState<string | null>(null);
+  const isOpen = menuOpenForPath === pathname;
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const { isRendered: isMenuRendered, isVisible: isMenuVisible } = usePresence(
     isOpen,
@@ -72,12 +76,12 @@ export default function ProfileMenuTrigger({
   const closeQuiet = useCallback(() => {
     // aria-hidden 적용 전에 포커스를 메뉴 밖으로 이동
     restoreTriggerFocusIfNeeded();
-    setIsOpen(false);
+    setMenuOpenForPath(null);
   }, []);
 
   const closeWithFocus = useCallback(() => {
     triggerRef.current?.focus();
-    setIsOpen(false);
+    setMenuOpenForPath(null);
   }, []);
 
   const containerRef = useClickOutside<HTMLDivElement>(closeQuiet);
@@ -130,7 +134,7 @@ export default function ProfileMenuTrigger({
 
   const handleLogout = async () => {
     triggerRef.current?.focus();
-    setIsOpen(false);
+    setMenuOpenForPath(null);
 
     const isPublicPage = isPublicPath(pathname);
     const logoutPath = role === "MOVER" ? APP_ROUTES.MOVER_LOGIN : APP_ROUTES.LOGIN;
@@ -171,27 +175,15 @@ export default function ProfileMenuTrigger({
         aria-expanded={isOpen}
         aria-controls={isOpen ? `${menuId}-menu` : undefined}
         className="focus-visible:ring-border-brand rounded-8 flex items-center focus-visible:ring-2 focus-visible:outline-none xl:gap-16"
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={() => setMenuOpenForPath((current) => (current === pathname ? null : pathname))}
       >
         {isAvatarPending ? (
-          <Skeleton className="size-24 rounded-full xl:size-36" />
-        ) : safeImageUrl ? (
-          <div className="rounded-100 overflow-hidden">
-            <Image
-              src={safeImageUrl}
-              alt=""
-              width={36}
-              height={36}
-              className="rounded-4 size-24 xl:size-36 xl:rounded-none"
-            />
-          </div>
+          <Skeleton className={HEADER_PROFILE_SKELETON_CLASSNAME} />
         ) : (
-          <Image
-            src="/icons/profile-default.svg"
-            alt=""
-            width={36}
-            height={36}
-            className="rounded-4 size-24 xl:size-36 xl:rounded-none"
+          <ProfileAvatar
+            imageUrl={safeImageUrl}
+            className={HEADER_PROFILE_AVATAR_CLASSNAME}
+            sizes="36px"
           />
         )}
         <Text as="span" variant="2lg-medium" className="text-text-primary hidden xl:block">

@@ -1112,6 +1112,7 @@
     "requesterCustomerName": "{name} 고객님",
     "imageIndexAria": "나눔 이미지 {current}/{total}",
     "imageAria": "나눔 이미지",
+    "imageLoadFailed": "{alt}를 불러오지 못했습니다",
     "previousImage": "이전 이미지",
     "nextImage": "다음 이미지",
     "nextLoading": "나눔 글을 더 불러오는 중이에요",

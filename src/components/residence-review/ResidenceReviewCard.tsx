@@ -3,18 +3,13 @@
 import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 
 import { useFormatter, useTranslations } from "next-intl";
-
-import Image from "next/image";
 import type { ReactNode } from "react";
 
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import { Text } from "@/components/common/Text";
 import ResidenceReviewRatingText from "@/components/residence-review/ResidenceReviewRatingText";
-import { ProfileDefaultIcon } from "@/icons";
 import { cn } from "@/lib/utils/cn";
-import {
-  formatResidenceReviewRating,
-  getResidenceReviewAuthorImageSrc,
-} from "@/lib/utils/residenceReviewFormat";
+import { formatResidenceReviewRating } from "@/lib/utils/residenceReviewFormat";
 import type { PublicResidenceReview } from "@/types/residenceReview";
 
 interface ResidenceReviewCardProps {
@@ -26,7 +21,6 @@ interface ResidenceReviewCardProps {
 const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCardProps) => {
   const t = useTranslations("residenceReview");
   const format = useFormatter();
-  const authorImageSrc = getResidenceReviewAuthorImageSrc(review.author.imageUrl);
   const authorName = review.author.name.trim() || t("customer");
   const regionName = t(`regions.${String(review.region.id)}`);
   const regionLabel =
@@ -56,13 +50,11 @@ const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCa
         })}
       </span>
       <div className="flex w-full items-center gap-16 md:gap-20">
-        <div className="bg-background-avatar rounded-12 relative hidden size-64 shrink-0 overflow-hidden md:block md:size-80">
-          {authorImageSrc ? (
-            <Image src={authorImageSrc} alt="" fill sizes="80px" className="object-cover" />
-          ) : (
-            <ProfileDefaultIcon className="size-full" aria-hidden="true" />
-          )}
-        </div>
+        <ProfileAvatar
+          imageUrl={review.author.imageUrl}
+          className="rounded-12 hidden size-64 md:block md:size-80"
+          sizes="80px"
+        />
 
         <div className="flex min-w-0 flex-1 flex-col gap-8">
           <div className="flex items-start justify-between gap-12 md:contents">
@@ -83,13 +75,11 @@ const ResidenceReviewCard = ({ review, onSelect, onPrefetch }: ResidenceReviewCa
               </Text>
             </div>
 
-            <div className="bg-background-avatar rounded-12 relative size-56 shrink-0 overflow-hidden md:hidden">
-              {authorImageSrc ? (
-                <Image src={authorImageSrc} alt="" fill sizes="56px" className="object-cover" />
-              ) : (
-                <ProfileDefaultIcon className="size-full" aria-hidden="true" />
-              )}
-            </div>
+            <ProfileAvatar
+              imageUrl={review.author.imageUrl}
+              className="rounded-12 size-56 md:hidden"
+              sizes="56px"
+            />
           </div>
         </div>
       </div>

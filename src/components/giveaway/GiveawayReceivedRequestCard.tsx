@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import Button from "@/components/common/Button/Button";
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import { Text } from "@/components/common/Text";
-import GiveawayProfileAvatar from "@/components/giveaway/GiveawayProfileAvatar";
 import GiveawayRequestCardLayout from "@/components/giveaway/GiveawayRequestCardLayout";
 import ReportModal from "@/components/report/ReportModal";
 import ReportMoreMenu from "@/components/report/ReportMoreMenu";
@@ -75,7 +75,7 @@ const GiveawayReceivedRequestCard = ({
       >
         <div className="flex items-start justify-between gap-12">
           <div className="flex min-w-0 flex-1 items-center gap-12 md:gap-20">
-            <GiveawayProfileAvatar
+            <ProfileAvatar
               imageUrl={request.requester.imageUrl}
               className="rounded-12 size-64 md:size-80"
               sizes="80px"

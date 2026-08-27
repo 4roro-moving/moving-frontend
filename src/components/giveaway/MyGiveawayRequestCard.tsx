@@ -3,13 +3,12 @@
 import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 
 import { useFormatter, useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
 
 import Button from "@/components/common/Button/Button";
 import { Text } from "@/components/common/Text";
+import GiveawayThumbnailImage from "@/components/giveaway/GiveawayThumbnailImage";
 import ResidenceReviewInfoItem from "@/components/residence-review/ResidenceReviewInfoItem";
-import { GalleryIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { canCancelGiveawayRequest, canEditGiveawayRequest } from "@/lib/constants/giveaway";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
@@ -50,19 +49,11 @@ const MyGiveawayRequestCard = ({ request, onEdit, onCancel }: MyGiveawayRequestC
       <div className="flex min-w-0 flex-1 flex-col gap-12 md:gap-8">
         <div className="flex items-center gap-8 md:gap-20">
           <div className="bg-background-avatar rounded-12 relative size-64 shrink-0 overflow-hidden md:size-80">
-            {request.giveaway.thumbnailUrl ? (
-              <Image
-                src={request.giveaway.thumbnailUrl}
-                alt=""
-                fill
-                sizes="(min-width: 768px) 80px, 64px"
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex size-full items-center justify-center">
-                <GalleryIcon className="text-icon-subtle size-32" aria-hidden="true" />
-              </div>
-            )}
+            <GiveawayThumbnailImage
+              src={request.giveaway.thumbnailUrl}
+              sizes="(min-width: 768px) 80px, 64px"
+              iconClassName="size-32"
+            />
           </div>
 
           <div className="flex min-w-0 flex-1 flex-col">
