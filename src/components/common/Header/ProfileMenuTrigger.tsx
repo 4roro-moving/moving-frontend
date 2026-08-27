@@ -1,29 +1,25 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, type FocusEvent } from "react";
 
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
+import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { Text } from "@/components/common/Text";
 import Toast from "@/components/common/Toast/Toast";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { usePresence } from "@/hooks/usePresence";
 import { sanitizeSoftUxProfileImageUrl } from "@/lib/auth/profileImage";
 import type { AuthRole } from "@/lib/auth/role";
 import { isPublicPath } from "@/lib/auth/redirect";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { cn } from "@/lib/utils/cn";
-import { DEFAULT_PROFILE_IMAGE } from "@/lib/utils/safeImageSrc";
 import { DROPDOWN_EXIT_DURATION_MS, dropdownMotionClassName } from "@/lib/utils/uiMotion";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const LOGOUT_FAILURE_TOAST = "로그아웃에 실패했습니다. 다시 시도해 주세요.";
-const HEADER_PROFILE_FALLBACK_SRC = DEFAULT_PROFILE_IMAGE;
-const HEADER_PROFILE_FRAME_CLASSNAME =
-  "bg-background-avatar rounded-100 relative size-24 overflow-hidden xl:size-36";
-const HEADER_PROFILE_IMAGE_CLASSNAME = "size-full object-cover";
+const HEADER_PROFILE_AVATAR_CLASSNAME = "rounded-100 size-24 xl:size-36";
 const HEADER_PROFILE_SKELETON_CLASSNAME = "size-24 rounded-full xl:size-36";
 
 export type ProfileMenuItem =
@@ -32,46 +28,6 @@ export type ProfileMenuItem =
 
 const LINK_ITEM_CLASS =
   "hover:bg-background-hover focus-visible:bg-background-hover flex w-full items-center py-14 pr-12 pl-24 transition-colors focus-visible:outline-none";
-
-const HeaderProfileFallbackImage = () => {
-  return (
-    <div className={HEADER_PROFILE_FRAME_CLASSNAME}>
-      <Image
-        src={HEADER_PROFILE_FALLBACK_SRC}
-        alt=""
-        width={36}
-        height={36}
-        className={HEADER_PROFILE_IMAGE_CLASSNAME}
-      />
-    </div>
-  );
-};
-
-const HeaderProfilePhoto = ({ src }: { src: string }) => {
-  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
-
-  if (status === "error") {
-    return <HeaderProfileFallbackImage />;
-  }
-
-  return (
-    <div className={HEADER_PROFILE_FRAME_CLASSNAME}>
-      {status === "loading" ? <Skeleton className={HEADER_PROFILE_SKELETON_CLASSNAME} /> : null}
-      <Image
-        src={src}
-        alt=""
-        width={36}
-        height={36}
-        className={cn(
-          HEADER_PROFILE_IMAGE_CLASSNAME,
-          status === "loading" && "pointer-events-none absolute inset-0 opacity-0",
-        )}
-        onLoad={() => setStatus("loaded")}
-        onError={() => setStatus("error")}
-      />
-    </div>
-  );
-};
 
 interface ProfileMenuTriggerProps {
   nickname: string;
@@ -222,10 +178,12 @@ export default function ProfileMenuTrigger({
       >
         {isAvatarPending ? (
           <Skeleton className={HEADER_PROFILE_SKELETON_CLASSNAME} />
-        ) : safeImageUrl ? (
-          <HeaderProfilePhoto key={safeImageUrl} src={safeImageUrl} />
         ) : (
-          <HeaderProfileFallbackImage />
+          <ProfileAvatar
+            imageUrl={safeImageUrl}
+            className={HEADER_PROFILE_AVATAR_CLASSNAME}
+            sizes="36px"
+          />
         )}
         <Text as="span" variant="2lg-medium" className="text-text-primary hidden xl:block">
           {nickname}

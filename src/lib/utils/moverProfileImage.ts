@@ -1,25 +1,11 @@
-import { isAllowedImageRemoteUrl } from "@/lib/constants/allowedImageHosts";
+import { DEFAULT_PROFILE_IMAGE, getAllowedImageSrc } from "@/lib/utils/safeImageSrc";
 
-export const DEFAULT_MOVER_PROFILE_IMAGE = "/images/profile-character.png";
-
-const isLocalPublicPath = (src: string) =>
-  src.startsWith("/") && !src.startsWith("//") && !src.includes("\\") && !src.includes("..");
+export const DEFAULT_MOVER_PROFILE_IMAGE = DEFAULT_PROFILE_IMAGE;
 
 /**
  * 카드/목록에 넣을 프로필 이미지 URL.
- * - 로컬 `/...` 허용 (프로토콜 상대 `//` 제외)
- * - 원격은 allowlist(seed picsum + NEXT_PUBLIC_PROFILE_IMAGE_HOSTS)만 허용
- * - 그 외는 기본 이미지
+ * allowlist를 통과하면 그대로, 그 외·빈 값은 기본 캐릭터 이미지.
  */
-export function resolveMoverProfileImageSrc(src: string | null | undefined) {
-  const trimmed = src?.trim() ?? "";
-  if (!trimmed) {
-    return DEFAULT_MOVER_PROFILE_IMAGE;
-  }
-
-  if (isLocalPublicPath(trimmed) || isAllowedImageRemoteUrl(trimmed)) {
-    return trimmed;
-  }
-
-  return DEFAULT_MOVER_PROFILE_IMAGE;
-}
+export const resolveMoverProfileImageSrc = (src: string | null | undefined) => {
+  return getAllowedImageSrc(src) ?? DEFAULT_PROFILE_IMAGE;
+};

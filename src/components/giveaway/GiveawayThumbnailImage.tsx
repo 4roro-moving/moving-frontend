@@ -21,10 +21,20 @@ interface GiveawayThumbnailImageInnerProps extends Omit<GiveawayThumbnailImagePr
   src: string;
 }
 
-const GiveawayThumbnailFallback = ({ iconClassName }: { iconClassName?: string }) => {
+interface GiveawayThumbnailFallbackProps {
+  iconClassName?: string;
+  alt?: string;
+}
+
+const getGiveawayThumbnailLoadErrorLabel = (alt: string) => {
+  return `${alt}를 불러오지 못했습니다`;
+};
+
+const GiveawayThumbnailFallback = ({ iconClassName, alt = "" }: GiveawayThumbnailFallbackProps) => {
   return (
     <div className="flex size-full items-center justify-center">
       <GalleryIcon className={cn("text-icon-subtle size-40", iconClassName)} aria-hidden="true" />
+      {alt ? <span className="sr-only">{getGiveawayThumbnailLoadErrorLabel(alt)}</span> : null}
     </div>
   );
 };
@@ -41,7 +51,7 @@ const GiveawayThumbnailImageInner = ({
   const [hasError, setHasError] = useState(false);
 
   if (hasError) {
-    return <GiveawayThumbnailFallback iconClassName={iconClassName} />;
+    return <GiveawayThumbnailFallback iconClassName={iconClassName} alt={alt} />;
   }
 
   return (
@@ -62,7 +72,7 @@ const GiveawayThumbnailImage = ({ src, ...props }: GiveawayThumbnailImageProps) 
   const safeSrc = getAllowedImageSrc(src);
 
   if (!safeSrc) {
-    return <GiveawayThumbnailFallback iconClassName={props.iconClassName} />;
+    return <GiveawayThumbnailFallback iconClassName={props.iconClassName} alt={props.alt} />;
   }
 
   return <GiveawayThumbnailImageInner key={safeSrc} src={safeSrc} {...props} />;
