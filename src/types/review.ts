@@ -39,6 +39,9 @@ export interface MyReviewItem {
   rating: number;
   content: string;
   createdAt: string;
+  isHidden: boolean;
+  /** 숨김일 때 관리자 HIDE 사유. 공개면 null */
+  hiddenReason: string | null;
   price: number;
   estimateRequest: {
     id: number;

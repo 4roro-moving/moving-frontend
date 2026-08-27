@@ -26,7 +26,7 @@ interface MyReviewCardProps {
 export default function MyReviewCard({ review }: MyReviewCardProps) {
   const t = useTranslations("reviews");
   const format = useFormatter();
-  const { mover, estimateRequest, rating, content, createdAt } = review;
+  const { mover, estimateRequest, rating, content, createdAt, isHidden, hiddenReason } = review;
   const displayName = getReviewMoverDisplayName(mover);
   const titleId = `my-review-${review.id}-title`;
   const createdDate = new Date(createdAt);
@@ -51,6 +51,11 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
             size="md"
             className="hidden py-4 pr-7 pl-5 md:inline-flex"
           />
+          {isHidden ? (
+            <span className="bg-background-brand-muted text-text-brand rounded-md px-8 py-2 text-xs font-semibold">
+              {t("hiddenBadge")}
+            </span>
+          ) : null}
         </div>
 
         <div className="flex w-full items-start gap-10 md:items-center md:gap-16">
@@ -106,10 +111,21 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
       <Text
         as="p"
         variant={{ base: "md-regular", md: "lg-regular" }}
-        className="text-text-secondary break-words whitespace-pre-wrap"
+        className={
+          isHidden
+            ? "text-text-muted break-words whitespace-pre-wrap"
+            : "text-text-secondary break-words whitespace-pre-wrap"
+        }
       >
         <AutoTranslatedText text={content} />
       </Text>
+
+      {isHidden && hiddenReason ? (
+        <div className="bg-background-subtle rounded-12 px-12 py-10">
+          <p className="text-text-muted text-xs font-semibold">{t("hiddenReason")}</p>
+          <p className="text-text-secondary mt-4 text-sm whitespace-pre-wrap">{hiddenReason}</p>
+        </div>
+      ) : null}
 
       <Text
         as="time"

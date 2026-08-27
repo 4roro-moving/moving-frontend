@@ -21,7 +21,7 @@ interface PricePredictionFormProps {
   onSubmit: (data: PricePredictionRequest) => void;
 }
 
-type RegionKind = "출발지" | "도착지";
+type RegionKind = "from" | "to";
 
 const MOVE_TYPES: PricePredictionMoveType[] = ["SMALL", "HOME", "OFFICE"];
 
@@ -175,7 +175,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
       return;
     }
 
-    const currentAddress = addressModalKind === "출발지" ? fromAddress : toAddress;
+    const currentAddress = addressModalKind === "from" ? fromAddress : toAddress;
 
     if (hasSameCoordinates(currentAddress, address)) {
       setAddressModalKind(null);
@@ -184,11 +184,11 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
 
     resetDistance();
 
-    if (addressModalKind === "출발지") {
+    if (addressModalKind === "from") {
       setFromAddress(address);
     }
 
-    if (addressModalKind === "도착지") {
+    if (addressModalKind === "to") {
       setToAddress(address);
     }
 
@@ -320,7 +320,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
             label={t("form.origin")}
             address={fromAddress}
             disabled={isPending || isDistancePending}
-            onClick={() => setAddressModalKind("출발지")}
+            onClick={() => setAddressModalKind("from")}
             onReset={handleFromAddressReset}
           />
 
@@ -328,7 +328,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
             label={t("form.destination")}
             address={toAddress}
             disabled={isPending || isDistancePending}
-            onClick={() => setAddressModalKind("도착지")}
+            onClick={() => setAddressModalKind("to")}
             onReset={handleToAddressReset}
           />
         </div>
@@ -472,7 +472,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
       {addressModalKind && (
         <AddressSelectModal
           open
-          kind={addressModalKind}
+          kind={addressModalKind === "from" ? t("form.origin") : t("form.destination")}
           onClose={() => setAddressModalKind(null)}
           onConfirm={handleAddressConfirm}
         />

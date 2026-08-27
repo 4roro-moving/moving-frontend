@@ -1,7 +1,15 @@
 import { getApiError } from "@/lib/api/getApiError";
 import { getApiErrorMessage } from "@/lib/api/getApiErrorMessage";
-import { getAudienceMismatchMessage, type AuthAudience } from "@/lib/auth/redirect";
+import type { AuthAudience } from "@/lib/auth/redirect";
 import { ERROR_CODES } from "@/lib/constants/errorCodes";
+
+export type LoginErrorCopy = {
+  roleMismatchCustomer: string;
+  roleMismatchMover: string;
+  accountSuspended: string;
+  suspensionReasonPrefix: string;
+  fallback: string;
+};
 
 export const isAccountSuspended = (error: unknown): boolean =>
   getApiError(error).code === ERROR_CODES.ACCOUNT_SUSPENDED.code;
@@ -30,20 +38,24 @@ export const isSuspensionAppealAvailable = (error: unknown): boolean => {
   );
 };
 
-export const getLoginErrorMessage = (error: unknown, pageAudience: AuthAudience): string => {
+export const getLoginErrorMessage = (
+  error: unknown,
+  pageAudience: AuthAudience,
+  copy: LoginErrorCopy,
+): string => {
   const apiError = getApiError(error);
 
   if (apiError.code === ERROR_CODES.AUTH_ROLE_MISMATCH.code) {
-    return getAudienceMismatchMessage(pageAudience);
+    return pageAudience === "mover" ? copy.roleMismatchMover : copy.roleMismatchCustomer;
   }
 
   if (apiError.code === ERROR_CODES.ACCOUNT_SUSPENDED.code) {
     const reason = getAccountSuspensionReason(error);
 
     return reason
-      ? `${ERROR_CODES.ACCOUNT_SUSPENDED.message}\n정지 사유: ${reason}`
-      : ERROR_CODES.ACCOUNT_SUSPENDED.message;
+      ? `${copy.accountSuspended}\n${copy.suspensionReasonPrefix}: ${reason}`
+      : copy.accountSuspended;
   }
 
-  return getApiErrorMessage(error);
+  return getApiErrorMessage(error, copy.fallback);
 };

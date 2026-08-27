@@ -20,7 +20,7 @@ import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import type { MoveType } from "@/types/move";
 
-type AddressModalKind = "출발지" | "도착지"; // 모달 종류
+type AddressModalKind = "from" | "to";
 type MoveTypeFilter = "ALL" | MoveType; //이사 유형 필터
 
 //기사 표시 카드
@@ -133,9 +133,9 @@ export function MoverRecommendationMapPage() {
 
   //주소 선택 시 현재 모달 종류에 따라 출발지 또는 도착지에 저장
   function handleAddressConfirm(address: AddressSearchItem) {
-    if (addressModalKind === "출발지") {
+    if (addressModalKind === "from") {
       setDeparture(address);
-    } else if (addressModalKind === "도착지") {
+    } else if (addressModalKind === "to") {
       setDestination(address);
     }
 
@@ -158,11 +158,11 @@ export function MoverRecommendationMapPage() {
               <Input
                 readOnly
                 value={departure?.roadAddress ?? ""}
-                onClick={() => setAddressModalKind("출발지")}
+                onClick={() => setAddressModalKind("from")}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
-                    setAddressModalKind("출발지");
+                    setAddressModalKind("from");
                   }
                 }}
                 placeholder={t("departurePlaceholder")}
@@ -177,11 +177,11 @@ export function MoverRecommendationMapPage() {
               <Input
                 readOnly
                 value={destination?.roadAddress ?? ""}
-                onClick={() => setAddressModalKind("도착지")}
+                onClick={() => setAddressModalKind("to")}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
-                    setAddressModalKind("도착지");
+                    setAddressModalKind("to");
                   }
                 }}
                 placeholder={t("destinationPlaceholder")}
@@ -294,7 +294,7 @@ export function MoverRecommendationMapPage() {
       {addressModalKind && (
         <AddressSelectModal
           open
-          kind={addressModalKind}
+          kind={addressModalKind === "from" ? t("departure") : t("destination")}
           onClose={() => setAddressModalKind(null)}
           onConfirm={handleAddressConfirm}
         />

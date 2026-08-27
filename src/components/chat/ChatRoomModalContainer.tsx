@@ -235,7 +235,9 @@ function ChatMessageList({
                             isMine ? "text-text-inverse" : "text-text-primary",
                           )}
                         >
-                          {revision.requestedComment}
+                          {revision.requestedComment ? (
+                            <AutoTranslatedText text={revision.requestedComment} />
+                          ) : null}
                         </Text>
                       </div>
 

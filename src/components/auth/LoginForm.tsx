@@ -48,6 +48,13 @@ interface LoginFormProps {
 
 const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
   const t = useTranslations("auth");
+  const loginErrorCopy = {
+    roleMismatchCustomer: t("roleMismatchCustomer"),
+    roleMismatchMover: t("roleMismatchMover"),
+    accountSuspended: t("accountSuspended"),
+    suspensionReasonPrefix: t("suspensionReasonLabel"),
+    fallback: t("requestFailed"),
+  };
   const router = useRouter();
   const { mutateAsync: login, isPending } = useLoginMutation();
   const establishSession = useAuthStore((state) => state.establishSession);
@@ -109,7 +116,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
       setSuspensionReason(getAccountSuspensionReason(error) ?? null);
       setIsSuspended(isAccountSuspended(error));
       setIsAppealAvailable(isSuspensionAppealAvailable(error));
-      setSubmitError(getLoginErrorMessage(error, audience));
+      setSubmitError(getLoginErrorMessage(error, audience, loginErrorCopy));
     }
   });
 
@@ -215,7 +222,7 @@ const LoginForm = ({ audience = "customer" }: LoginFormProps) => {
 
             setSuspensionReason(getAccountSuspensionReason(error) ?? null);
             setIsAppealAvailable(isSuspensionAppealAvailable(error));
-            setSubmitError(getLoginErrorMessage(error, audience));
+            setSubmitError(getLoginErrorMessage(error, audience, loginErrorCopy));
           }}
         />
       </div>

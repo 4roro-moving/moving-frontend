@@ -26,7 +26,7 @@ import MoveTypeCard from "./MoveTypeCard";
 const HOME_PATH = "/";
 const FORBIDDEN_REDIRECT_DELAY_MS = 1500;
 
-type RegionKind = "출발지" | "도착지";
+type RegionKind = "from" | "to";
 type MobileStep = 1 | 2 | 3;
 
 function StepIndicator({ current }: { current: MobileStep }) {
@@ -77,7 +77,7 @@ function RegionField({
   onDetailChange,
 }: RegionFieldProps) {
   const t = useTranslations("estimateRequest");
-  const isFrom = kind === "출발지";
+  const isFrom = kind === "from";
   const kindLabel = isFrom ? t("fromAddress") : t("toAddress");
   const detailInputId = `${kind}-detail-address`;
 
@@ -222,14 +222,14 @@ export default function EstimateRequestForm() {
   });
 
   function handleAddressConfirm(address: AddressItem) {
-    if (addressModalKind === "출발지") {
+    if (addressModalKind === "from") {
       // 기존 주소를 다른 주소로 바꿀 때만 상세주소를 초기화한다
       if (fromAddress != null) {
         setFromDetailAddress("");
       }
       setFromAddress(address);
     }
-    if (addressModalKind === "도착지") {
+    if (addressModalKind === "to") {
       if (toAddress != null) {
         setToDetailAddress("");
       }
@@ -450,19 +450,19 @@ export default function EstimateRequestForm() {
             </Text>
             <div className="flex w-full min-w-0 flex-col gap-24 md:w-[520px] md:max-w-full md:flex-row md:gap-16">
               <RegionField
-                kind="출발지"
+                kind="from"
                 value={fromAddress ? normalizeRoadAddress(fromAddress.roadAddress) : null}
                 detailValue={fromDetailAddress}
-                onSelect={() => setAddressModalKind("출발지")}
-                onReset={() => setAddressModalKind("출발지")}
+                onSelect={() => setAddressModalKind("from")}
+                onReset={() => setAddressModalKind("from")}
                 onDetailChange={setFromDetailAddress}
               />
               <RegionField
-                kind="도착지"
+                kind="to"
                 value={toAddress ? normalizeRoadAddress(toAddress.roadAddress) : null}
                 detailValue={toDetailAddress}
-                onSelect={() => setAddressModalKind("도착지")}
-                onReset={() => setAddressModalKind("도착지")}
+                onSelect={() => setAddressModalKind("to")}
+                onReset={() => setAddressModalKind("to")}
                 onDetailChange={setToDetailAddress}
               />
             </div>
@@ -533,7 +533,7 @@ export default function EstimateRequestForm() {
       {addressModalKind && (
         <AddressSelectModal
           open
-          kind={addressModalKind}
+          kind={addressModalKind === "from" ? t("fromAddress") : t("toAddress")}
           onClose={() => setAddressModalKind(null)}
           onConfirm={handleAddressConfirm}
         />
