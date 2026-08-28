@@ -1634,13 +1634,13 @@
       "emptyTitle": "Enter your move details",
       "errorFallback": "Unable to calculate an estimate.",
       "errorTitle": "Estimate calculation failed",
-      "estimatedPrice": "Estimated price",
-      "factorSummary": "Price factors",
+      "estimatedPrice": "About {price}",
+      "factorSummary": "{distance}km · {size} pyeong · load {load}",
       "peakSeason": "Peak season",
-      "priceRange": "Estimated range",
+      "priceRange": "Estimated range {min} ~ {max}",
       "sampleCount": "{count} similar estimates",
       "sampleLabel": "Similar estimates",
-      "title": "Title",
+      "title": "Estimated quote",
       "weekend": "Weekend"
     },
     "moveTypes": {

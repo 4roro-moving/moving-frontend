@@ -1634,13 +1634,13 @@
       "emptyTitle": "引越し条件を入力してください",
       "errorFallback": "予想見積もりを計算できませんでした。",
       "errorTitle": "予想見積もりの計算に失敗しました",
-      "estimatedPrice": "予想金額",
-      "factorSummary": "見積もり条件",
+      "estimatedPrice": "約{price}",
+      "factorSummary": "{distance}km · {size}坪 · 荷物量 {load}",
       "peakSeason": "繁忙期",
-      "priceRange": "予想範囲",
+      "priceRange": "予想範囲 {min} ~ {max}",
       "sampleCount": "類似見積もり{count}件",
       "sampleLabel": "類似見積もり",
-      "title": "タイトル",
+      "title": "予想見積もり",
       "weekend": "週末"
     },
     "moveTypes": {

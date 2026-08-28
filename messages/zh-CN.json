@@ -1634,13 +1634,13 @@
       "emptyTitle": "请输入搬家条件",
       "errorFallback": "无法计算预计报价。",
       "errorTitle": "预计报价计算失败",
-      "estimatedPrice": "预计金额",
-      "factorSummary": "报价影响因素",
+      "estimatedPrice": "约 {price}",
+      "factorSummary": "{distance}km · {size}平 · 行李量 {load}",
       "peakSeason": "旺季",
-      "priceRange": "预计范围",
+      "priceRange": "预计范围 {min} ~ {max}",
       "sampleCount": "{count}条相似报价",
       "sampleLabel": "相似报价",
-      "title": "标题",
+      "title": "预计报价",
       "weekend": "周末"
     },
     "moveTypes": {
