@@ -7,7 +7,6 @@ import { Text } from "@/components/common/Text";
 import { useNotifications } from "@/hooks/notifications/useNotifications";
 import { useReadAllNotifications } from "@/hooks/notifications/useReadAllNotifications";
 import { useReadNotification } from "@/hooks/notifications/useReadNotification";
-import { useUnreadNotificationCount } from "@/hooks/notifications/useUnreadNotificationCount";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { CloseIcon } from "@/icons";
 import { NOTIFICATION_PAGE_SIZE } from "@/lib/api/notifications";
@@ -22,6 +21,7 @@ interface NotificationPanelProps {
   onClose: () => void;
   className?: string;
   isVisible: boolean;
+  unreadCount: number;
 }
 
 export default function NotificationPanel({
@@ -29,6 +29,7 @@ export default function NotificationPanel({
   onClose,
   className,
   isVisible,
+  unreadCount,
 }: NotificationPanelProps) {
   const t = useTranslations("notifications");
   const panelRef = useRef<HTMLDivElement>(null);
@@ -41,11 +42,11 @@ export default function NotificationPanel({
   const { data, isPending, isError, isFetching } = useNotifications({
     page: queryPage,
     limit: NOTIFICATION_PAGE_SIZE,
+    enabled: isVisible,
   });
 
   const { mutateAsync: markAsRead } = useReadNotification();
   const { mutateAsync: markAllAsRead, isPending: isMarkAllPending } = useReadAllNotifications();
-  const { data: unreadCountData } = useUnreadNotificationCount({ enabled: isVisible });
 
   useFocusTrap({
     containerRef: panelRef,
@@ -54,7 +55,6 @@ export default function NotificationPanel({
   });
 
   const notifications = data?.notifications ?? [];
-  const unreadCount = unreadCountData?.unreadCount ?? 0;
   const canMarkAllAsRead = unreadCount > 0 && !isMarkAllPending;
   const totalPagesFromData = data?.pagination.totalPages;
   const pageCount = Math.max(1, totalPagesFromData ?? knownPageCount ?? 1);

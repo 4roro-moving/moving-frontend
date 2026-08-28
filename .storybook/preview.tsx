@@ -5,10 +5,12 @@ import "../src/app/globals.css";
 import messages from "../messages/ko.json";
 import { DEFAULT_LOCALE } from "../src/i18n/config";
 
+const STORYBOOK_NOW = new Date("2026-08-28T00:00:00.000Z");
+
 const preview: Preview = {
   decorators: [
     (Story) => (
-      <NextIntlClientProvider locale={DEFAULT_LOCALE} messages={messages}>
+      <NextIntlClientProvider locale={DEFAULT_LOCALE} messages={messages} now={STORYBOOK_NOW}>
         <Story />
       </NextIntlClientProvider>
     ),
