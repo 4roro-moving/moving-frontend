@@ -9,6 +9,7 @@ import Toast from "@/components/common/Toast/Toast";
 import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
 import { useCreateEstimateRequest } from "@/hooks/useCreateEstimateRequest";
 import { getLoginRedirectPath } from "@/lib/auth/session";
+import { ADDRESS_DIRECTION, type AddressDirection } from "@/lib/constants/address";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { MOVE_TYPE_CARDS } from "@/lib/constants/moveType";
 import { normalizeRoadAddress } from "@/lib/kakao/addressSearch";
@@ -26,7 +27,6 @@ import MoveTypeCard from "./MoveTypeCard";
 const HOME_PATH = "/";
 const FORBIDDEN_REDIRECT_DELAY_MS = 1500;
 
-type RegionKind = "출발지" | "도착지";
 type MobileStep = 1 | 2 | 3;
 
 function StepIndicator({ current }: { current: MobileStep }) {
@@ -58,7 +58,7 @@ function StepIndicator({ current }: { current: MobileStep }) {
 }
 
 interface RegionFieldProps {
-  kind: RegionKind;
+  kind: AddressDirection;
   value: string | null;
   detailValue: string;
   onSelect: () => void;
@@ -77,7 +77,7 @@ function RegionField({
   onDetailChange,
 }: RegionFieldProps) {
   const t = useTranslations("estimateRequest");
-  const isFrom = kind === "출발지";
+  const isFrom = kind === ADDRESS_DIRECTION.FROM;
   const kindLabel = isFrom ? t("fromAddress") : t("toAddress");
   const detailInputId = `${kind}-detail-address`;
 
@@ -169,7 +169,7 @@ export default function EstimateRequestForm() {
   const [toAddress, setToAddress] = useState<AddressItem | null>(null);
   const [fromDetailAddress, setFromDetailAddress] = useState("");
   const [toDetailAddress, setToDetailAddress] = useState("");
-  const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
+  const [addressModalKind, setAddressModalKind] = useState<AddressDirection | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isAccessDeniedToastVisible, setIsAccessDeniedToastVisible] = useState(true);
 
@@ -222,14 +222,14 @@ export default function EstimateRequestForm() {
   });
 
   function handleAddressConfirm(address: AddressItem) {
-    if (addressModalKind === "출발지") {
+    if (addressModalKind === ADDRESS_DIRECTION.FROM) {
       // 기존 주소를 다른 주소로 바꿀 때만 상세주소를 초기화한다
       if (fromAddress != null) {
         setFromDetailAddress("");
       }
       setFromAddress(address);
     }
-    if (addressModalKind === "도착지") {
+    if (addressModalKind === ADDRESS_DIRECTION.TO) {
       if (toAddress != null) {
         setToDetailAddress("");
       }
@@ -450,19 +450,19 @@ export default function EstimateRequestForm() {
             </Text>
             <div className="flex w-full min-w-0 flex-col gap-24 md:w-[520px] md:max-w-full md:flex-row md:gap-16">
               <RegionField
-                kind="출발지"
+                kind={ADDRESS_DIRECTION.FROM}
                 value={fromAddress ? normalizeRoadAddress(fromAddress.roadAddress) : null}
                 detailValue={fromDetailAddress}
-                onSelect={() => setAddressModalKind("출발지")}
-                onReset={() => setAddressModalKind("출발지")}
+                onSelect={() => setAddressModalKind(ADDRESS_DIRECTION.FROM)}
+                onReset={() => setAddressModalKind(ADDRESS_DIRECTION.FROM)}
                 onDetailChange={setFromDetailAddress}
               />
               <RegionField
-                kind="도착지"
+                kind={ADDRESS_DIRECTION.TO}
                 value={toAddress ? normalizeRoadAddress(toAddress.roadAddress) : null}
                 detailValue={toDetailAddress}
-                onSelect={() => setAddressModalKind("도착지")}
-                onReset={() => setAddressModalKind("도착지")}
+                onSelect={() => setAddressModalKind(ADDRESS_DIRECTION.TO)}
+                onReset={() => setAddressModalKind(ADDRESS_DIRECTION.TO)}
                 onDetailChange={setToDetailAddress}
               />
             </div>
@@ -533,7 +533,7 @@ export default function EstimateRequestForm() {
       {addressModalKind && (
         <AddressSelectModal
           open
-          kind={addressModalKind}
+          kind={addressModalKind === ADDRESS_DIRECTION.FROM ? t("fromAddress") : t("toAddress")}
           onClose={() => setAddressModalKind(null)}
           onConfirm={handleAddressConfirm}
         />

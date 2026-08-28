@@ -16,11 +16,11 @@ import KakaoMap from "@/components/mover/map/KakaoMap";
 import { type MoverRecommendation, useMoverRecommendations } from "@/hooks/useMoverRecommendations";
 import { useRecommendationRegionIds } from "@/hooks/useRecommendationRegionIds";
 import { DriverBadgeIcon, StarIcon } from "@/icons";
+import { ADDRESS_DIRECTION, type AddressDirection } from "@/lib/constants/address";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import type { AddressSearchItem } from "@/lib/kakao/addressSearch";
 import type { MoveType } from "@/types/move";
 
-type AddressModalKind = "출발지" | "도착지"; // 모달 종류
 type MoveTypeFilter = "ALL" | MoveType; //이사 유형 필터
 
 //기사 표시 카드
@@ -96,7 +96,7 @@ export function MoverRecommendationMapPage() {
   const [searchedDestination, setSearchedDestination] = useState<AddressSearchItem | null>(null);
   const [searchedMoveType, setSearchedMoveType] = useState<MoveTypeFilter>("ALL");
 
-  const [addressModalKind, setAddressModalKind] = useState<AddressModalKind | null>(null);
+  const [addressModalKind, setAddressModalKind] = useState<AddressDirection | null>(null);
   //검색 여부
   const hasSearched = searchedDeparture !== null && searchedDestination !== null;
 
@@ -133,9 +133,9 @@ export function MoverRecommendationMapPage() {
 
   //주소 선택 시 현재 모달 종류에 따라 출발지 또는 도착지에 저장
   function handleAddressConfirm(address: AddressSearchItem) {
-    if (addressModalKind === "출발지") {
+    if (addressModalKind === ADDRESS_DIRECTION.FROM) {
       setDeparture(address);
-    } else if (addressModalKind === "도착지") {
+    } else if (addressModalKind === ADDRESS_DIRECTION.TO) {
       setDestination(address);
     }
 
@@ -158,11 +158,11 @@ export function MoverRecommendationMapPage() {
               <Input
                 readOnly
                 value={departure?.roadAddress ?? ""}
-                onClick={() => setAddressModalKind("출발지")}
+                onClick={() => setAddressModalKind(ADDRESS_DIRECTION.FROM)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
-                    setAddressModalKind("출발지");
+                    setAddressModalKind(ADDRESS_DIRECTION.FROM);
                   }
                 }}
                 placeholder={t("departurePlaceholder")}
@@ -177,11 +177,11 @@ export function MoverRecommendationMapPage() {
               <Input
                 readOnly
                 value={destination?.roadAddress ?? ""}
-                onClick={() => setAddressModalKind("도착지")}
+                onClick={() => setAddressModalKind(ADDRESS_DIRECTION.TO)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
-                    setAddressModalKind("도착지");
+                    setAddressModalKind(ADDRESS_DIRECTION.TO);
                   }
                 }}
                 placeholder={t("destinationPlaceholder")}
@@ -294,7 +294,7 @@ export function MoverRecommendationMapPage() {
       {addressModalKind && (
         <AddressSelectModal
           open
-          kind={addressModalKind}
+          kind={addressModalKind === ADDRESS_DIRECTION.FROM ? t("departure") : t("destination")}
           onClose={() => setAddressModalKind(null)}
           onConfirm={handleAddressConfirm}
         />

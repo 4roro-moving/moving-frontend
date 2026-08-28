@@ -1,3 +1,4 @@
+import { MOVE_TYPE_VALUES } from "@/lib/constants/moveType";
 import { REGION_OPTIONS } from "@/lib/constants/region";
 import type { MoveType } from "@/types/move";
 import type { MoverSort, MoversListQuery } from "@/types/mover";
@@ -15,7 +16,7 @@ export const MOVERS_SEARCH_DEFAULTS = {
 
 export const MOVER_SORT_VALUES: MoverSort[] = ["rating", "reviewCount", "career", "confirmedCount"];
 
-export const MOVE_TYPE_VALUES: MoveType[] = ["SMALL", "HOME", "OFFICE"];
+export { MOVE_TYPE_VALUES };
 
 /** URL·필터에서 허용하는 지역 id 문자열 (REGION_OPTIONS와 동일) */
 const MOVER_SERVICE_AREA_VALUES = new Set(REGION_OPTIONS.map((region) => String(region.value)));
@@ -48,7 +49,7 @@ function parseMoveType(value: string | undefined): string {
   if (!value || value === MOVERS_ALL_VALUE) {
     return MOVERS_ALL_VALUE;
   }
-  if (MOVE_TYPE_VALUES.includes(value as MoveType)) {
+  if ((MOVE_TYPE_VALUES as readonly MoveType[]).includes(value as MoveType)) {
     return value;
   }
   return MOVERS_ALL_VALUE;

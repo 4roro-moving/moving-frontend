@@ -70,6 +70,7 @@ export const NOTIFICATION_MESSAGE_TEMPLATES: Record<NotificationType, Notificati
     NOTICE_RECEIVED: {},
     //문의 답변 등록 알림 문구
     INQUIRY_ANSWERED: {
+      // content(과거 완성 문장 포함)는 무시하고 locale 완성 문장만 사용
       suffixKey: "inquiryAnswered",
     },
     //관리자가 콘텐츠(리뷰/거주후기/나눔) 숨김 처리한 경우 알림 문구
@@ -148,6 +149,11 @@ export const buildNotificationMessageParts = (
     if (giveawayParts) {
       return giveawayParts;
     }
+  }
+
+  // BE가 완성 문장을 content에 넣던 타입 — locale 문장만 사용해 중복·한국어 고정을 피한다.
+  if (type === "INQUIRY_ANSWERED") {
+    return [{ text: translate("inquiryAnswered") }];
   }
 
   const prefix = template.prefixKey ? translate(template.prefixKey) : "";

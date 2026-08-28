@@ -52,13 +52,16 @@ export const getAuthAudienceFromRole = (role: AuthRole | null | undefined): Auth
   }
 };
 
-/** 로그인/OAuth 입구에서 AUTH_ROLE_MISMATCH일 때 안내 문구 */
-export const getAudienceMismatchMessage = (pageAudience: AuthAudience): string => {
+/** 로그인/OAuth 입구에서 AUTH_ROLE_MISMATCH일 때 안내 문구 (locale copy는 호출부에서 전달) */
+export const getAudienceMismatchMessage = (
+  pageAudience: AuthAudience,
+  copy: { roleMismatchCustomer: string; roleMismatchMover: string },
+): string => {
   if (pageAudience === "mover") {
-    return "일반 유저 계정입니다. 일반 유저 로그인을 이용해 주세요.";
+    return copy.roleMismatchMover;
   }
 
-  return "기사님 계정입니다. 기사님 전용 로그인을 이용해 주세요.";
+  return copy.roleMismatchCustomer;
 };
 
 /** 역할별 홈 — 잘못된 role 접근·auth 재진입 */

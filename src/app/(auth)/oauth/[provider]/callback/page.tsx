@@ -104,6 +104,14 @@ const OAuthCallbackContent = () => {
   const [loginButtonLabel, setLoginButtonLabel] = useState<string | undefined>();
 
   useEffect(() => {
+    const loginErrorCopy = {
+      roleMismatchCustomer: t("roleMismatchCustomer"),
+      roleMismatchMover: t("roleMismatchMover"),
+      accountSuspended: t("accountSuspended"),
+      suspensionReasonPrefix: t("suspensionReasonLabel"),
+      fallback: t("requestFailed"),
+    };
+
     const run = async () => {
       const code = searchParams.get("code");
       const state = searchParams.get("state");
@@ -152,7 +160,11 @@ const OAuthCallbackContent = () => {
             });
           } catch (err) {
             failOAuthCallback(
-              getLoginErrorMessage(err, getAuthAudienceFromRole(completed.user.role)),
+              getLoginErrorMessage(
+                err,
+                getAuthAudienceFromRole(completed.user.role),
+                loginErrorCopy,
+              ),
               setError,
             );
           }
@@ -238,7 +250,7 @@ const OAuthCallbackContent = () => {
           setLoginButtonLabel(tInquiry("create"));
         }
 
-        failOAuthCallback(getLoginErrorMessage(err, pageAudience), setError);
+        failOAuthCallback(getLoginErrorMessage(err, pageAudience, loginErrorCopy), setError);
       }
     };
 

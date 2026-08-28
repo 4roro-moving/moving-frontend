@@ -227,16 +227,18 @@ function ChatMessageList({
                           {t("price")} {formatPrice(revision.previousPrice)} →{" "}
                           {formatPrice(revision.requestedPrice)}
                         </Text>
-                        <Text
-                          as="p"
-                          variant="sm-medium"
-                          className={cn(
-                            "wrap-break-word whitespace-pre-wrap",
-                            isMine ? "text-text-inverse" : "text-text-primary",
-                          )}
-                        >
-                          {revision.requestedComment}
-                        </Text>
+                        {revision.requestedComment ? (
+                          <Text
+                            as="p"
+                            variant="sm-medium"
+                            className={cn(
+                              "wrap-break-word whitespace-pre-wrap",
+                              isMine ? "text-text-inverse" : "text-text-primary",
+                            )}
+                          >
+                            <AutoTranslatedText text={revision.requestedComment} />
+                          </Text>
+                        ) : null}
                       </div>
 
                       {canRespondRevision ? (

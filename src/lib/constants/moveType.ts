@@ -1,5 +1,7 @@
 import type { MoveType } from "@/types/move";
 
+export const MOVE_TYPE_VALUES = ["SMALL", "HOME", "OFFICE"] as const satisfies readonly MoveType[];
+
 export const MOVE_TYPE_LABEL: Record<MoveType, string> = {
   SMALL: "소형이사",
   HOME: "가정이사",
