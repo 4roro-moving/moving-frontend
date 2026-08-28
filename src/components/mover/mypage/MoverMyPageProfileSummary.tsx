@@ -2,9 +2,9 @@
 
 import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 
+import { ProfileImage } from "@/components/common/ProfileImage";
 import { Text } from "@/components/common/Text";
 import { useLocale, useTranslations } from "next-intl";
-import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
 import { DriverBadgeIcon, LikeIcon } from "@/icons";
 import type { MoverProfileMe } from "@/types/profile";
 
@@ -30,12 +30,12 @@ export default function MoverMyPageProfileSummary({
         aria-labelledby="mover-mypage-summary"
       >
         <div className="flex items-end gap-12">
-          <MoverProfileImage
+          <ProfileImage
             src={profile.imageUrl ?? ""}
             width={80}
             height={85}
             preload
-            className="bg-background-avatar rounded-12 md:h-mypage-profile-height md:rounded-20 h-64 w-60 object-cover md:w-80"
+            className="bg-background-avatar rounded-12 md:h-mypage-profile-height md:rounded-20 h-64 w-60 object-contain md:w-80"
           />
 
           <div className="flex min-w-0 flex-col justify-end md:gap-8">

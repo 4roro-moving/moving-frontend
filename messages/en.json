@@ -1562,7 +1562,7 @@
     "pageAria": "Notifications page {page}",
     "paginationAria": "Notification pagination",
     "previousPage": "Previous notification page",
-    "title": "Title",
+    "title": "Notifications",
     "triggerUnreadAria": "{count} unread notifications",
     "unread": "Unread",
     "estimateRequestReceived": " has sent an estimate request.",

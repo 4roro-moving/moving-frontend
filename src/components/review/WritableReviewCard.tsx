@@ -1,13 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 
 import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 import Button from "@/components/common/Button/Button";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import { Text } from "@/components/common/Text";
-import { DriverBadgeIcon, ProfileDefaultIcon } from "@/icons";
+import { DriverBadgeIcon } from "@/icons";
 import {
   formatMoveDateLabelSafe,
   formatPrice,
@@ -75,19 +75,13 @@ export default function WritableReviewCard({ item, onWriteClick }: WritableRevie
       <div className="flex w-full min-w-0 flex-col gap-20 xl:gap-24">
         {/* 상단: 프로필 + 기사 정보 / 견적 금액 */}
         <div className="flex w-full items-end gap-16 md:gap-24">
-          <div className="bg-background-avatar rounded-12 relative size-64 shrink-0 overflow-hidden md:size-80 xl:size-100">
-            {mover.imageUrl ? (
-              <Image
-                src={mover.imageUrl}
-                alt={t("moverProfileImageAlt", { name: moverLabel })}
-                fill
-                sizes="(min-width: 1280px) 100px, (min-width: 768px) 80px, 64px"
-                className="object-cover"
-              />
-            ) : (
-              <ProfileDefaultIcon className="size-full" />
-            )}
-          </div>
+          <ProfileAvatar
+            imageUrl={mover.imageUrl}
+            alt={t("moverProfileImageAlt", { name: moverLabel })}
+            sizes="(min-width: 1280px) 100px, (min-width: 768px) 80px, 64px"
+            className="rounded-12 size-64 md:size-80 xl:size-100"
+            imageClassName="object-contain"
+          />
 
           <div className="flex min-w-0 flex-1 items-end gap-8">
             <div className="flex min-w-0 flex-1 flex-col items-start gap-8">

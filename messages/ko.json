@@ -1562,7 +1562,7 @@
     "pageAria": "알림 {page}페이지",
     "paginationAria": "알림 페이지 이동",
     "previousPage": "이전 알림 페이지",
-    "title": "제목",
+    "title": "알림",
     "triggerUnreadAria": "읽지 않은 알림 {count}개",
     "unread": "읽지 않음",
     "estimateRequestReceived": " 견적 요청이 도착했어요",

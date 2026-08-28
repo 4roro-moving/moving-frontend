@@ -3,11 +3,10 @@
 import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 
 import { Text } from "@/components/common/Text";
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import { getDesignatedMoverDisplayName } from "@/lib/utils/estimateFormat";
-import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 import type { MyEstimateRequestDesignatedMover } from "@/types/estimate";
 
 interface EstimateRequestDesignatedMoversProps {
@@ -59,15 +58,13 @@ export default function EstimateRequestDesignatedMovers({
           return (
             <li key={item.moverId} className="flex w-full flex-col gap-8">
               <div className="flex w-full items-center gap-12">
-                <div className="bg-background-avatar rounded-12 relative size-40 shrink-0 overflow-hidden md:size-48">
-                  <Image
-                    src={resolveMoverProfileImageSrc(imageUrl)}
-                    alt={t("received.profileAlt", { name: displayName })}
-                    fill
-                    sizes="48px"
-                    className="object-cover"
-                  />
-                </div>
+                <ProfileAvatar
+                  imageUrl={imageUrl}
+                  alt={t("received.profileAlt", { name: displayName })}
+                  sizes="48px"
+                  className="rounded-12 size-40 md:size-48"
+                  imageClassName="object-contain"
+                />
 
                 <Text
                   as="span"

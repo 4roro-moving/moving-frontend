@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 
 import { toAbsoluteAppUrl } from "@/lib/utils/appUrl";
-import {
-  DEFAULT_MOVER_PROFILE_IMAGE,
-  resolveMoverProfileImageSrc,
-} from "@/lib/utils/moverProfileImage";
+import { DEFAULT_PROFILE_IMAGE, getAllowedImageSrc } from "@/lib/utils/safeImageSrc";
 import type { MoverDetailItem } from "@/types/mover";
 
 /** 기사님 상세 OG description */
@@ -27,7 +24,7 @@ interface BuildSharePageMetadataInput {
  * picsum seed(리다이렉트·경로의 `@`)는 스크랩 실패하는 경우가 많아 기본 이미지로 대체.
  */
 export function resolveShareOgImageUrl(profileImageUrl: string | null | undefined): string {
-  const src = resolveMoverProfileImageSrc(profileImageUrl);
+  const src = getAllowedImageSrc(profileImageUrl) ?? DEFAULT_PROFILE_IMAGE;
 
   if (src.startsWith("/")) {
     return toAbsoluteAppUrl(src);
@@ -38,10 +35,10 @@ export function resolveShareOgImageUrl(profileImageUrl: string | null | undefine
     const { hostname } = url;
     const isPicsumHost = hostname === "picsum.photos" || hostname.endsWith(".picsum.photos");
     if (isPicsumHost) {
-      return toAbsoluteAppUrl(DEFAULT_MOVER_PROFILE_IMAGE);
+      return toAbsoluteAppUrl(DEFAULT_PROFILE_IMAGE);
     }
   } catch {
-    return toAbsoluteAppUrl(DEFAULT_MOVER_PROFILE_IMAGE);
+    return toAbsoluteAppUrl(DEFAULT_PROFILE_IMAGE);
   }
 
   return src;
