@@ -1562,7 +1562,7 @@
     "pageAria": "通知第{page}页",
     "paginationAria": "通知分页",
     "previousPage": "上一页通知",
-    "title": "标题",
+    "title": "通知",
     "triggerUnreadAria": "{count}条未读通知",
     "unread": "未读",
     "estimateRequestReceived": " 向您发送了报价请求。",

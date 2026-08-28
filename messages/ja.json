@@ -1562,7 +1562,7 @@
     "pageAria": "通知{page}ページ",
     "paginationAria": "通知ページ移動",
     "previousPage": "前の通知ページ",
-    "title": "タイトル",
+    "title": "通知",
     "triggerUnreadAria": "未読通知{count}件",
     "unread": "未読",
     "estimateRequestReceived": " 見積もり依頼が届きました。",

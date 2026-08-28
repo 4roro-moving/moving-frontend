@@ -1,13 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 
 import Modal from "@/components/common/Modal/Modal";
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import { Text } from "@/components/common/Text";
 import { getDesignatedMoverDisplayName } from "@/lib/utils/estimateFormat";
 import { cn } from "@/lib/utils/cn";
-import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 import type { MyEstimateRequestDesignatedMover } from "@/types/estimate";
 
 const PANEL_CLASSNAME = cn(
@@ -84,15 +83,13 @@ export default function EstimateRequestCancelHubModal({
                     className="border-border-subtle rounded-12 flex w-full shrink-0 items-center justify-between gap-8 border px-10 py-8 md:gap-12 md:px-12 md:py-10"
                   >
                     <div className="flex min-w-0 flex-1 items-center gap-8 md:gap-10">
-                      <div className="bg-background-avatar rounded-12 relative size-36 shrink-0 overflow-hidden md:size-40">
-                        <Image
-                          src={resolveMoverProfileImageSrc(imageUrl)}
-                          alt={t("received.profileAlt", { name: displayName })}
-                          fill
-                          sizes="40px"
-                          className="object-cover"
-                        />
-                      </div>
+                      <ProfileAvatar
+                        imageUrl={imageUrl}
+                        alt={t("received.profileAlt", { name: displayName })}
+                        sizes="40px"
+                        className="rounded-12 size-36 md:size-40"
+                        imageClassName="object-contain"
+                      />
                       <Text
                         as="span"
                         variant={{ base: "md-semibold", md: "lg-semibold" }}

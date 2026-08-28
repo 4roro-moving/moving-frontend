@@ -1,10 +1,10 @@
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
-import { ArrowRightIcon, DriverBadgeIcon, ProfileDefaultIcon } from "@/icons";
+import { ArrowRightIcon, DriverBadgeIcon } from "@/icons";
 import { formatMoveDateLabelSafe, getReviewMoverDisplayName } from "@/lib/utils/estimateFormat";
 import type { ReviewableEstimateItem } from "@/types/review";
 
@@ -84,19 +84,13 @@ export default function ReviewEstimateSummary({ item }: ReviewEstimateSummaryPro
             </Text>
           </div>
 
-          <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
-            {mover.imageUrl ? (
-              <Image
-                src={mover.imageUrl}
-                alt={t("moverProfileImageAlt", { name: moverLabel })}
-                fill
-                sizes="50px"
-                className="object-cover"
-              />
-            ) : (
-              <ProfileDefaultIcon className="size-full" />
-            )}
-          </div>
+          <ProfileAvatar
+            imageUrl={mover.imageUrl}
+            alt={t("moverProfileImageAlt", { name: moverLabel })}
+            sizes="50px"
+            className="rounded-12 size-50"
+            imageClassName="object-contain"
+          />
         </div>
 
         <div className="bg-border-subtle h-px w-full" />

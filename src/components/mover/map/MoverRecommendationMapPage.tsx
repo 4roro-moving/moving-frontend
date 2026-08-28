@@ -6,11 +6,11 @@ import { useState } from "react";
 
 import Button from "@/components/common/Button/Button";
 import Input from "@/components/common/Input/Input";
+import { ProfileImage } from "@/components/common/ProfileImage";
 import Select from "@/components/common/Select/Select";
 import { Skeleton } from "@/components/common/Skeleton/Skeleton";
 import { Text } from "@/components/common/Text";
 import AddressSelectModal from "@/components/estimate/request/AddressSelectModal";
-import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
 import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips";
 import KakaoMap from "@/components/mover/map/KakaoMap";
 import { type MoverRecommendation, useMoverRecommendations } from "@/hooks/useMoverRecommendations";
@@ -45,11 +45,11 @@ function RecommendationCard({ mover }: { mover: MoverRecommendation }) {
         <div className="flex items-center gap-12">
           <div className="bg-background-avatar rounded-12 relative size-56 shrink-0 overflow-hidden">
             {/* 실제 프로필 이미지 */}
-            <MoverProfileImage
+            <ProfileImage
               src={mover.profileImageSrc}
               width={88}
               height={88}
-              className="absolute -top-8 -left-14 size-84 max-w-none object-cover"
+              className="size-full object-contain"
             />
           </div>
 

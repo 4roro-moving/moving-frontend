@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import { Text } from "@/components/common/Text";
 import { InfoIcon } from "@/icons";
 
@@ -6,8 +10,8 @@ import { InfoIcon } from "@/icons";
  * // 2026.07.29 정슬기 - [추가]
  * // 2026.07.29 정슬기 - [수정] notice 텍스트 토큰으로 아이콘 색·Figma 패딩 맞춤
  */
-export default async function EstimateDetailNotice() {
-  const t = await getTranslations("estimates");
+export default function EstimateDetailNotice() {
+  const t = useTranslations("estimates");
   return (
     <div
       role="status"
@@ -20,4 +24,3 @@ export default async function EstimateDetailNotice() {
     </div>
   );
 }
-import { getTranslations } from "next-intl/server";
