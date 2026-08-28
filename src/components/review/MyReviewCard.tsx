@@ -29,6 +29,12 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
   const { mover, estimateRequest, rating, content, createdAt, isHidden, hiddenReason } = review;
   const displayName = getReviewMoverDisplayName(mover);
   const titleId = `my-review-${review.id}-title`;
+  const hiddenBadgeId = `my-review-${review.id}-hidden-badge`;
+  const hiddenReasonId = `my-review-${review.id}-hidden-reason`;
+  const describedByIds = [
+    isHidden ? hiddenBadgeId : null,
+    isHidden && hiddenReason ? hiddenReasonId : null,
+  ].filter((id): id is string => id !== null);
   const createdDate = new Date(createdAt);
   const createdAtLabel = Number.isNaN(createdDate.getTime())
     ? createdAt
@@ -41,6 +47,7 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
         markInternalDetailNavigationOnClick(event, APP_ROUTES.MOVERS.DETAIL(mover.id))
       }
       aria-labelledby={titleId}
+      aria-describedby={describedByIds.length > 0 ? describedByIds.join(" ") : undefined}
       className="bg-background-surface border-border-subtle shadow-estimate-card rounded-16 md:rounded-20 focus-visible:ring-border-brand flex w-full flex-col gap-12 border-[0.5px] px-16 py-20 focus-visible:ring-2 focus-visible:outline-none md:gap-16 md:px-24 md:py-28 xl:gap-20 xl:px-32 xl:py-32"
     >
       <div className="flex w-full flex-col gap-12 md:gap-16">
@@ -52,7 +59,10 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
             className="hidden py-4 pr-7 pl-5 md:inline-flex"
           />
           {isHidden ? (
-            <span className="bg-background-brand-muted text-text-brand rounded-md px-8 py-2 text-xs font-semibold">
+            <span
+              id={hiddenBadgeId}
+              className="bg-background-brand-muted text-text-brand rounded-md px-8 py-2 text-xs font-semibold"
+            >
               {t("hiddenBadge")}
             </span>
           ) : null}
@@ -121,7 +131,7 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
       </Text>
 
       {isHidden && hiddenReason ? (
-        <div className="bg-background-subtle rounded-12 px-12 py-10">
+        <div id={hiddenReasonId} className="bg-background-subtle rounded-12 px-12 py-10">
           <Text as="p" variant="xs-semibold" className="text-text-muted">
             {t("hiddenReason")}
           </Text>
