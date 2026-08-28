@@ -17,9 +17,7 @@ const ProfileAvatar = ({
   alt = "",
 }: ProfileAvatarProps) => {
   return (
-    <div
-      className={cn("bg-background-avatar rounded-20 relative shrink-0 overflow-hidden", className)}
-    >
+    <div className={cn("bg-background-avatar relative shrink-0 overflow-hidden", className)}>
       <ProfileImage src={imageUrl} alt={alt} fill sizes={sizes} className={imageClassName} />
     </div>
   );
