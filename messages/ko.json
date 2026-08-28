@@ -1634,13 +1634,13 @@
       "emptyTitle": "이사 조건을 입력해 주세요",
       "errorFallback": "예상 견적을 계산하지 못했습니다.",
       "errorTitle": "예상 견적 계산에 실패했어요",
-      "estimatedPrice": "예상 금액",
-      "factorSummary": "견적 반영 조건",
+      "estimatedPrice": "약 {price}",
+      "factorSummary": "{distance}km · {size}평 · 짐량 {load}",
       "peakSeason": "성수기",
-      "priceRange": "예상 범위",
+      "priceRange": "예상 범위 {min} ~ {max}",
       "sampleCount": "유사 견적 {count}건",
       "sampleLabel": "유사 견적",
-      "title": "제목",
+      "title": "예상 견적",
       "weekend": "주말"
     },
     "moveTypes": {
