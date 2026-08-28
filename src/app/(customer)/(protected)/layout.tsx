@@ -1,0 +1,44 @@
+"use client";
+
+import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+
+import ProfileCompletionGuard from "@/components/auth/ProfileCompletionGuard";
+import RoleGuard from "@/components/auth/RoleGuard";
+import { getCustomerProtectedLoadingFallback } from "@/lib/loading/getCustomerProtectedLoadingFallback";
+
+interface CustomerProtectedLayoutProps {
+  children: ReactNode;
+}
+
+/**
+ * 고객 `(protected)` Route Group 공통 가드.
+ * 프로필 완료 검사는 이 layout의 ProfileCompletionGuard에서만 처리한다.
+ * 하위 페이지에 CustomerAuthGate(+ Guard)를 추가로 감싸지 말 것.
+ */
+const CustomerProtectedLayout = ({ children }: CustomerProtectedLayoutProps) => {
+  const t = useTranslations("profile");
+  const tFavorites = useTranslations("favorites");
+  const pathname = usePathname();
+  const loadingFallback = getCustomerProtectedLoadingFallback(pathname, {
+    favoritesTitle: tFavorites("title"),
+    create: {
+      title: t("createTitle"),
+      description: t("createDescription"),
+      loadingLabel: t("loading"),
+    },
+    edit: {
+      title: t("editTitle"),
+      loadingLabel: t("loading"),
+    },
+  });
+
+  return (
+    <RoleGuard allowedRole="CUSTOMER" loadingFallback={loadingFallback}>
+      <ProfileCompletionGuard loadingFallback={loadingFallback}>{children}</ProfileCompletionGuard>
+    </RoleGuard>
+  );
+};
+
+export default CustomerProtectedLayout;

@@ -1,16 +1,152 @@
 export const API_ROUTES = {
   AUTH: {
-    SIGN_UP: "/auth/signup",
-    SIGN_IN: "/auth/signin",
-    SIGN_OUT: "/auth/signout",
+    SIGN_UP_CUSTOMER: "/auth/signup/customer",
+    SIGN_UP_MOVER: "/auth/signup/mover",
+    LOGIN: "/auth/login",
+    LOGOUT: "/auth/logout",
     REFRESH: "/auth/refresh",
-    ME: "/auth/me",
+    GOOGLE_LOGIN: "/auth/oauth/google",
+    KAKAO_LOGIN: "/auth/oauth/kakao",
+    NAVER_LOGIN: "/auth/oauth/naver",
+    NAVER_OAUTH_STATE: "/auth/oauth/naver/state",
   },
-  USERS: "/users",
-  PROFILES: "/profiles",
-  MOVERS: "/movers",
-  ESTIMATE_REQUESTS: "/estimate-requests",
-  ESTIMATES: "/estimates",
-  REVIEWS: "/reviews",
-  NOTIFICATIONS: "/notifications",
+  USERS: {
+    ROOT: "/users",
+    ME: "/users/me",
+  },
+  PROFILES: {
+    ROOT: "/profiles",
+    IMAGE_UPLOAD_URL: "/profiles/image/upload-url",
+    CUSTOMER: "/profiles/customer",
+    CUSTOMER_STATUS: "/profiles/customer/status",
+    CUSTOMER_ME: "/profiles/customer/me",
+    CUSTOMER_BASIC: "/profiles/customer/me/basic",
+    MOVER: "/profiles/mover",
+    MOVER_STATUS: "/profiles/mover/status",
+    MOVER_ME: "/profiles/mover/me",
+    MOVER_BASIC: "/profiles/mover/me/basic",
+  },
+  MOVERS: {
+    ROOT: "/movers",
+    DETAIL: (moverId: string) => `/movers/${moverId}`,
+    REVIEWS: (moverId: string) => `/movers/${moverId}/reviews`,
+    // 2026.08.18 윤소정 - [추가] 캘린더 조회
+    CALENDAR: (moverId: string) => `/movers/${moverId}/calendar`,
+    MY_CALENDAR_DAY: (date: string) => `/movers/me/calendar/${date}`,
+  },
+  ESTIMATE_REQUESTS: {
+    ROOT: "/estimate-requests",
+    DETAIL: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
+    // 2026.08.03 정슬기 - [추가] 견적 요청의 cancel (DELETE)
+    DELETE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}`,
+    ACTIVE: "/estimate-requests/active",
+    DESIGNATE: (estimateRequestId: number) => `/estimate-requests/${estimateRequestId}/designate`,
+    // 2026.08.07 정슬기 - [추가] 지정 기사 개별 취소
+    CANCEL_DESIGNATE: (estimateRequestId: number, moverId: string) =>
+      `/estimate-requests/${estimateRequestId}/designate/${moverId}`,
+  },
+  // 2026.07.24 정슬기 - [추가] 받은 견적 목록·상세·확정 API 경로
+  // 2026.07.28 정슬기 - [수정] 대기 중인 견적 목록 경로 추가 (BE GET /estimates/pending)
+  ESTIMATES: {
+    ROOT: "/estimates",
+    REQUESTS: "/estimates/requests",
+    SEND: (estimateRequestId: number) => `/estimates/requests/${estimateRequestId}`,
+    REJECT: (estimateRequestId: number) => `/estimates/requests/${estimateRequestId}/reject`,
+    REJECTIONS: "/estimates/rejections",
+    SENT: "/estimates/sent",
+    SENT_DETAIL: (estimateId: number) => `/estimates/sent/${estimateId}`,
+    COMPLETE_SENT: (estimateId: number) => `/estimates/sent/${estimateId}/complete`,
+    PENDING: "/estimates/pending",
+    RECEIVED: "/estimates/received",
+    DETAIL: (estimateId: number) => `/estimates/${estimateId}`,
+    CONFIRM: (estimateId: number) => `/estimates/${estimateId}/confirm`,
+  },
+  FAVORITES: {
+    MOVERS: "/favorites/movers",
+    MOVER: (moverId: string) => `/favorites/movers/${moverId}`,
+  },
+  CHATS: {
+    ROOMS: "/chats/rooms",
+    ROOM: (roomId: number) => `/chats/rooms/${roomId}`,
+    MESSAGES: (roomId: number) => `/chats/rooms/${roomId}/messages`,
+    // 2026.08.18 김성현 - [추가] 채팅 이미지 Presigned URL 발급 경로
+    IMAGE_UPLOAD_URL: (roomId: number) => `/chats/rooms/${roomId}/images/upload-url`,
+  },
+  // 2026.07.25 정슬기 - [추가] 리뷰 API 경로
+  REVIEWS: {
+    ROOT: "/reviews",
+    ME: "/reviews/me",
+    REVIEWABLE: "/reviews/reviewable",
+  },
+  /** 내가 작성한 콘텐츠 검수(숨김) 상세 — 알림 linkUrl과 동일 */
+  MY_CONTENTS: {
+    DETAIL: (contentType: string, contentId: number) =>
+      `/my-contents/${contentType}/${String(contentId)}`,
+  },
+  // 2026.08.22 김나연 - [추가] 나눔 API 경로
+  GIVEAWAYS: {
+    ROOT: "/giveaways",
+    ME: "/giveaways/me",
+    DETAIL: (giveawayId: number) => `/giveaways/${giveawayId}`,
+    IMAGE_UPLOAD_URL: "/giveaways/image/upload-url",
+    REQUESTS: (giveawayId: number) => `/giveaways/${giveawayId}/requests`,
+    SELECT_REQUEST: (giveawayId: number, requestId: number) =>
+      `/giveaways/${giveawayId}/requests/${requestId}/select`,
+    REJECT_REQUEST: (giveawayId: number, requestId: number) =>
+      `/giveaways/${giveawayId}/requests/${requestId}/reject`,
+    COMPLETE: (giveawayId: number) => `/giveaways/${giveawayId}/complete`,
+  },
+  GIVEAWAY_REQUESTS: {
+    ME: "/giveaway-requests/me",
+    DETAIL: (requestId: number) => `/giveaway-requests/${requestId}`,
+    CANCEL: (requestId: number) => `/giveaway-requests/${requestId}/cancel`,
+  },
+  // 2026.08.20 김나연 - [추가] 거주후기 API 경로
+  RESIDENCE_REVIEWS: {
+    ROOT: "/residence-reviews",
+    ME: "/residence-reviews/me",
+    DETAIL: (residenceReviewId: number) => `/residence-reviews/${residenceReviewId}`,
+    STATISTICS: (regionId: number) => `/residence-reviews/statistics/${regionId}`,
+  },
+  NOTIFICATIONS: {
+    ROOT: "/notifications",
+    UNREAD_COUNT: "/notifications/unread-count",
+    READ: (notificationId: number) => `/notifications/${notificationId}/read`,
+    READ_ALL: "/notifications/read-all",
+    /** GET text/event-stream — Authorization Bearer 필요 */
+    SSE_SUBSCRIBE: "/notifications/sse/subscribe",
+  },
+
+  // 2026.08.16 심현수 - [추가] 약관 API 경로
+  TERMS: {
+    ROOT: "/terms",
+    BY_TYPE: (type: string) => `/terms/${type}`,
+  },
+
+  NOTICES: {
+    ROOT: "/notices",
+    DETAIL: (noticeId: number) => `/notices/${noticeId}`,
+  },
+
+  FAQS: {
+    ROOT: "/faqs",
+  },
+
+  INQUIRIES: {
+    ROOT: "/inquiries",
+    DETAIL: (inquiryId: number) => `/inquiries/${inquiryId}`,
+    MESSAGES: (inquiryId: number) => `/inquiries/${inquiryId}/messages`,
+    CLOSE: (inquiryId: number) => `/inquiries/${inquiryId}/close`,
+  },
+
+  REPORTS: {
+    ROOT: "/reports",
+    ME: "/reports/me",
+    IMAGE_UPLOAD_URL: "/reports/images/upload-url",
+  },
+
+  PRICE_PREDICTIONS: {
+    ROOT: "/price-predictions",
+    DISTANCE: "/price-predictions/distance",
+  },
 } as const;

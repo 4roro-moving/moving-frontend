@@ -1,0 +1,444 @@
+@theme inline {
+  /* Primitive Color */
+  --color-white: #ffffff;
+  --color-gray-100: #dedede;
+  --color-gray-200: #d9d9d9;
+  --color-gray-300: #c4c4c4;
+  --color-gray-400: #ababab;
+  --color-gray-500: #999999;
+  --color-gray-600: #808080;
+  --color-black-100: #61605e;
+  --color-black-200: #474643;
+  --color-black-300: #302f2d;
+  --color-black-400: #262524;
+  --color-black-500: #111111;
+  --color-orange-100: #feeeea;
+  --color-orange-200: #fed8d0;
+  --color-orange-300: #fd947f;
+  --color-orange-400: #f9502e;
+  --color-orange-500: #e04829;
+  --color-red-100: #ffeef0;
+  --color-red-200: #ff4f64;
+  --color-yellow-100: #ffc149;
+  --color-line-100: #f2f2f2;
+  --color-line-200: #e6e6e6;
+  --color-background-100: #fafafa;
+  --color-background-200: #f7f7f7;
+  --color-background-300: #efefef;
+
+  /* Semantic Color */
+  --color-brand-primary-strong: var(--color-orange-500);
+  --color-brand-primary: var(--color-orange-400);
+  --color-brand-primary-muted: var(--color-orange-300);
+  --color-brand-primary-subtle: var(--color-orange-100);
+
+  --color-background-default: var(--color-white);
+  --color-background-surface: var(--color-white);
+  --color-background-muted: var(--color-background-200);
+  --color-background-subtle: var(--color-background-100);
+  --color-background-brand-hover: var(--color-brand-primary-strong);
+  --color-background-brand: var(--color-brand-primary);
+  --color-background-brand-muted: var(--color-brand-primary-subtle);
+  --color-background-hover: var(--color-background-300);
+  --color-background-disabled: var(--color-gray-200);
+  --color-background-avatar: var(--color-black-300);
+
+  --color-text-primary: var(--color-black-500);
+  --color-text-secondary: var(--color-black-400);
+  --color-text-tertiary: var(--color-black-300);
+  --color-text-muted: var(--color-gray-600);
+  --color-text-subtle: var(--color-gray-500);
+  --color-text-weak: var(--color-gray-400);
+  --color-text-placeholder: var(--color-gray-500);
+  --color-text-disabled: var(--color-gray-600);
+  --color-text-description: var(--color-black-200);
+  --color-text-brand: var(--color-brand-primary);
+  --color-text-inverse: var(--color-white);
+  --color-text-error: var(--color-status-error);
+
+  --color-border-default: var(--color-line-200);
+  --color-border-muted: var(--color-gray-200);
+  --color-border-subtle: var(--color-line-100);
+  --color-border-brand: var(--color-brand-primary);
+  --color-border-error: var(--color-status-error);
+  --color-border-disabled: var(--color-gray-300);
+  --color-border-dimmed: var(--color-gray-400);
+
+  --color-icon-strong: var(--color-black-100);
+  --color-icon-default: var(--color-gray-400);
+  --color-icon-muted: var(--color-gray-300);
+  --color-icon-subtle: var(--color-gray-200);
+  --color-icon-weak: var(--color-gray-100);
+  --color-icon-brand: var(--color-brand-primary);
+  --color-icon-brand-secondary: var(--color-brand-primary-muted);
+  --color-icon-brand-tertiary: var(--color-brand-primary-subtle);
+  --color-icon-inverse: var(--color-white);
+
+  --color-status-error: var(--color-red-200);
+
+  --color-rating-fill: var(--color-yellow-100);
+
+  --color-rating-count: var(--color-gray-400);
+  --color-rating-track: var(--color-background-300);
+  --color-rating-empty: var(--color-gray-200);
+  --color-scrollbar-thumb: var(--color-gray-400);
+
+  --color-overlay-card-disabled: rgba(4, 4, 4, 0.64);
+  --color-overlay-scrim: rgba(20, 20, 20, 0.5);
+
+  /* Component Color */
+  --color-like-default-stroke: var(--color-gray-100);
+  --color-like-active-fill: var(--color-red-200);
+  --color-like-active-stroke: var(--color-red-200);
+  --color-social-kakao-icon: #331d1e;
+  --color-social-kakao-background: #fae100;
+  --color-social-google-background: var(--color-line-100);
+  --color-social-naver-icon: var(--color-white);
+  --color-social-naver-background: #03c75a;
+  --color-social-facebook-icon: var(--color-white);
+  --color-social-facebook-background: #1877f2;
+  --color-toast-background: var(--color-orange-200);
+  --color-toast-text: var(--color-orange-400);
+  --color-date-disabled: var(--color-gray-200);
+  --color-notice-background: var(--color-background-200);
+  --color-notice-text: var(--color-black-100);
+  --color-nav-text-active: var(--color-black-500);
+  --color-nav-text-default: var(--color-gray-500);
+  --color-nav-indicator-active: var(--color-black-400);
+  --color-icon-arrow-right-fill: var(--color-black-300);
+  --color-filter-button-icon: var(--color-gray-600);
+  --color-filter-button-border: var(--color-gray-600);
+
+  /* Shadow */
+  --shadow-input: 0 4px 4px -1px rgba(249, 80, 46, 0.2);
+  --shadow-select: 4px 4px 10px 0px rgba(224, 224, 224, 0.25);
+  /* 2026.07.26 정슬기 - [추가] Figma 대기 견적 sub-header shadow */
+  --shadow-sub-header: 0px 8px 10px 0 rgba(39, 39, 75, 0.02);
+  /* 2026.07.26 정슬기 - [추가] Button outlined/CTA · 견적 카드 shadow */
+  --shadow-cta: 4px 4px 10px 0 rgba(195, 217, 242, 0.2);
+  --shadow-estimate-card:
+    -2px -2px 10px 0 rgba(220, 220, 220, 0.2), 2px 2px 10px 0 rgba(220, 220, 220, 0.2);
+  /* Select default (sm): #EEEEEE / #C3D9F2 @ 10% */
+  --shadow-select: 4px 4px 10px 0px rgba(238, 238, 238, 0.1);
+  --shadow-select-open: 4px 4px 10px 0px rgba(195, 217, 242, 0.1);
+  /* Select lg: 동일 오프셋, 투명도 20% */
+  --shadow-select-lg: 4px 4px 10px 0px rgba(238, 238, 238, 0.2);
+  --shadow-select-lg-open: 4px 4px 10px 0px rgba(195, 217, 242, 0.2);
+  --shadow-page-header: 0 2px 10px 0 rgba(248, 248, 248, 0.1);
+  /* 2026.07.27 정슬기 - [추가] 견적/리뷰 탭 하단 shadow */
+  --shadow-tab: 0 2px 5px 0 rgba(248, 248, 248, 0.1);
+  /* 2026.07.28 정슬기 - [추가] Header 알림 패널 shadow */
+  --shadow-notification: 2px 2px 8px 0 rgba(0, 0, 0, 0.06);
+  /* Header 프로필 메뉴 shadow (Figma gnb/profile-menu) */
+  --shadow-profile-menu: 2px 2px 4px 0 rgba(224, 224, 224, 0.2);
+  /* Toast soft (Figma) */
+  --shadow-toast: -2px -2px 10px 0 rgba(46, 46, 46, 0.04), 2px 2px 10px 0 rgba(46, 46, 46, 0.04);
+
+  /* 2026.08.02 정슬기 - [추가] 랜딩 Hero/하단 배너 그라디언트 */
+  --color-landing-hero-warm: #462b14;
+  --background-image-landing-hero-overlay:
+    linear-gradient(
+      color-mix(in srgb, var(--color-black-500) 24%, transparent) 0%,
+      color-mix(in srgb, var(--color-black-500) 60%, transparent) 100%
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-landing-hero-warm) 70%, transparent) 0%,
+      color-mix(in srgb, var(--color-landing-hero-warm) 70%, transparent) 100%
+    );
+  --background-image-landing-bottom-banner: linear-gradient(
+    91.71deg,
+    var(--color-orange-400) 3.36%,
+    var(--color-orange-500) 88.38%
+  );
+
+  /* Typography */
+  --font-family-base: "Pretendard", sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Font Size */
+  --font-size-12: 0.75rem;
+  --font-size-13: 0.8125rem;
+  --font-size-14: 0.875rem;
+  --font-size-16: 1rem;
+  --font-size-18: 1.125rem;
+  --font-size-20: 1.25rem;
+  --font-size-24: 1.5rem;
+  --font-size-32: 2rem;
+  --font-size-38: 2.375rem;
+  --font-size-40: 2.5rem;
+  --font-size-64: 4rem;
+
+  /* Line Height */
+  --line-height-18: 1.125rem;
+  --line-height-20: 1.25rem;
+  --line-height-22: 1.375rem;
+  --line-height-24: 1.5rem;
+  --line-height-26: 1.625rem;
+  --line-height-29: 1.8125rem;
+  --line-height-32: 2rem;
+  --line-height-42: 2.625rem;
+  --line-height-45: 2.8125rem;
+  --line-height-46: 2.875rem;
+  --line-height-48: 3rem;
+  --line-height-76: 4.75rem;
+
+  /* Letter Spacing */
+  --letter-spacing-0: 0rem;
+
+  /* Radius */
+  --radius-2: 0.125rem;
+  --radius-4: 0.25rem;
+  --radius-6: 0.375rem;
+  --radius-8: 0.5rem;
+  --radius-12: 0.75rem;
+  --radius-16: 1rem;
+  --radius-20: 1.25rem;
+  --radius-24: 1.5rem;
+  --radius-32: 2rem;
+  --radius-40: 2.5rem;
+  --radius-100: 6.25rem;
+
+  /* Spacing */
+  --spacing-2: 0.125rem;
+  --spacing-4: 0.25rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Chip padding pl5/pr7 */
+  --spacing-5: 0.3125rem;
+  --spacing-6: 0.375rem;
+  --spacing-7: 0.4375rem;
+  --spacing-8: 0.5rem;
+  --spacing-10: 0.625rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Button CTA gap 11px */
+  --spacing-11: 0.6875rem;
+  --spacing-12: 0.75rem;
+  --spacing-14: 0.875rem;
+  --spacing-16: 1rem;
+  --spacing-18: 1.125rem;
+  --spacing-20: 1.25rem;
+  --spacing-22: 1.375rem;
+  /* 2026.07.25 정슬기 - [추가] Figma 인증배지 정렬 h23 / chip row h34 */
+  --spacing-23: 1.4375rem;
+  --spacing-24: 1.5rem;
+  /* 2026.07.26 정슬기 - [추가] Figma 견적 상세 Tablet 프로필 100×100 */
+  --spacing-25: 6.25rem;
+  --spacing-26: 1.625rem;
+  --spacing-28: 1.75rem;
+  --spacing-30: 1.875rem;
+  --spacing-31: 1.9375rem;
+  --spacing-32: 2rem;
+  /* 2026.07.25 정슬기 - [추가] Figma chip row height 34 */
+  --spacing-34: 2.125rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Mobile cards top offset 35 */
+  --spacing-35: 2.1875rem;
+  --spacing-36: 2.25rem;
+  /* 2026.07.30 정슬기 - [추가] Figma 견적 상세 Desktop bottom padding 150 (pb-37-5) */
+  --spacing-37-5: 9.375rem;
+  --spacing-38: 2.375rem;
+  --spacing-40: 2.5rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Tablet cards top offset 42 */
+  --spacing-42: 2.625rem;
+  --spacing-44: 2.75rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Mobile price row h47 */
+  --spacing-47: 2.9375rem;
+  --spacing-48: 3rem;
+  --spacing-50: 3.125rem;
+  /* 2026.07.25 정슬기 - [추가] Figma card price row h52 / Button CTA h54 */
+  --spacing-52: 3.25rem;
+  --spacing-54: 3.375rem;
+  --spacing-56: 3.5rem;
+  --spacing-57: 3.5625rem;
+  --spacing-60: 3.75rem;
+  --spacing-64: 4rem;
+  --spacing-70: 4.375rem;
+  --spacing-72: 4.5rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Desktop cards top offset 78 */
+  --spacing-78: 4.875rem;
+  --spacing-80: 5rem;
+  --spacing-90: 5.625rem;
+  --spacing-100: 6.25rem;
+  /* Toast Desktop top offset (Figma 103) */
+  --spacing-103: 6.4375rem;
+  --spacing-104: 6.5rem;
+  --spacing-120: 7.5rem;
+  /* 2026.08.07 정슬기 - [추가] Select/필터 폭 · 패널 요약 열 · 상태 min-height */
+  --spacing-128: 8rem;
+  --spacing-240: 15rem;
+  --spacing-260: 16.25rem;
+  --spacing-268: 16.75rem;
+  --spacing-320: 20rem;
+  /* 220px min-width — spacing-220(880px 레이아웃)과 충돌 방지용 */
+  --spacing-55: 13.75rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Desktop sub-header height 124 / Tablet 202 */
+  --spacing-124: 7.75rem;
+  --spacing-202: 12.625rem;
+  --spacing-160: 10rem;
+  /* 2026.07.30 정슬기 - [추가] Figma 견적 상세 Desktop main column 740 */
+  --spacing-185: 46.25rem;
+  /* 2026.08.03 정슬기 - [추가] 견적 상세 Desktop main — 여유 폭(840) */
+  --spacing-210: 52.5rem;
+  /* 2026.08.03 정슬기 - [추가] 견적 상세 Desktop main — 한 단계 확장(880) */
+  --spacing-220: 55rem;
+  /* 2026.07.25 정슬기 - [추가] Figma Empty illustration 200 / 280 */
+  --spacing-200: 12.5rem;
+  --spacing-280: 17.5rem;
+
+  /* Layout - GNB, Tab, PageHeader 컴포넌트 height */
+  --gnb-height-mobile: 3.375rem;
+  --gnb-height-tablet: 3.375rem;
+  --gnb-height-desktop: 5.5rem;
+  --tab-height-mobile: 3.375rem;
+  --tab-height-tablet: 3.375rem;
+  --tab-height-desktop: 5rem;
+  --page-header-height-mobile: 3.375rem;
+  --page-header-height-tablet: 3.375rem;
+  --page-header-height-desktop: 6rem;
+
+  /* Custom spacing - GNB 등 Tailwind 클래스 사용 시 컴포넌트 height */
+  --spacing-gnb-height-mobile: var(--gnb-height-mobile);
+  --spacing-gnb-height-tablet: var(--gnb-height-tablet);
+  --spacing-gnb-height-desktop: var(--gnb-height-desktop);
+  --spacing-tab-height-mobile: var(--tab-height-mobile);
+  --spacing-tab-height-tablet: var(--tab-height-tablet);
+  --spacing-tab-height-desktop: var(--tab-height-desktop);
+  --spacing-page-header-height-mobile: var(--page-header-height-mobile);
+  --spacing-page-header-height-tablet: var(--page-header-height-tablet);
+  --spacing-page-header-height-desktop: var(--page-header-height-desktop);
+
+  /* Layout - GNB, Tab, PageHeader 컴포넌트 desktop padding */
+  --gnb-padding-x-desktop: 10rem;
+  --tab-padding-x-desktop: 22.5rem;
+  --page-header-padding-x-desktop: 22.5rem;
+  --sub-header-padding-left-desktop: 22.5rem;
+  --sub-header-padding-right-desktop: 25rem;
+
+  /* Layout - responsive margin */
+  --margin-mobile: 1.5rem;
+  --margin-tablet: 4.5rem;
+
+  /* Layout - container */
+  --container-desktop: 75rem;
+  --container-desktop-narrow: 70rem;
+  /* 2026.07.25 정슬기 - [추가] Figma 대기 중 견적 Desktop 1140 / Tablet 600 / Mobile 327 */
+  --container-pending-desktop: 71.25rem;
+  --container-pending-tablet: 37.5rem;
+  --container-pending-mobile: 20.4375rem;
+
+  /* Layout - Auth */
+  --auth-container-radius: 2.5rem;
+  --auth-container-width-tablet: 40rem;
+  --auth-container-width-desktop: 46.25rem;
+  --auth-container-padding-x-tablet: 2.5rem;
+  --auth-container-padding-x-desktop: 3rem;
+  --auth-container-padding-y-tablet: 4.25rem;
+  --auth-container-padding-y-desktop: 3rem;
+  --auth-top-gap-mobile: 3.5rem;
+  --auth-bottom-gap-mobile: 3.25rem;
+  --auth-top-gap-tablet: 4.6875rem;
+  --auth-bottom-gap-tablet: 4.0625rem;
+  --auth-top-gap-desktop: 2.8125rem;
+  --auth-bottom-gap-desktop: 3.6875rem;
+  --auth-mascot-width-tablet: 15rem;
+  --auth-mascot-height-tablet: 15.375rem;
+  --auth-mascot-width-desktop: 23.875rem;
+  --auth-mascot-height-desktop: 24.5rem;
+
+  /* Tailwind aliases - Auth */
+  --radius-auth-container: var(--auth-container-radius);
+  --max-width-auth-container-tablet: var(--auth-container-width-tablet);
+  --max-width-auth-container-desktop: var(--auth-container-width-desktop);
+  --spacing-auth-container-padding-x-tablet: var(--auth-container-padding-x-tablet);
+  --spacing-auth-container-padding-x-desktop: var(--auth-container-padding-x-desktop);
+  --spacing-auth-container-padding-y-tablet: var(--auth-container-padding-y-tablet);
+  --spacing-auth-container-padding-y-desktop: var(--auth-container-padding-y-desktop);
+  --spacing-auth-top-gap-mobile: var(--auth-top-gap-mobile);
+  --spacing-auth-bottom-gap-mobile: var(--auth-bottom-gap-mobile);
+  --spacing-auth-top-gap-tablet: var(--auth-top-gap-tablet);
+  --spacing-auth-bottom-gap-tablet: var(--auth-bottom-gap-tablet);
+  --spacing-auth-top-gap-desktop: var(--auth-top-gap-desktop);
+  --spacing-auth-bottom-gap-desktop: var(--auth-bottom-gap-desktop);
+  --spacing-auth-mascot-width-tablet: var(--auth-mascot-width-tablet);
+  --spacing-auth-mascot-height-tablet: var(--auth-mascot-height-tablet);
+  --spacing-auth-mascot-width-desktop: var(--auth-mascot-width-desktop);
+  --spacing-auth-mascot-height-desktop: var(--auth-mascot-height-desktop);
+
+  /* Tailwind spacing aliases - px-margin-mobile, mt-margin-tablet 등으로 사용 가능 */
+  --spacing-margin-mobile: var(--margin-mobile);
+  --spacing-margin-tablet: var(--margin-tablet);
+  --spacing-tab-padding-x-desktop: var(--tab-padding-x-desktop);
+  --spacing-page-header-padding-x-desktop: var(--page-header-padding-x-desktop);
+  --spacing-gnb-padding-x-desktop: var(--gnb-padding-x-desktop);
+
+  /* Tailwind max-width aliases - max-w-container-desktop 등으로 사용 가능 */
+  --max-width-container-desktop: var(--container-desktop);
+  --max-width-container-desktop-narrow: var(--container-desktop-narrow);
+  --max-width-container-pending-desktop: var(--container-pending-desktop);
+  --max-width-container-pending-tablet: var(--container-pending-tablet);
+  --max-width-container-pending-mobile: var(--container-pending-mobile);
+
+  /* Tailwind spacing aliases - sub-header desktop padding */
+  --spacing-sub-header-padding-left-desktop: var(--sub-header-padding-left-desktop);
+  --spacing-sub-header-padding-right-desktop: var(--sub-header-padding-right-desktop);
+
+  /* 공통 UI 등장 모션 — animate-modal-overlay-in 등으로 사용
+   * // 2026.08.07 정슬기 - [추가]
+   */
+  --animate-modal-overlay-in: modal-overlay-in 180ms ease-out both;
+  --animate-modal-content-in: modal-content-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-modal-sheet-in: modal-sheet-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* exit — Modal presence 언마운트 지연과 맞춤 (180ms) */
+  --animate-modal-overlay-out: modal-overlay-out 160ms ease-in both;
+  --animate-modal-content-out: modal-content-out 180ms cubic-bezier(0.4, 0, 1, 1) both;
+  --animate-modal-sheet-out: modal-sheet-out 180ms cubic-bezier(0.4, 0, 1, 1) both;
+  --animate-dropdown-in: dropdown-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-dropdown-out: dropdown-out 160ms cubic-bezier(0.4, 0, 1, 1) both;
+  --animate-toast-in: toast-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-toast-out: toast-out 180ms cubic-bezier(0.4, 0, 1, 1) both;
+
+  /* Mover MyPage */
+  --spacing-mypage-content-width: 51.3125rem; /* 821px */
+  --spacing-mypage-actions-width: 17.6875rem; /* 283px */
+  --spacing-mypage-review-summary-width: 46.375rem; /* 742px */
+  --spacing-mypage-mobile-padding: 1.25rem; /* 20px */
+
+  --spacing-mypage-profile-height: 5.3125rem; /* 85px */
+
+  --spacing-mypage-hero-mobile: 7.625rem; /* 122px */
+  --spacing-mypage-hero-tablet: 9.8125rem; /* 157px */
+  --spacing-mypage-hero-desktop: 11.25rem; /* 180px */
+
+  --spacing-mypage-content-top-tablet: 2.875rem; /* 46px */
+  --spacing-mypage-content-top-desktop: 2.6875rem; /* 43px */
+
+  --spacing-mypage-activity-mobile: 6.5625rem; /* 105px */
+
+  --spacing-mypage-rating-track: 11.25rem; /* 180px */
+  --spacing-mypage-rating-width: 17.75rem; /* 284px */
+
+  /* Mover MyPage Hero Decoration */
+  --spacing-mypage-deco-left-mobile-w: 5.8125rem; /* 93px */
+  --spacing-mypage-deco-left-mobile-h: 3.9375rem; /* 63px */
+  --spacing-mypage-deco-left-mobile-x: 1.75rem; /* 28px */
+  --spacing-mypage-deco-left-mobile-y: 1.25rem; /* 20px */
+
+  --spacing-mypage-deco-left-large-w: 10.625rem; /* 170px */
+  --spacing-mypage-deco-left-large-h: 7.1875rem; /* 115px */
+  --spacing-mypage-deco-left-tablet-x: 2.625rem; /* 42px */
+  --spacing-mypage-deco-left-tablet-y: 0.5625rem; /* 9px */
+  --spacing-mypage-deco-left-desktop-x: 9.375rem; /* 150px */
+  --spacing-mypage-deco-left-desktop-y: 1.625rem; /* 26px */
+
+  --spacing-mypage-deco-right-mobile-w: 11.125rem; /* 178px */
+  --spacing-mypage-deco-right-mobile-h: 8.0625rem; /* 129px */
+  --spacing-mypage-deco-right-mobile-x: 1.1875rem; /* 19px */
+  --spacing-mypage-deco-right-mobile-y: 1.75rem; /* 28px */
+
+  --spacing-mypage-deco-right-large-w: 20.3125rem; /* 325px */
+  --spacing-mypage-deco-right-large-h: 14.75rem; /* 236px */
+  --spacing-mypage-deco-right-tablet-x: 1.5rem; /* 24px */
+  --spacing-mypage-deco-right-tablet-y: 1rem; /* 16px */
+  --spacing-mypage-deco-right-desktop-x: 7.6875rem; /* 123px */
+  --spacing-mypage-deco-right-desktop-y: 2.0625rem; /* 33px */
+}

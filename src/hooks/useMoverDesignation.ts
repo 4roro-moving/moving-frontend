@@ -1,0 +1,182 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+
+import { useLoginRequiredModal } from "@/components/auth/LoginRequiredModalProvider";
+import { useActiveEstimateRequest } from "@/hooks/useActiveEstimateRequest";
+import { useCustomerAuthReady } from "@/hooks/useCustomerAuthReady";
+import { useDesignateMover } from "@/hooks/useDesignateMover";
+
+import { APP_ROUTES } from "@/lib/constants/appRoutes";
+import { markInternalDetailNavigation } from "@/lib/utils/detailNavigation";
+import { getDesignateCtaState, isDesignateCtaDisabled } from "@/lib/utils/getDesignateCtaState";
+import type { MoveType } from "@/types/move";
+
+interface UseMoverDesignationOptions {
+  moverId: string;
+  moverServiceTypes: MoveType[] | null;
+  onError: (message: string) => void;
+}
+
+/**
+ * 기사님 상세의 지정 견적 CTA 상태와 동작을 관리합니다.
+ *
+ * - 비회원: 로그인 안내 모달
+ * - 활성 요청 없음: 일반 견적 요청 안내 모달
+ * - CONFIRMED 요청: 진행 중인 견적 상세로 이동
+ * - PENDING·OPEN 요청: 지정 가능 여부 확인 후 지정 API 호출
+ */
+export function useMoverDesignation({
+  moverId,
+  moverServiceTypes,
+  onError,
+}: UseMoverDesignationOptions) {
+  const t = useTranslations("profile");
+  const router = useRouter();
+
+  const [isEstimateRequestModalOpen, setIsEstimateRequestModalOpen] = useState(false);
+  const [isDesignateSuccessModalOpen, setIsDesignateSuccessModalOpen] = useState(false);
+  const [designatedEstimateRequestId, setDesignatedEstimateRequestId] = useState<number | null>(
+    null,
+  );
+  const loginRequiredModal = useLoginRequiredModal();
+  const { isPending: isAuthPending, isAuthenticated, user } = useCustomerAuthReady();
+  const isCustomer = user?.role === "CUSTOMER";
+  const isCustomerLoggedIn = !isAuthPending && isAuthenticated && isCustomer;
+
+  const {
+    data: activeRequest,
+    isLoading: isActiveLoading,
+    isError: isActiveError,
+    isFetching: isActiveFetching,
+    refetch: refetchActiveRequest,
+  } = useActiveEstimateRequest({
+    enabled: isCustomerLoggedIn,
+  });
+
+  const designateMutation = useDesignateMover({
+    onSuccess: (request) => {
+      setDesignatedEstimateRequestId(request.id);
+      setIsDesignateSuccessModalOpen(true);
+    },
+    onError,
+  });
+
+  const isServiceTypesLoading = moverServiceTypes === null;
+
+  const ctaState =
+    isCustomerLoggedIn && !isActiveLoading && !isActiveError && moverServiceTypes !== null
+      ? getDesignateCtaState(activeRequest ?? null, moverId, moverServiceTypes)
+      : null;
+
+  // 이미 기사를 지정했거나 만료·한도 초과 등 상태에서는 CTA 버튼 비활성화
+  const isRequestDisabled =
+    designateMutation.isPending ||
+    (isCustomerLoggedIn && isActiveLoading) ||
+    (isCustomerLoggedIn && isActiveError && isActiveFetching) ||
+    (ctaState !== null && isDesignateCtaDisabled(ctaState.status));
+
+  const designationButtonLabels = {
+    confirmed: t("designationCtaConfirmed"),
+    alreadyDesignated: t("designationCtaAlreadyDesignated"),
+    notEditable: t("designationCtaNotEditable"),
+    expired: t("designationCtaExpired"),
+    limitExceeded: t("designationCtaLimitExceeded"),
+    serviceTypeMismatch: t("designationCtaServiceTypeMismatch"),
+  };
+  const requestButtonLabel = ctaState?.buttonLabel
+    ? designationButtonLabels[ctaState.buttonLabel]
+    : designateMutation.isPending || (isActiveError && isActiveFetching)
+      ? t("designationPending")
+      : t("moverDetailEstimateRequest");
+
+  const isActionsLoading =
+    isAuthPending || (isCustomerLoggedIn && isActiveLoading) || isServiceTypesLoading;
+
+  const requestEstimate = async () => {
+    if (isAuthPending) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      loginRequiredModal?.openLoginRequiredModal(t("designationLoginRequired"));
+      return;
+    }
+
+    if (!isCustomer) {
+      return;
+    }
+
+    if (isActiveLoading || designateMutation.isPending || (isActiveError && isActiveFetching)) {
+      return;
+    }
+
+    let request = activeRequest ?? null;
+
+    // 조회 실패 상태면 재클릭 시 refetch 후 최신 결과로 CTA 판단
+    if (isActiveError) {
+      const result = await refetchActiveRequest();
+      if (result.error) {
+        onError(t("designationLoadFailed"));
+        return;
+      }
+      request = result.data ?? null;
+    }
+
+    if (moverServiceTypes === null) {
+      return;
+    }
+
+    const nextCtaState = getDesignateCtaState(request, moverId, moverServiceTypes);
+
+    if (nextCtaState.status === "needEstimateRequest") {
+      setIsEstimateRequestModalOpen(true);
+      return;
+    }
+
+    // 확정 견적이 있으면 추가 지정을 막고 현재 진행 중인 견적 상세로 안내
+    if (nextCtaState.status === "confirmed" && nextCtaState.estimateRequestId !== null) {
+      const detailHref = APP_ROUTES.ESTIMATES.REQUEST_DETAIL(nextCtaState.estimateRequestId);
+
+      markInternalDetailNavigation(detailHref);
+      router.push(detailHref);
+      return;
+    }
+
+    if (isDesignateCtaDisabled(nextCtaState.status)) {
+      return;
+    }
+
+    if (nextCtaState.message) {
+      onError(nextCtaState.message);
+      return;
+    }
+
+    if (!nextCtaState.canSubmit || nextCtaState.estimateRequestId === null) {
+      return;
+    }
+
+    designateMutation.mutate({
+      estimateRequestId: nextCtaState.estimateRequestId,
+      moverId,
+    });
+  };
+
+  return {
+    closeDesignateSuccessModal: () => {
+      setIsDesignateSuccessModalOpen(false);
+      setDesignatedEstimateRequestId(null);
+    },
+    closeEstimateRequestModal: () => setIsEstimateRequestModalOpen(false),
+    isDesignateSuccessModalOpen,
+    designatedEstimateRequestId,
+    isEstimateRequestModalOpen,
+    isActionsLoading,
+    isRequestDisabled,
+    requestButtonLabel,
+    requestEstimate,
+    showCustomerActions: !isAuthPending && (!isAuthenticated || isCustomer),
+  };
+}

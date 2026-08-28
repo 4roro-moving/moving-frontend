@@ -1,0 +1,382 @@
+"use client";
+
+import { create } from "zustand";
+
+import { logout as logoutApi, refreshSession } from "@/lib/api/auth";
+import type { AuthUser } from "@/lib/api/auth";
+import {
+  getCustomerProfileMe,
+  getMoverProfileMe,
+  toAuthUserFromCustomerProfile,
+  toAuthUserFromMoverProfile,
+} from "@/lib/api/profile";
+import { getAccessTokenPayload, getAccessTokenRole } from "@/lib/auth/accessTokenPayload";
+import { isAuthPagePath, isOAuthCallbackPath } from "@/lib/auth/redirect";
+import { clearAllClientStorageHints } from "@/lib/auth/clientStorageHint";
+import { loadNickname, saveNickname } from "@/lib/auth/nickname";
+import {
+  loadProfileImage,
+  saveProfileImage,
+  sanitizeSoftUxProfileImageUrl,
+} from "@/lib/auth/profileImage";
+import { loadRole, saveRole } from "@/lib/auth/role";
+import { clearAuthTokens, getAccessToken } from "@/lib/auth/token";
+import { clearSuspensionAppealSession } from "@/lib/auth/suspensionAppealSession";
+import { clearAppQueryCache } from "@/providers/query/appQueryClient";
+import { ApiError } from "@/types/api";
+
+interface AuthState {
+  user: AuthUser | null;
+  displayName: string | null;
+  profileImage: string | null;
+  /** 로그인 상태 여부 */
+  isAuthenticated: boolean;
+  /** 인증 중 여부 */
+  isCheckingAuth: boolean;
+  /** Soft UX 힌트 hydrate 완료 여부 — SSR/CSR 첫 페인트 일치용 */
+  hasHydrated: boolean;
+  /**
+   * 로그인/가입 직후 GuestOnly가 사용할 목적지.
+   * consume 시 한 번만 읽고 null로 비웁니다.
+   */
+  postAuthRedirectPath: string | null;
+  /** Soft UX 쿠키 힌트로 표시 상태 초기화 */
+  hydrateFromStorage: () => void;
+  /** 인증 상태 확인 */
+  checkAuth: (options?: { hasRefreshCookie?: boolean }) => Promise<void>;
+  /** 세션 생성 */
+  establishSession: (user: AuthUser) => void;
+  /** 로그인/회원가입 성공 후 이동 경로 예약 (establishSession 전에 호출) */
+  setPostAuthRedirectPath: (path: string) => void;
+  /** 예약된 이동 경로를 읽고 비웁니다 */
+  consumePostAuthRedirectPath: () => string | null;
+  /**
+   * 로그아웃. deferUiClear면 토큰·힌트·쿼리만 정리하고
+   * 비로그인 UI paint(markUnauthenticated)는 생략 (hard navigate 직전용)
+   */
+  logout: (options?: { deferUiClear?: boolean }) => Promise<void>;
+  /** 세션 초기화 */
+  clearSession: () => void;
+  /** 비로그인 상태 설정 */
+  markUnauthenticated: () => void;
+}
+
+// 비로그인 상태
+const UNAUTHENTICATED_STATE = {
+  user: null,
+  displayName: null,
+  profileImage: null,
+  isAuthenticated: false,
+  isCheckingAuth: false,
+  hasHydrated: true,
+  postAuthRedirectPath: null,
+} as const satisfies Partial<AuthState>;
+
+let checkAuthPromise: Promise<void> | null = null;
+/** 동시 checkAuth 호출 시 hasRefreshCookie를 OR로 승격 */
+let pendingHasRefreshCookie = false;
+
+const setAuthenticatedUser = (
+  set: (partial: Partial<AuthState>) => void,
+  user: AuthUser,
+  isCheckingAuth = false,
+) => {
+  saveNickname(user.name);
+  saveRole(user.role);
+
+  if (user.imageUrl !== undefined) {
+    saveProfileImage(user.imageUrl ?? "");
+  }
+
+  // Soft UX 힌트만 sanitize. user.imageUrl(원본)은 그대로 유지
+  const softUxProfileImage =
+    user.imageUrl === undefined ? undefined : sanitizeSoftUxProfileImageUrl(user.imageUrl);
+
+  set({
+    user,
+    displayName: user.name,
+    ...(softUxProfileImage !== undefined && { profileImage: softUxProfileImage }),
+    isAuthenticated: true,
+    isCheckingAuth,
+    hasHydrated: true,
+  });
+};
+
+const resolveAuthUser = async (): Promise<AuthUser> => {
+  const accessToken = getAccessToken();
+  if (!accessToken) {
+    throw new ApiError("인증 정보가 없습니다.", 401);
+  }
+
+  const role = getAccessTokenRole(accessToken) ?? loadRole();
+
+  if (role === "MOVER") {
+    const profile = await getMoverProfileMe();
+    return toAuthUserFromMoverProfile(profile);
+  }
+
+  const profile = await getCustomerProfileMe();
+  return toAuthUserFromCustomerProfile(profile);
+};
+
+/**
+ * auth 페이지 재진입·/me 실패 시 — profile/me 없이 JWT·쿠키만으로 세션 힌트.
+ *
+ * 용도: Header·AuthGate·ProfileCompletionGuard 등 클라이언트 Soft UX.
+ * 비목적: 권한·인가의 근거. 보호 API는 fetchInstance 사용 시 Access Token의 백엔드 검증에 의존한다.
+ * /me 네트워크·5xx에서도 동일 경로를 쓰므로, user.id/role을
+ * “서버가 보장한 프로필 상태”로 취급하지 않는다.
+ */
+const resolveAuthUserFromTokenHint = (): AuthUser | null => {
+  const accessToken = getAccessToken();
+  if (!accessToken) return null;
+
+  const payload = getAccessTokenPayload(accessToken);
+  const role = payload.role ?? loadRole();
+  if (!role) return null;
+
+  const name = loadNickname() ?? "";
+
+  return {
+    id: payload.userId ?? "",
+    email: "",
+    name,
+    phone: null,
+    role,
+    imageUrl: loadProfileImage(),
+  };
+};
+
+// 세션 세대 관리
+let curSessionGeneration: number = 0;
+
+export interface AuthSessionSnapshot {
+  generation: number;
+  userId: string | null;
+}
+
+/** mutation 시작 시점의 세션 소유권 스냅샷 */
+export const getAuthSessionSnapshot = (): AuthSessionSnapshot => ({
+  generation: curSessionGeneration,
+  userId: useAuthStore.getState().user?.id ?? null,
+});
+
+/** 스냅샷이 현재 로그인 세션과 일치하는지 여부 */
+export const isAuthSessionCurrent = (snapshot: AuthSessionSnapshot): boolean => {
+  if (snapshot.generation !== curSessionGeneration) return false;
+
+  const { user } = useAuthStore.getState();
+  // hydrate 직후 user 미설정이면 세대만으로 동일 세션으로 본다
+  if (snapshot.userId === null) return true;
+
+  return user?.id === snapshot.userId;
+};
+
+/**
+ * 인증 상태 관리 스토어
+ */
+export const useAuthStore = create<AuthState>((set, get) => ({
+  user: null,
+  displayName: null,
+  profileImage: null,
+  isAuthenticated: false,
+  isCheckingAuth: true,
+  hasHydrated: false,
+  postAuthRedirectPath: null,
+
+  hydrateFromStorage: () => {
+    if (get().hasHydrated) return;
+
+    const token = getAccessToken();
+    const displayName = loadNickname();
+    const profileImage = loadProfileImage();
+
+    set({
+      hasHydrated: true,
+      isCheckingAuth: true,
+      displayName,
+      profileImage,
+      isAuthenticated: Boolean(token),
+      user: null,
+    });
+  },
+
+  clearSession: () => {
+    curSessionGeneration++;
+    clearAuthTokens();
+    clearSuspensionAppealSession();
+    clearAllClientStorageHints();
+    get().markUnauthenticated();
+  },
+
+  markUnauthenticated: () => {
+    set({ ...UNAUTHENTICATED_STATE });
+    clearAppQueryCache();
+  },
+
+  setPostAuthRedirectPath: (path) => {
+    set({ postAuthRedirectPath: path });
+  },
+
+  consumePostAuthRedirectPath: () => {
+    const path = get().postAuthRedirectPath;
+    if (path) {
+      set({ postAuthRedirectPath: null });
+    }
+    return path;
+  },
+
+  establishSession: (user) => {
+    curSessionGeneration++;
+    // 계정 전환 로그인에서는 같은 queryKey에 남은 이전 계정 데이터를 제거한다.
+    clearAppQueryCache();
+    setAuthenticatedUser(set, user, false);
+  },
+
+  checkAuth: async (options) => {
+    if (options?.hasRefreshCookie) {
+      pendingHasRefreshCookie = true;
+    }
+
+    if (checkAuthPromise) {
+      await checkAuthPromise;
+      return;
+    }
+
+    const hasRefreshCookie = pendingHasRefreshCookie;
+    pendingHasRefreshCookie = false;
+
+    checkAuthPromise = (async () => {
+      const startSessionGeneration = curSessionGeneration;
+
+      set({ isCheckingAuth: true });
+
+      try {
+        // OAuth callback: code 교환과 겹치지 않도록 refresh/profile 생략
+        // establishSession과 경합하지 않도록 markUnauthenticated는 호출하지 않음
+        const onOAuthCallback =
+          typeof window !== "undefined" && isOAuthCallbackPath(window.location.pathname);
+
+        if (onOAuthCallback) {
+          if (startSessionGeneration !== curSessionGeneration) {
+            return;
+          }
+          set({ isCheckingAuth: false, hasHydrated: true });
+          return;
+        }
+
+        // Access 없음 + refresh 쿠키 있을 때만 선제 refresh (게스트 404 방지)
+        // HttpOnly라 클라이언트에서 쿠키를 못 읽으므로 SSR 힌트를 사용
+        if (!getAccessToken() && hasRefreshCookie) {
+          await refreshSession({ notifyOnFailure: false });
+        }
+
+        // login/signup 재진입: profile/me 생략 (GuestOnly가 역할 홈으로 보냄)
+        const onAuthPage =
+          typeof window !== "undefined" && isAuthPagePath(window.location.pathname);
+
+        if (onAuthPage) {
+          const hintedUser = resolveAuthUserFromTokenHint();
+          if (startSessionGeneration !== curSessionGeneration) {
+            return;
+          }
+
+          if (hintedUser) {
+            setAuthenticatedUser(set, hintedUser, false);
+            return;
+          }
+
+          get().markUnauthenticated();
+          return;
+        }
+
+        const me = await resolveAuthUser();
+
+        // 새 세션 생성 중 다른 세션 생성 요청 시 취소
+        if (startSessionGeneration !== curSessionGeneration) {
+          return;
+        }
+
+        setAuthenticatedUser(set, me, false);
+      } catch (error) {
+        // 새 세션 생성 중 다른 세션 생성 요청 시 취소
+        if (startSessionGeneration !== curSessionGeneration) {
+          return;
+        }
+
+        const token = getAccessToken();
+        const status = error instanceof ApiError ? error.status : undefined;
+
+        if (process.env.NODE_ENV === "development") {
+          // 401·refresh 부재(404+access 없음)는 예상 실패로 로그 생략
+          if (status !== 401 && !(status === 404 && !token)) {
+            console.error("[checkAuth] 세션 복구 실패", error);
+          }
+        }
+
+        // 인증 만료·역할 불일치·refresh 부재(404이고 access 없음)
+        // me 404(프로필 미생성)는 access가 있으므로 아래 힌트 경로로 감
+        if (status === 401 || status === 403 || (status === 404 && !token)) {
+          get().clearSession();
+          set({ isCheckingAuth: false });
+          return;
+        }
+
+        // 프로필 미생성(me 404)·일시 오류(5xx 등): JWT 힌트로 user를 채움.
+        // UI 가드용 임시 상태일 뿐이며, 보호 API 권한은 백엔드 토큰 검증에 맡긴다.
+        if (token) {
+          const hintedUser = resolveAuthUserFromTokenHint();
+          if (hintedUser) {
+            setAuthenticatedUser(set, hintedUser, false);
+            return;
+          }
+
+          set({
+            displayName: loadNickname(),
+            profileImage: loadProfileImage(),
+            isAuthenticated: true,
+            isCheckingAuth: false,
+            hasHydrated: true,
+          });
+          return;
+        }
+
+        get().markUnauthenticated();
+      } finally {
+        checkAuthPromise = null;
+      }
+    })();
+
+    await checkAuthPromise;
+  },
+
+  logout: async (options) => {
+    const logoutGeneration = curSessionGeneration;
+    const deferUiClear = options?.deferUiClear ?? false;
+    let logoutError: unknown;
+
+    try {
+      await logoutApi();
+    } catch (error) {
+      logoutError = error;
+    }
+
+    // 로그아웃 중 다른 세션이 들어섰으면 로컬 정리는 스킵 (에러는 그대로 전파)
+    if (logoutGeneration === curSessionGeneration) {
+      if (deferUiClear) {
+        // hard navigate 직전: 토큰·힌트만 정리하고 비로그인 UI paint는 생략
+        curSessionGeneration++;
+        clearAuthTokens();
+        clearSuspensionAppealSession();
+        clearAllClientStorageHints();
+        clearAppQueryCache();
+      } else {
+        get().clearSession();
+      }
+    }
+
+    if (logoutError !== undefined) {
+      throw logoutError;
+    }
+  },
+}));

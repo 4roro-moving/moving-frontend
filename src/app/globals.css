@@ -1,86 +1,6 @@
 @import "tailwindcss";
+@import "../styles/tokens.theme.css";
 @import "pretendard/dist/web/static/pretendard.css";
-
-@theme {
-  /* Brand */
-  --color-brand-100: #feeeea;
-  --color-brand-200: #fdb0a2;
-  --color-brand-300: #fd947f;
-  --color-brand-400: #f9502e;
-  --color-brand-500: #e04829;
-
-  /* Black */
-  --color-black-100: #0000001a;
-  --color-black-200: #00000033;
-
-  /* White */
-  --color-white: #ffffff;
-
-  /* Gray */
-  /* Figma Color Style 확인 후 추가 */
-  /*
---color-gray-50:
---color-gray-100:
---color-gray-200:
---color-gray-300:
---color-gray-400:
---color-gray-500:
---color-gray-600:
---color-gray-700:
---color-gray-800:
---color-gray-900:
-*/
-
-  /* System */
-  /*
---color-system-error:
---color-system-success:
---color-system-warning:
-*/
-
-  /* Social */
-  /*
---color-naver-background:
---color-naver-text:
-*/
-
-  /* Font family */
-  --font-pretendard: "Pretendard", sans-serif;
-
-  /* Font size + line height */
-  --text-3xl: 32px;
-  --text-3xl--line-height: 46px;
-
-  --text-2xl: 24px;
-  --text-2xl--line-height: 32px;
-
-  --text-xl: 20px;
-  --text-xl--line-height: 32px;
-
-  --text-2lg: 18px;
-  --text-2lg--line-height: 26px;
-
-  --text-lg: 16px;
-  --text-lg--line-height: 26px;
-
-  --text-md: 14px;
-  --text-md--line-height: 24px;
-
-  --text-sm: 13px;
-  --text-sm--line-height: 22px;
-
-  --text-xs: 12px;
-  --text-xs--line-height: 20px;
-
-  --text-xs-regular: 12px;
-  --text-xs-regular--line-height: 18px;
-
-  /* Font weight */
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-}
 
 * {
   box-sizing: border-box;
@@ -93,7 +13,8 @@ body {
 }
 
 body {
-  font-family: var(--font-pretendard);
+  font-family: var(--font-family-base);
+  color: var(--color-text-secondary);
 }
 
 button,
@@ -109,4 +30,120 @@ button {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+img,
+svg {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* 공통 UI 등장 모션 — Modal / Select / Toast / Dropdown
+ * // 2026.08.07 정슬기 - [추가]
+ * // 2026.08.07 정슬기 - [수정] bottom-sheet·테마 유틸 등록 (cubic-bezier 임의값 콤마 이슈 회피)
+ */
+@keyframes modal-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-content-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modal-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modal-overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-content-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98) translateY(6px);
+  }
+}
+
+@keyframes modal-sheet-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdown-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
 }
