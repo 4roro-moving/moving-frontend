@@ -122,8 +122,16 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
 
       {isHidden && hiddenReason ? (
         <div className="bg-background-subtle rounded-12 px-12 py-10">
-          <p className="text-text-muted text-xs font-semibold">{t("hiddenReason")}</p>
-          <p className="text-text-secondary mt-4 text-sm whitespace-pre-wrap">{hiddenReason}</p>
+          <Text as="p" variant="xs-semibold" className="text-text-muted">
+            {t("hiddenReason")}
+          </Text>
+          <Text
+            as="p"
+            variant="md-regular"
+            className="text-text-secondary mt-4 whitespace-pre-wrap"
+          >
+            {hiddenReason}
+          </Text>
         </div>
       ) : null}
 

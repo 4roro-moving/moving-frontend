@@ -8,6 +8,8 @@ import AddressSelectModal, {
   type AddressItem,
 } from "@/components/estimate/request/AddressSelectModal";
 import { useRouteDistance } from "@/hooks/useRouteDistance";
+import { ADDRESS_DIRECTION, type AddressDirection } from "@/lib/constants/address";
+import { MOVE_TYPE_VALUES } from "@/lib/constants/moveType";
 import { cn } from "@/lib/utils/cn";
 import { formatDateToKstISODate } from "@/lib/utils/date";
 import type {
@@ -20,10 +22,6 @@ interface PricePredictionFormProps {
   isPending: boolean;
   onSubmit: (data: PricePredictionRequest) => void;
 }
-
-type RegionKind = "from" | "to";
-
-const MOVE_TYPES: PricePredictionMoveType[] = ["SMALL", "HOME", "OFFICE"];
 
 const LOAD_AMOUNTS: PricePredictionLoadAmount[] = ["LOW", "MEDIUM", "HIGH"];
 
@@ -73,7 +71,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
 
   const [toAddress, setToAddress] = useState<AddressItem | null>(null);
 
-  const [addressModalKind, setAddressModalKind] = useState<RegionKind | null>(null);
+  const [addressModalKind, setAddressModalKind] = useState<AddressDirection | null>(null);
 
   const [houseSize, setHouseSize] = useState<number | "">(24);
 
@@ -175,7 +173,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
       return;
     }
 
-    const currentAddress = addressModalKind === "from" ? fromAddress : toAddress;
+    const currentAddress = addressModalKind === ADDRESS_DIRECTION.FROM ? fromAddress : toAddress;
 
     if (hasSameCoordinates(currentAddress, address)) {
       setAddressModalKind(null);
@@ -184,11 +182,11 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
 
     resetDistance();
 
-    if (addressModalKind === "from") {
+    if (addressModalKind === ADDRESS_DIRECTION.FROM) {
       setFromAddress(address);
     }
 
-    if (addressModalKind === "to") {
+    if (addressModalKind === ADDRESS_DIRECTION.TO) {
       setToAddress(address);
     }
 
@@ -250,7 +248,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
           </Text>
 
           <div className="grid grid-cols-1 gap-12 sm:grid-cols-3">
-            {MOVE_TYPES.map((type) => {
+            {MOVE_TYPE_VALUES.map((type) => {
               const isSelected = moveType === type;
 
               return (
@@ -320,7 +318,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
             label={t("form.origin")}
             address={fromAddress}
             disabled={isPending || isDistancePending}
-            onClick={() => setAddressModalKind("from")}
+            onClick={() => setAddressModalKind(ADDRESS_DIRECTION.FROM)}
             onReset={handleFromAddressReset}
           />
 
@@ -328,7 +326,7 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
             label={t("form.destination")}
             address={toAddress}
             disabled={isPending || isDistancePending}
-            onClick={() => setAddressModalKind("to")}
+            onClick={() => setAddressModalKind(ADDRESS_DIRECTION.TO)}
             onReset={handleToAddressReset}
           />
         </div>
@@ -472,7 +470,9 @@ export default function PricePredictionForm({ isPending, onSubmit }: PricePredic
       {addressModalKind && (
         <AddressSelectModal
           open
-          kind={addressModalKind === "from" ? t("form.origin") : t("form.destination")}
+          kind={
+            addressModalKind === ADDRESS_DIRECTION.FROM ? t("form.origin") : t("form.destination")
+          }
           onClose={() => setAddressModalKind(null)}
           onConfirm={handleAddressConfirm}
         />
