@@ -78,6 +78,7 @@ export default function NotificationTrigger() {
           onClose={closeWithFocus}
           className={dropdownMotionClassName(isPanelVisible)}
           isVisible={isPanelVisible}
+          unreadCount={unreadCount}
         />
       ) : null}
     </div>
