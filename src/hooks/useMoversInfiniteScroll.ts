@@ -10,6 +10,8 @@ interface UseMoversInfiniteScrollParams {
   fetchNextPage: () => Promise<unknown>;
 }
 
+const INFINITE_SCROLL_ROOT_MARGIN = "240px 0px";
+
 export function useMoversInfiniteScroll({
   enabled,
   hasNextPage,
@@ -20,7 +22,9 @@ export function useMoversInfiniteScroll({
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!enabled) {
+    // 불러오는 중이거나 실패 직후에는 observe하지 않습니다.
+    // fetch가 끝난 뒤에 다시 붙이면, sentinel이 그대로 보여도 첫 콜백에서 다음 페이지를 요청합니다.
+    if (!enabled || !hasNextPage || isFetchingNextPage || isFetchNextPageError) {
       return;
     }
 
@@ -29,14 +33,19 @@ export function useMoversInfiniteScroll({
       return;
     }
 
+    // 이미 요청한 경우 중복 요청을 방지하도록 합니다.
+    let hasRequested = false;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // 다음 페이지 실패 후에는 사용자가 직접 재시도할 때까지 자동 요청하지 않습니다.
-        if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage && !isFetchNextPageError) {
-          void fetchNextPage();
+        if (!entry?.isIntersecting || hasRequested) {
+          return;
         }
+
+        hasRequested = true;
+        void fetchNextPage();
       },
-      { rootMargin: "240px 0px" },
+      { rootMargin: INFINITE_SCROLL_ROOT_MARGIN },
     );
 
     observer.observe(sentinel);
