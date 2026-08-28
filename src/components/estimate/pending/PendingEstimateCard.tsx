@@ -1,17 +1,17 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
 
 import Button, { buttonVariants } from "@/components/common/Button/Button";
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { useConfirmEstimate } from "@/hooks/useConfirmEstimate";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { ConfirmedCheckIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
+import { ConfirmedCheckIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
@@ -21,7 +21,6 @@ import {
   isConfirmedEstimate,
   isPendingEstimate,
 } from "@/lib/utils/estimateFormat";
-import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 import type { MyPendingEstimateOffer } from "@/types/estimate";
 import type { MoveType } from "@/types/move";
 
@@ -121,19 +120,13 @@ export default function PendingEstimateCard({
             ) : null}
 
             <div className="border-border-muted flex w-full items-center gap-8 border-b pt-12 pb-20">
-              <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
-                {mover.imageUrl ? (
-                  <Image
-                    src={resolveMoverProfileImageSrc(mover.imageUrl)}
-                    alt={t("received.profileAlt", { name: displayName })}
-                    fill
-                    sizes="50px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <ProfileDefaultIcon className="size-full" />
-                )}
-              </div>
+              <ProfileAvatar
+                imageUrl={mover.imageUrl}
+                alt={t("received.profileAlt", { name: displayName })}
+                sizes="50px"
+                className="rounded-12 size-50"
+                imageClassName="object-contain"
+              />
 
               <div className="flex min-w-0 flex-1 flex-col gap-4">
                 <div className="flex w-full items-center justify-between gap-8">

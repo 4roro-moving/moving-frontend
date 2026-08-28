@@ -1,5 +1,5 @@
 import { REGION_LABEL, type RegionId } from "@/lib/constants/region";
-import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
+import { DEFAULT_PROFILE_IMAGE, getAllowedImageSrc } from "@/lib/utils/safeImageSrc";
 import type {
   Mover,
   MoverDetailItem,
@@ -47,7 +47,7 @@ export function mapMoverListItemToMover(item: MoverListItem): Mover {
     confirmedCount: item.confirmedEstimateCount,
     favoriteCount: item.favoriteCount,
     isFavorite: item.isFavorite,
-    profileImageSrc: resolveMoverProfileImageSrc(item.profileImageUrl),
+    profileImageSrc: getAllowedImageSrc(item.profileImageUrl) ?? DEFAULT_PROFILE_IMAGE,
     activityBase: item.activityBase, //기사 활동 거점
   };
 }

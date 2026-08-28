@@ -8,10 +8,10 @@ import Link from "next/link";
 import { memo } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
+import { ProfileImage } from "@/components/common/ProfileImage";
 import { Text } from "@/components/common/Text";
 import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { MoverMeta } from "@/components/mover/MoverMeta";
-import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
 import { MoverServiceTypeChips } from "@/components/mover/MoverServiceTypeChips";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
 import { DriverBadgeIcon } from "@/icons";
@@ -135,11 +135,11 @@ function MoverCard({
             </Text>
             <div className="flex items-center gap-8">
               <div className="bg-background-avatar rounded-12 relative size-48 shrink-0 overflow-hidden">
-                <MoverProfileImage
+                <ProfileImage
                   src={mover.profileImageSrc}
                   width={75}
                   height={75}
-                  className="absolute top-[-7px] left-[-12px] size-[75px] max-w-none object-cover"
+                  className="size-full object-contain"
                 />
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-4">
@@ -211,11 +211,11 @@ function MoverCard({
 
           <div className="flex items-center gap-8">
             <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
-              <MoverProfileImage
+              <ProfileImage
                 src={mover.profileImageSrc}
                 width={75}
                 height={75}
-                className="absolute top-[-7px] left-[-12.5px] size-[75px] max-w-none object-cover"
+                className="size-full object-contain"
               />
             </div>
 
@@ -258,12 +258,12 @@ function MoverCard({
 
         <div className="flex flex-row items-start gap-20">
           <div className="bg-background-avatar rounded-12 relative size-[134px] shrink-0 overflow-hidden">
-            <MoverProfileImage
+            <ProfileImage
               src={mover.profileImageSrc}
               width={192}
               height={192}
               preload={priorityProfileImage}
-              className="absolute top-[-16px] left-[-29px] size-[192px] max-w-none object-cover"
+              className="size-full object-contain"
             />
           </div>
 

@@ -1,21 +1,20 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
 
 import AutoTranslatedText from "@/components/common/AutoTranslatedText";
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
 import DesignatedChip from "@/components/estimate/DesignatedChip";
 import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { useFavoriteMover } from "@/hooks/useFavoriteMover";
-import { ConfirmedCheckIcon, ProfileDefaultIcon, StarIcon } from "@/icons";
+import { ConfirmedCheckIcon, StarIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { cn } from "@/lib/utils/cn";
 import { formatPrice, formatRating } from "@/lib/utils/estimateFormat";
-import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
 import type { ReceivedEstimateListItem } from "@/types/estimate";
 import type { MoveType } from "@/types/move";
 
@@ -105,19 +104,13 @@ export default function EstimateOfferCard({
               className="focus-visible:ring-border-brand rounded-8 flex min-w-0 flex-1 items-end gap-12 focus-visible:ring-2 focus-visible:outline-none"
               aria-label={t("received.detailAria", { name: displayName })}
             >
-              <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
-                {mover.imageUrl ? (
-                  <Image
-                    src={resolveMoverProfileImageSrc(mover.imageUrl)}
-                    alt={t("received.profileAlt", { name: displayName })}
-                    fill
-                    sizes="50px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <ProfileDefaultIcon className="size-full" />
-                )}
-              </div>
+              <ProfileAvatar
+                imageUrl={mover.imageUrl}
+                alt={t("received.profileAlt", { name: displayName })}
+                sizes="50px"
+                className="rounded-12 size-50"
+                imageClassName="object-contain"
+              />
 
               <div className="flex min-w-0 flex-1 flex-col gap-4 md:gap-8">
                 <Text

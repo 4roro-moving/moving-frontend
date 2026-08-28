@@ -1,4 +1,4 @@
-import { DEFAULT_MOVER_PROFILE_IMAGE } from "@/lib/utils/moverProfileImage";
+import { DEFAULT_PROFILE_IMAGE } from "@/lib/utils/safeImageSrc";
 
 /**
  * 기사님 상세 카카오톡 메시지 공유 템플릿 인자
@@ -47,7 +47,7 @@ export function getKakaoJavascriptKey(): string | null {
 
 /** 프로필 이미지를 카카오 템플릿용 URL로 변환, 상대 경로는 origin이 있을 때만 절대 URL로 변환 */
 export function buildKakaoShareImageUrl(src: string | null | undefined, origin?: string): string {
-  const trimmed = src?.trim() || DEFAULT_MOVER_PROFILE_IMAGE;
+  const trimmed = src?.trim() || DEFAULT_PROFILE_IMAGE;
 
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
     return trimmed;

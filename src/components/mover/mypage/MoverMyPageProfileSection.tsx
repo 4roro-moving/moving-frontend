@@ -3,8 +3,8 @@
 import { useTranslations } from "next-intl";
 import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 
+import { ProfileImage } from "@/components/common/ProfileImage";
 import { Text } from "@/components/common/Text";
-import { MoverProfileImage } from "@/components/mover/MoverProfileImage";
 import {
   MoverOfferedServiceChips,
   MoverServiceChip,
@@ -119,12 +119,12 @@ export default function MoverMyPageProfileSection({
           aria-labelledby="mover-mypage-summary"
         >
           <div className="flex items-end gap-12">
-            <MoverProfileImage
+            <ProfileImage
               src={profile.imageUrl ?? ""}
               width={80}
               height={85}
               preload
-              className="bg-background-avatar rounded-12 md:rounded-20 h-16 w-15 object-cover md:h-21.25 md:w-20"
+              className="bg-background-avatar rounded-12 md:rounded-20 h-16 w-15 object-contain md:h-21.25 md:w-20"
             />
 
             <div className="flex min-w-0 flex-col justify-end md:gap-8">

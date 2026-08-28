@@ -1,7 +1,5 @@
-import Image from "next/image";
-
-import { HeroDecorationLeftIcon, HeroDecorationRightIcon, ProfileDefaultIcon } from "@/icons";
-import { resolveMoverProfileImageSrc } from "@/lib/utils/moverProfileImage";
+import { ProfileImage } from "@/components/common/ProfileImage";
+import { HeroDecorationLeftIcon, HeroDecorationRightIcon } from "@/icons";
 
 interface DetailHeroBannerProps {
   /** false면 주황 배너만 (프로필 없음). 보낸 견적 요청 상세 등 */
@@ -50,20 +48,14 @@ export default function DetailHeroBanner({
       {/* 2026.07.26 정슬기 - [수정] Tablet 프로필 Figma 100×100·r12 (1:9171 / 1:11975) — size-25 */}
       {/* 프로필은 Figma처럼 둥근 네모(원형 X). 기본 아이콘도 사각 배경으로 맞춤 */}
       <div className="bg-background-avatar rounded-16 md:rounded-12 left-margin-mobile md:left-margin-tablet xl:rounded-20 absolute bottom-0 size-21.5 overflow-hidden md:size-25 xl:top-30.5 xl:bottom-auto xl:left-[max(1rem,calc(50%-601px))] xl:h-34.25 xl:w-32.25">
-        <div className="relative size-full">
-          {imageUrl ? (
-            <Image
-              src={resolveMoverProfileImageSrc(imageUrl)}
-              alt={profileImageAlt}
-              fill
-              sizes="(max-width: 768px) 86px, (max-width: 1024px) 100px, 129px"
-              preload={preloadProfileImage}
-              className="object-cover"
-            />
-          ) : (
-            <ProfileDefaultIcon className="size-full" aria-hidden="true" />
-          )}
-        </div>
+        <ProfileImage
+          src={imageUrl}
+          alt={profileImageAlt}
+          fill
+          sizes="(max-width: 768px) 86px, (max-width: 1024px) 100px, 129px"
+          preload={preloadProfileImage}
+          className="object-contain"
+        />
       </div>
     </div>
   );

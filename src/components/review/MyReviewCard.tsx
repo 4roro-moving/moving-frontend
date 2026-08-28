@@ -2,14 +2,13 @@
 
 import AutoTranslatedText from "@/components/common/AutoTranslatedText";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { Text } from "@/components/common/Text";
 import { MoveTypeChip } from "@/components/common/Chip/MoveTypeChip";
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import ReviewStarRating from "@/components/review/ReviewStarRating";
-import { ProfileDefaultIcon } from "@/icons";
 import { APP_ROUTES } from "@/lib/constants/appRoutes";
 import { markInternalDetailNavigationOnClick } from "@/lib/utils/detailNavigation";
 import { getReviewMoverDisplayName } from "@/lib/utils/estimateFormat";
@@ -54,19 +53,13 @@ export default function MyReviewCard({ review }: MyReviewCardProps) {
         </div>
 
         <div className="flex w-full items-start gap-10 md:items-center md:gap-16">
-          <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
-            {mover.imageUrl ? (
-              <Image
-                src={mover.imageUrl}
-                alt={t("moverProfileImageAlt", { name: displayName })}
-                fill
-                sizes="50px"
-                className="object-cover"
-              />
-            ) : (
-              <ProfileDefaultIcon className="size-full" />
-            )}
-          </div>
+          <ProfileAvatar
+            imageUrl={mover.imageUrl}
+            alt={t("moverProfileImageAlt", { name: displayName })}
+            sizes="50px"
+            className="rounded-12 size-50"
+            imageClassName="object-contain"
+          />
 
           <div className="flex min-w-0 flex-1 flex-col gap-4">
             <div className="flex w-full items-start justify-between gap-8">
