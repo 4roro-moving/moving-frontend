@@ -41,6 +41,7 @@ export default function NotificationPanel({
   const { data, isPending, isError, isFetching } = useNotifications({
     page: queryPage,
     limit: NOTIFICATION_PAGE_SIZE,
+    enabled: isVisible,
   });
 
   const { mutateAsync: markAsRead } = useReadNotification();

@@ -15,12 +15,12 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   const page = options.page ?? 1;
   const limit = options.limit ?? NOTIFICATION_PAGE_SIZE;
   const enabled = options.enabled ?? true;
-  const { authScope, isAuthQueryReady } = useAuthQueryScope();
+  const { authScope, isAuthenticated, isAuthQueryReady } = useAuthQueryScope();
 
   return useApiQuery({
     queryKey: QUERY_KEYS.NOTIFICATIONS.LIST(authScope, page, limit),
     queryFn: () => getNotifications({ page, limit }),
-    enabled: enabled && isAuthQueryReady,
+    enabled: enabled && isAuthenticated && isAuthQueryReady,
     // 같은 사용자·다른 페이지 이동 시에만 이전 데이터 유지 (계정 전환 시에는 유지하지 않음)
     placeholderData: (previousData, previousQuery) => {
       const previousScope = previousQuery?.queryKey[2];

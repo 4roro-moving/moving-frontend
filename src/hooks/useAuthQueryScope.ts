@@ -15,6 +15,7 @@ export function useAuthQueryScope() {
 
   return {
     authScope,
+    isAuthenticated,
     isAuthQueryReady: authScope !== AUTH_QUERY_UNRESOLVED_SCOPE,
   };
 }
