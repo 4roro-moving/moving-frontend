@@ -12,13 +12,13 @@ interface UseMoversInfiniteScrollParams {
 
 const INFINITE_SCROLL_ROOT_MARGIN = "240px 0px";
 
-export const useMoversInfiniteScroll = ({
+export function useMoversInfiniteScroll({
   enabled,
   hasNextPage,
   isFetchingNextPage,
   isFetchNextPageError,
   fetchNextPage,
-}: UseMoversInfiniteScrollParams) => {
+}: UseMoversInfiniteScrollParams) {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,11 +33,17 @@ export const useMoversInfiniteScroll = ({
       return;
     }
 
+    // 이미 요청한 경우 중복 요청을 방지하도록 합니다.
+    let hasRequested = false;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) {
-          void fetchNextPage();
+        if (!entry?.isIntersecting || hasRequested) {
+          return;
         }
+
+        hasRequested = true;
+        void fetchNextPage();
       },
       { rootMargin: INFINITE_SCROLL_ROOT_MARGIN },
     );
@@ -47,4 +53,4 @@ export const useMoversInfiniteScroll = ({
   }, [enabled, fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError]);
 
   return sentinelRef;
-};
+}
