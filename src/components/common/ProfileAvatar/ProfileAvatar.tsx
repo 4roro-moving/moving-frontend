@@ -7,6 +7,7 @@ interface ProfileAvatarProps {
   imageClassName?: string;
   sizes?: string;
   alt?: string;
+  preload?: boolean;
 }
 
 const ProfileAvatar = ({
@@ -15,10 +16,18 @@ const ProfileAvatar = ({
   imageClassName = "object-cover",
   sizes = "56px",
   alt = "",
+  preload = false,
 }: ProfileAvatarProps) => {
   return (
     <div className={cn("bg-background-avatar relative shrink-0 overflow-hidden", className)}>
-      <ProfileImage src={imageUrl} alt={alt} fill sizes={sizes} className={imageClassName} />
+      <ProfileImage
+        src={imageUrl}
+        alt={alt}
+        fill
+        sizes={sizes}
+        preload={preload}
+        className={imageClassName}
+      />
     </div>
   );
 };

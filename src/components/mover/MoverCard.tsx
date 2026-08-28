@@ -8,7 +8,7 @@ import Link from "next/link";
 import { memo } from "react";
 
 import Checkbox from "@/components/common/Checkbox/Checkbox";
-import { ProfileImage } from "@/components/common/ProfileImage";
+import ProfileAvatar from "@/components/common/ProfileAvatar/ProfileAvatar";
 import { Text } from "@/components/common/Text";
 import { FavoriteButton } from "@/components/mover/FavoriteButton";
 import { MoverMeta } from "@/components/mover/MoverMeta";
@@ -134,14 +134,12 @@ function MoverCard({
               <AutoTranslatedText text={mover.title} />
             </Text>
             <div className="flex items-center gap-8">
-              <div className="bg-background-avatar rounded-12 relative size-48 shrink-0 overflow-hidden">
-                <ProfileImage
-                  src={mover.profileImageSrc}
-                  width={75}
-                  height={75}
-                  className="size-full object-contain"
-                />
-              </div>
+              <ProfileAvatar
+                imageUrl={mover.profileImageSrc}
+                className="rounded-12 size-48"
+                imageClassName="object-contain"
+                sizes="48px"
+              />
               <div className="flex min-w-0 flex-1 flex-col gap-4">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-4">
@@ -210,14 +208,12 @@ function MoverCard({
           <div className="bg-border-subtle h-px w-full" aria-hidden="true" />
 
           <div className="flex items-center gap-8">
-            <div className="bg-background-avatar rounded-12 relative size-50 shrink-0 overflow-hidden">
-              <ProfileImage
-                src={mover.profileImageSrc}
-                width={75}
-                height={75}
-                className="size-full object-contain"
-              />
-            </div>
+            <ProfileAvatar
+              imageUrl={mover.profileImageSrc}
+              className="rounded-12 size-50"
+              imageClassName="object-contain"
+              sizes="50px"
+            />
 
             <div className="flex min-w-0 flex-1 flex-col gap-4">
               <div className="flex w-full items-center justify-between gap-8">
@@ -257,15 +253,13 @@ function MoverCard({
         </div>
 
         <div className="flex flex-row items-start gap-20">
-          <div className="bg-background-avatar rounded-12 relative size-[134px] shrink-0 overflow-hidden">
-            <ProfileImage
-              src={mover.profileImageSrc}
-              width={192}
-              height={192}
-              preload={priorityProfileImage}
-              className="size-full object-contain"
-            />
-          </div>
+          <ProfileAvatar
+            imageUrl={mover.profileImageSrc}
+            className="rounded-12 size-[134px]"
+            imageClassName="object-contain"
+            sizes="134px"
+            preload={priorityProfileImage}
+          />
 
           <div className="flex min-w-0 flex-1 flex-col gap-20 self-stretch py-4">
             <div className="flex flex-col">
