@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { Text } from "@/components/common/Text";
@@ -41,8 +41,9 @@ function NotificationContent({
 }) {
   const isRead = notification.isRead;
   const format = useFormatter();
+  const now = useNow();
   const createdAt = new Date(notification.createdAt);
-  const relativeTime = Number.isNaN(createdAt.getTime()) ? "" : format.relativeTime(createdAt);
+  const relativeTime = Number.isNaN(createdAt.getTime()) ? "" : format.relativeTime(createdAt, now);
 
   return (
     <>
