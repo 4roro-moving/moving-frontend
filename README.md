@@ -6,6 +6,12 @@
 
 ---
 
+## 배포주소
+
+[무빙](https://moving-frontend-p2ol.vercel.app/)
+
+---
+
 ## 개발 환경
 
 - Node.js 22.x
