@@ -220,9 +220,9 @@
     },
     "loginRequired": {
       "customerLogin": "一般ユーザーログイン",
-      "description": "説明",
+      "description": "ご利用のアカウント種別を選択してください。",
       "moverLogin": "業者ログイン",
-      "title": "タイトル"
+      "title": "ログインが必要です"
     }
   },
   "moverSearch": {

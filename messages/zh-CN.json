@@ -221,9 +221,9 @@
     },
     "loginRequired": {
       "customerLogin": "普通用户登录",
-      "description": "说明",
+      "description": "请选择您使用的账号类型。",
       "moverLogin": "搬家师傅登录",
-      "title": "标题"
+      "title": "需要登录"
     }
   },
   "moverSearch": {

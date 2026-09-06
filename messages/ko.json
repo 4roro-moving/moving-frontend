@@ -219,9 +219,9 @@
     },
     "loginRequired": {
       "customerLogin": "일반 사용자 로그인",
-      "description": "설명",
+      "description": "이용하시는 계정 유형을 선택해 주세요.",
       "moverLogin": "기사님 로그인",
-      "title": "제목"
+      "title": "로그인이 필요합니다"
     }
   },
   "moverSearch": {
