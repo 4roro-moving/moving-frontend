@@ -16,7 +16,6 @@
       "back": "Go back"
     },
     "metadata": {
-      "title": "Moving",
       "description": "Compare moving quotes and find trusted movers with Moving."
     },
     "share": {
@@ -121,7 +120,7 @@
     "noSearchResults": "No search results found.",
     "empty": "No frequently asked questions have been registered.",
     "metadata": {
-      "title": "FAQ | Moving",
+      "title": "FAQ",
       "description": "Find answers to frequently asked questions about Moving."
     }
   },
@@ -145,9 +144,9 @@
       "EVENT": "Event"
     },
     "metadata": {
-      "title": "Notices | Moving",
+      "title": "Notices",
       "description": "View important Moving updates and announcements.",
-      "detailTitle": "Notice Details | Moving",
+      "detailTitle": "Notice Details",
       "detailDescription": "View the details of a Moving notice."
     }
   },
@@ -214,9 +213,9 @@
       "ETC": "Other"
     },
     "metadata": {
-      "title": "1:1 Inquiry | Moving",
+      "title": "1:1 Inquiry",
       "description": "View your inquiry history and response status.",
-      "detailTitle": "Inquiry Details | Moving",
+      "detailTitle": "Inquiry Details",
       "detailDescription": "View your inquiry and response details."
     },
     "loginRequired": {
@@ -408,9 +407,9 @@
     "loading": "Loading...",
     "metadata": {
       "manageDescription": "Manage reviews you can write and reviews you've written.",
-      "manageTitle": "Review Management | MOVING",
-      "myReviewsTitle": "My Reviews | MOVING",
-      "writableTitle": "Reviews to Write | MOVING"
+      "manageTitle": "Review Management",
+      "myReviewsTitle": "My Reviews",
+      "writableTitle": "Reviews to Write"
     },
     "myListLoading": "Loading your reviews.",
     "myRatingLabel": "My rating",
@@ -833,22 +832,22 @@
     "oauthUnsupportedProvider": "This social login provider is not supported.",
     "oauthInvalidInfo": "The social login information is invalid.",
     "invalidRequest": "Invalid request.",
-    "customerLoginMetadataTitle": "Login | MOVING",
+    "customerLoginMetadataTitle": "Login",
     "customerLoginMetadataDescription": "Log in to MOVING as a customer.",
-    "moverLoginMetadataTitle": "Mover Login | MOVING",
+    "moverLoginMetadataTitle": "Mover Login",
     "moverLoginMetadataDescription": "Log in to MOVING as a mover.",
     "alreadyMember": "Already a member?",
     "brandName": "MOVING",
     "homeAria": "Go to home",
     "metadata": {
       "customerSignUpDescription": "Create a MOVING customer account.",
-      "customerSignUpTitle": "Customer Sign Up | MOVING",
+      "customerSignUpTitle": "Customer Sign Up",
       "customerSocialSignUpDescription": "Complete customer sign up with your social account.",
-      "customerSocialSignUpTitle": "Social Sign Up | MOVING",
+      "customerSocialSignUpTitle": "Social Sign Up",
       "moverSignUpDescription": "Create a MOVING mover account.",
-      "moverSignUpTitle": "Mover Sign Up | MOVING",
+      "moverSignUpTitle": "Mover Sign Up",
       "moverSocialSignUpDescription": "Complete mover sign up with your social account.",
-      "moverSocialSignUpTitle": "Mover Social Sign Up | MOVING"
+      "moverSocialSignUpTitle": "Mover Social Sign Up"
     },
     "name": "Name",
     "namePlaceholder": "Enter your name",
@@ -1537,7 +1536,7 @@
     "mapMoverStats": "Rating {rating} · {reviewCount} reviews · {careerYears} years",
     "mapMoverSummary": "Mover {name}",
     "metadataDescription": "Get mover recommendations based on your route and move conditions.",
-    "metadataTitle": "Regional Mover Recommendations | MOVING",
+    "metadataTitle": "Regional Mover Recommendations",
     "moveType": "Move type",
     "moverName": "{name}",
     "moversLoadFailed": "Failed to load recommended movers.",
@@ -1622,7 +1621,7 @@
       "yes": "Yes"
     },
     "metadataDescription": "Enter your move details to estimate the price.",
-    "metadataTitle": "Price Prediction | MOVING",
+    "metadataTitle": "Price Prediction",
     "pageDescription": "Enter your move details and AI will estimate the cost.",
     "pageTitle": "Price prediction",
     "result": {

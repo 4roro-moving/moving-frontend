@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import NotFoundView from "@/components/common/NotFoundView";
 
 export const metadata: Metadata = {
-  title: "404 | MOVING",
+  title: "404",
 };
 
 /**
