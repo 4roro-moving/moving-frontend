@@ -16,7 +16,6 @@
       "back": "前のページへ"
     },
     "metadata": {
-      "title": "Moving",
       "description": "引越し見積もりを比較し、信頼できる引越し業者を探せるMoving。"
     },
     "share": {
@@ -121,7 +120,7 @@
     "noSearchResults": "検索結果がありません。",
     "empty": "登録されているよくある質問はありません。",
     "metadata": {
-      "title": "FAQ | Moving",
+      "title": "FAQ",
       "description": "Movingのよくある質問と回答を確認できます。"
     }
   },
@@ -145,9 +144,9 @@
       "EVENT": "イベント"
     },
     "metadata": {
-      "title": "お知らせ | Moving",
+      "title": "お知らせ",
       "description": "Movingの重要なお知らせと最新情報を確認できます。",
-      "detailTitle": "お知らせ詳細 | Moving",
+      "detailTitle": "お知らせ詳細",
       "detailDescription": "Movingのお知らせの詳細を確認できます。"
     }
   },
@@ -214,16 +213,16 @@
       "ETC": "その他"
     },
     "metadata": {
-      "title": "1:1お問い合わせ | Moving",
+      "title": "1:1お問い合わせ",
       "description": "お問い合わせ履歴と回答状況を確認できます。",
-      "detailTitle": "お問い合わせ詳細 | Moving",
+      "detailTitle": "お問い合わせ詳細",
       "detailDescription": "お問い合わせ内容と回答の詳細を確認できます。"
     },
     "loginRequired": {
       "customerLogin": "一般ユーザーログイン",
-      "description": "説明",
+      "description": "ご利用のアカウント種別を選択してください。",
       "moverLogin": "業者ログイン",
-      "title": "タイトル"
+      "title": "ログインが必要です"
     }
   },
   "moverSearch": {
@@ -372,6 +371,10 @@
         "title": "オフィス引越し",
         "description": "オフィス・商業スペース"
       }
+    },
+    "metadata": {
+      "title": "見積もり依頼",
+      "description": "引越しタイプ、予定日、出発地、到着地を入力して、引越し見積もりを依頼しましょう。"
     }
   },
   "reviews": {
@@ -408,9 +411,9 @@
     "loading": "読み込み中...",
     "metadata": {
       "manageDescription": "作成可能なレビューと自分のレビューを管理します。",
-      "manageTitle": "レビュー管理 | MOVING",
-      "myReviewsTitle": "自分のレビュー | MOVING",
-      "writableTitle": "作成可能なレビュー | MOVING"
+      "manageTitle": "レビュー管理",
+      "myReviewsTitle": "自分のレビュー",
+      "writableTitle": "作成可能なレビュー"
     },
     "myListLoading": "自分のレビューを読み込み中です。",
     "myRatingLabel": "自分の評価",
@@ -502,6 +505,8 @@
       "listLoading": "見積もり一覧を読み込み中です。"
     },
     "metadata": {
+      "receivedRequestsTitle": "受信した依頼",
+      "receivedRequestsDescription": "お客様から届いた見積もり依頼を確認し、見積もりの送信または依頼の辞退ができます。",
       "sentTitle": "送信した見積もり",
       "sentDescription": "送信済み・確定済みの見積もりを確認できます。",
       "rejectedTitle": "拒否した依頼",
@@ -727,7 +732,7 @@
     "basicInfoSaveSuccess": "基本情報を更新しました。",
     "basicInfoSaveFailed": "基本情報の更新に失敗しました。",
     "myPageTitle": "マイページ",
-    "myPageDescription": "ムービング業者のマイページ",
+    "myPageDescription": "引越し業者のプロフィール、活動履歴、提供サービス、対応エリア、レビューを確認できます。",
     "myPageLoadFailed": "業者プロフィール情報を読み込めませんでした。",
     "myPageReviewsLoadFailed": "レビューを読み込めませんでした。",
     "retry": "再試行",
@@ -833,22 +838,22 @@
     "oauthUnsupportedProvider": "対応していないソーシャルログインです。",
     "oauthInvalidInfo": "ソーシャルログイン情報が正しくありません。",
     "invalidRequest": "無効なリクエストです。",
-    "customerLoginMetadataTitle": "ログイン | MOVING",
+    "customerLoginMetadataTitle": "ログイン",
     "customerLoginMetadataDescription": "MOVINGのお客様ログイン",
-    "moverLoginMetadataTitle": "ムーバーログイン | MOVING",
+    "moverLoginMetadataTitle": "ムーバーログイン",
     "moverLoginMetadataDescription": "MOVINGのムーバーログイン",
     "alreadyMember": "すでに会員ですか？",
     "brandName": "MOVING",
     "homeAria": "ホームへ移動",
     "metadata": {
       "customerSignUpDescription": "MOVING一般ユーザーの会員登録",
-      "customerSignUpTitle": "一般ユーザー会員登録 | MOVING",
+      "customerSignUpTitle": "一般ユーザー会員登録",
       "customerSocialSignUpDescription": "ソーシャルアカウントで一般ユーザー登録を完了します。",
-      "customerSocialSignUpTitle": "ソーシャル会員登録 | MOVING",
+      "customerSocialSignUpTitle": "ソーシャル会員登録",
       "moverSignUpDescription": "MOVING業者の会員登録",
-      "moverSignUpTitle": "業者会員登録 | MOVING",
+      "moverSignUpTitle": "業者会員登録",
       "moverSocialSignUpDescription": "ソーシャルアカウントで業者登録を完了します。",
-      "moverSocialSignUpTitle": "業者ソーシャル会員登録 | MOVING"
+      "moverSocialSignUpTitle": "業者ソーシャル会員登録"
     },
     "name": "名前",
     "namePlaceholder": "名前を入力してください",
@@ -969,8 +974,8 @@
       "title": "タイトル"
     },
     "metadata": {
-      "description": "説明",
-      "title": "タイトル"
+      "description": "提出した通報とその対応状況を確認できます。",
+      "title": "通報履歴"
     },
     "modal": {
       "addImage": "画像を追加",
@@ -1537,7 +1542,7 @@
     "mapMoverStats": "評価 {rating} · レビュー {reviewCount}件 · 経験 {careerYears}年",
     "mapMoverSummary": "{name}さん",
     "metadataDescription": "地域と引越し条件に合う業者をおすすめします。",
-    "metadataTitle": "地域別おすすめ業者 | MOVING",
+    "metadataTitle": "地域別おすすめ業者",
     "moveType": "引越しタイプ",
     "moverName": "{name}さん",
     "moversLoadFailed": "おすすめ業者を読み込めませんでした。",
@@ -1622,7 +1627,7 @@
       "yes": "あり"
     },
     "metadataDescription": "引越し条件を入力して予想見積もりを確認しましょう。",
-    "metadataTitle": "予想見積もり | MOVING",
+    "metadataTitle": "予想見積もり",
     "pageDescription": "引越し条件を入力するとAIが予想見積もりを計算します。",
     "pageTitle": "予想見積もり",
     "result": {

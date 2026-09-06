@@ -121,7 +121,7 @@
     "noSearchResults": "未找到搜索结果。",
     "empty": "暂无已登记的常见问题。",
     "metadata": {
-      "title": "FAQ | Moving",
+      "title": "FAQ",
       "description": "查看 Moving 的常见问题与答案。"
     }
   },
@@ -145,9 +145,9 @@
       "EVENT": "活动"
     },
     "metadata": {
-      "title": "公告 | Moving",
+      "title": "公告",
       "description": "查看 Moving 的重要公告和最新消息。",
-      "detailTitle": "公告详情 | Moving",
+      "detailTitle": "公告详情",
       "detailDescription": "查看 Moving 公告的详细内容。"
     }
   },
@@ -214,16 +214,16 @@
       "ETC": "其他"
     },
     "metadata": {
-      "title": "一对一咨询 | Moving",
+      "title": "一对一咨询",
       "description": "查看您的咨询记录和回复状态。",
-      "detailTitle": "咨询详情 | Moving",
+      "detailTitle": "咨询详情",
       "detailDescription": "查看咨询内容和回复详情。"
     },
     "loginRequired": {
       "customerLogin": "普通用户登录",
-      "description": "说明",
+      "description": "请选择您使用的账号类型。",
       "moverLogin": "搬家师傅登录",
-      "title": "标题"
+      "title": "需要登录"
     }
   },
   "moverSearch": {
@@ -372,6 +372,10 @@
         "title": "办公室搬家",
         "description": "办公室、商业空间"
       }
+    },
+    "metadata": {
+      "title": "申请报价",
+      "description": "输入搬家类型、预计日期、出发地和目的地，申请搬家报价。"
     }
   },
   "reviews": {
@@ -408,9 +412,9 @@
     "loading": "加载中...",
     "metadata": {
       "manageDescription": "管理可撰写的评价和已撰写的评价。",
-      "manageTitle": "评价管理 | MOVING",
-      "myReviewsTitle": "我的评价 | MOVING",
-      "writableTitle": "可撰写评价 | MOVING"
+      "manageTitle": "评价管理",
+      "myReviewsTitle": "我的评价",
+      "writableTitle": "可撰写评价"
     },
     "myListLoading": "正在加载您的评价。",
     "myRatingLabel": "我的评分",
@@ -502,6 +506,8 @@
       "listLoading": "正在加载报价列表。"
     },
     "metadata": {
+      "receivedRequestsTitle": "收到的请求",
+      "receivedRequestsDescription": "您可以查看客户发送的报价请求，并发送报价或拒绝请求。",
       "sentTitle": "已发送的报价",
       "sentDescription": "查看已发送和已确认的报价。",
       "rejectedTitle": "已拒绝的请求",
@@ -727,7 +733,7 @@
     "basicInfoSaveSuccess": "基本信息已更新。",
     "basicInfoSaveFailed": "更新基本信息失败。",
     "myPageTitle": "我的页面",
-    "myPageDescription": "搬家师傅个人页面",
+    "myPageDescription": "您可以查看搬家师傅的个人资料、活动记录、提供的服务、服务地区及评价。",
     "myPageLoadFailed": "无法加载搬家师傅个人资料。",
     "myPageReviewsLoadFailed": "无法加载评价。",
     "retry": "重试",
@@ -833,22 +839,22 @@
     "oauthUnsupportedProvider": "不支持此社交登录方式。",
     "oauthInvalidInfo": "社交登录信息无效。",
     "invalidRequest": "无效请求。",
-    "customerLoginMetadataTitle": "登录 | MOVING",
+    "customerLoginMetadataTitle": "登录",
     "customerLoginMetadataDescription": "MOVING 用户登录",
-    "moverLoginMetadataTitle": "搬家师傅登录 | MOVING",
+    "moverLoginMetadataTitle": "搬家师傅登录",
     "moverLoginMetadataDescription": "MOVING 搬家师傅登录",
     "alreadyMember": "已经是会员？",
     "brandName": "MOVING",
     "homeAria": "前往首页",
     "metadata": {
       "customerSignUpDescription": "注册 MOVING 普通用户账户",
-      "customerSignUpTitle": "普通用户注册 | MOVING",
+      "customerSignUpTitle": "普通用户注册",
       "customerSocialSignUpDescription": "使用社交账号完成普通用户注册。",
-      "customerSocialSignUpTitle": "社交账号注册 | MOVING",
+      "customerSocialSignUpTitle": "社交账号注册",
       "moverSignUpDescription": "注册 MOVING 搬家师傅账户",
-      "moverSignUpTitle": "搬家师傅注册 | MOVING",
+      "moverSignUpTitle": "搬家师傅注册",
       "moverSocialSignUpDescription": "使用社交账号完成搬家师傅注册。",
-      "moverSocialSignUpTitle": "搬家师傅社交账号注册 | MOVING"
+      "moverSocialSignUpTitle": "搬家师傅社交账号注册"
     },
     "name": "姓名",
     "namePlaceholder": "请输入姓名",
@@ -969,8 +975,8 @@
       "title": "标题"
     },
     "metadata": {
-      "description": "说明",
-      "title": "标题"
+      "description": "您可以查看已提交的举报及其处理状态。",
+      "title": "我的举报记录"
     },
     "modal": {
       "addImage": "添加图片",
@@ -1537,7 +1543,7 @@
     "mapMoverStats": "评分 {rating} · {reviewCount}条评价 · {careerYears}年经验",
     "mapMoverSummary": "搬家师傅{name}",
     "metadataDescription": "获取符合地区和搬家条件的搬家师傅推荐。",
-    "metadataTitle": "地区搬家师傅推荐 | MOVING",
+    "metadataTitle": "地区搬家师傅推荐",
     "moveType": "搬家类型",
     "moverName": "{name}师傅",
     "moversLoadFailed": "无法加载推荐搬家师傅。",
@@ -1622,7 +1628,7 @@
       "yes": "有"
     },
     "metadataDescription": "输入搬家条件查看预计报价。",
-    "metadataTitle": "预计报价 | MOVING",
+    "metadataTitle": "预计报价",
     "pageDescription": "输入搬家条件后，AI 将为您估算价格。",
     "pageTitle": "预计报价",
     "result": {

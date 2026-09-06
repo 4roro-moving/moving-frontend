@@ -5,7 +5,10 @@ import LandingPage from "@/components/landing/LandingPage";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("landing");
-  return { title: t("metadata.title"), description: t("metadata.description") };
+
+  return {
+    description: t("metadata.description"),
+  };
 }
 
 /**
