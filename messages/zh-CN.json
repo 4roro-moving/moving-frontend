@@ -506,6 +506,8 @@
       "listLoading": "正在加载报价列表。"
     },
     "metadata": {
+      "receivedRequestsTitle": "收到的请求",
+      "receivedRequestsDescription": "您可以查看客户发送的报价请求，并发送报价或拒绝请求。",
       "sentTitle": "已发送的报价",
       "sentDescription": "查看已发送和已确认的报价。",
       "rejectedTitle": "已拒绝的请求",

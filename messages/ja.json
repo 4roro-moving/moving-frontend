@@ -505,6 +505,8 @@
       "listLoading": "見積もり一覧を読み込み中です。"
     },
     "metadata": {
+      "receivedRequestsTitle": "受信した依頼",
+      "receivedRequestsDescription": "お客様から届いた見積もり依頼を確認し、見積もりの送信または依頼の辞退ができます。",
       "sentTitle": "送信した見積もり",
       "sentDescription": "送信済み・確定済みの見積もりを確認できます。",
       "rejectedTitle": "拒否した依頼",

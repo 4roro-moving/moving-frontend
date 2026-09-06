@@ -504,6 +504,8 @@
       "listLoading": "Loading estimates."
     },
     "metadata": {
+      "receivedRequestsTitle": "Received Requests",
+      "receivedRequestsDescription": "Review quote requests from customers and send a quote or decline the request.",
       "sentTitle": "Sent Estimates",
       "sentDescription": "View sent and confirmed estimates.",
       "rejectedTitle": "Rejected Requests",
