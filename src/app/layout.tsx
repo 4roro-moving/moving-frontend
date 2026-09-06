@@ -18,7 +18,14 @@ import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common");
-  return { title: t("metadata.title"), description: t("metadata.description") };
+
+  return {
+    title: {
+      default: t("brandName"),
+      template: `%s | ${t("brandName")}`,
+    },
+    description: t("metadata.description"),
+  };
 }
 
 interface RootLayoutProps {
