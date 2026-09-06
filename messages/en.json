@@ -371,6 +371,10 @@
         "title": "Office move",
         "description": "Office or commercial space"
       }
+    },
+    "metadata": {
+      "title": "Request a Quote",
+      "description": "Enter your move type, moving date, departure address, and destination address to request a moving quote."
     }
   },
   "reviews": {

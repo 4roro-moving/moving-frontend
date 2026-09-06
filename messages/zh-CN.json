@@ -372,6 +372,10 @@
         "title": "办公室搬家",
         "description": "办公室、商业空间"
       }
+    },
+    "metadata": {
+      "title": "申请报价",
+      "description": "输入搬家类型、预计日期、出发地和目的地，申请搬家报价。"
     }
   },
   "reviews": {
