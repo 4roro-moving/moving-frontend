@@ -726,7 +726,7 @@
     "basicInfoSaveSuccess": "Your basic information has been updated.",
     "basicInfoSaveFailed": "Failed to update your basic information.",
     "myPageTitle": "My page",
-    "myPageDescription": "Moving mover my page",
+    "myPageDescription": "View your mover profile, activity history, services, service areas, and reviews.",
     "myPageLoadFailed": "Failed to load the mover profile.",
     "myPageReviewsLoadFailed": "Failed to load reviews.",
     "retry": "Try again",

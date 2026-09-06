@@ -727,7 +727,7 @@
     "basicInfoSaveSuccess": "基本信息已更新。",
     "basicInfoSaveFailed": "更新基本信息失败。",
     "myPageTitle": "我的页面",
-    "myPageDescription": "搬家师傅个人页面",
+    "myPageDescription": "您可以查看搬家师傅的个人资料、活动记录、提供的服务、服务地区及评价。",
     "myPageLoadFailed": "无法加载搬家师傅个人资料。",
     "myPageReviewsLoadFailed": "无法加载评价。",
     "retry": "重试",

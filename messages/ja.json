@@ -726,7 +726,7 @@
     "basicInfoSaveSuccess": "基本情報を更新しました。",
     "basicInfoSaveFailed": "基本情報の更新に失敗しました。",
     "myPageTitle": "マイページ",
-    "myPageDescription": "ムービング業者のマイページ",
+    "myPageDescription": "引越し業者のプロフィール、活動履歴、提供サービス、対応エリア、レビューを確認できます。",
     "myPageLoadFailed": "業者プロフィール情報を読み込めませんでした。",
     "myPageReviewsLoadFailed": "レビューを読み込めませんでした。",
     "retry": "再試行",
