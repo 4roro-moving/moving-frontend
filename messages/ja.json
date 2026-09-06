@@ -968,8 +968,8 @@
       "title": "タイトル"
     },
     "metadata": {
-      "description": "説明",
-      "title": "タイトル"
+      "description": "提出した通報とその対応状況を確認できます。",
+      "title": "通報履歴"
     },
     "modal": {
       "addImage": "画像を追加",
