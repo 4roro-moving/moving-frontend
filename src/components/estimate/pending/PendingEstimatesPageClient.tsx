@@ -24,7 +24,7 @@ export default function PendingEstimatesPageClient() {
   const showRefetchError = isError && hasData;
 
   return (
-    <div className="bg-background-default md:bg-background-subtle flex w-full flex-1 flex-col items-center">
+    <div className="bg-background-subtle flex w-full flex-1 flex-col items-center">
       {showInitialSkeleton ? <PendingEstimatesLoadingSkeleton /> : null}
 
       {showBlockingError ? (
