@@ -37,7 +37,7 @@ export default function NavigationTabs({ ariaLabel, items, className }: Navigati
         className,
       )}
     >
-      <div className="px-margin-mobile md:px-margin-tablet mx-auto h-full w-full max-w-(--container-desktop) xl:px-0">
+      <div className="px-margin-mobile md:px-margin-tablet xl:max-w-container-desktop mx-auto h-full w-full xl:px-0">
         <div className="flex h-full items-center gap-24 md:gap-32 xl:gap-40">
           {items.map((item) => {
             if (item.disabled) {
