@@ -45,7 +45,7 @@ export default function PendingEstimatesList({
             <PendingEstimateRequestHeader request={section.request} titleId={titleId} />
 
             {section.estimates.length === 0 ? (
-              <div className="bg-background-default flex w-full justify-center">
+              <div className="bg-background-subtle flex w-full justify-center">
                 <PendingEstimatesEmpty />
               </div>
             ) : (
